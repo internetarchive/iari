@@ -1,0 +1,7 @@
+wiki = 'https://wikipediacitations.wiki.opencura.com'
+mediawiki_api_url = wiki + '/w/api.php'
+mediawiki_index_url = wiki + '/w/index.php'
+sparql_endpoint_url = wiki + '/query/sparql'
+user = 'WikiBot'
+pwd = 'A really long and safe password'
+
