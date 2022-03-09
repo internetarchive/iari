@@ -3,6 +3,7 @@ from typing import List
 
 from pydantic import BaseModel
 from pywikibot.scripts.generate_user_files import pywikibot
+from pywikibot import Page
 from wikibaseintegrator.wbi_config import config as wbi_config
 
 import config
@@ -12,7 +13,7 @@ from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logging.basicConfig(level=config.loglevel)
-
+logger = logging.getLogger(__name__)
 
 class WcdImportBot(BaseModel):
     max_count: int = 10
@@ -45,9 +46,11 @@ class WcdImportBot(BaseModel):
         for page in site.allpages(namespace=0):
             if count == self.max_count:
                 break
-            count += 1
-            console.print(count)
-            console.print(page)
-            raise DebugExit()
-            pages.append(page)
+            page: Page = page
+            if not page.isRedirectPage():
+                count += 1
+                # console.print(count)
+                logger.info(page.pageid, page.title(), page.isRedirectPage())
+                # raise DebugExit()
+                pages.append(page)
         return pages
