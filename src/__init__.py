@@ -50,7 +50,7 @@ class WcdImportBot(BaseModel):
             if not page.isRedirectPage():
                 count += 1
                 # console.print(count)
-                logger.info(page.pageid, page.title(), page.isRedirectPage())
+                logger.info(f"{page.pageid} {page.title()} {page.isRedirectPage()}")
                 # raise DebugExit()
                 pages.append(page)
         return pages
