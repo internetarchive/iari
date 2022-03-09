@@ -1,2 +1,7 @@
-wikidataintegrator
+#wikidataintegrator
 requests
+pydantic
+pywikibot
+mwparserfromhell
+git+git://github.com/LeMyst/WikibaseIntegrator@v0.12.0rc2#egg=wikibaseintegrator
+rich

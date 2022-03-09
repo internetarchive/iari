@@ -1,0 +1,2 @@
+class DebugExit(BaseException):
+    pass
