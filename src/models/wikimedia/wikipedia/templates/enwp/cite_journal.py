@@ -6,11 +6,11 @@ from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import Wi
 
 class CiteJournal(WikipediaPageReference):
     """This models the template cite journal in English Wikipedia"""
-    doi: Optional[str] = None
-    journal_title: Optional[str] = None
-    jstor: Optional[str] = None
-    pmid: Optional[str] = None
-    scopus_id: Optional[str] = None
+    doi: Optional[str]
+    journal_title: Optional[str]
+    jstor: Optional[str]
+    pmid: Optional[str]
+    scopus_id: Optional[str]
 
     # def __post_init_post_parse__(self):
     #     pass

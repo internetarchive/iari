@@ -8,9 +8,9 @@ import pywikibot  # type: ignore
 from pydantic import BaseModel
 from pywikibot import Page
 
-import config
-from src.helpers import console
+from src.models.wikimedia.wikipedia.templates.enwp.cite_book import CiteBook
 from src.models.wikimedia.wikipedia.templates.enwp.cite_journal import CiteJournal
+from src.models.wikimedia.wikipedia.templates.enwp.cite_news import CiteNews
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import WikipediaPageReference
 
 if TYPE_CHECKING:
@@ -36,6 +36,7 @@ class WikipediaPage(BaseModel):
     title: Optional[str] = None
     # We can't type this with WikimediaEvent because of pydantic
     wikimedia_event: Optional[Any]
+    pywikibot_site: Optional[Any]
 
     class Config:
         arbitrary_types_allowed = True
@@ -62,7 +63,11 @@ class WikipediaPage(BaseModel):
         if self.wikimedia_event is not None:
             # raise ValueError("wikimedia_event was None")
             self.__get_title_from_event__()
-            self.__get_wikipedia_page_by_title__()
+            self.__get_wikipedia_page_from_event__()
+        elif self.title is not None:
+            if self.pywikibot_site is None:
+                raise ValueError("self.pywikibot_site was None")
+            self.__get_wikipedia_page_from_title__()
         else:
             if self.pywikibot_page is None:
                 raise ValueError("self.pywikibot_page was None")
@@ -73,10 +78,17 @@ class WikipediaPage(BaseModel):
         if self.title is None or self.title == "":
             raise ValueError("title not set correctly")
 
-    def __get_wikipedia_page_by_title__(self):
+    def __get_wikipedia_page_from_event__(self):
         """Get the page from Wikipedia"""
         logger.info("Fetching the wikitext")
         self.pywikibot_page = pywikibot.Page(self.wikimedia_event.event_stream.pywikibot_site, self.title)
+        # this id is useful when talking to WikipediaCitations because it is unique
+        self.page_id = int(self.pywikibot_page.pageid)
+
+    def __get_wikipedia_page_from_title__(self):
+        """Get the page from Wikipedia"""
+        logger.info("Fetching the wikitext")
+        self.pywikibot_page = pywikibot.Page(self.pywikibot_site, self.title)
         # this id is useful when talking to WikipediaCitations because it is unique
         self.page_id = int(self.pywikibot_page.pageid)
 
@@ -127,3 +139,9 @@ class WikipediaPage(BaseModel):
                                        f"was found but no DOI. "
                                        f"(pmid:{cite_journal.pmid} jstor:{cite_journal.jstor})")
         # exit()
+            if template_name.lower() == "cite news":
+                reference = CiteNews(**json.loads(json.dumps(content)))
+                self.references.append(reference)
+            if template_name.lower() == "cite book":
+                reference = CiteBook(**json.loads(json.dumps(content)))
+                self.references.append(reference)

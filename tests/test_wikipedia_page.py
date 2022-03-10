@@ -1,21 +1,25 @@
 import logging
 from unittest import TestCase
 
+import pywikibot
+
 import config
-from src import WcdImportBot, WikipediaPage
+from src import WikipediaPage, WikimediaSite, console
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
+
 class TestWikipediaPage(TestCase):
-    def test_start(self):
-        bot = WcdImportBot(max_count=10,
-                           wikibase_url="test",
-                           mediawiki_api_url="test",
-                           mediawiki_index_url="test",
-                           sparql_endpoint_url="test")
-        pages = bot.get_pages_by_range()
-        for page in pages:
-            page.extract_references()
-            logger.info(len(page.references))
+    def test_extract_references(self):
+        site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
+        page = WikipediaPage(title="Anarchism", pywikibot_site=site)
+        page.extract_references()
+        logger.info(len(page.references))
+        for ref in page.references:
+            console.print(ref.dict())
         # self.fail()
+
+
+    def test___parse_templates__(self):
+        pass
