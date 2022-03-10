@@ -18,10 +18,9 @@ class TestWikipediaPage(TestCase):
         logger.info(len(page.references))
         for ref in page.references:
             if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
-                console.print(type(ref))
-                console.print(ref.dict())
+                console.print(ref.template_name)
+                # console.print(ref.dict())
         # self.fail()
-
 
     def test___parse_templates__(self):
         pass

@@ -2,17 +2,16 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import List, Any, TYPE_CHECKING, Optional
+from typing import List, Any, TYPE_CHECKING, Optional, Dict
 
 import pywikibot  # type: ignore
 from pydantic import BaseModel
 from pywikibot import Page
 
-from src.models.wikimedia.wikipedia.templates.enwp.cite_book import CiteBook
-from src.models.wikimedia.wikipedia.templates.enwp.cite_encyclopedia import CiteEncyclopedia
-from src.models.wikimedia.wikipedia.templates.enwp.cite_journal import CiteJournal
-from src.models.wikimedia.wikipedia.templates.enwp.cite_news import CiteNews
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import WikipediaPageReference
+from src.models.wikimedia.wikipedia.templates.enwp import EnglishWikipediaPageReference
+from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
+    WikipediaPageReference,
+)
 
 if TYPE_CHECKING:
     from src.models.identifier.doi import Doi
@@ -25,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
+
     pywikibot_page: Optional[Page] = None
     dois: Optional[List[Doi]] = None
     missing_dois: Optional[List[Doi]] = None
@@ -45,8 +45,10 @@ class WikipediaPage(BaseModel):
     def __calculate_statistics__(self):
         self.number_of_dois = len(self.dois)
         self.number_of_missing_dois = len(self.missing_dois)
-        logger.info(f"{self.number_of_missing_dois} out of {self.number_of_dois} "
-                    f"DOIs on this page were missing in Wikidata")
+        logger.info(
+            f"{self.number_of_missing_dois} out of {self.number_of_dois} "
+            f"DOIs on this page were missing in Wikidata"
+        )
         # if len(missing_dois) > 0:
         #     input_output.save_to_wikipedia_list(missing_dois, language_code, title)
         # if config.import_mode:
@@ -82,7 +84,9 @@ class WikipediaPage(BaseModel):
     def __get_wikipedia_page_from_event__(self):
         """Get the page from Wikipedia"""
         logger.info("Fetching the wikitext")
-        self.pywikibot_page = pywikibot.Page(self.wikimedia_event.event_stream.pywikibot_site, self.title)
+        self.pywikibot_page = pywikibot.Page(
+            self.wikimedia_event.event_stream.pywikibot_site, self.title
+        )
         # this id is useful when talking to WikipediaCitations because it is unique
         self.page_id = int(self.pywikibot_page.pageid)
 
@@ -101,6 +105,14 @@ class WikipediaPage(BaseModel):
     #              doi.wikidata_scientific_item.crossref_engine is not None and
     #              doi.wikidata_scientific_item.crossref_engine.work is not None
     #      )]
+    def __fix_class_key__(self, dict) -> Dict[str, Any]:
+        """convert "class" key to "_class" to avoid collision with reserved python expression"""
+        newdict = {}
+        for key in dict:
+            if key == "class":
+                key = "_class"
+            newdict[key] = dict[key]
+        return newdict
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -108,17 +120,39 @@ class WikipediaPage(BaseModel):
         raw = self.pywikibot_page.raw_extracted_templates
         self.references = []
         self.dois = []
+        supported_templates = [
+            "cite arxiv",
+            "cite av media notes",
+            "cite av media",
+            "cite biorxiv",
+            "cite book",
+            "cite cite seerx",
+            "cite conference",
+            "cite encyclopedia",
+            "cite episode",
+            "cite interview",
+            "cite journal",
+            "cite magazine",
+            "cite mailing list" "cite map",
+            "cite news",
+            "cite newsgroup",
+            "cite podcast",
+            "cite press release",
+            "cite report",
+            "cite serial",
+            "cite sign",
+            "cite speech",
+            "cite ssrn",
+            "cite techreport",
+            "cite thesis",
+            "cite web",
+        ]
         for template_name, content in raw:
             # logger.debug(f"working on {template_name}")
-            if template_name.lower() == "cite journal":
-                cite_journal = CiteJournal(**json.loads(json.dumps(content)))
-                self.references.append(cite_journal)
-            if template_name.lower() == "cite news":
-                reference = CiteNews(**json.loads(json.dumps(content)))
-                self.references.append(reference)
-            if template_name.lower() == "cite book":
-                reference = CiteBook(**json.loads(json.dumps(content)))
-                self.references.append(reference)
-            if template_name.lower() == "cite encyclopedia":
-                reference = CiteEncyclopedia(**json.loads(json.dumps(content)))
+            if template_name.lower() in supported_templates:
+                parsed_template = self.__fix_class_key__(
+                    json.loads(json.dumps(content))
+                )
+                parsed_template["template_name"] = template_name.lower()
+                reference = EnglishWikipediaPageReference(**parsed_template)
                 self.references.append(reference)
