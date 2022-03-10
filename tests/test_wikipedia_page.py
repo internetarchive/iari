@@ -17,7 +17,9 @@ class TestWikipediaPage(TestCase):
         page.extract_references()
         logger.info(len(page.references))
         for ref in page.references:
-            console.print(ref.dict())
+            if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
+                console.print(type(ref))
+                console.print(ref.dict())
         # self.fail()
 
 
