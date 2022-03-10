@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from pywikibot import Page
 
 from src.models.wikimedia.wikipedia.templates.enwp.cite_book import CiteBook
+from src.models.wikimedia.wikipedia.templates.enwp.cite_encyclopedia import CiteEncyclopedia
 from src.models.wikimedia.wikipedia.templates.enwp.cite_journal import CiteJournal
 from src.models.wikimedia.wikipedia.templates.enwp.cite_news import CiteNews
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import WikipediaPageReference
@@ -110,38 +111,14 @@ class WikipediaPage(BaseModel):
         for template_name, content in raw:
             # logger.debug(f"working on {template_name}")
             if template_name.lower() == "cite journal":
-                # Workaround from https://stackoverflow.com/questions/56494304/how-can-i-do-to-convert-ordereddict-to
-                # -dict First we convert the list of tuples to a normal dict
-                content_as_dict = json.loads(json.dumps(content))
-                # Then we add the dict to the "doi" key that pydantic expects
-                # logger.debug(f"content_dict:{content_as_dict}")
-                # if "doi" in content_as_dict:
-                #     doi = content_as_dict["doi"]
-                #     content_as_dict["doi"] = dict(
-                #         value=doi
-                #     )
-                # else:
-                #     content_as_dict["doi"] = None
-                cite_journal = CiteJournal(**content_as_dict)
+                cite_journal = CiteJournal(**json.loads(json.dumps(content)))
                 self.references.append(cite_journal)
-                if cite_journal.doi is not None:
-                    from src.models.identifier.doi import Doi
-                    doi = Doi(value=cite_journal.doi)
-                    doi.__test_doi__()
-                    if doi.regex_validated:
-                        self.number_of_dois += 1
-                        self.dois.append(doi)
-                else:
-                    # We ignore cultural magazines for now
-                    if cite_journal.journal_title is not None and "magazine" not in cite_journal.journal_title:
-                        logger.warning(f"An article titled {cite_journal.title} "
-                                       f"in the journal_title {cite_journal.journal_title} "
-                                       f"was found but no DOI. "
-                                       f"(pmid:{cite_journal.pmid} jstor:{cite_journal.jstor})")
-        # exit()
             if template_name.lower() == "cite news":
                 reference = CiteNews(**json.loads(json.dumps(content)))
                 self.references.append(reference)
             if template_name.lower() == "cite book":
                 reference = CiteBook(**json.loads(json.dumps(content)))
+                self.references.append(reference)
+            if template_name.lower() == "cite encyclopedia":
+                reference = CiteEncyclopedia(**json.loads(json.dumps(content)))
                 self.references.append(reference)
