@@ -61,7 +61,7 @@ class WikimediaEvent:
             logger.info("Found enwp article edit")
             self.__print_progress__()
             self.wikipedia_page = WikipediaPage(wikimedia_event=self)
-            self.wikipedia_page.start()
+            self.wikipedia_page.extract_references()
         else:
             logger.debug(f"Skipping event from {self.server_name}")
 

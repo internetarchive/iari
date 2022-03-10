@@ -35,7 +35,7 @@ class WikipediaPage(BaseModel):
     references: Optional[List[WikipediaPageReference]] = None
     title: Optional[str] = None
     # We can't type this with WikimediaEvent because of pydantic
-    wikimedia_event: Any
+    wikimedia_event: Optional[Any]
 
     class Config:
         arbitrary_types_allowed = True
@@ -58,11 +58,14 @@ class WikipediaPage(BaseModel):
         # else:
         #     pass
 
-    def start(self):
-        if self.wikimedia_event is None:
-            raise ValueError("wikimedia_event was None")
-        self.__get_title_from_event__()
-        self.__get_wikipedia_page_by_title__()
+    def extract_references(self):
+        if self.wikimedia_event is not None:
+            # raise ValueError("wikimedia_event was None")
+            self.__get_title_from_event__()
+            self.__get_wikipedia_page_by_title__()
+        else:
+            if self.pywikibot_page is None:
+                raise ValueError("self.pywikibot_page was None")
         self.__parse_templates__()
 
     def __get_title_from_event__(self):

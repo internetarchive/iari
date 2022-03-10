@@ -52,5 +52,5 @@ class WcdImportBot(BaseModel):
                 # console.print(count)
                 logger.info(f"{page.pageid} {page.title()} {page.isRedirectPage()}")
                 # raise DebugExit()
-                pages.append(page)
+                pages.append(WikipediaPage(pywikibot_page=page))
         return pages
