@@ -20,6 +20,14 @@ class TestWikipediaPage(TestCase):
             if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
                 console.print(ref.template_name)
                 # console.print(ref.dict())
+        assert len(page.references) >= 134
+        page = WikipediaPage(title="Democracy", pywikibot_site=site)
+        page.extract_references()
+        logger.info(len(page.references))
+        for ref in page.references:
+            if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
+                console.print(ref.template_name)
+        assert len(page.references) >= 216
         # self.fail()
 
     def test___parse_templates__(self):

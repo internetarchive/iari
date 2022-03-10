@@ -139,6 +139,7 @@ class WikipediaPage(BaseModel):
             "cite podcast",
             "cite press release",
             "cite q",
+            "citeq",
             "cite report",
             "cite serial",
             "cite sign",
