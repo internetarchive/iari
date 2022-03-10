@@ -1,6 +1,5 @@
 from typing import Optional
 
-from src.models.identifier.isbn import Isbn
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import WikipediaPageReference
 
 
