@@ -1,7 +1,10 @@
-wiki = 'https://wikipediacitations.wiki.opencura.com'
+import logging
+user_agent = "wcdimportbot 0.2.0-alpha"
+loglevel = logging.INFO
+
+wiki = 'https://wikicitations.wiki.opencura.com'
 mediawiki_api_url = wiki + '/w/api.php'
 mediawiki_index_url = wiki + '/w/index.php'
 sparql_endpoint_url = wiki + '/query/sparql'
 user = 'WikiBot'
 pwd = 'A really long and safe password'
-
