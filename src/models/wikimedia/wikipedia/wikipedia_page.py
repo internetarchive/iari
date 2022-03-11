@@ -8,6 +8,7 @@ import pywikibot  # type: ignore
 from pydantic import BaseModel
 from pywikibot import Page
 
+from src import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.enwp import EnglishWikipediaPageReference
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
@@ -25,19 +26,15 @@ logger = logging.getLogger(__name__)
 class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
-    pywikibot_page: Optional[Page] = None
-    dois: Optional[List[Doi]] = None
-    missing_dois: Optional[List[Doi]] = None
-    number_of_dois: int = 0
-    number_of_isbns: int = 0
-    number_of_missing_dois: int = 0
-    number_of_missing_isbns: int = 0
-    page_id: Optional[int] = None
-    references: Optional[List[WikipediaPageReference]] = None
-    title: Optional[str] = None
-    # We can't type this with WikimediaEvent because of pydantic
-    wikimedia_event: Optional[Any]
+    language_code: str
+    pywikibot_page: Optional[Page]
     pywikibot_site: Optional[Any]
+    references: Optional[List[WikipediaPageReference]]
+    title: Optional[str]
+    wikimedia_event: Optional[
+        Any  # We can't type this with WikimediaEvent because of pydantic
+    ]
+    wikimedia_site: WikimediaSite
 
     class Config:
         arbitrary_types_allowed = True
@@ -116,11 +113,17 @@ class WikipediaPage(BaseModel):
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
-        logger.info("Parsing templates")
         raw = self.pywikibot_page.raw_extracted_templates
+        number_of_templates = len(raw)
+        logger.info(
+            f"Parsing {number_of_templates} templates from {self.pywikibot_page.title()}, see {self.url}"
+        )
         self.references = []
-        self.dois = []
         supported_templates = [
+            "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
+            "cite q",
+            "citeq",
+            # CS1 templates:
             "cite arxiv",
             "cite av media notes",
             "cite av media",
@@ -138,8 +141,6 @@ class WikipediaPage(BaseModel):
             "cite newsgroup",
             "cite podcast",
             "cite press release",
-            "cite q",
-            "citeq",
             "cite report",
             "cite serial",
             "cite sign",
@@ -158,3 +159,12 @@ class WikipediaPage(BaseModel):
                 parsed_template["template_name"] = template_name.lower()
                 reference = EnglishWikipediaPageReference(**parsed_template)
                 self.references.append(reference)
+            else:
+                logger.warning(f"Template '{template_name.lower()}' not supported")
+
+    @property
+    def url(self):
+        return (
+            f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
+            f"wiki/{self.pywikibot_page.title(underscore=True)}"
+        )

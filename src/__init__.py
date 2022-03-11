@@ -15,6 +15,7 @@ from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
+
 class WcdImportBot(BaseModel):
     max_count: int = 10
     wikibase_url: str
@@ -26,16 +27,16 @@ class WcdImportBot(BaseModel):
 
     # pseudo code
     # for each pageid in range(1,1000)
-        # get wikipedia page
-        # extract templates
-        # iterate templates we support
-        # create reference objects for each one
-        # generate item in wcd
+    # get wikipedia page
+    # extract templates
+    # iterate templates we support
+    # create reference objects for each one
+    # generate item in wcd
     def __setup_wbi__(self):
-        wbi_config['WIKIBASE_URL'] = self.wikibase_url
-        wbi_config['MEDIAWIKI_API_URL'] = self.mediawiki_api_url
-        wbi_config['MEDIAWIKI_INDEX_URL'] = self.mediawiki_index_url
-        wbi_config['SPARQL_ENDPOINT_URL'] = self.sparql_endpoint_url
+        wbi_config["WIKIBASE_URL"] = self.wikibase_url
+        wbi_config["MEDIAWIKI_API_URL"] = self.mediawiki_api_url
+        wbi_config["MEDIAWIKI_INDEX_URL"] = self.mediawiki_index_url
+        wbi_config["SPARQL_ENDPOINT_URL"] = self.sparql_endpoint_url
 
     def get_pages_by_range(self) -> List[WikipediaPage]:
         pages = []
@@ -52,5 +53,11 @@ class WcdImportBot(BaseModel):
                 # console.print(count)
                 logger.info(f"{page.pageid} {page.title()} {page.isRedirectPage()}")
                 # raise DebugExit()
-                pages.append(WikipediaPage(pywikibot_page=page))
+                pages.append(
+                    WikipediaPage(
+                        pywikibot_page=page,
+                        language_code=self.language_code,
+                        wikimedia_site=self.wikimedia_site,
+                    )
+                )
         return pages
