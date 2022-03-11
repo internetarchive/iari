@@ -2,8 +2,7 @@ import logging
 from typing import List
 
 from pydantic import BaseModel
-from pywikibot.scripts.generate_user_files import pywikibot
-from pywikibot import Page
+from pywikibot import Page, Site
 from wikibaseintegrator.wbi_config import config as wbi_config
 
 import config
@@ -43,7 +42,7 @@ class WcdImportBot(BaseModel):
         count = 0
         # https://stackoverflow.com/questions/59605802/
         # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
-        site = pywikibot.Site(code=self.language_code, fam=self.wikimedia_site.value)
+        site = Site(code=self.language_code, fam=self.wikimedia_site.value)
         for page in site.allpages(namespace=0):
             if count == self.max_count:
                 break
