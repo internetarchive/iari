@@ -123,6 +123,7 @@ class WikipediaPage(BaseModel):
             "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
             "cite q",
             "citeq",
+            "isbn",
             # CS1 templates:
             "cite arxiv",
             "cite av media notes",
