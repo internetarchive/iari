@@ -13,7 +13,12 @@ logger = logging.getLogger(__name__)
 class TestWikipediaPage(TestCase):
     def test_extract_references(self):
         site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
-        page = WikipediaPage(title="Anarchism", pywikibot_site=site)
+        page = WikipediaPage(
+            title="Anarchism",
+            pywikibot_site=site,
+            language_code="en",
+            wikimedia_site=WikimediaSite.WIKIPEDIA,
+        )
         page.extract_references()
         logger.info(len(page.references))
         for ref in page.references:
@@ -21,7 +26,12 @@ class TestWikipediaPage(TestCase):
                 console.print(ref.template_name)
                 # console.print(ref.dict())
         assert len(page.references) >= 134
-        page = WikipediaPage(title="Democracy", pywikibot_site=site)
+        page = WikipediaPage(
+            title="Democracy",
+            pywikibot_site=site,
+            language_code="en",
+            wikimedia_site=WikimediaSite.WIKIPEDIA,
+        )
         page.extract_references()
         logger.info(len(page.references))
         for ref in page.references:
