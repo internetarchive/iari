@@ -28,9 +28,9 @@ class TestWcdImportBot(TestCase):
     #     if pages is None or len(pages) != 200:
     #         self.fail()
 
-    def test_extract_references_from_200_pages(self):
+    def test_extract_references_from_20_pages(self):
         bot = WcdImportBot(
-            max_count=200,
+            max_count=40,
             wikibase_url="test",
             mediawiki_api_url="test",
             mediawiki_index_url="test",

@@ -1,7 +1,13 @@
+import logging
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+
+from src import DebugExit, console
+from src.models.exceptions import TimeParseException
+
+logger = logging.getLogger(__name__)
 
 
 class WikipediaPageReference(BaseModel):
@@ -9,7 +15,10 @@ class WikipediaPageReference(BaseModel):
 
     Do we want to merge page + pages into a string property like in Wikidata?
     We want to parse all the dates. Do we want to use a custom validator?
-    How do we handle parse errors? In a file log? Should we publish the log for Wikipedians to fix?"""
+    How do we handle parse errors? In a file log? Should we publish the log for Wikipedians to fix?
+
+    Support date ranges like "May-June 2011"? See https://stackoverflow.com/questions/10340029/
+    """
 
     # We use this to keep track of which template the information came from
     template_name: str
@@ -201,7 +210,7 @@ class WikipediaPageReference(BaseModel):
     department: Optional[str]
     doi: Optional[str]
     doi_access: Optional[str]
-    doi_broken_date: Optional[str]
+    doi_broken_date: Optional[datetime]
     edition: Optional[str]
     eissn: Optional[str]
     encyclopedia: Optional[str]
@@ -235,7 +244,7 @@ class WikipediaPageReference(BaseModel):
     page: Optional[str]
     pages: Optional[str]
     pmc: Optional[str]
-    pmc_embargo_date: Optional[str]
+    pmc_embargo_date: Optional[datetime]
     pmid: Optional[str]
     postscript: Optional[str]  # what is this?
     publication_date: Optional[datetime]
@@ -270,7 +279,7 @@ class WikipediaPageReference(BaseModel):
     via: Optional[str]  # what is this?
     volume: Optional[str]
     work: Optional[str]
-    year: Optional[datetime]
+    year: Optional[str]
     zbl: Optional[str]  # what is this?
 
     #######################
@@ -283,3 +292,86 @@ class WikipediaPageReference(BaseModel):
     lay_source: Optional[str]
     lay_url: Optional[str]
     transcripturl: Optional[str]
+
+    @validator(
+        "access_date",
+        "archive_date",
+        "date",
+        "doi_broken_date",
+        "orig_date",
+        "pmc_embargo_date",
+        "publication_date",
+        pre=True,
+    )
+    def time_validate(cls, v):
+        """Pydantic validator
+        see https://stackoverflow.com/questions/66472255/"""
+        date = None
+        # Supported "2019-03-22"
+        try:
+            date = datetime.strptime(v, "%Y-%m-%d")
+        except ValueError:
+            pass
+        # Supported "19-03-22"
+        # try:
+        #     date = datetime.strptime(v, "%y-%m-%d")
+        # except ValueError:
+        #     pass
+        # Support "May 9, 2013"
+        try:
+            date = datetime.strptime(v, "%B %d, %Y")
+        except ValueError:
+            pass
+        # Support "Jul 9, 2013"
+        try:
+            date = datetime.strptime(v, "%b %d, %Y")
+        except ValueError:
+            pass
+        # Support "1 September 2003"
+        try:
+            date = datetime.strptime(v, "%d %B %Y")
+        except ValueError:
+            pass
+        # Support "September 2003"
+        try:
+            date = datetime.strptime(v, "%B %Y")
+        except ValueError:
+            pass
+        # Support "Sep 2003"
+        try:
+            date = datetime.strptime(v, "%b %Y")
+        except ValueError:
+            pass
+        # Support "May 9, 2013a"
+        try:
+            date = datetime.strptime(v[:-1], "%B %d, %Y")
+        except ValueError:
+            pass
+        # Support "Jul 9, 2013a"
+        try:
+            date = datetime.strptime(v[:-1], "%b %d, %Y")
+        except ValueError:
+            pass
+        # Support "2017"
+        try:
+            date = datetime.strptime(v, "%Y")
+        except ValueError:
+            pass
+        # Support "Summer 2013"
+        try:
+            # We strip the vague part and just keep the year.
+            date = datetime.strptime(
+                v.lower()
+                .replace("spring", "")
+                .replace("summer", "")
+                .replace("autumn", "")
+                .replace("winter", "")
+                .strip(),
+                "%Y",
+            )
+        except ValueError:
+            pass
+        if date is None:
+            logger.warning(f"date format '{v}' not supported yet")
+            return None
+        return date

@@ -85,7 +85,7 @@ class WikipediaPage(BaseModel):
         logger.info("Fetching the wikitext")
         self.pywikibot_page = pywikibot.Page(self.pywikibot_site, self.title)
         # this id is useful when talking to WikipediaCitations because it is unique
-        self.page_id = int(self.pywikibot_page.pageid)
+        # self.page_id = int(self.pywikibot_page.pageid)
 
     # def __match_subjects__(self):
     #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
