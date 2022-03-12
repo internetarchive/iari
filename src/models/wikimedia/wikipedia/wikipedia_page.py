@@ -124,6 +124,7 @@ class WikipediaPage(BaseModel):
             "cite q",
             "citeq",
             "isbn",
+            "url",
             # CS1 templates:
             "cite arxiv",
             "cite av media notes",
