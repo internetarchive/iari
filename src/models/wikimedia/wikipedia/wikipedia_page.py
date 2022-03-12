@@ -39,6 +39,13 @@ class WikipediaPage(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+    @property
+    def url(self):
+        return (
+            f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
+            f"wiki/{self.pywikibot_page.title(underscore=True)}"
+        )
+
     def __calculate_statistics__(self):
         self.number_of_dois = len(self.dois)
         self.number_of_missing_dois = len(self.missing_dois)
@@ -58,20 +65,6 @@ class WikipediaPage(BaseModel):
         #     pass
         # else:
         #     pass
-
-    def extract_references(self):
-        if self.wikimedia_event is not None:
-            # raise ValueError("wikimedia_event was None")
-            self.__get_title_from_event__()
-            self.__get_wikipedia_page_from_event__()
-        elif self.title is not None:
-            if self.pywikibot_site is None:
-                raise ValueError("self.pywikibot_site was None")
-            self.__get_wikipedia_page_from_title__()
-        else:
-            if self.pywikibot_page is None:
-                raise ValueError("self.pywikibot_page was None")
-        self.__parse_templates__()
 
     def __get_title_from_event__(self):
         self.title = self.wikimedia_event.page_title
@@ -164,9 +157,16 @@ class WikipediaPage(BaseModel):
             else:
                 logger.warning(f"Template '{template_name.lower()}' not supported")
 
-    @property
-    def url(self):
-        return (
-            f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
-            f"wiki/{self.pywikibot_page.title(underscore=True)}"
-        )
+    def extract_references(self):
+        if self.wikimedia_event is not None:
+            # raise ValueError("wikimedia_event was None")
+            self.__get_title_from_event__()
+            self.__get_wikipedia_page_from_event__()
+        elif self.title is not None:
+            if self.pywikibot_site is None:
+                raise ValueError("self.pywikibot_site was None")
+            self.__get_wikipedia_page_from_title__()
+        else:
+            if self.pywikibot_page is None:
+                raise ValueError("self.pywikibot_page was None")
+        self.__parse_templates__()
