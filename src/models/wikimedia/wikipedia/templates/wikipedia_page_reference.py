@@ -276,6 +276,7 @@ class WikipediaPageReference(BaseModel):
     #######################
     # Deprecated parameters
     #######################
+    # We ignore these
     # cite news
     lay_date: Optional[str]
     lay_format: Optional[str]
