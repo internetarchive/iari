@@ -8,6 +8,7 @@ import pywikibot  # type: ignore
 from pydantic import BaseModel
 from pywikibot import Page
 
+import config
 from src import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.enwp import EnglishWikipediaPageReference
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
@@ -155,7 +156,8 @@ class WikipediaPage(BaseModel):
                 reference = EnglishWikipediaPageReference(**parsed_template)
                 self.references.append(reference)
             else:
-                logger.warning(f"Template '{template_name.lower()}' not supported")
+                if config.debug_unsupported_templates:
+                    logger.debug(f"Template '{template_name.lower()}' not supported")
 
     def extract_references(self):
         if self.wikimedia_event is not None:
