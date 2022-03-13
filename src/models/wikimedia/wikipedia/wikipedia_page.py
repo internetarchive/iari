@@ -100,8 +100,8 @@ class WikipediaPage(BaseModel):
         newdict = {}
         for key in dict:
             if key == "class":
-                key = "_class"
-            newdict[key] = dict[key]
+                new_key = "news_class"
+            newdict[new_key] = dict[key]
         return newdict
 
     def __parse_templates__(self):
