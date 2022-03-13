@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, Field
 
 from src import DebugExit, console
 from src.models.exceptions import TimeParseException
@@ -202,7 +202,7 @@ class WikipediaPageReference(BaseModel):
     chapter_url: Optional[str]
     chapter_url_access: Optional[str]
     citeseerx: Optional[str]
-    _class: Optional[str]  # used in cite arxiv
+    news_class: Optional[str]  # used in cite arxiv
     conference: Optional[str]
     conference_url: Optional[str]
     date: Optional[datetime]
@@ -273,7 +273,7 @@ class WikipediaPageReference(BaseModel):
     trans_quote: Optional[str]  # this is a translation of a quote
     trans_title: Optional[str]  # this is a translation of a title
     type: Optional[str]  # what is this?
-    url: Optional[str]
+    url: Optional[str] = Field(..., alias="1")
     url_access: Optional[str]
     url_status: Optional[str]
     via: Optional[str]  # what is this?
@@ -292,6 +292,10 @@ class WikipediaPageReference(BaseModel):
     lay_source: Optional[str]
     lay_url: Optional[str]
     transcripturl: Optional[str]
+
+    class Config:
+        extra = "forbid"
+        allow_population_by_field_name = True
 
     @validator(
         "access_date",
