@@ -310,6 +310,7 @@ class WikipediaPageReference(BaseModel):
     # Fields found in the wild
     df: Optional[str]
     magazine: Optional[str]
+    newspaper: Optional[str]
 
     @validator(
         "access_date",
@@ -373,6 +374,7 @@ class WikipediaPageReferenceSchema(Schema):
             # found in the wild
             "df",
             "magazine",
+            "newspaper",
             # dates
             "access_date",
             "archive_date",
