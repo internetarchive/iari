@@ -4,13 +4,11 @@ from typing import Optional
 
 from marshmallow import (
     Schema,
-    ValidationError,
-    pre_load,
-    post_dump,
-    post_load,
 )
-from marshmallow.fields import String, DateTime
-from pydantic import BaseModel
+from marshmallow.fields import String
+from pydantic import BaseModel, validator
+
+from src.models.exceptions import TimeParseException
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +21,8 @@ class WikipediaPageReference(BaseModel):
 
     Do we want to merge page + pages into a string property like in Wikidata?
     How do we handle parse errors? In a file log? Should we publish the log for Wikipedians to fix?
+
+    Validation works better with pydantic so we validate when creating this object
 
     Support date ranges like "May-June 2011"? See https://stackoverflow.com/questions/10340029/
     """
@@ -307,100 +307,74 @@ class WikipediaPageReference(BaseModel):
     first_parameter: Optional[str]  # 1
     second_parameter: Optional[str]  # 2
 
-
-def time_validator(cls, v):
-    """Pydantic validator
-    see https://stackoverflow.com/questions/66472255/"""
-    date = None
-    # Supported "2019-03-22"
-    try:
-        date = datetime.strptime(v, "%Y-%m-%d")
-    except ValueError:
-        pass
-    # Supported "19-03-22"
-    # try:
-    #     date = datetime.strptime(v, "%y-%m-%d")
-    # except ValueError:
-    #     pass
-    # Support "May 9, 2013"
-    try:
-        date = datetime.strptime(v, "%B %d, %Y")
-    except ValueError:
-        pass
-    # Support "Jul 9, 2013"
-    try:
-        date = datetime.strptime(v, "%b %d, %Y")
-    except ValueError:
-        pass
-    # Support "1 September 2003"
-    try:
-        date = datetime.strptime(v, "%d %B %Y")
-    except ValueError:
-        pass
-    # Support "September 2003"
-    try:
-        date = datetime.strptime(v, "%B %Y")
-    except ValueError:
-        pass
-    # Support "Sep 2003"
-    try:
-        date = datetime.strptime(v, "%b %Y")
-    except ValueError:
-        pass
-    # Support "May 9, 2013a"
-    try:
-        date = datetime.strptime(v[:-1], "%B %d, %Y")
-    except ValueError:
-        pass
-    # Support "Jul 9, 2013a"
-    try:
-        date = datetime.strptime(v[:-1], "%b %d, %Y")
-    except ValueError:
-        pass
-    # Support "2017"
-    try:
-        date = datetime.strptime(v, "%Y")
-    except ValueError:
-        pass
-    # Support "Summer 2013"
-    try:
-        # We strip the vague part and just keep the year.
-        date = datetime.strptime(
-            v.lower()
-            .replace("spring", "")
-            .replace("summer", "")
-            .replace("autumn", "")
-            .replace("winter", "")
-            .strip(),
-            "%Y",
-        )
-    except ValueError:
-        pass
-    if date is None:
-        # logger.warning(f"date format '{v}' not supported yet")
-        raise ValidationError(f"date format '{v}' not supported yet")
-    return date
+    @validator(
+        "access_date",
+        "archive_date",
+        "date",
+        "doi_broken_date",
+        "orig_date",
+        "pmc_embargo_date",
+        "publication_date",
+        pre=True,
+    )
+    def validate_time(cls, v):
+        """Pydantic validator
+        see https://stackoverflow.com/questions/66472255/"""
+        date = None
+        try:
+            date = datetime.strptime(v, "%y-%m-%d")
+        except ValueError:
+            pass
+        # Support "May 9, 2013"
+        try:
+            date = datetime.strptime(v, "%B %d, %Y")
+        except ValueError:
+            pass
+        # Support "Jul 9, 2013"
+        try:
+            date = datetime.strptime(v, "%b %d, %Y")
+        except ValueError:
+            pass
+        # Support "1 September 2003"
+        try:
+            date = datetime.strptime(v, "%d %B %Y")
+        except ValueError:
+            pass
+        # Support "September 2003"
+        try:
+            date = datetime.strptime(v, "%B %Y")
+        except ValueError:
+            pass
+        # Support "Sep 2003"
+        try:
+            date = datetime.strptime(v, "%B %Y")
+        except ValueError:
+            pass
+        if date is None:
+            raise TimeParseException(f"date format '{v}' not supported yet")
+        return date
 
 
 class WikipediaPageReferenceSchema(Schema):
-    """Marshmellow schema to validate the templates
-    We declare the validators on the attributes because the
-    @validate decorator does not support multiple fields see
-    https://github.com/marshmallow-code/marshmallow/issues/1960"""
+    """Marshmellow schema to load the attributes using aliases
 
-    access_date = DateTime(validate=time_validator)
-    archive_date = DateTime(validate=time_validator)
-    date = DateTime(validate=time_validator)
-    doi_broken_date = DateTime(validate=time_validator)
+    We don't validate with marshmellow because it does not seem to work correctly."""
+
     first_parameter = String(data_key="1")
-    orig_date = DateTime(validate=time_validator)
-    pmc_embargo_date = DateTime(validate=time_validator)
-    publication_date = DateTime(validate=time_validator)
     second_parameter = String(data_key="2")
     template_name = String(required=True)
 
     class Meta:
         additional = (
+            # dates
+            "access_date",
+            "archive_date",
+            "date",
+            "doi_broken_date",
+            "orig_date",
+            "pmc_embargo_date",
+            "publication_date",
+            # others
             "first1",
             "first2",
             "first3",
@@ -626,3 +600,4 @@ class WikipediaPageReferenceSchema(Schema):
             "lay_url",
             "transcripturl",
         )
+        ordered = True
