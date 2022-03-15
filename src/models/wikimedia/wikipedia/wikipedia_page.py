@@ -90,6 +90,7 @@ class WikipediaPage(BaseModel):
             accessdate="access_date",
             archiveurl="archive_url",
             archivedate="archive_date",
+            ISBN="isbn",
         )
         newdict = {}
         for key in dictionary:

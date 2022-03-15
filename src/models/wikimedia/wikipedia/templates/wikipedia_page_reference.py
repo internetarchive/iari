@@ -247,6 +247,7 @@ class WikipediaPageReference(BaseModel):
     ol: Optional[str]  # what is this?
     ol_access: Optional[str]
     orig_date: Optional[datetime]
+    orig_year: Optional[datetime]
     osti: Optional[str]  # what is this?
     osti_access: Optional[str]
     others: Optional[str]  # what is this?
@@ -318,6 +319,7 @@ class WikipediaPageReference(BaseModel):
         "date",
         "doi_broken_date",
         "orig_date",
+        "orig_year",
         "pmc_embargo_date",
         "publication_date",
         pre=True,
@@ -381,6 +383,7 @@ class WikipediaPageReferenceSchema(Schema):
             "date",
             "doi_broken_date",
             "orig_date",
+            "orig_year",
             "pmc_embargo_date",
             "publication_date",
             # from template documentation
