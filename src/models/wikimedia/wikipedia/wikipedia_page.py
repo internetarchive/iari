@@ -44,26 +44,6 @@ class WikipediaPage(BaseModel):
             f"wiki/{self.pywikibot_page.title(underscore=True)}"
         )
 
-    def __calculate_statistics__(self):
-        self.number_of_dois = len(self.dois)
-        self.number_of_missing_dois = len(self.missing_dois)
-        logger.info(
-            f"{self.number_of_missing_dois} out of {self.number_of_dois} "
-            f"DOIs on this page were missing in Wikidata"
-        )
-        # if len(missing_dois) > 0:
-        #     input_output.save_to_wikipedia_list(missing_dois, language_code, title)
-        # if config.import_mode:
-        # answer = util.yes_no_question(
-        #     f"{doi} is missing in WD. Do you"+
-        #     " want to add it now?"
-        # )
-        # if answer:
-        #     crossref_engine.lookup_data(doi=doi, in_wikipedia=True)
-        #     pass
-        # else:
-        #     pass
-
     def __get_title_from_event__(self):
         self.title = self.wikimedia_event.page_title
         if self.title is None or self.title == "":
