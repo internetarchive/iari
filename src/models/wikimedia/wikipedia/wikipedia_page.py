@@ -115,8 +115,8 @@ class WikipediaPage(BaseModel):
         return newdict
 
     def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
-        dict = self.__fix_class_key__(dictionary=dictionary)
-        dict = self.__fix_aliases__(dictionary=dictionary)
+        dictionary = self.__fix_class_key__(dictionary=dictionary)
+        dictionary = self.__fix_aliases__(dictionary=dictionary)
         return self.__fix_dash__(dictionary=dictionary)
 
     def __parse_templates__(self):
