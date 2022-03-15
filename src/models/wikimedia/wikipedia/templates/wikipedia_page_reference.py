@@ -307,6 +307,10 @@ class WikipediaPageReference(BaseModel):
     first_parameter: Optional[str]  # 1
     second_parameter: Optional[str]  # 2
 
+    # Fields found in the wild
+    df: Optional[str]
+    magazine: Optional[str]
+
     @validator(
         "access_date",
         "archive_date",
@@ -366,6 +370,9 @@ class WikipediaPageReferenceSchema(Schema):
 
     class Meta:
         additional = (
+            # found in the wild
+            "df",
+            "magazine",
             # dates
             "access_date",
             "archive_date",
@@ -374,7 +381,7 @@ class WikipediaPageReferenceSchema(Schema):
             "orig_date",
             "pmc_embargo_date",
             "publication_date",
-            # others
+            # from template documentation
             "first1",
             "first2",
             "first3",

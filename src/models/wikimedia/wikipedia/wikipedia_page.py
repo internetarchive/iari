@@ -107,6 +107,25 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dict[key]
         return newdict
 
+    def __fix_aliases__(self):
+        """Replace alias keys"""
+        replacements = dict(
+            accessdate="access_date",
+            archiveurl="archive_url",
+            archivedate="archive_date",
+        )
+        newdict = {}
+        for key in dict:
+            replacement_made = False
+            for replacement in replacements.keys():
+                if replacement == key:
+                    new_key = replacements[key]
+                    newdict[new_key] = dict[key]
+                    replacement_made = True
+            if not replacement_made:
+                newdict[key] = dict[key]
+        return newdict
+
     def __fix_dash__(self, dict):
         newdict = {}
         for key in dict:
@@ -119,6 +138,7 @@ class WikipediaPage(BaseModel):
 
     def __fix_keys__(self, dict):
         dict = self.__fix_class_key__(dict=dict)
+        dict = self.__fix_aliases__(dict=dict)
         return self.__fix_dash__(dict=dict)
 
     def __parse_templates__(self):
