@@ -9,14 +9,11 @@ from pydantic import BaseModel
 from pywikibot import Page
 
 import config
-from src import WikimediaSite, console
+from src import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
     WikipediaPageReferenceSchema,
 )
-
-if TYPE_CHECKING:
-    from src.models.identifier.doi import Doi
 
 logger = logging.getLogger(__name__)
 
@@ -96,18 +93,18 @@ class WikipediaPage(BaseModel):
     #              doi.wikidata_scientific_item.crossref_engine is not None and
     #              doi.wikidata_scientific_item.crossref_engine.work is not None
     #      )]
-    def __fix_class_key__(self, dict) -> Dict[str, Any]:
+    def __fix_class_key__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         """convert "class" key to "_class" to avoid collision with reserved python expression"""
         newdict = {}
-        for key in dict:
+        for key in dictionary:
             if key == "class":
                 new_key = "news_class"
-                newdict[new_key] = dict[key]
+                newdict[new_key] = dictionary[key]
             else:
-                newdict[key] = dict[key]
+                newdict[key] = dictionary[key]
         return newdict
 
-    def __fix_aliases__(self):
+    def __fix_aliases__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         """Replace alias keys"""
         replacements = dict(
             accessdate="access_date",
@@ -115,31 +112,32 @@ class WikipediaPage(BaseModel):
             archivedate="archive_date",
         )
         newdict = {}
-        for key in dict:
+        for key in dictionary:
             replacement_made = False
-            for replacement in replacements.keys():
+            for replacement in replacements:
                 if replacement == key:
                     new_key = replacements[key]
-                    newdict[new_key] = dict[key]
+                    logger.debug(f"Replacing key {key} with {new_key}")
+                    newdict[new_key] = dictionary[key]
                     replacement_made = True
             if not replacement_made:
-                newdict[key] = dict[key]
+                newdict[key] = dictionary[key]
         return newdict
 
-    def __fix_dash__(self, dict):
+    def __fix_dash__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         newdict = {}
-        for key in dict:
+        for key in dictionary:
             if "-" in key:
                 new_key = key.replace("-", "_")
-                newdict[new_key] = dict[key]
+                newdict[new_key] = dictionary[key]
             else:
-                newdict[key] = dict[key]
+                newdict[key] = dictionary[key]
         return newdict
 
-    def __fix_keys__(self, dict):
-        dict = self.__fix_class_key__(dict=dict)
-        dict = self.__fix_aliases__(dict=dict)
-        return self.__fix_dash__(dict=dict)
+    def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
+        dict = self.__fix_class_key__(dictionary=dictionary)
+        dict = self.__fix_aliases__(dictionary=dictionary)
+        return self.__fix_dash__(dictionary=dictionary)
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -190,7 +188,7 @@ class WikipediaPage(BaseModel):
                 logger.debug(parsed_template)
                 schema = WikipediaPageReferenceSchema()
                 reference = schema.load(parsed_template)
-                console.print(reference)
+                logger.debug(f"reference object: {reference}")
                 # exit()
                 self.references.append(reference)
             else:
