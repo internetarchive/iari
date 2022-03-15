@@ -40,12 +40,14 @@ class WikipediaPageReference(BaseModel):
     first3: Optional[str]
     first4: Optional[str]
     first5: Optional[str]
+    first6: Optional[str]
     first: Optional[str]
     last1: Optional[str]
     last2: Optional[str]
     last3: Optional[str]
     last4: Optional[str]
     last5: Optional[str]
+    last6: Optional[str]
     last: Optional[str]
 
     #######################
@@ -312,6 +314,9 @@ class WikipediaPageReference(BaseModel):
     df: Optional[str]
     magazine: Optional[str]
     newspaper: Optional[str]
+    author1: Optional[str]
+    author2: Optional[str]
+    author3: Optional[str]
 
     @validator(
         "access_date",
@@ -377,6 +382,9 @@ class WikipediaPageReferenceSchema(Schema):
             "df",
             "magazine",
             "newspaper",
+            "author1",
+            "author2",
+            "author3",
             # dates
             "access_date",
             "archive_date",
@@ -392,12 +400,14 @@ class WikipediaPageReferenceSchema(Schema):
             "first3",
             "first4",
             "first5",
+            "first6",
             "first",
             "last1",
             "last2",
             "last3",
             "last4",
             "last5",
+            "last6",
             "last",
             "author_given",
             "author_given1",
