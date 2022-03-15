@@ -9,10 +9,10 @@ from pydantic import BaseModel
 from pywikibot import Page
 
 import config
-from src import WikimediaSite
-from src.models.wikimedia.wikipedia.templates.enwp import EnglishWikipediaPageReference
+from src import WikimediaSite, console
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
+    WikipediaPageReferenceSchema,
 )
 
 if TYPE_CHECKING:
@@ -107,6 +107,20 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dict[key]
         return newdict
 
+    def __fix_dash__(self, dict):
+        newdict = {}
+        for key in dict:
+            if "-" in key:
+                new_key = key.replace("-", "_")
+                newdict[new_key] = dict[key]
+            else:
+                newdict[key] = dict[key]
+        return newdict
+
+    def __fix_keys__(self, dict):
+        dict = self.__fix_class_key__(dict=dict)
+        return self.__fix_dash__(dict=dict)
+
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
         raw = self.pywikibot_page.raw_extracted_templates
@@ -151,11 +165,13 @@ class WikipediaPage(BaseModel):
         for template_name, content in raw:
             # logger.debug(f"working on {template_name}")
             if template_name.lower() in supported_templates:
-                parsed_template = self.__fix_class_key__(
-                    json.loads(json.dumps(content))
-                )
+                parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
                 parsed_template["template_name"] = template_name.lower()
-                reference = EnglishWikipediaPageReference(**parsed_template)
+                logger.debug(parsed_template)
+                schema = WikipediaPageReferenceSchema()
+                reference = schema.load(parsed_template)
+                console.print(reference)
+                # exit()
                 self.references.append(reference)
             else:
                 if config.debug_unsupported_templates:
