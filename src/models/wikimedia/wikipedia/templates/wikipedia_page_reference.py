@@ -386,6 +386,11 @@ class WikipediaPageReference(BaseModel):
             date = datetime.strptime(v, "%d %B %Y")
         except ValueError:
             pass
+        # Support "26 Dec 1996"
+        try:
+            date = datetime.strptime(v, "%d %b %Y")
+        except ValueError:
+            pass
         # Support "September 2003"
         try:
             date = datetime.strptime(v, "%B %Y")
@@ -402,7 +407,8 @@ class WikipediaPageReference(BaseModel):
         except ValueError:
             pass
         if date is None:
-            raise TimeParseException(f"date format '{v}' not supported yet")
+            # raise TimeParseException(f"date format '{v}' not supported yet")
+            logger.warning(f"date format '{v}' not supported yet")
         return date
 
 
