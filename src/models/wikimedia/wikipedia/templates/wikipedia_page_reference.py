@@ -343,6 +343,7 @@ class WikipediaPageReference(BaseModel):
     archive_format: Optional[str]
     time: Optional[datetime]
     interviewer: Optional[str]
+    medium: Optional[str]
 
     @validator(
         "access_date",
@@ -360,8 +361,9 @@ class WikipediaPageReference(BaseModel):
         """Pydantic validator
         see https://stackoverflow.com/questions/66472255/"""
         date = None
+        # Support "2013-01-01"
         try:
-            date = datetime.strptime(v, "%y-%m-%d")
+            date = datetime.strptime(v, "%Y-%m-%d")
         except ValueError:
             pass
         # Support "May 9, 2013"
@@ -442,6 +444,7 @@ class WikipediaPageReferenceSchema(Schema):
             "archive_format",
             "time",
             "interviewer",
+            "medium",
             # dates,
             "access_date",
             "archive_date",
