@@ -10,9 +10,11 @@ from pywikibot import Page
 
 import config
 from src import WikimediaSite
+from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
+    EnglishWikipediaPageReferenceSchema,
+)
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
-    WikipediaPageReferenceSchema,
 )
 
 logger = logging.getLogger(__name__)
@@ -173,7 +175,7 @@ class WikipediaPage(BaseModel):
                 parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
                 parsed_template["template_name"] = template_name.lower()
                 logger.debug(parsed_template)
-                schema = WikipediaPageReferenceSchema()
+                schema = EnglishWikipediaPageReferenceSchema()
                 reference = schema.load(parsed_template)
                 logger.debug(type(reference))
                 logger.debug(f"reference object: {reference}")
