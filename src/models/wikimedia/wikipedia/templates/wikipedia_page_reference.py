@@ -341,6 +341,7 @@ class WikipediaPageReference(BaseModel):
     message_id: Optional[str]
     newsgroup: Optional[str]
     archive_format: Optional[str]
+    time: Optional[datetime]
 
     @validator(
         "access_date",
@@ -351,6 +352,7 @@ class WikipediaPageReference(BaseModel):
         "orig_year",
         "pmc_embargo_date",
         "publication_date",
+        "time",
         pre=True,
     )
     def validate_time(cls, v):
@@ -437,6 +439,7 @@ class WikipediaPageReferenceSchema(Schema):
             "message_id",
             "newsgroup",
             "archive_format",
+            "time",
             # dates,
             "access_date",
             "archive_date",
