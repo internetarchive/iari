@@ -376,6 +376,11 @@ class WikipediaPageReference(BaseModel):
             date = datetime.strptime(v, "%b %d, %Y")
         except ValueError:
             pass
+        # Support "May 25, 2012a"
+        try:
+            date = datetime.strptime(v[:-1], "%b %d, %Y")
+        except ValueError:
+            pass
         # Support "1 September 2003"
         try:
             date = datetime.strptime(v, "%d %B %Y")
@@ -389,6 +394,11 @@ class WikipediaPageReference(BaseModel):
         # Support "Sep 2003"
         try:
             date = datetime.strptime(v, "%b %Y")
+        except ValueError:
+            pass
+        # Support "2003"
+        try:
+            date = datetime.strptime(v, "%Y")
         except ValueError:
             pass
         if date is None:
