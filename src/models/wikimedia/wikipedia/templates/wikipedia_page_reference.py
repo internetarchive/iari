@@ -340,6 +340,7 @@ class WikipediaPageReference(BaseModel):
     last10: Optional[str]
     message_id: Optional[str]
     newsgroup: Optional[str]
+    archive_format: Optional[str]
 
     @validator(
         "access_date",
@@ -435,6 +436,7 @@ class WikipediaPageReferenceSchema(Schema):
             "last12",
             "message_id",
             "newsgroup",
+            "archive_format",
             # dates,
             "access_date",
             "archive_date",
