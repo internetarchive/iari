@@ -388,7 +388,7 @@ class WikipediaPageReference(BaseModel):
             pass
         # Support "Sep 2003"
         try:
-            date = datetime.strptime(v, "%B %Y")
+            date = datetime.strptime(v, "%b %Y")
         except ValueError:
             pass
         if date is None:
