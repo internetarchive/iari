@@ -91,6 +91,12 @@ class WikipediaPage(BaseModel):
             archiveurl="archive_url",
             archivedate="archive_date",
             ISBN="isbn",
+            authorlink1="author_link1",
+            authorlink2="author_link2",
+            authorlink3="author_link3",
+            authorlink4="author_link4",
+            authorlink5="author_link5",
+            authorlink="author_link",
         )
         newdict = {}
         for key in dictionary:
@@ -169,6 +175,7 @@ class WikipediaPage(BaseModel):
                 logger.debug(parsed_template)
                 schema = WikipediaPageReferenceSchema()
                 reference = schema.load(parsed_template)
+                logger.debug(type(reference))
                 logger.debug(f"reference object: {reference}")
                 # exit()
                 self.references.append(reference)
