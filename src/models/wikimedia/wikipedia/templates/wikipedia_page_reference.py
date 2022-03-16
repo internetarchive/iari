@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from marshmallow import (
     Schema,
@@ -8,7 +8,10 @@ from marshmallow import (
 from marshmallow.fields import String
 from pydantic import BaseModel, validator
 
-from src.models.exceptions import TimeParseException
+from src import console
+from src.models.enums import Role
+from src.models.exceptions import TimeParseException, MoreThanOneNumberError
+from src.models.person import Person
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +32,8 @@ class WikipediaPageReference(BaseModel):
 
     # We use this to keep track of which template the information came from
     template_name: str
+
+    persons: Optional[List[Person]]
 
     # These are all the parameters in the supported templates
     #######################
@@ -345,6 +350,162 @@ class WikipediaPageReference(BaseModel):
     interviewer: Optional[str]
     medium: Optional[str]
 
+    @staticmethod
+    def __find_number__(str: str):
+        numbers = []
+        for char in str.split():
+            if char.isdigit():
+                numbers.append(int(char))
+        if len(numbers) > 0:
+            return numbers[0]
+        elif len(numbers) > 1:
+            raise MoreThanOneNumberError()
+        else:
+            return None
+
+    def __parse_authors__(self, attributes: List[str]):
+        authors = []
+        # first last
+        author_first_last = [
+            attribute
+            for attribute in attributes
+            if self.__find_number__(attribute) is None
+            and (attribute == "first" or attribute == "last")
+        ]
+        if len(author_first_last) > 0:
+            person = Person(role=Role.UNKNOWN, has_number=False)
+            for attribute in author_first_last:
+                # print(attribute, getattr(self, attribute))
+                if attribute == "first":
+                    person.given = self.first
+                if attribute == "last":
+                    person.surname = self.last
+            # console.print(person)
+            authors.append(person)
+            # exit()
+        # Authors
+        # author_without_number = [
+        #     attribute
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) is None and attribute.contains("author")
+        # ]
+        # if len(author_without_number) > 0:
+        #     for attribute in author_without_number:
+        #         print(attribute, getattr(self, attribute))
+        #     exit()
+        # first_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 1 and attribute.contains("author")
+        # ]
+        # if len(first_author) > 0:
+        #     for attribute in first_author:
+        #         print(attribute, getattr(self, attribute))
+        #     exit()
+        # second_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 2 and attribute.contains("author")
+        # ]
+        # if len(second_author) > 0:
+        #     for attribute in second_author:
+        #         print(attribute, getattr(self, attribute))
+        #     exit()
+        # third_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 3 and attribute.contains("author")
+        # ]
+        # if len(third_author) > 0:
+        #     for attribute in third_author:
+        #         print(attribute, getattr(self, attribute))
+        #     exit()
+        # fourth_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 4 and attribute.contains("author")
+        # ]
+        # fifth_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 5 and attribute.contains("author")
+        # ]
+        # sixth_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 6 and attribute.contains("author")
+        # ]
+        # seventh_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 7 and attribute.contains("author")
+        # ]
+        # eighth_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 8 and attribute.contains("author")
+        # ]
+        # ninth_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 9 and attribute.contains("author")
+        # ]
+        # tenth_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 10 and attribute.contains("author")
+        # ]
+        # elleventh_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 11 and attribute.contains("author")
+        # ]
+        # twelvth_author = [
+        #     attributes
+        #     for attribute in attributes
+        #     if self.__find_number__(attribute) == 12 and attribute.contains("author")
+        # ]
+
+        return authors
+
+    def parse_persons(self):
+        """Parse all person related data into Person objects"""
+        # find all the attributes
+        attributes = [
+            a
+            for a in dir(self)
+            if not a.startswith("_")
+            and not callable(getattr(self, a))
+            and getattr(self, a) is not None
+        ]
+        self.persons = []
+        authors = self.__parse_authors__(attributes=attributes)
+        self.persons.extend(authors)
+        # editors = self.__parse_authors__(attributes=attributes)
+        # translators = self.__parse_authors__(attributes=attributes)
+        # numbered_attributes_to_check = []
+        # for attribute in attributes:
+        #     person = Person()
+        #     print(attribute, getattr(self, attribute))
+        #
+        #     if attribute.startswith("first"):
+        #         logger.debug("found first")
+        #         # detect number
+        #         number = find_number(attribute)
+        #         if number:
+        #             person.number_in_sequence = number
+        #         # parsing up to 12 numbered persons
+        #         for number in range(1, 12):
+        #             logger.debug("found first")
+        #     if attribute.startswith("last"):
+        #         logger.debug("found last")
+        #     if attribute.startswith("editor"):
+        #         logger.debug("found editor")
+        #     if attribute.startswith("translator"):
+        #         logger.debug("found editor")
+        #
+        # exit()
+
     @validator(
         "access_date",
         "archive_date",
@@ -357,7 +518,7 @@ class WikipediaPageReference(BaseModel):
         "time",
         pre=True,
     )
-    def validate_time(cls, v):
+    def __validate_time__(cls, v):
         """Pydantic validator
         see https://stackoverflow.com/questions/66472255/"""
         date = None

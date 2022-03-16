@@ -9,9 +9,10 @@ from pydantic import BaseModel
 from pywikibot import Page
 
 import config
-from src import WikimediaSite
+from src import WikimediaSite, console
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
+    EnglishWikipediaPageReference,
 )
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
@@ -176,9 +177,11 @@ class WikipediaPage(BaseModel):
                 parsed_template["template_name"] = template_name.lower()
                 logger.debug(parsed_template)
                 schema = EnglishWikipediaPageReferenceSchema()
-                reference = schema.load(parsed_template)
-                logger.debug(type(reference))
-                logger.debug(f"reference object: {reference}")
+                reference: EnglishWikipediaPageReference = schema.load(parsed_template)
+                # logger.debug(type(reference))
+                # logger.debug(f"reference object: {reference.dict()}")
+                if config.loglevel == logging.DEBUG:
+                    console.print(reference.dict())
                 # exit()
                 self.references.append(reference)
             else:
