@@ -342,6 +342,7 @@ class WikipediaPageReference(BaseModel):
     newsgroup: Optional[str]
     archive_format: Optional[str]
     time: Optional[datetime]
+    interviewer: Optional[str]
 
     @validator(
         "access_date",
@@ -440,6 +441,7 @@ class WikipediaPageReferenceSchema(Schema):
             "newsgroup",
             "archive_format",
             "time",
+            "interviewer",
             # dates,
             "access_date",
             "archive_date",
