@@ -30,7 +30,7 @@ class TestWcdImportBot(TestCase):
 
     def test_extract_references_from_20_pages(self):
         bot = WcdImportBot(
-            max_count=40,
+            max_count=100,
             wikibase_url="test",
             mediawiki_api_url="test",
             mediawiki_index_url="test",

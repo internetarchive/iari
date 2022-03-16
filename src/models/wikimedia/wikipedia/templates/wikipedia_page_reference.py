@@ -317,6 +317,27 @@ class WikipediaPageReference(BaseModel):
     author1: Optional[str]
     author2: Optional[str]
     author3: Optional[str]
+    author4: Optional[str]
+    author5: Optional[str]
+    author6: Optional[str]
+    author7: Optional[str]
+    author8: Optional[str]
+    author9: Optional[str]
+    author10: Optional[str]
+    editor1: Optional[str]
+    editor2: Optional[str]
+    editor3: Optional[str]
+    editor4: Optional[str]
+    editor5: Optional[str]
+    number: Optional[str]
+    first7: Optional[str]
+    first8: Optional[str]
+    first9: Optional[str]
+    first10: Optional[str]
+    last7: Optional[str]
+    last8: Optional[str]
+    last9: Optional[str]
+    last10: Optional[str]
 
     @validator(
         "access_date",
@@ -385,7 +406,32 @@ class WikipediaPageReferenceSchema(Schema):
             "author1",
             "author2",
             "author3",
-            # dates
+            "author4",
+            "author5",
+            "author6",
+            "author7",
+            "author8",
+            "author9",
+            "author10",
+            "editor1",
+            "editor2",
+            "editor3",
+            "editor4",
+            "editor5",
+            "number",
+            "first7",
+            "first8",
+            "first9",
+            "first10",
+            "first11",
+            "first12",
+            "last7",
+            "last8",
+            "last9",
+            "last10",
+            "last11",
+            "last12",
+            # dates,
             "access_date",
             "archive_date",
             "date",
