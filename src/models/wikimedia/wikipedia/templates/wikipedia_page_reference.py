@@ -611,29 +611,6 @@ class WikipediaPageReference(BaseModel):
         self.persons_without_role = self.__parse_roleless_persons__(
             attributes=attributes
         )
-        # translators = self.__parse_authors__(attributes=attributes)
-        # numbered_attributes_to_check = []
-        # for attribute in attributes:
-        #     person = Person()
-        #     print(attribute, getattr(self, attribute))
-        #
-        #     if attribute.startswith("first"):
-        #         logger.debug("found first")
-        #         # detect number
-        #         number = find_number(attribute)
-        #         if number:
-        #             person.number_in_sequence = number
-        #         # parsing up to 12 numbered persons
-        #         for number in range(1, 12):
-        #             logger.debug("found first")
-        #     if attribute.startswith("last"):
-        #         logger.debug("found last")
-        #     if attribute.startswith("editor"):
-        #         logger.debug("found editor")
-        #     if attribute.startswith("translator"):
-        #         logger.debug("found editor")
-        #
-        # exit()
 
 
 class WikipediaPageReferenceSchema(Schema):
