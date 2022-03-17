@@ -6,6 +6,7 @@ from marshmallow import Schema, fields, ValidationError
 from src import console
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
+    EnglishWikipediaPageReference,
 )
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReferenceSchema,
@@ -45,6 +46,11 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite web",
         }
 
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
         reference.parse_persons()
         console.print(reference)
+        person = reference.persons_without_role[0]
+        assert person.given == "Melissa"
+        assert person.surname == "Locker"

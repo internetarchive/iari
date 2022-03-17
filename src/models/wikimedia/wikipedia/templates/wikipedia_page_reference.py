@@ -486,9 +486,7 @@ class WikipediaPageReference(BaseModel):
                 search_string=role.value,
             )
         )
-        console.print(f"{role.name}s: {persons}")
-        if len(persons) > 1:
-            exit()
+        # console.print(f"{role.name}s: {persons}")
         return persons
 
     @validate_arguments
