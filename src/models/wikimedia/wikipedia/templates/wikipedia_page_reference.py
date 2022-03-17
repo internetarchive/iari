@@ -6,8 +6,9 @@ from marshmallow import (
     Schema,
 )
 from marshmallow.fields import String
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, validate_arguments
 
+from src import console
 from src.models.enums import Role
 from src.models.exceptions import MoreThanOneNumberError
 from src.models.person import Person
@@ -385,9 +386,9 @@ class WikipediaPageReference(BaseModel):
                 if attribute == "editor":
                     person.name_string = self.editor
                 if attribute == "editor_link":
-                    person.editor_link = self.editor_link
+                    person.link = self.editor_link
                 if attribute == "editor_mask":
-                    person.editor_mask = self.editor_mask
+                    person.mask = self.editor_mask
             # console.print(person)
             editors.append(person)
             # exit()
@@ -409,13 +410,69 @@ class WikipediaPageReference(BaseModel):
                 if attribute == "editor":
                     person.name_string = self.editor
                 if attribute == "editor_link":
-                    person.editor_link = self.editor_link
+                    person.link = self.editor_link
                 if attribute == "editor_mask":
-                    person.editor_mask = self.editor_mask
+                    person.mask = self.editor_mask
             # console.print(person)
             editors.append(person)
             # exit()
+        # We use list comprehension to get the numbered persons to
+        # ease code maintentenance and easily support a larger range if neccessary
+        editors.extend(
+            self.__get_numbered_persons__(
+                attributes=attributes, role=Role.EDITOR, search_string="editor"
+            )
+        )
+        console.print(f"editors: {editors}")
+        if len(editors) > 1:
+            exit()
         return editors
+
+    @validate_arguments
+    def __get_numbered_persons__(
+        self, attributes: List[str], role: Role, search_string: str
+    ):
+        return [
+            self.__get_numbered_person__(
+                attributes=attributes,
+                number=number,
+                role=Role.EDITOR,
+                search_string=search_string,
+            )
+            for number in range(1, 12)
+            if self.__get_numbered_person__(
+                attributes=attributes,
+                number=number,
+                role=Role.EDITOR,
+                search_string=search_string,
+            )
+            is not None
+        ]
+
+    @validate_arguments
+    def __get_numbered_person__(
+        self, attributes: List[str], number: int, role: Role, search_string: str
+    ):
+        author = [
+            attributes
+            for attribute in attributes
+            if self.__find_number__(attribute) == number and search_string in attribute
+        ]
+        if len(author) > 0:
+            person = Person(role=role, has_number=True, number_in_sequence=number)
+            for attribute in author:
+                print(attribute, getattr(self, attribute))
+                if attribute == search_string + "1":
+                    person.name_string = getattr(self, search_string + number)
+                if attribute == search_string + "_link1":
+                    person.link = getattr(self, search_string + "_link" + number)
+                if attribute == search_string + "_mask1":
+                    person.mask = getattr(self, search_string + "_mask" + number)
+                if attribute == search_string + "_first1":
+                    person.given = getattr(self, search_string + "_first" + number)
+                if attribute == search_string + "_last1":
+                    person.surname = getattr(self, search_string + "_last" + number)
+            return person
 
     def __parse_authors__(self, attributes: List[str]):
         authors = []
@@ -431,89 +488,24 @@ class WikipediaPageReference(BaseModel):
                 if attribute == "author":
                     person.name_string = self.author
                 if attribute == "author_link":
-                    person.author_link = self.author_link
+                    person.link = self.author_link
                 if attribute == "author_mask":
-                    person.author_mask = self.author_mask
+                    person.mask = self.author_mask
+                if attribute == "author_first":
+                    person.given = self.author_first
+                if attribute == "author_last":
+                    person.surname = self.author_last
             authors.append(person)
-        first_author = [
-            attributes
-            for attribute in attributes
-            if self.__find_number__(attribute) == 1 and "author" in attribute
-        ]
-        if len(first_author) > 0:
-            person = Person(role=Role.AUTHOR, has_number=True, number_in_sequence=1)
-            for attribute in first_author:
-                print(attribute, getattr(self, attribute))
-                if attribute == "author1":
-                    person.name_string = self.author
-                # if attribute == "author_link":
-                #     person.author_link = self.author_link
-                # if attribute == "author_mask":
-                #     person.author_mask = self.author_mask
-            authors.append(person)
-        # second_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 2 and attribute.contains("author")
-        # ]
-        # if len(second_author) > 0:
-        #     for attribute in second_author:
-        #         print(attribute, getattr(self, attribute))
-        #     exit()
-        # third_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 3 and attribute.contains("author")
-        # ]
-        # if len(third_author) > 0:
-        #     for attribute in third_author:
-        #         print(attribute, getattr(self, attribute))
-        #     exit()
-        # fourth_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 4 and attribute.contains("author")
-        # ]
-        # fifth_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 5 and attribute.contains("author")
-        # ]
-        # sixth_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 6 and attribute.contains("author")
-        # ]
-        # seventh_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 7 and attribute.contains("author")
-        # ]
-        # eighth_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 8 and attribute.contains("author")
-        # ]
-        # ninth_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 9 and attribute.contains("author")
-        # ]
-        # tenth_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 10 and attribute.contains("author")
-        # ]
-        # elleventh_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 11 and attribute.contains("author")
-        # ]
-        # twelvth_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 12 and attribute.contains("author")
-        # ]
+        # We use list comprehension to get the numbered persons to
+        # ease code maintentenance and easily support a larger range if neccessary
+        authors.extend(
+            self.__get_numbered_persons__(
+                attributes=attributes, role=Role.AUTHOR, search_string="author"
+            )
+        )
+        console.print(f"authors: {authors}")
+        if len(authors) > 1:
+            exit()
         return authors
 
     def __parse_roleless_persons__(self, attributes: List[str]):
