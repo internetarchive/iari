@@ -435,14 +435,14 @@ class WikipediaPageReference(BaseModel):
             self.__get_numbered_person__(
                 attributes=attributes,
                 number=number,
-                role=EnglishWikipediaTemplatePersonRole.EDITOR,
+                role=role,
                 search_string=search_string,
             )
             for number in range(1, 12)
             if self.__get_numbered_person__(
                 attributes=attributes,
                 number=number,
-                role=EnglishWikipediaTemplatePersonRole.EDITOR,
+                role=role,
                 search_string=search_string,
             )
             is not None
