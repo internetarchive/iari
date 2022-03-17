@@ -93,6 +93,21 @@ class WikipediaPageReference(BaseModel):
     author_last5: Optional[str]
 
     # Author
+    author1_first: Optional[str]
+    author1_last: Optional[str]
+    author1_link: Optional[str]
+    author2_first: Optional[str]
+    author2_last: Optional[str]
+    author2_link: Optional[str]
+    author3_first: Optional[str]
+    author3_last: Optional[str]
+    author3_link: Optional[str]
+    author4_first: Optional[str]
+    author4_last: Optional[str]
+    author4_link: Optional[str]
+    author5_first: Optional[str]
+    author5_last: Optional[str]
+    author5_link: Optional[str]
     author: Optional[str]
     author_link1: Optional[str]
     author_link2: Optional[str]
@@ -387,16 +402,26 @@ class WikipediaPageReference(BaseModel):
             person = Person(role=role, has_number=True, number_in_sequence=number)
             for attribute in author:
                 logger.debug(attribute, getattr(self, attribute))
-                if attribute == search_string + "1":
+                # Number in the end. E.g. "author_link1"
+                if attribute == search_string + number:
                     person.name_string = getattr(self, search_string + number)
-                if attribute == search_string + "_link1":
+                if attribute == search_string + "_link" + number:
                     person.link = getattr(self, search_string + "_link" + number)
-                if attribute == search_string + "_mask1":
+                if attribute == search_string + "_mask" + number:
                     person.mask = getattr(self, search_string + "_mask" + number)
-                if attribute == search_string + "_first1":
+                if attribute == search_string + "_first" + number:
                     person.given = getattr(self, search_string + "_first" + number)
-                if attribute == search_string + "_last1":
+                if attribute == search_string + "_last" + number:
                     person.surname = getattr(self, search_string + "_last" + number)
+                # Number after author. E.g. "author1_link"
+                if attribute == search_string + number + "_link":
+                    person.link = getattr(self, search_string + number + "_link")
+                if attribute == search_string + number + "_mask":
+                    person.mask = getattr(self, search_string + number + "_mask")
+                if attribute == search_string + number + "_first":
+                    person.given = getattr(self, search_string + number + "_first")
+                if attribute == search_string + number + "_last":
+                    person.surname = getattr(self, search_string + number + "_last")
             return person
 
     @validate_arguments
@@ -661,6 +686,21 @@ class WikipediaPageReferenceSchema(Schema):
             "interviewer",
             "medium",
             "contribution",
+            "author1_first",
+            "author1_last",
+            "author1_link",
+            "author2_first",
+            "author2_last",
+            "author2_link",
+            "author3_first",
+            "author3_last",
+            "author3_link",
+            "author4_first",
+            "author4_last",
+            "author4_link",
+            "author5_first",
+            "author5_last",
+            "author5_link",
             # dates,
             "access_date",
             "archive_date",
