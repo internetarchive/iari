@@ -76,7 +76,8 @@ class WikipediaPage(BaseModel):
     #              doi.wikidata_scientific_item.crossref_engine is not None and
     #              doi.wikidata_scientific_item.crossref_engine.work is not None
     #      )]
-    def __fix_class_key__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
+    @staticmethod
+    def __fix_class_key__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
         """convert "class" key to "_class" to avoid collision with reserved python expression"""
         newdict = {}
         for key in dictionary:
@@ -87,7 +88,8 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dictionary[key]
         return newdict
 
-    def __fix_aliases__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
+    @staticmethod
+    def __fix_aliases__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
         """Replace alias keys"""
         replacements = dict(
             accessdate="access_date",
@@ -114,7 +116,8 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dictionary[key]
         return newdict
 
-    def __fix_dash__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
+    @staticmethod
+    def __fix_dash__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
         newdict = {}
         for key in dictionary:
             if "-" in key:
