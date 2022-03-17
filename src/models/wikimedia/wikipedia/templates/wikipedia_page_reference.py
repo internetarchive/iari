@@ -363,6 +363,30 @@ class WikipediaPageReference(BaseModel):
         else:
             return None
 
+    def __parse_editors__(self, attributes: List[str]):
+        editors = []
+        # editor with no given or surname
+        editor = [
+            attribute
+            for attribute in attributes
+            if self.__find_number__(attribute) is None
+            and (attribute == "editor" or attribute == "editor_link" or attribute == "editor_mask")
+        ]
+        if len(editor) > 0:
+            person = Person(role=Role.EDITOR, has_number=False)
+            for attribute in editor:
+                # print(attribute, getattr(self, attribute))
+                if attribute == "editor":
+                    person.name_string = self.editor
+                if attribute == "editor_link":
+                    person.editor_link = self.editor_link
+                if attribute == "editor_mask":
+                    person.editor_mask = self.editor_mask
+            # console.print(person)
+            editors.append(person)
+            # exit()
+        return editors
+
     def __parse_authors__(self, attributes: List[str]):
         authors = []
         # first last
@@ -858,5 +882,4 @@ class WikipediaPageReferenceSchema(Schema):
             "lay_source",
             "lay_url",
             "transcripturl",
-        )
-        ordered = True
+   

@@ -178,6 +178,7 @@ class WikipediaPage(BaseModel):
                 logger.debug(parsed_template)
                 schema = EnglishWikipediaPageReferenceSchema()
                 reference: EnglishWikipediaPageReference = schema.load(parsed_template)
+                reference.parse_persons()
                 # logger.debug(type(reference))
                 # logger.debug(f"reference object: {reference.dict()}")
                 if config.loglevel == logging.DEBUG:
