@@ -8,9 +8,8 @@ from marshmallow import (
 from marshmallow.fields import String
 from pydantic import BaseModel, validator
 
-from src import console
 from src.models.enums import Role
-from src.models.exceptions import TimeParseException, MoreThanOneNumberError
+from src.models.exceptions import MoreThanOneNumberError
 from src.models.person import Person
 
 logger = logging.getLogger(__name__)
@@ -30,10 +29,13 @@ class WikipediaPageReference(BaseModel):
     Support date ranges like "May-June 2011"? See https://stackoverflow.com/questions/10340029/
     """
 
-    # We use this to keep track of which template the information came from
-    template_name: str
-
-    persons: Optional[List[Person]]
+    authors: Optional[List[Person]]
+    editors: Optional[List[Person]]
+    hosts: Optional[List[Person]]
+    interviewers: Optional[List[Person]]
+    template_name: str  # We use this to keep track of which template the information came from
+    translators: Optional[List[Person]]
+    persons_without_role: Optional[List[Person]]
 
     # These are all the parameters in the supported templates
     #######################
@@ -351,9 +353,9 @@ class WikipediaPageReference(BaseModel):
     medium: Optional[str]
 
     @staticmethod
-    def __find_number__(str: str):
+    def __find_number__(string: str):
         numbers = []
-        for char in str.split():
+        for char in string.split():
             if char.isdigit():
                 numbers.append(int(char))
         if len(numbers) > 0:
@@ -370,7 +372,35 @@ class WikipediaPageReference(BaseModel):
             attribute
             for attribute in attributes
             if self.__find_number__(attribute) is None
-            and (attribute == "editor" or attribute == "editor_link" or attribute == "editor_mask")
+            and (
+                attribute == "editor"
+                or attribute == "editor_link"
+                or attribute == "editor_mask"
+            )
+        ]
+        if len(editor) > 0:
+            person = Person(role=Role.EDITOR, has_number=False)
+            for attribute in editor:
+                # print(attribute, getattr(self, attribute))
+                if attribute == "editor":
+                    person.name_string = self.editor
+                if attribute == "editor_link":
+                    person.editor_link = self.editor_link
+                if attribute == "editor_mask":
+                    person.editor_mask = self.editor_mask
+            # console.print(person)
+            editors.append(person)
+            # exit()
+        # editor with no given or surname
+        editor = [
+            attribute
+            for attribute in attributes
+            if self.__find_number__(attribute) is None
+            and (
+                attribute == "editor"
+                or attribute == "editor_link"
+                or attribute == "editor_mask"
+            )
         ]
         if len(editor) > 0:
             person = Person(role=Role.EDITOR, has_number=False)
@@ -408,15 +438,15 @@ class WikipediaPageReference(BaseModel):
             authors.append(person)
             # exit()
         # Authors
-        # author_without_number = [
-        #     attribute
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) is None and attribute.contains("author")
-        # ]
-        # if len(author_without_number) > 0:
-        #     for attribute in author_without_number:
-        #         print(attribute, getattr(self, attribute))
-        #     exit()
+        author_without_number = [
+            attribute
+            for attribute in attributes
+            if self.__find_number__(attribute) is None and attribute == "author"
+        ]
+        if len(author_without_number) > 0:
+            for attribute in author_without_number:
+                print(attribute, getattr(self, attribute))
+            exit()
         # first_author = [
         #     attributes
         #     for attribute in attributes
@@ -502,10 +532,8 @@ class WikipediaPageReference(BaseModel):
             and not callable(getattr(self, a))
             and getattr(self, a) is not None
         ]
-        self.persons = []
-        authors = self.__parse_authors__(attributes=attributes)
-        self.persons.extend(authors)
-        # editors = self.__parse_authors__(attributes=attributes)
+        self.authors = self.__parse_authors__(attributes=attributes)
+        self.editors = self.__parse_editors__(attributes=attributes)
         # translators = self.__parse_authors__(attributes=attributes)
         # numbered_attributes_to_check = []
         # for attribute in attributes:
@@ -882,4 +910,4 @@ class WikipediaPageReferenceSchema(Schema):
             "lay_source",
             "lay_url",
             "transcripturl",
-   
+        )
