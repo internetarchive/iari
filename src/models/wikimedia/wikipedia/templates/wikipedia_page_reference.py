@@ -419,25 +419,38 @@ class WikipediaPageReference(BaseModel):
 
     def __parse_authors__(self, attributes: List[str]):
         authors = []
-        # Authors
         author_without_number = [
             attribute
             for attribute in attributes
-            if self.__find_number__(attribute) is None and attribute == "author"
+            if self.__find_number__(attribute) is None and "author" in attribute
         ]
         if len(author_without_number) > 0:
+            person = Person(role=Role.AUTHOR, has_number=False)
             for attribute in author_without_number:
                 print(attribute, getattr(self, attribute))
-            exit()
-        # first_author = [
-        #     attributes
-        #     for attribute in attributes
-        #     if self.__find_number__(attribute) == 1 and attribute.contains("author")
-        # ]
-        # if len(first_author) > 0:
-        #     for attribute in first_author:
-        #         print(attribute, getattr(self, attribute))
-        #     exit()
+                if attribute == "author":
+                    person.name_string = self.author
+                if attribute == "author_link":
+                    person.author_link = self.author_link
+                if attribute == "author_mask":
+                    person.author_mask = self.author_mask
+            authors.append(person)
+        first_author = [
+            attributes
+            for attribute in attributes
+            if self.__find_number__(attribute) == 1 and "author" in attribute
+        ]
+        if len(first_author) > 0:
+            person = Person(role=Role.AUTHOR, has_number=True, number_in_sequence=1)
+            for attribute in first_author:
+                print(attribute, getattr(self, attribute))
+                if attribute == "author1":
+                    person.name_string = self.author
+                # if attribute == "author_link":
+                #     person.author_link = self.author_link
+                # if attribute == "author_mask":
+                #     person.author_mask = self.author_mask
+            authors.append(person)
         # second_author = [
         #     attributes
         #     for attribute in attributes
@@ -501,7 +514,6 @@ class WikipediaPageReference(BaseModel):
         #     for attribute in attributes
         #     if self.__find_number__(attribute) == 12 and attribute.contains("author")
         # ]
-
         return authors
 
     def __parse_roleless_persons__(self, attributes: List[str]):
