@@ -390,47 +390,73 @@ class WikipediaPageReference(BaseModel):
         self,
         attributes: List[str],
         number: int,
-        role: EnglishWikipediaTemplatePersonRole,
-        search_string: str,
+        role: Optional[EnglishWikipediaTemplatePersonRole],
+        search_string: Optional[str],
     ):
-        author = [
-            attributes
-            for attribute in attributes
-            if self.__find_number__(attribute) == number and search_string in attribute
-        ]
-        if len(author) > 0:
-            person = Person(role=role, has_number=True, number_in_sequence=number)
-            for attribute in author:
-                logger.debug(attribute, getattr(self, attribute))
-                # Number in the end. E.g. "author_link1"
-                if attribute == search_string + number:
-                    person.name_string = getattr(self, search_string + number)
-                if attribute == search_string + "_link" + number:
-                    person.link = getattr(self, search_string + "_link" + number)
-                if attribute == search_string + "_mask" + number:
-                    person.mask = getattr(self, search_string + "_mask" + number)
-                if attribute == search_string + "_first" + number:
-                    person.given = getattr(self, search_string + "_first" + number)
-                if attribute == search_string + "_last" + number:
-                    person.surname = getattr(self, search_string + "_last" + number)
-                # Number after author. E.g. "author1_link"
-                if attribute == search_string + number + "_link":
-                    person.link = getattr(self, search_string + number + "_link")
-                if attribute == search_string + number + "_mask":
-                    person.mask = getattr(self, search_string + number + "_mask")
-                if attribute == search_string + number + "_first":
-                    person.given = getattr(self, search_string + number + "_first")
-                if attribute == search_string + number + "_last":
-                    person.surname = getattr(self, search_string + number + "_last")
-            return person
+        # TODO guard agains empty persons somehow
+        if role is not None:
+            found_attributes = [
+                attributes
+                for attribute in attributes
+                if self.__find_number__(attribute) == number
+                and search_string in attribute
+            ]
+            if len(found_attributes) > 0:
+                person = Person(role=role, has_number=True, number_in_sequence=number)
+                for attribute in found_attributes:
+                    logger.debug(attribute, getattr(self, attribute))
+                    # Number in the end. E.g. "author_link1"
+                    if attribute == search_string + number:
+                        person.name_string = getattr(self, search_string + number)
+                    if attribute == search_string + "_link" + number:
+                        person.link = getattr(self, search_string + "_link" + number)
+                    if attribute == search_string + "_mask" + number:
+                        person.mask = getattr(self, search_string + "_mask" + number)
+                    if attribute == search_string + "_first" + number:
+                        person.given = getattr(self, search_string + "_first" + number)
+                    if attribute == search_string + "_last" + number:
+                        person.surname = getattr(self, search_string + "_last" + number)
+                    # Number after author. E.g. "author1_link"
+                    if attribute == search_string + number + "_link":
+                        person.link = getattr(self, search_string + number + "_link")
+                    if attribute == search_string + number + "_mask":
+                        person.mask = getattr(self, search_string + number + "_mask")
+                    if attribute == search_string + number + "_first":
+                        person.given = getattr(self, search_string + number + "_first")
+                    if attribute == search_string + number + "_last":
+                        person.surname = getattr(self, search_string + number + "_last")
+                return person
+        else:
+            # Support cite journal first[1-12] and last[1-12]
+            found_attributes = [
+                attributes
+                for attribute in attributes
+                if self.__find_number__(attribute) == number
+                and ("first" in attribute or "last" in attribute)
+            ]
+            if len(found_attributes) > 0:
+                person = Person(
+                    role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
+                    has_number=False,
+                )
+                for attribute in found_attributes:
+                    logger.debug(attribute, getattr(self, attribute))
+                    first = "first" + number
+                    last = "last" + number
+                    if attribute == first:
+                        person.given = getattr(self, first)
+                    if attribute == last:
+                        person.surname = getattr(self, last)
+                return person
 
     @validate_arguments
     def __get_numbered_persons__(
         self,
         attributes: List[str],
-        role: EnglishWikipediaTemplatePersonRole,
-        search_string: str,
+        role: Optional[EnglishWikipediaTemplatePersonRole],
+        search_string: Optional[str],
     ):
+        """This is just a helper function to call __get_numbered_person__"""
         return [
             self.__get_numbered_person__(
                 attributes=attributes,
@@ -512,7 +538,9 @@ class WikipediaPageReference(BaseModel):
             # console.print(person)
             persons.append(person)
             # exit()
-        # TODO add support for numbered parameters first1, etc.
+        # We use list comprehension to get the numbered persons to
+        # ease code maintentenance and easily support a larger range if neccessary
+        persons.extend(self.__get_numbered_persons__(attributes=attributes))
         return persons
 
     @validator(
