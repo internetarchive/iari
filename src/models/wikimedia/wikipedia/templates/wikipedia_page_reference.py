@@ -354,6 +354,7 @@ class WikipediaPageReference(BaseModel):
     time: Optional[datetime]
     interviewer: Optional[str]
     medium: Optional[str]
+    contribution: Optional[str]
 
     @staticmethod
     @validate_arguments
@@ -659,6 +660,7 @@ class WikipediaPageReferenceSchema(Schema):
             "time",
             "interviewer",
             "medium",
+            "contribution",
             # dates,
             "access_date",
             "archive_date",
