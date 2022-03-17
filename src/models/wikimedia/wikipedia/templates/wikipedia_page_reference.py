@@ -385,7 +385,7 @@ class WikipediaPageReference(BaseModel):
         if len(author) > 0:
             person = Person(role=role, has_number=True, number_in_sequence=number)
             for attribute in author:
-                print(attribute, getattr(self, attribute))
+                logger.debug(attribute, getattr(self, attribute))
                 if attribute == search_string + "1":
                     person.name_string = getattr(self, search_string + number)
                 if attribute == search_string + "_link1":
