@@ -419,24 +419,6 @@ class WikipediaPageReference(BaseModel):
 
     def __parse_authors__(self, attributes: List[str]):
         authors = []
-        # first last
-        author_first_last = [
-            attribute
-            for attribute in attributes
-            if self.__find_number__(attribute) is None
-            and (attribute == "first" or attribute == "last")
-        ]
-        if len(author_first_last) > 0:
-            person = Person(role=Role.UNKNOWN, has_number=False)
-            for attribute in author_first_last:
-                # print(attribute, getattr(self, attribute))
-                if attribute == "first":
-                    person.given = self.first
-                if attribute == "last":
-                    person.surname = self.last
-            # console.print(person)
-            authors.append(person)
-            # exit()
         # Authors
         author_without_number = [
             attribute
@@ -522,6 +504,29 @@ class WikipediaPageReference(BaseModel):
 
         return authors
 
+    def __parse_roleless_persons__(self, attributes: List[str]):
+        persons = []
+        # first last
+        unnumbered_first_last = [
+            attribute
+            for attribute in attributes
+            if self.__find_number__(attribute) is None
+            and (attribute == "first" or attribute == "last")
+        ]
+        if len(unnumbered_first_last) > 0:
+            person = Person(role=Role.UNKNOWN, has_number=False)
+            for attribute in unnumbered_first_last:
+                # print(attribute, getattr(self, attribute))
+                if attribute == "first":
+                    person.given = self.first
+                if attribute == "last":
+                    person.surname = self.last
+            # console.print(person)
+            persons.append(person)
+            # exit()
+        # TODO add support for numbered parameters first1, etc.
+        return persons
+
     def parse_persons(self):
         """Parse all person related data into Person objects"""
         # find all the attributes
@@ -534,6 +539,9 @@ class WikipediaPageReference(BaseModel):
         ]
         self.authors = self.__parse_authors__(attributes=attributes)
         self.editors = self.__parse_editors__(attributes=attributes)
+        self.persons_without_role = self.__parse_roleless_persons__(
+            attributes=attributes
+        )
         # translators = self.__parse_authors__(attributes=attributes)
         # numbered_attributes_to_check = []
         # for attribute in attributes:
