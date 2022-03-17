@@ -9,7 +9,9 @@ from marshmallow.fields import String
 from pydantic import BaseModel, validator, validate_arguments
 
 from src import console
-from src.models.enums import Role
+from src.models.wikimedia.wikipedia.templates.enums import (
+    EnglishWikipediaTemplatePersonRole,
+)
 from src.models.exceptions import MoreThanOneNumberError
 from src.models.person import Person
 
@@ -354,6 +356,7 @@ class WikipediaPageReference(BaseModel):
     medium: Optional[str]
 
     @staticmethod
+    @validate_arguments
     def __find_number__(string: str):
         numbers = []
         for char in string.split():
@@ -366,92 +369,13 @@ class WikipediaPageReference(BaseModel):
         else:
             return None
 
-    def __parse_editors__(self, attributes: List[str]):
-        editors = []
-        # editor with no given or surname
-        editor = [
-            attribute
-            for attribute in attributes
-            if self.__find_number__(attribute) is None
-            and (
-                attribute == "editor"
-                or attribute == "editor_link"
-                or attribute == "editor_mask"
-            )
-        ]
-        if len(editor) > 0:
-            person = Person(role=Role.EDITOR, has_number=False)
-            for attribute in editor:
-                # print(attribute, getattr(self, attribute))
-                if attribute == "editor":
-                    person.name_string = self.editor
-                if attribute == "editor_link":
-                    person.link = self.editor_link
-                if attribute == "editor_mask":
-                    person.mask = self.editor_mask
-            # console.print(person)
-            editors.append(person)
-            # exit()
-        # editor with no given or surname
-        editor = [
-            attribute
-            for attribute in attributes
-            if self.__find_number__(attribute) is None
-            and (
-                attribute == "editor"
-                or attribute == "editor_link"
-                or attribute == "editor_mask"
-            )
-        ]
-        if len(editor) > 0:
-            person = Person(role=Role.EDITOR, has_number=False)
-            for attribute in editor:
-                # print(attribute, getattr(self, attribute))
-                if attribute == "editor":
-                    person.name_string = self.editor
-                if attribute == "editor_link":
-                    person.link = self.editor_link
-                if attribute == "editor_mask":
-                    person.mask = self.editor_mask
-            # console.print(person)
-            editors.append(person)
-            # exit()
-        # We use list comprehension to get the numbered persons to
-        # ease code maintentenance and easily support a larger range if neccessary
-        editors.extend(
-            self.__get_numbered_persons__(
-                attributes=attributes, role=Role.EDITOR, search_string="editor"
-            )
-        )
-        console.print(f"editors: {editors}")
-        if len(editors) > 1:
-            exit()
-        return editors
-
-    @validate_arguments
-    def __get_numbered_persons__(
-        self, attributes: List[str], role: Role, search_string: str
-    ):
-        return [
-            self.__get_numbered_person__(
-                attributes=attributes,
-                number=number,
-                role=Role.EDITOR,
-                search_string=search_string,
-            )
-            for number in range(1, 12)
-            if self.__get_numbered_person__(
-                attributes=attributes,
-                number=number,
-                role=Role.EDITOR,
-                search_string=search_string,
-            )
-            is not None
-        ]
-
     @validate_arguments
     def __get_numbered_person__(
-        self, attributes: List[str], number: int, role: Role, search_string: str
+        self,
+        attributes: List[str],
+        number: int,
+        role: EnglishWikipediaTemplatePersonRole,
+        search_string: str,
     ):
         author = [
             attributes
@@ -474,40 +398,74 @@ class WikipediaPageReference(BaseModel):
                     person.surname = getattr(self, search_string + "_last" + number)
             return person
 
-    def __parse_authors__(self, attributes: List[str]):
-        authors = []
-        author_without_number = [
+    @validate_arguments
+    def __get_numbered_persons__(
+        self,
+        attributes: List[str],
+        role: EnglishWikipediaTemplatePersonRole,
+        search_string: str,
+    ):
+        return [
+            self.__get_numbered_person__(
+                attributes=attributes,
+                number=number,
+                role=EnglishWikipediaTemplatePersonRole.EDITOR,
+                search_string=search_string,
+            )
+            for number in range(1, 12)
+            if self.__get_numbered_person__(
+                attributes=attributes,
+                number=number,
+                role=EnglishWikipediaTemplatePersonRole.EDITOR,
+                search_string=search_string,
+            )
+            is not None
+        ]
+
+    @validate_arguments
+    def __parse_known_role_persons__(
+        self, attributes: List[str], role: EnglishWikipediaTemplatePersonRole
+    ):
+        persons = []
+        person_without_number = [
             attribute
             for attribute in attributes
-            if self.__find_number__(attribute) is None and "author" in attribute
+            if self.__find_number__(attribute) is None and role.value in attribute
         ]
-        if len(author_without_number) > 0:
-            person = Person(role=Role.AUTHOR, has_number=False)
-            for attribute in author_without_number:
+        if len(person_without_number) > 0:
+            person = Person(role=role, has_number=False)
+            link = role.value + "_link"
+            mask = role.value + "_mask"
+            first = role.value + "_first"
+            last = role.value + "_last"
+            for attribute in person_without_number:
                 print(attribute, getattr(self, attribute))
-                if attribute == "author":
-                    person.name_string = self.author
-                if attribute == "author_link":
-                    person.link = self.author_link
-                if attribute == "author_mask":
-                    person.mask = self.author_mask
-                if attribute == "author_first":
-                    person.given = self.author_first
-                if attribute == "author_last":
-                    person.surname = self.author_last
-            authors.append(person)
+                if attribute == role.value:
+                    person.name_string = getattr(self, role.value)
+                if attribute == link:
+                    person.link = getattr(self, link)
+                if attribute == mask:
+                    person.mask = getattr(self, mask)
+                if attribute == first:
+                    person.given = getattr(self, first)
+                if attribute == last:
+                    person.surname = getattr(self, last)
+            persons.append(person)
         # We use list comprehension to get the numbered persons to
         # ease code maintentenance and easily support a larger range if neccessary
-        authors.extend(
+        persons.extend(
             self.__get_numbered_persons__(
-                attributes=attributes, role=Role.AUTHOR, search_string="author"
+                attributes=attributes,
+                role=EnglishWikipediaTemplatePersonRole.AUTHOR,
+                search_string=role.value,
             )
         )
-        console.print(f"authors: {authors}")
-        if len(authors) > 1:
+        console.print(f"{role.name}s: {persons}")
+        if len(persons) > 1:
             exit()
-        return authors
+        return persons
 
+    @validate_arguments
     def __parse_roleless_persons__(self, attributes: List[str]):
         persons = []
         # first last
@@ -518,7 +476,9 @@ class WikipediaPageReference(BaseModel):
             and (attribute == "first" or attribute == "last")
         ]
         if len(unnumbered_first_last) > 0:
-            person = Person(role=Role.UNKNOWN, has_number=False)
+            person = Person(
+                role=EnglishWikipediaTemplatePersonRole.UNKNOWN, has_number=False
+            )
             for attribute in unnumbered_first_last:
                 # print(attribute, getattr(self, attribute))
                 if attribute == "first":
@@ -530,45 +490,6 @@ class WikipediaPageReference(BaseModel):
             # exit()
         # TODO add support for numbered parameters first1, etc.
         return persons
-
-    def parse_persons(self):
-        """Parse all person related data into Person objects"""
-        # find all the attributes
-        attributes = [
-            a
-            for a in dir(self)
-            if not a.startswith("_")
-            and not callable(getattr(self, a))
-            and getattr(self, a) is not None
-        ]
-        self.authors = self.__parse_authors__(attributes=attributes)
-        self.editors = self.__parse_editors__(attributes=attributes)
-        self.persons_without_role = self.__parse_roleless_persons__(
-            attributes=attributes
-        )
-        # translators = self.__parse_authors__(attributes=attributes)
-        # numbered_attributes_to_check = []
-        # for attribute in attributes:
-        #     person = Person()
-        #     print(attribute, getattr(self, attribute))
-        #
-        #     if attribute.startswith("first"):
-        #         logger.debug("found first")
-        #         # detect number
-        #         number = find_number(attribute)
-        #         if number:
-        #             person.number_in_sequence = number
-        #         # parsing up to 12 numbered persons
-        #         for number in range(1, 12):
-        #             logger.debug("found first")
-        #     if attribute.startswith("last"):
-        #         logger.debug("found last")
-        #     if attribute.startswith("editor"):
-        #         logger.debug("found editor")
-        #     if attribute.startswith("translator"):
-        #         logger.debug("found editor")
-        #
-        # exit()
 
     @validator(
         "access_date",
@@ -635,6 +556,58 @@ class WikipediaPageReference(BaseModel):
             # raise TimeParseException(f"date format '{v}' not supported yet")
             logger.warning(f"date format '{v}' not supported yet")
         return date
+
+    def parse_persons(self):
+        """Parse all person related data into Person objects"""
+        # find all the attributes
+        attributes = [
+            a
+            for a in dir(self)
+            if not a.startswith("_")
+            and not callable(getattr(self, a))
+            and getattr(self, a) is not None
+        ]
+        self.authors = self.__parse_known_role_persons__(
+            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.AUTHOR
+        )
+        self.editors = self.__parse_known_role_persons__(
+            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.EDITOR
+        )
+        self.translators = self.__parse_known_role_persons__(
+            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
+        )
+        self.interviewers = self.__parse_known_role_persons__(
+            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.INTERVIEWER
+        )
+        self.hosts = self.__parse_known_role_persons__(
+            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.HOST
+        )
+        self.persons_without_role = self.__parse_roleless_persons__(
+            attributes=attributes
+        )
+        # translators = self.__parse_authors__(attributes=attributes)
+        # numbered_attributes_to_check = []
+        # for attribute in attributes:
+        #     person = Person()
+        #     print(attribute, getattr(self, attribute))
+        #
+        #     if attribute.startswith("first"):
+        #         logger.debug("found first")
+        #         # detect number
+        #         number = find_number(attribute)
+        #         if number:
+        #             person.number_in_sequence = number
+        #         # parsing up to 12 numbered persons
+        #         for number in range(1, 12):
+        #             logger.debug("found first")
+        #     if attribute.startswith("last"):
+        #         logger.debug("found last")
+        #     if attribute.startswith("editor"):
+        #         logger.debug("found editor")
+        #     if attribute.startswith("translator"):
+        #         logger.debug("found editor")
+        #
+        # exit()
 
 
 class WikipediaPageReferenceSchema(Schema):

@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Optional, Any
 
 from pydantic import BaseModel
 
-from src.models.enums import Role
+from src.models.wikimedia.wikipedia.templates.enums import (
+    EnglishWikipediaTemplatePersonRole,
+)
 
 
 class Person(BaseModel):
@@ -16,6 +18,10 @@ class Person(BaseModel):
     mask: Optional[str]
     orcid: Optional[str]
     link: Optional[str]
-    role: Role
     number_in_sequence: Optional[int]
     has_number: bool
+    role: Any
+
+
+class EnglishWikipediaTemplatePerson(Person):
+    role: EnglishWikipediaTemplatePersonRole
