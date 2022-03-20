@@ -47,35 +47,6 @@ class WikipediaPage(BaseModel):
             f"wiki/{self.pywikibot_page.title(underscore=True)}"
         )
 
-    def __get_title_from_event__(self):
-        self.title = self.wikimedia_event.page_title
-        if self.title is None or self.title == "":
-            raise ValueError("title not set correctly")
-
-    def __get_wikipedia_page_from_event__(self):
-        """Get the page from Wikipedia"""
-        logger.info("Fetching the wikitext")
-        self.pywikibot_page = pywikibot.Page(
-            self.wikimedia_event.event_stream.pywikibot_site, self.title
-        )
-        # this id is useful when talking to WikipediaCitations because it is unique
-        self.page_id = int(self.pywikibot_page.pageid)
-
-    def __get_wikipedia_page_from_title__(self):
-        """Get the page from Wikipedia"""
-        logger.info("Fetching the wikitext")
-        self.pywikibot_page = pywikibot.Page(self.pywikibot_site, self.title)
-        # this id is useful when talking to WikipediaCitations because it is unique
-        # self.page_id = int(self.pywikibot_page.pageid)
-
-    # def __match_subjects__(self):
-    #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
-    #     [doi.wikidata_scientific_item.crossref_engine.work.match_subjects_to_qids() for doi in self.dois
-    #      if (
-    #              doi.wikidata_scientific_item.doi_found_in_wikidata and
-    #              doi.wikidata_scientific_item.crossref_engine is not None and
-    #              doi.wikidata_scientific_item.crossref_engine.work is not None
-    #      )]
     @staticmethod
     def __fix_class_key__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
         """convert "class" key to "_class" to avoid collision with reserved python expression"""
@@ -132,6 +103,35 @@ class WikipediaPage(BaseModel):
         dictionary = self.__fix_aliases__(dictionary=dictionary)
         return self.__fix_dash__(dictionary=dictionary)
 
+    def __get_title_from_event__(self):
+        self.title = self.wikimedia_event.page_title
+        if self.title is None or self.title == "":
+            raise ValueError("title not set correctly")
+
+    def __get_wikipedia_page_from_event__(self):
+        """Get the page from Wikipedia"""
+        logger.info("Fetching the wikitext")
+        self.pywikibot_page = pywikibot.Page(
+            self.wikimedia_event.event_stream.pywikibot_site, self.title
+        )
+        # this id is useful when talking to WikipediaCitations because it is unique
+        self.page_id = int(self.pywikibot_page.pageid)
+
+    def __get_wikipedia_page_from_title__(self):
+        """Get the page from Wikipedia"""
+        logger.info("Fetching the wikitext")
+        self.pywikibot_page = pywikibot.Page(self.pywikibot_site, self.title)
+        # this id is useful when talking to WikipediaCitations because it is unique
+        # self.page_id = int(self.pywikibot_page.pageid)
+
+    # def __match_subjects__(self):
+    #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
+    #     [doi.wikidata_scientific_item.crossref_engine.work.match_subjects_to_qids() for doi in self.dois
+    #      if (
+    #              doi.wikidata_scientific_item.doi_found_in_wikidata and
+    #              doi.wikidata_scientific_item.crossref_engine is not None and
+    #              doi.wikidata_scientific_item.crossref_engine.work is not None
+    #      )]
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
         raw = self.pywikibot_page.raw_extracted_templates

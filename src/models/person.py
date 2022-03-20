@@ -13,14 +13,14 @@ class Person(BaseModel):
     and we save that as name_string for later disambiguation"""
 
     given: Optional[str]
-    surname: Optional[str]
-    name_string: Optional[str]
-    mask: Optional[str]
-    orcid: Optional[str]
-    link: Optional[str]
-    number_in_sequence: Optional[int]
     has_number: bool
+    link: Optional[str]
+    mask: Optional[str]
+    name_string: Optional[str]
+    number_in_sequence: Optional[int]
+    orcid: Optional[str]
     role: Any
+    surname: Optional[str]
 
 
 class EnglishWikipediaTemplatePerson(Person):
