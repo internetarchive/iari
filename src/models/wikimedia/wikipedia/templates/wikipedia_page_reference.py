@@ -1,3 +1,4 @@
+import hashlib
 import logging
 from datetime import datetime
 from typing import Optional, List
@@ -34,6 +35,7 @@ class WikipediaPageReference(BaseModel):
 
     authors: Optional[List[Person]]
     editors: Optional[List[Person]]
+    md5hash: Optional[str]
     hosts: Optional[List[Person]]
     interviewers: Optional[List[Person]]
     template_name: str  # We use this to keep track of which template the information came from
@@ -609,6 +611,10 @@ class WikipediaPageReference(BaseModel):
             logger.warning(f"date format '{v}' not supported yet")
         return date
 
+    @property
+    def isodate(self):
+        return datetime.strftime(self.publication_date, "%Y-%m-%d")
+
     def parse_persons(self):
         """Parse all person related data into Person objects"""
         # find all the attributes
@@ -637,6 +643,73 @@ class WikipediaPageReference(BaseModel):
         self.persons_without_role = self.__parse_roleless_persons__(
             attributes=attributes
         )
+
+    def __hash_based_on_title_and_publisher_and_date__(self):
+        if (self.title, self.publisher, self.publication_date) is not None:
+            return self.title + self.publisher + self.isodate
+        else:
+            raise ValueError(
+                f"did not get what we need to generate a hash, {self.dict()}"
+            )
+
+    def __hash_based_on_title_and_journal_and_date__(self):
+        if (self.title, self.journal, self.publication_date) is not None:
+            return self.title + self.journal + self.isodate
+        else:
+            raise ValueError(
+                f"did not get what we need to generate a hash, {self.dict()}"
+            )
+
+    def generate_hash(self):
+        """We generate a md5 hash of the reference as a unique identifier for any given reference in a Wikipedia page
+        We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
+        str2hash = None
+        if self.template_name == "cite book":
+            if self.isbn is None:
+                str2hash = self.__hash_based_on_title_and_publisher_and_date__()
+            else:
+                str2hash = self.isbn
+        elif self.template_name == "cite journal":
+            if self.doi is None:
+                # Fallback first to PMID
+                if self.pmid is None:
+                    str2hash = self.__hash_based_on_title_and_journal_and_date__()
+                else:
+                    str2hash = self.pmid
+            else:
+                str2hash = self.doi
+        elif self.template_name == "cite news":
+            if self.doi is None:
+                # TODO clean URL first?
+                if (self.url, self.publication_date) is not None:
+                    str2hash = self.url + self.isodate
+                else:
+                    raise ValueError(
+                        f"did not get what we need to generate a hash, {self.dict()}"
+                    )
+            else:
+                str2hash = self.doi
+        elif self.template_name == "cite web":
+            if self.doi is None:
+                # TODO clean URL first?
+                if (self.url, self.publication_date) is not None:
+                    str2hash = self.url + self.isodate
+                else:
+                    raise ValueError(
+                        f"did not get what we need to generate a hash, {self.dict()}"
+                    )
+            else:
+                str2hash = self.doi
+        else:
+            # Do we want a generic fallback?
+            pass
+        if str2hash is not None:
+            self.md5hash = str(hashlib.md5(str2hash.replace(" ", "").lower().encode()))
+            logger.debug(self.md5hash)
+        else:
+            raise NotImplementedError(
+                f"hashing is not implemented for {self.template_name} yet"
+            )
 
 
 class WikipediaPageReferenceSchema(Schema):

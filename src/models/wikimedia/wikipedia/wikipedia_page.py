@@ -182,6 +182,8 @@ class WikipediaPage(BaseModel):
                 schema = EnglishWikipediaPageReferenceSchema()
                 reference: EnglishWikipediaPageReference = schema.load(parsed_template)
                 reference.parse_persons()
+                reference.generate_hash()
+                # TODO insert hash into mariadb
                 # logger.debug(type(reference))
                 # logger.debug(f"reference object: {reference.dict()}")
                 if config.loglevel == logging.DEBUG:
