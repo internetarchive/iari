@@ -25,6 +25,8 @@ logger = logging.getLogger(__name__)
 class WikipediaPageReference(BaseModel):
     """This models any reference on a Wikipedia page
 
+    As we move to support more than one Wikipedia this model should be generalized further.
+
     Do we want to merge page + pages into a string property like in Wikidata?
     How do we handle parse errors? In a file log? Should we publish the log for Wikipedians to fix?
 
@@ -392,11 +394,11 @@ class WikipediaPageReference(BaseModel):
         self,
         attributes: List[str],
         number: int,
-        role: Optional[EnglishWikipediaTemplatePersonRole],
-        search_string: Optional[str],
+        role: EnglishWikipediaTemplatePersonRole = None,
+        search_string: str = None,
     ):
         # TODO guard agains empty persons somehow
-        if role is not None:
+        if (role, search_string) is not None:
             found_attributes = [
                 attributes
                 for attribute in attributes
@@ -455,8 +457,8 @@ class WikipediaPageReference(BaseModel):
     def __get_numbered_persons__(
         self,
         attributes: List[str],
-        role: Optional[EnglishWikipediaTemplatePersonRole],
-        search_string: Optional[str],
+        role: EnglishWikipediaTemplatePersonRole = None,
+        search_string: str = None,
     ):
         """This is just a helper function to call __get_numbered_person__"""
         return [
@@ -475,6 +477,24 @@ class WikipediaPageReference(BaseModel):
             )
             is not None
         ]
+
+    def __hash_based_on_title_and_publisher_and_date__(self):
+        logger.debug("__hash_based_on_title_and_publisher_and_date__: running")
+        if (self.title, self.publisher) is not None:
+            return self.title + self.publisher + self.isodate
+        else:
+            raise ValueError(
+                f"did not get what we need to generate a hash, {self.dict()}"
+            )
+
+    def __hash_based_on_title_and_journal_and_date__(self):
+        logger.debug("__hash_based_on_title_and_journal_and_date__: running")
+        if (self.title, self.journal) is not None:
+            return self.title + self.journal + self.isodate
+        else:
+            raise ValueError(
+                f"did not get what we need to generate a hash, {self.dict()}"
+            )
 
     @validate_arguments
     def __parse_known_role_persons__(
@@ -613,15 +633,23 @@ class WikipediaPageReference(BaseModel):
 
     @property
     def isodate(self):
-        return datetime.strftime(self.publication_date, "%Y-%m-%d")
+        if self.publication_date is not None:
+            return datetime.strftime(self.publication_date, "%Y-%m-%d")
+        elif self.date is not None:
+            return datetime.strftime(self.date, "%Y-%m-%d")
+        else:
+            raise ValueError(
+                f"missing publication date, in template {self.template_name}, see {self.dict()}"
+            )
 
     def parse_persons(self):
         """Parse all person related data into Person objects"""
-        # find all the attributes
+        # find all the attributes but exclude the properties as they lead to weird errors
         attributes = [
             a
             for a in dir(self)
             if not a.startswith("_")
+            and not a == "isodate"
             and not callable(getattr(self, a))
             and getattr(self, a) is not None
         ]
@@ -643,22 +671,6 @@ class WikipediaPageReference(BaseModel):
         self.persons_without_role = self.__parse_roleless_persons__(
             attributes=attributes
         )
-
-    def __hash_based_on_title_and_publisher_and_date__(self):
-        if (self.title, self.publisher, self.publication_date) is not None:
-            return self.title + self.publisher + self.isodate
-        else:
-            raise ValueError(
-                f"did not get what we need to generate a hash, {self.dict()}"
-            )
-
-    def __hash_based_on_title_and_journal_and_date__(self):
-        if (self.title, self.journal, self.publication_date) is not None:
-            return self.title + self.journal + self.isodate
-        else:
-            raise ValueError(
-                f"did not get what we need to generate a hash, {self.dict()}"
-            )
 
     def generate_hash(self):
         """We generate a md5 hash of the reference as a unique identifier for any given reference in a Wikipedia page
@@ -691,9 +703,23 @@ class WikipediaPageReference(BaseModel):
                 str2hash = self.doi
         elif self.template_name == "cite web":
             if self.doi is None:
+                # Many of these references lead to pages without any publication
+                # dates unfortunately. e.g. https://www.billboard.com/artist/chk-chk-chk-2/chart-history/tlp/
                 # TODO clean URL first?
-                if (self.url, self.publication_date) is not None:
-                    str2hash = self.url + self.isodate
+                if self.url is not None:
+                    str2hash = self.url
+                else:
+                    raise ValueError(
+                        f"did not get what we need to generate a hash, {self.dict()}"
+                    )
+            else:
+                str2hash = self.doi
+        elif self.template_name == "url":
+            """Example:{{url|chkchkchk.net}}"""
+            if self.doi is None:
+                # TODO clean URL first?
+                if self.first_parameter is not None:
+                    str2hash = self.first_parameter
                 else:
                     raise ValueError(
                         f"did not get what we need to generate a hash, {self.dict()}"
@@ -704,12 +730,17 @@ class WikipediaPageReference(BaseModel):
             # Do we want a generic fallback?
             pass
         if str2hash is not None:
-            self.md5hash = str(hashlib.md5(str2hash.replace(" ", "").lower().encode()))
+            self.md5hash = hashlib.md5(
+                str2hash.replace(" ", "").lower().encode()
+            ).hexdigest()
             logger.debug(self.md5hash)
         else:
             raise NotImplementedError(
-                f"hashing is not implemented for {self.template_name} yet"
+                f"hashing is not implemented for {self.template_name} yet, see "
             )
+
+    def url(self):
+        return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
 
 
 class WikipediaPageReferenceSchema(Schema):
