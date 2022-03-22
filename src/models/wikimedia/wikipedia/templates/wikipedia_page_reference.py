@@ -321,7 +321,7 @@ class WikipediaPageReference(BaseModel):
     volume: Optional[str]
     website: Optional[str]
     work: Optional[str]
-    year: Optional[str]
+    year: Optional[datetime]
     zbl: Optional[str]  # what is this?
 
     #######################
@@ -584,6 +584,7 @@ class WikipediaPageReference(BaseModel):
         "pmc_embargo_date",
         "publication_date",
         "time",
+        "year",
         pre=True,
     )
     def __validate_time__(cls, v):
