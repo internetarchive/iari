@@ -36,5 +36,6 @@ class TestWcdImportBot(TestCase):
             mediawiki_index_url="test",
             sparql_endpoint_url="test",
         )
-        pages = bot.get_pages_by_range()
-        [page.extract_references() for page in pages]
+        bot.get_pages_by_range()
+        [page.extract_references() for page in bot.pages]
+        bot.print_statistics()

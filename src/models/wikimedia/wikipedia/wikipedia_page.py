@@ -25,11 +25,15 @@ class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
     language_code: str
-    percent_of_references_missing_a_hash: Optional[int]
+    number_of_hashed_references: Optional[int]
+    number_of_references: Optional[int]
+    # number_of_references_without_a_hash: Optional[int]
+    # percent_of_references_missing_a_hash: Optional[int]
+    percent_of_references_with_a_hash: Optional[int]
     pywikibot_page: Optional[Page]
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
-    references_without_hashes: Optional[List[WikipediaPageReference]]
+    # references_without_hashes: Optional[List[WikipediaPageReference]]
     title: Optional[str]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
@@ -47,19 +51,39 @@ class WikipediaPage(BaseModel):
         )
 
     def __calculate_hash_percentage__(self):
-        self.__find_references_without_hashes__()
-        if self.references_without_hashes is not None:
-            number_of_references_without_a_hash = len(self.references_without_hashes)
-            self.percent_of_references_missing_a_hash = int(
-                len(self.references_without_hashes) * 100 / len(self.references)
+        logger.debug("Calculating hash percentage")
+        if self.number_of_references == 0:
+            self.percent_of_references_with_a_hash = 0
+        else:
+            # self.number_of_references_without_a_hash = (
+            #     len(self.references) - self.number_of_hashed_references
+            # )
+            self.percent_of_references_with_a_hash = int(
+                self.number_of_hashed_references * 100 / self.number_of_references
             )
+            # self.percent_of_references_missing_a_hash = int(
+            #     self.number_of_references_without_a_hash
+            #     * 100
+            #     / self.number_of_references
+            # )
 
     def __calculate_reference_statistics__(self):
-        if len(self.references) > 0:
-            # TODO calculate statistics of which templates were found
-            self.__calculate_hash_statistics__()
+        logger.debug("Calculating page statistics")
+        self.number_of_references = len(self.references)
+        self.__calculate_hash_statistics__()
+
+    def __count_references_with_hashes__(self):
+        self.number_of_hashed_references = len(
+            [
+                reference
+                for reference in self.references
+                if reference.md5hash is not None
+            ]
+        )
+        logger.info(f"number_of_hashed_references: {self.number_of_hashed_references}")
 
     def __calculate_hash_statistics__(self):
+        self.__count_references_with_hashes__()
         self.__calculate_hash_percentage__()
 
     def __calculate_hashed_template_distribution__(self):
@@ -116,10 +140,19 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dictionary[key]
         return newdict
 
-    def __find_references_without_hashes__(self):
-        self.references_without_hashes = [
-            reference for reference in self.references if reference.md5hash is None
-        ]
+    # def __find_references_without_hashes__(self):
+    #     references_without_hashes = [
+    #         reference for reference in self.references if reference.md5hash is None
+    #     ]
+    #     logger.info(f"references_without_hashes: {len(references_without_hashes)}")
+    #     if references_without_hashes is None:
+    #         self.references_without_hashes = []
+    #     else:
+    #         self.references_without_hashes = references_without_hashes
+    #     self.number_of_references_without_a_hash = len(self.references_without_hashes)
+    #     logger.info(
+    #         f"number_of_references_without_a_hash: {self.number_of_references_without_a_hash}"
+    #     )
 
     def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         dictionary = self.__fix_class_key__(dictionary=dictionary)
@@ -219,7 +252,7 @@ class WikipediaPage(BaseModel):
 
     def __print_hash_statistics__(self):
         logger.info(
-            f"Hashed {self.percent_of_references_missing_a_hash} percent of "
+            f"Hashed {self.percent_of_references_with_a_hash} percent of "
             f"{len(self.references)} references on page {self.pywikibot_page.title()}"
         )
 
@@ -238,3 +271,7 @@ class WikipediaPage(BaseModel):
         self.__parse_templates__()
         self.__calculate_reference_statistics__()
         self.__print_hash_statistics__()
+
+    def export_to_dataframe(self):
+        # TODO make it easy to quantify the references with pandas
+        raise NotImplementedError("To be written")
