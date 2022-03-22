@@ -489,7 +489,7 @@ class WikipediaPageReference(BaseModel):
 
     def __hash_based_on_title_and_journal_and_date__(self):
         logger.debug("__hash_based_on_title_and_journal_and_date__: running")
-        if (self.title, self.journal) is not None:
+        if (self.title and self.journal) is not None:
             return self.title + self.journal + self.isodate
         else:
             raise ValueError(
@@ -718,7 +718,7 @@ class WikipediaPageReference(BaseModel):
         elif self.template_name == "cite news":
             if self.doi is None:
                 # TODO clean URL first?
-                if (self.url, self.publication_date) is not None:
+                if (self.url) is not None:
                     str2hash = self.url + self.isodate
                 else:
                     raise ValueError(
