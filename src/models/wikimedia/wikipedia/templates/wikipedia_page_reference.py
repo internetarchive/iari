@@ -676,7 +676,19 @@ class WikipediaPageReference(BaseModel):
         """We generate a md5 hash of the reference as a unique identifier for any given reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         str2hash = None
-        if self.template_name == "cite book":
+        if self.template_name == "cite av media":
+            """{{cite AV media |people= |date= |title= |trans-title= |type=
+            |language= |url= |access-date= |archive-url= |archive-date=
+            |format= |time= |location= |publisher= |id= |isbn= |oclc= |quote= |ref=}}"""
+            # https://en.wikipedia.org/wiki/Template:Cite_AV_media
+            if self.doi is None:
+                if self.isbn is None:
+                    str2hash = self.__hash_based_on_title_and_date__()
+                else:
+                    str2hash = self.isbn
+            else:
+                str2hash = self.doi
+        elif self.template_name == "cite book":
             if self.isbn is None:
                 str2hash = self.__hash_based_on_title_and_publisher_and_date__()
             else:
@@ -688,6 +700,19 @@ class WikipediaPageReference(BaseModel):
                     str2hash = self.__hash_based_on_title_and_journal_and_date__()
                 else:
                     str2hash = self.pmid
+            else:
+                str2hash = self.doi
+        elif self.template_name == "cite magazine":
+            """{{cite magazine |last= |first= |date= |title= |url=
+            |magazine= |location= |publisher= |access-date=}}"""
+            if self.doi is None:
+                # TODO clean URL first?
+                if (self.title) is not None:
+                    str2hash = self.title + self.isodate
+                else:
+                    raise ValueError(
+                        f"did not get what we need to generate a hash, {self.dict()}"
+                    )
             else:
                 str2hash = self.doi
         elif self.template_name == "cite news":
