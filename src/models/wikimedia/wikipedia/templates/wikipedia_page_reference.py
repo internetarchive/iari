@@ -9,6 +9,7 @@ from marshmallow import (
 from marshmallow.fields import String
 from pydantic import BaseModel, validator, validate_arguments
 
+import config
 from src import console
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
@@ -697,9 +698,11 @@ class WikipediaPageReference(BaseModel):
         elif self.oclc is not None:
             str2hash = self.oclc
         elif self.url is not None:
-            str2hash = self.url
+            if config.include_url_and_first_parameter_in_hash_algorithm:
+                str2hash = self.url
         elif self.first_parameter is not None:
-            str2hash = self.first_parameter
+            if config.include_url_and_first_parameter_in_hash_algorithm:
+                str2hash = self.first_parameter
 
         # DISABLED template specific hashing for now because it is error
         # prone and does not make it easy to avoid duplicates
@@ -792,7 +795,8 @@ class WikipediaPageReference(BaseModel):
             self.md5hash = None
             logger.warning(
                 f"hashing not possible for this instance of {self.template_name} "
-                f"because no identifier or url or first parameter was found."
+                f"because no identifier or url or first parameter was found "
+                f"or they were turned of in config.py."
             )
 
     def template_url(self):
