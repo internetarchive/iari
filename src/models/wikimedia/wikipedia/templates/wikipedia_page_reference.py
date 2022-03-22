@@ -646,6 +646,8 @@ class WikipediaPageReference(BaseModel):
             return datetime.strftime(self.publication_date, "%Y-%m-%d")
         elif self.date is not None:
             return datetime.strftime(self.date, "%Y-%m-%d")
+        elif self.year is not None:
+            return datetime.strftime(self.year, "%Y-%m-%d")
         else:
             raise ValueError(
                 f"missing publication date, in template {self.template_name}, see {self.dict()}"
