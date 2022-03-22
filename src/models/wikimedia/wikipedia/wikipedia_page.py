@@ -54,9 +54,13 @@ class WikipediaPage(BaseModel):
                 len(self.references_without_hashes) * 100 / len(self.references)
             )
 
-    def __calculate_hash_statistics__(self):
+    def __calculate_reference_statistics__(self):
         if len(self.references) > 0:
-            self.__calculate_hash_percentage__()
+            # TODO calculate statistics of which templates were found
+            self.__calculate_hash_statistics__()
+
+    def __calculate_hash_statistics__(self):
+        self.__calculate_hash_percentage__()
 
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
@@ -216,7 +220,7 @@ class WikipediaPage(BaseModel):
     def __print_hash_statistics__(self):
         logger.info(
             f"Hashed {self.percent_of_references_missing_a_hash} percent of "
-            f"{len(self.references)} references on page {self.title}"
+            f"{len(self.references)} references on page {self.pywikibot_page.title()}"
         )
 
     def extract_references(self):
@@ -232,5 +236,5 @@ class WikipediaPage(BaseModel):
             if self.pywikibot_page is None:
                 raise ValueError("self.pywikibot_page was None")
         self.__parse_templates__()
-        self.__calculate_hash_statistics__()
+        self.__calculate_reference_statistics__()
         self.__print_hash_statistics__()
