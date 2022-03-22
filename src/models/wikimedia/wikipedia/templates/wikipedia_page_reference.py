@@ -522,7 +522,7 @@ class WikipediaPageReference(BaseModel):
             first = role.value + "_first"
             last = role.value + "_last"
             for attribute in person_without_number:
-                print(attribute, getattr(self, attribute))
+                # print(attribute, getattr(self, attribute))
                 if attribute == role.value:
                     person.name_string = getattr(self, role.value)
                 if attribute == link:
