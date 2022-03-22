@@ -688,92 +688,111 @@ class WikipediaPageReference(BaseModel):
         """We generate a md5 hash of the reference as a unique identifier for any given reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         str2hash = None
-        if self.template_name == "cite av media":
-            """{{cite AV media |people= |date= |title= |trans-title= |type=
-            |language= |url= |access-date= |archive-url= |archive-date=
-            |format= |time= |location= |publisher= |id= |isbn= |oclc= |quote= |ref=}}"""
-            # https://en.wikipedia.org/wiki/Template:Cite_AV_media
-            if self.doi is None:
-                if self.isbn is None:
-                    str2hash = self.__hash_based_on_title_and_date__()
-                else:
-                    str2hash = self.isbn
-            else:
-                str2hash = self.doi
-        elif self.template_name == "cite book":
-            if self.isbn is None:
-                str2hash = self.__hash_based_on_title_and_publisher_and_date__()
-            else:
-                str2hash = self.isbn
-        elif self.template_name == "cite journal":
-            if self.doi is None:
-                # Fallback first to PMID
-                if self.pmid is None:
-                    str2hash = self.__hash_based_on_title_and_date__()
-                else:
-                    str2hash = self.pmid
-            else:
-                str2hash = self.doi
-        elif self.template_name == "cite magazine":
-            """{{cite magazine |last= |first= |date= |title= |url=
-            |magazine= |location= |publisher= |access-date=}}"""
-            if self.doi is None:
-                # TODO clean URL first?
-                if (self.title) is not None:
-                    str2hash = self.title + self.isodate
-                else:
-                    raise ValueError(
-                        f"did not get what we need to generate a hash, {self.dict()}"
-                    )
-            else:
-                str2hash = self.doi
-        elif self.template_name == "cite news":
-            if self.doi is None:
-                # TODO clean URL first?
-                if (self.url) is not None:
-                    str2hash = self.url + self.isodate
-                else:
-                    raise ValueError(
-                        f"did not get what we need to generate a hash, {self.dict()}"
-                    )
-            else:
-                str2hash = self.doi
-        elif self.template_name == "cite web":
-            if self.doi is None:
-                # Many of these references lead to pages without any publication
-                # dates unfortunately. e.g. https://www.billboard.com/artist/chk-chk-chk-2/chart-history/tlp/
-                # TODO clean URL first?
-                if self.url is not None:
-                    str2hash = self.url
-                else:
-                    raise ValueError(
-                        f"did not get what we need to generate a hash, {self.dict()}"
-                    )
-            else:
-                str2hash = self.doi
-        elif self.template_name == "url":
-            """Example:{{url|chkchkchk.net}}"""
-            if self.doi is None:
-                # TODO clean URL first?
-                if self.first_parameter is not None:
-                    str2hash = self.first_parameter
-                else:
-                    raise ValueError(
-                        f"did not get what we need to generate a hash, {self.dict()}"
-                    )
-            else:
-                str2hash = self.doi
-        else:
-            # Do we want a generic fallback?
-            pass
+        if self.doi is not None:
+            str2hash = self.doi
+        elif self.pmid is not None:
+            str2hash = self.pmid
+        elif self.isbn is not None:
+            str2hash = self.isbn
+        elif self.oclc is not None:
+            str2hash = self.oclc
+        elif self.url is not None:
+            str2hash = self.url
+        elif self.first_parameter is not None:
+            str2hash = self.first_parameter
+
+        # DISABLED template specific hashing for now because it is error
+        # prone and does not make it easy to avoid duplicates
+        # For example a news article might be cited with the publication date in one place but not in another.
+        # If we include the publication date in the hash we will end up with a duplicate in Wikibase.
+        # if self.template_name == "cite av media":
+        #     """{{cite AV media |people= |date= |title= |trans-title= |type=
+        #     |language= |url= |access-date= |archive-url= |archive-date=
+        #     |format= |time= |location= |publisher= |id= |isbn= |oclc= |quote= |ref=}}"""
+        #     # https://en.wikipedia.org/wiki/Template:Cite_AV_media
+        #     if self.doi is None:
+        #         if self.isbn is None:
+        #             str2hash = self.__hash_based_on_title_and_date__()
+        #         else:
+        #             str2hash = self.isbn
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite book":
+        #     if self.isbn is None:
+        #         str2hash = self.__hash_based_on_title_and_publisher_and_date__()
+        #     else:
+        #         str2hash = self.isbn
+        # elif self.template_name == "cite journal":
+        #     if self.doi is None:
+        #         # Fallback first to PMID
+        #         if self.pmid is None:
+        #             str2hash = self.__hash_based_on_title_and_date__()
+        #         else:
+        #             str2hash = self.pmid
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite magazine":
+        #     """{{cite magazine |last= |first= |date= |title= |url=
+        #     |magazine= |location= |publisher= |access-date=}}"""
+        #     if self.doi is None:
+        #         # TODO clean URL first?
+        #         if (self.title) is not None:
+        #             str2hash = self.title + self.isodate
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite news":
+        #     if self.doi is None:
+        #         # TODO clean URL first?
+        #         if (self.title) is not None:
+        #             str2hash = self.title + self.isodate
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite web":
+        #     if self.doi is None:
+        #         # Many of these references lead to pages without any publication
+        #         # dates unfortunately. e.g. https://www.billboard.com/artist/chk-chk-chk-2/chart-history/tlp/
+        #         # TODO clean URL first?
+        #         if self.url is not None:
+        #             str2hash = self.url
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "url":
+        #     """Example:{{url|chkchkchk.net}}"""
+        #     if self.doi is None:
+        #         # TODO clean URL first?
+        #         if self.first_parameter is not None:
+        #             str2hash = self.first_parameter
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # else:
+        #     # Do we want a generic fallback?
+        #     pass
         if str2hash is not None:
             self.md5hash = hashlib.md5(
                 str2hash.replace(" ", "").lower().encode()
             ).hexdigest()
             logger.debug(self.md5hash)
         else:
-            raise NotImplementedError(
-                f"hashing is not implemented for {self.template_name} yet, see "
+            self.md5hash = None
+            logger.warning(
+                f"hashing not possible for this instance of {self.template_name} "
+                f"because no identifier or url or first parameter was found."
             )
 
     def template_url(self):
