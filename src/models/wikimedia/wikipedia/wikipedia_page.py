@@ -21,9 +21,6 @@ from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
 logger = logging.getLogger(__name__)
 
 
-# This is a hack. Copying it here avoids an otherwise seemingly unavoidable cascade of pydantic errors...
-
-
 class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
