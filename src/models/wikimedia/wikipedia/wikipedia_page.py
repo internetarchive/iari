@@ -28,9 +28,11 @@ class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
     language_code: str
+    percent_of_references_missing_a_hash: Optional[int]
     pywikibot_page: Optional[Page]
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
+    references_without_hashes: Optional[List[WikipediaPageReference]]
     title: Optional[str]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
@@ -46,6 +48,21 @@ class WikipediaPage(BaseModel):
             f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
             f"wiki/{self.pywikibot_page.title(underscore=True)}"
         )
+
+    def __calculate_hash_percentage__(self):
+        self.__find_references_without_hashes__()
+        if self.references_without_hashes is not None:
+            number_of_references_without_a_hash = len(self.references_without_hashes)
+            self.percent_of_references_missing_a_hash = int(
+                len(self.references_without_hashes) * 100 / len(self.references)
+            )
+
+    def __calculate_hash_statistics__(self):
+        if len(self.references) > 0:
+            self.__calculate_hash_percentage__()
+
+    def __calculate_hashed_template_distribution__(self):
+        raise NotImplementedError("To be written")
 
     @staticmethod
     def __fix_class_key__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
@@ -97,6 +114,11 @@ class WikipediaPage(BaseModel):
             else:
                 newdict[key] = dictionary[key]
         return newdict
+
+    def __find_references_without_hashes__(self):
+        self.references_without_hashes = [
+            reference for reference in self.references if reference.md5hash is None
+        ]
 
     def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         dictionary = self.__fix_class_key__(dictionary=dictionary)
@@ -194,6 +216,12 @@ class WikipediaPage(BaseModel):
                 if config.debug_unsupported_templates:
                     logger.debug(f"Template '{template_name.lower()}' not supported")
 
+    def __print_hash_statistics__(self):
+        logger.info(
+            f"Hashed {self.percent_of_references_missing_a_hash} percent of "
+            f"{len(self.references)} references on page {self.title}"
+        )
+
     def extract_references(self):
         if self.wikimedia_event is not None:
             # raise ValueError("wikimedia_event was None")
@@ -207,3 +235,5 @@ class WikipediaPage(BaseModel):
             if self.pywikibot_page is None:
                 raise ValueError("self.pywikibot_page was None")
         self.__parse_templates__()
+        self.__calculate_hash_statistics__()
+        self.__print_hash_statistics__()
