@@ -478,10 +478,10 @@ class WikipediaPageReference(BaseModel):
             is not None
         ]
 
-    def __hash_based_on_title_and_publisher_and_date__(self):
-        logger.debug("__hash_based_on_title_and_publisher_and_date__: running")
-        if (self.title, self.publisher) is not None:
-            return self.title + self.publisher + self.isodate
+    def __hash_based_on_title_and_date__(self):
+        logger.debug("__hash_based_on_title_and_date__: running")
+        if (self.title) is not None:
+            return self.title + self.isodate
         else:
             raise ValueError(
                 f"did not get what we need to generate a hash, {self.dict()}"
@@ -491,6 +491,15 @@ class WikipediaPageReference(BaseModel):
         logger.debug("__hash_based_on_title_and_journal_and_date__: running")
         if (self.title and self.journal) is not None:
             return self.title + self.journal + self.isodate
+        else:
+            raise ValueError(
+                f"did not get what we need to generate a hash, {self.dict()}"
+            )
+
+    def __hash_based_on_title_and_publisher_and_date__(self):
+        logger.debug("__hash_based_on_title_and_publisher_and_date__: running")
+        if (self.title and self.publisher) is not None:
+            return self.title + self.publisher + self.isodate
         else:
             raise ValueError(
                 f"did not get what we need to generate a hash, {self.dict()}"
@@ -697,7 +706,7 @@ class WikipediaPageReference(BaseModel):
             if self.doi is None:
                 # Fallback first to PMID
                 if self.pmid is None:
-                    str2hash = self.__hash_based_on_title_and_journal_and_date__()
+                    str2hash = self.__hash_based_on_title_and_date__()
                 else:
                     str2hash = self.pmid
             else:
