@@ -773,7 +773,7 @@ class WikipediaPageReference(BaseModel):
                 f"hashing is not implemented for {self.template_name} yet, see "
             )
 
-    def url(self):
+    def template_url(self):
         return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
 
 
