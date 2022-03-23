@@ -6,3 +6,4 @@ mwparserfromhell
 git+git://github.com/LeMyst/WikibaseIntegrator@v0.12.0rc2#egg=wikibaseintegrator
 rich~=11.2.0
 marshmallow~=3.15.0
+pymysql
