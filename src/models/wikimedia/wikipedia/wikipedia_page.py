@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import List, Any, TYPE_CHECKING, Optional, Dict
+from typing import List, Any, Optional, Dict
 
 import pywikibot  # type: ignore
 from pydantic import BaseModel

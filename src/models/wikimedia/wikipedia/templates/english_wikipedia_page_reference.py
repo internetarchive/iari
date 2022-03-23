@@ -12,9 +12,5 @@ class EnglishWikipediaPageReference(WikipediaPageReference):
 
 class EnglishWikipediaPageReferenceSchema(WikipediaPageReferenceSchema):
     @post_load
-    def return_object(self, data, **kwargs):
-        from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
-            EnglishWikipediaPageReference,
-        )
-
+    def return_object(self, data):
         return EnglishWikipediaPageReference(**data)

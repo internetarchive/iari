@@ -10,12 +10,11 @@ from marshmallow.fields import String
 from pydantic import BaseModel, validator, validate_arguments
 
 import config
-from src import console
+from src.models.exceptions import MoreThanOneNumberError
+from src.models.person import Person
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
-from src.models.exceptions import MoreThanOneNumberError
-from src.models.person import Person
 
 logger = logging.getLogger(__name__)
 
@@ -411,25 +410,41 @@ class WikipediaPageReference(BaseModel):
                 for attribute in found_attributes:
                     logger.debug(attribute, getattr(self, attribute))
                     # Number in the end. E.g. "author_link1"
-                    if attribute == search_string + number:
-                        person.name_string = getattr(self, search_string + number)
-                    if attribute == search_string + "_link" + number:
-                        person.link = getattr(self, search_string + "_link" + number)
-                    if attribute == search_string + "_mask" + number:
-                        person.mask = getattr(self, search_string + "_mask" + number)
-                    if attribute == search_string + "_first" + number:
-                        person.given = getattr(self, search_string + "_first" + number)
-                    if attribute == search_string + "_last" + number:
-                        person.surname = getattr(self, search_string + "_last" + number)
-                    # Number after author. E.g. "author1_link"
-                    if attribute == search_string + number + "_link":
-                        person.link = getattr(self, search_string + number + "_link")
-                    if attribute == search_string + number + "_mask":
-                        person.mask = getattr(self, search_string + number + "_mask")
-                    if attribute == search_string + number + "_first":
-                        person.given = getattr(self, search_string + number + "_first")
-                    if attribute == search_string + number + "_last":
-                        person.surname = getattr(self, search_string + number + "_last")
+                    if attribute == search_string + str(number):
+                        person.name_string = getattr(self, search_string + str(number))
+                    if attribute == search_string + "_link" + str(number):
+                        person.link = getattr(
+                            self, search_string + "_link" + str(number)
+                        )
+                    if attribute == search_string + "_mask" + str(number):
+                        person.mask = getattr(
+                            self, search_string + "_mask" + str(number)
+                        )
+                    if attribute == search_string + "_first" + str(number):
+                        person.given = getattr(
+                            self, search_string + "_first" + str(number)
+                        )
+                    if attribute == search_string + "_last" + str(number):
+                        person.surname = getattr(
+                            self, search_string + "_last" + str(number)
+                        )
+                    # str(number) after author. E.g. "author1_link"
+                    if attribute == search_string + str(number) + "_link":
+                        person.link = getattr(
+                            self, search_string + str(number) + "_link"
+                        )
+                    if attribute == search_string + str(number) + "_mask":
+                        person.mask = getattr(
+                            self, search_string + str(number) + "_mask"
+                        )
+                    if attribute == search_string + str(number) + "_first":
+                        person.given = getattr(
+                            self, search_string + str(number) + "_first"
+                        )
+                    if attribute == search_string + str(number) + "_last":
+                        person.surname = getattr(
+                            self, search_string + str(number) + "_last"
+                        )
                 return person
         else:
             # Support cite journal first[1-12] and last[1-12]
@@ -446,8 +461,8 @@ class WikipediaPageReference(BaseModel):
                 )
                 for attribute in found_attributes:
                     logger.debug(attribute, getattr(self, attribute))
-                    first = "first" + number
-                    last = "last" + number
+                    first = "first" + str(number)
+                    last = "last" + str(number)
                     if attribute == first:
                         person.given = getattr(self, first)
                     if attribute == last:
@@ -481,7 +496,7 @@ class WikipediaPageReference(BaseModel):
 
     def __hash_based_on_title_and_date__(self):
         logger.debug("__hash_based_on_title_and_date__: running")
-        if (self.title) is not None:
+        if self.title is not None:
             return self.title + self.isodate
         else:
             raise ValueError(

@@ -1,15 +1,9 @@
-from pprint import pprint
 from unittest import TestCase
-
-from marshmallow import Schema, fields, ValidationError
 
 from src import console
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaPageReference,
-)
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
-    WikipediaPageReferenceSchema,
 )
 
 
