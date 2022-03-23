@@ -20,14 +20,52 @@ class HashDatabase(BaseModel):
     password: str = "password"
     port: int = 3306
     host: str = "localhost"
-    cursor: Optional[Any]
     connection: Optional[Any]
+    table: str = "hashes"
+
+    @validate_arguments
+    def add_reference(self, reference: WikipediaPageReference):
+        if (reference.md5hash and reference.wikicitations_qid) is not None:
+            with self.connection.cursor() as cursor:
+                cursor.execute("USE HASHDB")
+                query = cursor.mogrify(
+                    f"INSERT INTO {self.table} (hash, wikicitations_qid) "
+                    f"VALUES ('{reference.md5hash}', '{reference.wikicitations_qid}')"
+                )
+                cursor.execute(query)
+                result = cursor.lastrowid
+                self.connection.commit()
+                print(f"rowid added:{result}")
+        else:
+            raise ValueError("did not get what we need")
+
+    @validate_arguments
+    def check_reference_and_get_wikicitations_qid(
+        self, reference: WikipediaPageReference
+    ):
+        if reference.md5hash is not None:
+            # https://stackoverflow.com/questions/55365543/
+            self.connection.ping()
+            with self.connection.cursor() as cursor:
+                query = cursor.mogrify(
+                    f"SELECT hash, wikicitations_qid FROM {self.table} "
+                    f"WHERE hash = '{reference.md5hash}';"
+                )
+                logger.info(f"running query: {query}")
+                cursor.execute(query)
+                return cursor.fetchone()
+        else:
+            raise ValueError("md5hash was None")
 
     def connect(self):
         # Connect to MariaDB Platform
         try:
             self.connection = pymysql.connect(
-                host=self.host, user=self.user, password=self.password, port=self.port
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                port=self.port,
+                database="hashdb",
             )
             # self.connection = mariadb.connect(
             #     user=self.user,
@@ -41,54 +79,42 @@ class HashDatabase(BaseModel):
         #     sys.exit(1)
         except:
             logger.error("error")
-        # Get Cursor
-        self.cursor = self.connection.cursor()
 
-    def initialize(self):
-        if self.cursor is not None:
-            # create db hashdatabase
-            # creating database
-            self.cursor.execute("CREATE DATABASE HASHDB")
-            self.cursor.execute("USE HASHDB")
-            self.cursor.execute(
-                """CREATE TABLE `hashes` (
-                  `id` int PRIMARY KEY AUTO_INCREMENT,
-                  `hash` varchar(32) UNIQUE NOT NULL,
-                  `wikicitations_qid` varchar(32) UNIQUE NOT NULL
-                );"""
-            )
-            self.cursor.execute("CREATE INDEX hash_index ON hashes(hash);")
-
-    def drop_if_exists(self):
-        try:
-            self.cursor.execute("DROP DATABASE HASHDB")
-        except OperationalError:
-            logger.error("Skipping drop. No database 'hashdb' found")
+    def create_database(self):
+        if self.connection is not None:
+            with self.connection.cursor() as cursor:
+                # create database hashdatabase
+                # creating database
+                cursor.execute("CREATE DATABASE HASHDB")
 
     def disconnect(self):
         # Close Connection
         self.connection.close()
 
-    @validate_arguments
-    def check_reference_and_get_wikicitations_qid(
-        self, reference: WikipediaPageReference
-    ):
-        if reference.md5hash is not None:
-            self.cursor.execute(
-                f"SELECT hash, wikicitations_qid FROM hashes WHERE hash = '{reference.md5hash}'"
-            )
-            return self.cursor.fetchone()
-        else:
-            raise ValueError("md5hash was None")
+    def drop_table_if_exists(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute(f"drop table if exists {self.table}")
 
-    @validate_arguments
-    def add_reference(self, reference: WikipediaPageReference):
-        if (reference.md5hash and reference.wikicitations_qid) is not None:
-            self.cursor.execute(
-                f"INSERT INTO hashes (hash, wikicitations_qid) "
-                f"VALUES ('{reference.md5hash}', '{reference.wikicitations_qid}')"
-            )
-            result = self.cursor.fetchone()
-            print(f"add:{result}")
-        else:
-            raise ValueError("did not get what we need")
+    def initialize(self):
+        if self.connection is not None:
+            with self.connection.cursor() as cursor:
+                # create database hashdatabase
+                # creating database
+                cursor.execute("USE HASHDB")
+                cursor.execute(
+                    f"""CREATE TABLE `{self.table}` (
+                      `id` int PRIMARY KEY AUTO_INCREMENT,
+                      `hash` varchar(32) UNIQUE NOT NULL,
+                      `wikicitations_qid` varchar(32) UNIQUE NOT NULL
+                    );"""
+                )
+                cursor.execute(
+                    f"CREATE INDEX {self.table}_index ON {self.table}(hash);"
+                )
+
+    def get_whole_table(self):
+        with self.connection.cursor() as cursor:
+            query = cursor.mogrify(f"SELECT * FROM hashdb.{self.table};")
+            logger.info(f"running query: {query}")
+            cursor.execute(query)
+            return cursor.fetchall()

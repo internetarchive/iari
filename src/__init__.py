@@ -1,13 +1,14 @@
 import logging
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validate_arguments
 from pywikibot import Page, Site
 from wikibaseintegrator.wbi_config import config as wbi_config
 
 import config
 from src.models.exceptions import DebugExit
 from src.helpers import console
+from src.models.hash_database import HashDatabase
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class WcdImportBot(BaseModel):
+    database: Optional[HashDatabase]
     language_code: str = "en"
     max_count: int = 10
     mediawiki_api_url: str
@@ -24,6 +26,8 @@ class WcdImportBot(BaseModel):
     pages: Optional[List[WikipediaPage]]
     percent_references_hashed_in_total: Optional[int]
     sparql_endpoint_url: str
+    table: Optional[str]
+    title: Optional[str]
     total_number_of_references: Optional[int]
     wikibase_url: str
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
@@ -35,6 +39,16 @@ class WcdImportBot(BaseModel):
     # iterate templates we support
     # create reference objects for each one
     # generate item in wcd
+
+    def __setup_mariadb__(self):
+        if self.table is not None:
+            self.database = HashDatabase(table=self.table)
+        else:
+            self.database = HashDatabase()
+        self.database.connect()
+        self.database.drop_table_if_exists()
+        self.database.initialize()
+
     def __setup_wbi__(self):
         wbi_config["WIKIBASE_URL"] = self.wikibase_url
         wbi_config["MEDIAWIKI_API_URL"] = self.mediawiki_api_url
@@ -42,11 +56,16 @@ class WcdImportBot(BaseModel):
         wbi_config["SPARQL_ENDPOINT_URL"] = self.sparql_endpoint_url
 
     def get_pages_by_range(self) -> None:
+        def prepare_pywiki_site():
+            return Site(code=self.language_code, fam=self.wikimedia_site.value)
+
+        if config.use_hash_database:
+            self.__setup_mariadb__()
         self.pages = []
         count = 0
         # https://stackoverflow.com/questions/59605802/
         # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
-        site = Site(code=self.language_code, fam=self.wikimedia_site.value)
+        site = prepare_pywiki_site()
         for page in site.allpages(namespace=0):
             if count == self.max_count:
                 break
@@ -61,8 +80,23 @@ class WcdImportBot(BaseModel):
                         pywikibot_page=page,
                         language_code=self.language_code,
                         wikimedia_site=self.wikimedia_site,
+                        database=self.database,
                     )
                 )
+        self.database.disconnect()
+
+    @validate_arguments
+    def get_page_by_title(self, title: str):
+        if config.use_hash_database:
+            self.__setup_mariadb__()
+        self.pages = []
+        page = WikipediaPage(
+            database=self.database,
+            language_code=self.language_code,
+            wikimedia_site=self.wikimedia_site,
+        )
+        page.__get_wikipedia_page_from_title__(title=title)
+        self.pages.append(page)
 
     def __calculate_statistics__(self):
         """We want to have an overview while the bot is running

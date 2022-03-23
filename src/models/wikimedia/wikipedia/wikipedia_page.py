@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import json
 import logging
+import random
 from typing import List, Any, Optional, Dict
 
 import pywikibot  # type: ignore
-from pydantic import BaseModel
-from pywikibot import Page
+from pydantic import BaseModel, validate_arguments
+from pywikibot import Page, Site
 
 import config
-from src import WikimediaSite, console
+from src import WikimediaSite, console, HashDatabase
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaPageReference,
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
+    database: Optional[HashDatabase]
     language_code: str
     number_of_hashed_references: Optional[int]
     number_of_references: Optional[int]
@@ -34,7 +36,6 @@ class WikipediaPage(BaseModel):
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
     # references_without_hashes: Optional[List[WikipediaPageReference]]
-    title: Optional[str]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
@@ -173,10 +174,15 @@ class WikipediaPage(BaseModel):
         # this id is useful when talking to WikipediaCitations because it is unique
         self.page_id = int(self.pywikibot_page.pageid)
 
-    def __get_wikipedia_page_from_title__(self):
+    @validate_arguments
+    def __get_wikipedia_page_from_title__(self, title: str):
         """Get the page from Wikipedia"""
+        self.__prepare_pywiki_site__()
         logger.info("Fetching the wikitext")
-        self.pywikibot_page = pywikibot.Page(self.pywikibot_site, self.title)
+        if (self.pywikibot_site) is None:
+            raise ValueError("did not get what we need")
+        self.pywikibot_page = pywikibot.Page(self.pywikibot_site, title)
+
         # this id is useful when talking to WikipediaCitations because it is unique
         # self.page_id = int(self.pywikibot_page.pageid)
 
@@ -239,7 +245,22 @@ class WikipediaPage(BaseModel):
                 reference: EnglishWikipediaPageReference = schema.load(parsed_template)
                 reference.parse_persons()
                 reference.generate_hash()
-                # TODO insert hash into mariadb
+                if config.use_hash_database and reference.md5hash is not None:
+                    if self.database is None:
+                        raise ValueError(
+                            "self.database was None and config.use_hash_database is True"
+                        )
+                    else:
+                        check = self.database.check_reference_and_get_wikicitations_qid(
+                            reference=reference
+                        )
+                        print(f"check:{check}")
+                        if check is None:
+                            reference.wikicitations_qid = str(
+                                random.randint(1, 100000000)
+                            )
+                            self.database.add_reference(reference=reference)
+                            logger.info("Reference inserted into the hash database")
                 # logger.debug(type(reference))
                 # logger.debug(f"reference object: {reference.dict()}")
                 if config.loglevel == logging.DEBUG:
@@ -250,6 +271,14 @@ class WikipediaPage(BaseModel):
                 if config.debug_unsupported_templates:
                     logger.debug(f"Template '{template_name.lower()}' not supported")
 
+    def __prepare_pywiki_site__(self):
+        if (self.language_code and self.wikimedia_site) is not None:
+            self.pywikibot_site = Site(
+                code=self.language_code, fam=self.wikimedia_site.value
+            )
+        else:
+            raise ValueError("did not get what we need")
+
     def __print_hash_statistics__(self):
         logger.info(
             f"Hashed {self.percent_of_references_with_a_hash} percent of "
@@ -257,17 +286,17 @@ class WikipediaPage(BaseModel):
         )
 
     def extract_references(self):
-        if self.wikimedia_event is not None:
-            # raise ValueError("wikimedia_event was None")
-            self.__get_title_from_event__()
-            self.__get_wikipedia_page_from_event__()
-        elif self.title is not None:
-            if self.pywikibot_site is None:
-                raise ValueError("self.pywikibot_site was None")
-            self.__get_wikipedia_page_from_title__()
-        else:
-            if self.pywikibot_page is None:
-                raise ValueError("self.pywikibot_page was None")
+        # if self.wikimedia_event is not None:
+        #     # raise ValueError("wikimedia_event was None")
+        #     self.__get_title_from_event__()
+        #     self.__get_wikipedia_page_from_event__()
+        # elif self.title is not None:
+        #     if self.pywikibot_site is None:
+        #         raise ValueError("self.pywikibot_site was None")
+        #     self.__get_wikipedia_page_from_title__()
+        # else:
+        if self.pywikibot_page is None:
+            raise ValueError("self.pywikibot_page was None")
         self.__parse_templates__()
         self.__calculate_reference_statistics__()
         self.__print_hash_statistics__()
