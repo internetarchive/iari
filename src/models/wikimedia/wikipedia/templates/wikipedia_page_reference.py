@@ -43,6 +43,7 @@ class WikipediaPageReference(BaseModel):
     template_name: str  # We use this to keep track of which template the information came from
     translators: Optional[List[Person]]
     persons_without_role: Optional[List[Person]]
+    wikicitations_qid: Optional[str]
 
     # These are all the parameters in the supported templates
     #######################
