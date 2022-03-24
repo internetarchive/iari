@@ -12,6 +12,8 @@ class Property(Enum):
     FAMILY_NAME = "P5"
     GIVEN_NAME = "P4"
     CITATIONS = "P19"
+    FULL_WORK_AVAILABLE_AT_URL = "P23"
+    HASH = "P30"
     INSTANCE_OF = "P10"
     ISBN_10 = "P28"
     ISBN_13 = "P21"
