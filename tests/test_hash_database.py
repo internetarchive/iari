@@ -4,7 +4,6 @@ from unittest import TestCase
 
 import config
 from src import WcdImportBot, console
-from src.models.hash_database import HashDatabase
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
@@ -38,7 +37,7 @@ class TestHashDatabase(TestCase):
         bot.get_page_by_title(
             title="!Action Pact!",
         )
-        [page.extract_references() for page in bot.pages]
+        [page.__extract_references__() for page in bot.pages]
         bot.print_statistics()
         pages = [page for page in bot.pages]
         references: List[WikipediaPageReference] = []

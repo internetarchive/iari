@@ -37,6 +37,6 @@ class TestWcdImportBot(TestCase):
             sparql_endpoint_url="test",
         )
         bot.get_pages_by_range()
-        [page.extract_references() for page in bot.pages]
+        [page.extract_and_upload_to_wikicitations() for page in bot.pages]
         bot.print_statistics()
         console.print(bot.database.get_whole_table())

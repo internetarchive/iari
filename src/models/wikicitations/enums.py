@@ -1,0 +1,33 @@
+from enum import Enum
+
+
+class Property(Enum):
+    # LANGUAGE_OF_WORK = "P407"
+    # MAIN_SUBJECT = "P921"
+    # STATED_AS = "P"
+    AUTHOR = "P7"
+    AUTHOR_NAME_STRING = "P15"
+    DOI = "P22"
+    EDITOR = "P6"
+    FAMILY_NAME = "P5"
+    GIVEN_NAME = "P4"
+    CITATIONS = "P19"
+    INSTANCE_OF = "P10"
+    ISBN_10 = "P28"
+    ISBN_13 = "P21"
+    ISSUE = "P24"
+    MEDIAWIKI_PAGE_ID = "P18"
+    ORCID = "P16"
+    PAGES = "P25"
+    PMID = "P26"
+    PUBLICATION_DATE = "P12"
+    PUBLISHED_IN = "P17"
+    RETRIEVED_DATE = "P29"
+    SERIES_ORDINAL = "P14"  # aka author position
+    SOURCE_WIKIPEDIA = "P9"
+    TEMPLATE_NAME = "P8"
+    TITLE = "P20"
+    URL = "P2"
+    VOLUME = "P27"
+    WEBSITE = "P13"
+    WIKIDATA_QID = "P1"

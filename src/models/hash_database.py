@@ -1,12 +1,9 @@
 import logging
-import sys
 from typing import Any, Optional
-
-from pydantic import BaseModel, validate_arguments
 
 # import mariadb
 import pymysql
-from pymysql import OperationalError
+from pydantic import BaseModel, validate_arguments
 
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,

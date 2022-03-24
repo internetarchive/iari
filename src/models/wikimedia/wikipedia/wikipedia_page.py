@@ -11,6 +11,7 @@ from pywikibot import Page, Site
 
 import config
 from src import WikimediaSite, console, HashDatabase
+from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaPageReference,
@@ -36,6 +37,7 @@ class WikipediaPage(BaseModel):
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
     # references_without_hashes: Optional[List[WikipediaPageReference]]
+    wikicitations: Optional[WikiCitations]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
@@ -179,7 +181,7 @@ class WikipediaPage(BaseModel):
         """Get the page from Wikipedia"""
         self.__prepare_pywiki_site__()
         logger.info("Fetching the wikitext")
-        if (self.pywikibot_site) is None:
+        if self.pywikibot_site is None:
             raise ValueError("did not get what we need")
         self.pywikibot_page = pywikibot.Page(self.pywikibot_site, title)
 
@@ -256,8 +258,10 @@ class WikipediaPage(BaseModel):
                         )
                         print(f"check:{check}")
                         if check is None:
-                            reference.wikicitations_qid = str(
-                                random.randint(1, 100000000)
+                            reference.wikicitations_qid = (
+                                self.wikicitations.prepare_and_upload_reference_item(
+                                    page_reference=reference
+                                )
                             )
                             self.database.add_reference(reference=reference)
                             logger.info("Reference inserted into the hash database")
@@ -285,7 +289,7 @@ class WikipediaPage(BaseModel):
             f"{len(self.references)} references on page {self.pywikibot_page.title()}"
         )
 
-    def extract_references(self):
+    def __extract_references__(self):
         # if self.wikimedia_event is not None:
         #     # raise ValueError("wikimedia_event was None")
         #     self.__get_title_from_event__()
@@ -300,6 +304,15 @@ class WikipediaPage(BaseModel):
         self.__parse_templates__()
         self.__calculate_reference_statistics__()
         self.__print_hash_statistics__()
+
+    def extract_and_upload_to_wikicitations(self):
+        # pseudo code
+        # initialize wikicitations
+        self.wikicitations = WikiCitations()
+        # extract references and create items for the missing ones
+        self.__extract_references__()
+        # upload a new item for the page with links to all the reference items
+        self.wikicitations.prepare_and_upload_wikipedia_page_item(wikipedia_page=self)
 
     def export_to_dataframe(self):
         # TODO make it easy to quantify the references with pandas
