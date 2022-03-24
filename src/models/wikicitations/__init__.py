@@ -8,6 +8,7 @@ from wikibaseintegrator.entities import ItemEntity
 from wikibaseintegrator.models import Claim
 
 import config
+from src.models.wikicitations.enums import Property
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
@@ -44,15 +45,41 @@ class WikiCitations(BaseModel):
                 claims.append(claim)
         return claims
 
-    def __prepare_single_value_claims__(self):
-        if (work, doi, reference) is None:
-            raise ValueError("did not get what we need")
-        logger.info("Preparing other claims")
-        doi = datatypes.ExternalID(
-            prop_nr=Property.DOI.value,
-            value=doi.lower(),  # This is a community norm in Wikidata
-            references=[reference],
-        )
+    def __prepare_single_value_reference_claims__(
+        self, page_reference: WikipediaPageReference
+    ):
+        logger.info("Preparing single value claims")
+        doi = None
+        pmid = None
+        orcid = None
+        isbn_10 = None
+        isbn_13 = None
+        if page_reference.doi is not None:
+            doi = datatypes.ExternalID(
+                prop_nr=Property.DOI.value,
+                value=page_reference.doi,
+            )
+        if page_reference.orcid is not None:
+            orcid = datatypes.ExternalID(
+                prop_nr=Property.ORCID.value,
+                value=page_reference.orcid,
+            )
+        if page_reference.pmid is not None:
+            pmid = datatypes.ExternalID(
+                prop_nr=Property.PMID.value,
+                value=page_reference.pmid,
+            )
+        if page_reference.isbn_10 is not None:
+            isbn_10 = datatypes.ExternalID(
+                prop_nr=Property.ISBN_10.value,
+                value=page_reference.isbn_10,
+            )
+        if page_reference.isbn_13 is not None:
+            isbn_13 = datatypes.ExternalID(
+                prop_nr=Property.ISBN_13.value,
+                value=page_reference.isbn_13,
+            )
+        # TODO gather the statements
 
     def __upload_new_item__(self, item: ItemEntity):
         if item is None:
@@ -71,6 +98,9 @@ class WikiCitations(BaseModel):
     ) -> str:
         # pseudo
         # prepare the statements
+        # doi
+        # isbn-13 and isbn-10
+        #
         # upload
         raise NotImplementedError()
 
