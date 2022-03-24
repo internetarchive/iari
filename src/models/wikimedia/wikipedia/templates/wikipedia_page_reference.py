@@ -40,6 +40,8 @@ class WikipediaPageReference(BaseModel):
     md5hash: Optional[str]
     hosts: Optional[List[Person]]
     interviewers: Optional[List[Person]]
+    isbn_10: Optional[str]
+    isbn_13: Optional[str]
     template_name: str  # We use this to keep track of which template the information came from
     translators: Optional[List[Person]]
     persons_without_role: Optional[List[Person]]
@@ -670,6 +672,18 @@ class WikipediaPageReference(BaseModel):
             raise ValueError(
                 f"missing publication date, in template {self.template_name}, see {self.dict()}"
             )
+
+    def parse_isbn(self):
+        if self.isbn is not None:
+            stripped_isbn = self.isbn.replace("-", "")
+            if len(stripped_isbn) == 13:
+                self.isbn_13 = self.isbn
+            elif len(stripped_isbn) == 10:
+                self.isbn_10 = self.isbn
+            else:
+                raise ValueError(
+                    "isbn: {self.isbn} was not 10 or 13 chars long after removing the da"
+                )
 
     def parse_persons(self):
         """Parse all person related data into Person objects"""

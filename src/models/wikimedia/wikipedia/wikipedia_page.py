@@ -246,6 +246,7 @@ class WikipediaPage(BaseModel):
                 schema = EnglishWikipediaPageReferenceSchema()
                 reference: EnglishWikipediaPageReference = schema.load(parsed_template)
                 reference.parse_persons()
+                reference.parse_isbn()
                 reference.generate_hash()
                 if config.use_hash_database and reference.md5hash is not None:
                     if self.database is None:
