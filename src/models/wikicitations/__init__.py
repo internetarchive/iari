@@ -241,7 +241,7 @@ class WikiCitations(BaseModel):
 
     @validate_arguments
     def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> str:
-        from src import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         if not isinstance(wikipedia_page, WikipediaPage):
             raise ValueError("did not get a WikipediaPage object")
