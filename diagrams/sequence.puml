@@ -16,7 +16,7 @@ loop for each page
             wcdimportbot -> WikiCitations: Create new item for the reference
             WikiCitations -> wcdimportbot: Response with QID
         end
-        wcdimportbot -> WikiCitations: Create new item for the page with links to all references
     end
+    wcdimportbot -> WikiCitations: Create new item for the page with links to all references
 end
 @enduml
