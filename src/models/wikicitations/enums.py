@@ -1,6 +1,11 @@
 from enum import Enum
 
 
+class Item(Enum):
+    WIKIPEDIA_REFERENCE = "Q4"
+    WIKIPEDIA_PAGE = "Q6"
+
+
 class Property(Enum):
     """Mapping for WikiCitations Wikibase"""
 
