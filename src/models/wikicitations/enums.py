@@ -2,9 +2,8 @@ from enum import Enum
 
 
 class Property(Enum):
-    # LANGUAGE_OF_WORK = "P407"
-    # MAIN_SUBJECT = "P921"
-    # STATED_AS = "P"
+    """Mapping for WikiCitations Wikibase"""
+
     AUTHOR = "P7"
     AUTHOR_NAME_STRING = "P15"
     DOI = "P33"
