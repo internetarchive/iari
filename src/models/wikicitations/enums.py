@@ -1,12 +1,14 @@
 from enum import Enum
 
+# WCD = WikiCitations Database
 
-class Item(Enum):
+
+class WCDItem(Enum):
     WIKIPEDIA_REFERENCE = "Q4"
     WIKIPEDIA_PAGE = "Q6"
 
 
-class Property(Enum):
+class WCDProperty(Enum):
     """Mapping for WikiCitations Wikibase"""
 
     AUTHOR = "P7"
