@@ -130,41 +130,85 @@ class WikiCitations(BaseModel):
 
     def __prepare_single_value_reference_claims__(
         self, page_reference: WikipediaPageReference
-    ):
+    ) -> Optional[List[Claim]]:
+        # TODO add more statements
+        # support source wikipedia
+        # support publication date
+
         logger.info("Preparing single value claims")
+        # Claims always present
+        instance_of = Item(
+            prop_nr=WCDProperty.INSTANCE_OF.value,
+            value=WCDItem.WIKIPEDIA_REFERENCE.value,
+        )
+        # Optional claims
+        author_name_string = None
         doi = None
-        pmid = None
-        orcid = None
         isbn_10 = None
         isbn_13 = None
+        orcid = None
+        pmid = None
+        publication_date = None
+        source_wikipedia = None
+        template_name = None
+        url = None
+        website_string = None
+
         if page_reference.doi is not None:
             doi = datatypes.ExternalID(
-                prop_nr=Property.DOI.value,
+                prop_nr=WCDProperty.DOI.value,
                 value=page_reference.doi,
-            )
-        if page_reference.orcid is not None:
-            orcid = datatypes.ExternalID(
-                prop_nr=Property.ORCID.value,
-                value=page_reference.orcid,
-            )
-        if page_reference.pmid is not None:
-            pmid = datatypes.ExternalID(
-                prop_nr=Property.PMID.value,
-                value=page_reference.pmid,
             )
         if page_reference.isbn_10 is not None:
             isbn_10 = datatypes.ExternalID(
-                prop_nr=Property.ISBN_10.value,
+                prop_nr=WCDProperty.ISBN_10.value,
                 value=page_reference.isbn_10,
             )
         if page_reference.isbn_13 is not None:
             isbn_13 = datatypes.ExternalID(
-                prop_nr=Property.ISBN_13.value,
+                prop_nr=WCDProperty.ISBN_13.value,
                 value=page_reference.isbn_13,
+            )
+        if page_reference.orcid is not None:
+            orcid = datatypes.ExternalID(
+                prop_nr=WCDProperty.ORCID.value,
+                value=page_reference.orcid,
+            )
+        if page_reference.pmid is not None:
+            pmid = datatypes.ExternalID(
+                prop_nr=WCDProperty.PMID.value,
+                value=page_reference.pmid,
+            )
+        if page_reference.template_name is not None:
+            website_string = datatypes.String(
+                prop_nr=WCDProperty.TEMPLATE_NAME.value,
+                value=page_reference.template_name,
+            )
+        else:
+            raise ValueError("no template name found")
+        if page_reference.url is not None:
+            url = datatypes.URL(
+                prop_nr=WCDProperty.URL.value,
+                value=page_reference.url,
+            )
+        if page_reference.website is not None:
+            website_string = datatypes.String(
+                prop_nr=WCDProperty.WEBSITE_STRING.value,
+                value=page_reference.website,
             )
         # TODO gather the statements
         claims = []
-        for claim in (doi, orcid, pmid, isbn_10, isbn_13):
+        for claim in (
+            doi,
+            instance_of,
+            isbn_10,
+            isbn_13,
+            orcid,
+            pmid,
+            template_name,
+            url,
+            website_string,
+        ):
             if claim is not None:
                 claims.append(claim)
         return claims
