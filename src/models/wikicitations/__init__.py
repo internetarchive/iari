@@ -232,15 +232,12 @@ class WikiCitations(BaseModel):
 
     @validate_arguments
     def prepare_and_upload_reference_item(
-        self, page_reference: WikipediaPageReference
-    ) -> str:
-        # pseudo
-        # prepare the statements
-        # doi
-        # isbn-13 and isbn-10
-        #
-        # upload
-        raise NotImplementedError()
+        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
+    ) -> Optional[str]:
+        item = self.__prepare_new_reference_item__(
+            page_reference=page_reference, wikipedia_page=wikipedia_page
+        )
+        return self.__upload_new_item__(item=item)
 
     @validate_arguments
     def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> str:
