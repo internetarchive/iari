@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from pydantic import BaseModel, validate_arguments
 from pywikibot import Page, Site
@@ -10,7 +10,6 @@ from src.models.exceptions import DebugExit
 from src.helpers import console
 from src.models.hash_database import HashDatabase
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ class WcdImportBot(BaseModel):
     mediawiki_api_url: str
     mediawiki_index_url: str
     total_number_of_hashed_references: Optional[int]
-    pages: Optional[List[WikipediaPage]]
+    pages: Optional[List[Any]]
     percent_references_hashed_in_total: Optional[int]
     sparql_endpoint_url: str
     table: Optional[str]
@@ -58,6 +57,8 @@ class WcdImportBot(BaseModel):
     def get_pages_by_range(self) -> None:
         def prepare_pywiki_site():
             return Site(code=self.language_code, fam=self.wikimedia_site.value)
+
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         if config.use_hash_database:
             self.__setup_mariadb__()
