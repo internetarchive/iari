@@ -4,21 +4,26 @@
 autonumber
 wcdimportbot -> "Wikipedia API": Get range of pages
 loop for each page
-    wcdimportbot -> wcdimportbot: Parse templates into objects
-    loop for each reference
-        wcdimportbot -> wcdimportbot: tokenize/hash the reference
-        wcdimportbot -> MariaDB: Lookup reference hash
-        MariaDB -> wcdimportbot: Response
-        alt found
-            wcdimportbot -> wcdimportbot: Link to existing reference
+    wcdimportbot -> MariaDB: Lookup page hash
+    alt "page hash not found"
+        wcdimportbot -> wcdimportbot: Parse templates into objects
+        loop for each reference
+            wcdimportbot -> wcdimportbot: tokenize/hash the reference
+            wcdimportbot -> MariaDB: Lookup reference hash
+            MariaDB -> wcdimportbot: Response
+            alt reference hash found
+                wcdimportbot -> wcdimportbot: Link to existing reference
+            end
+            alt reference hash not found
+                wcdimportbot -> wcdimportbot: Generate the statements
+                wcdimportbot -> MariaDB: Insert reference hash
+                wcdimportbot -> WikiCitations: Create new item for the reference
+                WikiCitations -> wcdimportbot: Response with QID
+            end
         end
-        alt not found
-            wcdimportbot -> wcdimportbot: Generate the statements
-            wcdimportbot -> WikiCitations: Create new item for the reference
-            WikiCitations -> wcdimportbot: Response with QID
-        end
+        wcdimportbot -> MariaDB: Insert page hash
+        wcdimportbot -> wcdimportbot: Generate the statements
+        wcdimportbot -> WikiCitations: Create new item for the page with links to all references
     end
-    wcdimportbot -> wcdimportbot: Generate the statements
-    wcdimportbot -> WikiCitations: Create new item for the page with links to all references
 end
 @enduml
