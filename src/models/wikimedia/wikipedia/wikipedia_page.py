@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import random
 from typing import List, Any, Optional, Dict
 
 import pywikibot  # type: ignore
@@ -11,7 +10,6 @@ from pywikibot import Page, Site
 
 import config
 from src import WikimediaSite, console, HashDatabase
-from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaPageReference,
@@ -27,7 +25,7 @@ class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
     database: Optional[HashDatabase]
-    language_code: str
+    language_code: str = "en"
     number_of_hashed_references: Optional[int]
     number_of_references: Optional[int]
     # number_of_references_without_a_hash: Optional[int]
@@ -37,11 +35,11 @@ class WikipediaPage(BaseModel):
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
     # references_without_hashes: Optional[List[WikipediaPageReference]]
-    wikicitations: Optional[WikiCitations]
+    wikicitations: Optional[Any]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
-    wikimedia_site: WikimediaSite
+    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 
     class Config:
         arbitrary_types_allowed = True
@@ -309,6 +307,8 @@ class WikipediaPage(BaseModel):
     def extract_and_upload_to_wikicitations(self):
         # pseudo code
         # initialize wikicitations
+        from src.models.wikicitations import WikiCitations
+
         self.wikicitations = WikiCitations()
         # extract references and create items for the missing ones
         self.__extract_references__()
