@@ -21,8 +21,60 @@ class WikiCitations(BaseModel):
 
     We want to create items for all Wikipedia pages and references with a unique hash"""
 
-    wikipedia_page: Any
-    wikicitations_qid: Optional[str]
+    @validate_arguments
+    def __prepare_new_wikipedia_page_item__(
+        self, wikipedia_page: WikipediaPage
+    ) -> ItemEntity:
+        """This method converts a reference into a new WikiCitations item"""
+        wbi = WikibaseIntegrator(
+            login=wbi_login.Login(user=config.user, password=config.pwd),
+        )
+        item = wbi.item.new()
+        item.labels.set("en", wikipedia_page.pywikibot_page.title)
+        item.descriptions.set(
+            "en", f"page from {wikipedia_page.wikimedia_site.name.title()}"
+        )
+        # Prepare claims
+        # First prepare the reference needed in other claims
+        citations = self.__prepare_citations__()
+        if len(citations) > 0:
+            item.add_claims()
+        item.add_claims(
+            self.__prepare_single_value_wikipedia_page_claims__(
+                wikipedia_page=wikipedia_page
+            ),
+        )
+        if config.loglevel == logging.DEBUG:
+            logger.debug("Printing the item json")
+            print(item.get_json())
+            exit()
+        return item
+
+    @validate_arguments
+    def __prepare_new_reference_item__(
+        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
+    ) -> ItemEntity:
+        """This method converts a reference into a new WikiCitations item"""
+        wbi = WikibaseIntegrator(
+            login=wbi_login.Login(user=config.user, password=config.pwd),
+        )
+        item = wbi.item.new()
+        item.labels.set("en", page_reference.title)
+        item.descriptions.set(
+            "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
+        )
+        # Prepare claims
+        # First prepare the reference needed in other claims
+        item.add_claims(
+            self.__prepare_single_value_reference_claims__(
+                page_reference=page_reference
+            ),
+        )
+        if config.loglevel == logging.DEBUG:
+            logger.debug("Printing the item json")
+            print(item.get_json())
+            exit()
+        return item
 
     @staticmethod
     def __prepare_reference_claim__() -> List[Claim]:
