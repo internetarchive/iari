@@ -42,6 +42,7 @@ class WikipediaPageReference(BaseModel):
     interviewers: Optional[List[Person]]
     isbn_10: Optional[str]
     isbn_13: Optional[str]
+    orcid: Optional[str]  # Is this present in the wild?
     template_name: str  # We use this to keep track of which template the information came from
     translators: Optional[List[Person]]
     persons_without_role: Optional[List[Person]]
