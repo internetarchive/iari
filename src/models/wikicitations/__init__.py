@@ -97,8 +97,8 @@ class WikiCitations(BaseModel):
         logger.info("Preparing reference claim")
         # Prepare reference
         retrieved_date = datatypes.Time(
-            prop_nr="P813",  # Fetched today
-            time=datetime.utcnow()
+            prop_nr=WCDProperty.RETRIEVED_DATE.value,
+            time=datetime.utcnow()  # Fetched today
             .replace(tzinfo=timezone.utc)
             .replace(
                 hour=0,
@@ -108,7 +108,7 @@ class WikiCitations(BaseModel):
             .strftime("+%Y-%m-%dT%H:%M:%SZ"),
         )
         claims = []
-        for claim in (retrieved_date, openalex_id):
+        for claim in (retrieved_date,):
             if claim is not None:
                 claims.append(claim)
         return claims
