@@ -37,5 +37,5 @@ class WCDProperty(Enum):
     TITLE = "P20"
     URL = "P2"
     VOLUME = "P27"
-    WEBSITE = "P13"
+    WEBSITE_STRING = "P35"
     WIKIDATA_QID = "P1"
