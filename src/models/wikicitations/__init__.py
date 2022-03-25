@@ -3,12 +3,14 @@ from datetime import datetime, timezone
 from typing import Any, Optional, List
 
 from pydantic import BaseModel, validate_arguments
-from wikibaseintegrator import wbi_config, datatypes
+from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
+from wikibaseintegrator.datatypes import Item
 from wikibaseintegrator.entities import ItemEntity
 from wikibaseintegrator.models import Claim
 
 import config
-from src.models.wikicitations.enums import Property
+from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+from src.models.wikicitations.enums import WCDProperty, WCDItem
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
