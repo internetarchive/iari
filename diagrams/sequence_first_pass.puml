@@ -13,10 +13,12 @@ loop for each page
             wcdimportbot -> wcdimportbot: Link to existing reference
         end
         alt not found
+            wcdimportbot -> wcdimportbot: Generate the statements
             wcdimportbot -> WikiCitations: Create new item for the reference
             WikiCitations -> wcdimportbot: Response with QID
         end
     end
+    wcdimportbot -> wcdimportbot: Generate the statements
     wcdimportbot -> WikiCitations: Create new item for the page with links to all references
 end
 @enduml
