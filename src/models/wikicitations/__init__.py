@@ -226,6 +226,7 @@ class WikiCitations(BaseModel):
             print(f"Added new item {self.entity_url(new_item.id)}")
             if config.press_enter_to_continue:
                 input("press enter to continue")
+            return new_item.id
         else:
             print("skipped upload")
 
