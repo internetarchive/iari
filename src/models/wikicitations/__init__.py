@@ -21,6 +21,17 @@ class WikiCitations(BaseModel):
 
     We want to create items for all Wikipedia pages and references with a unique hash"""
 
+    def __prepare_citations__(
+        self, wikipedia_page: WikipediaPage
+    ) -> Optional[List[Claim]]:
+        # pseudo code
+        # for each reference in the page
+        # if wikicitations_qid is not None
+        # prepare claim
+        # add to list
+        # return claims
+        pass
+
     @validate_arguments
     def __prepare_new_wikipedia_page_item__(
         self, wikipedia_page: WikipediaPage
@@ -132,8 +143,18 @@ class WikiCitations(BaseModel):
                 value=page_reference.isbn_13,
             )
         # TODO gather the statements
+        claims = []
+        for claim in (doi, orcid, pmid, isbn_10, isbn_13):
+            if claim is not None:
+                claims.append(claim)
+        return claims
 
-    def __upload_new_item__(self, item: ItemEntity):
+    def __prepare_single_value_wikipedia_page_claims__(
+        self, wikipedia_page
+    ) -> Optional[List[Claim]]:
+        pass
+
+    def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
         if item is None:
             raise ValueError("Did not get what we need")
         if config.upload_enabled:
