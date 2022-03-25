@@ -725,7 +725,10 @@ class WikipediaPageReference(BaseModel):
         elif self.pmid is not None:
             str2hash = self.pmid
         elif self.isbn is not None:
-            str2hash = self.isbn
+            # We strip the dashes before hashing
+            str2hash = self.isbn.replace(
+                "-",
+            )
         elif self.oclc is not None:
             str2hash = self.oclc
         elif self.url is not None:
