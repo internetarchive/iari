@@ -22,6 +22,19 @@ class Person(BaseModel):
     role: Any
     surname: Optional[str]
 
+    @property
+    def author_name_string(self) -> str:
+        """We hardcode western cultural name ordering pattern here with the order "givenname surname" """
+        if self.name_string is None:
+            string = ""
+            if self.given is not None:
+                string += self.given
+            if self.surname is not None:
+                string += " " + self.surname
+        else:
+            string = self.name_string
+        return string
+
 
 class EnglishWikipediaTemplatePerson(Person):
     role: EnglishWikipediaTemplatePersonRole
