@@ -76,6 +76,9 @@ class WikiCitations(BaseModel):
         )
         # Prepare claims
         # First prepare the reference needed in other claims
+        authors = self.__prepare_authors__()
+        if authors is not None:
+            item.add_claims(authors)
         item.add_claims(
             self.__prepare_single_value_reference_claims__(
                 page_reference=page_reference
@@ -107,6 +110,21 @@ class WikiCitations(BaseModel):
             if claim is not None:
                 claims.append(claim)
         return claims
+
+    def __prepare_authors__(
+        self, page_reference: WikipediaPageReference
+    ) -> Optional[List[Claim]]:
+        authors = []
+        if len(page_reference.authors) > 0:
+            for author in page_reference.authors:
+                author = datatypes.String(
+                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                    value=author.author_name_string,
+                )
+                authors.append(author)
+        else:
+            authors = None
+        return authors
 
     def __prepare_single_value_reference_claims__(
         self, page_reference: WikipediaPageReference
