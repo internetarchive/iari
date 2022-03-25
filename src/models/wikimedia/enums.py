@@ -1,12 +1,12 @@
 from enum import Enum
 
-# class Property(Enum):
+# class WikidataProperty(Enum):
 #     MAIN_SUBJECT = "P921"
 #     DETERMINATION_METHOD = "P459"
 #     STATED_AS = "P1932"
 
 
-# class StatedIn(Enum):
+# class WikidataItem(Enum):
 #     CROSSREF = "Q5188229"
 
 
