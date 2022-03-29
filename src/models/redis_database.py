@@ -1,23 +1,22 @@
 from typing import Optional, Any
 
 import redis
-from pydantic import BaseModel
+from pydantic import BaseModel, validate_arguments
 
 
 class RedisDatabase(BaseModel):
     password: str = "password"
-    port: int = 6379
-    host: str = "localhost"
+    port: int = "6379"
+    host: str = "127.0.0.1"
     connection: Optional[Any]
-    table: str = "hashes"
 
     def connect(self):
-        connection = redis.Redis(host=self.host, port=self.port, password=self.password)
+        self.connection = redis.Redis(host=self.host, port=self.port)
 
-    def set(self):
-        self.connection.set("foo", "bar")
-        value = self.connection.get("foo")
-        print(value)
+    @validate_arguments
+    def set(self, key: str, value: str):
+        self.connection.set(key, value)
 
-    def get(self):
-        return self.connection.get("foo")
+    @validate_arguments
+    def get(self, key: str):
+        return self.connection.get(key)
