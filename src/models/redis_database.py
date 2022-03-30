@@ -6,7 +6,7 @@ from pydantic import BaseModel, validate_arguments
 
 class RedisDatabase(BaseModel):
     password: str = "password"
-    port: int = "6379"
+    port: int = "8888"  # "6379"
     host: str = "127.0.0.1"
     connection: Optional[Any]
 
