@@ -14,9 +14,9 @@ class SsdbDatabase(BaseModel):
         self.connection = redis.Redis(host=self.host, port=self.port)
 
     @validate_arguments
-    def set(self, key: str, value: str):
-        return self.connection.set(key, value)
-
-    @validate_arguments
     def get(self, key: str):
         return self.connection.get(key)
+
+    @validate_arguments
+    def set(self, key: str, value: str):
+        return self.connection.set(key, value)

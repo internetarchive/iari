@@ -41,7 +41,7 @@ class HashDatabase(BaseModel):
         try:
             self.ssdb.connect()
         except:
-            logger.error("error")
+            logger.error("error connection to SSDB")
 
     # def get_whole_table(self):
     #     with self.connection.cursor() as cursor:

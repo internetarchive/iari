@@ -3,6 +3,8 @@
 
 abstract class BaseModel
 
+BaseModel <|-- HashDatabase
+BaseModel <|-- SsdbDatabase
 BaseModel <|-- Person
 BaseModel <|-- WikipediaPage
 BaseModel <|-- WikipediaPageReference
@@ -353,6 +355,23 @@ number_in_sequence
 orcid
 role
 surname
+}
+
+class HashDatabase{
+ssdb
+add_reference()
+check_reference_and_get_wikicitations_qid()
+connect()
+}
+
+class SsdbDatabase{
+connection
+host
+password
+port
+connect()
+get()
+set()
 }
 
 enum EnglishWikipediaTemplatePersonRole {
