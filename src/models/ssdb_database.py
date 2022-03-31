@@ -4,7 +4,7 @@ import redis
 from pydantic import BaseModel, validate_arguments
 
 
-class RedisDatabase(BaseModel):
+class SsdbDatabase(BaseModel):
     password: str = "password"
     port: int = "8888"  # "6379"
     host: str = "127.0.0.1"
@@ -15,7 +15,7 @@ class RedisDatabase(BaseModel):
 
     @validate_arguments
     def set(self, key: str, value: str):
-        self.connection.set(key, value)
+        return self.connection.set(key, value)
 
     @validate_arguments
     def get(self, key: str):
