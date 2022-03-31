@@ -18,7 +18,7 @@ loop for each page
                 wcdimportbot -> wcdimportbot: Generate the statements
                 wcdimportbot -> SSDB: Insert reference hash and WCDQID
                 wcdimportbot -> WikiCitations: Create new item for the reference
-                WikiCitations -> wcdimportbot: Response with QID
+                WikiCitations -> wcdimportbot: Response with WCDQID
             end
         end
         wcdimportbot -> SSDB: Insert page hash and WCDQID
