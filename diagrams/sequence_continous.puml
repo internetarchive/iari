@@ -8,8 +8,8 @@ loop for each event
     wcdimportbot -> wcdimportbot: Parse templates into objects
     loop for each reference
         wcdimportbot -> wcdimportbot: tokenize/hash the reference
-        wcdimportbot -> MariaDB: Lookup reference hash
-        MariaDB -> wcdimportbot: Response
+        wcdimportbot -> SSDB: Lookup reference hash
+        SSDB -> wcdimportbot: Response
         alt found
             wcdimportbot -> wcdimportbot: Link to existing reference
         end
