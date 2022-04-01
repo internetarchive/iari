@@ -662,6 +662,13 @@ class WikipediaPageReference(BaseModel):
         return date
 
     @property
+    def has_hash(self) -> bool:
+        if self.md5hash is not None:
+            return True
+        else:
+            return False
+
+    @property
     def isodate(self):
         if self.publication_date is not None:
             return datetime.strftime(self.publication_date, "%Y-%m-%d")
