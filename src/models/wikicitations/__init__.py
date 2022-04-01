@@ -28,11 +28,48 @@ class WikiCitations(BaseModel):
     ) -> Optional[List[Claim]]:
         # pseudo code
         # for each reference in the page
-        # if wikicitations_qid is not None
-        # prepare claim
-        # add to list
-        # return claims
-        pass
+        claims = []
+        for reference in wikipedia_page.references:
+            if reference.wikicitations_qid is not None:
+                citation = datatypes.Item(
+                    prop_nr=WCDProperty.CITATIONS.value,
+                    value=reference.wikicitations_qid,
+                )
+            claims.append(citation)
+        return claims
+
+    def __prepare_string_citation_qualifiers__(self, reference: WikipediaPageReference):
+        """Here we prepare all statements we normally
+        would put on a unique separate reference item"""
+        # TODO support
+        # authors as strings
+        # publication date
+        # title
+        # website string
+        raise NotImplementedError()
+
+    @validate_arguments()
+    def __prepare_string_citation__(self, reference: WikipediaPageReference) -> Claim:
+        """We import citations which could not be uniquely identified
+        as strings directly on the wikipedia page item"""
+        string_citation = datatypes.Item(
+            prop_nr=WCDProperty.STRING_CITATIONS.value,
+            value=reference.template_name,
+            qualifiers=self.__prepare_string_citation_qualifiers__(reference=reference),
+        )
+        return string_citation
+
+    def __prepare_string_citations__(
+        self, wikipedia_page: WikipediaPage
+    ) -> Optional[List[Claim]]:
+        # pseudo code
+        # for each reference in the page that
+        claims = []
+        for reference in wikipedia_page.references:
+            if not reference.has_hash:
+                # generate string statements
+                claims.append(self.__prepare_string_citation__(reference=reference))
+        return claims
 
     @validate_arguments
     def __prepare_new_wikipedia_page_item__(
@@ -51,8 +88,13 @@ class WikiCitations(BaseModel):
         # Prepare claims
         # First prepare the reference needed in other claims
         citations = self.__prepare_citations__(wikipedia_page=wikipedia_page)
+        string_citations = self.__prepare_string_citations__(
+            wikipedia_page=wikipedia_page
+        )
         if citations is not None and len(citations) > 0:
             item.add_claims(citations)
+        if string_citations is not None and len(string_citations) > 0:
+            item.add_claims(string_citations)
         item.add_claims(
             self.__prepare_single_value_wikipedia_page_claims__(
                 wikipedia_page=wikipedia_page
