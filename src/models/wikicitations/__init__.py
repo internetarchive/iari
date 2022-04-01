@@ -132,7 +132,6 @@ class WikiCitations(BaseModel):
         self, page_reference: WikipediaPageReference
     ) -> Optional[List[Claim]]:
         # TODO add more statements
-        # support source wikipedia
         # support publication date
 
         logger.info("Preparing single value claims")
@@ -183,6 +182,19 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.PMID.value,
                 value=page_reference.pmid,
             )
+        if page_reference.publication_date is not None:
+            publication_date = datatypes.Time(
+                prop_nr=WCDProperty.PUBLICATION_DATE.value,
+                value=(
+                    page_reference.publication_date.replace(tzinfo=timezone.utc)
+                    .replace(
+                        hour=0,
+                        minute=0,
+                        second=0,
+                    )
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                ),
+            )
         if page_reference.template_name is not None:
             website_string = datatypes.String(
                 prop_nr=WCDProperty.TEMPLATE_NAME.value,
@@ -209,6 +221,8 @@ class WikiCitations(BaseModel):
             isbn_13,
             orcid,
             pmid,
+            publication_date,
+            source_wikipedia,
             template_name,
             url,
             website_string,
