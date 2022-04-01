@@ -1,8 +1,6 @@
 import logging
-from typing import Any, Optional
+from typing import Optional
 
-# import mariadb
-import pymysql
 from pydantic import BaseModel, validate_arguments
 
 from src.models.ssdb_database import SsdbDatabase
@@ -13,8 +11,8 @@ from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
 logger = logging.getLogger(__name__)
 
 
-class HashDatabase(BaseModel):
-    ssdb: SsdbDatabase
+class Cache(BaseModel):
+    ssdb: Optional[SsdbDatabase]
 
     @validate_arguments
     def add_reference(self, reference: WikipediaPageReference):
@@ -29,19 +27,20 @@ class HashDatabase(BaseModel):
     def check_reference_and_get_wikicitations_qid(
         self, reference: WikipediaPageReference
     ):
+        """We get binary from SSDB so we decode it"""
         if reference.md5hash is not None:
             # https://stackoverflow.com/questions/55365543/
-            return self.ssdb.get(key=reference.md5hash)
+            return self.ssdb.get(key=reference.md5hash).decode("UTF-8")
         else:
             raise ValueError("md5hash was None")
 
     def connect(self):
         # Connect to MariaDB Platform
         self.ssdb = SsdbDatabase()
-        try:
-            self.ssdb.connect()
-        except:
-            logger.error("error connection to SSDB")
+        # try:
+        self.ssdb.connect()
+        # except:
+        #    logger.error("error connection to SSDB")
 
     # def get_whole_table(self):
     #     with self.connection.cursor() as cursor:

@@ -3,7 +3,7 @@
 
 abstract class BaseModel
 
-BaseModel <|-- HashDatabase
+BaseModel <|-- Cache
 BaseModel <|-- SsdbDatabase
 BaseModel <|-- Person
 BaseModel <|-- WikipediaPage
@@ -357,7 +357,7 @@ role
 surname
 }
 
-class HashDatabase{
+class Cache{
 ssdb
 add_reference()
 check_reference_and_get_wikicitations_qid()

@@ -7,7 +7,7 @@ from pywikibot import Page, Site
 import config
 from src.helpers import console
 from src.models.exceptions import DebugExit
-from src.models.hash_database import HashDatabase
+from src.models.cache import Cache
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 

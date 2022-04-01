@@ -9,7 +9,7 @@ from pydantic import BaseModel, validate_arguments
 from pywikibot import Page, Site
 
 import config
-from src import WikimediaSite, console, HashDatabase
+from src import WikimediaSite, console, Cache
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaPageReference,
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
-    cache: Optional[HashDatabase]
+    cache: Optional[Cache]
     language_code: str = "en"
     # number_of_references_without_a_hash: Optional[int]
     # percent_of_references_missing_a_hash: Optional[int]
@@ -289,7 +289,7 @@ class WikipediaPage(BaseModel):
         )
 
     def __setup_cache__(self):
-        self.cache = HashDatabase()
+        self.cache = Cache()
         self.cache.connect()
 
     def __setup_wikicitations__(self):
