@@ -498,32 +498,32 @@ class WikipediaPageReference(BaseModel):
             is not None
         ]
 
-    def __hash_based_on_title_and_date__(self):
-        logger.debug("__hash_based_on_title_and_date__: running")
-        if self.title is not None:
-            return self.title + self.isodate
-        else:
-            raise ValueError(
-                f"did not get what we need to generate a hash, {self.dict()}"
-            )
-
-    def __hash_based_on_title_and_journal_and_date__(self):
-        logger.debug("__hash_based_on_title_and_journal_and_date__: running")
-        if (self.title and self.journal) is not None:
-            return self.title + self.journal + self.isodate
-        else:
-            raise ValueError(
-                f"did not get what we need to generate a hash, {self.dict()}"
-            )
-
-    def __hash_based_on_title_and_publisher_and_date__(self):
-        logger.debug("__hash_based_on_title_and_publisher_and_date__: running")
-        if (self.title and self.publisher) is not None:
-            return self.title + self.publisher + self.isodate
-        else:
-            raise ValueError(
-                f"did not get what we need to generate a hash, {self.dict()}"
-            )
+    # def __hash_based_on_title_and_date__(self):
+    #     logger.debug("__hash_based_on_title_and_date__: running")
+    #     if self.title is not None:
+    #         return self.title + self.isodate
+    #     else:
+    #         raise ValueError(
+    #             f"did not get what we need to generate a hash, {self.dict()}"
+    #         )
+    #
+    # def __hash_based_on_title_and_journal_and_date__(self):
+    #     logger.debug("__hash_based_on_title_and_journal_and_date__: running")
+    #     if (self.title and self.journal) is not None:
+    #         return self.title + self.journal + self.isodate
+    #     else:
+    #         raise ValueError(
+    #             f"did not get what we need to generate a hash, {self.dict()}"
+    #         )
+    #
+    # def __hash_based_on_title_and_publisher_and_date__(self):
+    #     logger.debug("__hash_based_on_title_and_publisher_and_date__: running")
+    #     if (self.title and self.publisher) is not None:
+    #         return self.title + self.publisher + self.isodate
+    #     else:
+    #         raise ValueError(
+    #             f"did not get what we need to generate a hash, {self.dict()}"
+    #         )
 
     @validate_arguments
     def __parse_known_role_persons__(
