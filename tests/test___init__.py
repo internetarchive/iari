@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src import WcdImportBot, console
+from src import WcdImportBot
 
 
 class TestWcdImportBot(TestCase):

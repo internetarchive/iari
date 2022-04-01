@@ -115,8 +115,9 @@ class WikiCitations(BaseModel):
                 claims.append(claim)
         return claims
 
+    @staticmethod
     def __prepare_authors__(
-        self, page_reference: WikipediaPageReference
+        page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         authors = []
         if page_reference.authors is not None and len(page_reference.authors) > 0:
@@ -130,8 +131,9 @@ class WikiCitations(BaseModel):
             authors = None
         return authors
 
+    @staticmethod
     def __prepare_single_value_reference_claims__(
-        self, page_reference: WikipediaPageReference
+        page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         logger.info("Preparing single value claims")
         # Claims always present
@@ -145,7 +147,6 @@ class WikiCitations(BaseModel):
             value=WCDItem.ENGLISH_WIKIPEDIA.value,
         )
         # Optional claims
-        author_name_string = None
         doi = None
         isbn_10 = None
         isbn_13 = None
@@ -235,7 +236,8 @@ class WikiCitations(BaseModel):
     ) -> Optional[List[Claim]]:
         pass
 
-    def __setup_wbi__(self):
+    @staticmethod
+    def __setup_wbi__():
         wbi_config.config["WIKIBASE_URL"] = config.wikibase_url
         wbi_config.config["MEDIAWIKI_API_URL"] = config.mediawiki_api_url
         wbi_config.config["MEDIAWIKI_INDEX_URL"] = config.mediawiki_index_url
