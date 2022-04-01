@@ -133,9 +133,6 @@ class WikiCitations(BaseModel):
     def __prepare_single_value_reference_claims__(
         self, page_reference: WikipediaPageReference
     ) -> Optional[List[Claim]]:
-        # TODO add more statements
-        # support publication date
-
         logger.info("Preparing single value claims")
         # Claims always present
         instance_of = Item(
