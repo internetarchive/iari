@@ -35,7 +35,8 @@ class WikipediaPage(BaseModel):
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
     # references_without_hashes: Optional[List[WikipediaPageReference]]
-    wikicitations: Optional[Any]
+    wikicitations: Optional[Any]  # This is needed
+    wikicitations_qid: Optional[str]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
@@ -304,13 +305,14 @@ class WikipediaPage(BaseModel):
         self.__calculate_reference_statistics__()
         self.__print_hash_statistics__()
 
-    def extract_and_upload_to_wikicitations(self):
-        # pseudo code
-        # initialize wikicitations
+    def __setup_wikicitations__(self):
         from src.models.wikicitations import WikiCitations
 
         self.wikicitations = WikiCitations()
-        # extract references and create items for the missing ones
+
+    def extract_and_upload_to_wikicitations(self):
+        self.__setup_wikicitations__()
+        # extract references and create items for the missing ones first
         self.__extract_references__()
         # upload a new item for the page with links to all the reference items
         self.wikicitations.prepare_and_upload_wikipedia_page_item(wikipedia_page=self)
