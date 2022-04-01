@@ -44,6 +44,10 @@ class WikipediaPage(BaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def absolute_url(self):
+        return f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/index.php?curid={self.page_id}"
+
+    @property
     def number_of_hashed_references(self):
         return len(
             [
@@ -58,6 +62,12 @@ class WikipediaPage(BaseModel):
         return len(self.references)
 
     @property
+    def page_id(self):
+        """Helper property"""
+        # this id is useful when talking to WikipediaCitations because it is unique
+        return int(self.pywikibot_page.pageid)
+
+    @property
     def percent_of_references_with_a_hash(self):
         if self.number_of_references == 0:
             return 0
@@ -65,6 +75,11 @@ class WikipediaPage(BaseModel):
             return int(
                 self.number_of_hashed_references * 100 / self.number_of_references
             )
+
+    @property
+    def title(self):
+        """Helper property"""
+        return str(self.pywikibot_page.title)
 
     @property
     def url(self):
@@ -174,10 +189,10 @@ class WikipediaPage(BaseModel):
         dictionary = self.__fix_aliases__(dictionary=dictionary)
         return self.__fix_dash__(dictionary=dictionary)
 
-    def __get_title_from_event__(self):
-        self.title = self.wikimedia_event.page_title
-        if self.title is None or self.title == "":
-            raise ValueError("title not set correctly")
+    # def __get_title_from_event__(self):
+    #     self.title = self.wikimedia_event.page_title
+    #     if self.title is None or self.title == "":
+    #         raise ValueError("title not set correctly")
 
     def __get_wcdqid_from_cache__(self, reference: WikipediaPageReference):
         if self.cache is None:
@@ -188,14 +203,12 @@ class WikipediaPage(BaseModel):
         print(f"result:{wcdqid}")
         return wcdqid
 
-    def __get_wikipedia_page_from_event__(self):
-        """Get the page from Wikipedia"""
-        logger.info("Fetching the wikitext")
-        self.pywikibot_page = pywikibot.Page(
-            self.wikimedia_event.event_stream.pywikibot_site, self.title
-        )
-        # this id is useful when talking to WikipediaCitations because it is unique
-        self.page_id = int(self.pywikibot_page.pageid)
+    # def __get_wikipedia_page_from_event__(self):
+    #     """Get the page from Wikipedia"""
+    #     logger.info("Fetching the wikitext")
+    #     self.pywikibot_page = pywikibot.Page(
+    #         self.wikimedia_event.event_stream.pywikibot_site, self.title
+    #     )
 
     @validate_arguments
     def __get_wikipedia_page_from_title__(self, title: str):

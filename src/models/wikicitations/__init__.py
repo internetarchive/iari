@@ -51,7 +51,7 @@ class WikiCitations(BaseModel):
         # Prepare claims
         # First prepare the reference needed in other claims
         citations = self.__prepare_citations__(wikipedia_page=wikipedia_page)
-        if len(citations) > 0:
+        if citations is not None and len(citations) > 0:
             item.add_claims(citations)
         item.add_claims(
             self.__prepare_single_value_wikipedia_page_claims__(
@@ -233,8 +233,25 @@ class WikiCitations(BaseModel):
 
     def __prepare_single_value_wikipedia_page_claims__(
         self, wikipedia_page
-    ) -> Optional[List[Claim]]:
-        pass
+    ) -> List[Claim]:
+        # There are no optional claims for Wikipedia Pages
+        absolute_url = datatypes.URL(
+            prop_nr=WCDProperty.URL.value,
+            value=wikipedia_page.absolute_url,
+        )
+        page_id = datatypes.String(
+            prop_nr=WCDProperty.MEDIAWIKI_PAGE_ID.value,
+            value=str(wikipedia_page.page_id),
+        )
+        published_in = datatypes.Item(
+            prop_nr=WCDProperty.PUBLISHED_IN.value,
+            value=WCDItem.ENGLISH_WIKIPEDIA.value,
+        )
+        title = datatypes.String(
+            prop_nr=WCDProperty.TITLE.value,
+            value=wikipedia_page.title,
+        )
+        return [absolute_url, page_id, published_in, title]
 
     @staticmethod
     def __setup_wbi__():
@@ -270,11 +287,8 @@ class WikiCitations(BaseModel):
 
         if not isinstance(wikipedia_page, WikipediaPage):
             raise ValueError("did not get a WikipediaPage object")
-        # pseudo code
-        # prepare statements for all references
-        # prepare the rest of the statements
-        # upload
-        raise NotImplementedError()
+        item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
+        self.__upload_new_item__(item=item)
 
     @staticmethod
     def entity_url(qid):
