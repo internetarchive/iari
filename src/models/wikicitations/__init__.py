@@ -39,6 +39,7 @@ class WikiCitations(BaseModel):
         self, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
         """This method converts a reference into a new WikiCitations item"""
+        self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
         )
@@ -68,6 +69,7 @@ class WikiCitations(BaseModel):
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
         """This method converts a reference into a new WikiCitations item"""
+        self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
         )
@@ -78,7 +80,7 @@ class WikiCitations(BaseModel):
         )
         # Prepare claims
         # First prepare the reference needed in other claims
-        authors = self.__prepare_authors__()
+        authors = self.__prepare_authors__(page_reference=page_reference)
         if authors is not None:
             item.add_claims(authors)
         item.add_claims(
@@ -117,7 +119,7 @@ class WikiCitations(BaseModel):
         self, page_reference: WikipediaPageReference
     ) -> Optional[List[Claim]]:
         authors = []
-        if len(page_reference.authors) > 0:
+        if page_reference.authors is not None and len(page_reference.authors) > 0:
             for author in page_reference.authors:
                 author = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
@@ -235,6 +237,12 @@ class WikiCitations(BaseModel):
         self, wikipedia_page
     ) -> Optional[List[Claim]]:
         pass
+
+    def __setup_wbi__(self):
+        wbi_config.config["WIKIBASE_URL"] = config.wikibase_url
+        wbi_config.config["MEDIAWIKI_API_URL"] = config.mediawiki_api_url
+        wbi_config.config["MEDIAWIKI_INDEX_URL"] = config.mediawiki_index_url
+        wbi_config.config["SPARQL_ENDPOINT_URL"] = config.sparql_endpoint_url
 
     def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
         if item is None:
