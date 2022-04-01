@@ -6,6 +6,7 @@ from enum import Enum
 class WCDItem(Enum):
     WIKIPEDIA_REFERENCE = "Q4"
     WIKIPEDIA_PAGE = "Q6"
+    ENGLISH_WIKIPEDIA = "Q3"
 
 
 class WCDProperty(Enum):

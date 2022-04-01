@@ -141,6 +141,11 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.INSTANCE_OF.value,
             value=WCDItem.WIKIPEDIA_REFERENCE.value,
         )
+        # We hardcode enWP for now
+        source_wikipedia = Item(
+            prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
+            value=WCDItem.ENGLISH_WIKIPEDIA.value,
+        )
         # Optional claims
         author_name_string = None
         doi = None
@@ -149,7 +154,6 @@ class WikiCitations(BaseModel):
         orcid = None
         pmid = None
         publication_date = None
-        source_wikipedia = None
         template_name = None
         url = None
         website_string = None
