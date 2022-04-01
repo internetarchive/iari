@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src import WcdImportBot
+from src import WcdImportBot, console
 
 
 class TestWcdImportBot(TestCase):
@@ -30,11 +30,13 @@ class TestWcdImportBot(TestCase):
 
     def test_extract_references_from_20_pages(self):
         bot = WcdImportBot(
-            max_count=40,
+            max_count=20,
             wikibase_url="test",
             mediawiki_api_url="test",
             mediawiki_index_url="test",
             sparql_endpoint_url="test",
         )
-        pages = bot.get_pages_by_range()
-        [page.extract_references() for page in pages]
+        bot.get_pages_by_range()
+        [page.extract_and_upload_to_wikicitations() for page in bot.pages]
+        bot.print_statistics()
+        console.print(bot.database.get_whole_table())

@@ -4,3 +4,7 @@ class DebugExit(BaseException):
 
 class TimeParseException(BaseException):
     pass
+
+
+class MoreThanOneNumberError(BaseException):
+    pass

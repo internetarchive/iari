@@ -1,18 +1,13 @@
 from enum import Enum
 
-
-class DeterminationMethod(Enum):
-    FUZZY_POWERED_NAMED_ENTITY_RECOGNITION_MATCHER = "Q110733873"
-
-
-class Property(Enum):
-    MAIN_SUBJECT = "P921"
-    DETERMINATION_METHOD = "P459"
-    STATED_AS = "P1932"
+# class WikidataProperty(Enum):
+#     MAIN_SUBJECT = "P921"
+#     DETERMINATION_METHOD = "P459"
+#     STATED_AS = "P1932"
 
 
-class StatedIn(Enum):
-    CROSSREF = "Q5188229"
+# class WikidataItem(Enum):
+#     CROSSREF = "Q5188229"
 
 
 class WikidataNamespaceLetters(Enum):

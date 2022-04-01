@@ -1,6 +1,7 @@
 import logging
 user_agent = "wcdimportbot 0.2.0-alpha"
 loglevel = logging.INFO
+debug_unsupported_templates = False
 
 wiki = 'https://wikicitations.wiki.opencura.com'
 mediawiki_api_url = wiki + '/w/api.php'
