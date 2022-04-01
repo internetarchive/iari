@@ -24,10 +24,8 @@ logger = logging.getLogger(__name__)
 class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
-    database: Optional[HashDatabase]
+    cache: Optional[HashDatabase]
     language_code: str = "en"
-    number_of_hashed_references: Optional[int]
-    number_of_references: Optional[int]
     # number_of_references_without_a_hash: Optional[int]
     # percent_of_references_missing_a_hash: Optional[int]
     percent_of_references_with_a_hash: Optional[int]
@@ -46,50 +44,65 @@ class WikipediaPage(BaseModel):
         arbitrary_types_allowed = True
 
     @property
-    def url(self):
-        return (
-            f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
-            f"wiki/{self.pywikibot_page.title(underscore=True)}"
-        )
-
-    def __calculate_hash_percentage__(self):
-        logger.debug("Calculating hash percentage")
-        if self.number_of_references == 0:
-            self.percent_of_references_with_a_hash = 0
-        else:
-            # self.number_of_references_without_a_hash = (
-            #     len(self.references) - self.number_of_hashed_references
-            # )
-            self.percent_of_references_with_a_hash = int(
-                self.number_of_hashed_references * 100 / self.number_of_references
-            )
-            # self.percent_of_references_missing_a_hash = int(
-            #     self.number_of_references_without_a_hash
-            #     * 100
-            #     / self.number_of_references
-            # )
-
-    def __calculate_reference_statistics__(self):
-        logger.debug("Calculating page statistics")
-        self.number_of_references = len(self.references)
-        self.__calculate_hash_statistics__()
-
-    def __count_references_with_hashes__(self):
-        self.number_of_hashed_references = len(
+    def number_of_hashed_references(self):
+        return len(
             [
                 reference
                 for reference in self.references
                 if reference.md5hash is not None
             ]
         )
-        logger.info(f"number_of_hashed_references: {self.number_of_hashed_references}")
 
-    def __calculate_hash_statistics__(self):
-        self.__count_references_with_hashes__()
-        self.__calculate_hash_percentage__()
+    @property
+    def number_of_references(self):
+        return len(self.references)
+
+    @property
+    def percent_of_references_with_a_hash(self):
+        if self.number_of_references == 0:
+            return 0
+        else:
+            return int(
+                self.number_of_hashed_references * 100 / self.number_of_references
+            )
+
+    @property
+    def url(self):
+        return (
+            f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
+            f"wiki/{self.pywikibot_page.title(underscore=True)}"
+        )
 
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
+
+    @validate_arguments
+    def __check_and_upload_reference__(self, reference: WikipediaPageReference):
+        if config.use_cache and reference.md5hash is not None:
+            wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
+            if wcdqid:
+                reference.wikicitations_qid = wcdqid
+            else:
+                reference = self.__upload_reference_to_wikicitations__(
+                    reference=reference
+                )
+                self.__insert_in_cache__(reference=reference)
+        return reference
+
+    def __extract_references__(self):
+        # if self.wikimedia_event is not None:
+        #     # raise ValueError("wikimedia_event was None")
+        #     self.__get_title_from_event__()
+        #     self.__get_wikipedia_page_from_event__()
+        # elif self.title is not None:
+        #     if self.pywikibot_site is None:
+        #         raise ValueError("self.pywikibot_site was None")
+        #     self.__get_wikipedia_page_from_title__()
+        # else:
+        if self.pywikibot_page is None:
+            raise ValueError("self.pywikibot_page was None")
+        self.__parse_templates__()
+        self.__print_hash_statistics__()
 
     @staticmethod
     def __fix_class_key__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
@@ -166,6 +179,15 @@ class WikipediaPage(BaseModel):
         if self.title is None or self.title == "":
             raise ValueError("title not set correctly")
 
+    def __get_wcdqid_from_cache__(self, reference: WikipediaPageReference):
+        if self.cache is None:
+            self.__setup_cache__()
+        wcdqid = self.cache.check_reference_and_get_wikicitations_qid(
+            reference=reference
+        )
+        print(f"result:{wcdqid}")
+        return wcdqid
+
     def __get_wikipedia_page_from_event__(self):
         """Get the page from Wikipedia"""
         logger.info("Fetching the wikitext")
@@ -187,15 +209,11 @@ class WikipediaPage(BaseModel):
         # this id is useful when talking to WikipediaCitations because it is unique
         # self.page_id = int(self.pywikibot_page.pageid)
 
-    # def __match_subjects__(self):
-    #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
-    #     [doi.wikidata_scientific_item.crossref_engine.work.match_subjects_to_qids() for doi in self.dois
-    #      if (
-    #              doi.wikidata_scientific_item.doi_found_in_wikidata and
-    #              doi.wikidata_scientific_item.crossref_engine is not None and
-    #              doi.wikidata_scientific_item.crossref_engine.work is not None
-    #      )]
-    def __parse_templates__(self):
+    def __insert_in_cache__(self, reference: WikipediaPageReference):
+        self.cache.add_reference(reference=reference)
+        logger.info("Reference inserted into the hash database")
+
+    def __parse_templates__(self, check_and_upload_to_cache: bool = True):
         """We parse all the templates into WikipediaPageReferences"""
         raw = self.pywikibot_page.raw_extracted_templates
         number_of_templates = len(raw)
@@ -247,29 +265,10 @@ class WikipediaPage(BaseModel):
                 reference.parse_persons()
                 reference.parse_isbn()
                 reference.generate_hash()
-                if config.use_hash_database and reference.md5hash is not None:
-                    if self.database is None:
-                        raise ValueError(
-                            "self.database was None and config.use_hash_database is True"
-                        )
-                    else:
-                        check = self.database.check_reference_and_get_wikicitations_qid(
-                            reference=reference
-                        )
-                        print(f"check:{check}")
-                        if check is None:
-                            reference.wikicitations_qid = (
-                                self.wikicitations.prepare_and_upload_reference_item(
-                                    page_reference=reference
-                                )
-                            )
-                            self.database.add_reference(reference=reference)
-                            logger.info("Reference inserted into the hash database")
-                # logger.debug(type(reference))
-                # logger.debug(f"reference object: {reference.dict()}")
+                if check_and_upload_to_cache:
+                    reference = self.__check_and_upload_reference__(reference=reference)
                 if config.loglevel == logging.DEBUG:
                     console.print(reference.dict())
-                # exit()
                 self.references.append(reference)
             else:
                 if config.debug_unsupported_templates:
@@ -289,26 +288,31 @@ class WikipediaPage(BaseModel):
             f"{len(self.references)} references on page {self.pywikibot_page.title()}"
         )
 
-    def __extract_references__(self):
-        # if self.wikimedia_event is not None:
-        #     # raise ValueError("wikimedia_event was None")
-        #     self.__get_title_from_event__()
-        #     self.__get_wikipedia_page_from_event__()
-        # elif self.title is not None:
-        #     if self.pywikibot_site is None:
-        #         raise ValueError("self.pywikibot_site was None")
-        #     self.__get_wikipedia_page_from_title__()
-        # else:
-        if self.pywikibot_page is None:
-            raise ValueError("self.pywikibot_page was None")
-        self.__parse_templates__()
-        self.__calculate_reference_statistics__()
-        self.__print_hash_statistics__()
+    def __setup_cache__(self):
+        self.cache = HashDatabase()
+        self.cache.connect()
 
     def __setup_wikicitations__(self):
         from src.models.wikicitations import WikiCitations
 
         self.wikicitations = WikiCitations()
+
+    @validate_arguments
+    def __upload_reference_to_wikicitations__(
+        self, reference: WikipediaPageReference
+    ) -> WikipediaPageReference:
+        if self.wikicitations is None:
+            self.__setup_wikicitations__()
+        reference.wikicitations_qid = (
+            self.wikicitations.prepare_and_upload_reference_item(
+                page_reference=reference, wikipedia_page=self
+            )
+        )
+        if reference.wikicitations_qid is None:
+            raise ValueError(
+                "Got None instead of WCDQID when trying to upload to WikiCitations"
+            )
+        return reference
 
     def extract_and_upload_to_wikicitations(self):
         self.__setup_wikicitations__()
@@ -320,3 +324,12 @@ class WikipediaPage(BaseModel):
     def export_to_dataframe(self):
         # TODO make it easy to quantify the references with pandas
         raise NotImplementedError("To be written")
+
+    # def __match_subjects__(self):
+    #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
+    #     [doi.wikidata_scientific_item.crossref_engine.work.match_subjects_to_qids() for doi in self.dois
+    #      if (
+    #              doi.wikidata_scientific_item.doi_found_in_wikidata and
+    #              doi.wikidata_scientific_item.crossref_engine is not None and
+    #              doi.wikidata_scientific_item.crossref_engine.work is not None
+    #      )]
