@@ -50,7 +50,7 @@ class WikiCitations(BaseModel):
         )
         # Prepare claims
         # First prepare the reference needed in other claims
-        citations = self.__prepare_citations__()
+        citations = self.__prepare_citations__(wikipedia_page=wikipedia_page)
         if len(citations) > 0:
             item.add_claims(citations)
         item.add_claims(
