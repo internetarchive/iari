@@ -674,6 +674,10 @@ class WikipediaPageReference(BaseModel):
                 f"missing publication date, in template {self.template_name}, see {self.dict()}"
             )
 
+    @property
+    def wikicitations_url(self):
+        return f"{config.wikibase_url}/" f"wiki/{self.wikicitations_qid}"
+
     def parse_isbn(self):
         if self.isbn is not None:
             stripped_isbn = self.isbn.replace("-", "")

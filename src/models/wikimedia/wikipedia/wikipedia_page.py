@@ -88,6 +88,10 @@ class WikipediaPage(BaseModel):
             f"wiki/{self.pywikibot_page.title(underscore=True)}"
         )
 
+    @property
+    def wikicitations_url(self):
+        return f"{config.wikibase_url}/" f"wiki/{self.wikicitations_qid}"
+
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
 

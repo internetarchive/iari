@@ -18,17 +18,15 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations()
         wppage = WikipediaPage()
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
-        qid = wc.prepare_and_upload_wikipedia_page_item(
+        reference = wc.prepare_and_upload_reference_item(
+            page_reference=EnglishWikipediaPageReference(
+                title="test", template_name="test", doi="test"
+            ),
             wikipedia_page=wppage,
         )
-        if qid is not None:
-            wppage.wikicitations_qid = qid
-            wc.prepare_and_upload_reference_item(
-                page_reference=EnglishWikipediaPageReference(
-                    title="test", template_name="test", doi="test"
-                ),
-                wikipedia_page=wppage,
-            )
-            # self.fail()
-        else:
-            logger.error("qid was None")
+        logger.info(f"url: {reference.wikicitations_url}")
+
+        wppage = wc.prepare_and_upload_wikipedia_page_item(
+            wikipedia_page=wppage,
+        )
+        logger.info(f"url: {wppage.wikicitations_url}")

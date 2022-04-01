@@ -275,20 +275,24 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
-    ) -> Optional[str]:
+    ) -> WikipediaPageReference:
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
         )
-        return self.__upload_new_item__(item=item)
+        page_reference.wikicitations_qid = self.__upload_new_item__(item=item)
+        return page_reference
 
     @validate_arguments
-    def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> str:
+    def prepare_and_upload_wikipedia_page_item(
+        self, wikipedia_page: Any
+    ) -> WikipediaPage:
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         if not isinstance(wikipedia_page, WikipediaPage):
             raise ValueError("did not get a WikipediaPage object")
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
-        self.__upload_new_item__(item=item)
+        wikipedia_page.wikicitations_qid = self.__upload_new_item__(item=item)
+        return wikipedia_page
 
     @staticmethod
     def entity_url(qid):
