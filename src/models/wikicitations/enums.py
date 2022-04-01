@@ -34,6 +34,7 @@ class WCDProperty(Enum):
     RETRIEVED_DATE = "P29"
     SERIES_ORDINAL = "P14"  # aka author position
     SOURCE_WIKIPEDIA = "P9"
+    STRING_CITATIONS = "P36"
     TEMPLATE_NAME = "P8"
     TITLE = "P20"
     URL = "P2"
