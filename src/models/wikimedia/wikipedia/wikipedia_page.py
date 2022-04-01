@@ -96,8 +96,10 @@ class WikipediaPage(BaseModel):
         raise NotImplementedError("To be written")
 
     @validate_arguments
-    def __check_and_upload_reference__(self, reference: WikipediaPageReference):
-        if config.use_cache and reference.md5hash is not None:
+    def __check_and_upload_reference_item_if_missing__(
+        self, reference: WikipediaPageReference
+    ):
+        if config.use_cache is not None:
             wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
             if wcdqid:
                 reference.wikicitations_qid = wcdqid
@@ -282,8 +284,10 @@ class WikipediaPage(BaseModel):
                 reference.parse_persons()
                 reference.parse_isbn()
                 reference.generate_hash()
-                if check_and_upload_to_cache:
-                    reference = self.__check_and_upload_reference__(reference=reference)
+                if check_and_upload_to_cache and reference.has_hash:
+                    reference = self.__check_and_upload_reference_item_if_missing__(
+                        reference=reference
+                    )
                 if config.loglevel == logging.DEBUG:
                     console.print(reference.dict())
                 self.references.append(reference)
