@@ -30,7 +30,11 @@ class Cache(BaseModel):
         """We get binary from SSDB so we decode it"""
         if reference.md5hash is not None:
             # https://stackoverflow.com/questions/55365543/
-            return self.ssdb.get(key=reference.md5hash).decode("UTF-8")
+            response = self.ssdb.get(key=reference.md5hash)
+            if response is None:
+                return None
+            else:
+                return response.decode("UTF-8")
         else:
             raise ValueError("md5hash was None")
 
