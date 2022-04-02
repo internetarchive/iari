@@ -35,7 +35,7 @@ class WikiCitations(BaseModel):
                     prop_nr=WCDProperty.CITATIONS.value,
                     value=reference.wikicitations_qid,
                 )
-            claims.append(citation)
+                claims.append(citation)
         return claims
 
     def __prepare_string_citation_qualifiers__(self, reference: WikipediaPageReference):
