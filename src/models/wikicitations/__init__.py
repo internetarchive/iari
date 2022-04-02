@@ -179,14 +179,17 @@ class WikiCitations(BaseModel):
     ) -> Optional[List[Claim]]:
         logger.info("Preparing single value claims")
         # Claims always present
-        instance_of = Item(
+        instance_of = datatypes.Item(
             prop_nr=WCDProperty.INSTANCE_OF.value,
             value=WCDItem.WIKIPEDIA_REFERENCE.value,
         )
         # We hardcode enWP for now
-        source_wikipedia = Item(
+        source_wikipedia = datatypes.Item(
             prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
             value=WCDItem.ENGLISH_WIKIPEDIA.value,
+        )
+        hash = datatypes.String(
+            prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
         )
         # Optional claims
         doi = None
@@ -258,6 +261,7 @@ class WikiCitations(BaseModel):
         claims = []
         for claim in (
             doi,
+            hash,
             instance_of,
             isbn_10,
             isbn_13,
@@ -281,6 +285,9 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.URL.value,
             value=wikipedia_page.absolute_url,
         )
+        hash = datatypes.String(
+            prop_nr=WCDProperty.HASH.value, value=wikipedia_page.md5hash
+        )
         page_id = datatypes.String(
             prop_nr=WCDProperty.MEDIAWIKI_PAGE_ID.value,
             value=str(wikipedia_page.page_id),
@@ -293,7 +300,7 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.TITLE.value,
             value=wikipedia_page.title,
         )
-        return [absolute_url, page_id, published_in, title]
+        return [absolute_url, hash, page_id, published_in, title]
 
     @staticmethod
     def __setup_wbi__():
