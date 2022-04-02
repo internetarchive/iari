@@ -683,7 +683,7 @@ class WikipediaPageReference(BaseModel):
 
     @property
     def wikicitations_url(self):
-        return f"{config.wikibase_url}/" f"wiki/{self.wikicitations_qid}"
+        return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
 
     def parse_isbn(self):
         if self.isbn is not None:
