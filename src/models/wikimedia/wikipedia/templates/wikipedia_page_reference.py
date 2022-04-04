@@ -715,17 +715,17 @@ class WikipediaPageReference(BaseModel):
         self.editors = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.EDITOR
         )
-        self.translators = self.__parse_known_role_persons__(
-            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
+        self.hosts = self.__parse_known_role_persons__(
+            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.HOST
         )
         self.interviewers = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.INTERVIEWER
         )
-        self.hosts = self.__parse_known_role_persons__(
-            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.HOST
-        )
         self.persons_without_role = self.__parse_roleless_persons__(
             attributes=attributes
+        )
+        self.translators = self.__parse_known_role_persons__(
+            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
         )
 
     def generate_hash(self):
