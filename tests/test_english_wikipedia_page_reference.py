@@ -71,3 +71,26 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         person = reference.persons_without_role[0]
         assert person.given == "Svend-Erik"
         assert person.surname == "Skaaning"
+
+    def test_parse_persons_from_cite_book(self):
+        data = {
+            "last": "Tangian",
+            "first": "Andranik",
+            "date": "2020",
+            "title": "Analytical Theory of Democracy: History, Mathematics and Applications",
+            "series": "Studies in Choice and Welfare",
+            "publisher": "Springer",
+            "location": "Cham, Switzerland",
+            "isbn": "978-3-030-39690-9",
+            "doi": "10.1007/978-3-030-39691-6",
+            "s2cid": "216190330",
+            "template_name": "cite book",
+        }
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.parse_persons()
+        console.print(reference)
+        person = reference.persons_without_role[0]
+        assert person.given == "Andranik"
+        assert person.surname == "Tangian"
