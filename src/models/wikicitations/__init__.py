@@ -52,6 +52,22 @@ class WikiCitations(BaseModel):
                 claims.append(citation)
         return claims
 
+    @staticmethod
+    def __prepare_editors__(
+        page_reference: WikipediaPageReference,
+    ) -> Optional[List[Claim]]:
+        persons = []
+        if page_reference.editors is not None and len(page_reference.editors) > 0:
+            for person in page_reference.editors:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
+                    value=person.author_name_string,
+                )
+                persons.append(person)
+        else:
+            persons = None
+        return persons
+
     @validate_arguments
     def __prepare_new_reference_item__(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
@@ -71,6 +87,18 @@ class WikiCitations(BaseModel):
         authors = self.__prepare_authors__(page_reference=page_reference)
         if authors is not None:
             item.add_claims(authors)
+        else:
+            logger.info(f"No authors found")
+        editors = self.__prepare_editors__(page_reference=page_reference)
+        if editors is not None:
+            item.add_claims(editors)
+        else:
+            logger.info(f"No editors found")
+        translators = self.__prepare_translators__(page_reference=page_reference)
+        if translators is not None:
+            item.add_claims(translators)
+        else:
+            logger.info(f"No translators found")
         item.add_claims(
             self.__prepare_single_value_reference_claims__(
                 page_reference=page_reference
@@ -455,6 +483,25 @@ class WikiCitations(BaseModel):
                     self.__prepare_string_citation__(page_reference=reference)
                 )
         return claims
+
+    @staticmethod
+    def __prepare_translators__(
+        page_reference: WikipediaPageReference,
+    ) -> Optional[List[Claim]]:
+        persons = []
+        if (
+            page_reference.translators is not None
+            and len(page_reference.translators) > 0
+        ):
+            for person in page_reference.translators:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
+                    value=person.author_name_string,
+                )
+                persons.append(person)
+        else:
+            persons = None
+        return persons
 
     @staticmethod
     def __setup_wbi__():
