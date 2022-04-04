@@ -29,21 +29,31 @@ class WikiCitations(BaseModel):
     ) -> Optional[List[Claim]]:
         authors = []
         if page_reference.authors is not None and len(page_reference.authors) > 0:
+            logger.debug("Preparing authors")
             for author in page_reference.authors:
                 author = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
                     value=author.author_name_string,
                 )
                 authors.append(author)
-            if config.assume_persons_without_role_are_authors:
-                for person in page_reference.persons_without_role:
-                    person = datatypes.String(
-                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                        value=person.author_name_string,
-                    )
-                    authors.append(person)
+        elif (
+            config.assume_persons_without_role_are_authors
+            and page_reference.persons_without_role is not None
+            and len(page_reference.persons_without_role) > 0
+        ):
+            logger.info("Assuming persons without role are authors")
+            for person in page_reference.persons_without_role:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                    value=person.author_name_string,
+                )
+                authors.append(person)
         else:
             authors = None
+        if authors is not None:
+            logger.info(f"Found {len(authors)} authors")
+        else:
+            logger.info("Found no authors")
         return authors
 
     @staticmethod
@@ -74,6 +84,10 @@ class WikiCitations(BaseModel):
                 persons.append(person)
         else:
             persons = None
+        if persons is not None:
+            logger.info(f"Found {len(persons)} editors")
+        else:
+            logger.info("Found no editors")
         return persons
 
     @validate_arguments
@@ -95,27 +109,21 @@ class WikiCitations(BaseModel):
         authors = self.__prepare_authors__(page_reference=page_reference)
         if authors is not None:
             item.add_claims(authors)
-        else:
-            logger.info(f"No authors found")
         editors = self.__prepare_editors__(page_reference=page_reference)
         if editors is not None:
             item.add_claims(editors)
-        else:
-            logger.info(f"No editors found")
         translators = self.__prepare_translators__(page_reference=page_reference)
         if translators is not None:
             item.add_claims(translators)
-        else:
-            logger.info(f"No translators found")
         item.add_claims(
             self.__prepare_single_value_reference_claims__(
                 page_reference=page_reference
             ),
         )
-        if config.loglevel == logging.DEBUG:
-            logger.debug("Printing the item json")
-            print(item.get_json())
-            exit()
+        # if config.loglevel == logging.DEBUG:
+        #     logger.debug("Printing the item json")
+        #     print(item.get_json())
+        #     # exit()
         return item
 
     @validate_arguments
@@ -178,6 +186,8 @@ class WikiCitations(BaseModel):
     def __prepare_single_value_reference_claims__(
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
+        if page_reference.md5hash is None:
+            raise ValueError("md5hash was None")
         logger.info("Preparing single value claims")
         # Claims always present
         instance_of = datatypes.Item(
@@ -509,6 +519,10 @@ class WikiCitations(BaseModel):
                 persons.append(person)
         else:
             persons = None
+        if persons is not None:
+            logger.info(f"Found {len(persons)} translators")
+        else:
+            logger.info("Found no translators")
         return persons
 
     @staticmethod
@@ -521,10 +535,11 @@ class WikiCitations(BaseModel):
     def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
         if item is None:
             raise ValueError("Did not get what we need")
+        if config.loglevel == logging.DEBUG:
+            logger.debug("Finished item JSON")
+            console.print(item.get_json())
+            # exit()
         if config.upload_enabled:
-            if config.loglevel == logging.DEBUG:
-                logger.debug("Sending the following JSON to WCD")
-                console.print(item.get_json())
             new_item = item.write(summary="New item imported from Wikipedia")
             print(f"Added new item {self.entity_url(new_item.id)}")
             if config.press_enter_to_continue:
