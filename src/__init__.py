@@ -30,7 +30,7 @@ class WcdImportBot(BaseModel):
     # get wikipedia page
     # extract templates
     # iterate templates we support
-    # create reference objects for each one
+    # create page_reference objects for each one
     # generate item in wcd
 
     def get_pages_by_range(self) -> None:

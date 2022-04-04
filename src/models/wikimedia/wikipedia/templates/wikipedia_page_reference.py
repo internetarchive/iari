@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class WikipediaPageReference(BaseModel):
-    """This models any reference on a Wikipedia page
+    """This models any page_reference on a Wikipedia page
 
     As we move to support more than one Wikipedia this model should be generalized further.
 
@@ -728,7 +728,7 @@ class WikipediaPageReference(BaseModel):
         )
 
     def generate_hash(self):
-        """We generate a md5 hash of the reference as a unique identifier for any given reference in a Wikipedia page
+        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         str2hash = None
         if self.doi is not None:

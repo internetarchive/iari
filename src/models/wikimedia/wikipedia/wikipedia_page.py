@@ -26,6 +26,7 @@ class WikipediaPage(BaseModel):
 
     cache: Optional[Cache]
     language_code: str = "en"
+    md5hash: Optional[str]
     # number_of_references_without_a_hash: Optional[int]
     # percent_of_references_missing_a_hash: Optional[int]
     percent_of_references_with_a_hash: Optional[int]
@@ -178,7 +179,7 @@ class WikipediaPage(BaseModel):
 
     # def __find_references_without_hashes__(self):
     #     references_without_hashes = [
-    #         reference for reference in self.references if reference.md5hash is None
+    #         page_reference for page_reference in self.references if page_reference.md5hash is None
     #     ]
     #     logger.info(f"references_without_hashes: {len(references_without_hashes)}")
     #     if references_without_hashes is None:
@@ -339,7 +340,7 @@ class WikipediaPage(BaseModel):
         self.__setup_wikicitations__()
         # extract references and create items for the missing ones first
         self.__extract_references__()
-        # upload a new item for the page with links to all the reference items
+        # upload a new item for the page with links to all the page_reference items
         self.wikicitations.prepare_and_upload_wikipedia_page_item(wikipedia_page=self)
 
     def export_to_dataframe(self):

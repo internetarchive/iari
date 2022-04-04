@@ -8,7 +8,7 @@ from src.models.wikimedia.wikipedia.templates.enums import (
 
 
 class Person(BaseModel):
-    """Model a person mentioned in a reference
+    """Model a person mentioned in a page_reference
     Sometimes they are stated as "editor=John Niel"
     and we save that as name_string for later disambiguation"""
 

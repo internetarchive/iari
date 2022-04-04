@@ -27,7 +27,7 @@ class WikiCitations(BaseModel):
         self, wikipedia_page: WikipediaPage
     ) -> Optional[List[Claim]]:
         # pseudo code
-        # for each reference in the page
+        # for each page_reference in the page
         claims = []
         for reference in wikipedia_page.references:
             if reference.wikicitations_qid is not None:
@@ -75,7 +75,7 @@ class WikiCitations(BaseModel):
     def __prepare_new_wikipedia_page_item__(
         self, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
-        """This method converts a reference into a new WikiCitations item"""
+        """This method converts a page_reference into a new WikiCitations item"""
         self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
@@ -86,7 +86,7 @@ class WikiCitations(BaseModel):
             "en", f"page from {wikipedia_page.wikimedia_site.name.title()}"
         )
         # Prepare claims
-        # First prepare the reference needed in other claims
+        # First prepare the page_reference needed in other claims
         citations = self.__prepare_citations__(wikipedia_page=wikipedia_page)
         string_citations = self.__prepare_string_citations__(
             wikipedia_page=wikipedia_page
@@ -110,7 +110,7 @@ class WikiCitations(BaseModel):
     def __prepare_new_reference_item__(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
-        """This method converts a reference into a new WikiCitations item"""
+        """This method converts a page_reference into a new WikiCitations item"""
         self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
@@ -121,7 +121,7 @@ class WikiCitations(BaseModel):
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
         )
         # Prepare claims
-        # First prepare the reference needed in other claims
+        # First prepare the page_reference needed in other claims
         authors = self.__prepare_authors__(page_reference=page_reference)
         if authors is not None:
             item.add_claims(authors)
@@ -139,7 +139,7 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_reference_claim__() -> List[Claim]:
         logger.info("Preparing reference claim")
-        # Prepare reference
+        # Prepare page_reference
         retrieved_date = datatypes.Time(
             prop_nr=WCDProperty.RETRIEVED_DATE.value,
             time=datetime.utcnow()  # Fetched today
