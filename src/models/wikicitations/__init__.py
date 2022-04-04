@@ -8,6 +8,7 @@ from wikibaseintegrator.entities import ItemEntity
 from wikibaseintegrator.models import Claim
 
 import config
+from src import console
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 from src.models.wikicitations.enums import WCDProperty, WCDItem
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
@@ -521,6 +522,9 @@ class WikiCitations(BaseModel):
         if item is None:
             raise ValueError("Did not get what we need")
         if config.upload_enabled:
+            if config.loglevel == logging.DEBUG:
+                logger.debug("Sending the following JSON to WCD")
+                console.print(item.get_json())
             new_item = item.write(summary="New item imported from Wikipedia")
             print(f"Added new item {self.entity_url(new_item.id)}")
             if config.press_enter_to_continue:
