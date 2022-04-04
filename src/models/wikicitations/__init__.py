@@ -475,6 +475,10 @@ class WikiCitations(BaseModel):
         else:
             print("skipped upload")
 
+    @staticmethod
+    def entity_url(qid):
+        return f"{wbi_config.config['WIKIBASE_URL']}/wiki/{qid}"
+
     @validate_arguments
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
@@ -496,7 +500,3 @@ class WikiCitations(BaseModel):
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wikipedia_page.wikicitations_qid = self.__upload_new_item__(item=item)
         return wikipedia_page
-
-    @staticmethod
-    def entity_url(qid):
-        return f"{wbi_config.config['WIKIBASE_URL']}/wiki/{qid}"
