@@ -53,6 +53,36 @@ class WikiCitations(BaseModel):
         return claims
 
     @validate_arguments
+    def __prepare_new_reference_item__(
+        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
+    ) -> ItemEntity:
+        """This method converts a page_reference into a new WikiCitations item"""
+        self.__setup_wbi__()
+        wbi = WikibaseIntegrator(
+            login=wbi_login.Login(user=config.user, password=config.pwd),
+        )
+        item = wbi.item.new()
+        item.labels.set("en", page_reference.title)
+        item.descriptions.set(
+            "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
+        )
+        # Prepare claims
+        # First prepare the page_reference needed in other claims
+        authors = self.__prepare_authors__(page_reference=page_reference)
+        if authors is not None:
+            item.add_claims(authors)
+        item.add_claims(
+            self.__prepare_single_value_reference_claims__(
+                page_reference=page_reference
+            ),
+        )
+        if config.loglevel == logging.DEBUG:
+            logger.debug("Printing the item json")
+            print(item.get_json())
+            exit()
+        return item
+
+    @validate_arguments
     def __prepare_new_wikipedia_page_item__(
         self, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
@@ -79,36 +109,6 @@ class WikiCitations(BaseModel):
         item.add_claims(
             self.__prepare_single_value_wikipedia_page_claims__(
                 wikipedia_page=wikipedia_page
-            ),
-        )
-        if config.loglevel == logging.DEBUG:
-            logger.debug("Printing the item json")
-            print(item.get_json())
-            exit()
-        return item
-
-    @validate_arguments
-    def __prepare_new_reference_item__(
-        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
-    ) -> ItemEntity:
-        """This method converts a page_reference into a new WikiCitations item"""
-        self.__setup_wbi__()
-        wbi = WikibaseIntegrator(
-            login=wbi_login.Login(user=config.user, password=config.pwd),
-        )
-        item = wbi.item.new()
-        item.labels.set("en", page_reference.title)
-        item.descriptions.set(
-            "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
-        )
-        # Prepare claims
-        # First prepare the page_reference needed in other claims
-        authors = self.__prepare_authors__(page_reference=page_reference)
-        if authors is not None:
-            item.add_claims(authors)
-        item.add_claims(
-            self.__prepare_single_value_reference_claims__(
-                page_reference=page_reference
             ),
         )
         if config.loglevel == logging.DEBUG:
