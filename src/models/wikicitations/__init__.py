@@ -164,6 +164,7 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
         )
         # Optional claims
+        access_date = None
         doi = None
         isbn_10 = None
         isbn_13 = None
@@ -173,6 +174,19 @@ class WikiCitations(BaseModel):
         template_name = None
         title = None
         url = None
+        if page_reference.access_date is not None:
+            access_date = datatypes.Time(
+                prop_nr=WCDProperty.ACCESS_DATE.value,
+                value=(
+                    page_reference.access_date.replace(tzinfo=timezone.utc)
+                    .replace(
+                        hour=0,
+                        minute=0,
+                        second=0,
+                    )
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                ),
+            )
         if page_reference.doi is not None:
             doi = datatypes.ExternalID(
                 prop_nr=WCDProperty.DOI.value,
@@ -230,6 +244,7 @@ class WikiCitations(BaseModel):
             )
         claims = []
         for claim in (
+            access_date,
             doi,
             hash,
             instance_of,
@@ -296,10 +311,24 @@ class WikiCitations(BaseModel):
         string_authors = self.__prepare_string_authors__(page_reference=page_reference)
         if string_authors is not None:
             claims.extend(string_authors)
+        access_date = None
         publication_date = None
         title = None
         url = None
         website_string = None
+        if page_reference.access_date is not None:
+            access_date = datatypes.Time(
+                prop_nr=WCDProperty.ACCESS_DATE.value,
+                value=(
+                    page_reference.access_date.replace(tzinfo=timezone.utc)
+                    .replace(
+                        hour=0,
+                        minute=0,
+                        second=0,
+                    )
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                ),
+            )
         if page_reference.publication_date is not None:
             publication_date = datatypes.Time(
                 prop_nr=WCDProperty.PUBLICATION_DATE.value,
@@ -329,6 +358,7 @@ class WikiCitations(BaseModel):
                 value=page_reference.website,
             )
         for claim in (
+            access_date,
             hash,
             publication_date,
             title,

@@ -12,6 +12,7 @@ class WCDItem(Enum):
 class WCDProperty(Enum):
     """Mapping for WikiCitations Wikibase"""
 
+    ACCESS_DATE = "P37"
     AUTHOR = "P7"
     AUTHOR_NAME_STRING = "P15"
     DOI = "P33"
