@@ -108,6 +108,10 @@ class WikipediaPage(BaseModel):
                 reference = self.__upload_reference_to_wikicitations__(
                     reference=reference
                 )
+                logger.debug(
+                    f"Hash before insertion: {reference.md5hash}. "
+                    f"WCDQID before insertion: {reference.wikicitations_qid}"
+                )
                 self.__insert_in_cache__(reference=reference)
         return reference
 
@@ -207,7 +211,7 @@ class WikipediaPage(BaseModel):
         wcdqid = self.cache.check_reference_and_get_wikicitations_qid(
             reference=reference
         )
-        print(f"result:{wcdqid}")
+        logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
 
     # def __get_wikipedia_page_from_event__(self):
