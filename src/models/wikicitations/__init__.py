@@ -34,6 +34,13 @@ class WikiCitations(BaseModel):
                     value=author.author_name_string,
                 )
                 authors.append(author)
+            if config.assume_persons_without_role_are_authors:
+                for person in page_reference.persons_without_role:
+                    person = datatypes.String(
+                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                        value=person.author_name_string,
+                    )
+                    authors.append(person)
         else:
             authors = None
         return authors
