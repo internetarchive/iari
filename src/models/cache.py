@@ -17,6 +17,8 @@ class Cache(BaseModel):
     @validate_arguments
     def add_reference(self, reference: WikipediaPageReference):
         if (reference.md5hash and reference.wikicitations_qid) is not None:
+            if type(reference.wikicitations_qid) is not str:
+                raise ValueError(f"{reference.wikicitations_qid} is not of type str")
             return self.ssdb.set(
                 key=reference.md5hash, value=reference.wikicitations_qid
             )
