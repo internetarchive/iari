@@ -312,6 +312,8 @@ class WikiCitations(BaseModel):
         if string_authors is not None:
             claims.extend(string_authors)
         access_date = None
+        archive_date = None
+        archive_url = None
         publication_date = None
         title = None
         url = None
@@ -328,6 +330,24 @@ class WikiCitations(BaseModel):
                     )
                     .strftime("+%Y-%m-%dT%H:%M:%SZ"),
                 ),
+            )
+        if page_reference.archive_date is not None:
+            access_date = datatypes.Time(
+                prop_nr=WCDProperty.ARCHIVE_DATE.value,
+                value=(
+                    page_reference.archive_date.replace(tzinfo=timezone.utc)
+                    .replace(
+                        hour=0,
+                        minute=0,
+                        second=0,
+                    )
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                ),
+            )
+        if page_reference.archive_url is not None:
+            archive_url = datatypes.URL(
+                prop_nr=WCDProperty.URL.value,
+                value=page_reference.url,
             )
         if page_reference.publication_date is not None:
             publication_date = datatypes.Time(
@@ -359,6 +379,8 @@ class WikiCitations(BaseModel):
             )
         for claim in (
             access_date,
+            archive_date,
+            archive_url,
             hash,
             publication_date,
             title,

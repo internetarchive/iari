@@ -13,6 +13,8 @@ class WCDProperty(Enum):
     """Mapping for WikiCitations Wikibase"""
 
     ACCESS_DATE = "P37"
+    ARCHIVE_DATE = "P39"
+    ARCHIVE_URL = "P38"
     AUTHOR = "P7"
     AUTHOR_NAME_STRING = "P15"
     DOI = "P33"
