@@ -240,11 +240,6 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ"),
                 ),
             )
-        if page_reference.title is not None:
-            title = datatypes.String(
-                prop_nr=WCDProperty.TITLE.value,
-                value=page_reference.title,
-            )
         if page_reference.template_name is not None:
             website_string = datatypes.String(
                 prop_nr=WCDProperty.TEMPLATE_NAME.value,
@@ -252,6 +247,11 @@ class WikiCitations(BaseModel):
             )
         else:
             raise ValueError("no template name found")
+        if page_reference.title is not None:
+            title = datatypes.String(
+                prop_nr=WCDProperty.TITLE.value,
+                value=page_reference.title,
+            )
         if page_reference.url is not None:
             url = datatypes.URL(
                 prop_nr=WCDProperty.URL.value,
