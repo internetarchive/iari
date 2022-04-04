@@ -301,6 +301,34 @@ class WikiCitations(BaseModel):
             authors = None
         return authors
 
+    @staticmethod
+    def __prepare_string_editors__(page_reference: WikipediaPageReference):
+        persons = []
+        if page_reference.editors is not None and len(page_reference.editors) > 0:
+            for person in page_reference.editors:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
+                    value=person.name_string,
+                )
+                persons.append(person)
+        else:
+            persons = None
+        return persons
+
+    @staticmethod
+    def __prepare_string_translators__(page_reference: WikipediaPageReference):
+        persons = []
+        if page_reference.editors is not None and len(page_reference.editors) > 0:
+            for person in page_reference.editors:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
+                    value=person.name_string,
+                )
+                persons.append(person)
+        else:
+            persons = None
+        return persons
+
     def __prepare_string_citation_qualifiers__(
         self, page_reference: WikipediaPageReference
     ):
@@ -311,6 +339,14 @@ class WikiCitations(BaseModel):
         string_authors = self.__prepare_string_authors__(page_reference=page_reference)
         if string_authors is not None:
             claims.extend(string_authors)
+        string_editors = self.__prepare_string_editors__(page_reference=page_reference)
+        if string_editors is not None:
+            claims.extend(string_editors)
+        string_translators = self.__prepare_string_translators__(
+            page_reference=page_reference
+        )
+        if string_translators is not None:
+            claims.extend(string_translators)
         access_date = None
         archive_date = None
         archive_url = None
