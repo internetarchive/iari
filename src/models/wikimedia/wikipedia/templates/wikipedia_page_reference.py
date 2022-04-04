@@ -37,11 +37,13 @@ class WikipediaPageReference(BaseModel):
 
     authors: Optional[List[Person]]
     editors: Optional[List[Person]]
-    md5hash: Optional[str]
+    first_lasts: Optional[List]
     hosts: Optional[List[Person]]
     interviewers: Optional[List[Person]]
     isbn_10: Optional[str]
     isbn_13: Optional[str]
+    md5hash: Optional[str]
+    numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
     template_name: str  # We use this to keep track of which template the information came from
     translators: Optional[List[Person]]
@@ -382,15 +384,19 @@ class WikipediaPageReference(BaseModel):
     @staticmethod
     @validate_arguments
     def __find_number__(string: str):
+        """Find all numbers in a string"""
+        logger.debug(f"Trying to find numbers in: {string}.")
         numbers = []
-        for char in string.split():
+        for char in list(string):
             if char.isdigit():
                 numbers.append(int(char))
         if len(numbers) > 0:
+            logger.debug(f"Found one number: {numbers[0]}.")
             return numbers[0]
         elif len(numbers) > 1:
             raise MoreThanOneNumberError()
         else:
+            logger.debug(f"Found no numbers.")
             return None
 
     @validate_arguments
@@ -401,18 +407,22 @@ class WikipediaPageReference(BaseModel):
         role: EnglishWikipediaTemplatePersonRole = None,
         search_string: str = None,
     ):
-        # TODO guard agains empty persons somehow
-        if (role, search_string) is not None:
-            found_attributes = [
-                attributes
+        # TODO guard against empty persons somehow
+        if (role and search_string) is not None:
+            matching_attributes = [
+                attribute
                 for attribute in attributes
+                if search_string in attribute and getattr(self, attribute) is not None
+            ]
+            found_attributes = [
+                attribute
+                for attribute in matching_attributes
                 if self.__find_number__(attribute) == number
-                and search_string in attribute
             ]
             if len(found_attributes) > 0:
                 person = Person(role=role, has_number=True, number_in_sequence=number)
                 for attribute in found_attributes:
-                    logger.debug(attribute, getattr(self, attribute))
+                    # logger.debug(attribute, getattr(self, attribute))
                     # Number in the end. E.g. "author_link1"
                     if attribute == search_string + str(number):
                         person.name_string = getattr(self, search_string + str(number))
@@ -449,29 +459,54 @@ class WikipediaPageReference(BaseModel):
                         person.surname = getattr(
                             self, search_string + str(number) + "_last"
                         )
-                return person
+                # Guard against empty person objects being returned
+                if (person.given and person.surname) is not None:
+                    person.number_in_sequence = number
+                    return person
+                else:
+                    logger.warning(
+                        f"Discarded {person} because it did not have both given- and surnames"
+                    )
         else:
             # Support cite journal first[1-12] and last[1-12]
-            found_attributes = [
-                attributes
-                for attribute in attributes
-                if self.__find_number__(attribute) == number
-                and ("first" in attribute or "last" in attribute)
-            ]
-            if len(found_attributes) > 0:
+            if self.first_lasts is None:
+                self.first_lasts = [
+                    attribute
+                    for attribute in attributes
+                    if ("first" in attribute or "last" in attribute)
+                    and getattr(self, attribute) is not None
+                ]
+            logger.debug(f"{len(self.first_lasts)} first lasts found.")
+            if self.numbered_first_lasts is None:
+                self.numbered_first_lasts = [
+                    attribute
+                    for attribute in self.first_lasts
+                    if self.__find_number__(attribute) == number
+                ]
+            logger.debug(
+                f"{len(self.numbered_first_lasts)} numbered first lasts found with number {number}."
+            )
+            if len(self.numbered_first_lasts) > 0:
                 person = Person(
                     role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
                     has_number=False,
                 )
-                for attribute in found_attributes:
-                    logger.debug(attribute, getattr(self, attribute))
+                for attribute in self.numbered_first_lasts:
+                    # logger.debug(attribute, getattr(self, attribute))
                     first = "first" + str(number)
                     last = "last" + str(number)
                     if attribute == first:
                         person.given = getattr(self, first)
                     if attribute == last:
                         person.surname = getattr(self, last)
-                return person
+                # Guard against empty person objects being returned
+                if (person.given and person.surname) is not None:
+                    person.number_in_sequence = number
+                    return person
+                else:
+                    logger.warning(
+                        f"Discarded {person} because it did not have both given- and surnames"
+                    )
 
     @validate_arguments
     def __get_numbered_persons__(
@@ -576,6 +611,7 @@ class WikipediaPageReference(BaseModel):
             if self.__find_number__(attribute) is None
             and (attribute == "first" or attribute == "last")
         ]
+        logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
         if len(unnumbered_first_last) > 0:
             person = Person(
                 role=EnglishWikipediaTemplatePersonRole.UNKNOWN, has_number=False
