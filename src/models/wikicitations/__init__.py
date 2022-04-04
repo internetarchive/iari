@@ -4,7 +4,6 @@ from typing import Any, Optional, List
 
 from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
-from wikibaseintegrator.datatypes import Item
 from wikibaseintegrator.entities import ItemEntity
 from wikibaseintegrator.models import Claim
 
@@ -23,9 +22,24 @@ class WikiCitations(BaseModel):
 
     We want to create items for all Wikipedia pages and references with a unique hash"""
 
-    def __prepare_citations__(
-        self, wikipedia_page: WikipediaPage
+    @staticmethod
+    def __prepare_authors__(
+        page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
+        authors = []
+        if page_reference.authors is not None and len(page_reference.authors) > 0:
+            for author in page_reference.authors:
+                author = datatypes.String(
+                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                    value=author.author_name_string,
+                )
+                authors.append(author)
+        else:
+            authors = None
+        return authors
+
+    @staticmethod
+    def __prepare_citations__(wikipedia_page: WikipediaPage) -> Optional[List[Claim]]:
         # pseudo code
         # for each page_reference in the page
         claims = []
@@ -36,39 +50,6 @@ class WikiCitations(BaseModel):
                     value=reference.wikicitations_qid,
                 )
                 claims.append(citation)
-        return claims
-
-    def __prepare_string_citation_qualifiers__(self, reference: WikipediaPageReference):
-        """Here we prepare all statements we normally
-        would put on a unique separate reference item"""
-        # TODO support
-        # authors as strings
-        # publication date
-        # title
-        # website string
-        raise NotImplementedError()
-
-    @validate_arguments()
-    def __prepare_string_citation__(self, reference: WikipediaPageReference) -> Claim:
-        """We import citations which could not be uniquely identified
-        as strings directly on the wikipedia page item"""
-        string_citation = datatypes.Item(
-            prop_nr=WCDProperty.STRING_CITATIONS.value,
-            value=reference.template_name,
-            qualifiers=self.__prepare_string_citation_qualifiers__(reference=reference),
-        )
-        return string_citation
-
-    def __prepare_string_citations__(
-        self, wikipedia_page: WikipediaPage
-    ) -> Optional[List[Claim]]:
-        # pseudo code
-        # for each reference in the page that
-        claims = []
-        for reference in wikipedia_page.references:
-            if not reference.has_hash:
-                # generate string statements
-                claims.append(self.__prepare_string_citation__(reference=reference))
         return claims
 
     @validate_arguments
@@ -158,22 +139,6 @@ class WikiCitations(BaseModel):
         return claims
 
     @staticmethod
-    def __prepare_authors__(
-        page_reference: WikipediaPageReference,
-    ) -> Optional[List[Claim]]:
-        authors = []
-        if page_reference.authors is not None and len(page_reference.authors) > 0:
-            for author in page_reference.authors:
-                author = datatypes.String(
-                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                    value=author.author_name_string,
-                )
-                authors.append(author)
-        else:
-            authors = None
-        return authors
-
-    @staticmethod
     def __prepare_single_value_reference_claims__(
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
@@ -183,6 +148,13 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.INSTANCE_OF.value,
             value=WCDItem.WIKIPEDIA_REFERENCE.value,
         )
+        if page_reference.template_name is not None:
+            website_string = datatypes.String(
+                prop_nr=WCDProperty.TEMPLATE_NAME.value,
+                value=page_reference.template_name,
+            )
+        else:
+            raise ValueError("no template name found")
         # We hardcode enWP for now
         source_wikipedia = datatypes.Item(
             prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
@@ -199,9 +171,8 @@ class WikiCitations(BaseModel):
         pmid = None
         publication_date = None
         template_name = None
+        title = None
         url = None
-        website_string = None
-
         if page_reference.doi is not None:
             doi = datatypes.ExternalID(
                 prop_nr=WCDProperty.DOI.value,
@@ -240,13 +211,6 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ"),
                 ),
             )
-        if page_reference.template_name is not None:
-            website_string = datatypes.String(
-                prop_nr=WCDProperty.TEMPLATE_NAME.value,
-                value=page_reference.template_name,
-            )
-        else:
-            raise ValueError("no template name found")
         if page_reference.title is not None:
             title = datatypes.String(
                 prop_nr=WCDProperty.TITLE.value,
@@ -262,7 +226,6 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.WEBSITE_STRING.value,
                 value=page_reference.website,
             )
-        # TODO gather the statements
         claims = []
         for claim in (
             doi,
@@ -283,9 +246,8 @@ class WikiCitations(BaseModel):
                 claims.append(claim)
         return claims
 
-    def __prepare_single_value_wikipedia_page_claims__(
-        self, wikipedia_page
-    ) -> List[Claim]:
+    @staticmethod
+    def __prepare_single_value_wikipedia_page_claims__(wikipedia_page) -> List[Claim]:
         # There are no optional claims for Wikipedia Pages
         absolute_url = datatypes.URL(
             prop_nr=WCDProperty.URL.value,
@@ -307,6 +269,102 @@ class WikiCitations(BaseModel):
             value=wikipedia_page.title,
         )
         return [absolute_url, hash, page_id, published_in, title]
+
+    @staticmethod
+    def __prepare_string_authors__(page_reference: WikipediaPageReference):
+        authors = []
+        if page_reference.authors is not None and len(page_reference.authors) > 0:
+            for author in page_reference.authors:
+                author = datatypes.String(
+                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                    value=author.author_name_string,
+                )
+                authors.append(author)
+        else:
+            authors = None
+        return authors
+
+    def __prepare_string_citation_qualifiers__(
+        self, page_reference: WikipediaPageReference
+    ):
+        """Here we prepare all statements we normally
+        would put on a unique separate page_reference item"""
+        # TODO support more fields
+        claims = []
+        string_authors = self.__prepare_string_authors__(page_reference=page_reference)
+        if string_authors is not None:
+            claims.extend(string_authors)
+        publication_date = None
+        title = None
+        url = None
+        website_string = None
+        if page_reference.publication_date is not None:
+            publication_date = datatypes.Time(
+                prop_nr=WCDProperty.PUBLICATION_DATE.value,
+                value=(
+                    page_reference.publication_date.replace(tzinfo=timezone.utc)
+                    .replace(
+                        hour=0,
+                        minute=0,
+                        second=0,
+                    )
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                ),
+            )
+        if page_reference.title is not None:
+            title = datatypes.String(
+                prop_nr=WCDProperty.TITLE.value,
+                value=page_reference.title,
+            )
+        if page_reference.url is not None:
+            url = datatypes.URL(
+                prop_nr=WCDProperty.URL.value,
+                value=page_reference.url,
+            )
+        if page_reference.website is not None:
+            website_string = datatypes.String(
+                prop_nr=WCDProperty.WEBSITE_STRING.value,
+                value=page_reference.website,
+            )
+        for claim in (
+            hash,
+            publication_date,
+            title,
+            url,
+            website_string,
+        ):
+            if claim is not None:
+                claims.append(claim)
+        return claims
+
+    @validate_arguments()
+    def __prepare_string_citation__(
+        self, page_reference: WikipediaPageReference
+    ) -> Claim:
+        """We import citations which could not be uniquely identified
+        as strings directly on the wikipedia page item"""
+        string_citation = datatypes.Item(
+            prop_nr=WCDProperty.STRING_CITATIONS.value,
+            value=page_reference.template_name,
+            qualifiers=self.__prepare_string_citation_qualifiers__(
+                page_reference=page_reference
+            ),
+        )
+        return string_citation
+
+    def __prepare_string_citations__(
+        self, wikipedia_page: WikipediaPage
+    ) -> Optional[List[Claim]]:
+        # pseudo code
+        # for each page_reference in the page that
+        claims = []
+        for reference in wikipedia_page.references:
+            if not reference.has_hash:
+                # generate string statements
+                claims.append(
+                    self.__prepare_string_citation__(page_reference=reference)
+                )
+        return claims
 
     @staticmethod
     def __setup_wbi__():
