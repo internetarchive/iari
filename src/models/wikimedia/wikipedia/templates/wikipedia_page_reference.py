@@ -700,11 +700,12 @@ class WikipediaPageReference(BaseModel):
     def parse_persons(self):
         """Parse all person related data into Person objects"""
         # find all the attributes but exclude the properties as they lead to weird errors
+        properties = ["has_hash", "isodate", "wikicitations_url"]
         attributes = [
             a
             for a in dir(self)
             if not a.startswith("_")
-            and not a == "isodate"
+            and a not in properties
             and not callable(getattr(self, a))
             and getattr(self, a) is not None
         ]
