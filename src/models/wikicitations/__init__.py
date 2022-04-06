@@ -9,6 +9,7 @@ from wikibaseintegrator.models import Claim
 
 import config
 from src import console
+from src.models.person import Person
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 from src.models.wikicitations.enums import WCDProperty, WCDItem
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
@@ -30,10 +31,11 @@ class WikiCitations(BaseModel):
         authors = []
         if page_reference.authors is not None and len(page_reference.authors) > 0:
             logger.debug("Preparing authors")
-            for author in page_reference.authors:
+            page_reference.authors: List[Person]
+            for author_object in page_reference.authors:
                 author = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                    value=author.author_name_string,
+                    value=author_object.name_string,
                 )
                 authors.append(author)
         elif (
@@ -42,10 +44,10 @@ class WikiCitations(BaseModel):
             and len(page_reference.persons_without_role) > 0
         ):
             logger.info("Assuming persons without role are authors")
-            for person in page_reference.persons_without_role:
+            for person_object in page_reference.persons_without_role:
                 person = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                    value=person.author_name_string,
+                    value=person_object.author_name_string,
                 )
                 authors.append(person)
         else:
