@@ -146,7 +146,8 @@ class TestWikiCitations(TestCase):
         )
         reference.parse_persons()
         reference.generate_hash()
-        reference.wikicitations_qid = "Q1"
+        test_qid = "Q4"
+        reference.wikicitations_qid = test_qid
         wppage.references = []
         wppage.references.append(reference)
         # with self.assertRaises(ValueError):
