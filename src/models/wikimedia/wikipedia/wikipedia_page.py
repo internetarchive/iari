@@ -287,9 +287,7 @@ class WikipediaPage(BaseModel):
                 logger.debug(parsed_template)
                 schema = EnglishWikipediaPageReferenceSchema()
                 reference: EnglishWikipediaPageReference = schema.load(parsed_template)
-                reference.parse_persons()
-                reference.parse_isbn()
-                reference.generate_hash()
+                reference.finish_parsing_and_generate_hash()
                 if check_and_upload_to_cache and reference.has_hash:
                     reference = self.__check_and_upload_reference_item_if_missing__(
                         reference=reference

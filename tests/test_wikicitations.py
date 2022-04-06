@@ -38,8 +38,7 @@ class TestWikiCitations(TestCase):
                 "template_name": "cite book",
             }
         )
-        reference.parse_persons()
-        reference.generate_hash()
+        reference.finish_parsing_and_generate_hash()
         assert len(reference.persons_without_role) > 0
         item = wc.__prepare_new_reference_item__(
             page_reference=reference, wikipedia_page=wppage
@@ -70,8 +69,7 @@ class TestWikiCitations(TestCase):
                 "template_name": "cite book",
             }
         )
-        reference.parse_persons()
-        reference.generate_hash()
+        reference.finish_parsing_and_generate_hash()
         reference.wikicitations_qid = "test"
         wppage.references = []
         wppage.references.append(reference)
@@ -105,8 +103,7 @@ class TestWikiCitations(TestCase):
                 "template_name": "cite book",
             }
         )
-        reference.parse_persons()
-        reference.generate_hash()
+        reference.finish_parsing_and_generate_hash()
         reference.wikicitations_qid = "Q1"
         wppage.references = []
         wppage.references.append(reference)
@@ -144,8 +141,7 @@ class TestWikiCitations(TestCase):
                 "template_name": "cite book",
             }
         )
-        reference.parse_persons()
-        reference.generate_hash()
+        reference.finish_parsing_and_generate_hash()
         test_qid = "Q4"
         reference.wikicitations_qid = test_qid
         wppage.references = []

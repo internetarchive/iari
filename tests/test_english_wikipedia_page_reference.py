@@ -43,7 +43,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference: EnglishWikipediaPageReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
-        reference.parse_persons()
+        reference.finish_parsing_and_generate_hash()
         console.print(reference)
         person = reference.persons_without_role[0]
         assert person.given == "Melissa"
@@ -66,7 +66,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference: EnglishWikipediaPageReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
-        reference.parse_persons()
+        reference.finish_parsing_and_generate_hash()
         console.print(reference)
         person = reference.persons_without_role[0]
         assert person.given == "Svend-Erik"
@@ -89,7 +89,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference: EnglishWikipediaPageReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
-        reference.parse_persons()
+        reference.finish_parsing_and_generate_hash()
         console.print(reference)
         person = reference.persons_without_role[0]
         assert person.given == "Andranik"

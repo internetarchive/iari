@@ -381,6 +381,34 @@ class WikipediaPageReference(BaseModel):
     medium: Optional[str]
     contribution: Optional[str]
 
+    @property
+    def has_hash(self) -> bool:
+        if self.md5hash is not None:
+            return True
+        else:
+            return False
+
+    @property
+    def isodate(self):
+        if self.publication_date is not None:
+            return datetime.strftime(self.publication_date, "%Y-%m-%d")
+        elif self.date is not None:
+            return datetime.strftime(self.date, "%Y-%m-%d")
+        elif self.year is not None:
+            return datetime.strftime(self.year, "%Y-%m-%d")
+        else:
+            raise ValueError(
+                f"missing publication date, in template {self.template_name}, see {self.dict()}"
+            )
+
+    @property
+    def template_url(self):
+        return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
+
+    @property
+    def wikicitations_url(self):
+        return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+
     @staticmethod
     @validate_arguments
     def __find_number__(string: str):
@@ -697,31 +725,7 @@ class WikipediaPageReference(BaseModel):
             logger.warning(f"date format '{v}' not supported yet")
         return date
 
-    @property
-    def has_hash(self) -> bool:
-        if self.md5hash is not None:
-            return True
-        else:
-            return False
-
-    @property
-    def isodate(self):
-        if self.publication_date is not None:
-            return datetime.strftime(self.publication_date, "%Y-%m-%d")
-        elif self.date is not None:
-            return datetime.strftime(self.date, "%Y-%m-%d")
-        elif self.year is not None:
-            return datetime.strftime(self.year, "%Y-%m-%d")
-        else:
-            raise ValueError(
-                f"missing publication date, in template {self.template_name}, see {self.dict()}"
-            )
-
-    @property
-    def wikicitations_url(self):
-        return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
-
-    def parse_isbn(self):
+    def __parse_isbn__(self):
         if self.isbn is not None:
             stripped_isbn = self.isbn.replace("-", "")
             if len(stripped_isbn) == 13:
@@ -733,10 +737,21 @@ class WikipediaPageReference(BaseModel):
                     "isbn: {self.isbn} was not 10 or 13 chars long after removing the da"
                 )
 
-    def parse_persons(self):
+    def __parse_first_parameter__(self):
+        # pseudo code
+        if self.template_name == ("cite q" or "citeq"):
+            # We assume that the first parameter is the Wikidata QID
+            # TODO add crude check?
+            self.wikidata_qid = self.first_parameter
+        elif self.template_name == "url":
+            # crudely detect if url in first_parameter
+            if "://" in self.first_parameter:
+                self.url = self.first_parameter
+
+    def __parse_persons__(self):
         """Parse all person related data into Person objects"""
         # find all the attributes but exclude the properties as they lead to weird errors
-        properties = ["has_hash", "isodate", "wikicitations_url"]
+        properties = ["has_hash", "isodate", "template_url", "wikicitations_url"]
         attributes = [
             a
             for a in dir(self)
@@ -764,7 +779,7 @@ class WikipediaPageReference(BaseModel):
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
         )
 
-    def generate_hash(self):
+    def __generate_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         str2hash = None
@@ -879,8 +894,12 @@ class WikipediaPageReference(BaseModel):
                 f"or they were turned of in config.py."
             )
 
-    def template_url(self):
-        return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
+    def finish_parsing_and_generate_hash(self):
+        """Parse the rest of the information and generate a hash"""
+        self.__generate_hash__()
+        self.__parse_first_parameter__()
+        self.__parse_isbn__()
+        self.__parse_persons__()
 
 
 class WikipediaPageReferenceSchema(Schema):
