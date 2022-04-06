@@ -189,8 +189,6 @@ class WikiCitations(BaseModel):
     def __prepare_single_value_reference_claims__(
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
-        if page_reference.md5hash is None:
-            raise ValueError("md5hash was None")
         logger.info("Preparing single value claims")
         # Claims always present
         instance_of = datatypes.Item(
@@ -209,6 +207,8 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
             value=WCDItem.ENGLISH_WIKIPEDIA.value,
         )
+        if page_reference.md5hash is None:
+            raise ValueError("page_reference.md5hash was None")
         hash = datatypes.String(
             prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
         )
@@ -319,20 +319,29 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.URL.value,
             value=wikipedia_page.absolute_url,
         )
+        if wikipedia_page.md5hash is None:
+            raise ValueError("wikipedia_page.md5hash was None")
         hash = datatypes.String(
             prop_nr=WCDProperty.HASH.value, value=wikipedia_page.md5hash
         )
+        if wikipedia_page.page_id is None:
+            raise ValueError("wikipedia_page.page_id was None")
         page_id = datatypes.String(
             prop_nr=WCDProperty.MEDIAWIKI_PAGE_ID.value,
             value=str(wikipedia_page.page_id),
         )
         published_in = datatypes.Item(
             prop_nr=WCDProperty.PUBLISHED_IN.value,
+            # FIXME avoid hardcoding here
             value=WCDItem.ENGLISH_WIKIPEDIA.value,
         )
-        title = datatypes.String(
+        if wikipedia_page.title is None:
+            raise ValueError("wikipedia_page.title was None")
+        title = datatypes.MonolingualText(
             prop_nr=WCDProperty.TITLE.value,
-            value=wikipedia_page.title,
+            text=wikipedia_page.title,
+            # FIXME avoid hardcoding here
+            language="en",
         )
         return [absolute_url, hash, page_id, published_in, title]
 
@@ -553,7 +562,7 @@ class WikiCitations(BaseModel):
 
     @staticmethod
     def entity_url(qid):
-        return f"{wbi_config.config['WIKIBASE_URL']}/wiki/{qid}"
+        return f"{wbi_config.config['WIKIBASE_URL']}/wiki/Item:{qid}"
 
     @validate_arguments
     def prepare_and_upload_reference_item(
