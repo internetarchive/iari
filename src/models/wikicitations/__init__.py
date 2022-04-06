@@ -226,14 +226,14 @@ class WikiCitations(BaseModel):
         if page_reference.access_date is not None:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
-                value=(
+                time=(
                     page_reference.access_date.replace(tzinfo=timezone.utc)
                     .replace(
                         hour=0,
                         minute=0,
                         second=0,
                     )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
         if page_reference.doi is not None:
@@ -264,14 +264,14 @@ class WikiCitations(BaseModel):
         if page_reference.publication_date is not None:
             publication_date = datatypes.Time(
                 prop_nr=WCDProperty.PUBLICATION_DATE.value,
-                value=(
+                time=(
                     page_reference.publication_date.replace(tzinfo=timezone.utc)
                     .replace(
                         hour=0,
                         minute=0,
                         second=0,
                     )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
         if page_reference.title is not None:
@@ -415,27 +415,27 @@ class WikiCitations(BaseModel):
         if page_reference.access_date is not None:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
-                value=(
+                time=(
                     page_reference.access_date.replace(tzinfo=timezone.utc)
                     .replace(
                         hour=0,
                         minute=0,
                         second=0,
                     )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
         if page_reference.archive_date is not None:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ARCHIVE_DATE.value,
-                value=(
+                time=(
                     page_reference.archive_date.replace(tzinfo=timezone.utc)
                     .replace(
                         hour=0,
                         minute=0,
                         second=0,
                     )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
         if page_reference.archive_url is not None:
@@ -446,14 +446,14 @@ class WikiCitations(BaseModel):
         if page_reference.publication_date is not None:
             publication_date = datatypes.Time(
                 prop_nr=WCDProperty.PUBLICATION_DATE.value,
-                value=(
+                time=(
                     page_reference.publication_date.replace(tzinfo=timezone.utc)
                     .replace(
                         hour=0,
                         minute=0,
                         second=0,
                     )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
         if page_reference.title is not None:
