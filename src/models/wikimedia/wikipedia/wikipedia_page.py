@@ -343,6 +343,7 @@ class WikipediaPage(BaseModel):
 
     def extract_and_upload_to_wikicitations(self):
         self.__setup_wikicitations__()
+        self.__generate_hash__()
         # extract references and create items for the missing ones first
         self.__extract_references__()
         # upload a new item for the page with links to all the page_reference items
@@ -361,7 +362,7 @@ class WikipediaPage(BaseModel):
     #              doi.wikidata_scientific_item.crossref_engine.work is not None
     #      )]
 
-    def generate_hash(self):
+    def __generate_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         self.md5hash = hashlib.md5(

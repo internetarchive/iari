@@ -128,7 +128,7 @@ class TestWikiCitations(TestCase):
         wppage = WikipediaPage()
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
-        wppage.generate_hash()
+        wppage.__generate_hash__()
         reference = EnglishWikipediaPageReference(
             **{
                 "last": "Tangian",
