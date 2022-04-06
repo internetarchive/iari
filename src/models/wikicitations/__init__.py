@@ -136,7 +136,7 @@ class WikiCitations(BaseModel):
             login=wbi_login.Login(user=config.user, password=config.pwd),
         )
         item = wbi.item.new()
-        item.labels.set("en", wikipedia_page.pywikibot_page.title)
+        item.labels.set("en", wikipedia_page.title)
         item.descriptions.set(
             "en", f"page from {wikipedia_page.wikimedia_site.name.title()}"
         )
