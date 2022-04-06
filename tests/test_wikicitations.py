@@ -1,5 +1,8 @@
 import logging
+from typing import List
 from unittest import TestCase
+
+from wikibaseintegrator.models import Claim
 
 import config
 from src import console
@@ -45,9 +48,75 @@ class TestWikiCitations(TestCase):
         assert (
             item.claims.get(property=WCDProperty.AUTHOR_NAME_STRING.value) is not None
         )
-        # logger.info(f"url: {reference.wikicitations_url}")
-        #
-        # wppage = wc.prepare_and_upload_wikipedia_page_item(
-        #     wikipedia_page=wppage,
-        # )
+
+    def test_prepare_and_upload_page_item_invalid_qid(self):
+        from src.models.wikicitations import WikiCitations
+
+        wc = WikiCitations()
+        wppage = WikipediaPage()
+        wppage.__get_wikipedia_page_from_title__(title="Democracy")
+        reference = EnglishWikipediaPageReference(
+            **{
+                "last": "Tangian",
+                "first": "Andranik",
+                "date": "2020",
+                "title": "Analytical Theory of Democracy: History, Mathematics and Applications",
+                "series": "Studies in Choice and Welfare",
+                "publisher": "Springer",
+                "location": "Cham, Switzerland",
+                "isbn": "978-3-030-39690-9",
+                "doi": "10.1007/978-3-030-39691-6",
+                "s2cid": "216190330",
+                "template_name": "cite book",
+            }
+        )
+        reference.parse_persons()
+        reference.generate_hash()
+        reference.wikicitations_qid = "test"
+        wppage.references = []
+        wppage.references.append(reference)
+        with self.assertRaises(ValueError):
+            item = wc.__prepare_new_wikipedia_page_item__(
+                wikipedia_page=wppage,
+            )
+        # console.print(item.get_json())
+
+        # logger.info(f"url: {wppage.wikicitations_url}")
+
+    def test_prepare_and_upload_page_item_valid_qid(self):
+        from src.models.wikicitations import WikiCitations
+
+        wc = WikiCitations()
+        wppage = WikipediaPage()
+        title = "Democracy"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        reference = EnglishWikipediaPageReference(
+            **{
+                "last": "Tangian",
+                "first": "Andranik",
+                "date": "2020",
+                "title": "Analytical Theory of Democracy: History, Mathematics and Applications",
+                "series": "Studies in Choice and Welfare",
+                "publisher": "Springer",
+                "location": "Cham, Switzerland",
+                "isbn": "978-3-030-39690-9",
+                "doi": "10.1007/978-3-030-39691-6",
+                "s2cid": "216190330",
+                "template_name": "cite book",
+            }
+        )
+        reference.parse_persons()
+        reference.generate_hash()
+        reference.wikicitations_qid = "Q1"
+        wppage.references = []
+        wppage.references.append(reference)
+        # with self.assertRaises(ValueError):
+        item = wc.__prepare_new_wikipedia_page_item__(
+            wikipedia_page=wppage,
+        )
+        # console.print(item.get_json())
+        # assert item.labels.get("en") == title
+        citations: List[Claim] = item.claims.get(WCDProperty.CITATIONS.value)
+        # console.print(citations[0].mainsnak.datavalue["value"]["id"])
+        assert citations[0].mainsnak.datavalue["value"]["id"] == "Q1"
         # logger.info(f"url: {wppage.wikicitations_url}")
