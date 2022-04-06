@@ -49,7 +49,7 @@ class TestWikiCitations(TestCase):
             item.claims.get(property=WCDProperty.AUTHOR_NAME_STRING.value) is not None
         )
 
-    def test_prepare_and_upload_page_item_invalid_qid(self):
+    def test_prepare_new_wikipedia_page_item_invalid_qid(self):
         from src.models.wikicitations import WikiCitations
 
         wc = WikiCitations()
@@ -83,7 +83,7 @@ class TestWikiCitations(TestCase):
 
         # logger.info(f"url: {wppage.wikicitations_url}")
 
-    def test_prepare_and_upload_page_item_valid_qid(self):
+    def test_prepare_new_wikipedia_page_item_valid_qid(self):
         from src.models.wikicitations import WikiCitations
 
         wc = WikiCitations()
