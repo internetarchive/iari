@@ -365,6 +365,6 @@ class WikipediaPage(BaseModel):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         self.md5hash = hashlib.md5(
-            f"{self.language_}{self.page_id}".encode()
+            f"{self.language_code}{self.page_id}".encode()
         ).hexdigest()
         logger.debug(self.md5hash)
