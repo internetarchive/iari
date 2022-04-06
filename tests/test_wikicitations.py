@@ -120,3 +120,37 @@ class TestWikiCitations(TestCase):
         # console.print(citations[0].mainsnak.datavalue["value"]["id"])
         assert citations[0].mainsnak.datavalue["value"]["id"] == "Q1"
         # logger.info(f"url: {wppage.wikicitations_url}")
+
+    def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
+        from src.models.wikicitations import WikiCitations
+
+        wc = WikiCitations()
+        wppage = WikipediaPage()
+        title = "Democracy"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.generate_hash()
+        reference = EnglishWikipediaPageReference(
+            **{
+                "last": "Tangian",
+                "first": "Andranik",
+                "date": "2020",
+                "title": "Analytical Theory of Democracy: History, Mathematics and Applications",
+                "series": "Studies in Choice and Welfare",
+                "publisher": "Springer",
+                "location": "Cham, Switzerland",
+                "isbn": "978-3-030-39690-9",
+                "doi": "10.1007/978-3-030-39691-6",
+                "s2cid": "216190330",
+                "template_name": "cite book",
+            }
+        )
+        reference.parse_persons()
+        reference.generate_hash()
+        reference.wikicitations_qid = "Q1"
+        wppage.references = []
+        wppage.references.append(reference)
+        # with self.assertRaises(ValueError):
+        page_with_wcdqid = wc.prepare_and_upload_wikipedia_page_item(
+            wikipedia_page=wppage,
+        )
+        console.print(page_with_wcdqid.wikicitations_qid)
