@@ -5,7 +5,7 @@ from typing import Any, Optional, List
 from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
-from wikibaseintegrator.models import Claim
+from wikibaseintegrator.models import Claim, Qualifiers
 
 import config
 from src import console
@@ -389,7 +389,7 @@ class WikiCitations(BaseModel):
 
     def __prepare_string_citation_qualifiers__(
         self, page_reference: WikipediaPageReference
-    ):
+    ) -> List[Claim]:
         """Here we prepare all statements we normally
         would put on a unique separate page_reference item"""
         # TODO support more fields
@@ -475,7 +475,6 @@ class WikiCitations(BaseModel):
             access_date,
             archive_date,
             archive_url,
-            hash,
             publication_date,
             title,
             url,
@@ -491,12 +490,17 @@ class WikiCitations(BaseModel):
     ) -> Claim:
         """We import citations which could not be uniquely identified
         as strings directly on the wikipedia page item"""
-        string_citation = datatypes.Item(
+        qualifiers = self.__prepare_string_citation_qualifiers__(
+            page_reference=page_reference
+        )
+        claim_qualifiers = Qualifiers()
+        for qualifier in qualifiers:
+            logger.debug(f"Adding qualifier {qualifier}")
+            claim_qualifiers.add(qualifier)
+        string_citation = datatypes.String(
             prop_nr=WCDProperty.STRING_CITATIONS.value,
             value=page_reference.template_name,
-            qualifiers=self.__prepare_string_citation_qualifiers__(
-                page_reference=page_reference
-            ),
+            qualifiers=claim_qualifiers,
         )
         return string_citation
 
