@@ -457,9 +457,11 @@ class WikiCitations(BaseModel):
                 ),
             )
         if page_reference.title is not None:
-            title = datatypes.String(
+            title = datatypes.MonolingualText(
                 prop_nr=WCDProperty.TITLE.value,
                 value=page_reference.title,
+                # FIXME avoid hardcoding here
+                language="en",
             )
         if page_reference.url is not None:
             url = datatypes.URL(
