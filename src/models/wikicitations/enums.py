@@ -40,7 +40,7 @@ class WCDProperty(Enum):
     SOURCE_WIKIPEDIA = "P9"
     STRING_CITATIONS = "P36"
     TEMPLATE_NAME = "P8"
-    TITLE = "P20"
+    TITLE = "P20"  # monolingual text
     TRANSLATOR_NAME_STRING = "P41"
     URL = "P2"
     VOLUME = "P27"
