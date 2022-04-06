@@ -158,7 +158,7 @@ class WikiCitations(BaseModel):
         if config.loglevel == logging.DEBUG:
             logger.debug("Printing the item json")
             print(item.get_json())
-            exit()
+            # exit()
         return item
 
     @staticmethod
