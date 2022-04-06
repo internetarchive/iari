@@ -80,7 +80,7 @@ class WikipediaPage(BaseModel):
     @property
     def title(self):
         """Helper property"""
-        return str(self.pywikibot_page.title)
+        return self.pywikibot_page.title()
 
     @property
     def url(self):
