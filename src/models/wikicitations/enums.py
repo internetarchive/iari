@@ -36,6 +36,7 @@ class WCDProperty(Enum):
     PUBLICATION_DATE = "P12"
     PUBLISHED_IN = "P17"
     RETRIEVED_DATE = "P29"
+    PAGE_REVISION_ID = "P42"  # string
     SERIES_ORDINAL = "P14"  # aka author position
     SOURCE_WIKIPEDIA = "P9"
     STRING_CITATIONS = "P36"

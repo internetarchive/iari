@@ -165,7 +165,10 @@ class WikiCitations(BaseModel):
         return item
 
     @staticmethod
-    def __prepare_reference_claim__() -> List[Claim]:
+    @validate_arguments
+    def __prepare_reference_claim__(wikipedia_page: WikipediaPage) -> List[Claim]:
+        """This reference claim contains the current revision id and the current date
+        This enables us to track references over time in the graph using SPARQL."""
         logger.info("Preparing reference claim")
         # Prepare page_reference
         retrieved_date = datatypes.Time(
@@ -179,10 +182,10 @@ class WikiCitations(BaseModel):
             )
             .strftime("+%Y-%m-%dT%H:%M:%SZ"),
         )
-        claims = []
-        for claim in (retrieved_date,):
-            if claim is not None:
-                claims.append(claim)
+        revision_id = datatypes.String(
+            prop_nr=WCDProperty.PAGE_REVISION_ID.value, value=wikipedia_page.revision_id
+        )
+        claims = [retrieved_date, revision_id]
         return claims
 
     @staticmethod
@@ -499,6 +502,11 @@ class WikiCitations(BaseModel):
         for qualifier in qualifiers:
             logger.debug(f"Adding qualifier {qualifier}")
             claim_qualifiers.add(qualifier)
+        references = self.__prepare_reference_claim__()
+        claim_references = References()
+        for reference in references:
+            logger.debug(f"Adding reference {reference}")
+            claim_references.add(reference)
         string_citation = datatypes.String(
             prop_nr=WCDProperty.STRING_CITATIONS.value,
             value=page_reference.template_name,

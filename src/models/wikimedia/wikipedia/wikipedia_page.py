@@ -79,6 +79,14 @@ class WikipediaPage(BaseModel):
             )
 
     @property
+    def revision_id(self):
+        revid = self.pywikibot_page.latest_revision_id
+        if revid is not None:
+            return revid
+        else:
+            raise ValueError("got no revision id form pywikibot")
+
+    @property
     def title(self):
         """Helper property"""
         return self.pywikibot_page.title()
