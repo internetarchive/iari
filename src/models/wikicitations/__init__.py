@@ -138,7 +138,8 @@ class WikiCitations(BaseModel):
         item = wbi.item.new()
         item.labels.set("en", wikipedia_page.title)
         item.descriptions.set(
-            "en", f"page from {wikipedia_page.wikimedia_site.name.title()}"
+            "en",
+            f"page from {wikipedia_page.language_code}:{wikipedia_page.wikimedia_site.name.title()}",
         )
         # Prepare claims
         # First prepare the page_reference needed in other claims
