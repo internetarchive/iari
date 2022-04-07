@@ -150,7 +150,7 @@ class TestWikiCitations(TestCase):
         wppage.references = []
         wppage.references.append(reference)
         # with self.assertRaises(ValueError):
-        page_with_wcdqid = wc.prepare_and_upload_wikipedia_page_item(
+        wcdqid = wc.prepare_and_upload_wikipedia_page_item(
             wikipedia_page=wppage,
         )
-        console.print(page_with_wcdqid.wikicitations_qid)
+        console.print(wcdqid)
