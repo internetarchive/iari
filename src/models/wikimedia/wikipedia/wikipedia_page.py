@@ -10,10 +10,9 @@ from pydantic import BaseModel, validate_arguments
 from pywikibot import Page, Site
 
 import config
-from src import WikimediaSite, console, Cache
+from src import WikimediaSite, Cache
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
-    EnglishWikipediaPageReference,
 )
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
@@ -27,6 +26,8 @@ class WikipediaPage(BaseModel):
 
     cache: Optional[Cache]
     language_code: str = "en"
+    max_number_of_item_citations_to_upload: Optional[int]
+    uploaded_item_citations: int = 0
     md5hash: Optional[str]
     # number_of_references_without_a_hash: Optional[int]
     # percent_of_references_missing_a_hash: Optional[int]
@@ -35,7 +36,7 @@ class WikipediaPage(BaseModel):
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
     # references_without_hashes: Optional[List[WikipediaPageReference]]
-    wikicitations: Optional[Any]  # This is needed
+    wikicitations: Optional[Any]  # WikiCitaitons
     wikicitations_qid: Optional[str]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
@@ -105,8 +106,8 @@ class WikipediaPage(BaseModel):
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
 
-    # @validate_arguments
-    def __check_and_upload_reference_item_if_missing__(
+    @validate_arguments
+    def __check_and_upload_reference_item_to_wikicitations_if_missing__(
         self, reference: WikipediaPageReference
     ):
         if reference is None:
@@ -115,21 +116,30 @@ class WikipediaPage(BaseModel):
             wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
-                reference.wikicitations_qid = wcdqid
+                # reference.wikicitations_qid = wcdqid
             else:
-                # Here we get the reference back with WCDQID
-                reference = self.__upload_reference_to_wikicitations__(
-                    reference=reference
-                )
-                if reference.wikicitations_qid is None:
-                    raise ValueError("WCDQID was None")
-                if reference.md5hash is None:
-                    raise ValueError("hash was None")
-                logger.debug(
-                    f"Hash before insertion: {reference.md5hash}. "
-                    f"WCDQID before insertion: {reference.wikicitations_qid}"
-                )
-                self.__insert_in_cache__(reference=reference)
+                if self.max_number_of_item_citations_to_upload is not None:
+                    if (
+                        self.uploaded_item_citations
+                        < self.max_number_of_item_citations_to_upload
+                    ):
+                        reference = self.__upload_reference_and_insert_in_the_cache__(
+                            reference=reference
+                        )
+                        self.uploaded_item_citations += 1
+                        logger.info(
+                            f"Added {self.uploaded_item_citations} out "
+                            f"of maximum {self.max_number_of_item_citations_to_upload}"
+                        )
+                    else:
+                        logger.info(
+                            f"Skipping upload of this reference because the maximum number of "
+                            f"{self.max_number_of_item_citations_to_upload} has been reached"
+                        )
+                else:
+                    reference = self.__upload_reference_and_insert_in_the_cache__(
+                        reference=reference
+                    )
         return reference
 
     def __page_has_already_been_uploaded__(self) -> bool:
@@ -261,12 +271,12 @@ class WikipediaPage(BaseModel):
         # this id is useful when talking to WikipediaCitations because it is unique
         # self.page_id = int(self.pywikibot_page.pageid)
 
-    def __insert_in_cache__(self, reference: WikipediaPageReference):
+    def __insert_in_cache__(self, reference: WikipediaPageReference, wcdqid: str):
         logger.debug("__insert_in_cache__: Running")
-        self.cache.add_reference(reference=reference)
+        self.cache.add_reference(reference=reference, wcdqid=wcdqid)
         logger.info("Reference inserted into the hash database")
 
-    def __parse_templates__(self, check_and_upload_to_cache: bool = True):
+    def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
         raw = self.pywikibot_page.raw_extracted_templates
         number_of_templates = len(raw)
@@ -316,11 +326,6 @@ class WikipediaPage(BaseModel):
                 schema = EnglishWikipediaPageReferenceSchema()
                 reference: WikipediaPageReference = schema.load(parsed_template)
                 reference.finish_parsing_and_generate_hash()
-                if check_and_upload_to_cache and reference.has_hash:
-                    # Here we get the reference with the WCDQID back
-                    reference = self.__check_and_upload_reference_item_if_missing__(
-                        reference=reference
-                    )
                 # if config.loglevel == logging.DEBUG:
                 #     console.print(reference.dict())
                 self.references.append(reference)
@@ -354,33 +359,69 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __upload_reference_to_wikicitations__(
         self, reference: WikipediaPageReference
-    ) -> WikipediaPageReference:
+    ) -> str:
         logger.debug("__upload_reference_to_wikicitations__: Running")
         if self.wikicitations is None:
             self.__setup_wikicitations__()
-        reference.wikicitations_qid = (
-            self.wikicitations.prepare_and_upload_reference_item(
-                page_reference=reference, wikipedia_page=self
-            )
+        wcdqid = self.wikicitations.prepare_and_upload_reference_item(
+            page_reference=reference, wikipedia_page=self
         )
-        if reference.wikicitations_qid is None:
+        if wcdqid is None:
             raise ValueError(
                 "Got None instead of WCDQID when trying to upload to WikiCitations"
             )
+        return wcdqid
+
+    @validate_arguments
+    def __upload_reference_and_insert_in_the_cache__(
+        self, reference: WikipediaPageReference
+    ):
+        # Here we get the reference back with WCDQID
+        wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
+        if wcdqid is None:
+            raise ValueError("WCDQID was None")
+        if reference.md5hash is None:
+            raise ValueError("hash was None")
+        logger.debug(
+            f"Hash before insertion: {reference.md5hash}. "
+            f"WCDQID before insertion: {wcdqid}"
+        )
+        self.__insert_in_cache__(reference=reference, wcdqid=wcdqid)
+        reference.wikicitations_qid = wcdqid
         return reference
 
-    def extract_and_upload_to_wikicitations(self, max_number_of_item_citations: int):
+    def __upload_references_if_missing__(self):
+        """Go through each reference and upload if missing to WikiCitations"""
+        updated_references = []
+        for reference in self.references:
+            if reference.has_hash:
+                # Here we get the reference with the WCDQID back
+                reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
+                    reference=reference
+                )
+            updated_references.append(reference)
+        self.references = updated_references
+
+    def extract_and_upload_to_wikicitations(self):
         """Extract the references and upload first
         the references and then the page to WikiCitations"""
-        self.__setup_wikicitations__()
+        # First we check if this page has already been uploaded
         self.__generate_hash__()
-        # extract references and create items for the missing ones first
-        self.__extract_references__()
-        # upload a new item for the page with links to all the page_reference items
-        self.wikicitations.prepare_and_upload_wikipedia_page_item(
-            wikipedia_page=self,
-            max_number_of_item_citations=max_number_of_item_citations,
-        )
+        if not self.__page_has_already_been_uploaded__():
+            logger.info(
+                "This page is missing from WikiCitations according to the cache"
+            )
+            self.__setup_wikicitations__()
+            # extract references and create items for the missing ones first
+            self.__extract_and_parse_references__()
+            self.__upload_references_if_missing__()
+            # upload a new item for the page with links to all the page_reference items
+            wcdqid = self.wikicitations.prepare_and_upload_wikipedia_page_item(
+                wikipedia_page=self,
+            )
+            self.cache.add_page(wikipedia_page=self, wcdqid=wcdqid)
+        else:
+            logger.info("This page has already been uploaded to WikiCitations")
 
     def export_to_dataframe(self):
         # TODO make it easy to quantify the references with pandas
