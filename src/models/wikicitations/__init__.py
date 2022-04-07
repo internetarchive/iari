@@ -238,6 +238,7 @@ class WikiCitations(BaseModel):
         template_name = None
         title = None
         url = None
+        wikidata_qid = None
         if page_reference.access_date is not None:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
@@ -306,6 +307,11 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.WEBSITE_STRING.value,
                 value=page_reference.website,
             )
+        if page_reference.wikidata_qid is not None:
+            wikidata_qid = datatypes.ExternalID(
+                prop_nr=WCDProperty.PMID.value,
+                value=page_reference.wikidata_qid,
+            )
         claims = []
         for claim in (
             access_date,
@@ -322,6 +328,7 @@ class WikiCitations(BaseModel):
             title,
             url,
             website_string,
+            wikidata_qid,
         ):
             if claim is not None:
                 claims.append(claim)
