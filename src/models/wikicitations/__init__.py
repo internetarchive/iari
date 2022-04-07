@@ -217,7 +217,7 @@ class WikiCitations(BaseModel):
             )
         else:
             raise ValueError("no template name found")
-        # We hardcode enWP for now
+        # FIXME don't hardcode enWP
         source_wikipedia = datatypes.Item(
             prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
             value=WCDItem.ENGLISH_WIKIPEDIA.value,
