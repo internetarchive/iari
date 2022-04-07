@@ -898,11 +898,12 @@ class WikipediaPageReference(BaseModel):
 
     def finish_parsing_and_generate_hash(self):
         """Parse the rest of the information and generate a hash"""
-        self.__generate_hash__()
         # We parse the first parameter before isbn
         self.__parse_first_parameter__()
         self.__parse_isbn__()
         self.__parse_persons__()
+        # We generate the hash last because the parsing needs to be done first
+        self.__generate_hash__()
 
 
 class WikipediaPageReferenceSchema(Schema):
