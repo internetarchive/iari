@@ -642,9 +642,7 @@ class WikiCitations(BaseModel):
         return wcdqid
 
     @validate_arguments
-    def prepare_and_upload_wikipedia_page_item(
-        self, wikipedia_page: Any, max_number_of_item_citations: int = 0
-    ) -> str:
+    def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> str:
         logging.debug("prepare_and_upload_wikipedia_page_item: Running")
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
