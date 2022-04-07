@@ -206,7 +206,8 @@ class WikiCitations(BaseModel):
             .strftime("+%Y-%m-%dT%H:%M:%SZ"),
         )
         revision_id = datatypes.String(
-            prop_nr=WCDProperty.PAGE_REVISION_ID.value, value=wikipedia_page.revision_id
+            prop_nr=WCDProperty.PAGE_REVISION_ID.value,
+            value=str(wikipedia_page.revision_id),
         )
         claims = [retrieved_date, revision_id]
         self.claim_references = References()
