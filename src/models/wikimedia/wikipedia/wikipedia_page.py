@@ -368,7 +368,7 @@ class WikipediaPage(BaseModel):
         wcdqid = self.wikicitations.prepare_and_upload_reference_item(
             page_reference=reference, wikipedia_page=self
         )
-        if wcdqid is None:
+        if wcdqid is None and config.upload_enabled is True:
             raise ValueError(
                 "Got None instead of WCDQID when trying to upload to WikiCitations"
             )
@@ -379,17 +379,18 @@ class WikipediaPage(BaseModel):
         self, reference: WikipediaPageReference
     ):
         # Here we get the reference back with WCDQID
-        wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
-        if wcdqid is None:
-            raise ValueError("WCDQID was None")
-        if reference.md5hash is None:
-            raise ValueError("hash was None")
-        logger.debug(
-            f"Hash before insertion: {reference.md5hash}. "
-            f"WCDQID before insertion: {wcdqid}"
-        )
-        self.__insert_in_cache__(reference=reference, wcdqid=wcdqid)
-        reference.wikicitations_qid = wcdqid
+        if config.upload_enabled:
+            wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
+            if wcdqid is None:
+                raise ValueError("WCDQID was None")
+            if reference.md5hash is None:
+                raise ValueError("hash was None")
+            logger.debug(
+                f"Hash before insertion: {reference.md5hash}. "
+                f"WCDQID before insertion: {wcdqid}"
+            )
+            self.__insert_in_cache__(reference=reference, wcdqid=wcdqid)
+            reference.wikicitations_qid = wcdqid
         return reference
 
     def __upload_references_if_missing__(self):
@@ -421,7 +422,7 @@ class WikipediaPage(BaseModel):
             wcdqid = self.wikicitations.prepare_and_upload_wikipedia_page_item(
                 wikipedia_page=self,
             )
-            if config.use_cache:
+            if config.use_cache and config.upload_enabled is True:
                 if wcdqid is None:
                     raise ValueError("wcdqid was None")
                 self.cache.add_page(wikipedia_page=self, wcdqid=wcdqid)
