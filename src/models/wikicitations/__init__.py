@@ -652,7 +652,7 @@ class WikiCitations(BaseModel):
         if not isinstance(wikipedia_page, WikipediaPage):
             raise ValueError("did not get a WikipediaPage object")
         self.max_number_of_item_citations = max_number_of_item_citations
-        self.__prepare_reference_claims__()
+        self.__prepare_reference_claims__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wikipedia_page.wikicitations_qid = self.__upload_new_item__(item=item)
         return wikipedia_page
