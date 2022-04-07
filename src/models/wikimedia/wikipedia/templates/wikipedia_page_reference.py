@@ -436,7 +436,6 @@ class WikipediaPageReference(BaseModel):
         role: EnglishWikipediaTemplatePersonRole = None,
         search_string: str = None,
     ):
-        # TODO guard against empty persons somehow
         if (role and search_string) is not None:
             matching_attributes = [
                 attribute
