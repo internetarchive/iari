@@ -56,9 +56,9 @@ class WikiCitations(BaseModel):
                 )
                 qualifiers.append(surname)
             if author_object.number_in_sequence is not None:
-                number_in_sequence = datatypes.String(
+                number_in_sequence = datatypes.Quantity(
                     prop_nr=WCDProperty.SERIES_ORDINAL.value,
-                    value=str(author_object.number_in_sequence),
+                    amount=author_object.number_in_sequence,
                 )
                 qualifiers.append(number_in_sequence)
             if author_object.orcid is not None:
