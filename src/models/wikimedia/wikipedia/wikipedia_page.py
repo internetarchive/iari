@@ -113,7 +113,7 @@ class WikipediaPage(BaseModel):
         logger.debug("Checking and uploading page references")
         if reference is None:
             raise ValueError("reference was None")
-        if config.use_cache is not None:
+        if config.cache_and_upload_enabled is not None:
             wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
@@ -368,7 +368,7 @@ class WikipediaPage(BaseModel):
         wcdqid = self.wikicitations.prepare_and_upload_reference_item(
             page_reference=reference, wikipedia_page=self
         )
-        if wcdqid is None and config.upload_enabled is True:
+        if wcdqid is None and config.cache_and_upload_enabled is True:
             raise ValueError(
                 "Got None instead of WCDQID when trying to upload to WikiCitations"
             )
@@ -379,7 +379,7 @@ class WikipediaPage(BaseModel):
         self, reference: WikipediaPageReference
     ):
         # Here we get the reference back with WCDQID
-        if config.upload_enabled:
+        if config.cache_and_upload_enabled:
             wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
             if wcdqid is None:
                 raise ValueError("WCDQID was None")
@@ -422,7 +422,7 @@ class WikipediaPage(BaseModel):
             wcdqid = self.wikicitations.prepare_and_upload_wikipedia_page_item(
                 wikipedia_page=self,
             )
-            if config.use_cache and config.upload_enabled is True:
+            if config.cache_and_upload_enabled is True:
                 if wcdqid is None:
                     raise ValueError("wcdqid was None")
                 self.cache.add_page(wikipedia_page=self, wcdqid=wcdqid)

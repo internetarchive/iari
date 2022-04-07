@@ -675,7 +675,7 @@ class WikiCitations(BaseModel):
             logger.debug("Finished item JSON")
             console.print(item.get_json())
             # exit()
-        if config.upload_enabled:
+        if config.cache_and_upload_enabled:
             new_item = item.write(summary="New item imported from Wikipedia")
             print(f"Added new item {self.entity_url(new_item.id)}")
             if config.press_enter_to_continue:
