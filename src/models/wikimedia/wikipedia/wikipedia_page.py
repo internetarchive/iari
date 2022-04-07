@@ -105,18 +105,26 @@ class WikipediaPage(BaseModel):
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
 
-    @validate_arguments
+    # @validate_arguments
     def __check_and_upload_reference_item_if_missing__(
         self, reference: WikipediaPageReference
     ):
+        if reference is None:
+            raise ValueError("reference was None")
         if config.use_cache is not None:
             wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
-            if wcdqid:
+            if wcdqid is not None:
+                logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.wikicitations_qid = wcdqid
             else:
+                # Here we get the reference back with WCDQID
                 reference = self.__upload_reference_to_wikicitations__(
                     reference=reference
                 )
+                if reference.wikicitations_qid is None:
+                    raise ValueError("WCDQID was None")
+                if reference.md5hash is None:
+                    raise ValueError("hash was None")
                 logger.debug(
                     f"Hash before insertion: {reference.md5hash}. "
                     f"WCDQID before insertion: {reference.wikicitations_qid}"
@@ -214,7 +222,9 @@ class WikipediaPage(BaseModel):
     #     if self.title is None or self.title == "":
     #         raise ValueError("title not set correctly")
 
-    def __get_wcdqid_from_cache__(self, reference: WikipediaPageReference):
+    def __get_wcdqid_from_cache__(
+        self, reference: WikipediaPageReference
+    ) -> Optional[str]:
         if self.cache is None:
             self.__setup_cache__()
         wcdqid = self.cache.check_reference_and_get_wikicitations_qid(
@@ -243,6 +253,7 @@ class WikipediaPage(BaseModel):
         # self.page_id = int(self.pywikibot_page.pageid)
 
     def __insert_in_cache__(self, reference: WikipediaPageReference):
+        logger.debug("__insert_in_cache__: Running")
         self.cache.add_reference(reference=reference)
         logger.info("Reference inserted into the hash database")
 
@@ -294,14 +305,15 @@ class WikipediaPage(BaseModel):
                 parsed_template["template_name"] = template_name.lower()
                 logger.debug(parsed_template)
                 schema = EnglishWikipediaPageReferenceSchema()
-                reference: EnglishWikipediaPageReference = schema.load(parsed_template)
+                reference: WikipediaPageReference = schema.load(parsed_template)
                 reference.finish_parsing_and_generate_hash()
                 if check_and_upload_to_cache and reference.has_hash:
+                    # Here we get the reference with the WCDQID back
                     reference = self.__check_and_upload_reference_item_if_missing__(
                         reference=reference
                     )
-                if config.loglevel == logging.DEBUG:
-                    console.print(reference.dict())
+                # if config.loglevel == logging.DEBUG:
+                #     console.print(reference.dict())
                 self.references.append(reference)
             else:
                 if config.debug_unsupported_templates:
@@ -334,6 +346,7 @@ class WikipediaPage(BaseModel):
     def __upload_reference_to_wikicitations__(
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
+        logger.debug("__upload_reference_to_wikicitations__: Running")
         if self.wikicitations is None:
             self.__setup_wikicitations__()
         reference.wikicitations_qid = (
