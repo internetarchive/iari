@@ -25,6 +25,7 @@ class WikiCitations(BaseModel):
     We want to create items for all Wikipedia pages and references with a unique hash"""
 
     claim_references: Optional[References]
+    max_number_of_item_citations: Optional[int]
 
     class Config:
         arbitrary_types_allowed = True
@@ -69,16 +70,29 @@ class WikiCitations(BaseModel):
         self, wikipedia_page: WikipediaPage
     ) -> Optional[List[Claim]]:
         """Prepare the item citations and add a reference
-        to in which revision it was found and the retrieval date"""
+        to in which revision it was found and the retrieval date
+        Interpret max_number_of_item_citations = 0 as unlimited"""
         claims = []
+        number_of_added_reference_items = 0
         for reference in wikipedia_page.references:
             if reference.wikicitations_qid is not None:
-                citation = datatypes.Item(
-                    prop_nr=WCDProperty.CITATIONS.value,
-                    value=reference.wikicitations_qid,
-                    references=self.claim_references,
-                )
-                claims.append(citation)
+                if (
+                    self.max_number_of_item_citations > 0
+                    and number_of_added_reference_items
+                    < self.max_number_of_item_citations
+                ):
+                    citation = datatypes.Item(
+                        prop_nr=WCDProperty.CITATIONS.value,
+                        value=reference.wikicitations_qid,
+                        references=self.claim_references,
+                    )
+                    claims.append(citation)
+                    number_of_added_reference_items += 1
+                else:
+                    logger.info(
+                        f"Skipping item citation because the maximum number of "
+                        f"{self.max_number_of_item_citations} has been reached"
+                    )
         return claims
 
     @staticmethod
@@ -617,12 +631,13 @@ class WikiCitations(BaseModel):
 
     @validate_arguments
     def prepare_and_upload_wikipedia_page_item(
-        self, wikipedia_page: Any
+        self, wikipedia_page: Any, max_number_of_item_citations: int = 0
     ) -> WikipediaPage:
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         if not isinstance(wikipedia_page, WikipediaPage):
             raise ValueError("did not get a WikipediaPage object")
+        self.max_number_of_item_citations = max_number_of_item_citations
         self.__prepare_reference_claims__()
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wikipedia_page.wikicitations_qid = self.__upload_new_item__(item=item)

@@ -347,13 +347,16 @@ class WikipediaPage(BaseModel):
             )
         return reference
 
-    def extract_and_upload_to_wikicitations(self):
+    def extract_and_upload_to_wikicitations(self, max_number_of_item_citations: int):
         self.__setup_wikicitations__()
         self.__generate_hash__()
         # extract references and create items for the missing ones first
         self.__extract_references__()
         # upload a new item for the page with links to all the page_reference items
-        self.wikicitations.prepare_and_upload_wikipedia_page_item(wikipedia_page=self)
+        self.wikicitations.prepare_and_upload_wikipedia_page_item(
+            wikipedia_page=self,
+            max_number_of_item_citations=max_number_of_item_citations,
+        )
 
     def export_to_dataframe(self):
         # TODO make it easy to quantify the references with pandas
