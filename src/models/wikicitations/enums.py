@@ -48,4 +48,4 @@ class WCDProperty(Enum):
     VOLUME = "P27"
     WEBSITE = "P13"
     WEBSITE_STRING = "P35"
-    WIKIDATA_QID = "P1"
+    WIKIDATA_QID = "P44"  # external id
