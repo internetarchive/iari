@@ -20,3 +20,7 @@ class SsdbDatabase(BaseModel):
     @validate_arguments
     def set_value(self, key: str, value: str):
         return self.connection.set(key, value)
+
+    @validate_arguments
+    def delete(self, key: str):
+        return self.connection.delete(key)
