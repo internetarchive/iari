@@ -30,7 +30,6 @@ class WikiCitations(BaseModel):
     revision id and retrieved date of the statement"""
 
     reference_claim: Optional[References]
-    max_number_of_item_citations: Optional[int]
 
     class Config:
         arbitrary_types_allowed = True
@@ -99,7 +98,6 @@ class WikiCitations(BaseModel):
         to in which revision it was found and the retrieval date"""
         logger.info("Preparing item citations")
         claims = []
-        number_of_added_reference_items = 0
         for reference in wikipedia_page.references:
             if reference.wikicitations_qid is not None:
                 logger.debug("Appending to citations")
