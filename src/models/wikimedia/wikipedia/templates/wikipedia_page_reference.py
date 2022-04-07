@@ -747,6 +747,8 @@ class WikipediaPageReference(BaseModel):
             # crudely detect if url in first_parameter
             if "://" in self.first_parameter:
                 self.url = self.first_parameter
+        elif self.template_name == "isbn":
+            self.isbn = self.first_parameter
 
     def __parse_persons__(self):
         """Parse all person related data into Person objects"""
@@ -897,6 +899,7 @@ class WikipediaPageReference(BaseModel):
     def finish_parsing_and_generate_hash(self):
         """Parse the rest of the information and generate a hash"""
         self.__generate_hash__()
+        # We parse the first parameter before isbn
         self.__parse_first_parameter__()
         self.__parse_isbn__()
         self.__parse_persons__()
