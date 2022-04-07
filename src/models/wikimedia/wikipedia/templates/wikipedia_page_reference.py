@@ -49,6 +49,7 @@ class WikipediaPageReference(BaseModel):
     translators: Optional[List[Person]]
     persons_without_role: Optional[List[Person]]
     wikicitations_qid: Optional[str]
+    wikidata_qid: Optional[str]
 
     # These are all the parameters in the supported templates
     #######################
