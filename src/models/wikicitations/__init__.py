@@ -34,9 +34,56 @@ class WikiCitations(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    @staticmethod
+    @validate_arguments
+    def __prepare_person_qualifiers__(self, author_object: Person):
+        qualifiers = []
+        if (
+            author_object.given
+            or author_object.given
+            or author_object.orcid
+            or author_object.number_in_sequence
+        ) is not None:
+            if author_object.given is not None:
+                given_name = datatypes.String(
+                    propnr=WCDProperty.GIVEN_NAME.value,
+                    value=author_object.given,
+                )
+                qualifiers.append(given_name)
+            if author_object.surname is not None:
+                surname = datatypes.String(
+                    propnr=WCDProperty.FAMILY_NAME.value,
+                    value=author_object.surname,
+                )
+                qualifiers.append(surname)
+            if author_object.number_in_sequence is not None:
+                number_in_sequence = datatypes.String(
+                    propnr=WCDProperty.SERIES_ORDINAL.value,
+                    value=str(author_object.number_in_sequence),
+                )
+                qualifiers.append(number_in_sequence)
+            if author_object.orcid is not None:
+                orcid = datatypes.ExternalID(
+                    propnr=WCDProperty.ORCID.value,
+                    value=author_object.orcid,
+                )
+                qualifiers.append(orcid)
+            if author_object.link is not None:
+                link = datatypes.URL(
+                    propnr=WCDProperty.URL.value,
+                    value=author_object.link,
+                )
+                qualifiers.append(link)
+            if author_object.mask is not None:
+                mask = datatypes.String(
+                    propnr=WCDProperty.NAME_MASK.value,
+                    value=author_object.mask,
+                )
+                qualifiers.append(mask)
+        return qualifiers
+
     @validate_arguments
     def __prepare_authors__(
+        self,
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         authors = []
@@ -44,10 +91,20 @@ class WikiCitations(BaseModel):
             logger.debug("Preparing authors")
             page_reference.authors: List[Person]  # type: ignore
             for author_object in page_reference.authors:
-                author = datatypes.String(
-                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                    value=author_object.name_string,
+                qualifiers = self.__prepare_person_qualifiers__(
+                    author_object=author_object
                 )
+                if len(qualifiers) > 0:
+                    author = datatypes.String(
+                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                        value=author_object.name_string,
+                        qualifiers=qualifiers,
+                    )
+                else:
+                    author = datatypes.String(
+                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                        value=author_object.name_string,
+                    )
                 authors.append(author)
         elif (
             config.assume_persons_without_role_are_authors
@@ -56,9 +113,13 @@ class WikiCitations(BaseModel):
         ):
             logger.info("Assuming persons without role are authors")
             for person_object in page_reference.persons_without_role:
+                qualifiers = self.__prepare_person_qualifiers__(
+                    author_object=person_object
+                )
                 person = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
                     value=person_object.author_name_string,
+                    qualifiers=qualifiers,
                 )
                 authors.append(person)
         else:

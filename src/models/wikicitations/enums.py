@@ -31,6 +31,7 @@ class WCDProperty(Enum):
     ISSUE = "P24"
     LAST_UPDATE = "P43"
     MEDIAWIKI_PAGE_ID = "P18"
+    NAME_MASK = "P45"
     ORCID = "P31"
     PAGES = "P25"
     PMID = "P34"
