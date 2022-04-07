@@ -16,10 +16,12 @@ class Cache(BaseModel):
 
     @validate_arguments
     def add_reference(self, reference: WikipediaPageReference):
-        if (reference.md5hash and reference.wikicitations_qid) is not None:
-            if type(reference.wikicitations_qid) is not str:
-                raise ValueError(f"{reference.wikicitations_qid} is not of type str")
-            return self.ssdb.set(
+        logger.debug("add_reference: Running")
+        if reference.md5hash is not None and reference.wikicitations_qid is not None:
+            # if type(reference.wikicitations_qid) is not str:
+            #     raise ValueError(f"{reference.wikicitations_qid} is not of type str")
+            logger.debug(f"Trying to set the value: {reference.wikicitations_qid}")
+            return self.ssdb.set_value(
                 key=reference.md5hash, value=reference.wikicitations_qid
             )
         else:
@@ -28,11 +30,11 @@ class Cache(BaseModel):
     @validate_arguments
     def check_reference_and_get_wikicitations_qid(
         self, reference: WikipediaPageReference
-    ):
+    ) -> Optional[str]:
         """We get binary from SSDB so we decode it"""
         if reference.md5hash is not None:
             # https://stackoverflow.com/questions/55365543/
-            response = self.ssdb.get(key=reference.md5hash)
+            response = self.ssdb.get_value(key=reference.md5hash)
             if response is None:
                 return None
             else:
