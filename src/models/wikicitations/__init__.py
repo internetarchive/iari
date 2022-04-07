@@ -5,7 +5,7 @@ from typing import Any, Optional, List
 from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
-from wikibaseintegrator.models import Claim, Qualifiers, References
+from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
 
 import config
 from src import console
@@ -22,9 +22,14 @@ logger = logging.getLogger(__name__)
 class WikiCitations(BaseModel):
     """This class models the WikiCitations Wikibase and handles all uploading to it
 
-    We want to create items for all Wikipedia pages and references with a unique hash"""
+    We want to create items for all Wikipedia pages and references with a unique hash
 
-    claim_references: Optional[References]
+    Terminology:
+    page_reference is a reference that appear in a Wikipedia page
+    reference_claim is a datastructure from WBI that contains the
+    revision id and retrieved date of the statement"""
+
+    reference_claim: Optional[References]
     max_number_of_item_citations: Optional[int]
 
     class Config:
@@ -38,7 +43,7 @@ class WikiCitations(BaseModel):
         authors = []
         if page_reference.authors is not None and len(page_reference.authors) > 0:
             logger.debug("Preparing authors")
-            page_reference.authors: List[Person]
+            page_reference.authors: List[Person]  # type: ignore
             for author_object in page_reference.authors:
                 author = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
@@ -66,39 +71,24 @@ class WikiCitations(BaseModel):
         return authors
 
     @validate_arguments
-    def __prepare_citations__(
+    def __prepare_item_citations__(
         self, wikipedia_page: WikipediaPage
     ) -> Optional[List[Claim]]:
         """Prepare the item citations and add a reference
         to in which revision it was found and the retrieval date
-        Interpret max_number_of_item_citations = 0 as unlimited"""
-
-        def generate_citation():
-            citation = datatypes.Item(
-                prop_nr=WCDProperty.CITATIONS.value,
-                value=reference.wikicitations_qid,
-                references=self.claim_references,
-            )
-            claims.append(citation)
-
+        Interpret max_number_of_item_citations_to_upload = 0 as unlimited"""
+        logger.info("Preparing item citations")
         claims = []
         number_of_added_reference_items = 0
         for reference in wikipedia_page.references:
             if reference.wikicitations_qid is not None:
-                if self.max_number_of_item_citations == 0:
-                    generate_citation()
-                elif (
-                    self.max_number_of_item_citations > 0
-                    and number_of_added_reference_items
-                    < self.max_number_of_item_citations
-                ):
-                    generate_citation()
-                    number_of_added_reference_items += 1
-                else:
-                    logger.info(
-                        f"Skipping item citation because the maximum number of "
-                        f"{self.max_number_of_item_citations} has been reached"
+                claims.append(
+                    datatypes.Item(
+                        prop_nr=WCDProperty.CITATIONS.value,
+                        value=reference.wikicitations_qid,
+                        references=self.reference_claim,
                     )
+                )
         return claims
 
     @staticmethod
@@ -176,7 +166,7 @@ class WikiCitations(BaseModel):
         )
         # Prepare claims
         # First prepare the page_reference needed in other claims
-        citations = self.__prepare_citations__(wikipedia_page=wikipedia_page)
+        citations = self.__prepare_item_citations__(wikipedia_page=wikipedia_page)
         string_citations = self.__prepare_string_citations__(
             wikipedia_page=wikipedia_page
         )
@@ -196,7 +186,7 @@ class WikiCitations(BaseModel):
         return item
 
     @validate_arguments
-    def __prepare_reference_claims__(self, wikipedia_page: WikipediaPage):
+    def __prepare_reference_claim__(self, wikipedia_page: WikipediaPage):
         """This reference claim contains the current revision id and the current date
         This enables us to track references over time in the graph using SPARQL."""
         logger.info("Preparing reference claims")
@@ -217,10 +207,12 @@ class WikiCitations(BaseModel):
             value=str(wikipedia_page.revision_id),
         )
         claims = [retrieved_date, revision_id]
-        self.claim_references = References()
-        for reference in claims:
-            logger.debug(f"Adding reference {reference}")
-            self.claim_references.add(reference)
+        citation_reference = Reference()
+        for claim in claims:
+            logger.debug(f"Adding reference {claim}")
+            citation_reference.add(claim)
+        self.reference_claim = References()
+        self.reference_claim.add(citation_reference)
 
     @staticmethod
     def __prepare_single_value_reference_claims__(
@@ -569,7 +561,7 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.STRING_CITATIONS.value,
             value=page_reference.template_name,
             qualifiers=claim_qualifiers,
-            references=self.claim_references,
+            references=self.reference_claim,
         )
         return string_citation
 
@@ -629,6 +621,7 @@ class WikiCitations(BaseModel):
             print(f"Added new item {self.entity_url(new_item.id)}")
             if config.press_enter_to_continue:
                 input("press enter to continue")
+            logger.debug(f"returning new wcdqid: {new_item.id}")
             return new_item.id
         else:
             print("skipped upload")
@@ -640,25 +633,24 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
-    ) -> WikipediaPageReference:
-        self.__prepare_reference_claims__(wikipedia_page=wikipedia_page)
+    ) -> str:
+        self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
         )
-        page_reference.wikicitations_qid = self.__upload_new_item__(item=item)
-        return page_reference
+        wcdqid = self.__upload_new_item__(item=item)
+        return wcdqid
 
     @validate_arguments
     def prepare_and_upload_wikipedia_page_item(
         self, wikipedia_page: Any, max_number_of_item_citations: int = 0
-    ) -> WikipediaPage:
+    ) -> str:
         logging.debug("prepare_and_upload_wikipedia_page_item: Running")
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         if not isinstance(wikipedia_page, WikipediaPage):
             raise ValueError("did not get a WikipediaPage object")
-        self.max_number_of_item_citations = max_number_of_item_citations
-        self.__prepare_reference_claims__(wikipedia_page=wikipedia_page)
+        self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
-        wikipedia_page.wikicitations_qid = self.__upload_new_item__(item=item)
-        return wikipedia_page
+        wcdqid = self.__upload_new_item__(item=item)
+        return wcdqid
