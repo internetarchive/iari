@@ -96,8 +96,7 @@ class WikiCitations(BaseModel):
         self, wikipedia_page: WikipediaPage
     ) -> Optional[List[Claim]]:
         """Prepare the item citations and add a reference
-        to in which revision it was found and the retrieval date
-        Interpret max_number_of_item_citations_to_upload = 0 as unlimited"""
+        to in which revision it was found and the retrieval date"""
         logger.info("Preparing item citations")
         claims = []
         number_of_added_reference_items = 0
