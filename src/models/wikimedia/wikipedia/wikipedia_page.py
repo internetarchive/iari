@@ -110,6 +110,7 @@ class WikipediaPage(BaseModel):
     def __check_and_upload_reference_item_to_wikicitations_if_missing__(
         self, reference: WikipediaPageReference
     ):
+        logger.debug("Checking and uploading page references")
         if reference is None:
             raise ValueError("reference was None")
         if config.use_cache is not None:
@@ -420,7 +421,10 @@ class WikipediaPage(BaseModel):
             wcdqid = self.wikicitations.prepare_and_upload_wikipedia_page_item(
                 wikipedia_page=self,
             )
-            self.cache.add_page(wikipedia_page=self, wcdqid=wcdqid)
+            if config.use_cache:
+                if wcdqid is None:
+                    raise ValueError("wcdqid was None")
+                self.cache.add_page(wikipedia_page=self, wcdqid=wcdqid)
         else:
             logger.info("This page has already been uploaded to WikiCitations")
 
