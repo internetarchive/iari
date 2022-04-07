@@ -74,6 +74,7 @@ class TestWikiCitations(TestCase):
         wppage.references = []
         wppage.references.append(reference)
         with self.assertRaises(ValueError):
+            wc.max_number_of_item_citations = 0
             item = wc.__prepare_new_wikipedia_page_item__(
                 wikipedia_page=wppage,
             )
@@ -107,7 +108,9 @@ class TestWikiCitations(TestCase):
         reference.wikicitations_qid = "Q1"
         wppage.references = []
         wppage.references.append(reference)
+        wppage.__generate_hash__()
         # with self.assertRaises(ValueError):
+        wc.max_number_of_item_citations = 0
         item = wc.__prepare_new_wikipedia_page_item__(
             wikipedia_page=wppage,
         )
