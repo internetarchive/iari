@@ -72,21 +72,27 @@ class WikiCitations(BaseModel):
         """Prepare the item citations and add a reference
         to in which revision it was found and the retrieval date
         Interpret max_number_of_item_citations = 0 as unlimited"""
+
+        def generate_citation():
+            citation = datatypes.Item(
+                prop_nr=WCDProperty.CITATIONS.value,
+                value=reference.wikicitations_qid,
+                references=self.claim_references,
+            )
+            claims.append(citation)
+
         claims = []
         number_of_added_reference_items = 0
         for reference in wikipedia_page.references:
             if reference.wikicitations_qid is not None:
-                if (
+                if self.max_number_of_item_citations == 0:
+                    generate_citation()
+                elif (
                     self.max_number_of_item_citations > 0
                     and number_of_added_reference_items
                     < self.max_number_of_item_citations
                 ):
-                    citation = datatypes.Item(
-                        prop_nr=WCDProperty.CITATIONS.value,
-                        value=reference.wikicitations_qid,
-                        references=self.claim_references,
-                    )
-                    claims.append(citation)
+                    generate_citation()
                     number_of_added_reference_items += 1
                 else:
                     logger.info(
