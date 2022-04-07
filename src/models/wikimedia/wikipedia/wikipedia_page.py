@@ -348,6 +348,8 @@ class WikipediaPage(BaseModel):
         return reference
 
     def extract_and_upload_to_wikicitations(self, max_number_of_item_citations: int):
+        """Extract the references and upload first
+        the references and then the page to WikiCitations"""
         self.__setup_wikicitations__()
         self.__generate_hash__()
         # extract references and create items for the missing ones first
