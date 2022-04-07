@@ -622,7 +622,7 @@ class WikiCitations(BaseModel):
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> WikipediaPageReference:
-        self.__prepare_reference_claims__()
+        self.__prepare_reference_claims__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
         )
