@@ -571,11 +571,11 @@ class WikiCitations(BaseModel):
         # pseudo code
         # for each page_reference in the page that
         claims = []
-        for reference in wikipedia_page.references:
-            if not reference.has_hash:
+        for page_reference in wikipedia_page.references:
+            if not page_reference.has_hash:
                 # generate string statements
                 claims.append(
-                    self.__prepare_string_citation__(page_reference=reference)
+                    self.__prepare_string_citation__(page_reference=page_reference)
                 )
         return claims
 
