@@ -5,7 +5,7 @@ from typing import Any, Optional, List
 from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
-from wikibaseintegrator.models import Claim, Qualifiers
+from wikibaseintegrator.models import Claim, Qualifiers, References
 
 import config
 from src import console
@@ -23,6 +23,11 @@ class WikiCitations(BaseModel):
     """This class models the WikiCitations Wikibase and handles all uploading to it
 
     We want to create items for all Wikipedia pages and references with a unique hash"""
+
+    claim_references: Optional[References]
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @staticmethod
     @validate_arguments
@@ -167,12 +172,11 @@ class WikiCitations(BaseModel):
             # exit()
         return item
 
-    @staticmethod
     @validate_arguments
-    def __prepare_reference_claim__(wikipedia_page: WikipediaPage) -> List[Claim]:
+    def __prepare_reference_claims__(self, wikipedia_page: WikipediaPage):
         """This reference claim contains the current revision id and the current date
         This enables us to track references over time in the graph using SPARQL."""
-        logger.info("Preparing reference claim")
+        logger.info("Preparing reference claims")
         # Prepare page_reference
         retrieved_date = datatypes.Time(
             prop_nr=WCDProperty.RETRIEVED_DATE.value,
@@ -189,7 +193,10 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.PAGE_REVISION_ID.value, value=wikipedia_page.revision_id
         )
         claims = [retrieved_date, revision_id]
-        return claims
+        self.claim_references = References()
+        for reference in claims:
+            logger.debug(f"Adding reference {reference}")
+            self.claim_references.add(reference)
 
     @staticmethod
     def __prepare_single_value_reference_claims__(
@@ -505,15 +512,11 @@ class WikiCitations(BaseModel):
         for qualifier in qualifiers:
             logger.debug(f"Adding qualifier {qualifier}")
             claim_qualifiers.add(qualifier)
-        references = self.__prepare_reference_claim__()
-        claim_references = References()
-        for reference in references:
-            logger.debug(f"Adding reference {reference}")
-            claim_references.add(reference)
         string_citation = datatypes.String(
             prop_nr=WCDProperty.STRING_CITATIONS.value,
             value=page_reference.template_name,
             qualifiers=claim_qualifiers,
+            references=self.claim_references,
         )
         return string_citation
 
@@ -585,6 +588,7 @@ class WikiCitations(BaseModel):
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> WikipediaPageReference:
+        self.__prepare_reference_claims__()
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
         )
@@ -599,6 +603,7 @@ class WikiCitations(BaseModel):
 
         if not isinstance(wikipedia_page, WikipediaPage):
             raise ValueError("did not get a WikipediaPage object")
+        self.__prepare_reference_claims__()
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wikipedia_page.wikicitations_qid = self.__upload_new_item__(item=item)
         return wikipedia_page
