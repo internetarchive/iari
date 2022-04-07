@@ -25,6 +25,7 @@ class WikiCitations(BaseModel):
     We want to create items for all Wikipedia pages and references with a unique hash"""
 
     @staticmethod
+    @validate_arguments
     def __prepare_authors__(
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
@@ -59,6 +60,7 @@ class WikiCitations(BaseModel):
         return authors
 
     @staticmethod
+    @validate_arguments
     def __prepare_citations__(wikipedia_page: WikipediaPage) -> Optional[List[Claim]]:
         # pseudo code
         # for each page_reference in the page
@@ -73,6 +75,7 @@ class WikiCitations(BaseModel):
         return claims
 
     @staticmethod
+    @validate_arguments
     def __prepare_editors__(
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
