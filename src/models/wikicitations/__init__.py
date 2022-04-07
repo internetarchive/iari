@@ -70,27 +70,6 @@ class WikiCitations(BaseModel):
             logger.info("Found no authors")
         return authors
 
-    @validate_arguments
-    def __prepare_item_citations__(
-        self, wikipedia_page: WikipediaPage
-    ) -> Optional[List[Claim]]:
-        """Prepare the item citations and add a reference
-        to in which revision it was found and the retrieval date
-        Interpret max_number_of_item_citations_to_upload = 0 as unlimited"""
-        logger.info("Preparing item citations")
-        claims = []
-        number_of_added_reference_items = 0
-        for reference in wikipedia_page.references:
-            if reference.wikicitations_qid is not None:
-                claims.append(
-                    datatypes.Item(
-                        prop_nr=WCDProperty.CITATIONS.value,
-                        value=reference.wikicitations_qid,
-                        references=self.reference_claim,
-                    )
-                )
-        return claims
-
     @staticmethod
     @validate_arguments
     def __prepare_editors__(
@@ -111,6 +90,27 @@ class WikiCitations(BaseModel):
         else:
             logger.info("Found no editors")
         return persons
+
+    @validate_arguments
+    def __prepare_item_citations__(
+        self, wikipedia_page: WikipediaPage
+    ) -> Optional[List[Claim]]:
+        """Prepare the item citations and add a reference
+        to in which revision it was found and the retrieval date
+        Interpret max_number_of_item_citations_to_upload = 0 as unlimited"""
+        logger.info("Preparing item citations")
+        claims = []
+        number_of_added_reference_items = 0
+        for reference in wikipedia_page.references:
+            if reference.wikicitations_qid is not None:
+                claims.append(
+                    datatypes.Item(
+                        prop_nr=WCDProperty.CITATIONS.value,
+                        value=reference.wikicitations_qid,
+                        references=self.reference_claim,
+                    )
+                )
+        return claims
 
     @validate_arguments
     def __prepare_new_reference_item__(
