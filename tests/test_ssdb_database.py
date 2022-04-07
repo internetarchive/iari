@@ -8,7 +8,7 @@ class TestSsdbDatabase(TestCase):
     def test_set():
         r = SsdbDatabase()
         r.connect()
-        r.set(key="test", value="test")
+        r.set_value(key="test", value="test")
         result = r.get_value("test").decode("UTF-8")
         print(result)
         assert result == "test"
