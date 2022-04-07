@@ -45,37 +45,37 @@ class WikiCitations(BaseModel):
         ) is not None:
             if author_object.given is not None:
                 given_name = datatypes.String(
-                    propnr=WCDProperty.GIVEN_NAME.value,
+                    prop_nr=WCDProperty.GIVEN_NAME.value,
                     value=author_object.given,
                 )
                 qualifiers.append(given_name)
             if author_object.surname is not None:
                 surname = datatypes.String(
-                    propnr=WCDProperty.FAMILY_NAME.value,
+                    prop_nr=WCDProperty.FAMILY_NAME.value,
                     value=author_object.surname,
                 )
                 qualifiers.append(surname)
             if author_object.number_in_sequence is not None:
                 number_in_sequence = datatypes.String(
-                    propnr=WCDProperty.SERIES_ORDINAL.value,
+                    prop_nr=WCDProperty.SERIES_ORDINAL.value,
                     value=str(author_object.number_in_sequence),
                 )
                 qualifiers.append(number_in_sequence)
             if author_object.orcid is not None:
                 orcid = datatypes.ExternalID(
-                    propnr=WCDProperty.ORCID.value,
+                    prop_nr=WCDProperty.ORCID.value,
                     value=author_object.orcid,
                 )
                 qualifiers.append(orcid)
             if author_object.link is not None:
                 link = datatypes.URL(
-                    propnr=WCDProperty.URL.value,
+                    prop_nr=WCDProperty.URL.value,
                     value=author_object.link,
                 )
                 qualifiers.append(link)
             if author_object.mask is not None:
                 mask = datatypes.String(
-                    propnr=WCDProperty.NAME_MASK.value,
+                    prop_nr=WCDProperty.NAME_MASK.value,
                     value=author_object.mask,
                 )
                 qualifiers.append(mask)
