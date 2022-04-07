@@ -496,7 +496,7 @@ class WikiCitations(BaseModel):
             )
         if page_reference.archive_url is not None:
             archive_url = datatypes.URL(
-                prop_nr=WCDProperty.URL.value,
+                prop_nr=WCDProperty.ARCHIVE_URL.value,
                 value=page_reference.url,
             )
         if page_reference.publication_date is not None:
