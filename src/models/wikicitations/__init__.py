@@ -157,6 +157,7 @@ class WikiCitations(BaseModel):
         self, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
         """This method converts a page_reference into a new WikiCitations item"""
+        logging.debug("__prepare_new_wikipedia_page_item__: Running")
         self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
@@ -645,6 +646,7 @@ class WikiCitations(BaseModel):
     def prepare_and_upload_wikipedia_page_item(
         self, wikipedia_page: Any, max_number_of_item_citations: int = 0
     ) -> WikipediaPage:
+        logging.debug("prepare_and_upload_wikipedia_page_item: Running")
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         if not isinstance(wikipedia_page, WikipediaPage):
