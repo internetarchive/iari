@@ -102,6 +102,7 @@ class WikiCitations(BaseModel):
         number_of_added_reference_items = 0
         for reference in wikipedia_page.references:
             if reference.wikicitations_qid is not None:
+                logger.debug("Appending to citations")
                 claims.append(
                     datatypes.Item(
                         prop_nr=WCDProperty.CITATIONS.value,
