@@ -64,17 +64,19 @@ class WikiCitations(BaseModel):
             logger.info("Found no authors")
         return authors
 
-    @staticmethod
     @validate_arguments
-    def __prepare_citations__(wikipedia_page: WikipediaPage) -> Optional[List[Claim]]:
-        # pseudo code
-        # for each page_reference in the page
+    def __prepare_citations__(
+        self, wikipedia_page: WikipediaPage
+    ) -> Optional[List[Claim]]:
+        """Prepare the item citations and add a reference
+        to in which revision it was found and the retrieval date"""
         claims = []
         for reference in wikipedia_page.references:
             if reference.wikicitations_qid is not None:
                 citation = datatypes.Item(
                     prop_nr=WCDProperty.CITATIONS.value,
                     value=reference.wikicitations_qid,
+                    references=self.claim_references,
                 )
                 claims.append(citation)
         return claims
