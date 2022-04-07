@@ -117,7 +117,7 @@ class WikipediaPage(BaseModel):
             wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
-                # reference.wikicitations_qid = wcdqid
+                reference.wikicitations_qid = wcdqid
             else:
                 if self.max_number_of_item_citations_to_upload is not None:
                     if (
