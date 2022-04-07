@@ -346,6 +346,17 @@ class WikiCitations(BaseModel):
         hash = datatypes.String(
             prop_nr=WCDProperty.HASH.value, value=wikipedia_page.md5hash
         )
+        last_update = datatypes.Time(
+            prop_nr=WCDProperty.LAST_UPDATE.value,
+            time=datetime.utcnow()  # Fetched today
+            .replace(tzinfo=timezone.utc)
+            .replace(
+                hour=0,
+                minute=0,
+                second=0,
+            )
+            .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+        )
         if wikipedia_page.page_id is None:
             raise ValueError("wikipedia_page.page_id was None")
         page_id = datatypes.String(
@@ -365,7 +376,7 @@ class WikiCitations(BaseModel):
             # FIXME avoid hardcoding here
             language="en",
         )
-        return [absolute_url, hash, page_id, published_in, title]
+        return [absolute_url, hash, last_update, page_id, published_in, title]
 
     @staticmethod
     def __prepare_string_authors__(page_reference: WikipediaPageReference):
