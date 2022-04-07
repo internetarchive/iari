@@ -151,7 +151,8 @@ class WikipediaPage(BaseModel):
         else:
             return True
 
-    def __extract_references__(self):
+    def __extract_and_parse_references__(self):
+        logger.info("Extracting references now")
         # if self.wikimedia_event is not None:
         #     # raise ValueError("wikimedia_event was None")
         #     self.__get_title_from_event__()
