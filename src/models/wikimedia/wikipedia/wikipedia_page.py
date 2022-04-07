@@ -132,6 +132,15 @@ class WikipediaPage(BaseModel):
                 self.__insert_in_cache__(reference=reference)
         return reference
 
+    def __page_has_already_been_uploaded__(self) -> bool:
+        if self.cache is None:
+            self.__setup_cache__()
+        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
+        if wcdqid is None:
+            return False
+        else:
+            return True
+
     def __extract_references__(self):
         # if self.wikimedia_event is not None:
         #     # raise ValueError("wikimedia_event was None")
