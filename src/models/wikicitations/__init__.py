@@ -232,6 +232,17 @@ class WikiCitations(BaseModel):
             )
         else:
             raise ValueError("no template name found")
+        retrieved_date = datatypes.Time(
+            prop_nr=WCDProperty.RETRIEVED_DATE.value,
+            time=datetime.utcnow()  # Fetched today
+            .replace(tzinfo=timezone.utc)
+            .replace(
+                hour=0,
+                minute=0,
+                second=0,
+            )
+            .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+        )
         # FIXME don't hardcode enWP
         source_wikipedia = datatypes.Item(
             prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
@@ -338,6 +349,7 @@ class WikiCitations(BaseModel):
             orcid,
             pmid,
             publication_date,
+            retrieved_date,
             source_wikipedia,
             template_name,
             title,
@@ -440,7 +452,6 @@ class WikiCitations(BaseModel):
     ) -> List[Claim]:
         """Here we prepare all statements we normally
         would put on a unique separate page_reference item"""
-        # TODO support more fields
         claims = []
         string_authors = self.__prepare_string_authors__(page_reference=page_reference)
         if string_authors is not None:
