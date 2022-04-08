@@ -33,7 +33,8 @@ class Person(BaseModel):
                 string += " " + self.surname
         else:
             string = self.name_string
-        return string
+        # We strip spaces to avoid a MWAPIError when a space appears in the beginning of the string
+        return string.lstrip()
 
 
 class EnglishWikipediaTemplatePerson(Person):
