@@ -87,7 +87,7 @@ class WikiCitations(BaseModel):
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         authors = []
-        if page_reference.authors is not None and len(page_reference.authors) > 0:
+        if page_reference.authors is not None and len(page_reference.authors_list) > 0:
             logger.debug("Preparing authors")
             page_reference.authors: List[Person]  # type: ignore
             for author_object in page_reference.authors:
@@ -473,7 +473,7 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_authors__(page_reference: WikipediaPageReference):
         authors = []
-        if page_reference.authors is not None and len(page_reference.authors) > 0:
+        if page_reference.authors is not None and len(page_reference.authors_list) > 0:
             for author in page_reference.authors:
                 author = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
@@ -484,6 +484,12 @@ class WikiCitations(BaseModel):
             author = datatypes.String(
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
                 value=page_reference.vauthors,
+            )
+            authors.append(author)
+        if page_reference.authors is not None:
+            author = datatypes.String(
+                prop_nr=WCDProperty.LUMPED_AUTHORS.value,
+                value=page_reference.authors,
             )
             authors.append(author)
         if len(authors) == 0:
@@ -657,10 +663,10 @@ class WikiCitations(BaseModel):
     ) -> Optional[List[Claim]]:
         persons = []
         if (
-            page_reference.translators is not None
-            and len(page_reference.translators) > 0
+            page_reference.translators_list is not None
+            and len(page_reference.translators_list) > 0
         ):
-            for person in page_reference.translators:
+            for person in page_reference.translators_list:
                 person = datatypes.String(
                     prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
                     value=person.author_name_string,
@@ -669,7 +675,7 @@ class WikiCitations(BaseModel):
         else:
             persons = None
         if persons is not None:
-            logger.info(f"Found {len(persons)} translators")
+            logger.info(f"Found {len(persons)} translators_list")
         else:
             logger.info("Found no translators")
         return persons

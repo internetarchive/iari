@@ -391,7 +391,8 @@ class WikipediaPageReference(BaseModel):
     contribution: Optional[str]
     vauthors: Optional[
         str
-    ]  # this appears in cite journal and is used to specify authors using the Vancouver system
+    ]  # this appears in cite journal and is used to specify authors_list using the Vancouver system
+    authors: Optional[str]
 
     @property
     def has_hash(self) -> bool:
@@ -773,7 +774,7 @@ class WikipediaPageReference(BaseModel):
             and not callable(getattr(self, a))
             and getattr(self, a) is not None
         ]
-        self.authors = self.__parse_known_role_persons__(
+        self.authors_list = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.AUTHOR
         )
         self.editors = self.__parse_known_role_persons__(
@@ -782,13 +783,13 @@ class WikipediaPageReference(BaseModel):
         self.hosts = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.HOST
         )
-        self.interviewers = self.__parse_known_role_persons__(
+        self.interviewers_list = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.INTERVIEWER
         )
         self.persons_without_role = self.__parse_roleless_persons__(
             attributes=attributes
         )
-        self.translators = self.__parse_known_role_persons__(
+        self.translators_list = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
         )
 
@@ -987,6 +988,7 @@ class WikipediaPageReferenceSchema(Schema):
             "author5_last",
             "author5_link",
             "vauthors",
+            "authors",
             # dates,
             "access_date",
             "archive_date",
