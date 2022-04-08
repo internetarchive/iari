@@ -370,10 +370,18 @@ class WikipediaPageReference(BaseModel):
     first8: Optional[str]
     first9: Optional[str]
     first10: Optional[str]
+    first11: Optional[str]
+    first12: Optional[str]
+    first13: Optional[str]
+    first14: Optional[str]
     last7: Optional[str]
     last8: Optional[str]
     last9: Optional[str]
     last10: Optional[str]
+    last11: Optional[str]
+    last12: Optional[str]
+    last13: Optional[str]
+    last14: Optional[str]
     message_id: Optional[str]
     newsgroup: Optional[str]
     archive_format: Optional[str]
@@ -551,7 +559,7 @@ class WikipediaPageReference(BaseModel):
                 role=role,
                 search_string=search_string,
             )
-            for number in range(1, 12)
+            for number in range(1, 14)
             if self.__get_numbered_person__(
                 attributes=attributes,
                 number=number,
@@ -943,12 +951,16 @@ class WikipediaPageReferenceSchema(Schema):
             "first10",
             "first11",
             "first12",
+            "first13",
+            "first14",
             "last7",
             "last8",
             "last9",
             "last10",
             "last11",
             "last12",
+            "last13",
+            "last14",
             "message_id",
             "newsgroup",
             "archive_format",
