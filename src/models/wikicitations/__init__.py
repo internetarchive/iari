@@ -87,10 +87,13 @@ class WikiCitations(BaseModel):
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         authors = []
-        if page_reference.authors is not None and len(page_reference.authors_list) > 0:
+        if (
+            page_reference.authors_list is not None
+            and len(page_reference.authors_list) > 0
+        ):
             logger.debug("Preparing authors")
-            page_reference.authors: List[Person]  # type: ignore
-            for author_object in page_reference.authors:
+            page_reference.authors_list: List[Person]  # type: ignore
+            for author_object in page_reference.authors_list:
                 qualifiers = self.__prepare_person_qualifiers__(
                     author_object=author_object
                 )
