@@ -23,7 +23,7 @@ class Person(BaseModel):
     surname: Optional[str]
 
     @property
-    def author_name_string(self) -> str:
+    def author_name_string(self) -> Optional[str]:
         """We hardcode western cultural name ordering pattern here with the order "givenname surname" """
         if self.name_string is None:
             string = ""
@@ -34,7 +34,11 @@ class Person(BaseModel):
         else:
             string = self.name_string
         # We strip spaces to avoid a MWAPIError when a space appears in the beginning of the string
-        return string.lstrip()
+        string = string.lstrip()
+        if len(string) > 0:
+            return string
+        else:
+            return None
 
 
 class EnglishWikipediaTemplatePerson(Person):
