@@ -479,7 +479,10 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_authors__(page_reference: WikipediaPageReference):
         authors = []
-        if page_reference.authors is not None and len(page_reference.authors_list) > 0:
+        if (
+            page_reference.authors_list is not None
+            and len(page_reference.authors_list) > 0
+        ):
             for author in page_reference.authors:
                 author = datatypes.String(
                     prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
