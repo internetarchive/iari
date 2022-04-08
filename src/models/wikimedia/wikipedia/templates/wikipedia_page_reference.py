@@ -389,6 +389,9 @@ class WikipediaPageReference(BaseModel):
     interviewer: Optional[str]
     medium: Optional[str]
     contribution: Optional[str]
+    vauthors: Optional[
+        str
+    ]  # this appears in cite journal and is used to specify authors using the Vancouver system
 
     @property
     def has_hash(self) -> bool:
@@ -983,6 +986,7 @@ class WikipediaPageReferenceSchema(Schema):
             "author5_first",
             "author5_last",
             "author5_link",
+            "vauthors",
             # dates,
             "access_date",
             "archive_date",

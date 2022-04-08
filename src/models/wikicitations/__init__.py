@@ -316,6 +316,7 @@ class WikiCitations(BaseModel):
         doi = None
         isbn_10 = None
         isbn_13 = None
+        lumped_authors = None
         orcid = None
         pmid = None
         publication_date = None
@@ -350,6 +351,11 @@ class WikiCitations(BaseModel):
             isbn_13 = datatypes.ExternalID(
                 prop_nr=WCDProperty.ISBN_13.value,
                 value=page_reference.isbn_13,
+            )
+        if page_reference.vauthors is not None:
+            lumped_authors = datatypes.String(
+                prop_nr=WCDProperty.LUMPED_AUTHORS.value,
+                value=page_reference.vauthors,
             )
         if page_reference.orcid is not None:
             orcid = datatypes.ExternalID(
@@ -404,6 +410,7 @@ class WikiCitations(BaseModel):
             instance_of,
             isbn_10,
             isbn_13,
+            lumped_authors,
             orcid,
             pmid,
             publication_date,
@@ -473,7 +480,13 @@ class WikiCitations(BaseModel):
                     value=author.author_name_string,
                 )
                 authors.append(author)
-        else:
+        if page_reference.vauthors is not None:
+            author = datatypes.String(
+                prop_nr=WCDProperty.LUMPED_AUTHORS.value,
+                value=page_reference.vauthors,
+            )
+            authors.append(author)
+        if len(authors) == 0:
             authors = None
         return authors
 

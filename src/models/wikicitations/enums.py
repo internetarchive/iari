@@ -30,6 +30,7 @@ class WCDProperty(Enum):
     ISBN_13 = "P32"
     ISSUE = "P24"
     LAST_UPDATE = "P43"
+    LUMPED_AUTHORS = "P46"
     MEDIAWIKI_PAGE_ID = "P18"
     NAME_MASK = "P45"
     ORCID = "P31"
