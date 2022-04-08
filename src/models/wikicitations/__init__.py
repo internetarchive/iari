@@ -136,8 +136,11 @@ class WikiCitations(BaseModel):
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         persons = []
-        if page_reference.editors is not None and len(page_reference.editors) > 0:
-            for person in page_reference.editors:
+        if (
+            page_reference.editors_list is not None
+            and len(page_reference.editors_list) > 0
+        ):
+            for person in page_reference.editors_list:
                 person = datatypes.String(
                     prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
                     value=person.author_name_string,

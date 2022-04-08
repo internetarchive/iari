@@ -38,7 +38,7 @@ class WikipediaPageReference(BaseModel):
     authors_list: Optional[List[Person]]
     editors_list: Optional[List[Person]]
     first_lasts: Optional[List]
-    hosts: Optional[List[Person]]
+    hosts_list: Optional[List[Person]]
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
     isbn_13: Optional[str]
@@ -777,10 +777,10 @@ class WikipediaPageReference(BaseModel):
         self.authors_list = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.AUTHOR
         )
-        self.editors = self.__parse_known_role_persons__(
+        self.editors_list = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.EDITOR
         )
-        self.hosts = self.__parse_known_role_persons__(
+        self.hosts_list = self.__parse_known_role_persons__(
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.HOST
         )
         self.interviewers_list = self.__parse_known_role_persons__(
