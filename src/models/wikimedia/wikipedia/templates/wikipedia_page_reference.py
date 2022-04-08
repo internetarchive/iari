@@ -35,18 +35,18 @@ class WikipediaPageReference(BaseModel):
     Support date ranges like "May-June 2011"? See https://stackoverflow.com/questions/10340029/
     """
 
-    authors: Optional[List[Person]]
-    editors: Optional[List[Person]]
+    authors_list: Optional[List[Person]]
+    editors_list: Optional[List[Person]]
     first_lasts: Optional[List]
     hosts: Optional[List[Person]]
-    interviewers: Optional[List[Person]]
+    interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
     isbn_13: Optional[str]
     md5hash: Optional[str]
     numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
     template_name: str  # We use this to keep track of which template the information came from
-    translators: Optional[List[Person]]
+    translators_list: Optional[List[Person]]
     persons_without_role: Optional[List[Person]]
     wikicitations_qid: Optional[str]
     wikidata_qid: Optional[str]
