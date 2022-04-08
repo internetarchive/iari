@@ -34,162 +34,81 @@ class WikiCitations(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    @validate_arguments
-    def __prepare_person_qualifiers__(self, person_object: Person):
-        qualifiers = []
-        if (
-            person_object.given
-            or person_object.given
-            or person_object.orcid
-            or person_object.number_in_sequence
-        ) is not None:
-            if person_object.given is not None:
-                given_name = datatypes.String(
-                    prop_nr=WCDProperty.GIVEN_NAME.value,
-                    value=person_object.given,
-                )
-                qualifiers.append(given_name)
-            if person_object.surname is not None:
-                surname = datatypes.String(
-                    prop_nr=WCDProperty.FAMILY_NAME.value,
-                    value=person_object.surname,
-                )
-                qualifiers.append(surname)
-            if person_object.number_in_sequence is not None:
-                number_in_sequence = datatypes.Quantity(
-                    prop_nr=WCDProperty.SERIES_ORDINAL.value,
-                    amount=person_object.number_in_sequence,
-                )
-                qualifiers.append(number_in_sequence)
-            if person_object.orcid is not None:
-                orcid = datatypes.ExternalID(
-                    prop_nr=WCDProperty.ORCID.value,
-                    value=person_object.orcid,
-                )
-                qualifiers.append(orcid)
-            if person_object.link is not None:
-                link = datatypes.URL(
-                    prop_nr=WCDProperty.URL.value,
-                    value=person_object.link,
-                )
-                qualifiers.append(link)
-            if person_object.mask is not None:
-                mask = datatypes.String(
-                    prop_nr=WCDProperty.NAME_MASK.value,
-                    value=person_object.mask,
-                )
-                qualifiers.append(mask)
-        return qualifiers
-
-    # def __prepare_person_claims__(
-    #     self,
-    #     page_reference: WikipediaPageReference,
-    #     use_list: List[Person],
-    #     property: WCDProperty,
-    # ):
-    #     """Prepare claims using the specified property"""
-
-    @validate_arguments
-    def __prepare_all_person_claims__(
-        self, page_reference: WikipediaPageReference
-    ) -> List[Claim]:
-        persons = []
-        # TODO support hosts and interviewers also
-        authors = self.__prepare_authors__(page_reference=page_reference)
-        if authors is not None:
-            persons.extend(authors)
-        editors = self.__prepare_editors__(page_reference=page_reference)
-        if editors is not None:
-            persons.extend(editors)
-        # TODO support hosts, but we are missing a property
-        # hosts = self.__prepare_person_claims__(
-        #     page_reference=page_reference,
-        #     use_list=page_reference.hosts_list,
-        #     property=WCDProperty,
-        # )
-        # if hosts is not None:
-        #     persons.extend(hosts)
-        translators = self.__prepare_translators__(page_reference=page_reference)
-        if translators is not None:
-            persons.extend(translators)
-        return persons
-
-    @validate_arguments
-    def __prepare_authors__(
+    def __prepare_person_claims__(
         self,
-        page_reference: WikipediaPageReference,
-    ) -> Optional[List[Claim]]:
+        use_list: List[Person],
+        property: WCDProperty,
+    ):
+        """Prepare claims using the specified property and list of person objects"""
         persons = []
-        if (
-            page_reference.authors_list is not None
-            and len(page_reference.authors_list) > 0
-        ):
-            logger.debug("Preparing authors")
-            page_reference.authors_list: List[Person]  # type: ignore
-            for person_object in page_reference.authors_list:
+        if use_list is not None and len(use_list) > 0:
+            logger.debug(f"Preparing {property.name}")
+            for person_object in use_list:
                 if person_object.author_name_string is not None:
                     qualifiers = self.__prepare_person_qualifiers__(
                         person_object=person_object
                     )
                     if len(qualifiers) > 0:
                         person = datatypes.String(
-                            prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                            prop_nr=property.value,
                             value=person_object.author_name_string,
                             qualifiers=qualifiers,
                         )
                     else:
                         person = datatypes.String(
-                            prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                            prop_nr=property.value,
                             value=person_object.author_name_string,
                         )
                     persons.append(person)
-        elif (
+        return persons
+
+    @validate_arguments
+    def __prepare_all_person_claims__(
+        self, page_reference: WikipediaPageReference
+    ) -> List[Claim]:
+        persons = []
+        authors = self.__prepare_person_claims__(
+            use_list=page_reference.authors_list,
+            property=WCDProperty.AUTHOR_NAME_STRING,
+        )
+        if authors is not None:
+            persons.extend(authors)
+        if (
             config.assume_persons_without_role_are_authors
             and page_reference.persons_without_role is not None
             and len(page_reference.persons_without_role) > 0
         ):
             logger.info("Assuming persons without role are authors")
-            for person_object in page_reference.persons_without_role:
-                if person_object.author_name_string is not None:
-                    qualifiers = self.__prepare_person_qualifiers__(
-                        person_object=person_object
-                    )
-                    person = datatypes.String(
-                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                        value=person_object.author_name_string,
-                        qualifiers=qualifiers,
-                    )
-                    persons.append(person)
-        else:
-            persons = None
-        if persons is not None:
-            logger.info(f"Found {len(persons)} authors")
-        else:
-            logger.info("Found no authors")
-        return persons
-
-    @staticmethod
-    @validate_arguments
-    def __prepare_editors__(
-        page_reference: WikipediaPageReference,
-    ) -> Optional[List[Claim]]:
-        persons = []
-        if (
-            page_reference.editors_list is not None
-            and len(page_reference.editors_list) > 0
-        ):
-            for person in page_reference.editors_list:
-                person = datatypes.String(
-                    prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
-                    value=person.author_name_string,
-                )
-                persons.append(person)
-        else:
-            persons = None
-        if persons is not None:
-            logger.info(f"Found {len(persons)} editors")
-        else:
-            logger.info("Found no editors")
+        no_role_authors = self.__prepare_person_claims__(
+            use_list=page_reference.persons_without_role,
+            property=WCDProperty.AUTHOR_NAME_STRING,
+        )
+        if no_role_authors is not None:
+            persons.extend(no_role_authors)
+        editors = self.__prepare_person_claims__(
+            use_list=page_reference.interviewers_list,
+            property=WCDProperty.EDITOR_NAME_STRING,
+        )
+        if editors is not None:
+            persons.extend(editors)
+        hosts = self.__prepare_person_claims__(
+            use_list=page_reference.hosts_list,
+            property=WCDProperty.HOST_STRING,
+        )
+        if hosts is not None:
+            persons.extend(hosts)
+        interviewers = self.__prepare_person_claims__(
+            use_list=page_reference.interviewers_list,
+            property=WCDProperty.INTERVIEWER_STRING,
+        )
+        if interviewers is not None:
+            persons.extend(interviewers)
+        translators = self.__prepare_person_claims__(
+            use_list=page_reference.interviewers_list,
+            property=WCDProperty.INTERVIEWER_STRING,
+        )
+        if translators is not None:
+            persons.extend(translators)
         return persons
 
     @validate_arguments
@@ -276,6 +195,53 @@ class WikiCitations(BaseModel):
             print(item.get_json())
             # exit()
         return item
+
+    @validate_arguments
+    def __prepare_person_qualifiers__(self, person_object: Person):
+        qualifiers = []
+        if (
+            person_object.given
+            or person_object.given
+            or person_object.orcid
+            or person_object.number_in_sequence
+        ) is not None:
+            if person_object.given is not None:
+                given_name = datatypes.String(
+                    prop_nr=WCDProperty.GIVEN_NAME.value,
+                    value=person_object.given,
+                )
+                qualifiers.append(given_name)
+            if person_object.surname is not None:
+                surname = datatypes.String(
+                    prop_nr=WCDProperty.FAMILY_NAME.value,
+                    value=person_object.surname,
+                )
+                qualifiers.append(surname)
+            if person_object.number_in_sequence is not None:
+                number_in_sequence = datatypes.Quantity(
+                    prop_nr=WCDProperty.SERIES_ORDINAL.value,
+                    amount=person_object.number_in_sequence,
+                )
+                qualifiers.append(number_in_sequence)
+            if person_object.orcid is not None:
+                orcid = datatypes.ExternalID(
+                    prop_nr=WCDProperty.ORCID.value,
+                    value=person_object.orcid,
+                )
+                qualifiers.append(orcid)
+            if person_object.link is not None:
+                link = datatypes.URL(
+                    prop_nr=WCDProperty.URL.value,
+                    value=person_object.link,
+                )
+                qualifiers.append(link)
+            if person_object.mask is not None:
+                mask = datatypes.String(
+                    prop_nr=WCDProperty.NAME_MASK.value,
+                    value=person_object.mask,
+                )
+                qualifiers.append(mask)
+        return qualifiers
 
     @validate_arguments
     def __prepare_reference_claim__(self, wikipedia_page: WikipediaPage):
@@ -701,30 +667,6 @@ class WikiCitations(BaseModel):
                     self.__prepare_string_citation__(page_reference=page_reference)
                 )
         return claims
-
-    @staticmethod
-    def __prepare_translators__(
-        page_reference: WikipediaPageReference,
-    ) -> Optional[List[Claim]]:
-        persons = []
-        if (
-            page_reference.translators_list is not None
-            and len(page_reference.translators_list) > 0
-        ):
-            for person in page_reference.translators_list:
-                if person.author_name_string is not None:
-                    person = datatypes.String(
-                        prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
-                        value=person.author_name_string,
-                    )
-                    persons.append(person)
-        else:
-            persons = None
-        if persons is not None:
-            logger.info(f"Found {len(persons)} translators_list")
-        else:
-            logger.info("Found no translators")
-        return persons
 
     @staticmethod
     def __setup_wbi__():
