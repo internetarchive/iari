@@ -192,7 +192,7 @@ class WikiCitations(BaseModel):
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
         )
         # Prepare claims
-        # First prepare the page_reference needed in other claims
+        # TODO support hosts and interviewers also
         authors = self.__prepare_authors__(page_reference=page_reference)
         if authors is not None:
             item.add_claims(authors)
