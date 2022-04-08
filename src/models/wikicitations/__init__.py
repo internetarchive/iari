@@ -510,7 +510,7 @@ class WikiCitations(BaseModel):
             page_reference.authors_list is not None
             and len(page_reference.authors_list) > 0
         ):
-            for author in page_reference.authors:
+            for author in page_reference.authors_list:
                 if author.author_name_string is not None:
                     author = datatypes.String(
                         prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
