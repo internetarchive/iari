@@ -35,80 +35,114 @@ class WikiCitations(BaseModel):
         arbitrary_types_allowed = True
 
     @validate_arguments
-    def __prepare_person_qualifiers__(self, author_object: Person):
+    def __prepare_person_qualifiers__(self, person_object: Person):
         qualifiers = []
         if (
-            author_object.given
-            or author_object.given
-            or author_object.orcid
-            or author_object.number_in_sequence
+            person_object.given
+            or person_object.given
+            or person_object.orcid
+            or person_object.number_in_sequence
         ) is not None:
-            if author_object.given is not None:
+            if person_object.given is not None:
                 given_name = datatypes.String(
                     prop_nr=WCDProperty.GIVEN_NAME.value,
-                    value=author_object.given,
+                    value=person_object.given,
                 )
                 qualifiers.append(given_name)
-            if author_object.surname is not None:
+            if person_object.surname is not None:
                 surname = datatypes.String(
                     prop_nr=WCDProperty.FAMILY_NAME.value,
-                    value=author_object.surname,
+                    value=person_object.surname,
                 )
                 qualifiers.append(surname)
-            if author_object.number_in_sequence is not None:
+            if person_object.number_in_sequence is not None:
                 number_in_sequence = datatypes.Quantity(
                     prop_nr=WCDProperty.SERIES_ORDINAL.value,
-                    amount=author_object.number_in_sequence,
+                    amount=person_object.number_in_sequence,
                 )
                 qualifiers.append(number_in_sequence)
-            if author_object.orcid is not None:
+            if person_object.orcid is not None:
                 orcid = datatypes.ExternalID(
                     prop_nr=WCDProperty.ORCID.value,
-                    value=author_object.orcid,
+                    value=person_object.orcid,
                 )
                 qualifiers.append(orcid)
-            if author_object.link is not None:
+            if person_object.link is not None:
                 link = datatypes.URL(
                     prop_nr=WCDProperty.URL.value,
-                    value=author_object.link,
+                    value=person_object.link,
                 )
                 qualifiers.append(link)
-            if author_object.mask is not None:
+            if person_object.mask is not None:
                 mask = datatypes.String(
                     prop_nr=WCDProperty.NAME_MASK.value,
-                    value=author_object.mask,
+                    value=person_object.mask,
                 )
                 qualifiers.append(mask)
         return qualifiers
+
+    # def __prepare_person_claims__(
+    #     self,
+    #     page_reference: WikipediaPageReference,
+    #     use_list: List[Person],
+    #     property: WCDProperty,
+    # ):
+    #     """Prepare claims using the specified property"""
+
+    @validate_arguments
+    def __prepare_all_person_claims__(
+        self, page_reference: WikipediaPageReference
+    ) -> List[Claim]:
+        persons = []
+        # TODO support hosts and interviewers also
+        authors = self.__prepare_authors__(page_reference=page_reference)
+        if authors is not None:
+            persons.extend(authors)
+        editors = self.__prepare_editors__(page_reference=page_reference)
+        if editors is not None:
+            persons.extend(editors)
+        # TODO support hosts, but we are missing a property
+        # hosts = self.__prepare_person_claims__(
+        #     page_reference=page_reference,
+        #     use_list=page_reference.hosts_list,
+        #     property=WCDProperty,
+        # )
+        # if hosts is not None:
+        #     persons.extend(hosts)
+        translators = self.__prepare_translators__(page_reference=page_reference)
+        if translators is not None:
+            persons.extend(translators)
+        return persons
 
     @validate_arguments
     def __prepare_authors__(
         self,
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
-        authors = []
+        persons = []
         if (
             page_reference.authors_list is not None
             and len(page_reference.authors_list) > 0
         ):
             logger.debug("Preparing authors")
             page_reference.authors_list: List[Person]  # type: ignore
-            for author_object in page_reference.authors_list:
-                qualifiers = self.__prepare_person_qualifiers__(
-                    author_object=author_object
-                )
-                if len(qualifiers) > 0:
-                    author = datatypes.String(
-                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                        value=author_object.name_string,
-                        qualifiers=qualifiers,
+            for person_object in page_reference.authors_list:
+                if person_object.author_name_string is not None:
+                    qualifiers = self.__prepare_person_qualifiers__(
+                        person_object=person_object
                     )
-                else:
-                    author = datatypes.String(
-                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                        value=author_object.name_string,
-                    )
-                authors.append(author)
+                    if len(qualifiers) > 0:
+                        person = datatypes.String(
+                            prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                            value=person_object.author_name_string,
+                            qualifiers=qualifiers,
+                        )
+                    else:
+                        person = datatypes.String(
+                            prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                            value=person_object.author_name_string,
+                        )
+                    persons.append(person)
         elif (
             config.assume_persons_without_role_are_authors
             and page_reference.persons_without_role is not None
@@ -116,22 +150,23 @@ class WikiCitations(BaseModel):
         ):
             logger.info("Assuming persons without role are authors")
             for person_object in page_reference.persons_without_role:
-                qualifiers = self.__prepare_person_qualifiers__(
-                    author_object=person_object
-                )
-                person = datatypes.String(
-                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                    value=person_object.author_name_string,
-                    qualifiers=qualifiers,
-                )
-                authors.append(person)
+                if person_object.author_name_string is not None:
+                    qualifiers = self.__prepare_person_qualifiers__(
+                        person_object=person_object
+                    )
+                    person = datatypes.String(
+                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                        value=person_object.author_name_string,
+                        qualifiers=qualifiers,
+                    )
+                    persons.append(person)
         else:
-            authors = None
-        if authors is not None:
-            logger.info(f"Found {len(authors)} authors")
+            persons = None
+        if persons is not None:
+            logger.info(f"Found {len(persons)} authors")
         else:
             logger.info("Found no authors")
-        return authors
+        return persons
 
     @staticmethod
     @validate_arguments
@@ -191,17 +226,9 @@ class WikiCitations(BaseModel):
         item.descriptions.set(
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
         )
-        # Prepare claims
-        # TODO support hosts and interviewers also
-        authors = self.__prepare_authors__(page_reference=page_reference)
-        if authors is not None:
-            item.add_claims(authors)
-        editors = self.__prepare_editors__(page_reference=page_reference)
-        if editors is not None:
-            item.add_claims(editors)
-        translators = self.__prepare_translators__(page_reference=page_reference)
-        if translators is not None:
-            item.add_claims(translators)
+        persons = self.__prepare_all_person_claims__(page_reference=page_reference)
+        if len(persons) > 0:
+            item.add_claims(persons)
         item.add_claims(
             self.__prepare_single_value_reference_claims__(
                 page_reference=page_reference
@@ -484,11 +511,12 @@ class WikiCitations(BaseModel):
             and len(page_reference.authors_list) > 0
         ):
             for author in page_reference.authors:
-                author = datatypes.String(
-                    prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                    value=author.author_name_string,
-                )
-                authors.append(author)
+                if author.author_name_string is not None:
+                    author = datatypes.String(
+                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
+                        value=author.author_name_string,
+                    )
+                    authors.append(author)
         if page_reference.vauthors is not None:
             author = datatypes.String(
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
@@ -508,13 +536,17 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_editors__(page_reference: WikipediaPageReference):
         persons = []
-        if page_reference.editors is not None and len(page_reference.editors) > 0:
-            for person in page_reference.editors:
-                person = datatypes.String(
-                    prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
-                    value=person.name_string,
-                )
-                persons.append(person)
+        if (
+            page_reference.editors_list is not None
+            and len(page_reference.editors_list) > 0
+        ):
+            for person in page_reference.editors_list:
+                if person.author_name_string is not None:
+                    person = datatypes.String(
+                        prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
+                        value=person.author_name_string,
+                    )
+                    persons.append(person)
         else:
             persons = None
         return persons
@@ -522,13 +554,17 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_translators__(page_reference: WikipediaPageReference):
         persons = []
-        if page_reference.editors is not None and len(page_reference.editors) > 0:
-            for person in page_reference.editors:
-                person = datatypes.String(
-                    prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
-                    value=person.name_string,
-                )
-                persons.append(person)
+        if (
+            page_reference.translators_list is not None
+            and len(page_reference.translators_list) > 0
+        ):
+            for person in page_reference.translators_list:
+                if person.author_name_string is not None:
+                    person = datatypes.String(
+                        prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
+                        value=person.author_name_string,
+                    )
+                    persons.append(person)
         else:
             persons = None
         return persons
@@ -676,11 +712,12 @@ class WikiCitations(BaseModel):
             and len(page_reference.translators_list) > 0
         ):
             for person in page_reference.translators_list:
-                person = datatypes.String(
-                    prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
-                    value=person.author_name_string,
-                )
-                persons.append(person)
+                if person.author_name_string is not None:
+                    person = datatypes.String(
+                        prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
+                        value=person.author_name_string,
+                    )
+                    persons.append(person)
         else:
             persons = None
         if persons is not None:
