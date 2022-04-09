@@ -31,10 +31,7 @@ class TestCache(TestCase):
         bot.get_page_by_title(
             title="!Action Pact!",
         )
-        [
-            page.__parse_templates__(check_and_upload_to_cache=False)
-            for page in bot.pages
-        ]
+        [page.__parse_templates__() for page in bot.pages]
         bot.print_statistics()
         pages = [page for page in bot.pages]
         references: List[WikipediaPageReference] = []
@@ -45,11 +42,10 @@ class TestCache(TestCase):
         if len(hashed_references) > 0:
             logger.info(f"found {len(hashed_references)} hashed references")
             reference = hashed_references[0]
-            reference.wikicitations_qid = "test"
             console.print(reference)
             cache = Cache()
             cache.connect()
-            cache.add_reference(reference=reference)
+            cache.add_reference(reference=reference, wcdqid="test")
             check = cache.check_reference_and_get_wikicitations_qid(reference=reference)
             print(f"check:{check}")
             # assert check is not None

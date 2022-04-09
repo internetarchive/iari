@@ -3,6 +3,7 @@ from typing import List
 from unittest import TestCase
 
 from wikibaseintegrator.models import Claim
+from wikibaseintegrator.wbi_exceptions import MWApiError
 
 import config
 from src import console
@@ -149,10 +150,11 @@ class TestWikiCitations(TestCase):
         wppage.references = []
         wppage.references.append(reference)
         # with self.assertRaises(ValueError):
-        wcdqid = wc.prepare_and_upload_wikipedia_page_item(
-            wikipedia_page=wppage,
-        )
-        console.print(wcdqid)
+        with self.assertRaises(MWApiError):
+            wcdqid = wc.prepare_and_upload_wikipedia_page_item(
+                wikipedia_page=wppage,
+            )
+        # console.print(wcdqid)
 
     # def test_P19_claims(self):
     #     site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
