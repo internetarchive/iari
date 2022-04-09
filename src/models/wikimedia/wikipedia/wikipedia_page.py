@@ -10,7 +10,9 @@ from pydantic import BaseModel, validate_arguments
 from pywikibot import Page, Site
 
 import config
-from src import WikimediaSite, Cache
+from src.models.wikicitations.enums import WCDItem
+from src.models.cache import Cache
+from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
 )
@@ -25,17 +27,15 @@ class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
     cache: Optional[Cache]
-    language_code: str = "en"
+    language_code: str
+    language_wcditem: WCDItem
     max_number_of_item_citations_to_upload: Optional[int]
-    uploaded_item_citations: int = 0
     md5hash: Optional[str]
-    # number_of_references_without_a_hash: Optional[int]
-    # percent_of_references_missing_a_hash: Optional[int]
     percent_of_references_with_a_hash: Optional[int]
     pywikibot_page: Optional[Page]
     pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
-    # references_without_hashes: Optional[List[WikipediaPageReference]]
+    uploaded_item_citations: int = 0
     wikicitations: Optional[Any]  # WikiCitaitons
     wikicitations_qid: Optional[str]
     wikimedia_event: Optional[
@@ -356,7 +356,9 @@ class WikipediaPage(BaseModel):
     def __setup_wikicitations__(self):
         from src.models.wikicitations import WikiCitations
 
-        self.wikicitations = WikiCitations()
+        self.wikicitations = WikiCitations(
+            language_code=self.language_code, language_wcditem=self.language_wcditem
+        )
 
     @validate_arguments
     def __upload_reference_to_wikicitations__(

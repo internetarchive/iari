@@ -6,7 +6,7 @@ from wikibaseintegrator.models import Claim
 from wikibaseintegrator.wbi_exceptions import MWApiError
 
 import config
-from src import console
+from src import console, WCDItem
 from src.models.wikicitations import WCDProperty
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
@@ -21,8 +21,12 @@ class TestWikiCitations(TestCase):
     def test_prepare_new_reference_item(self):
         from src.models.wikicitations import WikiCitations
 
-        wc = WikiCitations()
-        wppage = WikipediaPage()
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
             **{
@@ -52,8 +56,12 @@ class TestWikiCitations(TestCase):
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
         from src.models.wikicitations import WikiCitations
 
-        wc = WikiCitations()
-        wppage = WikipediaPage()
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
             **{
@@ -86,8 +94,12 @@ class TestWikiCitations(TestCase):
     def test_prepare_new_wikipedia_page_item_valid_qid(self):
         from src.models.wikicitations import WikiCitations
 
-        wc = WikiCitations()
-        wppage = WikipediaPage()
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         reference = EnglishWikipediaPageReference(
@@ -124,8 +136,12 @@ class TestWikiCitations(TestCase):
     def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
         from src.models.wikicitations import WikiCitations
 
-        wc = WikiCitations()
-        wppage = WikipediaPage()
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -151,7 +167,7 @@ class TestWikiCitations(TestCase):
         wppage.references.append(reference)
         # with self.assertRaises(ValueError):
         with self.assertRaises(MWApiError):
-            wcdqid = wc.prepare_and_upload_wikipedia_page_item(
+            wc.prepare_and_upload_wikipedia_page_item(
                 wikipedia_page=wppage,
             )
         # console.print(wcdqid)

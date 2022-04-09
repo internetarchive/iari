@@ -27,8 +27,12 @@ class WikiCitations(BaseModel):
     Terminology:
     page_reference is a reference that appear in a Wikipedia page
     reference_claim is a datastructure from WBI that contains the
-    revision id and retrieved date of the statement"""
+    revision id and retrieved date of the statement
 
+    The language code is the one used by Wikimedia Foundation"""
+
+    language_code: str
+    language_wcditem: WCDItem
     reference_claim: Optional[References]
 
     class Config:
@@ -272,8 +276,8 @@ class WikiCitations(BaseModel):
         self.reference_claim = References()
         self.reference_claim.add(citation_reference)
 
-    @staticmethod
     def __prepare_single_value_reference_claims__(
+        self,
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         logger.info("Preparing single value claims")
@@ -300,14 +304,13 @@ class WikiCitations(BaseModel):
             )
             .strftime("+%Y-%m-%dT%H:%M:%SZ"),
         )
-        # FIXME don't hardcode enWP
         source_wikipedia = datatypes.Item(
             prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
-            value=WCDItem.ENGLISH_WIKIPEDIA.value,
+            value=self.language_wcditem.value,
         )
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
-        hash = datatypes.String(
+        hash_claim = datatypes.String(
             prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
         )
         # Optional claims
@@ -383,8 +386,7 @@ class WikiCitations(BaseModel):
             title = datatypes.MonolingualText(
                 prop_nr=WCDProperty.TITLE.value,
                 text=page_reference.title,
-                # FIXME avoid hardcoding here
-                language="en",
+                language=self.language_code,
             )
         if page_reference.url is not None:
             url = datatypes.URL(
@@ -405,7 +407,7 @@ class WikiCitations(BaseModel):
         for claim in (
             access_date,
             doi,
-            hash,
+            hash_claim,
             instance_of,
             isbn_10,
             isbn_13,
@@ -425,8 +427,9 @@ class WikiCitations(BaseModel):
                 claims.append(claim)
         return claims
 
-    @staticmethod
-    def __prepare_single_value_wikipedia_page_claims__(wikipedia_page) -> List[Claim]:
+    def __prepare_single_value_wikipedia_page_claims__(
+        self, wikipedia_page
+    ) -> List[Claim]:
         # There are no optional claims for Wikipedia Pages
         absolute_url = datatypes.URL(
             prop_nr=WCDProperty.URL.value,
@@ -434,7 +437,7 @@ class WikiCitations(BaseModel):
         )
         if wikipedia_page.md5hash is None:
             raise ValueError("wikipedia_page.md5hash was None")
-        hash = datatypes.String(
+        hash_claim = datatypes.String(
             prop_nr=WCDProperty.HASH.value, value=wikipedia_page.md5hash
         )
         last_update = datatypes.Time(
@@ -456,18 +459,16 @@ class WikiCitations(BaseModel):
         )
         published_in = datatypes.Item(
             prop_nr=WCDProperty.PUBLISHED_IN.value,
-            # FIXME avoid hardcoding here
-            value=WCDItem.ENGLISH_WIKIPEDIA.value,
+            value=self.language_wcditem.value,
         )
         if wikipedia_page.title is None:
             raise ValueError("wikipedia_page.title was None")
         title = datatypes.MonolingualText(
             prop_nr=WCDProperty.TITLE.value,
             text=wikipedia_page.title,
-            # FIXME avoid hardcoding here
-            language="en",
+            language=self.language_code,
         )
-        return [absolute_url, hash, last_update, page_id, published_in, title]
+        return [absolute_url, hash_claim, last_update, page_id, published_in, title]
 
     @staticmethod
     def __prepare_string_authors__(page_reference: WikipediaPageReference):
@@ -607,8 +608,7 @@ class WikiCitations(BaseModel):
             title = datatypes.MonolingualText(
                 prop_nr=WCDProperty.TITLE.value,
                 text=page_reference.title,
-                # FIXME avoid hardcoding here
-                language="en",
+                language=self.language_code,
             )
         if page_reference.url is not None:
             url = datatypes.URL(

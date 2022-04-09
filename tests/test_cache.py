@@ -3,7 +3,7 @@ from typing import List
 from unittest import TestCase
 
 import config
-from src import WcdImportBot, Cache, console
+from src import WcdImportBot, Cache, console, WCDItem
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
@@ -27,7 +27,9 @@ class TestCache(TestCase):
 
     def test_add_reference(self):
         config.use_cache = True
-        bot = WcdImportBot()
+        bot = WcdImportBot(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
         bot.get_page_by_title(
             title="!Action Pact!",
         )
