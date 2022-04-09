@@ -3,8 +3,8 @@ This bot is capable of fetching and storing
 reference information from Wikipedia pages as structured data 
 in a Wikibase instance. 
 
-This bot has been developed by James Hare (version 0.1) 
-and Dennis Priskorn (version 0.2) as part of the 
+This bot has been developed by James Hare (version 1.0.0) 
+and Dennis Priskorn (version 2) as part of the 
 Turn All References Blue project which is led by 
 Mark Graham head of The 
 Wayback Machine department of the Internet Archive.
