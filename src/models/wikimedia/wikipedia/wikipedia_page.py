@@ -286,42 +286,9 @@ class WikipediaPage(BaseModel):
             f"Parsing {number_of_templates} templates from {self.pywikibot_page.title()}, see {self.url}"
         )
         self.references = []
-        supported_templates = [
-            "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
-            "cite q",
-            "citeq",
-            "isbn",
-            "url",
-            # CS1 templates:
-            "cite arxiv",
-            "cite av media notes",
-            "cite av media",
-            "cite biorxiv",
-            "cite book",
-            "cite cite seerx",
-            "cite conference",
-            "cite encyclopedia",
-            "cite episode",
-            "cite interview",
-            "cite journal",
-            "cite magazine",
-            "cite mailing list" "cite map",
-            "cite news",
-            "cite newsgroup",
-            "cite podcast",
-            "cite press release",
-            "cite report",
-            "cite serial",
-            "cite sign",
-            "cite speech",
-            "cite ssrn",
-            "cite techreport",
-            "cite thesis",
-            "cite web",
-        ]
         for template_name, content in raw:
             # logger.debug(f"working on {template_name}")
-            if template_name.lower() in supported_templates:
+            if template_name.lower() in config.supported_templates:
                 parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
                 parsed_template["template_name"] = template_name.lower()
                 logger.debug(parsed_template)

@@ -11,8 +11,41 @@ include_url_and_first_parameter_in_hash_algorithm = False
 loglevel = logging.INFO
 press_enter_to_continue = False
 cache_and_upload_enabled = False
-user_agent = "wcdimportbot 0.2.0-alpha"
+user_agent = "wcdimportbot 2.0.0-alpha1"
 
+supported_templates = [
+    "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
+    "cite q",
+    "citeq",
+    "isbn",
+    "url",
+    # CS1 templates:
+    "cite arxiv",
+    "cite av media notes",
+    "cite av media",
+    "cite biorxiv",
+    "cite book",
+    "cite cite seerx",
+    "cite conference",
+    "cite encyclopedia",
+    "cite episode",
+    "cite interview",
+    "cite journal",
+    "cite magazine",
+    "cite mailing list" "cite map",
+    "cite news",
+    "cite newsgroup",
+    "cite podcast",
+    "cite press release",
+    "cite report",
+    "cite serial",
+    "cite sign",
+    "cite speech",
+    "cite ssrn",
+    "cite techreport",
+    "cite thesis",
+    "cite web",
+]
 
 wikibase_url = "https://wikicitations.wiki.opencura.com"
 mediawiki_api_url = wikibase_url + "/w/api.php"
