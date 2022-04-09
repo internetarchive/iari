@@ -32,3 +32,51 @@ The advantages of having access to this data in a graph are many.
 * Using SPARQL it becomes easy to e.g. pinpint pages with less trustworthy sources
 * Using the data over time can help follow and understand changes in patterns of referencing.
 * and more...
+
+# Supported templates
+There are a lot of templates in use in the different Wikipedias. For now 
+the bot only supports templates and parameters from English Wikipedia 
+but intention is to code it in a way that avoids hardcoding of 
+enwp specific templates and parameters.
+
+## English Wikipedia templates
+English Wikipedia has hundreds of special reference templates in use 
+and a handful of widely used generic templates.
+
+Currently the focus is on supporting the most widely used reference 
+templates in English Wikipedia.
+
+### List of currently supported templates
+supported_templates = [
+    "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
+    "cite q",
+    "citeq",
+    "isbn",
+    "url",
+    # CS1 templates:
+    "cite arxiv",
+    "cite av media notes",
+    "cite av media",
+    "cite biorxiv",
+    "cite book",
+    "cite cite seerx",
+    "cite conference",
+    "cite encyclopedia",
+    "cite episode",
+    "cite interview",
+    "cite journal",
+    "cite magazine",
+    "cite mailing list" "cite map",
+    "cite news",
+    "cite newsgroup",
+    "cite podcast",
+    "cite press release",
+    "cite report",
+    "cite serial",
+    "cite sign",
+    "cite speech",
+    "cite ssrn",
+    "cite techreport",
+    "cite thesis",
+    "cite web",
+]
