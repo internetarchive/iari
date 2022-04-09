@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestWikiCitations(TestCase):
-    def test_prepare_and_upload_reference_item(self):
+    def test_prepare_new_reference_item(self):
         from src.models.wikicitations import WikiCitations
 
         wc = WikiCitations()
@@ -75,7 +75,7 @@ class TestWikiCitations(TestCase):
         wppage.references.append(reference)
         with self.assertRaises(ValueError):
             wc.max_number_of_item_citations = 0
-            item = wc.__prepare_new_wikipedia_page_item__(
+            wc.__prepare_new_wikipedia_page_item__(
                 wikipedia_page=wppage,
             )
         # console.print(item.get_json())
@@ -110,7 +110,6 @@ class TestWikiCitations(TestCase):
         wppage.references.append(reference)
         wppage.__generate_hash__()
         # with self.assertRaises(ValueError):
-        wc.max_number_of_item_citations = 0
         item = wc.__prepare_new_wikipedia_page_item__(
             wikipedia_page=wppage,
         )
@@ -154,3 +153,15 @@ class TestWikiCitations(TestCase):
             wikipedia_page=wppage,
         )
         console.print(wcdqid)
+
+    # def test_P19_claims(self):
+    #     site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
+    #
+    #     page = WikipediaPage(
+    #         pywikibot_site=site,
+    #         language_code="en",
+    #         wikimedia_site=WikimediaSite.WIKIPEDIA,
+    #         # max_number_of_item_citations_to_upload=1,
+    #     )
+    #     page.__get_wikipedia_page_from_title__(title="Culture change")
+    #     page.extract_and_upload_to_wikicitations()
