@@ -6,6 +6,7 @@ from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
 from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
+from wikibaseintegrator.wbi_helpers import execute_sparql_query
 
 import config
 from src import console
@@ -718,3 +719,37 @@ class WikiCitations(BaseModel):
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wcdqid = self.__upload_new_item__(item=item)
         return wcdqid
+
+    @validate_arguments
+    def get_items_via_sparql(self, query: str):
+        results = execute_sparql_query(query)
+
+    def delete_all_page_items(self):
+        # pseudo code
+        # get all wcdqids for wikipedia pages using sparql
+        items = self.get_items_via_sparql(
+            """
+            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
+            SELECT ?item WHERE {
+                ?item wdt:P10 <http://wikicitations.wiki.opencura.com/entity/Q6>
+            }
+            """
+        )
+        # for each item
+        # use pywikibot to delete it or call the api manually
+        raise NotImplementedError()
+
+    def delete_all_reference_items(self):
+        # pseudo code
+        # get all wcdqids for references using sparql
+        items = self.get_items_via_sparql(
+            """
+            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
+            SELECT ?item WHERE {
+                ?item wdt:P10 wd:Q4
+            }
+            """
+        )
+        # for each item
+        # use pywikibot to delete it or call the api manually
+        raise NotImplementedError()
