@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+wcdimportbot -> "Wikipedia API": Get range of pages
+loop for each page
+    wcdimportbot -> wcdimportbot: Parse templates into objects
+    loop for each reference
+        wcdimportbot -> wcdimportbot: tokenize/hash the reference
+        wcdimportbot -> Cache: Lookup reference hash
+        Cache -> wcdimportbot: Response
+        alt found
+            wcdimportbot -> wcdimportbot: Link to existing reference
+        end
+        alt not found
+            wcdimportbot -> WikiCitations: Create new item for the reference
+            WikiCitations -> wcdimportbot: Response with QID
+        end
+    end
+    alt "page already in wikicitations"
+        wcdimportbot -> WikiCitations: Update item with removed/new citations
+    end
+    alt "page not yet in wikicitations"
+    wcdimportbot -> WikiCitations: Create new item for the page with links to all references
+    end
+end
+@enduml
