@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Dict
 
 from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
@@ -39,6 +39,38 @@ class WikiCitations(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+    @validate_arguments
+    def __convert_wcd_entity_id_to_item_entity__(self, entity_id: str) -> ItemEntity:
+        self.__setup_wbi__()
+        wbi = WikibaseIntegrator()
+        return wbi.item.get(entity_id)
+
+    @validate_arguments
+    def __delete_item__(self, item_id: str):
+        raise NotImplementedError(
+            "this should use the new delete function in wbi_helper"
+        )
+
+    @validate_arguments
+    def __extract_wcdqs_json_entity_id__(
+        self, data: Dict, sparql_variable: str = "item"
+    ) -> str:
+        """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
+        return data[sparql_variable]["value"].replace(
+            config.wikibase_rdf_entity_prefix, ""
+        )
+
+    @validate_arguments
+    def __get_item_entity_from_wcdqs_json__(
+        self, data: Dict, sparql_variable: str = "item"
+    ):
+        return self.__convert_wcd_entity_id_to_item_entity__(
+            self.__extract_wcdqs_json_entity_id__(
+                data=data, sparql_variable=sparql_variable
+            )
+        )
+
+    @validate_arguments
     def __prepare_person_claims__(
         self,
         use_list: List[Person],
@@ -159,7 +191,7 @@ class WikiCitations(BaseModel):
             ),
         )
         # if config.loglevel == logging.DEBUG:
-        #     logger.debug("Printing the item json")
+        #     logger.debug("Printing the item data")
         #     print(item.get_json())
         #     # exit()
         return item
@@ -196,7 +228,7 @@ class WikiCitations(BaseModel):
             ),
         )
         if config.loglevel == logging.DEBUG:
-            logger.debug("Printing the item json")
+            logger.debug("Printing the item data")
             print(item.get_json())
             # exit()
         return item
@@ -721,23 +753,37 @@ class WikiCitations(BaseModel):
         return wcdqid
 
     @validate_arguments
-    def get_items_via_sparql(self, query: str):
-        results = execute_sparql_query(query)
+    def get_items_via_sparql(self, query: str) -> dict:
+        return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
 
     def delete_all_page_items(self):
         # pseudo code
         # get all wcdqids for wikipedia pages using sparql
-        items = self.get_items_via_sparql(
+        results = self.get_items_via_sparql(
             """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
+            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {
-                ?item wdt:P10 <http://wikicitations.wiki.opencura.com/entity/Q6>
+              ?item wcdt:P10 wcd:Q6
             }
             """
         )
         # for each item
-        # use pywikibot to delete it or call the api manually
-        raise NotImplementedError()
+        if results is not None:
+            console.print(results)
+            bindings = results["results"]["bindings"]
+            number_of_bindings = len(bindings)
+            if number_of_bindings > 0:
+                logger.debug(f"Got {number_of_bindings} bindings")
+                for binding in bindings:
+                    console.print(binding)
+                    item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
+                    print(f"Deleting {item_id}")
+                    self.__delete_item__(item_id=item_id)
+                # use pywikibot to delete it or call the api manually
+            else:
+                logger.info("Got no items from the WCD Query Service")
+                # raise NotImplementedError()
 
     def delete_all_reference_items(self):
         # pseudo code
