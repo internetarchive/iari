@@ -188,6 +188,10 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
-        with self.assertRaises(NotImplementedError):
-            wc.delete_all_page_items()
-        # self.fail()
+        wc.__delete_all_page_items__()
+
+    def test_delete_all_reference_items(self):
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wc.__delete_all_reference_items__()
