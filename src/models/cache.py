@@ -83,9 +83,6 @@ class Cache(BaseModel):
         logger.debug(f"result from SSDB: {result}")
         console.print("Done flushing the SSDB database")
 
-    def check_flush(self):
-        pass
-
     def get_cache_information(self):
         result = self.ssdb.get_info()
         console.print(result)
