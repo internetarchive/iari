@@ -12,4 +12,12 @@ class TestSsdbDatabase(TestCase):
         result = r.get_value("test").decode("UTF-8")
         print(result)
         assert result == "test"
-        # self.fail()
+
+    def test_flush_database(self):
+        r = SsdbDatabase()
+        r.connect()
+        r.set_value(key="test", value="test")
+        r.flush_database()
+        result = r.get_value("test")
+        # print(result)
+        assert result == None

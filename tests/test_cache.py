@@ -54,4 +54,8 @@ class TestCache(TestCase):
             assert check == "test"
         else:
             raise ValueError("No hashed references found")
-            # self.fail()
+
+    def test_get_cache_information(self):
+        cache = Cache()
+        cache.connect()
+        cache.get_cache_information()

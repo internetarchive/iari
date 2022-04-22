@@ -8,7 +8,7 @@ import config
 from src.helpers import console
 from src.models.exceptions import DebugExit
 from src.models.cache import Cache
-from src.models.wikicitations import WCDItem
+from src.models.wikicitations import WCDItem, WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
@@ -21,7 +21,7 @@ class WcdImportBot(BaseModel):
 
     The language code is the one used by Wikimedia Foundation"""
 
-    language_code: str
+    language_code: str = "en"
     max_count: int = 10
     total_number_of_hashed_references: Optional[int]
     pages: Optional[List[Any]]
@@ -29,7 +29,7 @@ class WcdImportBot(BaseModel):
     title: Optional[str]
     total_number_of_references: Optional[int]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
-    language_wcditem: WCDItem
+    language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
 
     # pseudo code
     # for each pageid in range(1,1000)
@@ -108,3 +108,11 @@ class WcdImportBot(BaseModel):
             f"({self.percent_references_hashed_in_total}%) could be hashed on "
             f"a total of {len(self.pages)} pages."
         )
+
+    def rinse_all_items_and_cache(self):
+        """Delete all page and reference items and clear the SSDB cache"""
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wc.delete_all_page_and_reference_items()
+        cache = Cache()
