@@ -143,15 +143,6 @@ class WikipediaPage(BaseModel):
                     )
         return reference
 
-    def __page_has_already_been_uploaded__(self) -> bool:
-        if self.cache is None:
-            self.__setup_cache__()
-        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
-        if wcdqid is None:
-            return False
-        else:
-            return True
-
     def __extract_and_parse_references__(self):
         logger.info("Extracting references now")
         # if self.wikimedia_event is not None:
@@ -243,6 +234,14 @@ class WikipediaPage(BaseModel):
     #     if self.title is None or self.title == "":
     #         raise ValueError("title not set correctly")
 
+    def __generate_hash__(self):
+        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
+        We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
+        self.md5hash = hashlib.md5(
+            f"{self.language_code}{self.page_id}".encode()
+        ).hexdigest()
+        logger.debug(self.md5hash)
+
     def __get_wcdqid_from_cache__(
         self, reference: WikipediaPageReference
     ) -> Optional[str]:
@@ -277,6 +276,15 @@ class WikipediaPage(BaseModel):
         logger.debug("__insert_in_cache__: Running")
         self.cache.add_reference(reference=reference, wcdqid=wcdqid)
         logger.info("Reference inserted into the hash database")
+
+    def __page_has_already_been_uploaded__(self) -> bool:
+        if self.cache is None:
+            self.__setup_cache__()
+        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
+        if wcdqid is None:
+            return False
+        else:
+            return True
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -374,6 +382,10 @@ class WikipediaPage(BaseModel):
             updated_references.append(reference)
         self.references = updated_references
 
+    def export_to_dataframe(self):
+        # TODO make it easy to quantify the references with pandas
+        raise NotImplementedError("To be written")
+
     def extract_and_upload_to_wikicitations(self):
         """Extract the references and upload first
         the references and then the page to WikiCitations"""
@@ -398,10 +410,6 @@ class WikipediaPage(BaseModel):
         else:
             logger.info("This page has already been uploaded to WikiCitations")
 
-    def export_to_dataframe(self):
-        # TODO make it easy to quantify the references with pandas
-        raise NotImplementedError("To be written")
-
     # def __match_subjects__(self):
     #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
     #     [doi.wikidata_scientific_item.crossref_engine.work.match_subjects_to_qids() for doi in self.dois
@@ -410,11 +418,3 @@ class WikipediaPage(BaseModel):
     #              doi.wikidata_scientific_item.crossref_engine is not None and
     #              doi.wikidata_scientific_item.crossref_engine.work is not None
     #      )]
-
-    def __generate_hash__(self):
-        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
-        We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
-        self.md5hash = hashlib.md5(
-            f"{self.language_code}{self.page_id}".encode()
-        ).hexdigest()
-        logger.debug(self.md5hash)
