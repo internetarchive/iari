@@ -3,6 +3,7 @@ from typing import Optional, Any
 
 from pydantic import BaseModel, validate_arguments
 
+from src import console
 from src.models.ssdb_database import SsdbDatabase
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
@@ -68,13 +69,23 @@ class Cache(BaseModel):
         else:
             raise ValueError("md5hash was None")
 
-    def connect(self):
-        # Connect to MariaDB Platform
-        self.ssdb = SsdbDatabase()
+    @validate_arguments
+    def connect(self, host: str = "127.0.0.1", port: int = 8888):
+        # Connect to the SSDB
+        self.ssdb = SsdbDatabase(host=host, port=port)
         # try:
         self.ssdb.connect()
         # except:
         #    logger.error("error connection to SSDB")
+
+    def flush_database(self):
+        result = self.ssdb.flush_database()
+        logger.debug(f"result from SSDB: {result}")
+        console.print("Done flushing the SSDB database")
+
+    def get_cache_information(self):
+        result = self.ssdb.get_info()
+        console.print(result)
 
     # def get_whole_table(self):
     #     with self.connection.cursor() as cursor:

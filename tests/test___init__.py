@@ -36,3 +36,8 @@ class TestWcdImportBot(TestCase):
     #     bot.get_pages_by_range()
     #     [page.extract_and_upload_to_wikicitations() for page in bot.pages]
     #     bot.print_statistics()
+
+    def test_rinse_all_items_and_cache(self):
+        bot = WcdImportBot()
+        bot.rinse_all_items_and_cache()
+        # self.fail()
