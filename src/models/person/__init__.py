@@ -2,10 +2,6 @@ from typing import Optional, Any
 
 from pydantic import BaseModel
 
-from src.models.wikimedia.wikipedia.templates.enums import (
-    EnglishWikipediaTemplatePersonRole,
-)
-
 
 class Person(BaseModel):
     """Model a person mentioned in a page_reference
@@ -39,7 +35,3 @@ class Person(BaseModel):
             return string
         else:
             return None
-
-
-class EnglishWikipediaTemplatePerson(Person):
-    role: EnglishWikipediaTemplatePersonRole
