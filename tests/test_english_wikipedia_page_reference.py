@@ -23,6 +23,26 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference = EnglishWikipediaPageReferenceSchema().load(data)
         console.print(reference)
 
+    def test_url_template_with_archive_url(self):
+        data = {
+            "url": "https://www.stereogum.com/1345401/turntable-interview/interviews/",
+            "title": "Turntable Interview: !!!",
+            "last": "Locker",
+            "first": "Melissa",
+            "date": "May 9, 2013",
+            "website": "Stereogum",
+            "access_date": "May 24, 2021",
+            "template_name": "cite web",
+            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+        }
+
+        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        assert (
+            reference.archive_url
+            == "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
+        )
+        # console.print(reference)
+
     def test_url_template2(self):
         data = {"1": "chkchkchk.net", "template_name": "url"}
         reference = EnglishWikipediaPageReferenceSchema().load(data)
