@@ -796,8 +796,9 @@ class WikiCitations(BaseModel):
         self.__delete_all_reference_items__()
 
     @staticmethod
-    def entity_url(qid):
-        return f"{wbi_config.config['WIKIBASE_URL']}/wiki/Item:{qid}"
+    @validate_arguments
+    def entity_url(qid: str):
+        return f"{config.wikibase_url}/wiki/Item:{qid}"
 
     @validate_arguments
     def prepare_and_upload_reference_item(
