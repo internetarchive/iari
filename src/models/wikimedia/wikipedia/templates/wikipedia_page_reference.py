@@ -41,6 +41,8 @@ class WikipediaPageReference(BaseModel):
     first_lasts: Optional[List]
     first_level_domain_of_archive_url: Optional[str]
     first_level_domain_of_url: Optional[str]
+    first_level_domain_of_url_hash: Optional[str]
+    first_level_domain_of_url_qid: Optional[str]
     hosts_list: Optional[List[Person]]
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
@@ -400,6 +402,13 @@ class WikipediaPageReference(BaseModel):
     @property
     def has_hash(self) -> bool:
         if self.md5hash is not None:
+            return True
+        else:
+            return False
+
+    @property
+    def has_first_level_domain_url_hash(self) -> bool:
+        if self.first_level_domain_of_url_hash is not None:
             return True
         else:
             return False
@@ -803,7 +812,18 @@ class WikipediaPageReference(BaseModel):
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
         )
 
-    def __generate_hash__(self):
+    def __generate_hashes__(self):
+        self.__generate_reference_hash__()
+        self.__generate_first_level_domain_hash__()
+
+    def __generate_first_level_domain_hash__(self):
+        if self.first_level_domain_of_url is not None:
+            str2hash = self.first_level_domain_of_url
+            self.first_level_domain_of_url_hash = hashlib.md5(
+                str2hash.replace(" ", "").lower().encode()
+            ).hexdigest()
+
+    def __generate_reference_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         str2hash = None
@@ -926,7 +946,7 @@ class WikipediaPageReference(BaseModel):
         self.__parse_isbn__()
         self.__parse_persons__()
         # We generate the hash last because the parsing needs to be done first
-        self.__generate_hash__()
+        self.__generate_hashes__()
 
 
 class WikipediaPageReferenceSchema(Schema):
