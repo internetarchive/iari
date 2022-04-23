@@ -27,8 +27,8 @@ class WikipediaPage(BaseModel):
     """Models a WMF Wikipedia page"""
 
     cache: Optional[Cache]
-    language_code: str
-    language_wcditem: WCDItem
+    language_code: str = "en"
+    language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
     max_number_of_item_citations_to_upload: Optional[int]
     md5hash: Optional[str]
     percent_of_references_with_a_hash: Optional[int]
