@@ -116,3 +116,5 @@ class WcdImportBot(BaseModel):
         )
         wc.delete_all_page_and_reference_items()
         cache = Cache()
+        cache.connect()
+        cache.flush_database()
