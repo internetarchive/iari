@@ -10,6 +10,7 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page
 
 import config
 from src import console
+from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 from src.models.wikicitations.enums import WCDProperty, WCDItem
@@ -237,7 +238,7 @@ class WikiCitations(BaseModel):
     def __prepare_new_reference_item__(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
-        """This method converts a page_reference into a new WikiCitations item"""
+        """This method converts a page_reference into a new reference item"""
         self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
@@ -250,6 +251,35 @@ class WikiCitations(BaseModel):
         persons = self.__prepare_all_person_claims__(page_reference=page_reference)
         if len(persons) > 0:
             item.add_claims(persons)
+        item.add_claims(
+            self.__prepare_single_value_reference_claims__(
+                page_reference=page_reference
+            ),
+        )
+        # if config.loglevel == logging.DEBUG:
+        #     logger.debug("Printing the item data")
+        #     print(item.get_json())
+        #     # exit()
+        return item
+
+    def __prepare_new_website_item__(
+        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
+    ) -> ItemEntity:
+        """This method converts a page_reference into a new website item"""
+        self.__setup_wbi__()
+        wbi = WikibaseIntegrator(
+            login=wbi_login.Login(user=config.user, password=config.pwd),
+        )
+        item = wbi.item.new()
+        if page_reference.first_level_domain_of_url is None:
+            raise MissingInformationError(
+                "page_reference.first_level_domain_of_url was None"
+            )
+        item.labels.set("en", page_reference.first_level_domain_of_url)
+        item.descriptions.set(
+            "en",
+            f"website referenced from {wikipedia_page.wikimedia_site.name.title()}",
+        )
         item.add_claims(
             self.__prepare_single_value_reference_claims__(
                 page_reference=page_reference
@@ -521,6 +551,36 @@ class WikiCitations(BaseModel):
             website_string,
             wikidata_qid,
         ):
+            if claim is not None:
+                claims.append(claim)
+        return claims
+
+    def __prepare_single_value_website_claims__(
+        self,
+        page_reference: WikipediaPageReference,
+    ) -> Optional[List[Claim]]:
+        logger.info("Preparing single value claims for the website item")
+        # Claims always present
+        instance_of = datatypes.Item(
+            prop_nr=WCDProperty.INSTANCE_OF.value,
+            value=WCDItem.WEBSITE.value,
+        )
+        source_wikipedia = datatypes.Item(
+            prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
+            value=self.language_wcditem.value,
+        )
+        first_level_domain_string = datatypes.String(
+            prop_nr=WCDProperty.FIRST_LEVEL_DOMAIN_STRING.value,
+            value=page_reference.first_level_domain_of_url,
+        )
+
+        # if page_reference.md5hash is None:
+        #     raise ValueError("page_reference.md5hash was None")
+        # hash_claim = datatypes.String(
+        #     prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
+        # )
+        claims = []
+        for claim in (instance_of, source_wikipedia, first_level_domain_string):
             if claim is not None:
                 claims.append(claim)
         return claims
@@ -799,6 +859,19 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def entity_url(qid: str):
         return f"{config.wikibase_url}/wiki/Item:{qid}"
+
+    @validate_arguments
+    def prepare_and_upload_website_item(
+        self,
+        page_reference: WikipediaPageReference,
+        wikipedia_page: WikipediaPage,
+    ) -> str:
+        self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
+        item = self.__prepare_new_website_item__(
+            page_reference=page_reference, wikipedia_page=wikipedia_page
+        )
+        wcdqid = self.__upload_new_item__(item=item)
+        return wcdqid
 
     @validate_arguments
     def prepare_and_upload_reference_item(
