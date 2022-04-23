@@ -37,6 +37,17 @@ class Cache(BaseModel):
         else:
             raise ValueError("did not get what we need")
 
+    @validate_arguments
+    def add_website(self, reference: WikipediaPageReference, wcdqid: str):
+        logger.debug("add_website: Running")
+        if reference.first_level_domain_of_url_hash is not None and wcdqid is not None:
+            logger.debug(f"Trying to set the value: {wcdqid}")
+            return self.ssdb.set_value(
+                key=reference.first_level_domain_of_url_hash, value=wcdqid
+            )
+        else:
+            raise ValueError("did not get what we need")
+
     # TODO refactor into one generic lookup function?
     @validate_arguments
     def check_page_and_get_wikicitations_qid(
@@ -68,6 +79,22 @@ class Cache(BaseModel):
                 return response.decode("UTF-8")
         else:
             raise ValueError("md5hash was None")
+
+    @validate_arguments
+    def check_website_and_get_wikicitations_qid(
+        self, reference: WikipediaPageReference
+    ) -> Optional[str]:
+        """We get binary from SSDB so we decode it"""
+        if reference.first_level_domain_of_url_hash is not None:
+            # https://stackoverflow.com/questions/55365543/
+            response = self.ssdb.get_value(key=reference.first_level_domain_of_url_hash)
+            if response is None:
+                return None
+            else:
+                return response.decode("UTF-8")
+        else:
+            # Not all references have urls so we fail silently
+            return None
 
     @validate_arguments
     def connect(self, host: str = "127.0.0.1", port: int = 8888):
