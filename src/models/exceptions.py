@@ -2,9 +2,9 @@ class DebugExit(BaseException):
     pass
 
 
-class TimeParseException(BaseException):
+class MoreThanOneNumberError(BaseException):
     pass
 
 
-class MoreThanOneNumberError(BaseException):
+class TimeParseException(BaseException):
     pass
