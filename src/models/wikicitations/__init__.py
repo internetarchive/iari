@@ -32,8 +32,8 @@ class WikiCitations(BaseModel):
 
     The language code is the one used by Wikimedia Foundation"""
 
-    language_code: str
-    language_wcditem: WCDItem
+    language_code: str = "en"
+    language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
     reference_claim: Optional[References]
 
     class Config:
