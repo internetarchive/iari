@@ -210,29 +210,10 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dictionary[key]
         return newdict
 
-    # def __find_references_without_hashes__(self):
-    #     references_without_hashes = [
-    #         page_reference for page_reference in self.references if page_reference.md5hash is None
-    #     ]
-    #     logger.info(f"references_without_hashes: {len(references_without_hashes)}")
-    #     if references_without_hashes is None:
-    #         self.references_without_hashes = []
-    #     else:
-    #         self.references_without_hashes = references_without_hashes
-    #     self.number_of_references_without_a_hash = len(self.references_without_hashes)
-    #     logger.info(
-    #         f"number_of_references_without_a_hash: {self.number_of_references_without_a_hash}"
-    #     )
-
     def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         dictionary = self.__fix_class_key__(dictionary=dictionary)
         dictionary = self.__fix_aliases__(dictionary=dictionary)
         return self.__fix_dash__(dictionary=dictionary)
-
-    # def __get_title_from_event__(self):
-    #     self.title = self.wikimedia_event.page_title
-    #     if self.title is None or self.title == "":
-    #         raise ValueError("title not set correctly")
 
     def __generate_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
@@ -252,13 +233,6 @@ class WikipediaPage(BaseModel):
         )
         logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
-
-    # def __get_wikipedia_page_from_event__(self):
-    #     """Get the page from Wikipedia"""
-    #     logger.info("Fetching the wikitext")
-    #     self.pywikibot_page = pywikibot.Page(
-    #         self.wikimedia_event.event_stream.pywikibot_site, self.title
-    #     )
 
     @validate_arguments
     def __get_wikipedia_page_from_title__(self, title: str):
@@ -418,3 +392,26 @@ class WikipediaPage(BaseModel):
     #              doi.wikidata_scientific_item.crossref_engine is not None and
     #              doi.wikidata_scientific_item.crossref_engine.work is not None
     #      )]
+    # def __get_title_from_event__(self):
+    #     self.title = self.wikimedia_event.page_title
+    #     if self.title is None or self.title == "":
+    #         raise ValueError("title not set correctly")
+    # def __find_references_without_hashes__(self):
+    #     references_without_hashes = [
+    #         page_reference for page_reference in self.references if page_reference.md5hash is None
+    #     ]
+    #     logger.info(f"references_without_hashes: {len(references_without_hashes)}")
+    #     if references_without_hashes is None:
+    #         self.references_without_hashes = []
+    #     else:
+    #         self.references_without_hashes = references_without_hashes
+    #     self.number_of_references_without_a_hash = len(self.references_without_hashes)
+    #     logger.info(
+    #         f"number_of_references_without_a_hash: {self.number_of_references_without_a_hash}"
+    #     )
+    # def __get_wikipedia_page_from_event__(self):
+    #     """Get the page from Wikipedia"""
+    #     logger.info("Fetching the wikitext")
+    #     self.pywikibot_page = pywikibot.Page(
+    #         self.wikimedia_event.event_stream.pywikibot_site, self.title
+    #     )
