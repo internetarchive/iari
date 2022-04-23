@@ -185,17 +185,17 @@ class TestWikiCitations(TestCase):
     #     page.__get_wikipedia_page_from_title__(title="Culture change")
     #     page.extract_and_upload_to_wikicitations()
 
-    def test_delete_all_page_items(self):
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wc.__delete_all_page_items__()
-
-    def test_delete_all_reference_items(self):
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wc.__delete_all_reference_items__()
+    # def test_delete_all_page_items(self):
+    #     wc = WikiCitations(
+    #         language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+    #     )
+    #     wc.__delete_all_page_items__()
+    #
+    # def test_delete_all_reference_items(self):
+    #     wc = WikiCitations(
+    #         language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+    #     )
+    #     wc.__delete_all_reference_items__()
 
     def test_entity_url(self):
         wc = WikiCitations()
