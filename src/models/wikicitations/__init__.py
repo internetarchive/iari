@@ -108,7 +108,8 @@ class WikiCitations(BaseModel):
 
     @validate_arguments
     def __delete_item__(self, item_id: str):
-        input(f"Do you want to delete {item_id}?")
+        if config.press_enter_to_continue:
+            input(f"Do you want to delete {item_id}?")
         return delete_page(
             title=f"Item:{item_id}",
             # deletetalk=True,
