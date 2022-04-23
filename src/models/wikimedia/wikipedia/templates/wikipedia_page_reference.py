@@ -8,6 +8,7 @@ from marshmallow import (
 )
 from marshmallow.fields import String
 from pydantic import BaseModel, validator, validate_arguments
+from tld import get_fld
 
 import config
 from src.models.exceptions import MoreThanOneNumberError
@@ -38,6 +39,8 @@ class WikipediaPageReference(BaseModel):
     authors_list: Optional[List[Person]]
     editors_list: Optional[List[Person]]
     first_lasts: Optional[List]
+    first_level_domain_of_archive_url: Optional[str]
+    first_level_domain_of_url: Optional[str]
     hosts_list: Optional[List[Person]]
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
@@ -45,9 +48,9 @@ class WikipediaPageReference(BaseModel):
     md5hash: Optional[str]
     numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
+    persons_without_role: Optional[List[Person]]
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
-    persons_without_role: Optional[List[Person]]
     wikicitations_qid: Optional[str]
     wikidata_qid: Optional[str]
 
@@ -421,6 +424,13 @@ class WikipediaPageReference(BaseModel):
     @property
     def wikicitations_url(self):
         return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+
+    def __extract_first_level_domain__(self):
+        logger.info("Extracting first level domain from 2 attributes")
+        if self.url is not None:
+            self.first_level_domain_of_url = get_fld(self.url)
+        if self.archive_url is not None:
+            self.first_level_domain_of_archive_url = get_fld(self.archive_url)
 
     @staticmethod
     @validate_arguments
@@ -912,6 +922,7 @@ class WikipediaPageReference(BaseModel):
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
         self.__parse_first_parameter__()
+        self.__extract_first_level_domain__()
         self.__parse_isbn__()
         self.__parse_persons__()
         # We generate the hash last because the parsing needs to be done first
