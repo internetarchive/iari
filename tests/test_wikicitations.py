@@ -19,6 +19,16 @@ logger = logging.getLogger(__name__)
 
 
 class TestWikiCitations(TestCase):
+    def test_entity_url(self):
+        wc = WikiCitations()
+        result = wc.entity_url(qid="Q1")
+        assert result == "https://wikicitations.wiki.opencura.com/wiki/Item:Q1"
+
+    def test_entity_url_missing_arguments(self):
+        wc = WikiCitations()
+        with self.assertRaises(ValidationError):
+            wc.entity_url()
+
     def test_prepare_new_reference_item(self):
         from src.models.wikicitations import WikiCitations
 
@@ -196,13 +206,3 @@ class TestWikiCitations(TestCase):
     #         language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
     #     )
     #     wc.__delete_all_reference_items__()
-
-    def test_entity_url(self):
-        wc = WikiCitations()
-        result = wc.entity_url(qid="Q1")
-        assert result == "https://wikicitations.wiki.opencura.com/wiki/Item:Q1"
-
-    def test_entity_url_missing_arguments(self):
-        wc = WikiCitations()
-        with self.assertRaises(ValidationError):
-            wc.entity_url()
