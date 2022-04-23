@@ -821,63 +821,7 @@ class WikiCitations(BaseModel):
     def get_items_via_sparql(self, query: str) -> dict:
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
 
-    def __delete_all_page_items__(self):
-        # Here we get all wcdqids for wikipedia pages using sparql
-        results = self.get_items_via_sparql(
-            """
-            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
-            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
-            SELECT ?item WHERE {
-              ?item wcdt:P10 wcd:Q6
-            }
-            """
-        )
-        if results is not None:
-            console.print(results)
-            bindings = results["results"]["bindings"]
-            number_of_bindings = len(bindings)
-            if number_of_bindings > 0:
-                logger.debug(f"Got {number_of_bindings} bindings")
-                self.__setup_wbi__()
-                for binding in bindings:
-                    console.print(binding)
-                    item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
-                    print(f"Deleting {item_id}")
-                    result = self.__delete_item__(item_id=item_id)
-                    console.print(result)
-                    input("continue?")
-            else:
-                logger.info("Got no page items from the WCD Query Service.")
-
-    def __delete_all_reference_items__(self):
-        # pseudo code
-        # get all wcdqids for references using sparql
-        results = self.get_items_via_sparql(
-            """
-            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
-            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
-            SELECT ?item WHERE {
-                ?item wcdt:P10 wcd:Q4
-            }
-            """
-        )
-        if results is not None:
-            console.print(results)
-            bindings = results["results"]["bindings"]
-            number_of_bindings = len(bindings)
-            if number_of_bindings > 0:
-                logger.debug(f"Got {number_of_bindings} bindings")
-                self.__setup_wbi__()
-                for binding in bindings:
-                    console.print(binding)
-                    item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
-                    print(f"Deleting {item_id}")
-                    result = self.__delete_item__(item_id=item_id)
-                    console.print(result)
-                    input("continue?")
-            else:
-                logger.info("Got no reference items from the WCD Query Service.")
-
     def delete_all_page_and_reference_items(self):
+        """This function deletes first the page item and then the reference items"""
         self.__delete_all_page_items__()
         self.__delete_all_reference_items__()
