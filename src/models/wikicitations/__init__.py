@@ -790,6 +790,11 @@ class WikiCitations(BaseModel):
         else:
             print("skipped upload")
 
+    def delete_all_page_and_reference_items(self):
+        """This function deletes first the page item and then the reference items"""
+        self.__delete_all_page_items__()
+        self.__delete_all_reference_items__()
+
     @staticmethod
     def entity_url(qid):
         return f"{wbi_config.config['WIKIBASE_URL']}/wiki/Item:{qid}"
@@ -816,12 +821,3 @@ class WikiCitations(BaseModel):
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wcdqid = self.__upload_new_item__(item=item)
         return wcdqid
-
-    @validate_arguments
-    def get_items_via_sparql(self, query: str) -> dict:
-        return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
-
-    def delete_all_page_and_reference_items(self):
-        """This function deletes first the page item and then the reference items"""
-        self.__delete_all_page_items__()
-        self.__delete_all_reference_items__()
