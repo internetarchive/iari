@@ -2,6 +2,7 @@ import logging
 from typing import List
 from unittest import TestCase
 
+from pydantic import ValidationError
 from wikibaseintegrator.models import Claim
 from wikibaseintegrator.wbi_exceptions import MWApiError
 
@@ -195,3 +196,13 @@ class TestWikiCitations(TestCase):
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
         wc.__delete_all_reference_items__()
+
+    def test_entity_url(self):
+        wc = WikiCitations()
+        result = wc.entity_url(qid="Q1")
+        assert result == "https://wikicitations.wiki.opencura.com/wiki/Item:Q1"
+
+    def test_entity_url_missing_arguments(self):
+        wc = WikiCitations()
+        with self.assertRaises(ValidationError):
+            wc.entity_url()
