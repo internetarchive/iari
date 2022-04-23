@@ -2,6 +2,10 @@ class DebugExit(BaseException):
     pass
 
 
+class MissingInformationError(BaseException):
+    pass
+
+
 class MoreThanOneNumberError(BaseException):
     pass
 

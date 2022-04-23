@@ -7,6 +7,7 @@ class WCDItem(Enum):
     WIKIPEDIA_REFERENCE = "Q4"
     WIKIPEDIA_PAGE = "Q6"
     ENGLISH_WIKIPEDIA = "Q3"
+    WEBSITE = "Q145"
 
 
 class WCDProperty(Enum):
