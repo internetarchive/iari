@@ -1,3 +1,4 @@
+import argparse
 import logging
 from typing import List, Optional, Any
 
@@ -56,6 +57,34 @@ class WcdImportBot(BaseModel):
                 * 100
                 / self.total_number_of_references
             )
+
+    def __setup_argparse_and_return_args__(self):
+        # TODO add possibility to specify the wikipedia language version to work on
+        parser = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            description="""
+    WCD Import Bot imports references and pages from Wikipedia
+
+    Example adding one page:
+    '$ wcdimportbot.py --import-title "Easter Island"'
+
+    Example rinsing the Wikibase and the cache:
+    '$ wcdimportbot.py --rinse'
+        """,
+        )
+        parser.add_argument(
+            "-i",
+            "--import-title",
+            help=(
+                "Title to import from a Wikipedia (Defaults to English Wikipedia for now)"
+            ),
+        )
+        parser.add_argument(
+            "--rinse",
+            action="store_true",
+            help="Rinse all page and reference items and delete the cache",
+        )
+        return parser.parse_args()
 
     def extract_and_upload_all_pages_to_wikicitations(self):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]
@@ -118,3 +147,16 @@ class WcdImportBot(BaseModel):
         cache = Cache()
         cache.connect()
         cache.flush_database()
+
+    def run(self):
+        """This method handles runnig the bot
+        based on the given command line arguments."""
+        args = self.__setup_argparse_and_return_args__()
+        if args.rinse is True:
+            self.rinse_all_items_and_cache()
+        elif args.import_title is not None:
+            logger.info(f"importing title {args.import_title}")
+            self.get_page_by_title(title=args.import_title)
+            self.extract_and_upload_all_pages_to_wikicitations()
+        else:
+            console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
