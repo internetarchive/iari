@@ -47,7 +47,7 @@ class WikiCitations(BaseModel):
 
     def __delete_all_page_items__(self):
         # Here we get all wcdqids for wikipedia pages using sparql
-        results = self.get_items_via_sparql(
+        results = self.__get_items_via_sparql__(
             """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
@@ -57,20 +57,21 @@ class WikiCitations(BaseModel):
             """
         )
         if results is not None:
-            console.print(results)
+            # logger.debug(results)
             bindings = results["results"]["bindings"]
             number_of_bindings = len(bindings)
             if number_of_bindings > 0:
                 logger.info(f"Got {number_of_bindings} bindings to delete")
                 self.__setup_wbi__()
-                for binding in bindings:
-                    console.print(binding)
-                    item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
-                    print(f"Deleting {item_id}")
-                    result = self.__delete_item__(item_id=item_id)
-                    console.print(result)
-                    if config.press_enter_to_continue:
-                        input("continue?")
+                with console.status(f"Deleting {number_of_bindings} page items"):
+                    for binding in bindings:
+                        # logger.debug(binding)
+                        item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
+                        print(f"Deleting {item_id}")
+                        result = self.__delete_item__(item_id=item_id)
+                        # logger.debug(result)
+                        if config.press_enter_to_continue:
+                            input("continue?")
             else:
                 logger.info("Got no page items from the WCD Query Service.")
         console.print("Done deleting all page items")
@@ -78,7 +79,7 @@ class WikiCitations(BaseModel):
     def __delete_all_reference_items__(self):
         # pseudo code
         # get all wcdqids for references using sparql
-        results = self.get_items_via_sparql(
+        results = self.__get_items_via_sparql__(
             """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
@@ -88,22 +89,23 @@ class WikiCitations(BaseModel):
             """
         )
         if results is not None:
-            console.print(results)
+            # logger.debug(results)
             bindings = results["results"]["bindings"]
             number_of_bindings = len(bindings)
             if number_of_bindings > 0:
                 logger.info(f"Got {number_of_bindings} bindings to delete")
                 self.__setup_wbi__()
-                for binding in bindings:
-                    console.print(binding)
-                    item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
-                    print(f"Deleting {item_id}")
-                    result = self.__delete_item__(item_id=item_id)
-                    console.print(result)
-                    if config.press_enter_to_continue:
-                        input("continue?")
+                with console.status(f"Deleting {number_of_bindings} reference items"):
+                    for binding in bindings:
+                        # logger.debug(binding)
+                        item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
+                        print(f"Deleting {item_id}")
+                        result = self.__delete_item__(item_id=item_id)
+                        # console.print(result)
+                        if config.press_enter_to_continue:
+                            input("continue?")
             else:
-                logger.info("Got no reference items from the WCD Query Service.")
+                console.print("Got no reference items from the WCD Query Service.")
         console.print("Done deleting all reference items")
 
     @validate_arguments
@@ -134,6 +136,10 @@ class WikiCitations(BaseModel):
                 data=data, sparql_variable=sparql_variable
             )
         )
+
+    @validate_arguments
+    def __get_items_via_sparql__(self, query: str):
+        results = execute_sparql_query(query)
 
     @validate_arguments
     def __prepare_person_claims__(
