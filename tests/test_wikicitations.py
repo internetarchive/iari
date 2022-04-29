@@ -5,6 +5,7 @@ from unittest import TestCase
 from pydantic import ValidationError
 from wikibaseintegrator.models import Claim
 from wikibaseintegrator.wbi_exceptions import MWApiError
+from wikibaseintegrator.wbi_helpers import execute_sparql_query
 
 import config
 from src import console, WCDItem
@@ -206,3 +207,43 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations()
         with self.assertRaises(ValidationError):
             wc.entity_url()
+
+    def test_get_all_page_items(self):
+        wc = WikiCitations()
+        result = execute_sparql_query(
+            """
+                prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
+                prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
+                SELECT ?item WHERE {
+                  ?item wcdt:P10 wcd:Q6
+                }
+                """
+        )
+        console.print(result)
+        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
+        bindings = result["results"]["bindings"]
+        assert len(bindings) > 0
+        # exit()
+        # items = wc.__get_all_page_items__()
+        # if items is None or len(items) == 0:
+        #     self.fail("Got no items")
+
+    def test_get_all_reference_items(self):
+        wc = WikiCitations()
+        result = execute_sparql_query(
+            """
+            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
+            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
+            SELECT ?item WHERE {
+                ?item wcdt:P10 wcd:Q4
+            }
+            """
+        )
+        console.print(result)
+        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
+        bindings = result["results"]["bindings"]
+        assert len(bindings) > 0
+        # exit()
+        # items = wc.__get_all_page_items__()
+        # if items is None or len(items) == 0:
+        #     self.fail("Got no items")
