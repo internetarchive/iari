@@ -544,6 +544,10 @@ class WikiCitations(BaseModel):
         hash_claim = datatypes.String(
             prop_nr=WCDProperty.HASH.value, value=wikipedia_page.md5hash
         )
+        instance_of = datatypes.Item(
+            prop_nr=WCDProperty.INSTANCE_OF.value,
+            value=WCDItem.WIKIPEDIA_PAGE.value,
+        )
         last_update = datatypes.Time(
             prop_nr=WCDProperty.LAST_UPDATE.value,
             time=datetime.utcnow()  # Fetched today
