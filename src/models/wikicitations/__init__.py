@@ -1,7 +1,9 @@
 import logging
 from datetime import datetime, timezone
+from time import sleep
 from typing import Any, Optional, List, Dict
 
+import requests
 from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
