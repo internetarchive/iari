@@ -252,12 +252,15 @@ class WikipediaPage(BaseModel):
         logger.info("Reference inserted into the hash database")
 
     def __page_has_already_been_uploaded__(self) -> bool:
+        """This checks whether the page has already been uploaded by checking the cache"""
         if self.cache is None:
             self.__setup_cache__()
         wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
         if wcdqid is None:
+            logger.debug("Page not found in the cache")
             return False
         else:
+            logger.debug("Page found in the cache")
             return True
 
     def __parse_templates__(self):

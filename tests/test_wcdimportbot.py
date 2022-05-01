@@ -1,6 +1,7 @@
+from time import sleep
 from unittest import TestCase
 
-from src import WcdImportBot
+from src import WcdImportBot, WikiCitations, console
 
 
 class TestWcdImportBot(TestCase):
@@ -38,6 +39,16 @@ class TestWcdImportBot(TestCase):
     #     bot.print_statistics()
 
     # DISABLED because we don't want to rinse all items every time we run all tests
-    # def test_rinse_all_items_and_cache(self):
-    #     bot = WcdImportBot()
-    #     bot.rinse_all_items_and_cache()
+    # FIXME test against a test Wikibase instance so Mark can play with the production one himself
+    def test_rinse_all_items_and_cache(self):
+        bot = WcdImportBot()
+        bot.rinse_all_items_and_cache()
+        console.print("waiting 60 seconds for WDQS to sync after removal of all items")
+        sleep(30)
+        wc = WikiCitations()
+        items = wc.__extract_item_ids__(sparql_result=wc.__get_all_page_items__())
+        if items is not None and len(items) > 0:
+            self.fail()
+        items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
+        if items is not None and len(items) > 0:
+            self.fail()
