@@ -1,11 +1,11 @@
 import logging
 from typing import List
 from unittest import TestCase
+from requests import HTTPError
 
 from pydantic import ValidationError
 from wikibaseintegrator.models import Claim
 from wikibaseintegrator.wbi_exceptions import MWApiError
-from wikibaseintegrator.wbi_helpers import execute_sparql_query
 
 import config
 from src import console, WCDItem
@@ -210,15 +210,7 @@ class TestWikiCitations(TestCase):
 
     def test_get_all_page_items(self):
         wc = WikiCitations()
-        result = execute_sparql_query(
-            """
-                prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
-                prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
-                SELECT ?item WHERE {
-                  ?item wcdt:P10 wcd:Q6
-                }
-                """
-        )
+        result = wc.__get_all_page_items__()
         console.print(result)
         # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
         bindings = result["results"]["bindings"]
@@ -230,15 +222,7 @@ class TestWikiCitations(TestCase):
 
     def test_get_all_reference_items(self):
         wc = WikiCitations()
-        result = execute_sparql_query(
-            """
-            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
-            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
-            SELECT ?item WHERE {
-                ?item wcdt:P10 wcd:Q4
-            }
-            """
-        )
+        result = wc.__get_all_reference_items__()
         console.print(result)
         # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
         bindings = result["results"]["bindings"]
@@ -247,3 +231,8 @@ class TestWikiCitations(TestCase):
         # items = wc.__get_all_page_items__()
         # if items is None or len(items) == 0:
         #     self.fail("Got no items")
+
+    def test_get_items_via_sparql(self):
+        wc = WikiCitations()
+        with self.assertRaises(HTTPError):
+            wc.__get_items_via_sparql__(query="test")
