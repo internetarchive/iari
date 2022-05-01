@@ -4,7 +4,8 @@ pydantic~=1.9.0
 pywikibot~=7.0.0
 mwparserfromhell
 #git+http://github.com/LeMyst/WikibaseIntegrator@v0.12.0rc3#egg=wikibaseintegrator
-git+http://github.com/LeMyst/WikibaseIntegrator@rewrite-wbi#egg=wikibaseintegrator
+#git+http://github.com/LeMyst/WikibaseIntegrator@rewrite-wbi#egg=wikibaseintegrator
+git+http://github.com/LeMyst/WikibaseIntegrator@04a6f4c148ba8e6e47e51a01b61d34b845ff88ba#egg=wikibaseintegrator
 rich~=11.2.0
 marshmallow~=3.15.0
 pyssdb~=0.4.2
