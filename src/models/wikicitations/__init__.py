@@ -157,7 +157,7 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def __get_items_via_sparql__(self, query: str) -> Optional[Dict[str, Dict]]:
         self.__setup_wbi__()
-        results = execute_sparql_query(query)
+        return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
 
     @validate_arguments
     def __prepare_person_claims__(
