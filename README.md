@@ -80,3 +80,45 @@ supported_templates = [
     "cite thesis",
     "cite web",
 ]
+
+# Installation
+Clone the git repo:
+
+`$ git clone https://github.com/internetarchive/wcdimportbot.git`
+
+# Setup
+Copy config.py.sample -> config.py and 
+enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251t8o3nwgqov0c0h8gvqt20" 
+
+# Features
+Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
+## Import a page
+The bot can import any Wikipedia page (in English Wikipedia)
+
+`$ python wcdimportbot.py --import "title of page"` 
+
+## Rinse all items from the Wikibase
+To delete all the imported items e.g. 
+after changes in the data model run
+
+`$ python wcdimportbot.py --rinse`
+
+# Help
+```
+usage: wcdimportbot.py [-h] [-i IMPORT_TITLE] [--rinse]
+
+    WCD Import Bot imports references and pages from Wikipedia
+
+    Example adding one page:
+    '$ wcdimportbot.py --import-title "Easter Island"'
+
+    Example rinsing the Wikibase and the cache:
+    '$ wcdimportbot.py --rinse'
+
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i IMPORT_TITLE, --import-title IMPORT_TITLE
+                        Title to import from a Wikipedia (Defaults to English Wikipedia for now)
+  --rinse               Rinse all page and reference items and delete the cache
+```
