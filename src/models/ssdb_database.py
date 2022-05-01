@@ -18,10 +18,15 @@ class SsdbDatabase(BaseModel):
     connection: Optional[Any]
 
     def connect(self):
-        self.connection = pyssdb.Client(
-            host=self.host,
-            port=self.port,
-        )
+        try:
+            self.connection = pyssdb.Client(
+                host=self.host,
+                port=self.port,
+            )
+        except ConnectionRefusedError as e:
+            raise ConnectionRefusedError(
+                f"Could not connect to the AWS SSDB cache, got {e}"
+            )
 
     def get_info(self):
         return self.connection.info()
