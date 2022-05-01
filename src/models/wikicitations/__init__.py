@@ -1,9 +1,7 @@
 import logging
 from datetime import datetime, timezone
-from time import sleep
 from typing import Any, Optional, List, Dict
 
-import requests
 from pydantic import BaseModel, validate_arguments
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
@@ -23,9 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 class WikiCitations(BaseModel):
-    """This class models the WikiCitations Wikibase and handles all uploading to it
+    """This class models the WikiCitations Wikibase
+    and handles all uploading to it
 
-    We want to create items for all Wikipedia pages and references with a unique hash
+    We want to create items for all Wikipedia pages
+    and references with a unique hash
 
     Terminology:
     page_reference is a reference that appear in a Wikipedia page
