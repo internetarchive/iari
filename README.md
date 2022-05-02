@@ -89,7 +89,7 @@ Log into the AWS server via putty or a virtual terminal in Linux/Mac OSX.
 You will need to generate a public SSH key and have 
 an account set up before being able to log in. 
 
-Start GNU screen
+Start GNU screen (if you want to have a persisting session)
 `$ screen -D -RR`
 
 Now you are ready to install and setup the bot.
@@ -106,8 +106,11 @@ Install the dependencies:
 
 [Generate a botpassword](https://wikicitations.wiki.opencura.com/w/index.php?title=Special:UserLogin&returnto=Special%3ABotPasswords&returntoquery=&force=BotPasswords)
 
-Copy config.py.sample -> config.py and 
+Copy config.py.sample -> config.py 
+`$ cp config.py.sample config.py`
+and 
 enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251t8o3nwgqov0c0h8gvqt20"
+`$ nano config.py`
 
 If you want to delete items from the Wikibase, ask an administrator of the Wikibase to become admin.
 
