@@ -14,7 +14,8 @@ class SsdbDatabase(BaseModel):
     we don't use it because it is sent in clear text and that is pretty useless"""
 
     port: int = 8888  # "6379"
-    host: str = "18.217.22.248"
+    host: str = "127.0.0.0"
+    # host: str = "archive-wcd.aws.scatter.red"
     connection: Optional[Any]
 
     def connect(self):
