@@ -87,8 +87,16 @@ Clone the git repo:
 `$ git clone https://github.com/internetarchive/wcdimportbot.git`
 
 # Setup
+Install the dependencies:
+
+`$ pip install -r requirements.txt`
+
+[Generate a botpassword](https://wikicitations.wiki.opencura.com/w/index.php?title=Special:UserLogin&returnto=Special%3ABotPasswords&returntoquery=&force=BotPasswords)
+
 Copy config.py.sample -> config.py and 
-enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251t8o3nwgqov0c0h8gvqt20" 
+enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251t8o3nwgqov0c0h8gvqt20"
+
+If you want to delete items from the Wikibase, ask an administrator of the Wikibase to become admin.
 
 # Features
 Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
