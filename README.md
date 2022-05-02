@@ -81,6 +81,19 @@ supported_templates = [
     "cite web",
 ]
 
+# Running the bot in AWS
+Because of security limitations of SSDB it is recommended 
+to only run the bot on the same server as the SSDB instance.
+
+Log into the AWS server via putty or a virtual terminal in Linux/Mac OSX. 
+You will need to generate a public SSH key and have 
+an account set up before being able to log in. 
+
+Start GNU screen
+`$ screen -D -RR`
+
+Now you are ready to install and setup the bot.
+
 # Installation
 Clone the git repo:
 
@@ -97,6 +110,7 @@ Copy config.py.sample -> config.py and
 enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251t8o3nwgqov0c0h8gvqt20"
 
 If you want to delete items from the Wikibase, ask an administrator of the Wikibase to become admin.
+
 
 # Features
 Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
