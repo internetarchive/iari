@@ -65,6 +65,19 @@ class WikipediaPage(BaseModel):
         return len(self.references)
 
     @property
+    def page_already_present_in_wcd(self) -> bool:
+        """This checks whether the page has already been uploaded by checking the cache"""
+        if self.cache is None:
+            self.__setup_cache__()
+        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
+        if wcdqid is None:
+            logger.debug("Page not found in the cache")
+            return False
+        else:
+            logger.debug("Page found in the cache")
+            return True
+
+    @property
     def page_id(self):
         """Helper property"""
         # this id is useful when talking to WikipediaCitations because it is unique
@@ -281,17 +294,6 @@ class WikipediaPage(BaseModel):
         self.cache.add_reference(reference=reference, wcdqid=wcdqid)
         logger.info("Reference inserted into the hash database")
 
-    def __page_has_already_been_uploaded__(self) -> bool:
-        """This checks whether the page has already been uploaded by checking the cache"""
-        if self.cache is None:
-            self.__setup_cache__()
-        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
-        if wcdqid is None:
-            logger.debug("Page not found in the cache")
-            return False
-        else:
-            logger.debug("Page found in the cache")
-            return True
     def __insert_website_in_cache__(
         self, reference: WikipediaPageReference, wcdqid: str
     ):
@@ -389,7 +391,9 @@ class WikipediaPage(BaseModel):
     ):
         # Here we get the reference back with WCDQID
         if config.cache_and_upload_enabled:
-            wcdqid = self.__upload_website_to_wikicitations__(reference=reference)
+            wcdqid = self.__upload_website_and_insert_in_the_cache__(
+                reference=reference
+            )
             if wcdqid is None:
                 raise ValueError("WCDQID was None")
             if reference.first_level_domain_of_url_hash is None:
@@ -430,7 +434,7 @@ class WikipediaPage(BaseModel):
         the references and then the page to WikiCitations"""
         # First we check if this page has already been uploaded
         self.__generate_hash__()
-        if not self.page_has_already_been_uploaded():
+        if not self.page_already_present_in_wcd():
             logger.info(
                 "This page is missing from WikiCitations according to the cache"
             )
