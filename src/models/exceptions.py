@@ -10,5 +10,9 @@ class MoreThanOneNumberError(BaseException):
     pass
 
 
+class NotLoggedInError(BaseException):
+    pass
+
+
 class TimeParseException(BaseException):
     pass

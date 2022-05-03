@@ -3,7 +3,7 @@ import logging
 from typing import List, Optional, Any
 
 from pydantic import BaseModel, validate_arguments
-from pywikibot import Page, Site
+from pywikibot import Page, Site, BaseSite  # type: ignore
 
 import config
 from src.helpers import console
@@ -100,11 +100,11 @@ class WcdImportBot(BaseModel):
         count = 0
         # https://stackoverflow.com/questions/59605802/
         # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
-        site = prepare_pywiki_site()
+        site: BaseSite = prepare_pywiki_site()
         for page in site.allpages(namespace=0):
             if count == self.max_count:
                 break
-            page: Page = page
+            # page: Page = page
             if not page.isRedirectPage():
                 count += 1
                 # console.print(count)

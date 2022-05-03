@@ -2,10 +2,15 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Optional, List, Dict
 
-from pydantic import BaseModel, validate_arguments
-from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
-from wikibaseintegrator.entities import ItemEntity
-from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
+from pydantic import BaseModel, validate_arguments, NoneStr
+from wikibaseintegrator import (
+    wbi_config,
+    datatypes,
+    WikibaseIntegrator,
+    wbi_login,
+)  # type: ignore
+from wikibaseintegrator.entities import ItemEntity  # type: ignore
+from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page
 
 import config
@@ -163,7 +168,7 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def __prepare_person_claims__(
         self,
-        use_list: List[Person],
+        use_list: Optional[List[Person]],
         property: WCDProperty,
     ):
         """Prepare claims using the specified property and list of person objects"""
@@ -245,18 +250,21 @@ class WikiCitations(BaseModel):
         """Prepare the item citations and add a reference
         to in which revision it was found and the retrieval date"""
         logger.info("Preparing item citations")
-        claims = []
-        for reference in wikipedia_page.references:
-            if reference.wikicitations_qid is not None:
-                logger.debug("Appending to citations")
-                claims.append(
-                    datatypes.Item(
-                        prop_nr=WCDProperty.CITATIONS.value,
-                        value=reference.wikicitations_qid,
-                        references=self.reference_claim,
+        if wikipedia_page.references is not None:
+            claims = []
+            for reference in wikipedia_page.references:
+                if reference.wikicitations_qid is not None:
+                    logger.debug("Appending to citations")
+                    claims.append(
+                        datatypes.Item(
+                            prop_nr=WCDProperty.CITATIONS.value,
+                            value=reference.wikicitations_qid,
+                            references=self.reference_claim,
+                        )
                     )
-                )
-        return claims
+            return claims
+        else:
+            return None
 
     @validate_arguments
     def __prepare_new_reference_item__(
@@ -853,22 +861,26 @@ class WikiCitations(BaseModel):
     ) -> Optional[List[Claim]]:
         # pseudo code
         # for each page_reference in the page that
-        claims = []
-        for page_reference in wikipedia_page.references:
-            if not page_reference.has_hash:
-                # generate string statements
-                claims.append(
-                    self.__prepare_string_citation__(page_reference=page_reference)
-                )
-        return claims
+        if wikipedia_page.references is not None:
+            claims = []
+            for page_reference in wikipedia_page.references:
+                if not page_reference.has_hash:
+                    # generate string statements
+                    claims.append(
+                        self.__prepare_string_citation__(page_reference=page_reference)
+                    )
+            return claims
+        else:
+            return None
 
     @staticmethod
-    def __setup_wbi__():
+    def __setup_wbi__() -> None:
         wbi_config.config["USER_AGENT"] = "wcdimportbot"
         wbi_config.config["WIKIBASE_URL"] = config.wikibase_url
         wbi_config.config["MEDIAWIKI_API_URL"] = config.mediawiki_api_url
         wbi_config.config["MEDIAWIKI_INDEX_URL"] = config.mediawiki_index_url
         wbi_config.config["SPARQL_ENDPOINT_URL"] = config.sparql_endpoint_url
+        return None
 
     def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
         if item is None:
@@ -886,6 +898,7 @@ class WikiCitations(BaseModel):
             return new_item.id
         else:
             print("skipped upload")
+            return None
 
     def delete_all_page_and_reference_items(self):
         """This function deletes first the page item and then the reference items"""
@@ -903,7 +916,7 @@ class WikiCitations(BaseModel):
         self,
         page_reference: WikipediaPageReference,
         wikipedia_page: WikipediaPage,
-    ) -> str:
+    ) -> NoneStr:
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_website_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
@@ -914,7 +927,7 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
-    ) -> str:
+    ) -> NoneStr:
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
@@ -923,7 +936,7 @@ class WikiCitations(BaseModel):
         return wcdqid
 
     @validate_arguments
-    def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> str:
+    def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> NoneStr:
         logging.debug("prepare_and_upload_wikipedia_page_item: Running")
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
