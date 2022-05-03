@@ -89,7 +89,7 @@ class WikiCitations(BaseModel):
     def __delete_item__(self, item_id: str):
         if config.press_enter_to_continue:
             input(f"Do you want to delete {item_id}?")
-
+        logger.debug(f"trying to log in with {config.user} and {config.pwd}")
         return delete_page(
             title=f"Item:{item_id}",
             # deletetalk=True,
