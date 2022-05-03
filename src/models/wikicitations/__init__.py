@@ -833,6 +833,13 @@ class WikiCitations(BaseModel):
         self.__delete_all_page_items__()
         self.__delete_all_reference_items__()
 
+    @validate_arguments
+    def get_item(self, item_id: str) -> Optional[ItemEntity]:
+        """Get one item from WikiCitations"""
+        self.__setup_wbi__()
+        wbi = WikibaseIntegrator()
+        return wbi.item.get(item_id)
+
     @staticmethod
     @validate_arguments
     def entity_url(qid: str):

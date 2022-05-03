@@ -114,13 +114,17 @@ enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251
 
 If you want to delete items from the Wikibase, ask an administrator of the Wikibase to become admin.
 
-
 # Features
 Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
 ## Import a page
 The bot can import any Wikipedia page (in English Wikipedia)
 
 `$ python wcdimportbot.py --import "title of page"` 
+
+## Delete a page
+The bot can delete any page item (Defaults to English Wikipedia)
+
+`$ python wcdimportbot.py --delete-page "title of page"` 
 
 ## Rinse all items from the Wikibase
 To delete all the imported items e.g. 
