@@ -1,13 +1,15 @@
 import logging
+from time import sleep
 from typing import List
 from unittest import TestCase
+from requests import HTTPError
 
 from pydantic import ValidationError
 from wikibaseintegrator.models import Claim
 from wikibaseintegrator.wbi_exceptions import MWApiError
 
 import config
-from src import console, WCDItem
+from src import console, WCDItem, WcdImportBot
 from src.models.wikicitations import WCDProperty, WikiCitations
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
@@ -19,16 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 class TestWikiCitations(TestCase):
-    def test_entity_url(self):
-        wc = WikiCitations()
-        result = wc.entity_url(qid="Q1")
-        assert result == "https://wikicitations.wiki.opencura.com/wiki/Item:Q1"
-
-    def test_entity_url_missing_arguments(self):
-        wc = WikiCitations()
-        with self.assertRaises(ValidationError):
-            wc.entity_url()
-
     def test_prepare_new_reference_item(self):
         from src.models.wikicitations import WikiCitations
 
@@ -206,3 +198,59 @@ class TestWikiCitations(TestCase):
     #         language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
     #     )
     #     wc.__delete_all_reference_items__()
+
+    def test_entity_url(self):
+        wc = WikiCitations()
+        result = wc.entity_url(qid="Q1")
+        assert result == "https://wikicitations.wiki.opencura.com/wiki/Item:Q1"
+
+    def test_entity_url_missing_arguments(self):
+        wc = WikiCitations()
+        with self.assertRaises(ValidationError):
+            wc.entity_url()
+
+    def test_get_all_page_items(self):
+        # first import a page to make sure there is at least one to be found
+        bot = WcdImportBot()
+        # this page has no references
+        bot.get_page_by_title(title="Test")
+        bot.extract_and_upload_all_pages_to_wikicitations()
+        console.print("Waiting 30 seconds for WCDQS to sync")
+        sleep(30)
+        wc = WikiCitations()
+        result = wc.__get_all_page_items__()
+        console.print(result)
+        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
+        bindings = result["results"]["bindings"]
+        assert len(bindings) > 0
+        bot.rinse_all_items_and_cache()
+        # exit()
+        # items = wc.__get_all_page_items__()
+        # if items is None or len(items) == 0:
+        #     self.fail("Got no items")
+
+    def test_get_all_reference_items(self):
+        # first import a page with at least one reference
+        # to make sure there is at least one to be found
+        bot = WcdImportBot()
+        # this page has no references
+        bot.get_page_by_title(title="Will Pan's Freestyle Remix 2005")
+        bot.extract_and_upload_all_pages_to_wikicitations()
+        console.print("Waiting 30 seconds for WCDQS to sync")
+        sleep(30)
+        wc = WikiCitations()
+        result = wc.__get_all_reference_items__()
+        console.print(result)
+        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
+        bindings = result["results"]["bindings"]
+        assert len(bindings) > 0
+        bot.rinse_all_items_and_cache()
+        # exit()
+        # items = wc.__get_all_page_items__()
+        # if items is None or len(items) == 0:
+        #     self.fail("Got no items")
+
+    def test_get_items_via_sparql(self):
+        wc = WikiCitations()
+        with self.assertRaises(HTTPError):
+            wc.__get_items_via_sparql__(query="test")

@@ -65,16 +65,6 @@ class WikipediaPage(BaseModel):
         return len(self.references)
 
     @property
-    def page_has_already_been_uploaded(self) -> bool:
-        if self.cache is None:
-            self.__setup_cache__()
-        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
-        if wcdqid is None:
-            return False
-        else:
-            return True
-
-    @property
     def page_id(self):
         """Helper property"""
         # this id is useful when talking to WikipediaCitations because it is unique
@@ -291,6 +281,17 @@ class WikipediaPage(BaseModel):
         self.cache.add_reference(reference=reference, wcdqid=wcdqid)
         logger.info("Reference inserted into the hash database")
 
+    def __page_has_already_been_uploaded__(self) -> bool:
+        """This checks whether the page has already been uploaded by checking the cache"""
+        if self.cache is None:
+            self.__setup_cache__()
+        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
+        if wcdqid is None:
+            logger.debug("Page not found in the cache")
+            return False
+        else:
+            logger.debug("Page found in the cache")
+            return True
     def __insert_website_in_cache__(
         self, reference: WikipediaPageReference, wcdqid: str
     ):
