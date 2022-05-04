@@ -134,12 +134,15 @@ after changes in the data model run
 
 # Help
 ```
-usage: wcdimportbot.py [-h] [-i IMPORT_TITLE] [--rinse]
+usage: wcdimportbot.py [-h] [-d DELETE_PAGE] [-i IMPORT_TITLE] [--rinse]
 
     WCD Import Bot imports references and pages from Wikipedia
 
     Example adding one page:
     '$ wcdimportbot.py --import-title "Easter Island"'
+
+    Example deleting one page:
+    '$ wcdimportbot.py --delete-page "Easter Island"'
 
     Example rinsing the Wikibase and the cache:
     '$ wcdimportbot.py --rinse'
@@ -147,6 +150,9 @@ usage: wcdimportbot.py [-h] [-i IMPORT_TITLE] [--rinse]
 
 optional arguments:
   -h, --help            show this help message and exit
+  -d DELETE_PAGE, --delete-page DELETE_PAGE
+                        Delete a single page from WikiCitations and the cache by title (Defaults to English Wikipedia for now). Note: This does not delete the reference
+                        items associated with the page.
   -i IMPORT_TITLE, --import-title IMPORT_TITLE
                         Title to import from a Wikipedia (Defaults to English Wikipedia for now)
   --rinse               Rinse all page and reference items and delete the cache
