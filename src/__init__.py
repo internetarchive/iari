@@ -120,7 +120,7 @@ class WcdImportBot(BaseModel):
                 if page.md5hash is not None:
                     cache.delete_key(key=page.md5hash)
                     console.print(
-                        f"Deleted {title} from both the WikiCitations and the"
+                        f"Deleted {title} from both WikiCitations and the cache"
                     )
                 else:
                     raise ValueError("md5hash was None")
