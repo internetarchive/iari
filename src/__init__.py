@@ -76,6 +76,7 @@ class WcdImportBot(BaseModel):
         """,
         )
         parser.add_argument(
+            "-d",
             "--delete-page",
             help=(
                 "Delete a single page from WikiCitations and the cache by title "
