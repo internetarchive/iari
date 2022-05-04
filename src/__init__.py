@@ -16,7 +16,7 @@ from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 pywikibot_logger = logging.getLogger("pywiki")
-pywikibot_logger.setLevel(logging.WARNING)
+pywikibot_logger.setLevel(config.loglevel)
 
 
 class WcdImportBot(BaseModel):
