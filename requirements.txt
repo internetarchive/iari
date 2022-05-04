@@ -1,7 +1,7 @@
 #wikidataintegrator
-requests
+requests~=2.27.1
 pydantic~=1.9.0
-pywikibot~=7.0.0
+pywikibot~=7.2.0
 mwparserfromhell
 #git+http://github.com/LeMyst/WikibaseIntegrator@v0.12.0rc3#egg=wikibaseintegrator
 #git+http://github.com/LeMyst/WikibaseIntegrator@rewrite-wbi#egg=wikibaseintegrator
