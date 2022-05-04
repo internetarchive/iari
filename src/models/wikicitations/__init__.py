@@ -90,10 +90,15 @@ class WikiCitations(BaseModel):
         if config.press_enter_to_continue:
             input(f"Do you want to delete {item_id}?")
         logger.debug(f"trying to log in with {config.user} and {config.pwd}")
+        self.__setup_wbi__()
         return delete_page(
             title=f"Item:{item_id}",
             # deletetalk=True,
-            login=wbi_login.Login(user=config.user, password=config.pwd),
+            login=wbi_login.Login(
+                user=config.user,
+                password=config.pwd,
+                mediawiki_api_url=config.mediawiki_api_url,
+            ),
         )
 
     @validate_arguments
