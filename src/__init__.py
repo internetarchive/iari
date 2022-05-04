@@ -3,7 +3,7 @@ import logging
 from typing import List, Optional, Any
 
 from pydantic import BaseModel, validate_arguments
-from pywikibot import Page, Site
+from pywikibot import Site  # type: ignore
 
 import config
 from src.helpers import console
@@ -15,6 +15,8 @@ from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
+pywikibot_logger = logging.getLogger("pywiki")
+pywikibot_logger.setLevel(logging.WARNING)
 
 
 class WcdImportBot(BaseModel):
@@ -58,7 +60,8 @@ class WcdImportBot(BaseModel):
                 / self.total_number_of_references
             )
 
-    def __setup_argparse_and_return_args__(self):
+    @staticmethod
+    def __setup_argparse_and_return_args__():
         # TODO add possibility to specify the wikipedia language version to work on
         parser = argparse.ArgumentParser(
             formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -103,7 +106,7 @@ class WcdImportBot(BaseModel):
         for page in site.allpages(namespace=0):
             if count == self.max_count:
                 break
-            page: Page = page
+            # page: Page = page
             if not page.isRedirectPage():
                 count += 1
                 # console.print(count)
@@ -138,7 +141,8 @@ class WcdImportBot(BaseModel):
             f"a total of {len(self.pages)} pages."
         )
 
-    def rinse_all_items_and_cache(self):
+    @staticmethod
+    def rinse_all_items_and_cache():
         """Delete all page and reference items and clear the SSDB cache"""
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
