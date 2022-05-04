@@ -234,7 +234,7 @@ class TestWikiCitations(TestCase):
         # to make sure there is at least one to be found
         bot = WcdImportBot()
         # this page has no references
-        bot.get_page_by_title(title="Will Pan's Freestyle Remix 2005")
+        bot.get_page_by_title(title="Muskö naval base")
         bot.extract_and_upload_all_pages_to_wikicitations()
         console.print("Waiting 30 seconds for WCDQS to sync")
         sleep(30)
