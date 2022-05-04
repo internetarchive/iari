@@ -100,7 +100,8 @@ class WcdImportBot(BaseModel):
         return parser.parse_args()
 
     @validate_arguments
-    def delete_one_page(self, title: str):
+    def delete_one_page(self, title: str) -> str:
+        """Deletes one page from WikiCitations"""
         with console.status(f"Deleting {title}"):
             page = WikipediaPage(
                 language_code=self.language_code,
@@ -122,6 +123,7 @@ class WcdImportBot(BaseModel):
                     console.print(
                         f"Deleted {title} from both WikiCitations and the cache"
                     )
+                    return item_id
                 else:
                     raise ValueError("md5hash was None")
             else:

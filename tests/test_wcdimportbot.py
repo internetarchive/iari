@@ -55,7 +55,10 @@ class TestWcdImportBot(TestCase):
 
     def test_delete_one_page(self):
         bot = WcdImportBot()
+        bot.get_page_by_title(title="Test")
+        bot.extract_and_upload_all_pages_to_wikicitations()
         deleted_item_id = bot.delete_one_page(title="Test")
         wc = WikiCitations()
-        item = wc.get_item(item_id=deleted_item_id)
-        assert item is None
+        with self.assertRaises(ValueError):
+            item = wc.get_item(item_id=deleted_item_id)
+            # assert item is None
