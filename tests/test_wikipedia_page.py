@@ -1,8 +1,6 @@
 import logging
 from unittest import TestCase
 
-import pywikibot
-
 import config
 from src import WikipediaPage, WikimediaSite, console
 
@@ -45,9 +43,7 @@ class TestWikipediaPage(TestCase):
     pass
 
     def test_fix_dash(self):
-        site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
         page = WikipediaPage(
-            pywikibot_site=site,
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
         )
@@ -62,3 +58,12 @@ class TestWikipediaPage(TestCase):
                     == "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
                 ):
                     console.print(ref.url, ref.archive_url)
+
+    def test_fetch_page_data_and_parse_the_wikitext(self):
+        page = WikipediaPage(
+            language_code="en",
+            wikimedia_site=WikimediaSite.WIKIPEDIA,
+        )
+        page.__fetch_page_data__(title="Test")
+        assert page.page_id == 11089416
+        assert page.title == "Test"
