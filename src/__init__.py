@@ -89,36 +89,36 @@ class WcdImportBot(BaseModel):
     def extract_and_upload_all_pages_to_wikicitations(self):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]
 
-    def get_pages_by_range(self) -> None:
-        from pywikibot import Site  # type: ignore
-
-        def prepare_pywiki_site():
-            return Site(code=self.language_code, fam=self.wikimedia_site.value)
-
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
-
-        self.pages = []
-        count = 0
-        # https://stackoverflow.com/questions/59605802/
-        # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
-        site = prepare_pywiki_site()
-        for page in site.allpages(namespace=0):
-            if count == self.max_count:
-                break
-            # page: Page = page
-            if not page.isRedirectPage():
-                count += 1
-                # console.print(count)
-                logger.info(f"{page.pageid} {page.title()} {page.isRedirectPage()}")
-                # raise DebugExit()
-                self.pages.append(
-                    WikipediaPage(
-                        pywikibot_page=page,
-                        language_code=self.language_code,
-                        wikimedia_site=self.wikimedia_site,
-                        language_wcditem=self.language_wcditem,
-                    )
-                )
+    # def get_pages_by_range(self) -> None:
+    #     from pywikibot import Site  # type: ignore
+    #
+    #     def prepare_pywiki_site():
+    #         return Site(code=self.language_code, fam=self.wikimedia_site.value)
+    #
+    #     from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+    #
+    #     self.pages = []
+    #     count = 0
+    #     # https://stackoverflow.com/questions/59605802/
+    #     # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
+    #     site = prepare_pywiki_site()
+    #     for page in site.allpages(namespace=0):
+    #         if count == self.max_count:
+    #             break
+    #         # page: Page = page
+    #         if not page.isRedirectPage():
+    #             count += 1
+    #             # console.print(count)
+    #             logger.info(f"{page.pageid} {page.title()} {page.isRedirectPage()}")
+    #             # raise DebugExit()
+    #             self.pages.append(
+    #                 WikipediaPage(
+    #                     wikitext=page.text,
+    #                     language_code=self.language_code,
+    #                     wikimedia_site=self.wikimedia_site,
+    #                     language_wcditem=self.language_wcditem,
+    #                 )
+    #             )
 
     @validate_arguments
     def get_page_by_title(self, title: str):
