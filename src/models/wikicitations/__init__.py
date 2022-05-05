@@ -388,7 +388,7 @@ class WikiCitations(BaseModel):
         )
         revision_id = datatypes.String(
             prop_nr=WCDProperty.PAGE_REVISION_ID.value,
-            value=str(wikipedia_page.revision_id),
+            value=str(wikipedia_page.latest_revision_id),
         )
         claims = [retrieved_date, revision_id]
         citation_reference = Reference()

@@ -3,15 +3,17 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+from datetime import datetime
 from typing import List, Any, Optional, Dict
 
-import pywikibot  # type: ignore
-from pydantic import BaseModel, validate_arguments
-from pywikibot import Page, Site
+import requests
+from dateutil.parser import isoparse
+from pydantic import BaseModel, validate_arguments, NoneStr
 
 import config
-from src.models.wikicitations.enums import WCDItem
+from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import Cache
+from src.models.wikicitations.enums import WCDItem
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
@@ -21,8 +23,6 @@ from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
 )
 
 logger = logging.getLogger(__name__)
-pywikibot_logger = logging.getLogger("pywiki")
-pywikibot_logger.setLevel(config.loglevel)
 
 
 class WikipediaPage(BaseModel):
@@ -31,12 +31,14 @@ class WikipediaPage(BaseModel):
     cache: Optional[Cache]
     language_code: str = "en"
     language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
+    latest_revision_date: Optional[datetime]
+    latest_revision_id: Optional[int]
     max_number_of_item_citations_to_upload: Optional[int]
     md5hash: Optional[str]
+    page_id: Optional[int]
     percent_of_references_with_a_hash: Optional[int]
-    pywikibot_page: Optional[Page]
-    pywikibot_site: Optional[Any]
     references: Optional[List[WikipediaPageReference]]
+    title: NoneStr
     uploaded_item_citations: int = 0
     wikicitations: Optional[Any]  # WikiCitaitons
     wikicitations_qid: Optional[str]
@@ -44,6 +46,7 @@ class WikipediaPage(BaseModel):
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    wikitext: NoneStr
 
     class Config:
         arbitrary_types_allowed = True
@@ -67,12 +70,6 @@ class WikipediaPage(BaseModel):
         return len(self.references)
 
     @property
-    def page_id(self):
-        """Helper property"""
-        # this id is useful when talking to WikipediaCitations because it is unique
-        return int(self.pywikibot_page.pageid)
-
-    @property
     def percent_of_references_with_a_hash(self):
         if self.number_of_references == 0:
             return 0
@@ -82,23 +79,17 @@ class WikipediaPage(BaseModel):
             )
 
     @property
-    def revision_id(self):
-        revid = self.pywikibot_page.latest_revision_id
-        if revid is not None:
-            return revid
-        else:
-            raise ValueError("got no revision id form pywikibot")
-
-    @property
-    def title(self):
+    def underscored_title(self):
         """Helper property"""
-        return self.pywikibot_page.title()
+        if self.title is None:
+            raise ValueError("self.title was None")
+        return self.title.replace(" ", "_")
 
     @property
     def url(self):
         return (
             f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
-            f"wiki/{self.pywikibot_page.title(underscore=True)}"
+            f"wiki/{self.underscored_title}"
         )
 
     @property
@@ -156,10 +147,28 @@ class WikipediaPage(BaseModel):
         #         raise ValueError("self.pywikibot_site was None")
         #     self.__get_wikipedia_page_from_title__()
         # else:
-        if self.pywikibot_page is None:
-            raise ValueError("self.pywikibot_page was None")
         self.__parse_templates__()
         self.__print_hash_statistics__()
+
+    @validate_arguments
+    def __fetch_page_data__(self, title: str) -> str:
+        """This fetches metadata and the latest revision id
+        and date from the MediaWiki REST v1 API"""
+        self.title = title
+        url = f"https://en.wikipedia.org/w/rest.php/v1/page/{title}"
+        headers = {"User-Agent": config.user_agent}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            # TODO read up on the documentation to find out if this is reliable
+            self.latest_revision_id = int(data["latest"]["id"])
+            self.latest_revision_date = isoparse(data["latest"]["timestamp"])
+            self.page_id = int(data["id"])
+            self.wikitext = data["source"]
+        else:
+            raise ValueError(
+                f"Could not fetch page data. Got {response.status_code} from {url}"
+            )
 
     @staticmethod
     def __fix_class_key__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
@@ -225,6 +234,7 @@ class WikipediaPage(BaseModel):
         ).hexdigest()
         logger.debug(self.md5hash)
 
+    @validate_arguments
     def __get_wcdqid_from_cache__(
         self, reference: WikipediaPageReference
     ) -> Optional[str]:
@@ -238,16 +248,11 @@ class WikipediaPage(BaseModel):
 
     @validate_arguments
     def __get_wikipedia_page_from_title__(self, title: str):
-        """Get the page from Wikipedia"""
-        self.__prepare_pywiki_site__()
-        logger.info("Fetching the wikitext")
-        if self.pywikibot_site is None:
-            raise ValueError("did not get what we need")
-        self.pywikibot_page = pywikibot.Page(self.pywikibot_site, title)
+        """Get the page from the Wikimedia site"""
+        logger.info("Fetching the page data")
+        self.__fetch_page_data__(title=title)
 
-        # this id is useful when talking to WikipediaCitations because it is unique
-        # self.page_id = int(self.pywikibot_page.pageid)
-
+    @validate_arguments
     def __insert_in_cache__(self, reference: WikipediaPageReference, wcdqid: str):
         logger.debug("__insert_in_cache__: Running")
         self.cache.add_reference(reference=reference, wcdqid=wcdqid)
@@ -267,13 +272,16 @@ class WikipediaPage(BaseModel):
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
-        raw = self.pywikibot_page.raw_extracted_templates
-        number_of_templates = len(raw)
+        if self.wikitext is None:
+            raise ValueError("self.wikitext was None")
+        # We use the pywikibot template extracting function
+        template_tuples = extract_templates_and_params(self.wikitext, True)
+        number_of_templates = len(template_tuples)
         logger.info(
-            f"Parsing {number_of_templates} templates from {self.pywikibot_page.title()}, see {self.url}"
+            f"Parsing {number_of_templates} templates from {self.title}, see {self.url}"
         )
         self.references = []
-        for template_name, content in raw:
+        for template_name, content in template_tuples:
             # logger.debug(f"working on {template_name}")
             if template_name.lower() in config.supported_templates:
                 parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
@@ -289,18 +297,10 @@ class WikipediaPage(BaseModel):
                 if config.debug_unsupported_templates:
                     logger.debug(f"Template '{template_name.lower()}' not supported")
 
-    def __prepare_pywiki_site__(self):
-        if (self.language_code and self.wikimedia_site) is not None:
-            self.pywikibot_site = Site(
-                code=self.language_code, fam=self.wikimedia_site.value
-            )
-        else:
-            raise ValueError("did not get what we need")
-
     def __print_hash_statistics__(self):
         logger.info(
             f"Hashed {self.percent_of_references_with_a_hash} percent of "
-            f"{len(self.references)} references on page {self.pywikibot_page.title()}"
+            f"{len(self.references)} references on page {self.title}"
         )
 
     def __setup_cache__(self):
@@ -416,7 +416,7 @@ class WikipediaPage(BaseModel):
     #     )
     # def __get_wikipedia_page_from_event__(self):
     #     """Get the page from Wikipedia"""
-    #     logger.info("Fetching the wikitext")
+    #     logger.info("Fetching the parsed_wikitext")
     #     self.pywikibot_page = pywikibot.Page(
     #         self.wikimedia_event.event_stream.pywikibot_site, self.title
     #     )

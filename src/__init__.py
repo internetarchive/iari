@@ -3,7 +3,6 @@ import logging
 from typing import List, Optional, Any
 
 from pydantic import BaseModel, validate_arguments
-from pywikibot import Site  # type: ignore
 
 import config
 from src.helpers import console
@@ -15,8 +14,6 @@ from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
-pywikibot_logger = logging.getLogger("pywiki")
-pywikibot_logger.setLevel(config.loglevel)
 
 
 class WcdImportBot(BaseModel):
@@ -93,6 +90,8 @@ class WcdImportBot(BaseModel):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]
 
     def get_pages_by_range(self) -> None:
+        from pywikibot import Site  # type: ignore
+
         def prepare_pywiki_site():
             return Site(code=self.language_code, fam=self.wikimedia_site.value)
 
