@@ -432,6 +432,10 @@ class WikipediaPage(BaseModel):
                 if self.wikicitations_qid is None:
                     raise ValueError("wcdqid was None")
                 self.cache.add_page(wikipedia_page=self, wcdqid=self.wikicitations_qid)
+            console.print(
+                f"Finished uploading {self.title} to WikiCitations, "
+                f"see {self.url} and {self.wikicitations_url}"
+            )
         else:
             console.print(
                 f"This page has already been uploaded to WikiCitations, "
