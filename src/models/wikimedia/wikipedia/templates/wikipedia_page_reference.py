@@ -517,7 +517,7 @@ class WikipediaPageReference(BaseModel):
                     return person
                 else:
                     logger.warning(
-                        f"Discarded {person} because it did not have both given- and surnames"
+                        f"Discarded {person} because it did not have both given- and surnames or name_string"
                     )
         else:
             # Support cite journal first[1-12] and last[1-12]
@@ -559,7 +559,7 @@ class WikipediaPageReference(BaseModel):
                     return person
                 else:
                     logger.warning(
-                        f"Discarded {person} because it did not have both given- and surnames"
+                        f"Discarded {person} because it did not have both given- and surnames or name_string"
                     )
 
     @validate_arguments
