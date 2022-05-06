@@ -510,7 +510,9 @@ class WikipediaPageReference(BaseModel):
                             self, search_string + str(number) + "_last"
                         )
                 # Guard against empty person objects being returned
-                if (person.given and person.surname) is not None:
+                if (
+                    person.given and person.surname
+                ) is not None or person.name_string is not None:
                     person.number_in_sequence = number
                     return person
                 else:
@@ -550,7 +552,9 @@ class WikipediaPageReference(BaseModel):
                     if attribute == last:
                         person.surname = getattr(self, last)
                 # Guard against empty person objects being returned
-                if (person.given and person.surname) is not None:
+                if (
+                    person.given and person.surname
+                ) is not None or person.name_string is not None:
                     person.number_in_sequence = number
                     return person
                 else:
