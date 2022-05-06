@@ -115,7 +115,7 @@ class WikipediaPage(BaseModel):
                     )
                 )
         else:
-            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(reference=reference)
+            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=reference.md5hash)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.wikicitations_qid = wcdqid
@@ -421,13 +421,15 @@ class WikipediaPage(BaseModel):
             self.__extract_and_parse_references__()
             self.__upload_references_if_missing__()
             # upload a new item for the page with links to all the page_reference items
-            wcdqid = self.wikicitations.prepare_and_upload_wikipedia_page_item(
-                wikipedia_page=self,
+            self.wikicitations_qid = (
+                self.wikicitations.prepare_and_upload_wikipedia_page_item(
+                    wikipedia_page=self,
+                )
             )
             if config.use_cache:
-                if wcdqid is None:
+                if self.wikicitations_qid is None:
                     raise ValueError("wcdqid was None")
-                self.cache.add_page(wikipedia_page=self, wcdqid=wcdqid)
+                self.cache.add_page(wikipedia_page=self, wcdqid=self.wikicitations_qid)
         else:
             logger.info("This page has already been uploaded to WikiCitations")
 
