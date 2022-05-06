@@ -33,13 +33,10 @@ class WikipediaPage(BaseModel):
     language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
     latest_revision_date: Optional[datetime]
     latest_revision_id: Optional[int]
-    max_number_of_item_citations_to_upload: Optional[int]
     md5hash: Optional[str]
     page_id: Optional[int]
-    percent_of_references_with_a_hash: Optional[int]
     references: Optional[List[WikipediaPageReference]]
     title: NoneStr
-    uploaded_item_citations: int = 0
     wikicitations: Optional[Any]  # WikiCitaitons
     wikicitations_qid: Optional[str]
     wikimedia_event: Optional[
@@ -148,6 +145,10 @@ class WikipediaPage(BaseModel):
                     )
                 elif len(wcdqids) == 1:
                     return wcdqids[0]
+            else:
+                return None
+        else:
+            raise ValueError("self.wikicitations was None")
 
     def __extract_and_parse_references__(self):
         logger.info("Extracting references now")
@@ -164,7 +165,7 @@ class WikipediaPage(BaseModel):
         self.__print_hash_statistics__()
 
     @validate_arguments
-    def __fetch_page_data__(self, title: str) -> str:
+    def __fetch_page_data__(self, title: str) -> None:
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API"""
         self.title = title
@@ -253,9 +254,12 @@ class WikipediaPage(BaseModel):
     ) -> Optional[str]:
         if self.cache is None:
             self.__setup_cache__()
-        wcdqid = self.cache.check_reference_and_get_wikicitations_qid(
-            reference=reference
-        )
+        if self.cache is not None:
+            wcdqid = self.cache.check_reference_and_get_wikicitations_qid(
+                reference=reference
+            )
+        else:
+            raise ValueError("self.cache was None")
         logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
 
@@ -268,7 +272,12 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __insert_in_cache__(self, reference: WikipediaPageReference, wcdqid: str):
         logger.debug("__insert_in_cache__: Running")
-        self.cache.add_reference(reference=reference, wcdqid=wcdqid)
+        if self.cache is None:
+            self.__setup_cache__()
+        if self.cache is not None:
+            self.cache.add_reference(reference=reference, wcdqid=wcdqid)
+        else:
+            raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
 
     def __page_has_already_been_uploaded__(self) -> bool:
