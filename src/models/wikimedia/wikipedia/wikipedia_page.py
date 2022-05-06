@@ -5,6 +5,7 @@ import json
 import logging
 from datetime import datetime
 from typing import List, Any, Optional, Dict
+from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
@@ -87,7 +88,7 @@ class WikipediaPage(BaseModel):
     def url(self):
         return (
             f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
-            f"wiki/{self.underscored_title}"
+            f"wiki/{quote(self.underscored_title)}"
         )
 
     @property
@@ -433,7 +434,8 @@ class WikipediaPage(BaseModel):
                 self.cache.add_page(wikipedia_page=self, wcdqid=self.wikicitations_qid)
         else:
             console.print(
-                f"This page has already been uploaded to WikiCitations, see {self.url}"
+                f"This page has already been uploaded to WikiCitations, "
+                f"see {self.url} and {self.wikicitations_url}"
             )
 
     # def __match_subjects__(self):
