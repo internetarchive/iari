@@ -11,6 +11,7 @@ from dateutil.parser import isoparse
 from pydantic import BaseModel, validate_arguments, NoneStr
 
 import config
+from src import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import Cache
 from src.models.wikicitations.enums import WCDItem
@@ -431,7 +432,9 @@ class WikipediaPage(BaseModel):
                     raise ValueError("wcdqid was None")
                 self.cache.add_page(wikipedia_page=self, wcdqid=self.wikicitations_qid)
         else:
-            logger.info("This page has already been uploaded to WikiCitations")
+            console.print(
+                f"This page has already been uploaded to WikiCitations, see {self.url}"
+            )
 
     # def __match_subjects__(self):
     #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
