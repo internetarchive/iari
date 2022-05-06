@@ -1,6 +1,7 @@
 from time import sleep
 from unittest import TestCase
 
+import config
 from src import WcdImportBot, WikiCitations, console
 
 
@@ -43,8 +44,10 @@ class TestWcdImportBot(TestCase):
     def test_rinse_all_items_and_cache(self):
         bot = WcdImportBot()
         bot.rinse_all_items_and_cache()
-        console.print("waiting 60 seconds for WDQS to sync after removal of all items")
-        sleep(30)
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
         wc = WikiCitations()
         items = wc.__extract_item_ids__(sparql_result=wc.__get_all_page_items__())
         if items is not None and len(items) > 0:

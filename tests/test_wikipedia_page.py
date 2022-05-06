@@ -76,7 +76,10 @@ class TestWikipediaPage(TestCase):
         # page.__fetch_page_data__(title="Test")
         page.extract_and_upload_to_wikicitations()
         wcdqid = page.wikicitations_qid
-        console.print("Waiting 10 sec for WCDQS to sync")
-        sleep(10)
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
         check_wcdqid = page.__get_wcdqid_from_hash_via_sparql__(md5hash=page.md5hash)
+        print(wcdqid, check_wcdqid)
         assert wcdqid == check_wcdqid
