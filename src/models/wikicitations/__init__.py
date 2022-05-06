@@ -97,7 +97,9 @@ class WikiCitations(BaseModel):
         )
 
     @validate_arguments
-    def __extract_item_ids__(self, sparql_result: Optional[Dict]):
+    def __extract_item_ids__(
+        self, sparql_result: Optional[Dict]
+    ) -> Optional[List[str]]:
         """Extract item ids from the sparql result"""
         if sparql_result is not None:
             bindings = sparql_result["results"]["bindings"]
@@ -156,8 +158,25 @@ class WikiCitations(BaseModel):
 
     @validate_arguments
     def __get_items_via_sparql__(self, query: str) -> Optional[Dict[str, Dict]]:
+        """This is the lowest level function
+        that executes the query with WBI after setting it up"""
         self.__setup_wbi__()
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
+
+    @validate_arguments
+    def __get_wcdqids_from_hash__(self, md5hash: str) -> Optional[List[str]]:
+        """This is a slower SPARQL-powered fallback helper method
+        used when config.use_cache is False"""
+        logger.debug("__get_wcdqid_from_hash__: running")
+        query = f"""
+            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
+            SELECT ?item WHERE {{
+              ?item wcdt:P30 "{md5hash}".
+            }}
+        """
+        return self.__extract_item_ids__(
+            sparql_result=self.__get_items_via_sparql__(query=query)
+        )
 
     @validate_arguments
     def __prepare_person_claims__(
@@ -817,15 +836,12 @@ class WikiCitations(BaseModel):
             logger.debug("Finished item JSON")
             console.print(item.get_json())
             # exit()
-        if config.cache_and_upload_enabled:
-            new_item = item.write(summary="New item imported from Wikipedia")
-            print(f"Added new item {self.entity_url(new_item.id)}")
-            if config.press_enter_to_continue:
-                input("press enter to continue")
-            logger.debug(f"returning new wcdqid: {new_item.id}")
-            return new_item.id
-        else:
-            print("skipped upload")
+        new_item = item.write(summary="New item imported from Wikipedia")
+        print(f"Added new item {self.entity_url(new_item.id)}")
+        if config.press_enter_to_continue:
+            input("press enter to continue")
+        logger.debug(f"returning new wcdqid: {new_item.id}")
+        return new_item.id
 
     def delete_all_page_and_reference_items(self):
         """This function deletes first the page item and then the reference items"""

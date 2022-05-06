@@ -10,7 +10,7 @@ debug_unsupported_templates = False
 include_url_and_first_parameter_in_hash_algorithm = False
 loglevel = logging.WARNING
 press_enter_to_continue = False
-cache_and_upload_enabled = True
+use_cache = False
 user_agent = "wcdimportbot 2.0.0-alpha1"
 
 supported_templates = [

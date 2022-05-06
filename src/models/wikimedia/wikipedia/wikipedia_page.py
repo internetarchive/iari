@@ -106,35 +106,48 @@ class WikipediaPage(BaseModel):
         logger.debug("Checking and uploading page references")
         if reference is None:
             raise ValueError("reference was None")
-        if config.cache_and_upload_enabled is not None:
+        if config.use_cache:
             wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.wikicitations_qid = wcdqid
             else:
-                if self.max_number_of_item_citations_to_upload is not None:
-                    if (
-                        self.uploaded_item_citations
-                        < self.max_number_of_item_citations_to_upload
-                    ):
-                        reference = self.__upload_reference_and_insert_in_the_cache__(
-                            reference=reference
-                        )
-                        self.uploaded_item_citations += 1
-                        logger.info(
-                            f"Added {self.uploaded_item_citations} out "
-                            f"of maximum {self.max_number_of_item_citations_to_upload}"
-                        )
-                    else:
-                        logger.info(
-                            f"Skipping upload of this reference because the maximum number of "
-                            f"{self.max_number_of_item_citations_to_upload} has been reached"
-                        )
-                else:
-                    reference = self.__upload_reference_and_insert_in_the_cache__(
+                reference = (
+                    self.__upload_reference_and_insert_in_the_cache_if_enabled__(
                         reference=reference
                     )
+                )
+        else:
+            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(reference=reference)
+            if wcdqid is not None:
+                logger.debug(f"Got wcdqid:{wcdqid} from the cache")
+                reference.wikicitations_qid = wcdqid
+            else:
+                reference = (
+                    self.__upload_reference_and_insert_in_the_cache_if_enabled__(
+                        reference=reference
+                    )
+                )
         return reference
+
+    @validate_arguments
+    def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
+        """Looks up the WCDQID in WikiCitaitons and returns
+        it if only one found and complains if more than one was"""
+        logger.info("Looking up the WCDQID via SPARQL")
+        if self.wikicitations is None:
+            from src import WikiCitations
+
+            self.wikicitations = WikiCitations()
+        if self.wikicitations is not None:
+            wcdqids = self.wikicitations.__get_wcdqids_from_hash__(md5hash=md5hash)
+            if wcdqids is not None:
+                if len(wcdqids) > 1:
+                    raise ValueError(
+                        "Got more than one WCDQID for a hash. This should never happen"
+                    )
+                elif len(wcdqids) == 1:
+                    return wcdqids[0]
 
     def __extract_and_parse_references__(self):
         logger.info("Extracting references now")
@@ -260,15 +273,33 @@ class WikipediaPage(BaseModel):
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
-        if self.cache is None:
-            self.__setup_cache__()
-        wcdqid = self.cache.check_page_and_get_wikicitations_qid(wikipedia_page=self)
-        if wcdqid is None:
-            logger.debug("Page not found in the cache")
-            return False
+        if config.use_cache:
+            if self.cache is None:
+                self.__setup_cache__()
+            if self.cache is not None:
+                wcdqid = self.cache.check_page_and_get_wikicitations_qid(
+                    wikipedia_page=self
+                )
+            else:
+                raise ValueError("self.cache was None")
+            if wcdqid is None:
+                logger.debug("Page not found in the cache")
+                return False
+            else:
+                logger.debug("Page found in the cache")
+                return True
         else:
-            logger.debug("Page found in the cache")
-            return True
+            # Fallback
+            logger.info("Not using the cache. Falling back to lookup via SPARQL")
+            if self.md5hash is not None:
+                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=self.md5hash)
+            else:
+                raise ValueError("self.md5hash was None")
+            if wcdqid is not None:
+                self.wikicitations_qid = wcdqid
+                return True
+            else:
+                return False
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -321,22 +352,25 @@ class WikipediaPage(BaseModel):
         logger.debug("__upload_reference_to_wikicitations__: Running")
         if self.wikicitations is None:
             self.__setup_wikicitations__()
-        wcdqid = self.wikicitations.prepare_and_upload_reference_item(
-            page_reference=reference, wikipedia_page=self
-        )
-        if wcdqid is None and config.cache_and_upload_enabled is True:
+        if self.wikicitations is not None:
+            wcdqid = self.wikicitations.prepare_and_upload_reference_item(
+                page_reference=reference, wikipedia_page=self
+            )
+        else:
+            raise ValueError("self.wikicitations was None")
+        if wcdqid is None:
             raise ValueError(
                 "Got None instead of WCDQID when trying to upload to WikiCitations"
             )
         return wcdqid
 
     @validate_arguments
-    def __upload_reference_and_insert_in_the_cache__(
+    def __upload_reference_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
     ):
         # Here we get the reference back with WCDQID
-        if config.cache_and_upload_enabled:
-            wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
+        wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
+        if config.use_cache:
             if wcdqid is None:
                 raise ValueError("WCDQID was None")
             if reference.md5hash is None:
@@ -371,10 +405,9 @@ class WikipediaPage(BaseModel):
         # First we check if this page has already been uploaded
         self.__generate_hash__()
         if not self.__page_has_already_been_uploaded__():
-            logger.info(
-                "This page is missing from WikiCitations according to the cache"
-            )
+            logger.info("This page is missing from WikiCitations")
             self.__setup_wikicitations__()
+            self.__fetch_page_data__(title=self.title)
             # extract references and create items for the missing ones first
             self.__extract_and_parse_references__()
             self.__upload_references_if_missing__()
@@ -382,7 +415,7 @@ class WikipediaPage(BaseModel):
             wcdqid = self.wikicitations.prepare_and_upload_wikipedia_page_item(
                 wikipedia_page=self,
             )
-            if config.cache_and_upload_enabled is True:
+            if config.use_cache:
                 if wcdqid is None:
                     raise ValueError("wcdqid was None")
                 self.cache.add_page(wikipedia_page=self, wcdqid=wcdqid)

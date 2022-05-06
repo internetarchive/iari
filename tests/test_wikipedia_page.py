@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 from unittest import TestCase
 
 import config
@@ -67,3 +68,15 @@ class TestWikipediaPage(TestCase):
         page.__fetch_page_data__(title="Test")
         assert page.page_id == 11089416
         assert page.title == "Test"
+
+    def test_get_wcdqid_from_hash_via_sparql(self):
+        page = WikipediaPage(
+            language_code="en", wikimedia_site=WikimediaSite.WIKIPEDIA, title="Test"
+        )
+        # page.__fetch_page_data__(title="Test")
+        page.extract_and_upload_to_wikicitations()
+        wcdqid = page.wikicitations_qid
+        console.print("Waiting 10 sec for WCDQS to sync")
+        sleep(10)
+        check_wcdqid = page.__get_wcdqid_from_hash_via_sparql__(md5hash=page.md5hash)
+        assert wcdqid == check_wcdqid

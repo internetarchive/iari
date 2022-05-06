@@ -147,9 +147,10 @@ class WcdImportBot(BaseModel):
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
         wc.delete_all_page_and_reference_items()
-        cache = Cache()
-        cache.connect()
-        cache.flush_database()
+        if config.use_cache:
+            cache = Cache()
+            cache.connect()
+            cache.flush_database()
 
     def run(self):
         """This method handles runnig the bot
