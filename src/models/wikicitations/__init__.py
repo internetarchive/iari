@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Optional, List, Dict
 
-from pydantic import BaseModel, validate_arguments
+from pydantic import BaseModel, validate_arguments, NoneStr
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
 from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
