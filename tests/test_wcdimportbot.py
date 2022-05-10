@@ -55,3 +55,13 @@ class TestWcdImportBot(TestCase):
         items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
         if items is not None and len(items) > 0:
             self.fail()
+
+    def test_delete_one_page(self):
+        bot = WcdImportBot()
+        bot.get_page_by_title(title="Test")
+        bot.extract_and_upload_all_pages_to_wikicitations()
+        deleted_item_id = bot.delete_one_page(title="Test")
+        wc = WikiCitations()
+        with self.assertRaises(ValueError):
+            item = wc.get_item(item_id=deleted_item_id)
+            # assert item is None

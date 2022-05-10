@@ -114,13 +114,17 @@ enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251
 
 If you want to delete items from the Wikibase, ask an administrator of the Wikibase to become admin.
 
-
 # Features
 Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
 ## Import a page
 The bot can import any Wikipedia page (in English Wikipedia)
 
 `$ python wcdimportbot.py --import "title of page"` 
+
+## Delete a page
+The bot can delete any page item (Defaults to English Wikipedia)
+
+`$ python wcdimportbot.py --delete-page "title of page"` 
 
 ## Rinse all items from the Wikibase
 To delete all the imported items e.g. 
@@ -130,12 +134,15 @@ after changes in the data model run
 
 # Help
 ```
-usage: wcdimportbot.py [-h] [-i IMPORT_TITLE] [--rinse]
+usage: wcdimportbot.py [-h] [-d DELETE_PAGE] [-i IMPORT_TITLE] [--rinse]
 
     WCD Import Bot imports references and pages from Wikipedia
 
     Example adding one page:
     '$ wcdimportbot.py --import-title "Easter Island"'
+
+    Example deleting one page:
+    '$ wcdimportbot.py --delete-page "Easter Island"'
 
     Example rinsing the Wikibase and the cache:
     '$ wcdimportbot.py --rinse'
@@ -143,6 +150,9 @@ usage: wcdimportbot.py [-h] [-i IMPORT_TITLE] [--rinse]
 
 optional arguments:
   -h, --help            show this help message and exit
+  -d DELETE_PAGE, --delete-page DELETE_PAGE
+                        Delete a single page from WikiCitations and the cache by title (Defaults to English Wikipedia for now). Note: This does not delete the reference
+                        items associated with the page.
   -i IMPORT_TITLE, --import-title IMPORT_TITLE
                         Title to import from a Wikipedia (Defaults to English Wikipedia for now)
   --rinse               Rinse all page and reference items and delete the cache
