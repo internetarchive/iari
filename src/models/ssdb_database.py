@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Any
 
-import pyssdb
+import pyssdb  # type: ignore
 from pydantic import BaseModel, validate_arguments
 
 logger = logging.getLogger(__name__)
@@ -34,16 +34,28 @@ class SsdbDatabase(BaseModel):
 
     @validate_arguments
     def get_value(self, key: str):
-        return self.connection.get(key)
+        if self.connection is not None:
+            return self.connection.get(key)
+        else:
+            raise ValueError("self.connection was None")
 
     @validate_arguments
     def set_value(self, key: str, value: str):
-        return self.connection.set(key, value)
+        if self.connection is not None:
+            return self.connection.set(key, value)
+        else:
+            raise ValueError("self.connection was None")
 
     @validate_arguments
     def delete(self, key: str):
-        return self.connection.delete(key)
+        if self.connection is not None:
+            return self.connection.delete(key)
+        else:
+            raise ValueError("self.connection was None")
 
     def flush_database(self):
         logger.info("Flushing the SSDB database now")
-        return self.connection.flushdb()
+        if self.connection is not None:
+            return self.connection.flushdb()
+        else:
+            raise ValueError("self.connection was None")
