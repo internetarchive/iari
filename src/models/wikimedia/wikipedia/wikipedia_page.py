@@ -117,8 +117,11 @@ class WikipediaPage(BaseModel):
                     )
                 )
         else:
-            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=reference.md5hash)
-            if wcdqid is not None:
+            if reference.md5hash is not None:
+                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=reference.md5hash)
+            else:
+                raise ValueError("reference.md5hash was None")
+        if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.wikicitations_qid = wcdqid
             else:
@@ -146,7 +149,7 @@ class WikipediaPage(BaseModel):
                         "Got more than one WCDQID for a hash. This should never happen"
                     )
                 elif len(wcdqids) == 1:
-                    return wcdqids[0]
+                    return str(wcdqids[0])
             else:
                 return None
         else:
@@ -159,7 +162,7 @@ class WikipediaPage(BaseModel):
         logger.debug("Checking and uploading website item")
         if reference is None:
             raise ValueError("reference was None")
-        if config.cache_and_upload_enabled is not None:
+        if config.use_cache is not None:
             wcdqid = self.__get_website_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
@@ -289,7 +292,10 @@ class WikipediaPage(BaseModel):
     ) -> Optional[str]:
         if self.cache is None:
             self.__setup_cache__()
-        wcdqid = self.cache.check_website_and_get_wikicitations_qid(reference=reference)
+        if self.cache is not None:
+            wcdqid = self.cache.check_website_and_get_wikicitations_qid(reference=reference)
+        else:
+            raise ValueError("self.cache was None")
         logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
 
@@ -344,11 +350,15 @@ class WikipediaPage(BaseModel):
                 return True
             else:
                 return False
+
     def __insert_website_in_cache__(
         self, reference: WikipediaPageReference, wcdqid: str
     ):
         logger.debug("__insert_website_in_cache__: Running")
-        self.cache.add_website(reference=reference, wcdqid=wcdqid)
+        if self.cache is not None:
+            self.cache.add_website(reference=reference, wcdqid=wcdqid)
+        else:
+            raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
 
     def __parse_templates__(self):
@@ -412,7 +422,7 @@ class WikipediaPage(BaseModel):
             raise ValueError(
                 "Got None instead of WCDQID when trying to upload to WikiCitations"
             )
-        return wcdqid
+        return str(wcdqid)
 
     @validate_arguments
     def __upload_reference_and_insert_in_the_cache_if_enabled__(
@@ -438,7 +448,7 @@ class WikipediaPage(BaseModel):
         self, reference: WikipediaPageReference
     ):
         # Here we get the reference back with WCDQID
-        if config.cache_and_upload_enabled:
+        if config.use_cache:
             wcdqid = self.__upload_website_and_insert_in_the_cache__(
                 reference=reference
             )
