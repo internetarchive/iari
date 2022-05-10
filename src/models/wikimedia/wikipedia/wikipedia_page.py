@@ -162,7 +162,7 @@ class WikipediaPage(BaseModel):
         logger.debug("Checking and uploading website item")
         if reference is None:
             raise ValueError("reference was None")
-        if config.use_cache is not None:
+        if config.use_cache:
             wcdqid = self.__get_website_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
