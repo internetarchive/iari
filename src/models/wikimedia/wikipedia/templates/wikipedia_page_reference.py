@@ -467,7 +467,9 @@ class WikipediaPageReference(BaseModel):
         role: EnglishWikipediaTemplatePersonRole = None,
         search_string: str = None,
     ):
-        if (role and search_string) is not None:
+        """This functions gets all types of numbered persons,
+        both those with roles and those without"""
+        if role is not None and search_string is not None:
             matching_attributes = [
                 attribute
                 for attribute in attributes
