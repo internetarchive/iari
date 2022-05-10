@@ -118,18 +118,18 @@ class WikipediaPage(BaseModel):
                 )
         else:
             if reference.md5hash is not None:
-                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=reference.md5hash)
+                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                    md5hash=reference.md5hash
+                )
             else:
                 raise ValueError("reference.md5hash was None")
         if wcdqid is not None:
-                logger.debug(f"Got wcdqid:{wcdqid} from the cache")
-                reference.wikicitations_qid = wcdqid
-            else:
-                reference = (
-                    self.__upload_reference_and_insert_in_the_cache_if_enabled__(
-                        reference=reference
-                    )
-                )
+            logger.debug(f"Got wcdqid:{wcdqid} from the cache")
+            reference.wikicitations_qid = wcdqid
+        else:
+            reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
+                reference=reference
+            )
         return reference
 
     @validate_arguments
@@ -293,7 +293,9 @@ class WikipediaPage(BaseModel):
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            wcdqid = self.cache.check_website_and_get_wikicitations_qid(reference=reference)
+            wcdqid = self.cache.check_website_and_get_wikicitations_qid(
+                reference=reference
+            )
         else:
             raise ValueError("self.cache was None")
         logger.debug(f"result from the cache:{wcdqid}")
