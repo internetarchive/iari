@@ -505,6 +505,13 @@ class WikiCitations(BaseModel):
         title = None
         url = None
         wikidata_qid = None
+        if page_reference.first_level_domain_of_url_qid is not None:
+            website_item = datatypes.Item(
+                prop_nr=WCDProperty.WEBSITE.value,
+                value=page_reference.first_level_domain_of_url_qid,
+            )
+        else:
+            website_item = None
         if page_reference.access_date is not None:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
@@ -600,6 +607,7 @@ class WikiCitations(BaseModel):
             title,
             url,
             website_string,
+            website_item,
             wikidata_qid,
         ):
             if claim is not None:

@@ -172,6 +172,8 @@ class WikipediaPage(BaseModel):
                     reference=reference
                 )
                 logger.info(f"Added website item to WCD")
+        else:
+            NotImplementedError("Implement sparql fallback")
         return reference
 
     def __extract_and_parse_references__(self):
@@ -446,14 +448,30 @@ class WikipediaPage(BaseModel):
         return reference
 
     @validate_arguments
-    def __upload_website_and_insert_in_the_cache__(
+    def __upload_website_to_wikicitations__(
+        self, reference: WikipediaPageReference
+    ) -> str:
+        """This is a lower level method that only handles uploading the website item"""
+        if self.wikicitations is None:
+            self.__setup_wikicitations__()
+        if self.wikicitations is not None:
+            wcdqid = self.wikicitations.prepare_and_upload_website_item(
+                page_reference=reference, wikipedia_page=self
+            )
+        else:
+            raise ValueError("self.wikicitations was None")
+        if wcdqid is None:
+            raise ValueError(
+                "Got None instead of WCDQID when trying to upload to WikiCitations"
+            )
+        return str(wcdqid)
+
+    def __upload_website_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
     ):
         # Here we get the reference back with WCDQID
+        wcdqid = self.__upload_website_to_wikicitations__(reference=reference)
         if config.use_cache:
-            wcdqid = self.__upload_website_and_insert_in_the_cache__(
-                reference=reference
-            )
             if wcdqid is None:
                 raise ValueError("WCDQID was None")
             if reference.first_level_domain_of_url_hash is None:
@@ -462,8 +480,11 @@ class WikipediaPage(BaseModel):
                 f"Hash before insertion: {reference.first_level_domain_of_url_hash}. "
                 f"WCDQID before insertion: {wcdqid}"
             )
-            self.__insert_reference_in_cache__(reference=reference, wcdqid=wcdqid)
-            reference.wikicitations_qid = wcdqid
+            self.__insert_website_in_cache__(
+                reference=reference,
+                wcdqid=wcdqid,
+            )
+        reference.first_level_domain_of_url_qid = wcdqid
         return reference
 
     def __upload_references_and_websites_if_missing__(self):
@@ -478,7 +499,7 @@ class WikipediaPage(BaseModel):
                     )
                 )
             if reference.has_hash:
-                # Here we get the reference with the WCDQID back
+                # Here we get the reference with its own WCDQID back
                 reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
                     reference=reference
                 )
