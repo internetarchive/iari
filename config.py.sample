@@ -8,10 +8,11 @@ pwd = ""
 assume_persons_without_role_are_authors = True
 debug_unsupported_templates = False
 include_url_and_first_parameter_in_hash_algorithm = False
-loglevel = logging.WARNING
+loglevel = logging.ERROR
 press_enter_to_continue = False
-cache_and_upload_enabled = True
-user_agent = "wcdimportbot 2.0.0-alpha1"
+use_cache = False
+user_agent = "wcdimportbot 2.0.0-alpha3"
+sparql_sync_waiting_time_in_seconds = 10
 
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation

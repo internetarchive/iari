@@ -1,6 +1,7 @@
 from time import sleep
 from unittest import TestCase
 
+import config
 from src import WcdImportBot, WikiCitations, console
 
 
@@ -43,8 +44,10 @@ class TestWcdImportBot(TestCase):
     def test_rinse_all_items_and_cache(self):
         bot = WcdImportBot()
         bot.rinse_all_items_and_cache()
-        console.print("waiting 60 seconds for WDQS to sync after removal of all items")
-        sleep(30)
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
         wc = WikiCitations()
         items = wc.__extract_item_ids__(sparql_result=wc.__get_all_page_items__())
         if items is not None and len(items) > 0:
@@ -52,3 +55,17 @@ class TestWcdImportBot(TestCase):
         items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
         if items is not None and len(items) > 0:
             self.fail()
+
+    def test_delete_one_page(self):
+        bot = WcdImportBot()
+        bot.get_page_by_title(title="Test")
+        bot.extract_and_upload_all_pages_to_wikicitations()
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
+        deleted_item_id = bot.delete_one_page(title="Test")
+        wc = WikiCitations()
+        with self.assertRaises(ValueError):
+            wc.get_item(item_id=deleted_item_id)
+            # assert item is None

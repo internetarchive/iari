@@ -5,8 +5,8 @@ from unittest import TestCase
 from requests import HTTPError
 
 from pydantic import ValidationError
-from wikibaseintegrator.models import Claim
-from wikibaseintegrator.wbi_exceptions import MWApiError
+from wikibaseintegrator.models import Claim  # type: ignore
+from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
 import config
 from src import console, WCDItem, WcdImportBot
@@ -215,8 +215,10 @@ class TestWikiCitations(TestCase):
         # this page has no references
         bot.get_page_by_title(title="Test")
         bot.extract_and_upload_all_pages_to_wikicitations()
-        console.print("Waiting 30 seconds for WCDQS to sync")
-        sleep(30)
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
         wc = WikiCitations()
         result = wc.__get_all_page_items__()
         console.print(result)
@@ -234,10 +236,12 @@ class TestWikiCitations(TestCase):
         # to make sure there is at least one to be found
         bot = WcdImportBot()
         # this page has no references
-        bot.get_page_by_title(title="Will Pan's Freestyle Remix 2005")
+        bot.get_page_by_title(title="Muskö naval base")
         bot.extract_and_upload_all_pages_to_wikicitations()
-        console.print("Waiting 30 seconds for WCDQS to sync")
-        sleep(30)
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
         wc = WikiCitations()
         result = wc.__get_all_reference_items__()
         console.print(result)

@@ -118,6 +118,10 @@ class Cache(BaseModel):
         # except:
         #    logger.error("error connection to SSDB")
 
+    @validate_arguments
+    def delete_key(self, key: str):
+        return self.ssdb.delete(key=key)
+
     def flush_database(self):
         result = self.ssdb.flush_database()
         logger.debug(f"result from SSDB: {result}")

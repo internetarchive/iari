@@ -2,15 +2,10 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Optional, List, Dict
 
-from pydantic import BaseModel, validate_arguments, NoneStr
-from wikibaseintegrator import (
-    wbi_config,
-    datatypes,
-    WikibaseIntegrator,
-    wbi_login,
-)  # type: ignore
-from wikibaseintegrator.entities import ItemEntity  # type: ignore
-from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
+from pydantic import BaseModel, validate_arguments
+from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
+from wikibaseintegrator.entities import ItemEntity
+from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
 from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page
 
 import config
@@ -95,15 +90,22 @@ class WikiCitations(BaseModel):
     def __delete_item__(self, item_id: str):
         if config.press_enter_to_continue:
             input(f"Do you want to delete {item_id}?")
-
+        logger.debug(f"trying to log in with {config.user} and {config.pwd}")
+        self.__setup_wbi__()
         return delete_page(
             title=f"Item:{item_id}",
             # deletetalk=True,
-            login=wbi_login.Login(user=config.user, password=config.pwd),
+            login=wbi_login.Login(
+                user=config.user,
+                password=config.pwd,
+                mediawiki_api_url=config.mediawiki_api_url,
+            ),
         )
 
     @validate_arguments
-    def __extract_item_ids__(self, sparql_result: Optional[Dict]):
+    def __extract_item_ids__(
+        self, sparql_result: Optional[Dict]
+    ) -> Optional[List[str]]:
         """Extract item ids from the sparql result"""
         if sparql_result is not None:
             bindings = sparql_result["results"]["bindings"]
@@ -162,8 +164,25 @@ class WikiCitations(BaseModel):
 
     @validate_arguments
     def __get_items_via_sparql__(self, query: str) -> Optional[Dict[str, Dict]]:
+        """This is the lowest level function
+        that executes the query with WBI after setting it up"""
         self.__setup_wbi__()
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
+
+    @validate_arguments
+    def __get_wcdqids_from_hash__(self, md5hash: str) -> Optional[List[str]]:
+        """This is a slower SPARQL-powered fallback helper method
+        used when config.use_cache is False"""
+        logger.debug("__get_wcdqid_from_hash__: running")
+        query = f"""
+            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
+            SELECT ?item WHERE {{
+              ?item wcdt:P30 "{md5hash}".
+            }}
+        """
+        return self.__extract_item_ids__(
+            sparql_result=self.__get_items_via_sparql__(query=query)
+        )
 
     @validate_arguments
     def __prepare_person_claims__(
@@ -426,7 +445,7 @@ class WikiCitations(BaseModel):
         )
         revision_id = datatypes.String(
             prop_nr=WCDProperty.PAGE_REVISION_ID.value,
-            value=str(wikipedia_page.revision_id),
+            value=str(wikipedia_page.latest_revision_id),
         )
         claims = [retrieved_date, revision_id]
         citation_reference = Reference()
@@ -889,22 +908,25 @@ class WikiCitations(BaseModel):
             logger.debug("Finished item JSON")
             console.print(item.get_json())
             # exit()
-        if config.cache_and_upload_enabled:
-            new_item = item.write(summary="New item imported from Wikipedia")
-            print(f"Added new item {self.entity_url(new_item.id)}")
-            if config.press_enter_to_continue:
-                input("press enter to continue")
-            logger.debug(f"returning new wcdqid: {new_item.id}")
-            return new_item.id
-        else:
-            print("skipped upload")
-            return None
+        new_item = item.write(summary="New item imported from Wikipedia")
+        print(f"Added new item {self.entity_url(new_item.id)}")
+        if config.press_enter_to_continue:
+            input("press enter to continue")
+        logger.debug(f"returning new wcdqid: {new_item.id}")
+        return new_item.id
 
     def delete_all_page_and_reference_items(self):
         """This function deletes first the page item and then the reference items"""
         console.print("Deleting all imported items")
         self.__delete_all_page_items__()
         self.__delete_all_reference_items__()
+
+    @validate_arguments
+    def get_item(self, item_id: str) -> Optional[ItemEntity]:
+        """Get one item from WikiCitations"""
+        self.__setup_wbi__()
+        wbi = WikibaseIntegrator()
+        return wbi.item.get(item_id)
 
     @staticmethod
     @validate_arguments
