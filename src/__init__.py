@@ -68,9 +68,22 @@ class WcdImportBot(BaseModel):
     Example adding one page:
     '$ wcdimportbot.py --import-title "Easter Island"'
 
+    Example deleting one page:
+    '$ wcdimportbot.py --delete-page "Easter Island"'
+
     Example rinsing the Wikibase and the cache:
     '$ wcdimportbot.py --rinse'
         """,
+        )
+        parser.add_argument(
+            "-d",
+            "--delete-page",
+            help=(
+                "Delete a single page from WikiCitations and the cache by title "
+                "(Defaults to English Wikipedia for now). "
+                "Note: This does not delete the reference items associated "
+                "with the page."
+            ),
         )
         parser.add_argument(
             "-i",
@@ -85,6 +98,46 @@ class WcdImportBot(BaseModel):
             help="Rinse all page and reference items and delete the cache",
         )
         return parser.parse_args()
+
+    @validate_arguments
+    def delete_one_page(self, title: str) -> str:
+        """Deletes one page from WikiCitations"""
+        with console.status(f"Deleting {title}"):
+            page = WikipediaPage(
+                language_code=self.language_code,
+                wikimedia_site=self.wikimedia_site,
+                language_wcditem=self.language_wcditem,
+            )
+            page.__get_wikipedia_page_from_title__(title=title)
+            page.__generate_hash__()
+            # delete from WCD
+            if config.use_cache:
+                cache = Cache()
+                cache.connect()
+                item_id = cache.check_page_and_get_wikicitations_qid(
+                    wikipedia_page=page
+                )
+            else:
+                if page.md5hash is not None:
+                    item_id = page.__get_wcdqid_from_hash_via_sparql__(
+                        md5hash=page.md5hash
+                    )
+                else:
+                    raise ValueError("page.md5hash was None")
+            if item_id is not None:
+                wc = WikiCitations()
+                item = wc.__delete_item__(item_id=item_id)
+                # delete from cache
+                if page.md5hash is not None:
+                    if config.use_cache:
+                        cache.delete_key(key=page.md5hash)
+                        console.print(f"Deleted {title} from the cache")
+                    console.print(f"Deleted {title} from WikiCitations")
+                    return item_id
+                else:
+                    raise ValueError("md5hash was None")
+            else:
+                raise ValueError("got no item id from the cache")
 
     def extract_and_upload_all_pages_to_wikicitations(self):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]
@@ -162,5 +215,8 @@ class WcdImportBot(BaseModel):
             logger.info(f"importing title {args.import_title}")
             self.get_page_by_title(title=args.import_title)
             self.extract_and_upload_all_pages_to_wikicitations()
+        elif args.delete_page is not None:
+            logger.info("deleting page")
+            self.delete_one_page(title=args.delete_page)
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")

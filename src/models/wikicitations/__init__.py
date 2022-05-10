@@ -89,11 +89,16 @@ class WikiCitations(BaseModel):
     def __delete_item__(self, item_id: str):
         if config.press_enter_to_continue:
             input(f"Do you want to delete {item_id}?")
-
+        logger.debug(f"trying to log in with {config.user} and {config.pwd}")
+        self.__setup_wbi__()
         return delete_page(
             title=f"Item:{item_id}",
             # deletetalk=True,
-            login=wbi_login.Login(user=config.user, password=config.pwd),
+            login=wbi_login.Login(
+                user=config.user,
+                password=config.pwd,
+                mediawiki_api_url=config.mediawiki_api_url,
+            ),
         )
 
     @validate_arguments
@@ -848,6 +853,13 @@ class WikiCitations(BaseModel):
         console.print("Deleting all imported items")
         self.__delete_all_page_items__()
         self.__delete_all_reference_items__()
+
+    @validate_arguments
+    def get_item(self, item_id: str) -> Optional[ItemEntity]:
+        """Get one item from WikiCitations"""
+        self.__setup_wbi__()
+        wbi = WikibaseIntegrator()
+        return wbi.item.get(item_id)
 
     @staticmethod
     @validate_arguments
