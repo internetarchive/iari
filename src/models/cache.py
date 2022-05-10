@@ -70,7 +70,7 @@ class Cache(BaseModel):
             if response is None:
                 return None
             else:
-                return response.decode("UTF-8")
+                return str(response.decode("UTF-8"))
         else:
             raise ValueError("md5hash was None")
 
@@ -87,7 +87,7 @@ class Cache(BaseModel):
             if response is None:
                 return None
             else:
-                return response.decode("UTF-8")
+                return str(response.decode("UTF-8"))
         else:
             raise ValueError("md5hash was None")
 
@@ -104,7 +104,7 @@ class Cache(BaseModel):
             if response is None:
                 return None
             else:
-                return response.decode("UTF-8")
+                return str(response.decode("UTF-8"))
         else:
             # Not all references have urls so we fail silently
             return None
@@ -120,7 +120,10 @@ class Cache(BaseModel):
 
     @validate_arguments
     def delete_key(self, key: str):
-        return self.ssdb.delete(key=key)
+        if self.ssdb is not None:
+            return self.ssdb.delete(key=key)
+        else:
+            raise ValueError("self.ssdb was None")
 
     def flush_database(self):
         result = self.ssdb.flush_database()
