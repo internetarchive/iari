@@ -111,18 +111,28 @@ class WcdImportBot(BaseModel):
             page.__get_wikipedia_page_from_title__(title=title)
             page.__generate_hash__()
             # delete from WCD
-            cache = Cache()
-            cache.connect()
-            item_id = cache.check_page_and_get_wikicitations_qid(wikipedia_page=page)
+            if config.use_cache:
+                cache = Cache()
+                cache.connect()
+                item_id = cache.check_page_and_get_wikicitations_qid(
+                    wikipedia_page=page
+                )
+            else:
+                if page.md5hash is not None:
+                    item_id = page.__get_wcdqid_from_hash_via_sparql__(
+                        md5hash=page.md5hash
+                    )
+                else:
+                    raise ValueError("page.md5hash was None")
             if item_id is not None:
                 wc = WikiCitations()
                 item = wc.__delete_item__(item_id=item_id)
                 # delete from cache
                 if page.md5hash is not None:
-                    cache.delete_key(key=page.md5hash)
-                    console.print(
-                        f"Deleted {title} from both WikiCitations and the cache"
-                    )
+                    if config.use_cache:
+                        cache.delete_key(key=page.md5hash)
+                        console.print(f"Deleted {title} from the cache")
+                    console.print(f"Deleted {title} from WikiCitations")
                     return item_id
                 else:
                     raise ValueError("md5hash was None")
