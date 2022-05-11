@@ -137,8 +137,6 @@ class TestWikiCitations(TestCase):
         # logger.info(f"url: {wppage.wikicitations_url}")
 
     def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
-        from src.models.wikicitations import WikiCitations
-
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
@@ -258,3 +256,29 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations()
         with self.assertRaises(HTTPError):
             wc.__get_items_via_sparql__(query="test")
+
+    def test_prepare_and_upload_website_item(self):
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        title = "Democracy"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
+        # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
+        reference = EnglishWikipediaPageReference(
+            **{
+                "agency": "Oxford University Press",
+                "access-date": "24 February 2021",
+                "title": "Democracy",
+                "template_name": "cite news",
+                "url": "https://www.oxfordreference.com/view/10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
+            }
+        )
+        reference.finish_parsing_and_generate_hash()
+        wcdqid = wc.prepare_and_upload_website_item(
+            page_reference=reference, wikipedia_page=wppage
+        )
+        assert wcdqid is not None

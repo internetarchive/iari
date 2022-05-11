@@ -202,7 +202,7 @@ class WcdImportBot(BaseModel):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
-        wc.delete_all_page_and_reference_items()
+        wc.delete_imported_items()
         if config.use_cache:
             cache = Cache()
             cache.connect()

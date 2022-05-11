@@ -86,6 +86,26 @@ class WikiCitations(BaseModel):
         else:
             console.print("Got no reference items from the WCD Query Service.")
 
+    def __delete_all_website_items__(self):
+        """Get all items and delete them one by one"""
+        items = self.__extract_item_ids__(
+            sparql_result=self.__get_all_website_items__()
+        )
+        if items is not None and len(items) > 0:
+            number_of_items = len(items)
+            logger.info(f"Got {number_of_items} bindings to delete")
+            self.__setup_wbi__()
+            with console.status(f"Deleting {number_of_items} website items"):
+                for item_id in items:
+                    logger.info(f"Deleting {item_id}")
+                    result = self.__delete_item__(item_id=item_id)
+                    # logger.debug(result)
+                    if config.press_enter_to_continue:
+                        input("continue?")
+            console.print(f"Done deleting all {number_of_items} website items")
+        else:
+            console.print("Got no website items from the WCD Query Service.")
+
     @validate_arguments
     def __delete_item__(self, item_id: str):
         if config.press_enter_to_continue:
@@ -128,6 +148,8 @@ class WikiCitations(BaseModel):
             config.wikibase_rdf_entity_prefix, ""
         )
 
+    # TODO refactor these get all functions
+    #  and use the enum value in the query
     def __get_all_page_items__(self):
         """Get all wcdqids for wikipedia pages using sparql"""
         return self.__get_items_via_sparql__(
@@ -141,13 +163,25 @@ class WikiCitations(BaseModel):
         )
 
     def __get_all_reference_items__(self):
-        """Get all wcdqids for wikipedia pages using sparql"""
+        """Get all wcdqids for references using sparql"""
         return self.__get_items_via_sparql__(
             """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {
                 ?item wcdt:P10 wcd:Q4
+            }
+            """
+        )
+
+    def __get_all_website_items__(self):
+        """Get all wcdqids for website items using sparql"""
+        return self.__get_items_via_sparql__(
+            """
+            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
+            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
+            SELECT ?item WHERE {
+                ?item wcdt:P10 wcd:Q145
             }
             """
         )
@@ -332,9 +366,7 @@ class WikiCitations(BaseModel):
             f"website referenced from {wikipedia_page.wikimedia_site.name.title()}",
         )
         item.add_claims(
-            self.__prepare_single_value_reference_claims__(
-                page_reference=page_reference
-            ),
+            self.__prepare_single_value_website_claims__(page_reference=page_reference),
         )
         # if config.loglevel == logging.DEBUG:
         #     logger.debug("Printing the item data")
@@ -923,11 +955,12 @@ class WikiCitations(BaseModel):
         logger.debug(f"returning new wcdqid: {new_item.id}")
         return new_item.id
 
-    def delete_all_page_and_reference_items(self):
-        """This function deletes first the page item and then the reference items"""
+    def delete_imported_items(self):
+        """This function deletes all the imported items in WikiCitations"""
         console.print("Deleting all imported items")
         self.__delete_all_page_items__()
         self.__delete_all_reference_items__()
+        self.__delete_all_website_items__()
 
     @validate_arguments
     def get_item(self, item_id: str) -> Optional[ItemEntity]:
