@@ -2,6 +2,7 @@ import hashlib
 import logging
 from datetime import datetime
 from typing import Optional, List
+from urllib.parse import quote
 
 from marshmallow import (
     Schema,
@@ -944,6 +945,15 @@ class WikipediaPageReference(BaseModel):
                 f"or they were turned of in config.py."
             )
 
+    def __quote_urls__(self):
+        """This function quotes the URL to avoid complaints from Wikibase"""
+        self.url = quote(self.url)
+        self.archive_url = quote(self.archive_url)
+        self.lay_url = quote(self.lay_url)
+        self.chapter_url = quote(self.chapter_url)
+        self.conference_url = quote(self.conference_url)
+        self.transcripturl = quote(self.transcripturl)
+
     def finish_parsing_and_generate_hash(self):
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
@@ -951,6 +961,7 @@ class WikipediaPageReference(BaseModel):
         self.__extract_first_level_domain__()
         self.__parse_isbn__()
         self.__parse_persons__()
+        self.__quote_urls__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
 
