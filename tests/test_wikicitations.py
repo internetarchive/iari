@@ -282,3 +282,40 @@ class TestWikiCitations(TestCase):
             page_reference=reference, wikipedia_page=wppage
         )
         assert wcdqid is not None
+        bot = WcdImportBot()
+        bot.rinse_all_items_and_cache()
+
+    def test_uploading_a_page_reference_and_website_item(self):
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wc.delete_imported_items()
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        title = "Democracy"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
+        # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
+        # TODO replace with a hashable one?
+        reference = EnglishWikipediaPageReference(
+            **{
+                "agency": "Oxford University Press",
+                "access-date": "24 February 2021",
+                "title": "Democracy",
+                "template_name": "cite news",
+                "url": "https://www.oxfordreference.com/view/10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
+            }
+        )
+        reference.finish_parsing_and_generate_hash()
+        wppage.references = []
+        wppage.references.append(reference)
+        wppage.__upload_references_and_websites_if_missing__()
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
+        items = wc.__get_all_website_items__()
+        assert len(items) > 0
+        ref_items = wc.__get_all_reference_items__()
+        assert len(ref_items) > 0
