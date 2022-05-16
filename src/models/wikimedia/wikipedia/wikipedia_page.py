@@ -159,6 +159,11 @@ class WikipediaPage(BaseModel):
     def __check_and_upload_website_item_to_wikicitations_if_missing__(
         self, reference: WikipediaPageReference
     ):
+        """This method checks if a website item is present
+        using the first_level_domain_of_url_hash and the cache if
+        enabled and uploads a new item if not"""
+        if reference.first_level_domain_of_url_hash is None:
+            raise ValueError("reference.first_level_domain_of_url_hash was None")
         logger.debug("Checking and uploading website item")
         if reference is None:
             raise ValueError("reference was None")
@@ -167,13 +172,15 @@ class WikipediaPage(BaseModel):
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.first_level_domain_of_url_qid = wcdqid
-            else:
-                reference = self.__upload_website_and_insert_in_the_cache__(
-                    reference=reference
-                )
-                logger.info(f"Added website item to WCD")
         else:
-            NotImplementedError("Implement sparql fallback")
+            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                md5hash=reference.first_level_domain_of_url_hash
+            )
+            reference.first_level_domain_of_url_qid = wcdqid
+        reference = self.__upload_website_and_insert_in_the_cache_if_enabled__(
+            reference=reference
+        )
+        logger.info(f"Added website item to WCD")
         return reference
 
     def __extract_and_parse_references__(self):
