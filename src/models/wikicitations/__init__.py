@@ -6,7 +6,8 @@ from pydantic import BaseModel, validate_arguments, NoneStr
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
 from wikibaseintegrator.entities import ItemEntity
 from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
-from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page
+from wikibaseintegrator.wbi_exceptions import MWApiError
+from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
 
 import config
 from src import console
@@ -112,15 +113,18 @@ class WikiCitations(BaseModel):
             input(f"Do you want to delete {item_id}?")
         logger.debug(f"trying to log in with {config.user} and {config.pwd}")
         self.__setup_wbi__()
-        return delete_page(
-            title=f"Item:{item_id}",
-            # deletetalk=True,
-            login=wbi_login.Login(
-                user=config.user,
-                password=config.pwd,
-                mediawiki_api_url=config.mediawiki_api_url,
-            ),
-        )
+        try:
+            return delete_page(
+                title=f"Item:{item_id}",
+                # deletetalk=True,
+                login=wbi_login.Login(
+                    user=config.user,
+                    password=config.pwd,
+                    mediawiki_api_url=config.mediawiki_api_url,
+                ),
+            )
+        except MWApiError:
+            return
 
     @validate_arguments
     def __extract_item_ids__(
