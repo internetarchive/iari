@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 from typing import Any, Optional, List, Dict
 
 from pydantic import BaseModel, validate_arguments, NoneStr
-from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
-from wikibaseintegrator.entities import ItemEntity
-from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
-from wikibaseintegrator.wbi_exceptions import MWApiError
+from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
+from wikibaseintegrator.entities import ItemEntity  # type: ignore
+from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
+from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
 
 import config
@@ -142,14 +142,20 @@ class WikiCitations(BaseModel):
                     if item_id is not None:
                         items.append(item_id)
                 return items
+            else:
+                return None
+        else:
+            return None
 
     @validate_arguments
     def __extract_wcdqs_json_entity_id__(
         self, data: Dict, sparql_variable: str = "item"
     ) -> str:
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
-        return data[sparql_variable]["value"].replace(
-            config.wikibase_rdf_entity_prefix, ""
+        return str(
+            data[sparql_variable]["value"].replace(
+                config.wikibase_rdf_entity_prefix, ""
+            )
         )
 
     # TODO refactor these get all functions
@@ -201,7 +207,7 @@ class WikiCitations(BaseModel):
         )
 
     @validate_arguments
-    def __get_items_via_sparql__(self, query: str) -> Optional[Dict[str, Dict]]:
+    def __get_items_via_sparql__(self, query: str) -> Optional[Any]:
         """This is the lowest level function
         that executes the query with WBI after setting it up"""
         self.__setup_wbi__()
@@ -945,7 +951,7 @@ class WikiCitations(BaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = config.sparql_endpoint_url
         return None
 
-    def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
+    def __upload_new_item__(self, item: ItemEntity) -> str:
         if item is None:
             raise ValueError("Did not get what we need")
         if config.loglevel == logging.DEBUG:
@@ -957,7 +963,7 @@ class WikiCitations(BaseModel):
         if config.press_enter_to_continue:
             input("press enter to continue")
         logger.debug(f"returning new wcdqid: {new_item.id}")
-        return new_item.id
+        return str(new_item.id)
 
     def delete_imported_items(self):
         """This function deletes all the imported items in WikiCitations"""
