@@ -2,7 +2,7 @@ import hashlib
 import logging
 from datetime import datetime
 from typing import Optional, List
-from urllib.parse import quote
+from urllib.parse import urlparse
 
 from marshmallow import (
     Schema,
@@ -945,14 +945,21 @@ class WikipediaPageReference(BaseModel):
                 f"or they were turned of in config.py."
             )
 
-    def __quote_urls__(self):
+    def __parse_urls__(self):
         """This function quotes the URL to avoid complaints from Wikibase"""
-        self.url = quote(self.url)
-        self.archive_url = quote(self.archive_url)
-        self.lay_url = quote(self.lay_url)
-        self.chapter_url = quote(self.chapter_url)
-        self.conference_url = quote(self.conference_url)
-        self.transcripturl = quote(self.transcripturl)
+        logger.debug("Parsing URLs")
+        if self.url is not None:
+            self.url = urlparse(self.url).geturl()
+        if self.archive_url is not None:
+            self.archive_url = urlparse(self.archive_url).geturl()
+        if self.lay_url is not None:
+            self.lay_url = urlparse(self.lay_url).geturl()
+        if self.chapter_url is not None:
+            self.chapter_url = urlparse(self.chapter_url).geturl()
+        if self.conference_url is not None:
+            self.conference_url = urlparse(self.conference_url).geturl()
+        if self.transcripturl is not None:
+            self.transcripturl = urlparse(self.transcripturl).geturl()
 
     def finish_parsing_and_generate_hash(self):
         """Parse the rest of the information and generate a hash"""
@@ -961,7 +968,7 @@ class WikipediaPageReference(BaseModel):
         self.__extract_first_level_domain__()
         self.__parse_isbn__()
         self.__parse_persons__()
-        self.__quote_urls__()
+        self.__parse_urls__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
 
