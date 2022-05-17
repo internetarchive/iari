@@ -506,17 +506,21 @@ class WikipediaPage(BaseModel):
         updated_references = []
         for reference in self.references:
             if reference.has_first_level_domain_url_hash:
-                # Here we get the reference with the first_level_domain_of_url WCDQID back
-                reference = (
-                    self.__check_and_upload_website_item_to_wikicitations_if_missing__(
+                with console.status(
+                    f"Working on {reference.template_name} reference "
+                    f"with link to {reference.first_level_domain_of_url} "
+                    f"and uploading necessary new website items"
+                ):
+                    # Here we get the reference with the first_level_domain_of_url WCDQID back
+                    reference = self.__check_and_upload_website_item_to_wikicitations_if_missing__(
                         reference=reference
                     )
-                )
             if reference.has_hash:
-                # Here we get the reference with its own WCDQID back
-                reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
-                    reference=reference
-                )
+                with console.status(f"Uploading the reference item"):
+                    # Here we get the reference with its own WCDQID back
+                    reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
+                        reference=reference
+                    )
             updated_references.append(reference)
         self.references = updated_references
 
@@ -532,9 +536,11 @@ class WikipediaPage(BaseModel):
         if not self.__page_has_already_been_uploaded__():
             logger.info("This page is missing from WikiCitations")
             self.__setup_wikicitations__()
-            self.__fetch_page_data__(title=self.title)
+            with console.status("Downloading page data"):
+                self.__fetch_page_data__(title=self.title)
             # extract references and create items for the missing ones first
-            self.__extract_and_parse_references__()
+            with console.status("Extracting information from the references"):
+                self.__extract_and_parse_references__()
             self.__upload_references_and_websites_if_missing__()
             # upload a new item for the page with links to all the page_reference items
             self.wikicitations_qid = (
