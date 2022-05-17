@@ -220,7 +220,7 @@ class WikiCitations(BaseModel):
         used when config.use_cache is False"""
         logger.debug("__get_wcdqid_from_hash__: running")
         with console.status(
-            f"Sleeping {config.sparql_sync_waiting_time_in_seconds} for WCDQS to sync"
+            f"Sleeping {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         ):
             sleep(config.sparql_sync_waiting_time_in_seconds)
         query = f"""
