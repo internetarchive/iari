@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timezone
+from time import sleep
 from typing import Any, Optional, List, Dict
 
 from pydantic import BaseModel, validate_arguments, NoneStr
@@ -218,6 +219,10 @@ class WikiCitations(BaseModel):
         """This is a slower SPARQL-powered fallback helper method
         used when config.use_cache is False"""
         logger.debug("__get_wcdqid_from_hash__: running")
+        with console.status(
+            f"Sleeping {config.sparql_sync_waiting_time_in_seconds} for WCDQS to sync"
+        ):
+            sleep(config.sparql_sync_waiting_time_in_seconds)
         query = f"""
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {{
@@ -361,15 +366,18 @@ class WikiCitations(BaseModel):
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
         """This method converts a page_reference into a new website item"""
+        if page_reference.first_level_domain_of_url is None:
+            raise MissingInformationError(
+                "page_reference.first_level_domain_of_url was None"
+            )
+        logger.info(
+            f"Creating website item: {page_reference.first_level_domain_of_url}"
+        )
         self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
         )
         item = wbi.item.new()
-        if page_reference.first_level_domain_of_url is None:
-            raise MissingInformationError(
-                "page_reference.first_level_domain_of_url was None"
-            )
         item.labels.set("en", page_reference.first_level_domain_of_url)
         item.descriptions.set(
             "en",
@@ -674,14 +682,19 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.FIRST_LEVEL_DOMAIN_STRING.value,
             value=page_reference.first_level_domain_of_url,
         )
-
-        # if page_reference.md5hash is None:
-        #     raise ValueError("page_reference.md5hash was None")
-        # hash_claim = datatypes.String(
-        #     prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
-        # )
+        if page_reference.first_level_domain_of_url_hash is None:
+            raise ValueError("page_reference.first_level_domain_of_url_hash was None")
+        hash_claim = datatypes.String(
+            prop_nr=WCDProperty.HASH.value,
+            value=page_reference.first_level_domain_of_url_hash,
+        )
         claims = []
-        for claim in (instance_of, source_wikipedia, first_level_domain_string):
+        for claim in (
+            instance_of,
+            source_wikipedia,
+            first_level_domain_string,
+            hash_claim,
+        ):
             if claim is not None:
                 claims.append(claim)
         return claims
