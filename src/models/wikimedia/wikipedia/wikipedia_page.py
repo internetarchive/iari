@@ -504,24 +504,27 @@ class WikipediaPage(BaseModel):
     def __upload_references_and_websites_if_missing__(self):
         """Go through each reference and upload if missing to WikiCitations"""
         updated_references = []
+        count = 1
+        total = len(self.references)
         for reference in self.references:
+            console.print(f"Working on reference {count}/{total}")
             if reference.has_first_level_domain_url_hash:
                 with console.status(
-                    f"Working on {reference.template_name} reference "
-                    f"with link to {reference.first_level_domain_of_url} "
-                    f"and uploading necessary new website items"
+                    f"Linking to or uploading new website item for reference "
+                    f"with link to {reference.first_level_domain_of_url}"
                 ):
                     # Here we get the reference with the first_level_domain_of_url WCDQID back
                     reference = self.__check_and_upload_website_item_to_wikicitations_if_missing__(
                         reference=reference
                     )
             if reference.has_hash:
-                with console.status(f"Uploading the reference item"):
+                with console.status(f"Creating the reference item itself"):
                     # Here we get the reference with its own WCDQID back
                     reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
                         reference=reference
                     )
             updated_references.append(reference)
+            count += 1
         self.references = updated_references
 
     def export_to_dataframe(self):
