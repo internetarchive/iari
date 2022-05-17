@@ -219,10 +219,10 @@ class WikiCitations(BaseModel):
         """This is a slower SPARQL-powered fallback helper method
         used when config.use_cache is False"""
         logger.debug("__get_wcdqid_from_hash__: running")
-        with console.status(
+        logger.info(
             f"Sleeping {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
-        ):
-            sleep(config.sparql_sync_waiting_time_in_seconds)
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
         query = f"""
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {{
