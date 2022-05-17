@@ -178,14 +178,15 @@ class WcdImportBot(BaseModel):
 
     @validate_arguments
     def get_page_by_title(self, title: str):
-        self.pages = []
-        page = WikipediaPage(
-            language_code=self.language_code,
-            wikimedia_site=self.wikimedia_site,
-            language_wcditem=self.language_wcditem,
-        )
-        page.__get_wikipedia_page_from_title__(title=title)
-        self.pages.append(page)
+        with console.status("Downloading page information"):
+            self.pages = []
+            page = WikipediaPage(
+                language_code=self.language_code,
+                wikimedia_site=self.wikimedia_site,
+                language_wcditem=self.language_wcditem,
+            )
+            page.__get_wikipedia_page_from_title__(title=title)
+            self.pages.append(page)
 
     def print_statistics(self):
         self.__calculate_statistics__()
