@@ -480,7 +480,7 @@ class WikiCitations(BaseModel):
     def __prepare_reference_claim__(self, wikipedia_page: WikipediaPage):
         """This reference claim contains the current revision id and the current date
         This enables us to track references over time in the graph using SPARQL."""
-        logger.info("Preparing reference claims")
+        logger.info("Preparing reference claim")
         # Prepare page_reference
         retrieved_date = datatypes.Time(
             prop_nr=WCDProperty.RETRIEVED_DATE.value,
