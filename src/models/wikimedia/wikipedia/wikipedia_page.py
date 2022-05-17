@@ -341,33 +341,36 @@ class WikipediaPage(BaseModel):
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
-        if config.use_cache:
-            if self.cache is None:
-                self.__setup_cache__()
-            if self.cache is not None:
-                wcdqid = self.cache.check_page_and_get_wikicitations_qid(
-                    wikipedia_page=self
-                )
+        with console.status("Checking if page has already been uploaded"):
+            if config.use_cache:
+                if self.cache is None:
+                    self.__setup_cache__()
+                if self.cache is not None:
+                    wcdqid = self.cache.check_page_and_get_wikicitations_qid(
+                        wikipedia_page=self
+                    )
+                else:
+                    raise ValueError("self.cache was None")
+                if wcdqid is None:
+                    logger.debug("Page not found in the cache")
+                    return False
+                else:
+                    logger.debug("Page found in the cache")
+                    return True
             else:
-                raise ValueError("self.cache was None")
-            if wcdqid is None:
-                logger.debug("Page not found in the cache")
-                return False
-            else:
-                logger.debug("Page found in the cache")
-                return True
-        else:
-            # Fallback
-            logger.info("Not using the cache. Falling back to lookup via SPARQL")
-            if self.md5hash is not None:
-                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=self.md5hash)
-            else:
-                raise ValueError("self.md5hash was None")
-            if wcdqid is not None:
-                self.wikicitations_qid = wcdqid
-                return True
-            else:
-                return False
+                # Fallback
+                logger.info("Not using the cache. Falling back to lookup via SPARQL")
+                if self.md5hash is not None:
+                    wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                        md5hash=self.md5hash
+                    )
+                else:
+                    raise ValueError("self.md5hash was None")
+                if wcdqid is not None:
+                    self.wikicitations_qid = wcdqid
+                    return True
+                else:
+                    return False
 
     def __insert_website_in_cache__(
         self, reference: WikipediaPageReference, wcdqid: str
