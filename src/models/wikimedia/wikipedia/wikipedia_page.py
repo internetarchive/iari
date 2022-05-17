@@ -124,7 +124,7 @@ class WikipediaPage(BaseModel):
             else:
                 raise ValueError("reference.md5hash was None")
         if wcdqid is not None:
-            logger.debug(f"Got wcdqid:{wcdqid} from the cache")
+            logger.debug(f"Got wcdqid:{wcdqid} from the cache/SPARQL")
             reference.wikicitations_qid = wcdqid
         else:
             reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
@@ -136,7 +136,7 @@ class WikipediaPage(BaseModel):
     def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
         """Looks up the WCDQID in WikiCitaitons and returns
         it if only one found and complains if more than one was"""
-        logger.info("Looking up the WCDQID via SPARQL")
+        logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
         if self.wikicitations is None:
             from src import WikiCitations
 
@@ -149,7 +149,9 @@ class WikipediaPage(BaseModel):
                         "Got more than one WCDQID for a hash. This should never happen"
                     )
                 elif len(wcdqids) == 1:
-                    return str(wcdqids[0])
+                    first_wcdqid = str(wcdqids[0])
+                    logger.debug(f"Returning WCDQID {first_wcdqid}")
+                    return first_wcdqid
             else:
                 return None
         else:
@@ -177,10 +179,15 @@ class WikipediaPage(BaseModel):
                 md5hash=reference.first_level_domain_of_url_hash
             )
             reference.first_level_domain_of_url_qid = wcdqid
-        reference = self.__upload_website_and_insert_in_the_cache_if_enabled__(
-            reference=reference
-        )
-        logger.info(f"Added website item to WCD")
+        if reference.first_level_domain_of_url_qid is None:
+            reference = self.__upload_website_and_insert_in_the_cache_if_enabled__(
+                reference=reference
+            )
+            logger.info(f"Added website item to WCD")
+        else:
+            logger.info(
+                f"Added link to existing website item {reference.first_level_domain_of_url_qid}"
+            )
         return reference
 
     def __extract_and_parse_references__(self):
