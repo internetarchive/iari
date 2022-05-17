@@ -2,6 +2,7 @@ import hashlib
 import logging
 from datetime import datetime
 from typing import Optional, List
+from urllib.parse import urlparse
 
 from marshmallow import (
     Schema,
@@ -41,6 +42,8 @@ class WikipediaPageReference(BaseModel):
     first_lasts: Optional[List]
     first_level_domain_of_archive_url: Optional[str]
     first_level_domain_of_url: Optional[str]
+    first_level_domain_of_url_hash: Optional[str]
+    first_level_domain_of_url_qid: Optional[str]
     hosts_list: Optional[List[Person]]
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
@@ -405,6 +408,13 @@ class WikipediaPageReference(BaseModel):
             return False
 
     @property
+    def has_first_level_domain_url_hash(self) -> bool:
+        if self.first_level_domain_of_url_hash is not None:
+            return True
+        else:
+            return False
+
+    @property
     def isodate(self):
         if self.publication_date is not None:
             return datetime.strftime(self.publication_date, "%Y-%m-%d")
@@ -458,7 +468,9 @@ class WikipediaPageReference(BaseModel):
         role: EnglishWikipediaTemplatePersonRole = None,
         search_string: str = None,
     ):
-        if (role and search_string) is not None:
+        """This functions gets all types of numbered persons,
+        both those with roles and those without"""
+        if role is not None and search_string is not None:
             matching_attributes = [
                 attribute
                 for attribute in attributes
@@ -807,7 +819,18 @@ class WikipediaPageReference(BaseModel):
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
         )
 
-    def __generate_hash__(self):
+    def __generate_hashes__(self):
+        self.__generate_reference_hash__()
+        self.__generate_first_level_domain_hash__()
+
+    def __generate_first_level_domain_hash__(self):
+        if self.first_level_domain_of_url is not None:
+            str2hash = self.first_level_domain_of_url
+            self.first_level_domain_of_url_hash = hashlib.md5(
+                str2hash.replace(" ", "").lower().encode()
+            ).hexdigest()
+
+    def __generate_reference_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         str2hash = None
@@ -922,6 +945,22 @@ class WikipediaPageReference(BaseModel):
                 f"or they were turned of in config.py."
             )
 
+    def __parse_urls__(self):
+        """This function quotes the URL to avoid complaints from Wikibase"""
+        logger.debug("Parsing URLs")
+        if self.url is not None:
+            self.url = urlparse(self.url).geturl()
+        if self.archive_url is not None:
+            self.archive_url = urlparse(self.archive_url).geturl()
+        if self.lay_url is not None:
+            self.lay_url = urlparse(self.lay_url).geturl()
+        if self.chapter_url is not None:
+            self.chapter_url = urlparse(self.chapter_url).geturl()
+        if self.conference_url is not None:
+            self.conference_url = urlparse(self.conference_url).geturl()
+        if self.transcripturl is not None:
+            self.transcripturl = urlparse(self.transcripturl).geturl()
+
     def finish_parsing_and_generate_hash(self):
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
@@ -929,8 +968,9 @@ class WikipediaPageReference(BaseModel):
         self.__extract_first_level_domain__()
         self.__parse_isbn__()
         self.__parse_persons__()
+        self.__parse_urls__()
         # We generate the hash last because the parsing needs to be done first
-        self.__generate_hash__()
+        self.__generate_hashes__()
 
 
 class WikipediaPageReferenceSchema(Schema):

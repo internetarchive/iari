@@ -7,6 +7,7 @@ class WCDItem(Enum):
     WIKIPEDIA_REFERENCE = "Q4"
     WIKIPEDIA_PAGE = "Q6"
     ENGLISH_WIKIPEDIA = "Q3"
+    WEBSITE = "Q145"
 
 
 class WCDProperty(Enum):
@@ -23,6 +24,7 @@ class WCDProperty(Enum):
     FAMILY_NAME = "P5"
     GIVEN_NAME = "P4"
     CITATIONS = "P19"
+    FIRST_LEVEL_DOMAIN_STRING = "P49"
     FULL_WORK_AVAILABLE_AT_URL = "P23"
     HASH = "P30"
     HOST_STRING = "P47"

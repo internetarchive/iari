@@ -106,7 +106,7 @@ class WikipediaPage(BaseModel):
         if reference is None:
             raise ValueError("reference was None")
         if config.use_cache:
-            wcdqid = self.__get_wcdqid_from_cache__(reference=reference)
+            wcdqid = self.__get_reference_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.wikicitations_qid = wcdqid
@@ -117,23 +117,26 @@ class WikipediaPage(BaseModel):
                     )
                 )
         else:
-            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=reference.md5hash)
-            if wcdqid is not None:
-                logger.debug(f"Got wcdqid:{wcdqid} from the cache")
-                reference.wikicitations_qid = wcdqid
-            else:
-                reference = (
-                    self.__upload_reference_and_insert_in_the_cache_if_enabled__(
-                        reference=reference
-                    )
+            if reference.md5hash is not None:
+                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                    md5hash=reference.md5hash
                 )
+            else:
+                raise ValueError("reference.md5hash was None")
+        if wcdqid is not None:
+            logger.debug(f"Got wcdqid:{wcdqid} from the cache/SPARQL")
+            reference.wikicitations_qid = wcdqid
+        else:
+            reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
+                reference=reference
+            )
         return reference
 
     @validate_arguments
     def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
         """Looks up the WCDQID in WikiCitaitons and returns
         it if only one found and complains if more than one was"""
-        logger.info("Looking up the WCDQID via SPARQL")
+        logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
         if self.wikicitations is None:
             from src import WikiCitations
 
@@ -146,11 +149,46 @@ class WikipediaPage(BaseModel):
                         "Got more than one WCDQID for a hash. This should never happen"
                     )
                 elif len(wcdqids) == 1:
-                    return wcdqids[0]
+                    first_wcdqid = str(wcdqids[0])
+                    logger.debug(f"Returning WCDQID {first_wcdqid}")
+                    return first_wcdqid
             else:
                 return None
         else:
             raise ValueError("self.wikicitations was None")
+
+    @validate_arguments
+    def __check_and_upload_website_item_to_wikicitations_if_missing__(
+        self, reference: WikipediaPageReference
+    ):
+        """This method checks if a website item is present
+        using the first_level_domain_of_url_hash and the cache if
+        enabled and uploads a new item if not"""
+        if reference.first_level_domain_of_url_hash is None:
+            raise ValueError("reference.first_level_domain_of_url_hash was None")
+        logger.debug("Checking and uploading website item")
+        if reference is None:
+            raise ValueError("reference was None")
+        if config.use_cache:
+            wcdqid = self.__get_website_wcdqid_from_cache__(reference=reference)
+            if wcdqid is not None:
+                logger.debug(f"Got wcdqid:{wcdqid} from the cache")
+                reference.first_level_domain_of_url_qid = wcdqid
+        else:
+            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                md5hash=reference.first_level_domain_of_url_hash
+            )
+            reference.first_level_domain_of_url_qid = wcdqid
+        if reference.first_level_domain_of_url_qid is None:
+            reference = self.__upload_website_and_insert_in_the_cache_if_enabled__(
+                reference=reference
+            )
+            logger.info(f"Added website item to WCD")
+        else:
+            logger.info(
+                f"Added link to existing website item {reference.first_level_domain_of_url_qid}"
+            )
+        return reference
 
     def __extract_and_parse_references__(self):
         logger.info("Extracting references now")
@@ -251,7 +289,7 @@ class WikipediaPage(BaseModel):
         logger.debug(self.md5hash)
 
     @validate_arguments
-    def __get_wcdqid_from_cache__(
+    def __get_reference_wcdqid_from_cache__(
         self, reference: WikipediaPageReference
     ) -> Optional[str]:
         if self.cache is None:
@@ -265,14 +303,33 @@ class WikipediaPage(BaseModel):
         logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
 
+    def __get_website_wcdqid_from_cache__(
+        self, reference: WikipediaPageReference
+    ) -> Optional[str]:
+        if self.cache is None:
+            self.__setup_cache__()
+        if self.cache is not None:
+            wcdqid = self.cache.check_website_and_get_wikicitations_qid(
+                reference=reference
+            )
+        else:
+            raise ValueError("self.cache was None")
+        logger.debug(f"result from the cache:{wcdqid}")
+        return wcdqid
+
     @validate_arguments
     def __get_wikipedia_page_from_title__(self, title: str):
         """Get the page from the Wikimedia site"""
         logger.info("Fetching the page data")
         self.__fetch_page_data__(title=title)
 
+        # this id is useful when talking to WikipediaCitations because it is unique
+        # self.page_id = int(self.pywikibot_page.pageid)
+
     @validate_arguments
-    def __insert_in_cache__(self, reference: WikipediaPageReference, wcdqid: str):
+    def __insert_reference_in_cache__(
+        self, reference: WikipediaPageReference, wcdqid: str
+    ):
         logger.debug("__insert_in_cache__: Running")
         if self.cache is None:
             self.__setup_cache__()
@@ -284,33 +341,46 @@ class WikipediaPage(BaseModel):
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
-        if config.use_cache:
-            if self.cache is None:
-                self.__setup_cache__()
-            if self.cache is not None:
-                wcdqid = self.cache.check_page_and_get_wikicitations_qid(
-                    wikipedia_page=self
-                )
+        with console.status("Checking if page has already been uploaded"):
+            if config.use_cache:
+                if self.cache is None:
+                    self.__setup_cache__()
+                if self.cache is not None:
+                    wcdqid = self.cache.check_page_and_get_wikicitations_qid(
+                        wikipedia_page=self
+                    )
+                else:
+                    raise ValueError("self.cache was None")
+                if wcdqid is None:
+                    logger.debug("Page not found in the cache")
+                    return False
+                else:
+                    logger.debug("Page found in the cache")
+                    return True
             else:
-                raise ValueError("self.cache was None")
-            if wcdqid is None:
-                logger.debug("Page not found in the cache")
-                return False
-            else:
-                logger.debug("Page found in the cache")
-                return True
+                # Fallback
+                logger.info("Not using the cache. Falling back to lookup via SPARQL")
+                if self.md5hash is not None:
+                    wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                        md5hash=self.md5hash
+                    )
+                else:
+                    raise ValueError("self.md5hash was None")
+                if wcdqid is not None:
+                    self.wikicitations_qid = wcdqid
+                    return True
+                else:
+                    return False
+
+    def __insert_website_in_cache__(
+        self, reference: WikipediaPageReference, wcdqid: str
+    ):
+        logger.debug("__insert_website_in_cache__: Running")
+        if self.cache is not None:
+            self.cache.add_website(reference=reference, wcdqid=wcdqid)
         else:
-            # Fallback
-            logger.info("Not using the cache. Falling back to lookup via SPARQL")
-            if self.md5hash is not None:
-                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(md5hash=self.md5hash)
-            else:
-                raise ValueError("self.md5hash was None")
-            if wcdqid is not None:
-                self.wikicitations_qid = wcdqid
-                return True
-            else:
-                return False
+            raise ValueError("self.cache was None")
+        logger.info("Reference inserted into the hash database")
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -373,7 +443,7 @@ class WikipediaPage(BaseModel):
             raise ValueError(
                 "Got None instead of WCDQID when trying to upload to WikiCitations"
             )
-        return wcdqid
+        return str(wcdqid)
 
     @validate_arguments
     def __upload_reference_and_insert_in_the_cache_if_enabled__(
@@ -390,20 +460,74 @@ class WikipediaPage(BaseModel):
                 f"Hash before insertion: {reference.md5hash}. "
                 f"WCDQID before insertion: {wcdqid}"
             )
-            self.__insert_in_cache__(reference=reference, wcdqid=wcdqid)
+            self.__insert_reference_in_cache__(reference=reference, wcdqid=wcdqid)
             reference.wikicitations_qid = wcdqid
         return reference
 
-    def __upload_references_if_missing__(self):
+    @validate_arguments
+    def __upload_website_to_wikicitations__(
+        self, reference: WikipediaPageReference
+    ) -> str:
+        """This is a lower level method that only handles uploading the website item"""
+        if self.wikicitations is None:
+            self.__setup_wikicitations__()
+        if self.wikicitations is not None:
+            wcdqid = self.wikicitations.prepare_and_upload_website_item(
+                page_reference=reference, wikipedia_page=self
+            )
+        else:
+            raise ValueError("self.wikicitations was None")
+        if wcdqid is None:
+            raise ValueError(
+                "Got None instead of WCDQID when trying to upload to WikiCitations"
+            )
+        return str(wcdqid)
+
+    def __upload_website_and_insert_in_the_cache_if_enabled__(
+        self, reference: WikipediaPageReference
+    ):
+        # Here we get the reference back with WCDQID
+        wcdqid = self.__upload_website_to_wikicitations__(reference=reference)
+        if config.use_cache:
+            if wcdqid is None:
+                raise ValueError("WCDQID was None")
+            if reference.first_level_domain_of_url_hash is None:
+                raise ValueError("first_level_domain_of_url_hash was None")
+            logger.debug(
+                f"Hash before insertion: {reference.first_level_domain_of_url_hash}. "
+                f"WCDQID before insertion: {wcdqid}"
+            )
+            self.__insert_website_in_cache__(
+                reference=reference,
+                wcdqid=wcdqid,
+            )
+        reference.first_level_domain_of_url_qid = wcdqid
+        return reference
+
+    def __upload_references_and_websites_if_missing__(self):
         """Go through each reference and upload if missing to WikiCitations"""
         updated_references = []
+        count = 1
+        total = len(self.references)
         for reference in self.references:
+            console.print(f"Working on reference {count}/{total}")
+            if reference.has_first_level_domain_url_hash:
+                with console.status(
+                    f"Linking to or uploading new website item for reference "
+                    f"with link to {reference.first_level_domain_of_url}"
+                ):
+                    # Here we get the reference with the first_level_domain_of_url WCDQID back
+                    reference = self.__check_and_upload_website_item_to_wikicitations_if_missing__(
+                        reference=reference
+                    )
             if reference.has_hash:
-                # Here we get the reference with the WCDQID back
-                reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
-                    reference=reference
-                )
+                with console.status(f"Creating the reference item itself"):
+                    # Here we get the reference with its own WCDQID back
+                    reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
+                        reference=reference
+                    )
             updated_references.append(reference)
+            count += 1
         self.references = updated_references
 
     def export_to_dataframe(self):
@@ -418,10 +542,12 @@ class WikipediaPage(BaseModel):
         if not self.__page_has_already_been_uploaded__():
             logger.info("This page is missing from WikiCitations")
             self.__setup_wikicitations__()
-            self.__fetch_page_data__(title=self.title)
+            with console.status("Downloading page data"):
+                self.__fetch_page_data__(title=self.title)
             # extract references and create items for the missing ones first
-            self.__extract_and_parse_references__()
-            self.__upload_references_if_missing__()
+            with console.status("Extracting information from the references"):
+                self.__extract_and_parse_references__()
+            self.__upload_references_and_websites_if_missing__()
             # upload a new item for the page with links to all the page_reference items
             self.wikicitations_qid = (
                 self.wikicitations.prepare_and_upload_wikipedia_page_item(
@@ -469,7 +595,7 @@ class WikipediaPage(BaseModel):
     #     )
     # def __get_wikipedia_page_from_event__(self):
     #     """Get the page from Wikipedia"""
-    #     logger.info("Fetching the parsed_wikitext")
+    #     logger.info("Fetching the wikitext")
     #     self.pywikibot_page = pywikibot.Page(
     #         self.wikimedia_event.event_stream.pywikibot_site, self.title
     #     )

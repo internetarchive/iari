@@ -1,15 +1,18 @@
 import logging
 from datetime import datetime, timezone
+from time import sleep
 from typing import Any, Optional, List, Dict
 
-from pydantic import BaseModel, validate_arguments
-from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login
-from wikibaseintegrator.entities import ItemEntity
-from wikibaseintegrator.models import Claim, Qualifiers, References, Reference
-from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page
+from pydantic import BaseModel, validate_arguments, NoneStr
+from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
+from wikibaseintegrator.entities import ItemEntity  # type: ignore
+from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
+from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
+from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
 
 import config
 from src import console
+from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 from src.models.wikicitations.enums import WCDProperty, WCDItem
@@ -85,21 +88,44 @@ class WikiCitations(BaseModel):
         else:
             console.print("Got no reference items from the WCD Query Service.")
 
+    def __delete_all_website_items__(self):
+        """Get all items and delete them one by one"""
+        items = self.__extract_item_ids__(
+            sparql_result=self.__get_all_website_items__()
+        )
+        if items is not None and len(items) > 0:
+            number_of_items = len(items)
+            logger.info(f"Got {number_of_items} bindings to delete")
+            self.__setup_wbi__()
+            with console.status(f"Deleting {number_of_items} website items"):
+                for item_id in items:
+                    logger.info(f"Deleting {item_id}")
+                    result = self.__delete_item__(item_id=item_id)
+                    # logger.debug(result)
+                    if config.press_enter_to_continue:
+                        input("continue?")
+            console.print(f"Done deleting all {number_of_items} website items")
+        else:
+            console.print("Got no website items from the WCD Query Service.")
+
     @validate_arguments
     def __delete_item__(self, item_id: str):
         if config.press_enter_to_continue:
             input(f"Do you want to delete {item_id}?")
         logger.debug(f"trying to log in with {config.user} and {config.pwd}")
         self.__setup_wbi__()
-        return delete_page(
-            title=f"Item:{item_id}",
-            # deletetalk=True,
-            login=wbi_login.Login(
-                user=config.user,
-                password=config.pwd,
-                mediawiki_api_url=config.mediawiki_api_url,
-            ),
-        )
+        try:
+            return delete_page(
+                title=f"Item:{item_id}",
+                # deletetalk=True,
+                login=wbi_login.Login(
+                    user=config.user,
+                    password=config.pwd,
+                    mediawiki_api_url=config.mediawiki_api_url,
+                ),
+            )
+        except MWApiError:
+            return
 
     @validate_arguments
     def __extract_item_ids__(
@@ -117,16 +143,24 @@ class WikiCitations(BaseModel):
                     if item_id is not None:
                         items.append(item_id)
                 return items
+            else:
+                return None
+        else:
+            return None
 
     @validate_arguments
     def __extract_wcdqs_json_entity_id__(
         self, data: Dict, sparql_variable: str = "item"
     ) -> str:
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
-        return data[sparql_variable]["value"].replace(
-            config.wikibase_rdf_entity_prefix, ""
+        return str(
+            data[sparql_variable]["value"].replace(
+                config.wikibase_rdf_entity_prefix, ""
+            )
         )
 
+    # TODO refactor these get all functions
+    #  and use the enum value in the query
     def __get_all_page_items__(self):
         """Get all wcdqids for wikipedia pages using sparql"""
         return self.__get_items_via_sparql__(
@@ -140,13 +174,25 @@ class WikiCitations(BaseModel):
         )
 
     def __get_all_reference_items__(self):
-        """Get all wcdqids for wikipedia pages using sparql"""
+        """Get all wcdqids for references using sparql"""
         return self.__get_items_via_sparql__(
             """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {
                 ?item wcdt:P10 wcd:Q4
+            }
+            """
+        )
+
+    def __get_all_website_items__(self):
+        """Get all wcdqids for website items using sparql"""
+        return self.__get_items_via_sparql__(
+            """
+            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
+            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
+            SELECT ?item WHERE {
+                ?item wcdt:P10 wcd:Q145
             }
             """
         )
@@ -162,7 +208,7 @@ class WikiCitations(BaseModel):
         )
 
     @validate_arguments
-    def __get_items_via_sparql__(self, query: str) -> Optional[Dict[str, Dict]]:
+    def __get_items_via_sparql__(self, query: str) -> Optional[Any]:
         """This is the lowest level function
         that executes the query with WBI after setting it up"""
         self.__setup_wbi__()
@@ -173,6 +219,10 @@ class WikiCitations(BaseModel):
         """This is a slower SPARQL-powered fallback helper method
         used when config.use_cache is False"""
         logger.debug("__get_wcdqid_from_hash__: running")
+        logger.info(
+            f"Sleeping {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
         query = f"""
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {{
@@ -186,7 +236,7 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def __prepare_person_claims__(
         self,
-        use_list: List[Person],
+        use_list: Optional[List[Person]],
         property: WCDProperty,
     ):
         """Prepare claims using the specified property and list of person objects"""
@@ -268,24 +318,27 @@ class WikiCitations(BaseModel):
         """Prepare the item citations and add a reference
         to in which revision it was found and the retrieval date"""
         logger.info("Preparing item citations")
-        claims = []
-        for reference in wikipedia_page.references:
-            if reference.wikicitations_qid is not None:
-                logger.debug("Appending to citations")
-                claims.append(
-                    datatypes.Item(
-                        prop_nr=WCDProperty.CITATIONS.value,
-                        value=reference.wikicitations_qid,
-                        references=self.reference_claim,
+        if wikipedia_page.references is not None:
+            claims = []
+            for reference in wikipedia_page.references:
+                if reference.wikicitations_qid is not None:
+                    logger.debug("Appending to citations")
+                    claims.append(
+                        datatypes.Item(
+                            prop_nr=WCDProperty.CITATIONS.value,
+                            value=reference.wikicitations_qid,
+                            references=self.reference_claim,
+                        )
                     )
-                )
-        return claims
+            return claims
+        else:
+            return None
 
     @validate_arguments
     def __prepare_new_reference_item__(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
-        """This method converts a page_reference into a new WikiCitations item"""
+        """This method converts a page_reference into a new reference item"""
         self.__setup_wbi__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(user=config.user, password=config.pwd),
@@ -302,6 +355,36 @@ class WikiCitations(BaseModel):
             self.__prepare_single_value_reference_claims__(
                 page_reference=page_reference
             ),
+        )
+        # if config.loglevel == logging.DEBUG:
+        #     logger.debug("Printing the item data")
+        #     print(item.get_json())
+        #     # exit()
+        return item
+
+    def __prepare_new_website_item__(
+        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
+    ) -> ItemEntity:
+        """This method converts a page_reference into a new website item"""
+        if page_reference.first_level_domain_of_url is None:
+            raise MissingInformationError(
+                "page_reference.first_level_domain_of_url was None"
+            )
+        logger.info(
+            f"Creating website item: {page_reference.first_level_domain_of_url}"
+        )
+        self.__setup_wbi__()
+        wbi = WikibaseIntegrator(
+            login=wbi_login.Login(user=config.user, password=config.pwd),
+        )
+        item = wbi.item.new()
+        item.labels.set("en", page_reference.first_level_domain_of_url)
+        item.descriptions.set(
+            "en",
+            f"website referenced from {wikipedia_page.wikimedia_site.name.title()}",
+        )
+        item.add_claims(
+            self.__prepare_single_value_website_claims__(page_reference=page_reference),
         )
         # if config.loglevel == logging.DEBUG:
         #     logger.debug("Printing the item data")
@@ -397,7 +480,7 @@ class WikiCitations(BaseModel):
     def __prepare_reference_claim__(self, wikipedia_page: WikipediaPage):
         """This reference claim contains the current revision id and the current date
         This enables us to track references over time in the graph using SPARQL."""
-        logger.info("Preparing reference claims")
+        logger.info("Preparing reference claim")
         # Prepare page_reference
         retrieved_date = datatypes.Time(
             prop_nr=WCDProperty.RETRIEVED_DATE.value,
@@ -472,6 +555,13 @@ class WikiCitations(BaseModel):
         title = None
         url = None
         wikidata_qid = None
+        if page_reference.first_level_domain_of_url_qid is not None:
+            website_item = datatypes.Item(
+                prop_nr=WCDProperty.WEBSITE.value,
+                value=page_reference.first_level_domain_of_url_qid,
+            )
+        else:
+            website_item = None
         if page_reference.access_date is not None:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
@@ -567,7 +657,43 @@ class WikiCitations(BaseModel):
             title,
             url,
             website_string,
+            website_item,
             wikidata_qid,
+        ):
+            if claim is not None:
+                claims.append(claim)
+        return claims
+
+    def __prepare_single_value_website_claims__(
+        self,
+        page_reference: WikipediaPageReference,
+    ) -> Optional[List[Claim]]:
+        logger.info("Preparing single value claims for the website item")
+        # Claims always present
+        instance_of = datatypes.Item(
+            prop_nr=WCDProperty.INSTANCE_OF.value,
+            value=WCDItem.WEBSITE.value,
+        )
+        source_wikipedia = datatypes.Item(
+            prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
+            value=self.language_wcditem.value,
+        )
+        first_level_domain_string = datatypes.String(
+            prop_nr=WCDProperty.FIRST_LEVEL_DOMAIN_STRING.value,
+            value=page_reference.first_level_domain_of_url,
+        )
+        if page_reference.first_level_domain_of_url_hash is None:
+            raise ValueError("page_reference.first_level_domain_of_url_hash was None")
+        hash_claim = datatypes.String(
+            prop_nr=WCDProperty.HASH.value,
+            value=page_reference.first_level_domain_of_url_hash,
+        )
+        claims = []
+        for claim in (
+            instance_of,
+            source_wikipedia,
+            first_level_domain_string,
+            hash_claim,
         ):
             if claim is not None:
                 claims.append(claim)
@@ -817,24 +943,28 @@ class WikiCitations(BaseModel):
     ) -> Optional[List[Claim]]:
         # pseudo code
         # for each page_reference in the page that
-        claims = []
-        for page_reference in wikipedia_page.references:
-            if not page_reference.has_hash:
-                # generate string statements
-                claims.append(
-                    self.__prepare_string_citation__(page_reference=page_reference)
-                )
-        return claims
+        if wikipedia_page.references is not None:
+            claims = []
+            for page_reference in wikipedia_page.references:
+                if not page_reference.has_hash:
+                    # generate string statements
+                    claims.append(
+                        self.__prepare_string_citation__(page_reference=page_reference)
+                    )
+            return claims
+        else:
+            return None
 
     @staticmethod
-    def __setup_wbi__():
+    def __setup_wbi__() -> None:
         wbi_config.config["USER_AGENT"] = "wcdimportbot"
         wbi_config.config["WIKIBASE_URL"] = config.wikibase_url
         wbi_config.config["MEDIAWIKI_API_URL"] = config.mediawiki_api_url
         wbi_config.config["MEDIAWIKI_INDEX_URL"] = config.mediawiki_index_url
         wbi_config.config["SPARQL_ENDPOINT_URL"] = config.sparql_endpoint_url
+        return None
 
-    def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
+    def __upload_new_item__(self, item: ItemEntity) -> str:
         if item is None:
             raise ValueError("Did not get what we need")
         if config.loglevel == logging.DEBUG:
@@ -846,13 +976,14 @@ class WikiCitations(BaseModel):
         if config.press_enter_to_continue:
             input("press enter to continue")
         logger.debug(f"returning new wcdqid: {new_item.id}")
-        return new_item.id
+        return str(new_item.id)
 
-    def delete_all_page_and_reference_items(self):
-        """This function deletes first the page item and then the reference items"""
+    def delete_imported_items(self):
+        """This function deletes all the imported items in WikiCitations"""
         console.print("Deleting all imported items")
         self.__delete_all_page_items__()
         self.__delete_all_reference_items__()
+        self.__delete_all_website_items__()
 
     @validate_arguments
     def get_item(self, item_id: str) -> Optional[ItemEntity]:
@@ -867,9 +998,22 @@ class WikiCitations(BaseModel):
         return f"{config.wikibase_url}/wiki/Item:{qid}"
 
     @validate_arguments
+    def prepare_and_upload_website_item(
+        self,
+        page_reference: WikipediaPageReference,
+        wikipedia_page: WikipediaPage,
+    ) -> NoneStr:
+        self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
+        item = self.__prepare_new_website_item__(
+            page_reference=page_reference, wikipedia_page=wikipedia_page
+        )
+        wcdqid = self.__upload_new_item__(item=item)
+        return wcdqid
+
+    @validate_arguments
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
-    ) -> str:
+    ) -> NoneStr:
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
@@ -878,7 +1022,7 @@ class WikiCitations(BaseModel):
         return wcdqid
 
     @validate_arguments
-    def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> str:
+    def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> NoneStr:
         logging.debug("prepare_and_upload_wikipedia_page_item: Running")
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
