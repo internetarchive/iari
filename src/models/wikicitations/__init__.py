@@ -344,7 +344,9 @@ class WikiCitations(BaseModel):
             login=wbi_login.Login(user=config.user, password=config.pwd),
         )
         item = wbi.item.new()
-        item.labels.set("en", page_reference.title)
+        # We append the first 7 chars of the hash to the title
+        # to avoid label collision errors
+        item.labels.set("en", f"{page_reference.title} | {page_reference.md5hash[:7]}")
         item.descriptions.set(
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
         )
