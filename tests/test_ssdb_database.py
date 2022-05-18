@@ -23,4 +23,4 @@ class TestSsdbDatabase(TestCase):
             r.flush_database()
             result = r.get_value("test")
             # print(result)
-            assert result == None
+            assert result is None

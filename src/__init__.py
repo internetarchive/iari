@@ -126,7 +126,7 @@ class WcdImportBot(BaseModel):
                     raise ValueError("page.md5hash was None")
             if item_id is not None:
                 wc = WikiCitations()
-                item = wc.__delete_item__(item_id=item_id)
+                wc.__delete_item__(item_id=item_id)
                 # delete from cache
                 if page.md5hash is not None:
                     if config.use_cache:

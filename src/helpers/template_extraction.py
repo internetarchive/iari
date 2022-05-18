@@ -1,4 +1,3 @@
-import re
 from collections import OrderedDict
 from typing import List, Tuple, OrderedDict as OrderedDictType
 
@@ -36,8 +35,6 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
     and `strip` parameters.
 
     :param text: The wikitext from which templates are extracted
-    :param remove_disabled_parts: If enabled, remove disabled wikitext
-        such as comments and pre.
     :param strip: If enabled, strip arguments and values of templates.
     :return: list of template name and params
 

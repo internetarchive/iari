@@ -60,7 +60,7 @@ class WikiCitations(BaseModel):
             with console.status(f"Deleting {number_of_items} page items"):
                 for item_id in items:
                     logger.info(f"Deleting {item_id}")
-                    result = self.__delete_item__(item_id=item_id)
+                    self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
                         input("continue?")
@@ -80,7 +80,7 @@ class WikiCitations(BaseModel):
             with console.status(f"Deleting {number_of_items} reference items"):
                 for item_id in items:
                     logger.info(f"Deleting {item_id}")
-                    result = self.__delete_item__(item_id=item_id)
+                    self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
                         input("continue?")
@@ -100,7 +100,7 @@ class WikiCitations(BaseModel):
             with console.status(f"Deleting {number_of_items} website items"):
                 for item_id in items:
                     logger.info(f"Deleting {item_id}")
-                    result = self.__delete_item__(item_id=item_id)
+                    self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
                         input("continue?")
