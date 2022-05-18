@@ -12,5 +12,6 @@ class EnglishWikipediaPageReference(WikipediaPageReference):
 
 class EnglishWikipediaPageReferenceSchema(WikipediaPageReferenceSchema):
     @post_load
-    def return_object(self, data, **kwargs):
+    # **kwargs is needed here despite what the validator claims
+    def return_object(self, data, **kwargs):  # type: ignore
         return EnglishWikipediaPageReference(**data)
