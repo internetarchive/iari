@@ -43,10 +43,10 @@ class WcdImportBot(BaseModel):
         """We want to have an overview while the bot is running
         about how many references could be imported"""
         self.total_number_of_hashed_references = sum(
-            [page.number_of_hashed_references for page in self.pages]
+            page.number_of_hashed_references for page in self.pages
         )
         self.total_number_of_references = sum(
-            [page.number_of_references for page in self.pages]
+            page.number_of_references for page in self.pages
         )
         if self.total_number_of_references == 0:
             self.percent_references_hashed_in_total = 0
@@ -210,7 +210,7 @@ class WcdImportBot(BaseModel):
             cache.flush_database()
 
     def run(self):
-        """This method handles runnig the bot
+        """This method handles running the bot
         based on the given command line arguments."""
         args = self.__setup_argparse_and_return_args__()
         if args.rinse is True:
