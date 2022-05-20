@@ -2,7 +2,13 @@
 'https://plantuml.com/sequence-diagram
 
 autonumber
-wcdimportbot -> "Wikipedia API": Get range of pages
+actor User as user
+control wcdimportbot
+database "Cache/SPARQL" as Cache
+database WikiCitations
+entity "Wikipedia API" as wikipediaapi
+user -> wcdimportbot: Run the bot using --range
+wcdimportbot -> wikipediaapi: Get range of pages
 loop for each page
     wcdimportbot -> Cache: Lookup page hash and WCDQID
     alt "page hash not found"
@@ -15,6 +21,11 @@ loop for each page
                 wcdimportbot -> wcdimportbot: Link to existing reference
             end
             alt reference hash not found
+                alt URL found
+                    wcdimportbot -> wcdimportbot: Generate website item
+                    wcdimportbot -> Cache: Insert website item hash and WCDQID
+                    wcdimportbot -> WikiCitations: Create new website item
+                end
                 wcdimportbot -> wcdimportbot: Generate the statements
                 wcdimportbot -> Cache: Insert reference hash and WCDQID
                 wcdimportbot -> WikiCitations: Create new item for the reference
