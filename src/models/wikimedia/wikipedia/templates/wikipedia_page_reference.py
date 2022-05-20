@@ -460,6 +460,132 @@ class WikipediaPageReference(BaseModel):
             logger.debug(f"Found no numbers.")
             return None
 
+    def __generate_first_level_domain_hash__(self):
+        if self.first_level_domain_of_url is not None:
+            str2hash = self.first_level_domain_of_url
+            self.first_level_domain_of_url_hash = hashlib.md5(
+                str2hash.replace(" ", "").lower().encode()
+            ).hexdigest()
+
+    def __generate_hashes__(self):
+        self.__generate_reference_hash__()
+        self.__generate_first_level_domain_hash__()
+
+    def __generate_reference_hash__(self):
+        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
+        We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
+        str2hash = None
+        if self.doi is not None:
+            str2hash = self.doi
+        elif self.pmid is not None:
+            str2hash = self.pmid
+        elif self.isbn is not None:
+            # We strip the dashes before hashing
+            str2hash = self.isbn.replace("-", "")
+        elif self.oclc is not None:
+            str2hash = self.oclc
+        elif self.url is not None:
+            if config.include_url_and_first_parameter_in_hash_algorithm:
+                str2hash = self.url
+        elif self.first_parameter is not None:
+            if config.include_url_and_first_parameter_in_hash_algorithm:
+                str2hash = self.first_parameter
+
+        # DISABLED template specific hashing for now because it is error
+        # prone and does not make it easy to avoid duplicates
+        # For example a news article might be cited with the publication date in one place but not in another.
+        # If we include the publication date in the hash we will end up with a duplicate in Wikibase.
+        # if self.template_name == "cite av media":
+        #     """{{cite AV media |people= |date= |title= |trans-title= |type=
+        #     |language= |url= |access-date= |archive-url= |archive-date=
+        #     |format= |time= |location= |publisher= |id= |isbn= |oclc= |quote= |ref=}}"""
+        #     # https://en.wikipedia.org/wiki/Template:Cite_AV_media
+        #     if self.doi is None:
+        #         if self.isbn is None:
+        #             str2hash = self.__hash_based_on_title_and_date__()
+        #         else:
+        #             str2hash = self.isbn
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite book":
+        #     if self.isbn is None:
+        #         str2hash = self.__hash_based_on_title_and_publisher_and_date__()
+        #     else:
+        #         str2hash = self.isbn
+        # elif self.template_name == "cite journal":
+        #     if self.doi is None:
+        #         # Fallback first to PMID
+        #         if self.pmid is None:
+        #             str2hash = self.__hash_based_on_title_and_date__()
+        #         else:
+        #             str2hash = self.pmid
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite magazine":
+        #     """{{cite magazine |last= |first= |date= |title= |url=
+        #     |magazine= |location= |publisher= |access-date=}}"""
+        #     if self.doi is None:
+        #         # TODO clean URL first?
+        #         if (self.title) is not None:
+        #             str2hash = self.title + self.isodate
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite news":
+        #     if self.doi is None:
+        #         # TODO clean URL first?
+        #         if (self.title) is not None:
+        #             str2hash = self.title + self.isodate
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "cite web":
+        #     if self.doi is None:
+        #         # Many of these references lead to pages without any publication
+        #         # dates unfortunately. e.g. https://www.billboard.com/artist/chk-chk-chk-2/chart-history/tlp/
+        #         # TODO clean URL first?
+        #         if self.url is not None:
+        #             str2hash = self.url
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # elif self.template_name == "url":
+        #     """Example:{{url|chkchkchk.net}}"""
+        #     if self.doi is None:
+        #         # TODO clean URL first?
+        #         if self.first_parameter is not None:
+        #             str2hash = self.first_parameter
+        #         else:
+        #             raise ValueError(
+        #                 f"did not get what we need to generate a hash, {self.dict()}"
+        #             )
+        #     else:
+        #         str2hash = self.doi
+        # else:
+        #     # Do we want a generic fallback?
+        #     pass
+        if str2hash is not None:
+            self.md5hash = hashlib.md5(
+                str2hash.replace(" ", "").lower().encode()
+            ).hexdigest()
+            logger.debug(self.md5hash)
+        else:
+            self.md5hash = None
+            logger.warning(
+                f"hashing not possible for this instance of {self.template_name} "
+                f"because no identifier or url or first parameter was found "
+                f"or they were turned of in config.py."
+            )
+
     @validate_arguments
     def __get_numbered_person__(
         self,
@@ -626,76 +752,6 @@ class WikipediaPageReference(BaseModel):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
-    @validate_arguments
-    def __parse_known_role_persons__(
-        self, attributes: List[str], role: EnglishWikipediaTemplatePersonRole
-    ):
-        persons = []
-        person_without_number = [
-            attribute
-            for attribute in attributes
-            if self.__find_number__(attribute) is None and role.value in attribute
-        ]
-        if len(person_without_number) > 0:
-            person = Person(role=role, has_number=False)
-            link = role.value + "_link"
-            mask = role.value + "_mask"
-            first = role.value + "_first"
-            last = role.value + "_last"
-            for attribute in person_without_number:
-                # print(attribute, getattr(self, attribute))
-                if attribute == role.value:
-                    person.name_string = getattr(self, role.value)
-                if attribute == link:
-                    person.link = getattr(self, link)
-                if attribute == mask:
-                    person.mask = getattr(self, mask)
-                if attribute == first:
-                    person.given = getattr(self, first)
-                if attribute == last:
-                    person.surname = getattr(self, last)
-            persons.append(person)
-        # We use list comprehension to get the numbered persons to
-        # ease code maintentenance and easily support a larger range if neccessary
-        persons.extend(
-            self.__get_numbered_persons__(
-                attributes=attributes,
-                role=EnglishWikipediaTemplatePersonRole.AUTHOR,
-                search_string=role.value,
-            )
-        )
-        # console.print(f"{role.name}s: {persons}")
-        return persons
-
-    @validate_arguments
-    def __parse_roleless_persons__(self, attributes: List[str]):
-        persons = []
-        # first last
-        unnumbered_first_last = [
-            attribute
-            for attribute in attributes
-            if self.__find_number__(attribute) is None
-            and (attribute == "first" or attribute == "last")
-        ]
-        logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
-        if len(unnumbered_first_last) > 0:
-            person = Person(
-                role=EnglishWikipediaTemplatePersonRole.UNKNOWN, has_number=False
-            )
-            for attribute in unnumbered_first_last:
-                # print(attribute, getattr(self, attribute))
-                if attribute == "first":
-                    person.given = self.first
-                if attribute == "last":
-                    person.surname = self.last
-            # console.print(person)
-            persons.append(person)
-            # exit()
-        # We use list comprehension to get the numbered persons to
-        # ease code maintentenance and easily support a larger range if neccessary
-        persons.extend(self.__get_numbered_persons__(attributes=attributes))
-        return persons
-
     @validator(
         "access_date",
         "archive_date",
@@ -763,18 +819,6 @@ class WikipediaPageReference(BaseModel):
             logger.warning(f"date format '{v}' not supported yet")
         return date
 
-    def __parse_isbn__(self):
-        if self.isbn is not None:
-            stripped_isbn = self.isbn.replace("-", "")
-            if len(stripped_isbn) == 13:
-                self.isbn_13 = self.isbn
-            elif len(stripped_isbn) == 10:
-                self.isbn_10 = self.isbn
-            else:
-                raise ValueError(
-                    "isbn: {self.isbn} was not 10 or 13 chars long after removing the da"
-                )
-
     def __parse_first_parameter__(self):
         # pseudo code
         if self.template_name == ("cite q" or "citeq"):
@@ -787,6 +831,59 @@ class WikipediaPageReference(BaseModel):
                 self.url = self.first_parameter
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
+
+    def __parse_isbn__(self):
+        if self.isbn is not None:
+            stripped_isbn = self.isbn.replace("-", "")
+            if len(stripped_isbn) == 13:
+                self.isbn_13 = self.isbn
+            elif len(stripped_isbn) == 10:
+                self.isbn_10 = self.isbn
+            else:
+                raise ValueError(
+                    "isbn: {self.isbn} was not 10 or 13 chars long after removing the da"
+                )
+
+    @validate_arguments
+    def __parse_known_role_persons__(
+        self, attributes: List[str], role: EnglishWikipediaTemplatePersonRole
+    ):
+        persons = []
+        person_without_number = [
+            attribute
+            for attribute in attributes
+            if self.__find_number__(attribute) is None and role.value in attribute
+        ]
+        if len(person_without_number) > 0:
+            person = Person(role=role, has_number=False)
+            link = role.value + "_link"
+            mask = role.value + "_mask"
+            first = role.value + "_first"
+            last = role.value + "_last"
+            for attribute in person_without_number:
+                # print(attribute, getattr(self, attribute))
+                if attribute == role.value:
+                    person.name_string = getattr(self, role.value)
+                if attribute == link:
+                    person.link = getattr(self, link)
+                if attribute == mask:
+                    person.mask = getattr(self, mask)
+                if attribute == first:
+                    person.given = getattr(self, first)
+                if attribute == last:
+                    person.surname = getattr(self, last)
+            persons.append(person)
+        # We use list comprehension to get the numbered persons to
+        # ease code maintentenance and easily support a larger range if neccessary
+        persons.extend(
+            self.__get_numbered_persons__(
+                attributes=attributes,
+                role=EnglishWikipediaTemplatePersonRole.AUTHOR,
+                search_string=role.value,
+            )
+        )
+        # console.print(f"{role.name}s: {persons}")
+        return persons
 
     def __parse_persons__(self):
         """Parse all person related data into Person objects"""
@@ -819,131 +916,34 @@ class WikipediaPageReference(BaseModel):
             attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
         )
 
-    def __generate_hashes__(self):
-        self.__generate_reference_hash__()
-        self.__generate_first_level_domain_hash__()
-
-    def __generate_first_level_domain_hash__(self):
-        if self.first_level_domain_of_url is not None:
-            str2hash = self.first_level_domain_of_url
-            self.first_level_domain_of_url_hash = hashlib.md5(
-                str2hash.replace(" ", "").lower().encode()
-            ).hexdigest()
-
-    def __generate_reference_hash__(self):
-        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
-        We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
-        str2hash = None
-        if self.doi is not None:
-            str2hash = self.doi
-        elif self.pmid is not None:
-            str2hash = self.pmid
-        elif self.isbn is not None:
-            # We strip the dashes before hashing
-            str2hash = self.isbn.replace("-", "")
-        elif self.oclc is not None:
-            str2hash = self.oclc
-        elif self.url is not None:
-            if config.include_url_and_first_parameter_in_hash_algorithm:
-                str2hash = self.url
-        elif self.first_parameter is not None:
-            if config.include_url_and_first_parameter_in_hash_algorithm:
-                str2hash = self.first_parameter
-
-        # DISABLED template specific hashing for now because it is error
-        # prone and does not make it easy to avoid duplicates
-        # For example a news article might be cited with the publication date in one place but not in another.
-        # If we include the publication date in the hash we will end up with a duplicate in Wikibase.
-        # if self.template_name == "cite av media":
-        #     """{{cite AV media |people= |date= |title= |trans-title= |type=
-        #     |language= |url= |access-date= |archive-url= |archive-date=
-        #     |format= |time= |location= |publisher= |id= |isbn= |oclc= |quote= |ref=}}"""
-        #     # https://en.wikipedia.org/wiki/Template:Cite_AV_media
-        #     if self.doi is None:
-        #         if self.isbn is None:
-        #             str2hash = self.__hash_based_on_title_and_date__()
-        #         else:
-        #             str2hash = self.isbn
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite book":
-        #     if self.isbn is None:
-        #         str2hash = self.__hash_based_on_title_and_publisher_and_date__()
-        #     else:
-        #         str2hash = self.isbn
-        # elif self.template_name == "cite journal":
-        #     if self.doi is None:
-        #         # Fallback first to PMID
-        #         if self.pmid is None:
-        #             str2hash = self.__hash_based_on_title_and_date__()
-        #         else:
-        #             str2hash = self.pmid
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite magazine":
-        #     """{{cite magazine |last= |first= |date= |title= |url=
-        #     |magazine= |location= |publisher= |access-date=}}"""
-        #     if self.doi is None:
-        #         # TODO clean URL first?
-        #         if (self.title) is not None:
-        #             str2hash = self.title + self.isodate
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite news":
-        #     if self.doi is None:
-        #         # TODO clean URL first?
-        #         if (self.title) is not None:
-        #             str2hash = self.title + self.isodate
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite web":
-        #     if self.doi is None:
-        #         # Many of these references lead to pages without any publication
-        #         # dates unfortunately. e.g. https://www.billboard.com/artist/chk-chk-chk-2/chart-history/tlp/
-        #         # TODO clean URL first?
-        #         if self.url is not None:
-        #             str2hash = self.url
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "url":
-        #     """Example:{{url|chkchkchk.net}}"""
-        #     if self.doi is None:
-        #         # TODO clean URL first?
-        #         if self.first_parameter is not None:
-        #             str2hash = self.first_parameter
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # else:
-        #     # Do we want a generic fallback?
-        #     pass
-        if str2hash is not None:
-            self.md5hash = hashlib.md5(
-                str2hash.replace(" ", "").lower().encode()
-            ).hexdigest()
-            logger.debug(self.md5hash)
-        else:
-            self.md5hash = None
-            logger.warning(
-                f"hashing not possible for this instance of {self.template_name} "
-                f"because no identifier or url or first parameter was found "
-                f"or they were turned of in config.py."
+    @validate_arguments
+    def __parse_roleless_persons__(self, attributes: List[str]):
+        persons = []
+        # first last
+        unnumbered_first_last = [
+            attribute
+            for attribute in attributes
+            if self.__find_number__(attribute) is None
+            and (attribute == "first" or attribute == "last")
+        ]
+        logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
+        if len(unnumbered_first_last) > 0:
+            person = Person(
+                role=EnglishWikipediaTemplatePersonRole.UNKNOWN, has_number=False
             )
+            for attribute in unnumbered_first_last:
+                # print(attribute, getattr(self, attribute))
+                if attribute == "first":
+                    person.given = self.first
+                if attribute == "last":
+                    person.surname = self.last
+            # console.print(person)
+            persons.append(person)
+            # exit()
+        # We use list comprehension to get the numbered persons to
+        # ease code maintentenance and easily support a larger range if neccessary
+        persons.extend(self.__get_numbered_persons__(attributes=attributes))
+        return persons
 
     def __parse_urls__(self):
         """This function quotes the URL to avoid complaints from Wikibase"""
