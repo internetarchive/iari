@@ -208,21 +208,31 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __fetch_page_data__(self, title: str) -> None:
         """This fetches metadata and the latest revision id
-        and date from the MediaWiki REST v1 API"""
-        self.title = title
-        url = f"https://en.wikipedia.org/w/rest.php/v1/page/{title}"
-        headers = {"User-Agent": config.user_agent}
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            data = response.json()
-            # TODO read up on the documentation to find out if this is reliable
-            self.latest_revision_id = int(data["latest"]["id"])
-            self.latest_revision_date = isoparse(data["latest"]["timestamp"])
-            self.page_id = int(data["id"])
-            self.wikitext = data["source"]
+        and date from the MediaWiki REST v1 API if needed"""
+        if (
+            self.latest_revision_id
+            or self.latest_revision_date
+            or self.wikitext
+            or self.page_id
+        ) is None:
+            self.title = title
+            url = f"https://en.wikipedia.org/w/rest.php/v1/page/{title}"
+            headers = {"User-Agent": config.user_agent}
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                # TODO read up on the documentation to find out if this is reliable
+                self.latest_revision_id = int(data["latest"]["id"])
+                self.latest_revision_date = isoparse(data["latest"]["timestamp"])
+                self.page_id = int(data["id"])
+                self.wikitext = data["source"]
+            else:
+                raise ValueError(
+                    f"Could not fetch page data. Got {response.status_code} from {url}"
+                )
         else:
-            raise ValueError(
-                f"Could not fetch page data. Got {response.status_code} from {url}"
+            logger.debug(
+                "Not fetching via REST API. We have already got all the data we need"
             )
 
     @staticmethod
