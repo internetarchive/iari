@@ -922,7 +922,7 @@ class WikiCitations(BaseModel):
         self, wikipedia_page: WikipediaPage
     ) -> List[Claim]:
         # pseudo code
-        # for each page_reference in the page that
+        # Return a citation for every page_reference that does not have a hash
         return [
             self.__prepare_string_citation__(page_reference=page_reference)
             for page_reference in (wikipedia_page.references or [])
