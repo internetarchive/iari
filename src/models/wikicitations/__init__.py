@@ -237,73 +237,54 @@ class WikiCitations(BaseModel):
     def __prepare_all_person_claims__(
         self, page_reference: WikipediaPageReference
     ) -> List[Claim]:
-        persons = []
         authors = self.__prepare_person_claims__(
             use_list=page_reference.authors_list,
             property=WCDProperty.AUTHOR_NAME_STRING,
         )
-        if authors is not None:
-            persons.extend(authors)
         if (
             config.assume_persons_without_role_are_authors
-            and page_reference.persons_without_role is not None
-            and len(page_reference.persons_without_role) > 0
+            and page_reference.persons_without_role
         ):
             logger.info("Assuming persons without role are authors")
         no_role_authors = self.__prepare_person_claims__(
             use_list=page_reference.persons_without_role,
             property=WCDProperty.AUTHOR_NAME_STRING,
         )
-        if no_role_authors is not None:
-            persons.extend(no_role_authors)
         editors = self.__prepare_person_claims__(
             use_list=page_reference.interviewers_list,
             property=WCDProperty.EDITOR_NAME_STRING,
         )
-        if editors is not None:
-            persons.extend(editors)
         hosts = self.__prepare_person_claims__(
             use_list=page_reference.hosts_list,
             property=WCDProperty.HOST_STRING,
         )
-        if hosts is not None:
-            persons.extend(hosts)
         interviewers = self.__prepare_person_claims__(
             use_list=page_reference.interviewers_list,
             property=WCDProperty.INTERVIEWER_STRING,
         )
-        if interviewers is not None:
-            persons.extend(interviewers)
         translators = self.__prepare_person_claims__(
             use_list=page_reference.interviewers_list,
             property=WCDProperty.INTERVIEWER_STRING,
         )
-        if translators is not None:
-            persons.extend(translators)
-        return persons
+        return authors + no_role_authors + editors + hosts + interviewers + translators
 
     @validate_arguments
-    def __prepare_item_citations__(
-        self, wikipedia_page: WikipediaPage
-    ) -> Optional[List[Claim]]:
+    def __prepare_item_citations__(self, wikipedia_page: WikipediaPage) -> List[Claim]:
         """Prepare the item citations and add a reference
         to in which revision it was found and the retrieval date"""
         logger.info("Preparing item citations")
-        if wikipedia_page.references is not None:
-            claims = []
-            for reference in wikipedia_page.references:
-                if reference.wikicitations_qid is not None:
-                    logger.debug("Appending to citations")
-                    claims.append(
-                        datatypes.Item(
-                            prop_nr=WCDProperty.CITATIONS.value,
-                            value=reference.wikicitations_qid,
-                            references=self.reference_claim,
-                        )
+        claims = []
+        for reference in wikipedia_page.references or []:
+            if reference.wikicitations_qid is not None:
+                logger.debug("Appending to citations")
+                claims.append(
+                    datatypes.Item(
+                        prop_nr=WCDProperty.CITATIONS.value,
+                        value=reference.wikicitations_qid,
+                        references=self.reference_claim,
                     )
-            return claims
-        else:
-            return None
+                )
+        return claims
 
     @validate_arguments
     def __prepare_new_reference_item__(
@@ -388,9 +369,9 @@ class WikiCitations(BaseModel):
         string_citations = self.__prepare_string_citations__(
             wikipedia_page=wikipedia_page
         )
-        if citations is not None and len(citations) > 0:
+        if citations:
             item.add_claims(citations)
-        if string_citations is not None and len(string_citations) > 0:
+        if string_citations:
             item.add_claims(string_citations)
         item.add_claims(
             self.__prepare_single_value_wikipedia_page_claims__(
@@ -408,17 +389,19 @@ class WikiCitations(BaseModel):
         self,
         use_list: Optional[List[Person]],
         property: WCDProperty,
-    ):
+    ) -> List:
         """Prepare claims using the specified property and list of person objects"""
         persons = []
-        if use_list is not None and len(use_list) > 0:
+        use_list = use_list or []
+        if use_list:
             logger.debug(f"Preparing {property.name}")
             for person_object in use_list:
                 if person_object.author_name_string is not None:
-                    qualifiers = self.__prepare_person_qualifiers__(
-                        person_object=person_object
+                    qualifiers = (
+                        self.__prepare_person_qualifiers__(person_object=person_object)
+                        or []
                     )
-                    if len(qualifiers) > 0:
+                    if qualifiers:
                         person = datatypes.String(
                             prop_nr=property.value,
                             value=person_object.author_name_string,
@@ -691,16 +674,16 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.HASH.value,
             value=page_reference.first_level_domain_of_url_hash,
         )
-        claims = []
-        for claim in (
-            instance_of,
-            source_wikipedia,
-            first_level_domain_string,
-            hash_claim,
-        ):
-            if claim is not None:
-                claims.append(claim)
-        return claims
+        return [
+            claim
+            for claim in (
+                instance_of,
+                source_wikipedia,
+                first_level_domain_string,
+                hash_claim,
+            )
+            if claim
+        ]
 
     def __prepare_single_value_wikipedia_page_claims__(
         self, wikipedia_page
@@ -937,20 +920,14 @@ class WikiCitations(BaseModel):
 
     def __prepare_string_citations__(
         self, wikipedia_page: WikipediaPage
-    ) -> Optional[List[Claim]]:
+    ) -> List[Claim]:
         # pseudo code
-        # for each page_reference in the page that
-        if wikipedia_page.references is not None:
-            claims = []
-            for page_reference in wikipedia_page.references:
-                if not page_reference.has_hash:
-                    # generate string statements
-                    claims.append(
-                        self.__prepare_string_citation__(page_reference=page_reference)
-                    )
-            return claims
-        else:
-            return None
+        # Return a citation for every page_reference that does not have a hash
+        return [
+            self.__prepare_string_citation__(page_reference=page_reference)
+            for page_reference in (wikipedia_page.references or [])
+            if not page_reference.has_hash
+        ]
 
     @staticmethod
     def __setup_wbi__() -> None:
