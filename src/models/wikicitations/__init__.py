@@ -243,7 +243,7 @@ class WikiCitations(BaseModel):
         )
         if (
             config.assume_persons_without_role_are_authors
-            and len(page_reference.persons_without_role or []) > 0
+            and page_reference.persons_without_role
         ):
             logger.info("Assuming persons without role are authors")
         no_role_authors = self.__prepare_person_claims__(
