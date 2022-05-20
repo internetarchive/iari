@@ -402,30 +402,20 @@ class WikipediaPageReference(BaseModel):
 
     @property
     def has_hash(self) -> bool:
-        if self.md5hash is not None:
-            return True
-        else:
-            return False
+        return bool(self.md5hash is not None)
 
     @property
     def has_first_level_domain_url_hash(self) -> bool:
-        if self.first_level_domain_of_url_hash is not None:
-            return True
-        else:
-            return False
+        return bool(self.first_level_domain_of_url_hash is not None)
 
     @property
-    def isodate(self):
-        if self.publication_date is not None:
-            return datetime.strftime(self.publication_date, "%Y-%m-%d")
-        elif self.date is not None:
-            return datetime.strftime(self.date, "%Y-%m-%d")
-        elif self.year is not None:
-            return datetime.strftime(self.year, "%Y-%m-%d")
-        else:
+    def isodate(self) -> str:
+        usable_date = self.publication_date or self.date or self.year
+        if not usable_date:
             raise ValueError(
                 f"missing publication date, in template {self.template_name}, see {self.dict()}"
             )
+        return f"{usable_date:%Y-%m-%d}"
 
     @property
     def template_url(self):
@@ -444,13 +434,10 @@ class WikipediaPageReference(BaseModel):
 
     @staticmethod
     @validate_arguments
-    def __find_number__(string: str):
+    def __find_number__(string: str) -> Optional[int]:
         """Find all numbers in a string"""
         logger.debug(f"Trying to find numbers in: {string}.")
-        numbers = []
-        for char in list(string):
-            if char.isdigit():
-                numbers.append(int(char))
+        numbers = [int(char) for char in list(string) if char.isdigit()]
         if len(numbers) > 0:
             logger.debug(f"Found one number: {numbers[0]}.")
             return numbers[0]
@@ -458,7 +445,7 @@ class WikipediaPageReference(BaseModel):
             raise MoreThanOneNumberError()
         else:
             logger.debug(f"Found no numbers.")
-            return None
+        return None
 
     def __generate_first_level_domain_hash__(self):
         if self.first_level_domain_of_url is not None:
