@@ -29,6 +29,20 @@ class SsdbDatabase(BaseModel):
                 f"Could not connect to the AWS SSDB cache, got {e}"
             )
 
+    @validate_arguments
+    def delete(self, key: str):
+        if self.connection is not None:
+            return self.connection.delete(key)
+        else:
+            raise ValueError("self.connection was None")
+
+    def flush_database(self):
+        logger.info("Flushing the SSDB database now")
+        if self.connection is not None:
+            return self.connection.flushdb()
+        else:
+            raise ValueError("self.connection was None")
+
     def get_info(self):
         return self.connection.info()
 
@@ -43,19 +57,5 @@ class SsdbDatabase(BaseModel):
     def set_value(self, key: str, value: str):
         if self.connection is not None:
             return self.connection.set(key, value)
-        else:
-            raise ValueError("self.connection was None")
-
-    @validate_arguments
-    def delete(self, key: str):
-        if self.connection is not None:
-            return self.connection.delete(key)
-        else:
-            raise ValueError("self.connection was None")
-
-    def flush_database(self):
-        logger.info("Flushing the SSDB database now")
-        if self.connection is not None:
-            return self.connection.flushdb()
         else:
             raise ValueError("self.connection was None")
