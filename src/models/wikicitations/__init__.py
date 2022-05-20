@@ -274,7 +274,7 @@ class WikiCitations(BaseModel):
         to in which revision it was found and the retrieval date"""
         logger.info("Preparing item citations")
         claims = []
-        for reference in (wikipedia_page.references or []):
+        for reference in wikipedia_page.references or []:
             if reference.wikicitations_qid is not None:
                 logger.debug("Appending to citations")
                 claims.append(
@@ -397,9 +397,10 @@ class WikiCitations(BaseModel):
             logger.debug(f"Preparing {property.name}")
             for person_object in use_list:
                 if person_object.author_name_string is not None:
-                    qualifiers = self.__prepare_person_qualifiers__(
-                        person_object=person_object
-                    ) or []
+                    qualifiers = (
+                        self.__prepare_person_qualifiers__(person_object=person_object)
+                        or []
+                    )
                     if qualifiers:
                         person = datatypes.String(
                             prop_nr=property.value,
@@ -673,12 +674,16 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.HASH.value,
             value=page_reference.first_level_domain_of_url_hash,
         )
-        return [claim for claim in (
-            instance_of,
-            source_wikipedia,
-            first_level_domain_string,
-            hash_claim,
-        ) if claim]
+        return [
+            claim
+            for claim in (
+                instance_of,
+                source_wikipedia,
+                first_level_domain_string,
+                hash_claim,
+            )
+            if claim
+        ]
 
     def __prepare_single_value_wikipedia_page_claims__(
         self, wikipedia_page
