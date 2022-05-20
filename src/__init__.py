@@ -86,6 +86,10 @@ class WcdImportBot(BaseModel):
             ),
         )
         parser.add_argument(
+            "--numerical-range",
+            help="Import range of pages",
+        )
+        parser.add_argument(
             "-i",
             "--import-title",
             help=(
@@ -145,36 +149,47 @@ class WcdImportBot(BaseModel):
     def extract_and_upload_all_pages_to_wikicitations(self):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]
 
-    # def get_pages_by_range(self) -> None:
-    #     from pywikibot import Site  # type: ignore
-    #
-    #     def prepare_pywiki_site():
-    #         return Site(code=self.language_code, fam=self.wikimedia_site.value)
-    #
-    #     from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
-    #
-    #     self.pages = []
-    #     count = 0
-    #     # https://stackoverflow.com/questions/59605802/
-    #     # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
-    #     site = prepare_pywiki_site()
-    #     for page in site.allpages(namespace=0):
-    #         if count == self.max_count:
-    #             break
-    #         # page: Page = page
-    #         if not page.isRedirectPage():
-    #             count += 1
-    #             # console.print(count)
-    #             logger.info(f"{page.pageid} {page.title()} {page.isRedirectPage()}")
-    #             # raise DebugExit()
-    #             self.pages.append(
-    #                 WikipediaPage(
-    #                     wikitext=page.text,
-    #                     language_code=self.language_code,
-    #                     wikimedia_site=self.wikimedia_site,
-    #                     language_wcditem=self.language_wcditem,
-    #                 )
-    #             )
+    @validate_arguments
+    def get_pages_by_range(self, max_count: int = None) -> None:
+        """
+        This method gets all pages in the main namespace up to max_count
+        It uses pywikibot
+        Caveat: the vanilla pywikibot is terribly verbose by default
+        TODO: fork pywikibot and disable the verbose messages
+        """
+        from pywikibot import Site  # type: ignore
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
+        if max_count is not None:
+            self.max_count = max_count
+        self.pages = []
+        count = 0
+        # https://stackoverflow.com/questions/59605802/
+        # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
+        site = Site(code=self.language_code, fam=self.wikimedia_site.value)
+        for page in site.allpages(namespace=0):
+            if count == self.max_count:
+                break
+            # page: Page = page
+            if not page.isRedirectPage():
+                count += 1
+                # console.print(count)
+                logger.info(
+                    f"{page.pageid} {page.title()} Redirect:{page.isRedirectPage()}"
+                )
+                # raise DebugExit()
+                self.pages.append(
+                    WikipediaPage(
+                        language_code=self.language_code,
+                        language_wcditem=self.language_wcditem,
+                        latest_revision_date=page.editTime(),
+                        latest_revision_id=page.latest_revision_id,
+                        page_id=page.pageid,
+                        title=str((page.title())),
+                        wikimedia_site=self.wikimedia_site,
+                        wikitext=page.text,
+                    )
+                )
 
     @validate_arguments
     def get_page_by_title(self, title: str):
@@ -222,5 +237,10 @@ class WcdImportBot(BaseModel):
         elif args.delete_page is not None:
             logger.info("deleting page")
             self.delete_one_page(title=args.delete_page)
+        elif args.numerical_range is not None:
+            logger.info("Importing range of pages")
+            with console.status("Downloading pages..."):
+                self.get_pages_by_range(max_count=args.numerical_range)
+            self.extract_and_upload_all_pages_to_wikicitations()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
