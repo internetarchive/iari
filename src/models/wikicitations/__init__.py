@@ -234,35 +234,6 @@ class WikiCitations(BaseModel):
         )
 
     @validate_arguments
-    def __prepare_person_claims__(
-        self,
-        use_list: Optional[List[Person]],
-        property: WCDProperty,
-    ):
-        """Prepare claims using the specified property and list of person objects"""
-        persons = []
-        if use_list is not None and len(use_list) > 0:
-            logger.debug(f"Preparing {property.name}")
-            for person_object in use_list:
-                if person_object.author_name_string is not None:
-                    qualifiers = self.__prepare_person_qualifiers__(
-                        person_object=person_object
-                    )
-                    if len(qualifiers) > 0:
-                        person = datatypes.String(
-                            prop_nr=property.value,
-                            value=person_object.author_name_string,
-                            qualifiers=qualifiers,
-                        )
-                    else:
-                        person = datatypes.String(
-                            prop_nr=property.value,
-                            value=person_object.author_name_string,
-                        )
-                    persons.append(person)
-        return persons
-
-    @validate_arguments
     def __prepare_all_person_claims__(
         self, page_reference: WikipediaPageReference
     ) -> List[Claim]:
@@ -430,6 +401,35 @@ class WikiCitations(BaseModel):
             print(item.get_json())
             # exit()
         return item
+
+    @validate_arguments
+    def __prepare_person_claims__(
+        self,
+        use_list: Optional[List[Person]],
+        property: WCDProperty,
+    ):
+        """Prepare claims using the specified property and list of person objects"""
+        persons = []
+        if use_list is not None and len(use_list) > 0:
+            logger.debug(f"Preparing {property.name}")
+            for person_object in use_list:
+                if person_object.author_name_string is not None:
+                    qualifiers = self.__prepare_person_qualifiers__(
+                        person_object=person_object
+                    )
+                    if len(qualifiers) > 0:
+                        person = datatypes.String(
+                            prop_nr=property.value,
+                            value=person_object.author_name_string,
+                            qualifiers=qualifiers,
+                        )
+                    else:
+                        person = datatypes.String(
+                            prop_nr=property.value,
+                            value=person_object.author_name_string,
+                        )
+                    persons.append(person)
+        return persons
 
     @validate_arguments
     def __prepare_person_qualifiers__(self, person_object: Person):
@@ -822,6 +822,27 @@ class WikiCitations(BaseModel):
             persons = None
         return persons
 
+    @validate_arguments()
+    def __prepare_string_citation__(
+        self, page_reference: WikipediaPageReference
+    ) -> Claim:
+        """We import citations which could not be uniquely identified
+        as strings directly on the wikipedia page item"""
+        qualifiers = self.__prepare_string_citation_qualifiers__(
+            page_reference=page_reference
+        )
+        claim_qualifiers = Qualifiers()
+        for qualifier in qualifiers:
+            logger.debug(f"Adding qualifier {qualifier}")
+            claim_qualifiers.add(qualifier)
+        string_citation = datatypes.String(
+            prop_nr=WCDProperty.STRING_CITATIONS.value,
+            value=page_reference.template_name,
+            qualifiers=claim_qualifiers,
+            references=self.reference_claim,
+        )
+        return string_citation
+
     def __prepare_string_citation_qualifiers__(
         self, page_reference: WikipediaPageReference
     ) -> List[Claim]:
@@ -919,27 +940,6 @@ class WikiCitations(BaseModel):
                 claims.append(claim)
         return claims
 
-    @validate_arguments()
-    def __prepare_string_citation__(
-        self, page_reference: WikipediaPageReference
-    ) -> Claim:
-        """We import citations which could not be uniquely identified
-        as strings directly on the wikipedia page item"""
-        qualifiers = self.__prepare_string_citation_qualifiers__(
-            page_reference=page_reference
-        )
-        claim_qualifiers = Qualifiers()
-        for qualifier in qualifiers:
-            logger.debug(f"Adding qualifier {qualifier}")
-            claim_qualifiers.add(qualifier)
-        string_citation = datatypes.String(
-            prop_nr=WCDProperty.STRING_CITATIONS.value,
-            value=page_reference.template_name,
-            qualifiers=claim_qualifiers,
-            references=self.reference_claim,
-        )
-        return string_citation
-
     def __prepare_string_citations__(
         self, wikipedia_page: WikipediaPage
     ) -> Optional[List[Claim]]:
@@ -987,6 +987,11 @@ class WikiCitations(BaseModel):
         self.__delete_all_reference_items__()
         self.__delete_all_website_items__()
 
+    @staticmethod
+    @validate_arguments
+    def entity_url(qid: str):
+        return f"{config.wikibase_url}/wiki/Item:{qid}"
+
     @validate_arguments
     def get_item(self, item_id: str) -> Optional[ItemEntity]:
         """Get one item from WikiCitations"""
@@ -994,10 +999,16 @@ class WikiCitations(BaseModel):
         wbi = WikibaseIntegrator()
         return wbi.item.get(item_id)
 
-    @staticmethod
     @validate_arguments
-    def entity_url(qid: str):
-        return f"{config.wikibase_url}/wiki/Item:{qid}"
+    def prepare_and_upload_reference_item(
+        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
+    ) -> NoneStr:
+        self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
+        item = self.__prepare_new_reference_item__(
+            page_reference=page_reference, wikipedia_page=wikipedia_page
+        )
+        wcdqid = self.__upload_new_item__(item=item)
+        return wcdqid
 
     @validate_arguments
     def prepare_and_upload_website_item(
@@ -1007,17 +1018,6 @@ class WikiCitations(BaseModel):
     ) -> NoneStr:
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_website_item__(
-            page_reference=page_reference, wikipedia_page=wikipedia_page
-        )
-        wcdqid = self.__upload_new_item__(item=item)
-        return wcdqid
-
-    @validate_arguments
-    def prepare_and_upload_reference_item(
-        self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
-    ) -> NoneStr:
-        self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
-        item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
         )
         wcdqid = self.__upload_new_item__(item=item)
