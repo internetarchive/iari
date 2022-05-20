@@ -69,3 +69,14 @@ class TestWcdImportBot(TestCase):
         with self.assertRaises(ValueError):
             wc.get_item(item_id=deleted_item_id)
             # assert item is None
+
+    def test_import_the_same_page_twice(self):
+        bot = WcdImportBot()
+        bot.get_page_by_title(title="Test")
+        bot.extract_and_upload_all_pages_to_wikicitations()
+        console.print(
+            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
+        bot.extract_and_upload_all_pages_to_wikicitations()
+        bot.rinse_all_items_and_cache()
