@@ -317,6 +317,7 @@ class WikiCitations(BaseModel):
         item = wbi.item.new()
         # We append the first 7 chars of the hash to the title
         # to avoid label collision errors
+        assert page_reference.md5hash, "Assure mypy that it is not None"
         item.labels.set("en", f"{page_reference.title} | {page_reference.md5hash[:7]}")
         item.descriptions.set(
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
@@ -782,9 +783,7 @@ class WikiCitations(BaseModel):
                 value=page_reference.authors,
             )
             authors.append(author)
-        if len(authors) == 0:
-            authors = None
-        return authors
+        return authors or None
 
     @staticmethod
     def __prepare_string_editors__(page_reference: WikipediaPageReference):
@@ -800,9 +799,7 @@ class WikiCitations(BaseModel):
                         value=person.author_name_string,
                     )
                     persons.append(person)
-        else:
-            persons = None
-        return persons
+        return persons or None
 
     @staticmethod
     def __prepare_string_translators__(page_reference: WikipediaPageReference):
@@ -818,9 +815,7 @@ class WikiCitations(BaseModel):
                         value=person.author_name_string,
                     )
                     persons.append(person)
-        else:
-            persons = None
-        return persons
+        return persons or None
 
     @validate_arguments()
     def __prepare_string_citation__(

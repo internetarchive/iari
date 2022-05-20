@@ -874,7 +874,7 @@ class WikipediaPageReference(BaseModel):
                     person.surname = getattr(self, last)
             persons.append(person)
         # We use list comprehension to get the numbered persons to
-        # ease code maintentenance and easily support a larger range if neccessary
+        # ease code maintentenance and easily support a larger range if necessary
         persons.extend(
             self.__get_numbered_persons__(
                 attributes=attributes,
@@ -941,7 +941,7 @@ class WikipediaPageReference(BaseModel):
             persons.append(person)
             # exit()
         # We use list comprehension to get the numbered persons to
-        # ease code maintentenance and easily support a larger range if neccessary
+        # ease code maintentenance and easily support a larger range if necessary
         persons.extend(self.__get_numbered_persons__(attributes=attributes))
         return persons
 

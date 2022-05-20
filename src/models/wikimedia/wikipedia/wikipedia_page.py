@@ -156,6 +156,7 @@ class WikipediaPage(BaseModel):
                 return None
         else:
             raise ValueError("self.wikicitations was None")
+        return None
 
     @validate_arguments
     def __check_and_upload_website_item_to_wikicitations_if_missing__(
