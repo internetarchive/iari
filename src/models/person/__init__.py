@@ -20,18 +20,11 @@ class Person(BaseModel):
 
     @property
     def author_name_string(self) -> Optional[str]:
-        """We hardcode western cultural name ordering pattern here with the order "givenname surname" """
-        if self.name_string is None:
-            string = ""
-            if self.given is not None:
-                string += self.given
-            if self.surname is not None:
-                string += " " + self.surname
-        else:
-            string = self.name_string
-        # We strip spaces to avoid a MWAPIError when a space appears in the beginning of the string
-        string = string.lstrip()
-        if len(string) > 0:
-            return string
-        else:
-            return None
+        """We hardcode western cultural name ordering pattern here with the
+        order "givenname surname".  We use str.strip() because name has
+        significant whitespace at the beginning or end of the string"""
+        return (
+            (self.name_string or "").strip()
+            or f"{self.given or ''} {self.surname or ''}".strip()
+            or None
+        )
