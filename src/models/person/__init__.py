@@ -21,7 +21,7 @@ class Person(BaseModel):
     @property
     def author_name_string(self) -> Optional[str]:
         """We hardcode western cultural name ordering pattern here with the
-        order "givenname surname".  We use str.strip() because name has
+        order "givenname surname".  We use str.strip() because no name has
         significant whitespace at the beginning or end of the string"""
         return (
             (self.name_string or "").strip()
