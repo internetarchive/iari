@@ -414,25 +414,25 @@ class WikipediaPageReference(BaseModel):
         else:
             return False
 
-    @property
-    def isodate(self):
-        if self.publication_date is not None:
-            return datetime.strftime(self.publication_date, "%Y-%m-%d")
-        elif self.date is not None:
-            return datetime.strftime(self.date, "%Y-%m-%d")
-        elif self.year is not None:
-            return datetime.strftime(self.year, "%Y-%m-%d")
-        else:
-            raise ValueError(
-                f"missing publication date, in template {self.template_name}, see {self.dict()}"
-            )
+    # @property
+    # def isodate(self) -> str:
+    #     if self.publication_date is not None:
+    #         return datetime.strftime(self.publication_date, "%Y-%m-%d")
+    #     elif self.date is not None:
+    #         return datetime.strftime(self.date, "%Y-%m-%d")
+    #     elif self.year is not None:
+    #         return datetime.strftime(self.year, "%Y-%m-%d")
+    #     else:
+    #         raise ValueError(
+    #             f"missing publication date, in template {self.template_name}, see {self.dict()}"
+    #         )
 
     @property
-    def template_url(self):
+    def template_url(self) -> str:
         return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
 
     @property
-    def wikicitations_url(self):
+    def wikicitations_url(self) -> str:
         return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
 
     def __extract_first_level_domain__(self):
@@ -444,7 +444,7 @@ class WikipediaPageReference(BaseModel):
 
     @staticmethod
     @validate_arguments
-    def __find_number__(string: str):
+    def __find_number__(string: str) -> Optional[int]:
         """Find all numbers in a string"""
         logger.debug(f"Trying to find numbers in: {string}.")
         numbers = []
@@ -593,15 +593,18 @@ class WikipediaPageReference(BaseModel):
         number: int,
         role: EnglishWikipediaTemplatePersonRole = None,
         search_string: str = None,
-    ):
+    ) -> Optional[Person]:
         """This functions gets all types of numbered persons,
         both those with roles and those without"""
+        # First handle persons with a role
         if role is not None and search_string is not None:
+            # Collect all attributes
             matching_attributes = [
                 attribute
                 for attribute in attributes
                 if search_string in attribute and getattr(self, attribute) is not None
             ]
+            # Find the attributes with the correct number
             found_attributes = [
                 attribute
                 for attribute in matching_attributes
@@ -611,7 +614,7 @@ class WikipediaPageReference(BaseModel):
                 person = Person(role=role, has_number=True, number_in_sequence=number)
                 for attribute in found_attributes:
                     # logger.debug(attribute, getattr(self, attribute))
-                    # Number in the end. E.g. "author_link1"
+                    # Handle attributes with a number in the end. E.g. "author_link1"
                     if attribute == search_string + str(number):
                         person.name_string = getattr(self, search_string + str(number))
                     if attribute == search_string + "_link" + str(number):
@@ -657,6 +660,9 @@ class WikipediaPageReference(BaseModel):
                     logger.warning(
                         f"Discarded {person} because it did not have both given- and surnames or name_string"
                     )
+                    return None
+            else:
+                return None
         else:
             # Support cite journal first[1-12] and last[1-12]
             if self.first_lasts is None:
@@ -699,6 +705,9 @@ class WikipediaPageReference(BaseModel):
                     logger.warning(
                         f"Discarded {person} because it did not have both given- and surnames or name_string"
                     )
+                    return None
+            else:
+                return None
 
     @validate_arguments
     def __get_numbered_persons__(
@@ -706,8 +715,10 @@ class WikipediaPageReference(BaseModel):
         attributes: List[str],
         role: EnglishWikipediaTemplatePersonRole = None,
         search_string: str = None,
-    ):
+    ) -> List[Person]:
         """This is just a helper function to call __get_numbered_person__"""
+        # Mypy warns that the following could add None to the list,
+        # but that cannot happen.
         return [
             self.__get_numbered_person__(
                 attributes=attributes,
@@ -765,7 +776,7 @@ class WikipediaPageReference(BaseModel):
         "year",
         pre=True,
     )
-    def __validate_time__(cls, v):
+    def __validate_time__(cls, v) -> Optional[datetime]:
         """Pydantic validator
         see https://stackoverflow.com/questions/66472255/"""
         date = None
@@ -819,7 +830,7 @@ class WikipediaPageReference(BaseModel):
             logger.warning(f"date format '{v}' not supported yet")
         return date
 
-    def __parse_first_parameter__(self):
+    def __parse_first_parameter__(self) -> None:
         # pseudo code
         if self.template_name == ("cite q" or "citeq"):
             # We assume that the first parameter is the Wikidata QID
@@ -832,7 +843,7 @@ class WikipediaPageReference(BaseModel):
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
-    def __parse_isbn__(self):
+    def __parse_isbn__(self) -> None:
         if self.isbn is not None:
             stripped_isbn = self.isbn.replace("-", "")
             if len(stripped_isbn) == 13:
@@ -847,7 +858,7 @@ class WikipediaPageReference(BaseModel):
     @validate_arguments
     def __parse_known_role_persons__(
         self, attributes: List[str], role: EnglishWikipediaTemplatePersonRole
-    ):
+    ) -> List[Person]:
         persons = []
         person_without_number = [
             attribute
@@ -885,7 +896,7 @@ class WikipediaPageReference(BaseModel):
         # console.print(f"{role.name}s: {persons}")
         return persons
 
-    def __parse_persons__(self):
+    def __parse_persons__(self) -> None:
         """Parse all person related data into Person objects"""
         # find all the attributes but exclude the properties as they lead to weird errors
         properties = ["has_hash", "isodate", "template_url", "wikicitations_url"]
@@ -917,7 +928,7 @@ class WikipediaPageReference(BaseModel):
         )
 
     @validate_arguments
-    def __parse_roleless_persons__(self, attributes: List[str]):
+    def __parse_roleless_persons__(self, attributes: List[str]) -> List[Person]:
         persons = []
         # first last
         unnumbered_first_last = [
@@ -945,7 +956,7 @@ class WikipediaPageReference(BaseModel):
         persons.extend(self.__get_numbered_persons__(attributes=attributes))
         return persons
 
-    def __parse_urls__(self):
+    def __parse_urls__(self) -> None:
         """This function quotes the URL to avoid complaints from Wikibase"""
         logger.debug("Parsing URLs")
         if self.url is not None:
@@ -961,7 +972,7 @@ class WikipediaPageReference(BaseModel):
         if self.transcripturl is not None:
             self.transcripturl = urlparse(self.transcripturl).geturl()
 
-    def finish_parsing_and_generate_hash(self):
+    def finish_parsing_and_generate_hash(self) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
         self.__parse_first_parameter__()
