@@ -19,12 +19,19 @@ class Person(BaseModel):
     surname: Optional[str]
 
     @property
-    def author_name_string(self) -> Optional[str]:
+    def full_name(self) -> str:
         """We hardcode western cultural name ordering pattern here with the
         order "givenname surname".  We use str.strip() because no name has
-        significant whitespace at the beginning or end of the string"""
-        return (
-            (self.name_string or "").strip()
-            or f"{self.given or ''} {self.surname or ''}".strip()
-            or None
-        )
+        significant whitespace at the beginning or end of the string
+
+        We want this property to return either the full name or empty string"""
+        if self.name_string:
+            # Sometimes the reference has a name string with the "full name"
+            # so we try that first
+            return self.name_string.strip()
+        elif self.given or self.surname:
+            # First fallback to given name + surname
+            return f"{self.given} {self.surname}".strip()
+        else:
+            # Second fallback
+            return ""

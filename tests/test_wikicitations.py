@@ -53,7 +53,7 @@ class TestWikiCitations(TestCase):
         )
         console.print(item.get_json())
         assert (
-            item.claims.get(property=WCDProperty.AUTHOR_NAME_STRING.value) is not None
+                item.claims.get(property=WCDProperty.FULL_NAME_STRING.value) is not None
         )
 
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):

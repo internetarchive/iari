@@ -17,7 +17,7 @@ class WCDProperty(Enum):
     ARCHIVE_DATE = "P39"
     ARCHIVE_URL = "P38"
     AUTHOR = "P7"
-    AUTHOR_NAME_STRING = "P15"
+    FULL_NAME_STRING = "P15"
     DOI = "P33"
     EDITOR = "P6"
     EDITOR_NAME_STRING = "P40"
