@@ -9,7 +9,6 @@ class Person(BaseModel):
     and we save that as name_string for later disambiguation"""
 
     given: Optional[str]
-    has_number: bool
     link: Optional[str]
     mask: Optional[str]
     name_string: Optional[str]
@@ -35,3 +34,8 @@ class Person(BaseModel):
         else:
             # Second fallback
             return ""
+
+    @property
+    def has_number(self) -> bool:
+        """This should return True if not None and False otherwise"""
+        return bool(self.number_in_sequence)
