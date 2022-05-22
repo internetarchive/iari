@@ -1,7 +1,11 @@
 from enum import Enum, auto
 
 
-class EnglishWikipediaTemplatePersonRole(Enum):
+class WikipediaTemplatePersonRole(Enum):
+    pass
+
+
+class EnglishWikipediaTemplatePersonRole(WikipediaTemplatePersonRole):
     AUTHOR = "author"
     EDITOR = "editor"
     HOST = "host"

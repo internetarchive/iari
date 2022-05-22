@@ -1,6 +1,10 @@
 from unittest import TestCase
 
 from src.models.person import Person
+from src.models.wikimedia.wikipedia.templates.enums import (
+    EnglishWikipediaTemplatePersonRole,
+    WikipediaTemplatePersonRole,
+)
 
 
 class TestPerson(TestCase):
@@ -17,3 +21,11 @@ class TestPerson(TestCase):
         assert p.has_number is False
         p = Person(given="test", surname="test", number_in_sequence=1)
         assert p.has_number is True
+
+    def test_role(self):
+        p = Person(
+            given="test",
+            surname="test",
+            role=EnglishWikipediaTemplatePersonRole.TRANSLATOR,
+        )
+        assert isinstance(p.role, WikipediaTemplatePersonRole)

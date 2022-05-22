@@ -2,6 +2,8 @@ from typing import Optional, Any
 
 from pydantic import BaseModel
 
+from src.models.wikimedia.wikipedia.templates.enums import WikipediaTemplatePersonRole
+
 
 class Person(BaseModel):
     """Model a person mentioned in a page_reference
@@ -14,7 +16,8 @@ class Person(BaseModel):
     name_string: Optional[str]
     number_in_sequence: Optional[int]
     orcid: Optional[str]
-    role: Any
+    # Pydantic 1.9.0 cannot handle hiearchical enums it seems so we use Any here
+    role: Any  # type: WikipediaTemplatePersonRole
     surname: Optional[str]
 
     @property
