@@ -185,7 +185,7 @@ class WcdImportBot(BaseModel):
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
                         page_id=page.pageid,
-                        title=str((page.title())),
+                        title=str(page.title()),
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
                     )
