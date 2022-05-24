@@ -611,7 +611,7 @@ class WikipediaPageReference(BaseModel):
                 if self.__find_number__(attribute) == number
             ]
             if len(found_attributes) > 0:
-                person = Person(role=role, has_number=True, number_in_sequence=number)
+                person = Person(role=role, number_in_sequence=number)
                 for attribute in found_attributes:
                     # logger.debug(attribute, getattr(self, attribute))
                     # Handle attributes with a number in the end. E.g. "author_link1"
@@ -685,7 +685,6 @@ class WikipediaPageReference(BaseModel):
             if len(self.numbered_first_lasts) > 0:
                 person = Person(
                     role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
-                    has_number=False,
                 )
                 for attribute in self.numbered_first_lasts:
                     # logger.debug(attribute, getattr(self, attribute))
@@ -866,7 +865,7 @@ class WikipediaPageReference(BaseModel):
             if self.__find_number__(attribute) is None and role.value in attribute
         ]
         if len(person_without_number) > 0:
-            person = Person(role=role, has_number=False)
+            person = Person(role=role)
             link = role.value + "_link"
             mask = role.value + "_mask"
             first = role.value + "_first"
@@ -940,7 +939,7 @@ class WikipediaPageReference(BaseModel):
         logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
         if len(unnumbered_first_last) > 0:
             person = Person(
-                role=EnglishWikipediaTemplatePersonRole.UNKNOWN, has_number=False
+                role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
             )
             for attribute in unnumbered_first_last:
                 # print(attribute, getattr(self, attribute))
