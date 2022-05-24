@@ -832,7 +832,7 @@ class WikipediaPageReference(BaseModel):
 
     def __parse_first_parameter__(self) -> None:
         # pseudo code
-        if self.template_name == ("cite q" or "citeq"):
+        if self.template_name in ("cite q", "citeq"):
             # We assume that the first parameter is the Wikidata QID
             # TODO add crude check?
             self.wikidata_qid = self.first_parameter
