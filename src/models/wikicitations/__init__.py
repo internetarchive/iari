@@ -239,7 +239,7 @@ class WikiCitations(BaseModel):
     ) -> List[Claim]:
         authors = self.__prepare_person_claims__(
             use_list=page_reference.authors_list,
-            property=WCDProperty.AUTHOR_NAME_STRING,
+            property=WCDProperty.FULL_NAME_STRING,
         )
         if (
             config.assume_persons_without_role_are_authors
@@ -248,7 +248,7 @@ class WikiCitations(BaseModel):
             logger.info("Assuming persons without role are authors")
         no_role_authors = self.__prepare_person_claims__(
             use_list=page_reference.persons_without_role,
-            property=WCDProperty.AUTHOR_NAME_STRING,
+            property=WCDProperty.FULL_NAME_STRING,
         )
         editors = self.__prepare_person_claims__(
             use_list=page_reference.interviewers_list,
@@ -396,7 +396,9 @@ class WikiCitations(BaseModel):
         if use_list:
             logger.debug(f"Preparing {property.name}")
             for person_object in use_list:
-                if person_object.author_name_string is not None:
+                # We use this pythonic way of checking if the string is empty inspired by:
+                # https://www.delftstack.com/howto/python/how-to-check-a-string-is-empty-in-a-pythonic-way/
+                if person_object.full_name:
                     qualifiers = (
                         self.__prepare_person_qualifiers__(person_object=person_object)
                         or []
@@ -404,13 +406,13 @@ class WikiCitations(BaseModel):
                     if qualifiers:
                         person = datatypes.String(
                             prop_nr=property.value,
-                            value=person_object.author_name_string,
+                            value=person_object.full_name,
                             qualifiers=qualifiers,
                         )
                     else:
                         person = datatypes.String(
                             prop_nr=property.value,
-                            value=person_object.author_name_string,
+                            value=person_object.full_name,
                         )
                     persons.append(person)
         return persons
@@ -748,10 +750,10 @@ class WikiCitations(BaseModel):
             and len(page_reference.authors_list) > 0
         ):
             for author in page_reference.authors_list:
-                if author.author_name_string is not None:
+                if author.full_name:
                     author = datatypes.String(
-                        prop_nr=WCDProperty.AUTHOR_NAME_STRING.value,
-                        value=author.author_name_string,
+                        prop_nr=WCDProperty.FULL_NAME_STRING.value,
+                        value=author.full_name,
                     )
                     authors.append(author)
         if page_reference.vauthors is not None:
@@ -776,10 +778,10 @@ class WikiCitations(BaseModel):
             and len(page_reference.editors_list) > 0
         ):
             for person in page_reference.editors_list:
-                if person.author_name_string is not None:
+                if person.full_name:
                     person = datatypes.String(
                         prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
-                        value=person.author_name_string,
+                        value=person.full_name,
                     )
                     persons.append(person)
         return persons or None
@@ -792,10 +794,10 @@ class WikiCitations(BaseModel):
             and len(page_reference.translators_list) > 0
         ):
             for person in page_reference.translators_list:
-                if person.author_name_string is not None:
+                if person.full_name:
                     person = datatypes.String(
                         prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
-                        value=person.author_name_string,
+                        value=person.full_name,
                     )
                     persons.append(person)
         return persons or None
