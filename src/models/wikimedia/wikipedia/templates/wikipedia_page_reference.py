@@ -836,7 +836,9 @@ class WikipediaPageReference(BaseModel):
                 if "://" in self.first_parameter:
                     self.url = self.first_parameter
                 else:
-                    logger.debug(f"'{self.first_parameter}' was not recognized as a URL")
+                    logger.debug(
+                        f"'{self.first_parameter}' was not recognized as a URL"
+                    )
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
