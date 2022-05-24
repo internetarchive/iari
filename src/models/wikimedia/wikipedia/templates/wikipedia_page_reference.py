@@ -611,7 +611,7 @@ class WikipediaPageReference(BaseModel):
                 if self.__find_number__(attribute) == number
             ]
             if len(found_attributes) > 0:
-                person = Person(role=role, has_number=True, number_in_sequence=number)
+                person = Person(role=role, number_in_sequence=number)
                 for attribute in found_attributes:
                     # logger.debug(attribute, getattr(self, attribute))
                     # Handle attributes with a number in the end. E.g. "author_link1"
@@ -685,7 +685,6 @@ class WikipediaPageReference(BaseModel):
             if len(self.numbered_first_lasts) > 0:
                 person = Person(
                     role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
-                    has_number=False,
                 )
                 for attribute in self.numbered_first_lasts:
                     # logger.debug(attribute, getattr(self, attribute))
@@ -719,7 +718,7 @@ class WikipediaPageReference(BaseModel):
         """This is just a helper function to call __get_numbered_person__"""
         # Mypy warns that the following could add None to the list,
         # but that cannot happen.
-        return [
+        maybe_persons = [
             self.__get_numbered_person__(
                 attributes=attributes,
                 number=number,
@@ -727,14 +726,9 @@ class WikipediaPageReference(BaseModel):
                 search_string=search_string,
             )
             for number in range(1, 14)
-            if self.__get_numbered_person__(
-                attributes=attributes,
-                number=number,
-                role=role,
-                search_string=search_string,
-            )
-            is not None
         ]
+        # We discard all None-values here to placate mypy
+        return [i for i in maybe_persons if i]
 
     # def __hash_based_on_title_and_date__(self):
     #     logger.debug("__hash_based_on_title_and_date__: running")
@@ -838,8 +832,13 @@ class WikipediaPageReference(BaseModel):
             self.wikidata_qid = self.first_parameter
         elif self.template_name == "url":
             # crudely detect if url in first_parameter
-            if "://" in self.first_parameter:
-                self.url = self.first_parameter
+            if self.first_parameter:
+                if "://" in self.first_parameter:
+                    self.url = self.first_parameter
+                else:
+                    logger.debug(
+                        f"'{self.first_parameter}' was not recognized as a URL"
+                    )
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
@@ -866,7 +865,7 @@ class WikipediaPageReference(BaseModel):
             if self.__find_number__(attribute) is None and role.value in attribute
         ]
         if len(person_without_number) > 0:
-            person = Person(role=role, has_number=False)
+            person = Person(role=role)
             link = role.value + "_link"
             mask = role.value + "_mask"
             first = role.value + "_first"
@@ -940,7 +939,7 @@ class WikipediaPageReference(BaseModel):
         logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
         if len(unnumbered_first_last) > 0:
             person = Person(
-                role=EnglishWikipediaTemplatePersonRole.UNKNOWN, has_number=False
+                role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
             )
             for attribute in unnumbered_first_last:
                 # print(attribute, getattr(self, attribute))

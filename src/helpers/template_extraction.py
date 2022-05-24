@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import List, Tuple, OrderedDict as OrderedDictType
 
-import mwparserfromhell
+import mwparserfromhell  # type: ignore
 
 # This code has been snipped from pywikibot 7.2.0 textlib.py to avoid forking the whole thing
 
