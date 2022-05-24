@@ -832,9 +832,11 @@ class WikipediaPageReference(BaseModel):
                 if self.first_parameter[:1] in ("q", "Q"):
                     self.wikidata_qid = self.first_parameter
                 else:
-                    logger.warning(f"First parameter '{self.first_parameter}' "
-                                   f"of {self.template_name} was not a valid "
-                                   f"WD QID")
+                    logger.warning(
+                        f"First parameter '{self.first_parameter}' "
+                        f"of {self.template_name} was not a valid "
+                        f"WD QID"
+                    )
         elif self.template_name == "url":
             # crudely detect if url in first_parameter
             if self.first_parameter:
