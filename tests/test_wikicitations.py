@@ -52,9 +52,7 @@ class TestWikiCitations(TestCase):
             page_reference=reference, wikipedia_page=wppage
         )
         console.print(item.get_json())
-        assert (
-                item.claims.get(property=WCDProperty.FULL_NAME_STRING.value) is not None
-        )
+        assert item.claims.get(property=WCDProperty.FULL_NAME_STRING.value) is not None
 
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
         from src.models.wikicitations import WikiCitations
