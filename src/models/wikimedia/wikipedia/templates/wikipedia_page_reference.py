@@ -720,7 +720,7 @@ class WikipediaPageReference(BaseModel):
         # Mypy warns that the following could add None to the list,
         # but that cannot happen.
         return [
-            self.__get_numbered_person__(
+            self.__get_numbered_person__(  # type: ignore
                 attributes=attributes,
                 number=number,
                 role=role,
@@ -838,7 +838,7 @@ class WikipediaPageReference(BaseModel):
             self.wikidata_qid = self.first_parameter
         elif self.template_name == "url":
             # crudely detect if url in first_parameter
-            if "://" in self.first_parameter:
+            if "://" in (self.first_parameter or ""):
                 self.url = self.first_parameter
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
