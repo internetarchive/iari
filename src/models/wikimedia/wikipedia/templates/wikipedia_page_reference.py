@@ -718,7 +718,7 @@ class WikipediaPageReference(BaseModel):
         """This is just a helper function to call __get_numbered_person__"""
         # Mypy warns that the following could add None to the list,
         # but that cannot happen.
-        return [
+        maybe_persons = [
             self.__get_numbered_person__(
                 attributes=attributes,
                 number=number,
@@ -726,14 +726,9 @@ class WikipediaPageReference(BaseModel):
                 search_string=search_string,
             )
             for number in range(1, 14)
-            if self.__get_numbered_person__(
-                attributes=attributes,
-                number=number,
-                role=role,
-                search_string=search_string,
-            )
-            is not None
         ]
+        # We discard all None-values here to placate mypy
+        return [i for i in maybe_persons if i]
 
     # def __hash_based_on_title_and_date__(self):
     #     logger.debug("__hash_based_on_title_and_date__: running")
