@@ -441,7 +441,7 @@ class WikipediaPageReference(BaseModel):
     def __find_number__(string: str) -> Optional[int]:
         """Find all numbers in a string"""
         logger.debug(f"Trying to find numbers in: {string}.")
-        numbers = [int(char) for char in list(string) if char.isdigit()]
+        numbers = [int(char) for char in string if char.isdigit()]
         if len(numbers) > 0:
             logger.debug(f"Found one number: {numbers[0]}.")
             return numbers[0]
