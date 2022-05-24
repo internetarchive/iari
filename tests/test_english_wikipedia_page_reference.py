@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from src import console
+from src.models.exceptions import MoreThanOneNumberError
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaPageReference,
@@ -131,3 +132,11 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference = EnglishWikipediaPageReferenceSchema().load(data)
         reference.finish_parsing_and_generate_hash()
         assert reference.first_level_domain_of_url == "stereogum.com"
+
+    def test_find_number(self):
+        ref = EnglishWikipediaPageReference(template_name="test")
+        with self.assertRaises(MoreThanOneNumberError):
+            ref.__find_number__(string="123")
+        assert ref.__find_number__(string="1one") == 1
+        assert ref.__find_number__(string="one1one") == 1
+        assert ref.__find_number__(string="one") is None
