@@ -6,8 +6,9 @@ from pydantic import BaseModel, validate_arguments
 
 import config
 from src.helpers import console
-from src.models.exceptions import DebugExit
 from src.models.cache import Cache
+from src.models.exceptions import DebugExit
+from src.models.ssdb_database import SsdbDatabase
 from src.models.wikicitations import WCDItem, WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
@@ -66,19 +67,22 @@ class WcdImportBot(BaseModel):
     WCD Import Bot imports references and pages from Wikipedia
 
     Example adding one page:
-    '$ wcdimportbot.py --import-title "Easter Island"'
+    '$ ./wcdimportbot.py --import-title "Easter Island"'
 
     Example deleting one page:
-    '$ wcdimportbot.py --delete-page "Easter Island"'
+    '$ ./wcdimportbot.py --delete-page "Easter Island"'
+
+    Example looking up a hash:
+    '$ ./wcdimportbot.py --lookup-hash e98adc5b05cb993cd0c884a28098096c'
 
     Example importing 5 pages (any page on the Wiki):
-    '$ wcdimportbot.py --numerical-range 5'
+    '$ ./wcdimportbot.py --numerical-range 5'
 
     Example importing 5 pages from a specific category_title:
-    '$ wcdimportbot.py --numerical-range 5 --category "World War II"'
+    '$ ./wcdimportbot.py --numerical-range 5 --category "World War II"'
 
     Example rinsing the Wikibase and the cache:
-    '$ wcdimportbot.py --rinse'
+    '$ ./wcdimportbot.py --rinse'
         """,
         )
         parser.add_argument(
@@ -106,6 +110,14 @@ class WcdImportBot(BaseModel):
             "--import-title",
             help=(
                 "Title to import from a Wikipedia (Defaults to English Wikipedia for now)"
+            ),
+        )
+        parser.add_argument(
+            "-l",
+            "--lookup-hash",
+            help=(
+                "Lookup hash in the cache (if enabled) "
+                "and WikiCitations via SPARQL (used mainly for debugging)"
             ),
         )
         parser.add_argument(
@@ -140,7 +152,7 @@ class WcdImportBot(BaseModel):
                     )
                 else:
                     raise ValueError("page.md5hash was None")
-            if item_id is not None:
+            if item_id is not None and isinstance(item_id, str):
                 wc = WikiCitations()
                 wc.__delete_item__(item_id=item_id)
                 # delete from cache
@@ -246,6 +258,33 @@ class WcdImportBot(BaseModel):
             page.__get_wikipedia_page_from_title__(title=title)
             self.pages.append(page)
 
+    @staticmethod
+    @validate_arguments
+    def lookup_hash(hash: str):
+        """Lookup a hash and show the result to the user"""
+        console.print(f"Lookup of hash {hash}")
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        if config.use_cache:
+            ssdb = SsdbDatabase()
+            cache_result = ssdb.get_value(key=hash)
+            if cache_result:
+                console.print(
+                    f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",
+                    style="green",
+                )
+            else:
+                console.print("CACHE: Not found", style="red")
+        sparql_result = wc.__get_wcdqids_from_hash__(md5hash=hash)
+        if sparql_result:
+            console.print(
+                f"SPARQL: Found: {sparql_result}, see {wc.entity_url(qid=sparql_result[0])}",
+                style="green",
+            )
+        else:
+            console.print("SPARQL: Not found", style="red")
+
     def print_statistics(self):
         self.__calculate_statistics__()
         logger.info(
@@ -288,5 +327,8 @@ class WcdImportBot(BaseModel):
                     max_count=max_count, category_title=args.category
                 )
             self.extract_and_upload_all_pages_to_wikicitations()
+        elif args.lookup_hash is not None:
+            # We strip here to avoid errors caused by spaces
+            self.lookup_hash(hash=args.lookup_hash.strip())
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
