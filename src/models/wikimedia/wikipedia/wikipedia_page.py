@@ -352,7 +352,9 @@ class WikipediaPage(BaseModel):
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
-        with console.status("Checking if page has already been uploaded"):
+        with console.status(
+            f"Checking if the page '{self.title}' has already been uploaded"
+        ):
             if config.use_cache:
                 if self.cache is None:
                     self.__setup_cache__()
