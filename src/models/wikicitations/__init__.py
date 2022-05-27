@@ -941,19 +941,24 @@ class WikiCitations(BaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = config.sparql_endpoint_url
         return None
 
-    def __upload_new_item__(self, item: ItemEntity) -> str:
+    def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
+        """Upload the new item to WikiCitations"""
         if item is None:
             raise ValueError("Did not get what we need")
         if config.loglevel == logging.DEBUG:
             logger.debug("Finished item JSON")
             console.print(item.get_json())
             # exit()
-        new_item = item.write(summary="New item imported from Wikipedia")
-        print(f"Added new item {self.entity_url(new_item.id)}")
-        if config.press_enter_to_continue:
-            input("press enter to continue")
-        logger.debug(f"returning new wcdqid: {new_item.id}")
-        return str(new_item.id)
+        try:
+            new_item = item.write(summary="New item imported from Wikipedia")
+            print(f"Added new item {self.entity_url(new_item.id)}")
+            if config.press_enter_to_continue:
+                input("press enter to continue")
+            logger.debug(f"returning new wcdqid: {new_item.id}")
+            return str(new_item.id)
+        except MWApiError:
+            logger.error("Could not write to WikiCitaitons. :/")
+            return None
 
     def delete_imported_items(self):
         """This function deletes all the imported items in WikiCitations"""
