@@ -330,6 +330,6 @@ class WcdImportBot(BaseModel):
             self.extract_and_upload_all_pages_to_wikicitations()
         elif args.lookup_md5hash is not None:
             # We strip here to avoid errors caused by spaces
-            self.lookup_md5hash(md5hash=args.lookup_hash.strip())
+            self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
