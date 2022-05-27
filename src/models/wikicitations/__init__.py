@@ -46,6 +46,7 @@ class WikiCitations(BaseModel):
 
     @validate_arguments
     def __convert_wcd_entity_id_to_item_entity__(self, entity_id: str) -> ItemEntity:
+        """Convert and get the item using WBI"""
         self.__setup_wbi__()
         wbi = WikibaseIntegrator()
         return wbi.item.get(entity_id)
