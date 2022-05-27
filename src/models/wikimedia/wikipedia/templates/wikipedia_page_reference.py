@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import re
 from datetime import datetime
 from typing import Optional, List
 from urllib.parse import urlparse
@@ -441,15 +442,14 @@ class WikipediaPageReference(BaseModel):
     def __find_number__(string: str) -> Optional[int]:
         """Find all numbers in a string"""
         logger.debug(f"Trying to find numbers in: {string}.")
-        numbers = [int(char) for char in string if char.isdigit()]
+        numbers = re.findall("[0-9]+", string)
         if len(numbers) == 1:
-            logger.debug(f"Found one number: {numbers[0]}.")
-            return numbers[0]
+            return int(numbers[0])
         elif len(numbers) > 1:
-            raise MoreThanOneNumberError()
+            raise MoreThanOneNumberError(f"found {numbers}")
         else:
             logger.debug(f"Found no numbers.")
-        return None
+            return None
 
     def __generate_first_level_domain_hash__(self):
         if self.first_level_domain_of_url is not None:

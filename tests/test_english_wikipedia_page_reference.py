@@ -136,7 +136,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
     def test_find_number(self):
         ref = EnglishWikipediaPageReference(template_name="test")
         with self.assertRaises(MoreThanOneNumberError):
-            ref.__find_number__(string="123")
+            ref.__find_number__(string="123one123")
         assert ref.__find_number__(string="1one") == 1
         assert ref.__find_number__(string="one1one") == 1
         assert ref.__find_number__(string="one") is None
