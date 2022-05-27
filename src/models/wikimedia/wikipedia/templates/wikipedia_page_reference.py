@@ -441,14 +441,14 @@ class WikipediaPageReference(BaseModel):
     @validate_arguments
     def __find_number__(string: str) -> Optional[int]:
         """Find all numbers in a string"""
-        logger.debug(f"Trying to find numbers in: {string}.")
+        # logger.debug(f"Trying to find numbers in: {string}.")
         numbers = re.findall("[0-9]+", string)
         if len(numbers) == 1:
             return int(numbers[0])
         elif len(numbers) > 1:
             raise MoreThanOneNumberError(f"found {numbers}")
         else:
-            logger.debug(f"Found no numbers.")
+            # logger.debug(f"Found no numbers.")
             return None
 
     def __generate_first_level_domain_hash__(self):
