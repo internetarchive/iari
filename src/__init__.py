@@ -268,6 +268,7 @@ class WcdImportBot(BaseModel):
         )
         if config.use_cache:
             ssdb = SsdbDatabase()
+            ssdb.connect()
             cache_result = ssdb.get_value(key=hash)
             if cache_result:
                 console.print(
