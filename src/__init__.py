@@ -72,8 +72,8 @@ class WcdImportBot(BaseModel):
     Example deleting one page:
     '$ ./wcdimportbot.py --delete-page "Easter Island"'
 
-    Example looking up a hash:
-    '$ ./wcdimportbot.py --lookup-hash e98adc5b05cb993cd0c884a28098096c'
+    Example looking up a md5hash:
+    '$ ./wcdimportbot.py --lookup-md5hash e98adc5b05cb993cd0c884a28098096c'
 
     Example importing 5 pages (any page on the Wiki):
     '$ ./wcdimportbot.py --numerical-range 5'
@@ -114,9 +114,9 @@ class WcdImportBot(BaseModel):
         )
         parser.add_argument(
             "-l",
-            "--lookup-hash",
+            "--lookup-md5hash",
             help=(
-                "Lookup hash in the cache (if enabled) "
+                "Lookup md5hash in the cache (if enabled) "
                 "and WikiCitations via SPARQL (used mainly for debugging)"
             ),
         )
@@ -260,16 +260,16 @@ class WcdImportBot(BaseModel):
 
     @staticmethod
     @validate_arguments
-    def lookup_hash(hash: str):
-        """Lookup a hash and show the result to the user"""
-        console.print(f"Lookup of hash {hash}")
+    def lookup_hash(md5hash: str):
+        """Lookup a md5hash and show the result to the user"""
+        console.print(f"Lookup of md5hash {md5hash}")
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
         if config.use_cache:
             ssdb = SsdbDatabase()
             ssdb.connect()
-            cache_result = ssdb.get_value(key=hash)
+            cache_result = ssdb.get_value(key=md5hash)
             if cache_result:
                 console.print(
                     f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",
@@ -277,7 +277,7 @@ class WcdImportBot(BaseModel):
                 )
             else:
                 console.print("CACHE: Not found", style="red")
-        sparql_result = wc.__get_wcdqids_from_hash__(md5hash=hash)
+        sparql_result = wc.__get_wcdqids_from_hash__(md5hash=md5hash)
         if sparql_result:
             console.print(
                 f"SPARQL: Found: {sparql_result}, see {wc.entity_url(qid=sparql_result[0])}",
@@ -330,6 +330,6 @@ class WcdImportBot(BaseModel):
             self.extract_and_upload_all_pages_to_wikicitations()
         elif args.lookup_hash is not None:
             # We strip here to avoid errors caused by spaces
-            self.lookup_hash(hash=args.lookup_hash.strip())
+            self.lookup_hash(md5hash=args.lookup_hash.strip())
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
