@@ -260,7 +260,7 @@ class WcdImportBot(BaseModel):
 
     @staticmethod
     @validate_arguments
-    def lookup_hash(md5hash: str):
+    def lookup_md5hash(md5hash: str):
         """Lookup a md5hash and show the result to the user"""
         console.print(f"Lookup of md5hash {md5hash}")
         wc = WikiCitations(
@@ -328,8 +328,8 @@ class WcdImportBot(BaseModel):
                     max_count=max_count, category_title=args.category
                 )
             self.extract_and_upload_all_pages_to_wikicitations()
-        elif args.lookup_hash is not None:
+        elif args.lookup_md5hash is not None:
             # We strip here to avoid errors caused by spaces
-            self.lookup_hash(md5hash=args.lookup_hash.strip())
+            self.lookup_md5hash(md5hash=args.lookup_hash.strip())
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
