@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
-from pydantic import BaseModel, validate_arguments, NoneStr
+from pydantic import BaseModel, validate_arguments
 
 import config
 from src import console
@@ -38,14 +38,14 @@ class WikipediaPage(BaseModel):
     md5hash: Optional[str]
     page_id: Optional[int]
     references: Optional[List[WikipediaPageReference]]
-    title: NoneStr
+    title: Optional[str]
     wikicitations: Optional[Any]  # WikiCitaitons
     wikicitations_qid: Optional[str]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
-    wikitext: NoneStr
+    wikitext: Optional[str]
 
     class Config:
         arbitrary_types_allowed = True
