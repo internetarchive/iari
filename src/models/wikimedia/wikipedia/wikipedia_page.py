@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
-from pydantic import BaseModel, validate_arguments
+from pydantic import BaseModel, validate_arguments, NoneStr
 
 import config
 from src import console
@@ -103,14 +103,15 @@ class WikipediaPage(BaseModel):
         self, reference: WikipediaPageReference
     ):
         logger.debug("Checking and uploading page references")
-        if reference is None:
-            raise ValueError("reference was None")
         if config.use_cache:
             wcdqid = self.__get_reference_wcdqid_from_cache__(reference=reference)
             if wcdqid is not None:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.wikicitations_qid = wcdqid
             else:
+                logger.debug(
+                    f"Could not find reference with {reference.md5hash} in the cache"
+                )
                 reference = (
                     self.__upload_reference_and_insert_in_the_cache_if_enabled__(
                         reference=reference
@@ -415,9 +416,20 @@ class WikipediaPage(BaseModel):
                 schema = EnglishWikipediaPageReferenceSchema()
                 reference: WikipediaPageReference = schema.load(parsed_template)
                 reference.finish_parsing_and_generate_hash()
+                # Handle duplicates:
+                if reference.md5hash in [
+                    reference.md5hash
+                    for reference in self.references
+                    if reference.md5hash is not None
+                ]:
+                    logging.warning(
+                        "Skipping reference already present "
+                        "in the list to avoid duplicates"
+                    )
                 # if config.loglevel == logging.DEBUG:
                 #     console.print(reference.dict())
-                self.references.append(reference)
+                else:
+                    self.references.append(reference)
             else:
                 if config.debug_unsupported_templates:
                     logger.debug(f"Template '{template_name.lower()}' not supported")
@@ -442,7 +454,7 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __upload_reference_to_wikicitations__(
         self, reference: WikipediaPageReference
-    ) -> str:
+    ) -> NoneStr:
         logger.debug("__upload_reference_to_wikicitations__: Running")
         if self.wikicitations is None:
             self.__setup_wikicitations__()
@@ -453,9 +465,10 @@ class WikipediaPage(BaseModel):
         else:
             raise ValueError("self.wikicitations was None")
         if wcdqid is None:
-            raise ValueError(
-                "Got None instead of WCDQID when trying to upload to WikiCitations"
-            )
+            return None
+            # logger.ERROR(
+            #     "Got None instead of WCDQID when trying to upload to WikiCitations"
+            # )
         return str(wcdqid)
 
     @validate_arguments
@@ -480,7 +493,7 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __upload_website_to_wikicitations__(
         self, reference: WikipediaPageReference
-    ) -> str:
+    ) -> NoneStr:
         """This is a lower level method that only handles uploading the website item"""
         if self.wikicitations is None:
             self.__setup_wikicitations__()
@@ -491,9 +504,10 @@ class WikipediaPage(BaseModel):
         else:
             raise ValueError("self.wikicitations was None")
         if wcdqid is None:
-            raise ValueError(
-                "Got None instead of WCDQID when trying to upload to WikiCitations"
-            )
+            return None
+            # raise ValueError(
+            #     "Got None instead of WCDQID when trying to upload to WikiCitations"
+            # )
         return str(wcdqid)
 
     def __upload_website_and_insert_in_the_cache_if_enabled__(
