@@ -82,6 +82,7 @@ class WcdImportBot(BaseModel):
         """,
         )
         parser.add_argument(
+            "-c",
             "--category",
             help="Import range of pages from a specific category_title",
         )
@@ -96,6 +97,7 @@ class WcdImportBot(BaseModel):
             ),
         )
         parser.add_argument(
+            "-r",
             "--numerical-range",
             help="Import range of pages",
         )
