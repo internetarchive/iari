@@ -210,7 +210,7 @@ class TestWikiCitations(TestCase):
         with self.assertRaises(ValidationError):
             wc.entity_url()
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
+    @pytest.mark.skipif(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_get_all_page_items(self):
         # first import a page to make sure there is at least one to be found
         bot = WcdImportBot()
@@ -233,7 +233,7 @@ class TestWikiCitations(TestCase):
         # if items is None or len(items) == 0:
         #     self.fail("Got no items")
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
+    @pytest.mark.skipif(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_get_all_reference_items(self):
         # first import a page with at least one reference
         # to make sure there is at least one to be found
