@@ -1,9 +1,11 @@
 import logging
+from os import getenv
 from time import sleep
 from typing import List
 from unittest import TestCase
 from requests import HTTPError
 
+import pytest
 from pydantic import ValidationError
 from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
@@ -21,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestWikiCitations(TestCase):
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item(self):
         from src.models.wikicitations import WikiCitations
 
@@ -92,6 +95,7 @@ class TestWikiCitations(TestCase):
 
         # logger.info(f"url: {wppage.wikicitations_url}")
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_wikipedia_page_item_valid_qid(self):
         from src.models.wikicitations import WikiCitations
 
@@ -134,6 +138,7 @@ class TestWikiCitations(TestCase):
         assert citations[0].mainsnak.datavalue["value"]["id"] == "Q1"
         # logger.info(f"url: {wppage.wikicitations_url}")
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
@@ -205,6 +210,7 @@ class TestWikiCitations(TestCase):
         with self.assertRaises(ValidationError):
             wc.entity_url()
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_get_all_page_items(self):
         # first import a page to make sure there is at least one to be found
         bot = WcdImportBot()
@@ -227,6 +233,7 @@ class TestWikiCitations(TestCase):
         # if items is None or len(items) == 0:
         #     self.fail("Got no items")
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_get_all_reference_items(self):
         # first import a page with at least one reference
         # to make sure there is at least one to be found
@@ -255,6 +262,7 @@ class TestWikiCitations(TestCase):
         with self.assertRaises(HTTPError):
             wc.__get_items_via_sparql__(query="test")
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_and_upload_website_item(self):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
@@ -283,6 +291,7 @@ class TestWikiCitations(TestCase):
         bot = WcdImportBot()
         bot.rinse_all_items_and_cache()
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_uploading_a_page_reference_and_website_item(self):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
