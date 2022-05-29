@@ -1,6 +1,9 @@
 import logging
+from os import getenv
 from time import sleep
 from unittest import TestCase
+
+import pytest
 
 import config
 from src import WikipediaPage, WikimediaSite, console
@@ -69,6 +72,7 @@ class TestWikipediaPage(TestCase):
         assert page.page_id == 11089416
         assert page.title == "Test"
 
+    @pytest.mark.xfail(getenv("CI"), reason="GitHub Actions do not yet have passwords")
     def test_get_wcdqid_from_hash_via_sparql(self):
         page = WikipediaPage(
             language_code="en", wikimedia_site=WikimediaSite.WIKIPEDIA, title="Test"
