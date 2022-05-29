@@ -179,4 +179,4 @@ optional arguments:
                         Lookup md5hash in the cache (if enabled) and WikiCitations via SPARQL (used mainly for
                         debugging)
   --rinse               Rinse all page and reference items and delete the cache
-  ```
+```
