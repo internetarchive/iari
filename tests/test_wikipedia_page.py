@@ -72,7 +72,7 @@ class TestWikipediaPage(TestCase):
         assert page.page_id == 11089416
         assert page.title == "Test"
 
-    @pytest.mark.xfail(getenv("CI", ""), reason="GitHub Actions do not have passwords")
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_get_wcdqid_from_hash_via_sparql(self):
         page = WikipediaPage(
             language_code="en", wikimedia_site=WikimediaSite.WIKIPEDIA, title="Test"
