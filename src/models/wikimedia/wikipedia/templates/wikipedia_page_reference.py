@@ -442,7 +442,7 @@ class WikipediaPageReference(BaseModel):
     def __find_number__(string: str) -> Optional[int]:
         """Find all numbers in a string"""
         # logger.debug(f"Trying to find numbers in: {string}.")
-        numbers = re.findall("\d+", string)
+        numbers = re.findall(r"\d+", string)
         if len(numbers) == 1:
             return int(numbers[0])
         elif len(numbers) > 1:
