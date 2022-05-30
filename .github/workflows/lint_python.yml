@@ -18,6 +18,8 @@ jobs:
       - run: pip install -r requirements.txt
       - run: mkdir --parents --verbose .mypy_cache
       - run: mypy --ignore-missing-imports --install-types --non-interactive .
-      - run: pytest . || true
+      - run: cp config.py.sample config.py
+      # Tests in test_wcdimportbot.py and test_wikicitations.py require a valid userid and password
+      - run: pytest --durations=10 --ignore=tests/test_wcdimportbot.py .
       - run: shopt -s globstar && pyupgrade --keep-runtime-typing --py37-plus **/*.py
       - run: safety check
