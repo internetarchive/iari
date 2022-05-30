@@ -99,6 +99,7 @@ Now you are ready to install and setup the bot.
 Clone the git repo:
 
 `$ git clone https://github.com/internetarchive/wcdimportbot.git`
+`$ cd wcdimportbot`
 
 # Setup
 Create a [virtual environment](https://docs.python.org/3/library/venv.html):
@@ -123,7 +124,7 @@ If you want to delete items from the Wikibase, ask an administrator of the Wikib
 
 # Features
 Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
-## Import a page
+## Import one or more pages
 The bot can import any Wikipedia page (in English Wikipedia)
 
 `$ python wcdimportbot.py --import "title of page"` 
