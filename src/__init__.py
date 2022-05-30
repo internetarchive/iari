@@ -267,16 +267,20 @@ class WcdImportBot(BaseModel):
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
         if config.use_cache:
-            ssdb = SsdbDatabase()
-            ssdb.connect()
-            cache_result = ssdb.get_value(key=md5hash)
-            if cache_result:
-                console.print(
-                    f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",
-                    style="green",
-                )
-            else:
-                console.print("CACHE: Not found", style="red")
+            cache = Cache()
+            cache.connect()
+            # TODO avoid using a lowlevel method here.
+            if cache.ssdb:
+                cache_result = cache.ssdb.get_value(key=md5hash)
+                if cache_result:
+                    console.print(
+                        f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",
+                        style="green",
+                    )
+                else:
+                    console.print("CACHE: Not found", style="red")
+        else:
+            console.print("Cache not in use.")
         sparql_result = wc.__get_wcdqids_from_hash__(md5hash=md5hash)
         if sparql_result:
             console.print(
