@@ -47,6 +47,7 @@ Currently the focus is on supporting the most widely used reference
 templates in English Wikipedia.
 
 ### List of currently supported templates
+```
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
     "cite q",
@@ -80,7 +81,7 @@ supported_templates = [
     "cite thesis",
     "cite web",
 ]
-
+```
 # Running the bot in AWS
 Because of security limitations of SSDB it is recommended 
 to only run the bot on the same server as the SSDB instance.
@@ -100,8 +101,14 @@ Clone the git repo:
 `$ git clone https://github.com/internetarchive/wcdimportbot.git`
 
 # Setup
-Install the dependencies:
+Create a [virtual environment](https://docs.python.org/3/library/venv.html):
+`$ python3 -m venv .venv`
 
+Activate the virtual environment:
+`$ source .venv/bin/activate`
+- When you have finished using wcdimportbot, you can deactivate this virtual environment by typing `deactivate`
+
+Install the dependencies:
 `$ pip install -r requirements.txt`
 
 [Generate a botpassword](https://wikicitations.wiki.opencura.com/w/index.php?title=Special:UserLogin&returnto=Special%3ABotPasswords&returntoquery=&force=BotPasswords)
@@ -127,33 +134,49 @@ The bot can delete any page item (Defaults to English Wikipedia)
 `$ python wcdimportbot.py --delete-page "title of page"` 
 
 ## Rinse all items from the Wikibase
-To delete all the imported items e.g. 
-after changes in the data model run
+To delete all the imported items e.g. after changes in the data model run
 
 `$ python wcdimportbot.py --rinse`
 
 # Help
 ```
-usage: wcdimportbot.py [-h] [-d DELETE_PAGE] [-i IMPORT_TITLE] [--rinse]
+usage: wcdimportbot.py [-h] [-c CATEGORY] [-d DELETE_PAGE] [-r NUMERICAL_RANGE] [-i IMPORT_TITLE] [-l LOOKUP_MD5HASH]
+                       [--rinse]
 
     WCD Import Bot imports references and pages from Wikipedia
 
     Example adding one page:
-    '$ wcdimportbot.py --import-title "Easter Island"'
+    '$ ./wcdimportbot.py --import-title "Easter Island"'
 
     Example deleting one page:
-    '$ wcdimportbot.py --delete-page "Easter Island"'
+    '$ ./wcdimportbot.py --delete-page "Easter Island"'
+
+    Example looking up a md5hash:
+    '$ ./wcdimportbot.py --lookup-md5hash e98adc5b05cb993cd0c884a28098096c'
+
+    Example importing 5 pages (any page on the Wiki):
+    '$ ./wcdimportbot.py --numerical-range 5'
+
+    Example importing 5 pages from a specific category_title:
+    '$ ./wcdimportbot.py --numerical-range 5 --category "World War II"'
 
     Example rinsing the Wikibase and the cache:
-    '$ wcdimportbot.py --rinse'
+    '$ ./wcdimportbot.py --rinse'
 
 
 optional arguments:
   -h, --help            show this help message and exit
+  -c CATEGORY, --category CATEGORY
+                        Import range of pages from a specific category_title
   -d DELETE_PAGE, --delete-page DELETE_PAGE
-                        Delete a single page from WikiCitations and the cache by title (Defaults to English Wikipedia for now). Note: This does not delete the reference
-                        items associated with the page.
+                        Delete a single page from WikiCitations and the cache by title (Defaults to English Wikipedia
+                        for now). Note: This does not delete the reference items associated with the page.
+  -r NUMERICAL_RANGE, --numerical-range NUMERICAL_RANGE
+                        Import range of pages
   -i IMPORT_TITLE, --import-title IMPORT_TITLE
                         Title to import from a Wikipedia (Defaults to English Wikipedia for now)
+  -l LOOKUP_MD5HASH, --lookup-md5hash LOOKUP_MD5HASH
+                        Lookup md5hash in the cache (if enabled) and WikiCitations via SPARQL (used mainly for
+                        debugging)
   --rinse               Rinse all page and reference items and delete the cache
 ```
