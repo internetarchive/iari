@@ -30,14 +30,17 @@ class Cache(BaseModel):
             raise ValueError("self.ssdb was None")
 
     @validate_arguments
-    def add_reference(self, reference: WikipediaPageReference, wcdqid: str):
+    def add_reference(self, reference: WikipediaPageReference, wcdqid: str) -> Any:
         logger.debug("add_reference: Running")
         if self.ssdb:
             if reference.md5hash is not None and wcdqid is not None:
                 # if type(reference.wikicitations_qid) is not str:
                 #     raise ValueError(f"{reference.wikicitations_qid} is not of type str")
                 logger.debug(f"Trying to set the value: {wcdqid}")
-                return self.ssdb.set_value(key=reference.md5hash, value=wcdqid)
+                result = self.ssdb.set_value(key=reference.md5hash, value=wcdqid)
+                logger.debug(f"Got {result} from SSDB")
+                # raise DebugExit()
+                return result
             else:
                 raise ValueError("did not get what we need")
         else:
@@ -47,7 +50,10 @@ class Cache(BaseModel):
     def add_website(self, reference: WikipediaPageReference, wcdqid: str):
         logger.debug("add_website: Running")
         if self.ssdb:
-            if reference.first_level_domain_of_url_hash is not None and wcdqid is not None:
+            if (
+                reference.first_level_domain_of_url_hash is not None
+                and wcdqid is not None
+            ):
                 logger.debug(f"Trying to set the value: {wcdqid}")
                 return self.ssdb.set_value(
                     key=reference.first_level_domain_of_url_hash, value=wcdqid
@@ -103,7 +109,9 @@ class Cache(BaseModel):
         if self.ssdb:
             if reference.first_level_domain_of_url_hash is not None:
                 # https://stackoverflow.com/questions/55365543/
-                response = self.ssdb.get_value(key=reference.first_level_domain_of_url_hash)
+                response = self.ssdb.get_value(
+                    key=reference.first_level_domain_of_url_hash
+                )
                 if response is None:
                     return None
                 else:
