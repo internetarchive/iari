@@ -7,10 +7,8 @@ from pydantic import BaseModel, validate_arguments, NoneStr
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
-from wikibaseintegrator.wbi_exceptions import (
-    NonUniqueLabelDescriptionPairError,  # type: ignore
-    NonExistentEntityError,  # type: ignore
-)  # type: ignore
+from wikibaseintegrator.wbi_exceptions import NonUniqueLabelDescriptionPairError  # type: ignore
+from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
 
 import config
