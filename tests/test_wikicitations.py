@@ -5,7 +5,7 @@ from typing import List
 from unittest import TestCase
 from requests import HTTPError
 
-import pytest # type: ignore
+import pytest  # type: ignore
 from pydantic import ValidationError
 from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
