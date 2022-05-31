@@ -15,6 +15,7 @@ import config
 from src import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import Cache
+from src.models.exceptions import MissingInformationError
 from src.models.wikicitations.enums import WCDItem
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
@@ -102,14 +103,15 @@ class WikipediaPage(BaseModel):
     def __check_and_upload_reference_item_to_wikicitations_if_missing__(
         self, reference: WikipediaPageReference
     ):
-        logger.debug("Checking and uploading page references")
+        logger.debug("__check_and_upload_reference_item_to_wikicitations_if_missing__: Running")
+        wcdqid = None
         if config.use_cache:
             wcdqid = self.__get_reference_wcdqid_from_cache__(reference=reference)
-            if wcdqid is not None:
+            if wcdqid:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
                 reference.wikicitations_qid = wcdqid
             else:
-                logger.debug(
+                logger.info(
                     f"Could not find reference with {reference.md5hash} in the cache"
                 )
                 reference = (
@@ -117,17 +119,12 @@ class WikipediaPage(BaseModel):
                         reference=reference
                     )
                 )
-        else:
-            if reference.md5hash is not None:
-                wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
-                    md5hash=reference.md5hash
-                )
-            else:
-                raise ValueError("reference.md5hash was None")
-        if wcdqid is not None:
+        if wcdqid:
+            # We got a WCDQID from the cache
             logger.debug(f"Got wcdqid:{wcdqid} from the cache/SPARQL")
             reference.wikicitations_qid = wcdqid
         else:
+            # We did not get a WCDQID, so try uploading
             reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
                 reference=reference
             )
@@ -454,40 +451,37 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __upload_reference_to_wikicitations__(
         self, reference: WikipediaPageReference
-    ) -> NoneStr:
+    ) -> str:
+        """This method tries to upload the reference to WikiCitations
+        and returns the WCDQID either if successfull upload or from the
+        Wikibase error if an item with the exact same label/hash already exists."""
         logger.debug("__upload_reference_to_wikicitations__: Running")
         if self.wikicitations is None:
             self.__setup_wikicitations__()
-        if self.wikicitations is not None:
+        if self.wikicitations:
             wcdqid = self.wikicitations.prepare_and_upload_reference_item(
                 page_reference=reference, wikipedia_page=self
             )
+            if wcdqid:
+                return str(wcdqid)
+            else:
+                raise MissingInformationError(
+                    "Got None instead of WCDQID when trying to upload to WikiCitations"
+                )
         else:
             raise ValueError("self.wikicitations was None")
-        if wcdqid is None:
-            return None
-            # logger.ERROR(
-            #     "Got None instead of WCDQID when trying to upload to WikiCitations"
-            # )
-        return str(wcdqid)
 
     @validate_arguments
     def __upload_reference_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
-    ):
+    ) -> WikipediaPageReference:
         # Here we get the reference back with WCDQID
         wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
         if config.use_cache:
-            if wcdqid is None:
-                raise ValueError("WCDQID was None")
-            if reference.md5hash is None:
-                raise ValueError("hash was None")
-            logger.debug(
-                f"Hash before insertion: {reference.md5hash}. "
-                f"WCDQID before insertion: {wcdqid}"
-            )
+            if not wcdqid or not reference.md5hash:
+                raise MissingInformationError("hash or WCDQID was None")
             self.__insert_reference_in_cache__(reference=reference, wcdqid=wcdqid)
-            reference.wikicitations_qid = wcdqid
+        reference.wikicitations_qid = wcdqid
         return reference
 
     @validate_arguments

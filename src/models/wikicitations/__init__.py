@@ -7,7 +7,7 @@ from pydantic import BaseModel, validate_arguments, NoneStr
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
-from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
+from wikibaseintegrator.wbi_exceptions import MWApiError, NonUniqueLabelDescriptionPairError  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
 
 import config
@@ -214,6 +214,45 @@ class WikiCitations(BaseModel):
         that executes the query with WBI after setting it up"""
         self.__setup_wbi__()
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
+
+    @validate_arguments(config=dict(arbitrary_types_allowed=True))
+    def __get_wcdqid_from_error_message__(self, mw_api_error: NonUniqueLabelDescriptionPairError) -> str:
+        """This method extracts the WCDQID from the Wikibase error message."""
+        expected_error_name = "wikibase-validator-label-with-description-conflict"
+        error_message = mw_api_error.error_msg
+        if "error" in error_message:
+            error_dict = error_message["error"]
+            if "messages" in error_dict:
+                # This is an array
+                messages = error_dict["messages"]
+                first_message = messages[0]
+                if "name" in first_message:
+                    name = first_message["name"]
+                    if name == expected_error_name:
+                        if "parameters" in first_message:
+                            # This is a list e.g.:
+                            """'parameters': [
+                              'google.com',
+                              'en',
+                              '[[Item:Q562|Q562]]'
+                            ],"""
+                            parameters = first_message["parameters"]
+                            wcdqid_wikitext = parameters[2].split("|")
+                            # We cut away the last to chars "]]"
+                            wcdqid = wcdqid_wikitext[1][:2]
+                            return str(wcdqid)
+                        else:
+                            raise ValueError("no parameters in first_message")
+                    else:
+                        raise ValueError(
+                                f"Name was '{name}' but we expected '{expected_error_name}' "
+                                f"in the first message of the the error response text from Wikibase.")
+                else:
+                    raise MissingInformationError("No name in the first message in the error response text from Wikibase.")
+            else:
+                raise MissingInformationError("No messages in the error response text from Wikibase.")
+        else:
+            raise MissingInformationError("No error dict in the error response text from Wikibase.")
 
     @validate_arguments
     def __get_wcdqids_from_hash__(self, md5hash: str) -> Optional[List[str]]:
@@ -941,7 +980,7 @@ class WikiCitations(BaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = config.sparql_endpoint_url
         return None
 
-    def __upload_new_item__(self, item: ItemEntity) -> Optional[str]:
+    def __upload_new_item__(self, item: ItemEntity) -> str:
         """Upload the new item to WikiCitations"""
         if item is None:
             raise ValueError("Did not get what we need")
@@ -956,9 +995,34 @@ class WikiCitations(BaseModel):
                 input("press enter to continue")
             logger.debug(f"returning new wcdqid: {new_item.id}")
             return str(new_item.id)
-        except MWApiError:
-            logger.error("Could not write to WikiCitaitons. :/")
-            return None
+        except NonUniqueLabelDescriptionPairError as e:
+            """Catch and extract the WCDQID
+            Example response:
+            {
+              'error': {
+                'code': 'modification-failed',
+                'info': 'Item [[Item:Q562|Q562]] already has label "google.com" associated with language code en, using the same description text.',
+                'messages': [
+                  {
+                    'name': 'wikibase-validator-label-with-description-conflict',
+                    'parameters': [
+                      'google.com',
+                      'en',
+                      '[[Item:Q562|Q562]]'
+                    ],
+                    'html': {
+                      '*': 'Item <a href="/wiki/Item:Q562" title="Item:Q562">Q562</a> already has label "google.com" associated with language code en, using the same description text.'
+                    }
+                  }
+                ],
+                '*': 'See   tps://wikicitations.wiki.opencura.com/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes.'
+              }
+            }"""
+            console.print(e)
+            wcdqid =  self.__get_wcdqid_from_error_message__(mw_api_error=e)
+            return wcdqid
+        # except MWApiError as e:
+        #     raise e
 
     def delete_imported_items(self):
         """This function deletes all the imported items in WikiCitations"""
@@ -982,7 +1046,14 @@ class WikiCitations(BaseModel):
     @validate_arguments
     def prepare_and_upload_reference_item(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
-    ) -> NoneStr:
+    ) -> str:
+        """This method prepares and then tries to upload the reference to WikiCitations
+        and returns the WCDQID either if successfull upload or from the
+        Wikibase error if an item with the exact same label/hash already exists.
+
+        A possible speedup would be to only prepare the label and description
+        and try to upload. If successfull add all the statements to the item.
+        This saves us from computing all the statements and discard them on error"""
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
@@ -1014,3 +1085,4 @@ class WikiCitations(BaseModel):
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wcdqid = self.__upload_new_item__(item=item)
         return wcdqid
+
