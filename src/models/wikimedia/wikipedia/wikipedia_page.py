@@ -103,7 +103,9 @@ class WikipediaPage(BaseModel):
     def __check_and_upload_reference_item_to_wikicitations_if_missing__(
         self, reference: WikipediaPageReference
     ):
-        logger.debug("__check_and_upload_reference_item_to_wikicitations_if_missing__: Running")
+        logger.debug(
+            "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
+        )
         wcdqid = None
         if config.use_cache:
             wcdqid = self.__get_reference_wcdqid_from_cache__(reference=reference)
@@ -339,6 +341,7 @@ class WikipediaPage(BaseModel):
     def __insert_reference_in_cache__(
         self, reference: WikipediaPageReference, wcdqid: str
     ):
+        """Insert reference in the cache"""
         logger.debug("__insert_in_cache__: Running")
         if self.cache is None:
             self.__setup_cache__()
