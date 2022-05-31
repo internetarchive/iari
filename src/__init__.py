@@ -269,9 +269,8 @@ class WcdImportBot(BaseModel):
         if config.use_cache:
             cache = Cache()
             cache.connect()
-            # TODO avoid using a lowlevel method here.
             if cache.ssdb:
-                cache_result = cache.ssdb.get_value(key=md5hash)
+                cache_result = cache.lookup(key=md5hash)
                 if cache_result:
                     console.print(
                         f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",

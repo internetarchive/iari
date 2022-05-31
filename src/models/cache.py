@@ -134,6 +134,13 @@ class Cache(BaseModel):
         result = self.ssdb.get_info()
         console.print(result)
 
+    @validate_arguments
+    def lookup(self, key: str):
+        if self.ssdb:
+            return self.ssdb.get_value(key=key)
+        else:
+            raise ValueError("self.ssdb was None")
+
     # def get_whole_table(self):
     #     with self.connection.cursor() as cursor:
     #         query = cursor.mogrify(f"SELECT * FROM hashdb.{self.table};")
