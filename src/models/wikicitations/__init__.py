@@ -7,7 +7,10 @@ from pydantic import BaseModel, validate_arguments, NoneStr
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
-from wikibaseintegrator.wbi_exceptions import MWApiError, NonUniqueLabelDescriptionPairError  # type: ignore
+from wikibaseintegrator.wbi_exceptions import (
+    NonUniqueLabelDescriptionPairError,  # type: ignore
+    NonExistentEntityError,  # type: ignore
+)  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
 
 import config
@@ -125,7 +128,7 @@ class WikiCitations(BaseModel):
                     mediawiki_api_url=config.mediawiki_api_url,
                 ),
             )
-        except MWApiError:
+        except NonExistentEntityError:
             return
 
     @validate_arguments
@@ -216,7 +219,9 @@ class WikiCitations(BaseModel):
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
 
     @validate_arguments(config=dict(arbitrary_types_allowed=True))
-    def __get_wcdqid_from_error_message__(self, mw_api_error: NonUniqueLabelDescriptionPairError) -> str:
+    def __get_wcdqid_from_error_message__(
+        self, mw_api_error: NonUniqueLabelDescriptionPairError
+    ) -> str:
         """This method extracts the WCDQID from the Wikibase error message."""
         expected_error_name = "wikibase-validator-label-with-description-conflict"
         error_message = mw_api_error.error_msg
@@ -245,14 +250,21 @@ class WikiCitations(BaseModel):
                             raise ValueError("no parameters in first_message")
                     else:
                         raise ValueError(
-                                f"Name was '{name}' but we expected '{expected_error_name}' "
-                                f"in the first message of the the error response text from Wikibase.")
+                            f"Name was '{name}' but we expected '{expected_error_name}' "
+                            f"in the first message of the the error response text from Wikibase."
+                        )
                 else:
-                    raise MissingInformationError("No name in the first message in the error response text from Wikibase.")
+                    raise MissingInformationError(
+                        "No name in the first message in the error response text from Wikibase."
+                    )
             else:
-                raise MissingInformationError("No messages in the error response text from Wikibase.")
+                raise MissingInformationError(
+                    "No messages in the error response text from Wikibase."
+                )
         else:
-            raise MissingInformationError("No error dict in the error response text from Wikibase.")
+            raise MissingInformationError(
+                "No error dict in the error response text from Wikibase."
+            )
 
     @validate_arguments
     def __get_wcdqids_from_hash__(self, md5hash: str) -> Optional[List[str]]:
@@ -1019,7 +1031,7 @@ class WikiCitations(BaseModel):
               }
             }"""
             console.print(e)
-            wcdqid =  self.__get_wcdqid_from_error_message__(mw_api_error=e)
+            wcdqid = self.__get_wcdqid_from_error_message__(mw_api_error=e)
             return wcdqid
         # except MWApiError as e:
         #     raise e
@@ -1085,4 +1097,3 @@ class WikiCitations(BaseModel):
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wcdqid = self.__upload_new_item__(item=item)
         return wcdqid
-

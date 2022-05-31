@@ -1,6 +1,8 @@
 from time import sleep
 from unittest import TestCase
 
+from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
+
 import config
 from src import WcdImportBot, WikiCitations, console
 
@@ -66,7 +68,7 @@ class TestWcdImportBot(TestCase):
         sleep(config.sparql_sync_waiting_time_in_seconds)
         deleted_item_id = bot.delete_one_page(title="Test")
         wc = WikiCitations()
-        with self.assertRaises(ValueError):
+        with self.assertRaises(NonExistentEntityError):
             wc.get_item(item_id=deleted_item_id)
             # assert item is None
 
