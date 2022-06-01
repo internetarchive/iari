@@ -1027,7 +1027,7 @@ class WikiCitations(BaseModel):
                 ],
                 '*': 'See   tps://wikicitations.wiki.opencura.com/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes.'
               }
-            }"""
+            }"""  # noqa: E501
             logger.info(e)
             wcdqid = self.__get_wcdqid_from_error_message__(mw_api_error=e)
             return wcdqid
