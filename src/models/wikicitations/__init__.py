@@ -54,7 +54,7 @@ class WikiCitations(BaseModel):
 
     def __delete_all_page_items__(self):
         """Get all items and delete them one by one"""
-        items = self.__extract_item_ids__(sparql_result=self.__get_all_page_items__())
+        items = self.__get_all_page_items__()
         if items is not None and len(items) > 0:
             number_of_items = len(items)
             logger.info(f"Got {number_of_items} bindings to delete")
@@ -72,9 +72,7 @@ class WikiCitations(BaseModel):
 
     def __delete_all_reference_items__(self):
         """Get all items and delete them one by one"""
-        items = self.__extract_item_ids__(
-            sparql_result=self.__get_all_reference_items__()
-        )
+        items = self.__get_all_reference_items__()
         if items is not None and len(items) > 0:
             number_of_items = len(items)
             logger.info(f"Got {number_of_items} bindings to delete")
@@ -92,9 +90,7 @@ class WikiCitations(BaseModel):
 
     def __delete_all_website_items__(self):
         """Get all items and delete them one by one"""
-        items = self.__extract_item_ids__(
-            sparql_result=self.__get_all_website_items__()
-        )
+        items = self.__get_all_website_items__()
         if items is not None and len(items) > 0:
             number_of_items = len(items)
             logger.info(f"Got {number_of_items} bindings to delete")
@@ -165,38 +161,44 @@ class WikiCitations(BaseModel):
     #  and use the enum value in the query
     def __get_all_page_items__(self):
         """Get all wcdqids for wikipedia pages using sparql"""
-        return self.__get_items_via_sparql__(
-            """
+        return self.__extract_item_ids__(
+            sparql_result=self.__get_items_via_sparql__(
+                """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {
               ?item wcdt:P10 wcd:Q6
             }
             """
+            )
         )
 
     def __get_all_reference_items__(self):
         """Get all wcdqids for references using sparql"""
-        return self.__get_items_via_sparql__(
-            """
+        return self.__extract_item_ids__(
+            sparql_result=self.__get_items_via_sparql__(
+                """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {
                 ?item wcdt:P10 wcd:Q4
             }
             """
+            )
         )
 
     def __get_all_website_items__(self):
         """Get all wcdqids for website items using sparql"""
-        return self.__get_items_via_sparql__(
-            """
+        return self.__extract_item_ids__(
+            sparql_result=self.__get_items_via_sparql__(
+                """
             prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
             prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
             SELECT ?item WHERE {
                 ?item wcdt:P10 wcd:Q145
             }
             """
+            )
         )
 
     @validate_arguments
