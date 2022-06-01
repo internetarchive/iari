@@ -168,9 +168,11 @@ class WcdImportBot(BaseModel):
                 if config.use_cache:
                     raise ValueError("got no item id from the cache")
                 else:
-                    raise ValueError("Got no item id from sparql, "
-                                     "probably because WCDQS did not have time sync. "
-                                     "Try increasing the waiting time in config.py")
+                    raise ValueError(
+                        "Got no item id from sparql, "
+                        "probably because WCDQS did not have time sync. "
+                        "Try increasing the waiting time in config.py"
+                    )
 
     def extract_and_upload_all_pages_to_wikicitations(self):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]

@@ -375,7 +375,9 @@ class WikipediaPage(BaseModel):
                     return True
             else:
                 if config.check_if_page_has_been_uploaded_via_sparql:
-                    logger.info("Not using the cache. Falling back to lookup via SPARQL")
+                    logger.info(
+                        "Not using the cache. Falling back to lookup via SPARQL"
+                    )
                     if self.md5hash is not None:
                         wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
                             md5hash=self.md5hash
@@ -502,9 +504,11 @@ class WikipediaPage(BaseModel):
         if self.wikicitations is not None:
             # from src.models.wikicitations import WikiCitations
             # self.wikicitations: WikiCitations
-            return str(self.wikicitations.prepare_and_upload_website_item(
-                page_reference=reference, wikipedia_page=self
-            ))
+            return str(
+                self.wikicitations.prepare_and_upload_website_item(
+                    page_reference=reference, wikipedia_page=self
+                )
+            )
         else:
             raise ValueError("self.wikicitations was None")
 
