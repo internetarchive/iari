@@ -94,6 +94,7 @@ Start GNU screen (if you want to have a persisting session)
 `$ screen -D -RR`
 
 Now you are ready to install and setup the bot.
+The bot requires to be run on Python 3.8 or later.
 
 # Installation
 Clone the git repo:
