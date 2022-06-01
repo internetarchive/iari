@@ -57,7 +57,7 @@ class WikiCitations(BaseModel):
     def __delete_all_page_items__(self):
         """Get all items and delete them one by one"""
         items = self.__get_all_page_items__()
-        if items is not None and len(items) > 0:
+        if items and len(items) > 0:
             number_of_items = len(items)
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
@@ -75,7 +75,7 @@ class WikiCitations(BaseModel):
     def __delete_all_reference_items__(self):
         """Get all items and delete them one by one"""
         items = self.__get_all_reference_items__()
-        if items is not None and len(items) > 0:
+        if items and len(items) > 0:
             number_of_items = len(items)
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
@@ -93,7 +93,7 @@ class WikiCitations(BaseModel):
     def __delete_all_website_items__(self):
         """Get all items and delete them one by one"""
         items = self.__get_all_website_items__()
-        if items is not None and len(items) > 0:
+        if items and len(items) > 0:
             number_of_items = len(items)
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
@@ -132,7 +132,7 @@ class WikiCitations(BaseModel):
         self, sparql_result: Optional[Dict]
     ) -> Optional[List[str]]:
         """Extract item ids from the sparql result"""
-        if sparql_result is not None:
+        if sparql_result:
             bindings = sparql_result["results"]["bindings"]
             number_of_bindings = len(bindings)
             if number_of_bindings > 0:
@@ -140,7 +140,7 @@ class WikiCitations(BaseModel):
                 logger.info(f"Got {number_of_bindings} bindings")
                 for binding in bindings:
                     item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
-                    if item_id is not None:
+                    if item_id:
                         items.append(item_id)
                 return items
             else:
@@ -330,7 +330,7 @@ class WikiCitations(BaseModel):
         logger.info("Preparing item citations")
         claims = []
         for reference in wikipedia_page.references or []:
-            if reference.wikicitations_qid is not None:
+            if reference.wikicitations_qid:
                 logger.debug("Appending to citations")
                 claims.append(
                     datatypes.Item(
@@ -480,38 +480,38 @@ class WikiCitations(BaseModel):
             or person_object.given
             or person_object.orcid
             or person_object.number_in_sequence
-        ) is not None:
-            if person_object.given is not None:
+        ):
+            if person_object.given:
                 given_name = datatypes.String(
                     prop_nr=WCDProperty.GIVEN_NAME.value,
                     value=person_object.given,
                 )
                 qualifiers.append(given_name)
-            if person_object.surname is not None:
+            if person_object.surname:
                 surname = datatypes.String(
                     prop_nr=WCDProperty.FAMILY_NAME.value,
                     value=person_object.surname,
                 )
                 qualifiers.append(surname)
-            if person_object.number_in_sequence is not None:
+            if person_object.number_in_sequence:
                 number_in_sequence = datatypes.Quantity(
                     prop_nr=WCDProperty.SERIES_ORDINAL.value,
                     amount=person_object.number_in_sequence,
                 )
                 qualifiers.append(number_in_sequence)
-            if person_object.orcid is not None:
+            if person_object.orcid:
                 orcid = datatypes.ExternalID(
                     prop_nr=WCDProperty.ORCID.value,
                     value=person_object.orcid,
                 )
                 qualifiers.append(orcid)
-            if person_object.link is not None:
+            if person_object.link:
                 link = datatypes.URL(
                     prop_nr=WCDProperty.URL.value,
                     value=person_object.link,
                 )
                 qualifiers.append(link)
-            if person_object.mask is not None:
+            if person_object.mask:
                 mask = datatypes.String(
                     prop_nr=WCDProperty.NAME_MASK.value,
                     value=person_object.mask,
@@ -558,7 +558,7 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.INSTANCE_OF.value,
             value=WCDItem.WIKIPEDIA_REFERENCE.value,
         )
-        if page_reference.template_name is not None:
+        if page_reference.template_name:
             website_string = datatypes.String(
                 prop_nr=WCDProperty.TEMPLATE_NAME.value,
                 value=page_reference.template_name,
@@ -586,6 +586,7 @@ class WikiCitations(BaseModel):
             prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
         )
         # Optional claims
+        # TODO unify and refactor if possible
         access_date = None
         doi = None
         isbn_10 = None
@@ -598,14 +599,7 @@ class WikiCitations(BaseModel):
         title = None
         url = None
         wikidata_qid = None
-        if page_reference.first_level_domain_of_url_qid is not None:
-            website_item = datatypes.Item(
-                prop_nr=WCDProperty.WEBSITE.value,
-                value=page_reference.first_level_domain_of_url_qid,
-            )
-        else:
-            website_item = None
-        if page_reference.access_date is not None:
+        if page_reference.access_date:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
                 time=(
@@ -618,17 +612,17 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
-        if page_reference.doi is not None:
+        if page_reference.doi:
             doi = datatypes.ExternalID(
                 prop_nr=WCDProperty.DOI.value,
                 value=page_reference.doi,
             )
-        if page_reference.isbn_10 is not None:
+        if page_reference.isbn_10:
             isbn_10 = datatypes.ExternalID(
                 prop_nr=WCDProperty.ISBN_10.value,
                 value=page_reference.isbn_10,
             )
-        if page_reference.isbn_13 is not None:
+        if page_reference.isbn_13:
             isbn_13 = datatypes.ExternalID(
                 prop_nr=WCDProperty.ISBN_13.value,
                 value=page_reference.isbn_13,
@@ -644,17 +638,17 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
                 value=page_reference.vauthors,
             )
-        if page_reference.orcid is not None:
+        if page_reference.orcid:
             orcid = datatypes.ExternalID(
                 prop_nr=WCDProperty.ORCID.value,
                 value=page_reference.orcid,
             )
-        if page_reference.pmid is not None:
+        if page_reference.pmid:
             pmid = datatypes.ExternalID(
                 prop_nr=WCDProperty.PMID.value,
                 value=page_reference.pmid,
             )
-        if page_reference.publication_date is not None:
+        if page_reference.publication_date:
             publication_date = datatypes.Time(
                 prop_nr=WCDProperty.PUBLICATION_DATE.value,
                 time=(
@@ -680,12 +674,12 @@ class WikiCitations(BaseModel):
                 text=page_reference.title,
                 language=self.language_code,
             )
-        if page_reference.url is not None:
+        if page_reference.url:
             url = datatypes.URL(
                 prop_nr=WCDProperty.URL.value,
                 value=page_reference.url,
             )
-        if page_reference.website is not None:
+        if page_reference.website:
             website_string = datatypes.String(
                 prop_nr=WCDProperty.WEBSITE_STRING.value,
                 value=page_reference.website,
@@ -726,7 +720,7 @@ class WikiCitations(BaseModel):
             website_item,
             wikidata_qid,
         ):
-            if claim is not None:
+            if claim:
                 claims.append(claim)
         return claims
 
@@ -823,10 +817,7 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_authors__(page_reference: WikipediaPageReference):
         authors = []
-        if (
-            page_reference.authors_list is not None
-            and len(page_reference.authors_list) > 0
-        ):
+        if page_reference.authors_list and len(page_reference.authors_list) > 0:
             for author in page_reference.authors_list:
                 if author.full_name:
                     author = datatypes.String(
@@ -834,13 +825,13 @@ class WikiCitations(BaseModel):
                         value=author.full_name,
                     )
                     authors.append(author)
-        if page_reference.vauthors is not None:
+        if page_reference.vauthors:
             author = datatypes.String(
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
                 value=page_reference.vauthors,
             )
             authors.append(author)
-        if page_reference.authors is not None:
+        if page_reference.authors:
             author = datatypes.String(
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
                 value=page_reference.authors,
@@ -851,10 +842,7 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_editors__(page_reference: WikipediaPageReference):
         persons = []
-        if (
-            page_reference.editors_list is not None
-            and len(page_reference.editors_list) > 0
-        ):
+        if page_reference.editors_list and len(page_reference.editors_list) > 0:
             for person in page_reference.editors_list:
                 if person.full_name:
                     person = datatypes.String(
@@ -867,10 +855,7 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_translators__(page_reference: WikipediaPageReference):
         persons = []
-        if (
-            page_reference.translators_list is not None
-            and len(page_reference.translators_list) > 0
-        ):
+        if page_reference.translators_list and len(page_reference.translators_list) > 0:
             for person in page_reference.translators_list:
                 if person.full_name:
                     person = datatypes.String(
@@ -908,15 +893,15 @@ class WikiCitations(BaseModel):
         would put on a unique separate page_reference item"""
         claims = []
         string_authors = self.__prepare_string_authors__(page_reference=page_reference)
-        if string_authors is not None:
+        if string_authors:
             claims.extend(string_authors)
         string_editors = self.__prepare_string_editors__(page_reference=page_reference)
-        if string_editors is not None:
+        if string_editors:
             claims.extend(string_editors)
         string_translators = self.__prepare_string_translators__(
             page_reference=page_reference
         )
-        if string_translators is not None:
+        if string_translators:
             claims.extend(string_translators)
         access_date = None
         archive_date = None
@@ -925,7 +910,7 @@ class WikiCitations(BaseModel):
         title = None
         url = None
         website_string = None
-        if page_reference.access_date is not None:
+        if page_reference.access_date:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
                 time=(
@@ -938,7 +923,7 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
-        if page_reference.archive_date is not None:
+        if page_reference.archive_date:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ARCHIVE_DATE.value,
                 time=(
@@ -951,12 +936,12 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
-        if page_reference.archive_url is not None:
+        if page_reference.archive_url:
             archive_url = datatypes.URL(
                 prop_nr=WCDProperty.ARCHIVE_URL.value,
                 value=page_reference.archive_url,
             )
-        if page_reference.publication_date is not None:
+        if page_reference.publication_date:
             publication_date = datatypes.Time(
                 prop_nr=WCDProperty.PUBLICATION_DATE.value,
                 time=(
@@ -969,18 +954,18 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
-        if page_reference.title is not None:
+        if page_reference.title:
             title = datatypes.MonolingualText(
                 prop_nr=WCDProperty.TITLE.value,
                 text=page_reference.title,
                 language=self.language_code,
             )
-        if page_reference.url is not None:
+        if page_reference.url:
             url = datatypes.URL(
                 prop_nr=WCDProperty.URL.value,
                 value=page_reference.url,
             )
-        if page_reference.website is not None:
+        if page_reference.website:
             website_string = datatypes.String(
                 prop_nr=WCDProperty.WEBSITE_STRING.value,
                 value=page_reference.website,
@@ -994,7 +979,7 @@ class WikiCitations(BaseModel):
             url,
             website_string,
         ):
-            if claim is not None:
+            if claim:
                 claims.append(claim)
         return claims
 
