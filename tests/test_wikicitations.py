@@ -354,6 +354,7 @@ class TestWikiCitations(TestCase):
         # It is successfull if no exceptions other than
         # NonUniqueLabelDescriptionPairError are raised.
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_publisher_and_location_statements(self):
         data = dict(
             template_name="cite web",
