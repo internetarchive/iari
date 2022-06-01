@@ -143,6 +143,7 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
+        wc.delete_imported_items()
         wppage = WikipediaPage(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
@@ -169,12 +170,11 @@ class TestWikiCitations(TestCase):
         reference.wikicitations_qid = test_qid
         wppage.references = []
         wppage.references.append(reference)
-        # with self.assertRaises(ValueError):
-        with self.assertRaises(MWApiError):
-            wc.prepare_and_upload_wikipedia_page_item(
-                wikipedia_page=wppage,
-            )
-        # console.print(wcdqid)
+        wc.prepare_and_upload_wikipedia_page_item(
+            wikipedia_page=wppage,
+        )
+        items = wc.__get_all_page_items__()
+        assert items and len(items) == 1
 
     # def test_P19_claims(self):
     #     site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
@@ -224,9 +224,7 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations()
         result = wc.__get_all_page_items__()
         console.print(result)
-        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
-        bindings = result["results"]["bindings"]
-        assert len(bindings) > 0
+        assert len(result) > 0
         bot.rinse_all_items_and_cache()
         # exit()
         # items = wc.__get_all_page_items__()
@@ -248,9 +246,7 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations()
         result = wc.__get_all_reference_items__()
         console.print(result)
-        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
-        bindings = result["results"]["bindings"]
-        assert len(bindings) > 0
+        assert len(result) > 0
         bot.rinse_all_items_and_cache()
         # exit()
         # items = wc.__get_all_page_items__()
@@ -332,6 +328,7 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
+        wc.delete_imported_items()
         wppage = WikipediaPage(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
