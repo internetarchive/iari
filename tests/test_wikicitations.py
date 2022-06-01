@@ -319,9 +319,9 @@ class TestWikiCitations(TestCase):
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
         items = wc.__get_all_website_items__()
-        assert len(items) > 0
+        assert len(items) == 1
         ref_items = wc.__get_all_reference_items__()
-        assert len(ref_items) > 0
+        assert len(ref_items) == 1
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_uploading_a_page_reference_and_website_item_twice(self):
