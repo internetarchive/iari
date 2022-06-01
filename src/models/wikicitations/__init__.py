@@ -212,10 +212,11 @@ class WikiCitations(BaseModel):
         )
 
     @validate_arguments
-    def __get_items_via_sparql__(self, query: str) -> Optional[Any]:
+    def __get_items_via_sparql__(self, query: str) -> Any:
         """This is the lowest level function
         that executes the query with WBI after setting it up"""
         self.__setup_wbi__()
+        self.__wait_for_wcdqs_to_sync__()
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
 
     @validate_arguments(config=dict(arbitrary_types_allowed=True))
@@ -1033,8 +1034,13 @@ class WikiCitations(BaseModel):
             console.print(e)
             wcdqid = self.__get_wcdqid_from_error_message__(mw_api_error=e)
             return wcdqid
-        # except MWApiError as e:
-        #     raise e
+
+    @staticmethod
+    def __wait_for_wcdqs_to_sync__():
+        logger.info(
+            f"Sleeping {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+        )
+        sleep(config.sparql_sync_waiting_time_in_seconds)
 
     def delete_imported_items(self):
         """This function deletes all the imported items in WikiCitations"""
