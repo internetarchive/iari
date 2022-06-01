@@ -135,7 +135,8 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
         """Looks up the WCDQID in WikiCitaitons and returns
-        it if only one found and complains if more than one was"""
+        it if only one found and complains if more than one was found"""
+        logger.debug("__get_wcdqid_from_hash_via_sparql__: Running")
         logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
         if self.wikicitations is None:
             from src import WikiCitations
@@ -153,6 +154,7 @@ class WikipediaPage(BaseModel):
                     logger.debug(f"Returning WCDQID {first_wcdqid}")
                     return first_wcdqid
             else:
+                logger.debug("Got no match from SPARQL")
                 return None
         else:
             raise ValueError("self.wikicitations was None")
