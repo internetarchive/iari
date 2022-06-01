@@ -60,6 +60,7 @@ class TestWcdImportBot(TestCase):
 
     def test_delete_one_page(self):
         bot = WcdImportBot()
+        bot.rinse_all_items_and_cache()
         bot.get_page_by_title(title="Test")
         bot.extract_and_upload_all_pages_to_wikicitations()
         console.print(
