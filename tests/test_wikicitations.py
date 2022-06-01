@@ -5,7 +5,7 @@ from typing import List
 from unittest import TestCase
 from requests import HTTPError
 
-import pytest
+import pytest  # type: ignore
 from pydantic import ValidationError
 from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
@@ -143,6 +143,7 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
+        wc.delete_imported_items()
         wppage = WikipediaPage(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
@@ -169,12 +170,11 @@ class TestWikiCitations(TestCase):
         reference.wikicitations_qid = test_qid
         wppage.references = []
         wppage.references.append(reference)
-        # with self.assertRaises(ValueError):
-        with self.assertRaises(MWApiError):
-            wc.prepare_and_upload_wikipedia_page_item(
-                wikipedia_page=wppage,
-            )
-        # console.print(wcdqid)
+        wc.prepare_and_upload_wikipedia_page_item(
+            wikipedia_page=wppage,
+        )
+        items = wc.__get_all_page_items__()
+        assert items and len(items) == 1
 
     # def test_P19_claims(self):
     #     site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
@@ -224,9 +224,7 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations()
         result = wc.__get_all_page_items__()
         console.print(result)
-        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
-        bindings = result["results"]["bindings"]
-        assert len(bindings) > 0
+        assert len(result) > 0
         bot.rinse_all_items_and_cache()
         # exit()
         # items = wc.__get_all_page_items__()
@@ -248,9 +246,7 @@ class TestWikiCitations(TestCase):
         wc = WikiCitations()
         result = wc.__get_all_reference_items__()
         console.print(result)
-        # {'head': {'vars': ['item']}, 'results': {'bindings': []}}
-        bindings = result["results"]["bindings"]
-        assert len(bindings) > 0
+        assert len(result) > 0
         bot.rinse_all_items_and_cache()
         # exit()
         # items = wc.__get_all_page_items__()
@@ -326,3 +322,34 @@ class TestWikiCitations(TestCase):
         assert len(items) > 0
         ref_items = wc.__get_all_reference_items__()
         assert len(ref_items) > 0
+
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
+    def test_uploading_a_page_reference_and_website_item_twice(self):
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wc.delete_imported_items()
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        title = "Democracy"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
+        # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
+        reference = EnglishWikipediaPageReference(
+            **{
+                "agency": "Oxford University Press",
+                "access-date": "24 February 2021",
+                "title": "Democracy",
+                "template_name": "cite news",
+                "url": "https://www.oxfordreference.com/view/10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
+            }
+        )
+        reference.finish_parsing_and_generate_hash()
+        wppage.references = []
+        wppage.references.append(reference)
+        wppage.references.append(reference)
+        wppage.__upload_references_and_websites_if_missing__()
+        # We have no assertions in this test.
+        # It is successfull if no exceptions other than
+        # NonUniqueLabelDescriptionPairError are raised.
