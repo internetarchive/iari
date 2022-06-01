@@ -15,6 +15,7 @@ import config
 from src import console
 from src.models.exceptions import MissingInformationError
 from src.models.person import Person
+from src.models.wikicitations.itemtypes.base_item_type import BaseItemType
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 from src.models.wikicitations.enums import WCDProperty, WCDItem
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
@@ -52,6 +53,7 @@ class WikiCitations(BaseModel):
         wbi = WikibaseIntegrator()
         return wbi.item.get(entity_id)
 
+    # TODO refactor delete_* methods into one using a BaseItemType
     def __delete_all_page_items__(self):
         """Get all items and delete them one by one"""
         items = self.__get_all_page_items__()
@@ -158,7 +160,11 @@ class WikiCitations(BaseModel):
         )
 
     # TODO refactor these get all functions
-    #  and use the enum value in the query
+    #  using BaseItemType and use the wcditem attribute value in the query
+    @validate_arguments
+    def __get_all_items__(self, item_type: BaseItemType):
+        pass
+
     def __get_all_page_items__(self):
         """Get all wcdqids for wikipedia pages using sparql"""
         return self.__extract_item_ids__(
