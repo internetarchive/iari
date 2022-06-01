@@ -152,7 +152,7 @@ class WcdImportBot(BaseModel):
                     )
                 else:
                     raise ValueError("page.md5hash was None")
-            if item_id is not None and isinstance(item_id, str):
+            if item_id:
                 wc = WikiCitations()
                 wc.__delete_item__(item_id=item_id)
                 # delete from cache
@@ -168,7 +168,9 @@ class WcdImportBot(BaseModel):
                 if config.use_cache:
                     raise ValueError("got no item id from the cache")
                 else:
-                    raise ValueError("got no item id from sparql")
+                    raise ValueError("Got no item id from sparql, "
+                                     "probably because WCDQS did not have time sync. "
+                                     "Try increasing the waiting time in config.py")
 
     def extract_and_upload_all_pages_to_wikicitations(self):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]
