@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
-from pydantic import BaseModel, validate_arguments, NoneStr
+from pydantic import BaseModel, validate_arguments
 
 import config
 from src import console
@@ -374,18 +374,21 @@ class WikipediaPage(BaseModel):
                     logger.debug("Page found in the cache")
                     return True
             else:
-                # Fallback
-                logger.info("Not using the cache. Falling back to lookup via SPARQL")
-                if self.md5hash is not None:
-                    wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
-                        md5hash=self.md5hash
-                    )
+                if config.check_if_page_has_been_uploaded_via_sparql:
+                    logger.info("Not using the cache. Falling back to lookup via SPARQL")
+                    if self.md5hash is not None:
+                        wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                            md5hash=self.md5hash
+                        )
+                    else:
+                        raise ValueError("self.md5hash was None")
+                    if wcdqid is not None:
+                        self.wikicitations_qid = wcdqid
+                        return True
+                    else:
+                        return False
                 else:
-                    raise ValueError("self.md5hash was None")
-                if wcdqid is not None:
-                    self.wikicitations_qid = wcdqid
-                    return True
-                else:
+                    logger.info("Skipping check if the page already exists")
                     return False
 
     def __insert_website_in_cache__(
@@ -492,27 +495,22 @@ class WikipediaPage(BaseModel):
     @validate_arguments
     def __upload_website_to_wikicitations__(
         self, reference: WikipediaPageReference
-    ) -> NoneStr:
+    ) -> str:
         """This is a lower level method that only handles uploading the website item"""
         if self.wikicitations is None:
             self.__setup_wikicitations__()
         if self.wikicitations is not None:
-            wcdqid = self.wikicitations.prepare_and_upload_website_item(
+            # from src.models.wikicitations import WikiCitations
+            # self.wikicitations: WikiCitations
+            return str(self.wikicitations.prepare_and_upload_website_item(
                 page_reference=reference, wikipedia_page=self
-            )
+            ))
         else:
             raise ValueError("self.wikicitations was None")
-        if wcdqid is None:
-            return None
-            # raise ValueError(
-            #     "Got None instead of WCDQID when trying to upload to WikiCitations"
-            # )
-        return str(wcdqid)
 
     def __upload_website_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
-    ):
-        # Here we get the reference back with WCDQID
+    ) -> WikipediaPageReference:
         wcdqid = self.__upload_website_to_wikicitations__(reference=reference)
         if config.use_cache:
             if wcdqid is None:
