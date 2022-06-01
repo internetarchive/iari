@@ -140,3 +140,27 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         assert ref.__find_number__(string="1one") == 1
         assert ref.__find_number__(string="one1one") == 1
         assert ref.__find_number__(string="one") is None
+
+    def test_publisher_and_location(self):
+        data = dict(
+            template_name="cite web",
+            url="http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            url_status="dead",
+            archive_date="2010-08-12",
+            title="Musköbasen 40 år",
+            first="Helene",
+            last="Skoglund",
+            author2="Nynäshamns Posten",
+            date="January 2010",
+            publisher="Kungliga Motorbåt Klubben",
+            location="Stockholm",
+            pages="4–7",
+            language="Swedish",
+            trans_title="Muskö Naval Base 40 years",
+            access_date="2010-11-09",
+        )
+        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference.finish_parsing_and_generate_hash()
+        assert reference.publisher == "Kungliga Motorbåt Klubben"
+        assert reference.location == "Stockholm"
