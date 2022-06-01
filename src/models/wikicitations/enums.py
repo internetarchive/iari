@@ -34,6 +34,7 @@ class WCDProperty(Enum):
     ISBN_13 = "P32"
     ISSUE = "P24"
     LAST_UPDATE = "P43"
+    LOCATION_STRING = "P51"
     LUMPED_AUTHORS = "P46"
     MEDIAWIKI_PAGE_ID = "P18"
     NAME_MASK = "P45"
@@ -42,6 +43,7 @@ class WCDProperty(Enum):
     PMID = "P34"
     PUBLICATION_DATE = "P12"
     PUBLISHED_IN = "P17"
+    PUBLISHER_STRING = "P50"
     RETRIEVED_DATE = "P29"
     PAGE_REVISION_ID = "P42"  # string
     SERIES_ORDINAL = "P14"  # aka author position # quantity

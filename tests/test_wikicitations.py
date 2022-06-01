@@ -353,3 +353,39 @@ class TestWikiCitations(TestCase):
         # We have no assertions in this test.
         # It is successfull if no exceptions other than
         # NonUniqueLabelDescriptionPairError are raised.
+
+    def test_publisher_and_location_statements(self):
+        data = dict(
+            template_name="cite web",
+            url="http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            url_status="dead",
+            archive_date="2010-08-12",
+            title="Musköbasen 40 år",
+            first="Helene",
+            last="Skoglund",
+            author2="Nynäshamns Posten",
+            date="January 2010",
+            publisher="Kungliga Motorbåt Klubben",
+            location="Stockholm",
+            pages="4–7",
+            language="Swedish",
+            trans_title="Muskö Naval Base 40 years",
+            access_date="2010-11-09",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        reference.finish_parsing_and_generate_hash()
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        title = "Test"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
+        item = wc.__prepare_new_reference_item__(
+            page_reference=reference, wikipedia_page=wppage
+        )
+        assert item.claims.get(property=WCDProperty.PUBLISHER_STRING.value) is not None
+        assert item.claims.get(property=WCDProperty.LOCATION_STRING.value) is not None
