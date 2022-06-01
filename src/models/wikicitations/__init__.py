@@ -245,7 +245,7 @@ class WikiCitations(BaseModel):
                             parameters = first_message["parameters"]
                             wcdqid_wikitext = parameters[2].split("|")
                             # We cut away the last to chars "]]"
-                            wcdqid = wcdqid_wikitext[1][:2]
+                            wcdqid = wcdqid_wikitext[1][:-2]
                             return str(wcdqid)
                         else:
                             raise ValueError("no parameters in first_message")
