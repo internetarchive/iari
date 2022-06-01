@@ -57,7 +57,7 @@ class WikiCitations(BaseModel):
     def __delete_all_page_items__(self) -> None:
         """Get all items and delete them one by one"""
         items = self.__get_all_page_items__() or []
-        if number_of_items := len(items) > 0:
+        if number_of_items := len(items):
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
             with console.status(f"Deleting {number_of_items} page items"):
@@ -74,7 +74,7 @@ class WikiCitations(BaseModel):
     def __delete_all_reference_items__(self) -> None:
         """Get all items and delete them one by one"""
         items = self.__get_all_reference_items__() or []
-        if number_of_items := len(items) > 0:
+        if number_of_items := len(items):
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
             with console.status(f"Deleting {number_of_items} reference items"):
@@ -91,7 +91,7 @@ class WikiCitations(BaseModel):
     def __delete_all_website_items__(self):
         """Get all items and delete them one by one"""
         items = self.__get_all_website_items__() or []
-        if number_of_items := len(items) > 0:
+        if number_of_items := len(items):
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
             with console.status(f"Deleting {number_of_items} website items"):
@@ -349,7 +349,7 @@ class WikiCitations(BaseModel):
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
         )
         persons = self.__prepare_all_person_claims__(page_reference=page_reference)
-        if len(persons) > 0:
+        if persons:
             item.add_claims(persons)
         item.add_claims(
             self.__prepare_single_value_reference_claims__(
@@ -807,14 +807,13 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_authors__(page_reference: WikipediaPageReference):
         authors = []
-        if page_reference.authors_list and len(page_reference.authors_list) > 0:
-            for author in page_reference.authors_list:
-                if author.full_name:
-                    author = datatypes.String(
-                        prop_nr=WCDProperty.FULL_NAME_STRING.value,
-                        value=author.full_name,
-                    )
-                    authors.append(author)
+        for author in page_reference.authors_list or []:
+            if author.full_name:
+                author = datatypes.String(
+                    prop_nr=WCDProperty.FULL_NAME_STRING.value,
+                    value=author.full_name,
+                )
+                authors.append(author)
         if page_reference.vauthors:
             author = datatypes.String(
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
@@ -832,27 +831,25 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_editors__(page_reference: WikipediaPageReference):
         persons = []
-        if page_reference.editors_list and len(page_reference.editors_list) > 0:
-            for person in page_reference.editors_list:
-                if person.full_name:
-                    person = datatypes.String(
-                        prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
-                        value=person.full_name,
-                    )
-                    persons.append(person)
+        for person in page_reference.editors_list or []:
+            if person.full_name:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
+                    value=person.full_name,
+                )
+                persons.append(person)
         return persons or None
 
     @staticmethod
     def __prepare_string_translators__(page_reference: WikipediaPageReference):
         persons = []
-        if page_reference.translators_list and len(page_reference.translators_list) > 0:
-            for person in page_reference.translators_list:
-                if person.full_name:
-                    person = datatypes.String(
-                        prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
-                        value=person.full_name,
-                    )
-                    persons.append(person)
+        for person in page_reference.translators_list or []:
+            if person.full_name:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
+                    value=person.full_name,
+                )
+                persons.append(person)
         return persons or None
 
     @validate_arguments()
