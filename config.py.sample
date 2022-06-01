@@ -12,7 +12,7 @@ loglevel = logging.ERROR
 press_enter_to_continue = False
 use_cache = False
 user_agent = "wcdimportbot 2.0.0-alpha3"
-sparql_sync_waiting_time_in_seconds = 3
+sparql_sync_waiting_time_in_seconds = 5
 
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
