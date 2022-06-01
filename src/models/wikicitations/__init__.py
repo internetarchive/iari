@@ -1086,7 +1086,7 @@ class WikiCitations(BaseModel):
         self,
         page_reference: WikipediaPageReference,
         wikipedia_page: WikipediaPage,
-    ) -> NoneStr:
+    ) -> str:
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_website_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
