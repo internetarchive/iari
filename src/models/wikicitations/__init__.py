@@ -1,4 +1,5 @@
 import logging
+import textwrap
 from datetime import datetime, timezone
 from time import sleep
 from typing import Any, Optional, List, Dict
@@ -7,20 +8,20 @@ from pydantic import BaseModel, validate_arguments, NoneStr
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
-from wikibaseintegrator.wbi_exceptions import NonUniqueLabelDescriptionPairError  # type: ignore
 from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
+from wikibaseintegrator.wbi_exceptions import NonUniqueLabelDescriptionPairError  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
 
 import config
 from src import console
-from src.models.exceptions import MissingInformationError
 from src.models.person import Person
-from src.models.wikicitations.itemtypes.base_item_type import BaseItemType
-from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+from src.models.exceptions import MissingInformationError
 from src.models.wikicitations.enums import WCDProperty, WCDItem
+from src.models.wikicitations.itemtypes.base_item_type import BaseItemType
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
+from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logger = logging.getLogger(__name__)
 
@@ -306,7 +307,16 @@ class WikiCitations(BaseModel):
         # We append the first 7 chars of the hash to the title
         # to avoid label collision errors
         assert page_reference.md5hash, "Assure mypy that it is not None"
-        item.labels.set("en", f"{page_reference.title} | {page_reference.md5hash[:7]}")
+        # Wikibase does not allow a label longer than 250 characters maximum
+        if page_reference.title:
+            shortened_title = textwrap.shorten(
+                page_reference.title, width=240, placeholder="..."
+            )
+        else:
+            # Handle title being None
+            shortened_title = "Title missing"
+        label = f"{shortened_title} | {page_reference.md5hash[:7]}"
+        item.labels.set("en", label)
         item.descriptions.set(
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
         )
@@ -365,7 +375,13 @@ class WikiCitations(BaseModel):
             login=wbi_login.Login(user=config.user, password=config.pwd),
         )
         item = wbi.item.new()
-        item.labels.set("en", wikipedia_page.title)
+        if wikipedia_page.title:
+            shortened_title = textwrap.shorten(
+                wikipedia_page.title, width=250, placeholder="..."
+            )
+        else:
+            shortened_title = None
+        item.labels.set("en", shortened_title)
         item.descriptions.set(
             "en",
             f"page from {wikipedia_page.language_code}:{wikipedia_page.wikimedia_site.name.title()}",

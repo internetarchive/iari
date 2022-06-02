@@ -57,6 +57,44 @@ class TestWikiCitations(TestCase):
         console.print(item.get_json())
         assert item.claims.get(property=WCDProperty.FULL_NAME_STRING.value) is not None
 
+    def test_prepare_new_reference_item_with_very_long_title(self):
+        from src.models.wikicitations import WikiCitations
+
+        wc = WikiCitations(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage = WikipediaPage(
+            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+        )
+        wppage.__get_wikipedia_page_from_title__(title="Test")
+        reference = EnglishWikipediaPageReference(
+            **{
+                "last": "Tangian",
+                "first": "Andranik",
+                "date": "2020",
+                "title": ("Analytical Theory of Democracy: "
+                          "History, Mathematics and Applications Analytical "
+                          "Theory of Democracy: History, "
+                          "Mathematics and Applications Analytical Theory of "
+                          "Theory of Democracy: History, "
+                          "Mathematics and Applications Analytical Theory of "
+                          "Democracy: History, Mathematics and Applications"),
+                "series": "Studies in Choice and Welfare",
+                "publisher": "Springer",
+                "location": "Cham, Switzerland",
+                "isbn": "978-3-030-39690-9",
+                "doi": "10.1007/978-3-030-39691-6",
+                "s2cid": "216190330",
+                "template_name": "cite book",
+            }
+        )
+        reference.finish_parsing_and_generate_hash()
+        item = wc.__prepare_new_reference_item__(
+            page_reference=reference, wikipedia_page=wppage
+        )
+        # console.print(item.get_json())
+        assert len(item.labels.get(language="en")) == 250
+
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
         from src.models.wikicitations import WikiCitations
 
