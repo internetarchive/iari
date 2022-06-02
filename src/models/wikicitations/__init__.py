@@ -1010,7 +1010,8 @@ class WikiCitations(BaseModel):
               }
             }"""
             logger.info(non_unique_label_description_pair_error)
-            wcdqid = non_unique_label_description_pair_error.get_conflicting_item_qid()
+            # We remove the prefix because of https://github.com/LeMyst/WikibaseIntegrator/issues/343
+            wcdqid = non_unique_label_description_pair_error.get_conflicting_item_qid().replace("Item:", "")
             return str(wcdqid)
 
     @staticmethod
