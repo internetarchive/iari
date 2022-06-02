@@ -463,7 +463,7 @@ class WikipediaPage(BaseModel):
         self, reference: WikipediaPageReference
     ) -> str:
         """This method tries to upload the reference to WikiCitations
-        and returns the WCDQID either if successfull upload or from the
+        and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists."""
         logger.debug("__upload_reference_to_wikicitations__: Running")
         if self.wikicitations is None:
