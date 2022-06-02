@@ -57,9 +57,9 @@ class TestWikiCitations(TestCase):
         console.print(item.get_json())
         assert item.claims.get(property=WCDProperty.FULL_NAME_STRING.value) is not None
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item_with_very_long_title(self):
         from src.models.wikicitations import WikiCitations
-
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
@@ -97,6 +97,7 @@ class TestWikiCitations(TestCase):
         # console.print(item.get_json())
         assert len(item.labels.get(language="en")) == 250
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
         from src.models.wikicitations import WikiCitations
 
@@ -394,6 +395,7 @@ class TestWikiCitations(TestCase):
         # It is successful if no exceptions other than
         # NonUniqueLabelDescriptionPairError are raised.
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_publisher_and_location_statements(self):
         data = dict(
             template_name="cite web",
