@@ -1011,7 +1011,9 @@ class WikiCitations(BaseModel):
             }"""
             logger.info(non_unique_label_description_pair_error)
             # We remove the prefix because of https://github.com/LeMyst/WikibaseIntegrator/issues/343
-            wcdqid = non_unique_label_description_pair_error.get_conflicting_item_qid().replace("Item:", "")
+            wcdqid = non_unique_label_description_pair_error.get_conflicting_item_qid().replace(
+                "Item:", ""
+            )
             return str(wcdqid)
 
     @staticmethod
@@ -1045,11 +1047,11 @@ class WikiCitations(BaseModel):
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> str:
         """This method prepares and then tries to upload the reference to WikiCitations
-        and returns the WCDQID either if successfull upload or from the
+        and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists.
 
         A possible speedup would be to only prepare the label and description
-        and try to upload. If successfull add all the statements to the item.
+        and try to upload. If successful add all the statements to the item.
         This saves us from computing all the statements and discard them on error"""
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_reference_item__(

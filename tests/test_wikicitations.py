@@ -72,13 +72,15 @@ class TestWikiCitations(TestCase):
                 "last": "Tangian",
                 "first": "Andranik",
                 "date": "2020",
-                "title": ("Analytical Theory of Democracy: "
-                          "History, Mathematics and Applications Analytical "
-                          "Theory of Democracy: History, "
-                          "Mathematics and Applications Analytical Theory of "
-                          "Theory of Democracy: History, "
-                          "Mathematics and Applications Analytical Theory of "
-                          "Democracy: History, Mathematics and Applications"),
+                "title": (
+                    "Analytical Theory of Democracy: "
+                    "History, Mathematics and Applications Analytical "
+                    "Theory of Democracy: History, "
+                    "Mathematics and Applications Analytical Theory of "
+                    "Theory of Democracy: History, "
+                    "Mathematics and Applications Analytical Theory of "
+                    "Democracy: History, Mathematics and Applications"
+                ),
                 "series": "Studies in Choice and Welfare",
                 "publisher": "Springer",
                 "location": "Cham, Switzerland",
@@ -389,7 +391,7 @@ class TestWikiCitations(TestCase):
         wppage.references.append(reference)
         wppage.__upload_references_and_websites_if_missing__()
         # We have no assertions in this test.
-        # It is successfull if no exceptions other than
+        # It is successful if no exceptions other than
         # NonUniqueLabelDescriptionPairError are raised.
 
     def test_publisher_and_location_statements(self):
