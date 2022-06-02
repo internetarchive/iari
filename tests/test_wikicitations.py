@@ -60,6 +60,7 @@ class TestWikiCitations(TestCase):
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item_with_very_long_title(self):
         from src.models.wikicitations import WikiCitations
+
         wc = WikiCitations(
             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
         )
