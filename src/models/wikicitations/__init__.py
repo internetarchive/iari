@@ -213,54 +213,6 @@ class WikiCitations(BaseModel):
         self.__wait_for_wcdqs_to_sync__()
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
 
-    @validate_arguments(config=dict(arbitrary_types_allowed=True))
-    def __get_wcdqid_from_error_message__(
-        self, mw_api_error: NonUniqueLabelDescriptionPairError
-    ) -> str:
-        """This method extracts the WCDQID from the Wikibase error message."""
-        expected_error_name = "wikibase-validator-label-with-description-conflict"
-        error_message = mw_api_error.error_msg
-        if "error" in error_message:
-            error_dict = error_message["error"]
-            if "messages" in error_dict:
-                # This is an array
-                messages = error_dict["messages"]
-                first_message = messages[0]
-                if "name" in first_message:
-                    name = first_message["name"]
-                    if name == expected_error_name:
-                        if "parameters" in first_message:
-                            # This is a list e.g.:
-                            """'parameters': [
-                              'google.com',
-                              'en',
-                              '[[Item:Q562|Q562]]'
-                            ],"""
-                            parameters = first_message["parameters"]
-                            wcdqid_wikitext = parameters[2].split("|")
-                            # We cut away the last to chars "]]"
-                            wcdqid = wcdqid_wikitext[1][:-2]
-                            return str(wcdqid)
-                        else:
-                            raise ValueError("no parameters in first_message")
-                    else:
-                        raise ValueError(
-                            f"Name was '{name}' but we expected '{expected_error_name}' "
-                            f"in the first message of the the error response text from Wikibase."
-                        )
-                else:
-                    raise MissingInformationError(
-                        "No name in the first message in the error response text from Wikibase."
-                    )
-            else:
-                raise MissingInformationError(
-                    "No messages in the error response text from Wikibase."
-                )
-        else:
-            raise MissingInformationError(
-                "No error dict in the error response text from Wikibase."
-            )
-
     @validate_arguments
     def __get_wcdqids_from_hash__(self, md5hash: str) -> List[str]:
         """This is a slower SPARQL-powered fallback helper method
@@ -1005,8 +957,8 @@ class WikiCitations(BaseModel):
                 input("press enter to continue")
             logger.debug(f"returning new wcdqid: {new_item.id}")
             return str(new_item.id)
-        except NonUniqueLabelDescriptionPairError as e:
-            """Catch and extract the WCDQID
+        except NonUniqueLabelDescriptionPairError as non_unique_label_description_pair_error:
+            """Catch, extract and return the conflicting WCDQID
             Example response:
             {
               'error': {
@@ -1027,10 +979,10 @@ class WikiCitations(BaseModel):
                 ],
                 '*': 'See   tps://wikicitations.wiki.opencura.com/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes.'
               }
-            }"""  # noqa: E501
-            logger.info(e)
-            wcdqid = self.__get_wcdqid_from_error_message__(mw_api_error=e)
-            return wcdqid
+            }"""
+            logger.info(non_unique_label_description_pair_error)
+            wcdqid = non_unique_label_description_pair_error.get_conflicting_item_qid()
+            return str(wcdqid)
 
     @staticmethod
     def __wait_for_wcdqs_to_sync__():
