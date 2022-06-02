@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timezone
 from time import sleep
-from typing import Any, Optional, List, Dict
+from typing import Any, Iterable, Optional, List, Dict
 
 from pydantic import BaseModel, validate_arguments, NoneStr
 from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
@@ -54,11 +54,10 @@ class WikiCitations(BaseModel):
         return wbi.item.get(entity_id)
 
     # TODO refactor delete_* methods into one using a BaseItemType
-    def __delete_all_page_items__(self):
+    def __delete_all_page_items__(self) -> None:
         """Get all items and delete them one by one"""
-        items = self.__get_all_page_items__()
-        if items and len(items) > 0:
-            number_of_items = len(items)
+        items = self.__get_all_page_items__() or []
+        if number_of_items := len(items):
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
             with console.status(f"Deleting {number_of_items} page items"):
@@ -72,11 +71,10 @@ class WikiCitations(BaseModel):
         else:
             console.print("Got no page items from the WCD Query Service.")
 
-    def __delete_all_reference_items__(self):
+    def __delete_all_reference_items__(self) -> None:
         """Get all items and delete them one by one"""
-        items = self.__get_all_reference_items__()
-        if items and len(items) > 0:
-            number_of_items = len(items)
+        items = self.__get_all_reference_items__() or []
+        if number_of_items := len(items):
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
             with console.status(f"Deleting {number_of_items} reference items"):
@@ -92,9 +90,8 @@ class WikiCitations(BaseModel):
 
     def __delete_all_website_items__(self):
         """Get all items and delete them one by one"""
-        items = self.__get_all_website_items__()
-        if items and len(items) > 0:
-            number_of_items = len(items)
+        items = self.__get_all_website_items__() or []
+        if number_of_items := len(items):
             logger.info(f"Got {number_of_items} bindings to delete")
             self.__setup_wbi__()
             with console.status(f"Deleting {number_of_items} website items"):
@@ -128,25 +125,16 @@ class WikiCitations(BaseModel):
             return
 
     @validate_arguments
-    def __extract_item_ids__(
-        self, sparql_result: Optional[Dict]
-    ) -> Optional[List[str]]:
-        """Extract item ids from the sparql result"""
+    def __extract_item_ids__(self, sparql_result: Optional[Dict]) -> Iterable[str]:
+        """Yield item ids from a sparql result"""
         if sparql_result:
-            bindings = sparql_result["results"]["bindings"]
-            number_of_bindings = len(bindings)
-            if number_of_bindings > 0:
-                items = []
-                logger.info(f"Got {number_of_bindings} bindings")
-                for binding in bindings:
-                    item_id = self.__extract_wcdqs_json_entity_id__(data=binding)
-                    if item_id:
-                        items.append(item_id)
-                return items
-            else:
-                return None
-        else:
-            return None
+            yielded = 0
+            for binding in sparql_result["results"]["bindings"]:
+                if item_id := self.__extract_wcdqs_json_entity_id__(data=binding):
+                    yielded += 1
+                    yield item_id
+            if number_of_bindings := len(sparql_result["results"]["bindings"]):
+                logger.info(f"Yielded {yielded} bindings out of {number_of_bindings}")
 
     @validate_arguments
     def __extract_wcdqs_json_entity_id__(
@@ -226,7 +214,7 @@ class WikiCitations(BaseModel):
         return execute_sparql_query(query=query, endpoint=config.sparql_endpoint_url)
 
     @validate_arguments
-    def __get_wcdqids_from_hash__(self, md5hash: str) -> Optional[List[str]]:
+    def __get_wcdqids_from_hash__(self, md5hash: str) -> List[str]:
         """This is a slower SPARQL-powered fallback helper method
         used when config.use_cache is False"""
         logger.debug("__get_wcdqid_from_hash__: running")
@@ -236,8 +224,10 @@ class WikiCitations(BaseModel):
               ?item wcdt:P30 "{md5hash}".
             }}
         """
-        return self.__extract_item_ids__(
-            sparql_result=self.__get_items_via_sparql__(query=query)
+        return list(
+            self.__extract_item_ids__(
+                sparql_result=self.__get_items_via_sparql__(query=query)
+            )
         )
 
     @validate_arguments
@@ -311,7 +301,7 @@ class WikiCitations(BaseModel):
             "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
         )
         persons = self.__prepare_all_person_claims__(page_reference=page_reference)
-        if len(persons) > 0:
+        if persons:
             item.add_claims(persons)
         item.add_claims(
             self.__prepare_single_value_reference_claims__(
@@ -769,14 +759,13 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_authors__(page_reference: WikipediaPageReference):
         authors = []
-        if page_reference.authors_list and len(page_reference.authors_list) > 0:
-            for author in page_reference.authors_list:
-                if author.full_name:
-                    author = datatypes.String(
-                        prop_nr=WCDProperty.FULL_NAME_STRING.value,
-                        value=author.full_name,
-                    )
-                    authors.append(author)
+        for author in page_reference.authors_list or []:
+            if author.full_name:
+                author = datatypes.String(
+                    prop_nr=WCDProperty.FULL_NAME_STRING.value,
+                    value=author.full_name,
+                )
+                authors.append(author)
         if page_reference.vauthors:
             author = datatypes.String(
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
@@ -794,27 +783,25 @@ class WikiCitations(BaseModel):
     @staticmethod
     def __prepare_string_editors__(page_reference: WikipediaPageReference):
         persons = []
-        if page_reference.editors_list and len(page_reference.editors_list) > 0:
-            for person in page_reference.editors_list:
-                if person.full_name:
-                    person = datatypes.String(
-                        prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
-                        value=person.full_name,
-                    )
-                    persons.append(person)
+        for person in page_reference.editors_list or []:
+            if person.full_name:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.EDITOR_NAME_STRING.value,
+                    value=person.full_name,
+                )
+                persons.append(person)
         return persons or None
 
     @staticmethod
     def __prepare_string_translators__(page_reference: WikipediaPageReference):
         persons = []
-        if page_reference.translators_list and len(page_reference.translators_list) > 0:
-            for person in page_reference.translators_list:
-                if person.full_name:
-                    person = datatypes.String(
-                        prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
-                        value=person.full_name,
-                    )
-                    persons.append(person)
+        for person in page_reference.translators_list or []:
+            if person.full_name:
+                person = datatypes.String(
+                    prop_nr=WCDProperty.TRANSLATOR_NAME_STRING.value,
+                    value=person.full_name,
+                )
+                persons.append(person)
         return persons or None
 
     @validate_arguments()
