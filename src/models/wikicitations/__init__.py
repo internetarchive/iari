@@ -992,7 +992,7 @@ class WikiCitations(BaseModel):
             {
               'error': {
                 'code': 'modification-failed',
-                'info': 'Item [[Item:Q562|Q562]] already has label "google.com" associated 
+                'info': 'Item [[Item:Q562|Q562]] already has label "google.com" associated
                 with language code en, using the same description text.',
                 'messages': [
                   {
@@ -1003,14 +1003,14 @@ class WikiCitations(BaseModel):
                       '[[Item:Q562|Q562]]'
                     ],
                     'html': {
-                      '*': 'Item <a href="/wiki/Item:Q562" title="Item:Q562">Q562</a> already has 
+                      '*': 'Item <a href="/wiki/Item:Q562" title="Item:Q562">Q562</a> already has
                       label "google.com" associated with language code en, using the same description text.'
                     }
                   }
                 ],
-                '*': 'See   tps://wikicitations.wiki.opencura.com/w/api.php for 
-                API usage. Subscribe to the mediawiki-api-announce mailing list 
-                at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; 
+                '*': 'See   tps://wikicitations.wiki.opencura.com/w/api.php for
+                API usage. Subscribe to the mediawiki-api-announce mailing list
+                at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt;
                 for notice of API deprecations and breaking changes.'
               }
             }"""
