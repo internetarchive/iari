@@ -400,6 +400,7 @@ class WikipediaPageReference(BaseModel):
         str
     ]  # this appears in cite journal and is used to specify authors_list using the Vancouver system
     authors: Optional[str]
+    place: Optional[str]
 
     @property
     def has_hash(self) -> bool:
@@ -1057,6 +1058,7 @@ class WikipediaPageReferenceSchema(Schema):
             "author5_link",
             "vauthors",
             "authors",
+            "place",
             # dates,
             "access_date",
             "archive_date",
