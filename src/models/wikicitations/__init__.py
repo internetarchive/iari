@@ -627,9 +627,13 @@ class WikiCitations(BaseModel):
         else:
             publisher = None
         if page_reference.title:
+            # Wikibase has a default limit of 400 chars for MonolingualText
+            shortened_title = textwrap.shorten(
+                page_reference.title, width=400, placeholder="..."
+            )
             title = datatypes.MonolingualText(
                 prop_nr=WCDProperty.TITLE.value,
-                text=page_reference.title,
+                text=shortened_title,
                 language=self.language_code,
             )
         if page_reference.url:
