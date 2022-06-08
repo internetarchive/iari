@@ -375,8 +375,7 @@ class WikipediaPage(BaseModel):
                 pass
         with open("parse_exceptions.log", "a") as f:
             f.write(f"{message}\n")
-        logger.error("This reference was skipped "
-                     "because an unknown field was found")
+        logger.error("This reference was skipped " "because an unknown field was found")
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
@@ -437,12 +436,16 @@ class WikipediaPage(BaseModel):
                 logger.debug(parsed_template)
                 schema = EnglishWikipediaPageReferenceSchema()
                 try:
-                    reference: Optional[WikipediaPageReference] = schema.load(parsed_template)
+                    reference: Optional[WikipediaPageReference] = schema.load(
+                        parsed_template
+                    )
                 except ValidationError as error:
                     logger.exception(f"Validation error: {error}")
                     self.__log_to_file__(message=str(error))
                     # Load partially (ie. ignore the unknown field)
-                    reference: WikipediaPageReference = schema.load(parsed_template, partial=True)
+                    reference: WikipediaPageReference = schema.load(
+                        parsed_template, partial=True
+                    )
                 reference.finish_parsing_and_generate_hash()
                 # Handle duplicates:
                 if reference.md5hash in [
