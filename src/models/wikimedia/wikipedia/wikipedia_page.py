@@ -9,6 +9,7 @@ from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
+from marshmallow.exceptions import ValidationError
 from pydantic import BaseModel, validate_arguments
 
 import config
@@ -421,22 +422,31 @@ class WikipediaPage(BaseModel):
                 parsed_template["template_name"] = template_name.lower()
                 logger.debug(parsed_template)
                 schema = EnglishWikipediaPageReferenceSchema()
-                reference: WikipediaPageReference = schema.load(parsed_template)
-                reference.finish_parsing_and_generate_hash()
-                # Handle duplicates:
-                if reference.md5hash in [
-                    reference.md5hash
-                    for reference in self.references
-                    if reference.md5hash is not None
-                ]:
-                    logging.warning(
-                        "Skipping reference already present "
-                        "in the list to avoid duplicates"
-                    )
-                # if config.loglevel == logging.DEBUG:
-                #     console.print(reference.dict())
-                else:
-                    self.references.append(reference)
+                try:
+                    reference: Optional[WikipediaPageReference] = schema.load(parsed_template)
+                except ValidationError as e:
+                    logger.exception(f"Validation error: {e}")
+                    with open("parse_exceptions.log") as f:
+                        f.write(str(e))
+                    logger.error("This reference was skipped "
+                                 "because an unknown field was found")
+                    reference = None
+                if reference:
+                    reference.finish_parsing_and_generate_hash()
+                    # Handle duplicates:
+                    if reference.md5hash in [
+                        reference.md5hash
+                        for reference in self.references
+                        if reference.md5hash is not None
+                    ]:
+                        logging.warning(
+                            "Skipping reference already present "
+                            "in the list to avoid duplicates"
+                        )
+                    # if config.loglevel == logging.DEBUG:
+                    #     console.print(reference.dict())
+                    else:
+                        self.references.append(reference)
             else:
                 if config.debug_unsupported_templates:
                     logger.debug(f"Template '{template_name.lower()}' not supported")
