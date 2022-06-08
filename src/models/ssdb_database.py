@@ -1,8 +1,8 @@
 import logging
 from typing import Optional, Any
 
-import pyssdb  # type: ignore
 from pydantic import BaseModel, validate_arguments
+import pyssdb  # type: ignore
 
 logger = logging.getLogger(__name__)
 
