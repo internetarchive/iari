@@ -448,8 +448,9 @@ class WikipediaPageReference(BaseModel):
     def __get_first_level_domain__(self, url: str):
         try:
             get_fld(url)
-        except TldBadUrl as message:
-            logger.warning(f"Bad url {url} encountered")
+        except TldBadUrl:
+            message = f"Bad url {url} encountered"
+            logger.warning(message)
             self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
 
     @staticmethod
