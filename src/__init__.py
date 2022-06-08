@@ -198,6 +198,7 @@ class WcdImportBot(BaseModel):
         TODO: fork pywikibot and disable the verbose messages
         """
         from pywikibot import Category, Site  # type: ignore
+
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         if max_count is not None:
