@@ -516,52 +516,9 @@ class WikiCitations(BaseModel):
         page_reference: WikipediaPageReference,
     ) -> Optional[List[Claim]]:
         logger.info("Preparing single value claims")
-        # Claims always present
-        instance_of = datatypes.Item(
-            prop_nr=WCDProperty.INSTANCE_OF.value,
-            value=WCDItem.WIKIPEDIA_REFERENCE.value,
-        )
-        if page_reference.template_name:
-            website_string = datatypes.String(
-                prop_nr=WCDProperty.TEMPLATE_NAME.value,
-                value=page_reference.template_name,
-            )
-        else:
-            raise ValueError("no template name found")
-        retrieved_date = datatypes.Time(
-            prop_nr=WCDProperty.RETRIEVED_DATE.value,
-            time=datetime.utcnow()  # Fetched today
-            .replace(tzinfo=timezone.utc)
-            .replace(
-                hour=0,
-                minute=0,
-                second=0,
-            )
-            .strftime("+%Y-%m-%dT%H:%M:%SZ"),
-        )
-        source_wikipedia = datatypes.Item(
-            prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
-            value=self.language_wcditem.value,
-        )
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
-        hash_claim = datatypes.String(
-            prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
-        )
         # Optional claims
-        # TODO unify and refactor if possible
-        access_date = None
-        doi = None
-        isbn_10 = None
-        isbn_13 = None
-        lumped_authors = None
-        orcid = None
-        pmid = None
-        publication_date = None
-        template_name = None
-        title = None
-        url = None
-        wikidata_qid = None
         if page_reference.access_date:
             access_date = datatypes.Time(
                 prop_nr=WCDProperty.ACCESS_DATE.value,
@@ -575,6 +532,8 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
+        else:
+            access_date = None
         if page_reference.archive_url:
             if page_reference.detected_archive_of_archive_url:
                 archive_url = datatypes.URL(
@@ -605,16 +564,22 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.DOI.value,
                 value=page_reference.doi,
             )
+        else:
+            doi = None
         if page_reference.isbn_10:
             isbn_10 = datatypes.ExternalID(
                 prop_nr=WCDProperty.ISBN_10.value,
                 value=page_reference.isbn_10,
             )
+        else:
+            isbn_10 = None
         if page_reference.isbn_13:
             isbn_13 = datatypes.ExternalID(
                 prop_nr=WCDProperty.ISBN_13.value,
                 value=page_reference.isbn_13,
             )
+        else:
+            isbn_13 = None
         if page_reference.location:
             location = datatypes.String(
                 prop_nr=WCDProperty.LOCATION_STRING.value, value=page_reference.location
@@ -626,16 +591,22 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.LUMPED_AUTHORS.value,
                 value=page_reference.vauthors,
             )
+        else:
+            lumped_authors = None
         if page_reference.orcid:
             orcid = datatypes.ExternalID(
                 prop_nr=WCDProperty.ORCID.value,
                 value=page_reference.orcid,
             )
+        else:
+            orcid = None
         if page_reference.pmid:
             pmid = datatypes.ExternalID(
                 prop_nr=WCDProperty.PMID.value,
                 value=page_reference.pmid,
             )
+        else:
+            pmid = None
         if page_reference.publication_date:
             publication_date = datatypes.Time(
                 prop_nr=WCDProperty.PUBLICATION_DATE.value,
@@ -649,6 +620,8 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
+        else:
+            publication_date = None
         if page_reference.publisher:
             publisher = datatypes.String(
                 prop_nr=WCDProperty.PUBLISHER_STRING.value,
@@ -666,16 +639,22 @@ class WikiCitations(BaseModel):
                 text=shortened_title,
                 language=self.language_code,
             )
+        else:
+            title = None
         if page_reference.url:
             url = datatypes.URL(
                 prop_nr=WCDProperty.URL.value,
                 value=page_reference.url,
             )
+        else:
+            url = None
         if page_reference.website:
             website_string = datatypes.String(
                 prop_nr=WCDProperty.WEBSITE_STRING.value,
                 value=page_reference.website,
             )
+        else:
+            website_string = None
         # Website item
         if page_reference.first_level_domain_of_url_qid:
             website_item = datatypes.Item(
@@ -689,13 +668,13 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.PMID.value,
                 value=page_reference.wikidata_qid,
             )
-        claims = []
+        else:
+            wikidata_qid = None
+        claims: List[Claim] = []
         for claim in (
             access_date,
             archive_url,
             doi,
-            hash_claim,
-            instance_of,
             isbn_10,
             isbn_13,
             location,
@@ -704,18 +683,58 @@ class WikiCitations(BaseModel):
             pmid,
             publication_date,
             publisher,
-            retrieved_date,
-            source_wikipedia,
-            template_name,
             title,
             url,
-            website_string,
             website_item,
+            website_string,
             wikidata_qid,
         ):
             if claim:
                 claims.append(claim)
-        return claims
+        return claims + self.__prepare_single_value_reference_claims_always_present__(
+            page_reference=page_reference
+        )
+
+    def __prepare_single_value_reference_claims_always_present__(
+        self,
+        page_reference: WikipediaPageReference,
+    ) -> List[Claim]:
+        instance_of = datatypes.Item(
+            prop_nr=WCDProperty.INSTANCE_OF.value,
+            value=WCDItem.WIKIPEDIA_REFERENCE.value,
+        )
+        hash_claim = datatypes.String(
+            prop_nr=WCDProperty.HASH.value, value=page_reference.md5hash
+        )
+        if page_reference.template_name:
+            template_string = datatypes.String(
+                prop_nr=WCDProperty.TEMPLATE_NAME.value,
+                value=page_reference.template_name,
+            )
+        else:
+            raise ValueError("no template name found")
+        retrieved_date = datatypes.Time(
+            prop_nr=WCDProperty.RETRIEVED_DATE.value,
+            time=datetime.utcnow()  # Fetched today
+            .replace(tzinfo=timezone.utc)
+            .replace(
+                hour=0,
+                minute=0,
+                second=0,
+            )
+            .strftime("+%Y-%m-%dT%H:%M:%SZ"),
+        )
+        source_wikipedia = datatypes.Item(
+            prop_nr=WCDProperty.SOURCE_WIKIPEDIA.value,
+            value=self.language_wcditem.value,
+        )
+        return [
+            hash_claim,
+            instance_of,
+            retrieved_date,
+            source_wikipedia,
+            template_string,
+        ]
 
     def __prepare_single_value_website_claims__(
         self,
@@ -893,12 +912,10 @@ class WikiCitations(BaseModel):
         )
         if string_translators:
             claims.extend(string_translators)
-        access_date = None
         archive_date = None
         archive_url = None
         publication_date = None
         title = None
-        url = None
         website_string = None
         if page_reference.access_date:
             access_date = datatypes.Time(
@@ -913,8 +930,10 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
+        else:
+            access_date = None
         if page_reference.archive_date:
-            access_date = datatypes.Time(
+            archive_date = datatypes.Time(
                 prop_nr=WCDProperty.ARCHIVE_DATE.value,
                 time=(
                     page_reference.archive_date.replace(tzinfo=timezone.utc)
@@ -926,6 +945,8 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
+        else:
+            access_date = None
         if page_reference.archive_url:
             archive_url = datatypes.URL(
                 prop_nr=WCDProperty.ARCHIVE_URL.value,
@@ -955,6 +976,8 @@ class WikiCitations(BaseModel):
                 prop_nr=WCDProperty.URL.value,
                 value=page_reference.url,
             )
+        else:
+            url = None
         if page_reference.website:
             website_string = datatypes.String(
                 prop_nr=WCDProperty.WEBSITE_STRING.value,
