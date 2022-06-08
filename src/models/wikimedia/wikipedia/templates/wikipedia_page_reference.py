@@ -931,7 +931,14 @@ class WikipediaPageReference(BaseModel):
         """This function quotes the URL to avoid complaints from Wikibase"""
         logger.debug("Parsing URLs")
         if self.url is not None:
-            self.url = urlparse(self.url).geturl()
+            # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+            parsed_url = urlparse(self.url)
+            if parsed_url.scheme:
+                self.url = parsed_url.geturl()
+            else:
+                skipped_url = self.url
+                self.url = None
+                logger.warning(f"Skipped the URL '{skipped_url}' because of missing scheme")
         if self.archive_url is not None:
             self.archive_url = urlparse(self.archive_url).geturl()
         if self.lay_url is not None:
