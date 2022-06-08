@@ -2,6 +2,7 @@ import hashlib
 import logging
 import re
 from datetime import datetime
+from os.path import exists
 from typing import Optional, List
 from urllib.parse import urlparse
 
@@ -749,6 +750,20 @@ class WikipediaPageReference(BaseModel):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
+    # TODO consider creating a
+    #  new WcdBaseModel with this method
+    #  and refactor the log_name since it is now
+    # used in 2 classes
+    @validate_arguments
+    def __log_to_file__(self, message: str) -> None:
+        log_name = "isbn_exceptions.log"
+        if not exists(log_name):
+            with open(log_name, "x"):
+                pass
+        with open(log_name, "a") as f:
+            f.write(f"{message}\n")
+        logger.error("This reference was skipped " "because an unknown field was found")
+
     @validator(
         "access_date",
         "archive_date",
@@ -849,9 +864,13 @@ class WikipediaPageReference(BaseModel):
             elif len(stripped_isbn) == 10:
                 self.isbn_10 = self.isbn
             else:
-                raise ValueError(
-                    "isbn: {self.isbn} was not 10 or 13 chars long after removing the da"
+                message = (
+                    f"isbn: {self.isbn} was not "
+                    f"10 or 13 chars long after "
+                    f"removing the dashes"
                 )
+                logger.warning(message)
+                self.__log_to_file__(message=message)
 
     @validate_arguments
     def __parse_known_role_persons__(
