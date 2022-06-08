@@ -678,9 +678,15 @@ class WikiCitations(BaseModel):
         ):
             if claim:
                 claims.append(claim)
-        return claims + self.__prepare_single_value_reference_claims_always_present__(
-            page_reference=page_reference
-        ) + self.__prepare_single_value_reference_claims_with_dates__(page_reference=page_reference)
+        return (
+            claims
+            + self.__prepare_single_value_reference_claims_always_present__(
+                page_reference=page_reference
+            )
+            + self.__prepare_single_value_reference_claims_with_dates__(
+                page_reference=page_reference
+            )
+        )
 
     @validate_arguments
     def __prepare_single_value_reference_claims_always_present__(
@@ -727,7 +733,7 @@ class WikiCitations(BaseModel):
     @staticmethod
     @validate_arguments
     def __prepare_single_value_reference_claims_with_dates__(
-            page_reference: WikipediaPageReference,
+        page_reference: WikipediaPageReference,
     ) -> List[Claim]:
         if page_reference.access_date:
             access_date = datatypes.Time(
@@ -1162,4 +1168,3 @@ class WikiCitations(BaseModel):
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wcdqid = self.__upload_new_item__(item=item)
         return wcdqid
-
