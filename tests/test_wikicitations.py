@@ -257,8 +257,7 @@ class TestWikiCitations(TestCase):
         # first import a page to make sure there is at least one to be found
         bot = WcdImportBot()
         # this page has no references
-        bot.get_page_by_title(title="Test")
-        bot.extract_and_upload_all_pages_to_wikicitations()
+        bot.get_and_extract_page_by_title(title="Test")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
@@ -279,8 +278,7 @@ class TestWikiCitations(TestCase):
         # to make sure there is at least one to be found
         bot = WcdImportBot()
         # this page has no references
-        bot.get_page_by_title(title="Muskö naval base")
-        bot.extract_and_upload_all_pages_to_wikicitations()
+        bot.get_and_extract_page_by_title(title="Muskö naval base")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )

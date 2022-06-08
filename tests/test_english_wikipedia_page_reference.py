@@ -128,7 +128,6 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite web",
             "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
-
         reference = EnglishWikipediaPageReferenceSchema().load(data)
         reference.finish_parsing_and_generate_hash()
         assert reference.first_level_domain_of_url == "stereogum.com"
