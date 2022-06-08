@@ -603,7 +603,7 @@ class WikipediaPage(BaseModel):
         # First we check if this page has already been uploaded
         self.__generate_hash__()
         if not self.__page_has_already_been_uploaded__():
-            console.print(f"Importing {self.title}")
+            console.print(f"Importing '{self.title}'")
             # logger.info("This page is missing from WikiCitations")
             self.__setup_wikicitations__()
             with console.status("Downloading page data"):
