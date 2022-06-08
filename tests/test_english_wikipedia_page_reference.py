@@ -132,6 +132,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference = EnglishWikipediaPageReferenceSchema().load(data)
         reference.finish_parsing_and_generate_hash()
         assert reference.first_level_domain_of_url == "stereogum.com"
+        assert reference.url == "https://www.stereogum.com/1345401/turntable-interview/interviews/"
 
     def test_find_number(self):
         ref = EnglishWikipediaPageReference(template_name="test")
