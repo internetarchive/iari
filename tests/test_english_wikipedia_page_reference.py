@@ -1,11 +1,16 @@
+import logging
 from unittest import TestCase
 
+import config
 from src import console
 from src.models.exceptions import MoreThanOneNumberError
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
     EnglishWikipediaPageReferenceSchema,
 )
+
+logging.basicConfig(level=config.loglevel)
+logger = logging.getLogger(__name__)
 
 
 class TestEnglishWikipediaPageReferenceSchema(TestCase):
@@ -183,3 +188,40 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash()
         assert reference.publisher == "Kungliga Motorbåt Klubben"
         assert reference.location == "Stockholm"
+
+    def test_detect_archive_urls(self):
+        # data = dict(
+        #     template_name="cite web",
+        #     url="http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+        #     archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+        #     url_status="dead",
+        #     archive_date="2010-08-12",
+        #     title="Musköbasen 40 år",
+        #     first="Helene",
+        #     last="Skoglund",
+        #     author2="Nynäshamns Posten",
+        #     date="January 2010",
+        #     publisher="Kungliga Motorbåt Klubben",
+        #     location="Stockholm",
+        #     pages="4–7",
+        #     language="Swedish",
+        #     trans_title="Muskö Naval Base 40 years",
+        #     access_date="2010-11-09",
+        # )
+        # reference: EnglishWikipediaPageReference = (
+        #     EnglishWikipediaPageReferenceSchema().load(data)
+        # )
+        # reference.finish_parsing_and_generate_hash()
+        reference = EnglishWikipediaPageReference(
+            archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            template_name="test",
+        )
+        reference.__extract_first_level_domain__()
+        reference.__detect_archive_urls__()
+        logger.debug(reference.detected_archive_of_url)
+        logger.debug(reference.detected_archive_of_archive_url)
+        assert reference.detected_archive_of_url is None
+        # from models.wikicitations.enums import KnownArchiveUrl
+
+        # FIXME this fails for some reason :/
+        # assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG

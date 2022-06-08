@@ -3,7 +3,7 @@ import logging
 import re
 from datetime import datetime
 from os.path import exists
-from typing import List, Optional
+from typing import Any, List, Optional
 from urllib.parse import urlparse
 
 from marshmallow import Schema
@@ -39,6 +39,12 @@ class WikipediaPageReference(BaseModel):
     """
 
     authors_list: Optional[List[Person]]
+    detected_archive_of_archive_url: Optional[
+        Any
+    ]  # KnownArchiveUrl: we don't type this because of circular imports
+    detected_archive_of_url: Optional[
+        Any
+    ]  # KnownArchiveUrl: we don't type this because of circular imports
     editors_list: Optional[List[Person]]
     first_lasts: Optional[List]
     first_level_domain_of_archive_url: Optional[str]
@@ -431,6 +437,42 @@ class WikipediaPageReference(BaseModel):
     def wikicitations_url(self) -> str:
         return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
 
+    def __detect_archive_urls__(self):
+        """Try to detect if self.url contains first level
+        domain from a known web archiver"""
+        logger.debug("__detect_archive_urls__: Running")
+        from src.models.wikicitations.enums import KnownArchiveUrl
+
+        # ARCHIVE_URL
+        if self.first_level_domain_of_archive_url:
+            logger.debug("__detect_archive_urls__: Working on self.archive_url")
+            archive_url_archive = None
+            try:
+                logger.debug(
+                    f"Trying to detect archive from {self.first_level_domain_of_archive_url}"
+                )
+                archive_url_archive = KnownArchiveUrl(
+                    self.first_level_domain_of_archive_url
+                )
+                # print(WCDItem[known_archive.name.upper().replace(".", "_")])
+            except ValueError:
+                pass
+            if archive_url_archive:
+                self.detected_archive_of_archive_url = archive_url_archive
+        # URL
+        if self.first_level_domain_of_url:
+            url_archive = None
+            try:
+                logger.debug(
+                    f"Trying to detect archive from {self.first_level_domain_of_url}"
+                )
+                url_archive = KnownArchiveUrl(self.first_level_domain_of_url)
+            except ValueError:
+                pass
+            # We don't care if the archive url is from self.url or self.archive_url.
+            if url_archive:
+                self.detected_archive_of_url = url_archive
+
     def __extract_first_level_domain__(self):
         logger.info("Extracting first level domain from 2 attributes")
         if self.url is not None:
@@ -584,8 +626,13 @@ class WikipediaPageReference(BaseModel):
 
     @validate_arguments
     def __get_first_level_domain__(self, url: str) -> Optional[str]:
+        logger.debug("__get_first_level_domain__: Running")
         try:
-            return get_fld(url)
+            logger.debug(f"Trying to get FLD from {url}")
+            fld = get_fld(url)
+            if fld:
+                logger.debug(f"Found FLD: {fld}")
+            return fld
         except TldBadUrl:
             message = f"Bad url {url} encountered"
             logger.warning(message)
@@ -1025,6 +1072,7 @@ class WikipediaPageReference(BaseModel):
         self.__parse_isbn__()
         self.__parse_persons__()
         self.__parse_urls__()
+        self.__detect_archive_urls__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
 
