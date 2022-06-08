@@ -405,6 +405,16 @@ class WikipediaPage(BaseModel):
             raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
 
+    @validate_arguments
+    def __log_to_file__(self, message: str) -> None:
+        if not exists("parse_exceptions.log"):
+            with open("parse_exceptions.log", "x"):
+                pass
+        with open("parse_exceptions.log", "a") as f:
+            f.write(f"{message}\n")
+        logger.error("This reference was skipped "
+                     "because an unknown field was found")
+
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
         if self.wikitext is None:
@@ -427,13 +437,7 @@ class WikipediaPage(BaseModel):
                     reference: Optional[WikipediaPageReference] = schema.load(parsed_template)
                 except ValidationError as e:
                     logger.exception(f"Validation error: {e}")
-                    if not exists("parse_exceptions.log"):
-                        with open("parse_exceptions.log", "x"):
-                            pass
-                    with open("parse_exceptions.log", "a") as f:
-                        f.write(f"{e}\n")
-                    logger.error("This reference was skipped "
-                                 "because an unknown field was found")
+                    self.__log_to_file__(message=str(e))
                     reference = None
                 if reference:
                     reference.finish_parsing_and_generate_hash()
