@@ -431,7 +431,7 @@ class WikipediaPage(BaseModel):
                         with open("parse_exceptions.log", "x"):
                             pass
                     with open("parse_exceptions.log", "a") as f:
-                        f.write(str(e))
+                        f.write(f"{e}\n")
                     logger.error("This reference was skipped "
                                  "because an unknown field was found")
                     reference = None
