@@ -585,13 +585,14 @@ class WikipediaPageReference(BaseModel):
             )
 
     @validate_arguments
-    def __get_first_level_domain__(self, url: str):
+    def __get_first_level_domain__(self, url: str) -> Optional[str]:
         try:
-            get_fld(url)
+            return get_fld(url)
         except TldBadUrl:
             message = f"Bad url {url} encountered"
             logger.warning(message)
             self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
+            return None
 
     @validate_arguments
     def __get_numbered_person__(
