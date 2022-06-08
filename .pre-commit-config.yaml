@@ -29,3 +29,13 @@ repos:
            "--max-complexity=21", "--max-line-length=162", "--show-source",
            "--statistics"]
     types: [ python ]
+
+# Disabled because we don't have a test-wikibase yet to run tests on
+#  - id: pytest
+#    name: pytest
+#    language: system
+#    entry: pytest
+#    args:
+#      - "--durations=10"
+#      - "--ignore=tests/test_wcdimportbot.py"
+#    types: [ python ]
