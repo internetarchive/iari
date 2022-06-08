@@ -405,12 +405,12 @@ class WikipediaPageReference(BaseModel):
     place: Optional[str]
 
     @property
-    def has_hash(self) -> bool:
-        return bool(self.md5hash is not None)
-
-    @property
     def has_first_level_domain_url_hash(self) -> bool:
         return bool(self.first_level_domain_of_url_hash is not None)
+
+    @property
+    def has_hash(self) -> bool:
+        return bool(self.md5hash is not None)
 
     # @property
     # def isodate(self) -> str:
@@ -443,15 +443,6 @@ class WikipediaPageReference(BaseModel):
             self.first_level_domain_of_archive_url = self.__get_first_level_domain__(
                 url=self.archive_url
             )
-
-    @validate_arguments
-    def __get_first_level_domain__(self, url: str):
-        try:
-            get_fld(url)
-        except TldBadUrl:
-            message = f"Bad url {url} encountered"
-            logger.warning(message)
-            self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
 
     @staticmethod
     @validate_arguments
@@ -592,6 +583,15 @@ class WikipediaPageReference(BaseModel):
                 f"because no identifier or url or first parameter was found "
                 f"or they were turned of in config.py."
             )
+
+    @validate_arguments
+    def __get_first_level_domain__(self, url: str):
+        try:
+            get_fld(url)
+        except TldBadUrl:
+            message = f"Bad url {url} encountered"
+            logger.warning(message)
+            self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
 
     @validate_arguments
     def __get_numbered_person__(
@@ -777,73 +777,6 @@ class WikipediaPageReference(BaseModel):
             f.write(f"{message}\n")
         logger.error("This reference was skipped " "because an unknown field was found")
 
-    @validator(
-        "access_date",
-        "archive_date",
-        "date",
-        "doi_broken_date",
-        "orig_date",
-        "orig_year",
-        "pmc_embargo_date",
-        "publication_date",
-        "time",
-        "year",
-        pre=True,
-    )
-    def __validate_time__(cls, v) -> Optional[datetime]:
-        """Pydantic validator
-        see https://stackoverflow.com/questions/66472255/"""
-        date = None
-        # Support "2013-01-01"
-        try:
-            date = datetime.strptime(v, "%Y-%m-%d")
-        except ValueError:
-            pass
-        # Support "May 9, 2013"
-        try:
-            date = datetime.strptime(v, "%B %d, %Y")
-        except ValueError:
-            pass
-        # Support "Jul 9, 2013"
-        try:
-            date = datetime.strptime(v, "%b %d, %Y")
-        except ValueError:
-            pass
-        # Support "May 25, 2012a"
-        try:
-            date = datetime.strptime(v[:-1], "%b %d, %Y")
-        except ValueError:
-            pass
-        # Support "1 September 2003"
-        try:
-            date = datetime.strptime(v, "%d %B %Y")
-        except ValueError:
-            pass
-        # Support "26 Dec 1996"
-        try:
-            date = datetime.strptime(v, "%d %b %Y")
-        except ValueError:
-            pass
-        # Support "September 2003"
-        try:
-            date = datetime.strptime(v, "%B %Y")
-        except ValueError:
-            pass
-        # Support "Sep 2003"
-        try:
-            date = datetime.strptime(v, "%b %Y")
-        except ValueError:
-            pass
-        # Support "2003"
-        try:
-            date = datetime.strptime(v, "%Y")
-        except ValueError:
-            pass
-        if date is None:
-            # raise TimeParseException(f"date format '{v}' not supported yet")
-            logger.warning(f"date format '{v}' not supported yet")
-        return date
-
     def __parse_first_parameter__(self) -> None:
         # pseudo code
         if self.template_name in ("cite q", "citeq"):
@@ -1004,6 +937,73 @@ class WikipediaPageReference(BaseModel):
             self.conference_url = urlparse(self.conference_url).geturl()
         if self.transcripturl is not None:
             self.transcripturl = urlparse(self.transcripturl).geturl()
+
+    @validator(
+        "access_date",
+        "archive_date",
+        "date",
+        "doi_broken_date",
+        "orig_date",
+        "orig_year",
+        "pmc_embargo_date",
+        "publication_date",
+        "time",
+        "year",
+        pre=True,
+    )
+    def __validate_time__(cls, v) -> Optional[datetime]:
+        """Pydantic validator
+        see https://stackoverflow.com/questions/66472255/"""
+        date = None
+        # Support "2013-01-01"
+        try:
+            date = datetime.strptime(v, "%Y-%m-%d")
+        except ValueError:
+            pass
+        # Support "May 9, 2013"
+        try:
+            date = datetime.strptime(v, "%B %d, %Y")
+        except ValueError:
+            pass
+        # Support "Jul 9, 2013"
+        try:
+            date = datetime.strptime(v, "%b %d, %Y")
+        except ValueError:
+            pass
+        # Support "May 25, 2012a"
+        try:
+            date = datetime.strptime(v[:-1], "%b %d, %Y")
+        except ValueError:
+            pass
+        # Support "1 September 2003"
+        try:
+            date = datetime.strptime(v, "%d %B %Y")
+        except ValueError:
+            pass
+        # Support "26 Dec 1996"
+        try:
+            date = datetime.strptime(v, "%d %b %Y")
+        except ValueError:
+            pass
+        # Support "September 2003"
+        try:
+            date = datetime.strptime(v, "%B %Y")
+        except ValueError:
+            pass
+        # Support "Sep 2003"
+        try:
+            date = datetime.strptime(v, "%b %Y")
+        except ValueError:
+            pass
+        # Support "2003"
+        try:
+            date = datetime.strptime(v, "%Y")
+        except ValueError:
+            pass
+        if date is None:
+            # raise TimeParseException(f"date format '{v}' not supported yet")
+            logger.warning(f"date format '{v}' not supported yet")
+        return date
 
     def finish_parsing_and_generate_hash(self) -> None:
         """Parse the rest of the information and generate a hash"""
