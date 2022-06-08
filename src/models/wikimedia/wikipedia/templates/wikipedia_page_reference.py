@@ -804,6 +804,8 @@ class WikipediaPageReference(BaseModel):
 
     def __parse_isbn__(self) -> None:
         if self.isbn is not None:
+            # Replace spaces with dashes to follow the ISBN standard
+            self.isbn = self.isbn.replace(" ", "-")
             stripped_isbn = self.isbn.replace("-", "")
             if stripped_isbn in ["", " "]:
                 self.isbn = None
