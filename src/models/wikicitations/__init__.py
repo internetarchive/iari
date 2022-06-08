@@ -674,6 +674,7 @@ class WikiCitations(BaseModel):
         claims = []
         for claim in (
             access_date,
+            archive_url,
             doi,
             hash_claim,
             instance_of,
