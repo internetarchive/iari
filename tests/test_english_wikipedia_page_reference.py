@@ -3,8 +3,8 @@ from unittest import TestCase
 from src import console
 from src.models.exceptions import MoreThanOneNumberError
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
-    EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaPageReference,
+    EnglishWikipediaPageReferenceSchema,
 )
 
 

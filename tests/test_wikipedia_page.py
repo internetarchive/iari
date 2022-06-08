@@ -6,7 +6,9 @@ from unittest import TestCase
 import pytest
 
 import config
-from src import WikipediaPage, WikimediaSite, console
+from src.helpers import console
+from src.models.wikimedia.enums import WikimediaSite
+from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)

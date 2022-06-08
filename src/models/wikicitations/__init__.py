@@ -2,21 +2,26 @@ import logging
 import textwrap
 from datetime import datetime, timezone
 from time import sleep
-from typing import Any, Iterable, Optional, List, Dict
+from typing import Any, Dict, Iterable, List, Optional
 
-from pydantic import BaseModel, validate_arguments, NoneStr
-from wikibaseintegrator import wbi_config, datatypes, WikibaseIntegrator, wbi_login  # type: ignore
+from pydantic import BaseModel, NoneStr, validate_arguments
+from wikibaseintegrator import datatypes  # type: ignore
+from wikibaseintegrator import WikibaseIntegrator, wbi_config, wbi_login
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
-from wikibaseintegrator.models import Claim, Qualifiers, References, Reference  # type: ignore
+from wikibaseintegrator.models import Qualifiers  # type: ignore
+from wikibaseintegrator.models import Claim, Reference, References
 from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
-from wikibaseintegrator.wbi_exceptions import NonUniqueLabelDescriptionPairError  # type: ignore
-from wikibaseintegrator.wbi_helpers import execute_sparql_query, delete_page  # type: ignore
+from wikibaseintegrator.wbi_exceptions import (  # type: ignore
+    NonUniqueLabelDescriptionPairError,
+)
+from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
+from wikibaseintegrator.wbi_helpers import execute_sparql_query
 
 import config
 from src import console
-from src.models.person import Person
 from src.models.exceptions import MissingInformationError
-from src.models.wikicitations.enums import WCDProperty, WCDItem
+from src.models.person import Person
+from src.models.wikicitations.enums import WCDItem, WCDProperty
 from src.models.wikicitations.itemtypes.base_item_type import BaseItemType
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,

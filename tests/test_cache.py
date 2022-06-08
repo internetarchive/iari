@@ -3,7 +3,7 @@ from typing import List
 from unittest import TestCase
 
 import config
-from src import WcdImportBot, Cache, console, WCDItem
+from src import Cache, WcdImportBot, WCDItem, console
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )

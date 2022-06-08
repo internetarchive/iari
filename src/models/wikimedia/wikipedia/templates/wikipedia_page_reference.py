@@ -3,14 +3,12 @@ import logging
 import re
 from datetime import datetime
 from os.path import exists
-from typing import Optional, List
+from typing import List, Optional
 from urllib.parse import urlparse
 
-from marshmallow import (
-    Schema,
-)
+from marshmallow import Schema
 from marshmallow.fields import String
-from pydantic import BaseModel, validator, validate_arguments
+from pydantic import BaseModel, validate_arguments, validator
 from tld import get_fld
 from tld.exceptions import TldBadUrl
 

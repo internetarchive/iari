@@ -3,15 +3,15 @@ from os import getenv
 from time import sleep
 from typing import List
 from unittest import TestCase
-from requests import HTTPError
 
 import pytest  # type: ignore
 from pydantic import ValidationError
+from requests import HTTPError
 from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
 import config
-from src import console, WCDItem, WcdImportBot
+from src import WcdImportBot, WCDItem, console
 from src.models.wikicitations import WCDProperty, WikiCitations
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,

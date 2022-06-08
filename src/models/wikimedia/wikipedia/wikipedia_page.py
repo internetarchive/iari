@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime
 from os.path import exists
-from typing import List, Any, Optional, Dict
+from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
 import requests

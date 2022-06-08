@@ -1,5 +1,7 @@
 from collections import OrderedDict
-from typing import List, Tuple, OrderedDict as OrderedDictType
+from typing import List
+from typing import OrderedDict as OrderedDictType
+from typing import Tuple
 
 import mwparserfromhell  # type: ignore
 
