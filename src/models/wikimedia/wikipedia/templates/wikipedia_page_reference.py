@@ -2,6 +2,7 @@ import hashlib
 import logging
 import re
 from datetime import datetime
+from os.path import exists
 from typing import Optional, List
 from urllib.parse import urlparse
 
@@ -11,6 +12,7 @@ from marshmallow import (
 from marshmallow.fields import String
 from pydantic import BaseModel, validator, validate_arguments
 from tld import get_fld
+from tld.exceptions import TldBadUrl
 
 import config
 from src.models.exceptions import MoreThanOneNumberError
@@ -403,12 +405,12 @@ class WikipediaPageReference(BaseModel):
     place: Optional[str]
 
     @property
-    def has_hash(self) -> bool:
-        return bool(self.md5hash is not None)
-
-    @property
     def has_first_level_domain_url_hash(self) -> bool:
         return bool(self.first_level_domain_of_url_hash is not None)
+
+    @property
+    def has_hash(self) -> bool:
+        return bool(self.md5hash is not None)
 
     # @property
     # def isodate(self) -> str:
@@ -434,9 +436,13 @@ class WikipediaPageReference(BaseModel):
     def __extract_first_level_domain__(self):
         logger.info("Extracting first level domain from 2 attributes")
         if self.url is not None:
-            self.first_level_domain_of_url = get_fld(self.url)
+            self.first_level_domain_of_url = self.__get_first_level_domain__(
+                url=self.url
+            )
         if self.archive_url is not None:
-            self.first_level_domain_of_archive_url = get_fld(self.archive_url)
+            self.first_level_domain_of_archive_url = self.__get_first_level_domain__(
+                url=self.archive_url
+            )
 
     @staticmethod
     @validate_arguments
@@ -577,6 +583,16 @@ class WikipediaPageReference(BaseModel):
                 f"because no identifier or url or first parameter was found "
                 f"or they were turned of in config.py."
             )
+
+    @validate_arguments
+    def __get_first_level_domain__(self, url: str) -> Optional[str]:
+        try:
+            return get_fld(url)
+        except TldBadUrl:
+            message = f"Bad url {url} encountered"
+            logger.warning(message)
+            self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
+            return None
 
     @validate_arguments
     def __get_numbered_person__(
@@ -749,72 +765,18 @@ class WikipediaPageReference(BaseModel):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
-    @validator(
-        "access_date",
-        "archive_date",
-        "date",
-        "doi_broken_date",
-        "orig_date",
-        "orig_year",
-        "pmc_embargo_date",
-        "publication_date",
-        "time",
-        "year",
-        pre=True,
-    )
-    def __validate_time__(cls, v) -> Optional[datetime]:
-        """Pydantic validator
-        see https://stackoverflow.com/questions/66472255/"""
-        date = None
-        # Support "2013-01-01"
-        try:
-            date = datetime.strptime(v, "%Y-%m-%d")
-        except ValueError:
-            pass
-        # Support "May 9, 2013"
-        try:
-            date = datetime.strptime(v, "%B %d, %Y")
-        except ValueError:
-            pass
-        # Support "Jul 9, 2013"
-        try:
-            date = datetime.strptime(v, "%b %d, %Y")
-        except ValueError:
-            pass
-        # Support "May 25, 2012a"
-        try:
-            date = datetime.strptime(v[:-1], "%b %d, %Y")
-        except ValueError:
-            pass
-        # Support "1 September 2003"
-        try:
-            date = datetime.strptime(v, "%d %B %Y")
-        except ValueError:
-            pass
-        # Support "26 Dec 1996"
-        try:
-            date = datetime.strptime(v, "%d %b %Y")
-        except ValueError:
-            pass
-        # Support "September 2003"
-        try:
-            date = datetime.strptime(v, "%B %Y")
-        except ValueError:
-            pass
-        # Support "Sep 2003"
-        try:
-            date = datetime.strptime(v, "%b %Y")
-        except ValueError:
-            pass
-        # Support "2003"
-        try:
-            date = datetime.strptime(v, "%Y")
-        except ValueError:
-            pass
-        if date is None:
-            # raise TimeParseException(f"date format '{v}' not supported yet")
-            logger.warning(f"date format '{v}' not supported yet")
-        return date
+    # TODO consider creating a
+    #  new WcdBaseModel with this method
+    #  and refactor the log_name since it is now
+    #  used in 2 classes
+    @validate_arguments
+    def __log_to_file__(self, message: str, file_name: str) -> None:
+        if not exists(file_name):
+            with open(file_name, "x"):
+                pass
+        with open(file_name, "a") as f:
+            f.write(f"{message}\n")
+        logger.error("This reference was skipped " "because an unknown field was found")
 
     def __parse_first_parameter__(self) -> None:
         # pseudo code
@@ -843,15 +805,26 @@ class WikipediaPageReference(BaseModel):
 
     def __parse_isbn__(self) -> None:
         if self.isbn is not None:
+            # Replace spaces with dashes to follow the ISBN standard
+            self.isbn = self.isbn.replace(" ", "-")
             stripped_isbn = self.isbn.replace("-", "")
-            if len(stripped_isbn) == 13:
-                self.isbn_13 = self.isbn
-            elif len(stripped_isbn) == 10:
-                self.isbn_10 = self.isbn
+            if stripped_isbn in ["", " "]:
+                self.isbn = None
             else:
-                raise ValueError(
-                    "isbn: {self.isbn} was not 10 or 13 chars long after removing the da"
-                )
+                if len(stripped_isbn) == 13:
+                    self.isbn_13 = self.isbn
+                elif len(stripped_isbn) == 10:
+                    self.isbn_10 = self.isbn
+                else:
+                    message = (
+                        f"isbn: {self.isbn} was not "
+                        f"10 or 13 chars long after "
+                        f"removing the dashes"
+                    )
+                    logger.warning(message)
+                    self.__log_to_file__(
+                        message=message, file_name="isbn_exceptions.log"
+                    )
 
     @validate_arguments
     def __parse_known_role_persons__(
@@ -958,7 +931,16 @@ class WikipediaPageReference(BaseModel):
         """This function quotes the URL to avoid complaints from Wikibase"""
         logger.debug("Parsing URLs")
         if self.url is not None:
-            self.url = urlparse(self.url).geturl()
+            # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+            parsed_url = urlparse(self.url)
+            if parsed_url.scheme:
+                self.url = parsed_url.geturl()
+            else:
+                skipped_url = self.url
+                self.url = None
+                logger.warning(
+                    f"Skipped the URL '{skipped_url}' because of missing scheme"
+                )
         if self.archive_url is not None:
             self.archive_url = urlparse(self.archive_url).geturl()
         if self.lay_url is not None:
@@ -969,6 +951,73 @@ class WikipediaPageReference(BaseModel):
             self.conference_url = urlparse(self.conference_url).geturl()
         if self.transcripturl is not None:
             self.transcripturl = urlparse(self.transcripturl).geturl()
+
+    @validator(
+        "access_date",
+        "archive_date",
+        "date",
+        "doi_broken_date",
+        "orig_date",
+        "orig_year",
+        "pmc_embargo_date",
+        "publication_date",
+        "time",
+        "year",
+        pre=True,
+    )
+    def __validate_time__(cls, v) -> Optional[datetime]:
+        """Pydantic validator
+        see https://stackoverflow.com/questions/66472255/"""
+        date = None
+        # Support "2013-01-01"
+        try:
+            date = datetime.strptime(v, "%Y-%m-%d")
+        except ValueError:
+            pass
+        # Support "May 9, 2013"
+        try:
+            date = datetime.strptime(v, "%B %d, %Y")
+        except ValueError:
+            pass
+        # Support "Jul 9, 2013"
+        try:
+            date = datetime.strptime(v, "%b %d, %Y")
+        except ValueError:
+            pass
+        # Support "May 25, 2012a"
+        try:
+            date = datetime.strptime(v[:-1], "%b %d, %Y")
+        except ValueError:
+            pass
+        # Support "1 September 2003"
+        try:
+            date = datetime.strptime(v, "%d %B %Y")
+        except ValueError:
+            pass
+        # Support "26 Dec 1996"
+        try:
+            date = datetime.strptime(v, "%d %b %Y")
+        except ValueError:
+            pass
+        # Support "September 2003"
+        try:
+            date = datetime.strptime(v, "%B %Y")
+        except ValueError:
+            pass
+        # Support "Sep 2003"
+        try:
+            date = datetime.strptime(v, "%b %Y")
+        except ValueError:
+            pass
+        # Support "2003"
+        try:
+            date = datetime.strptime(v, "%Y")
+        except ValueError:
+            pass
+        if date is None:
+            # raise TimeParseException(f"date format '{v}' not supported yet")
+            logger.warning(f"date format '{v}' not supported yet")
+        return date
 
     def finish_parsing_and_generate_hash(self) -> None:
         """Parse the rest of the information and generate a hash"""

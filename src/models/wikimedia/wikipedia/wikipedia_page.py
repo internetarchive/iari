@@ -4,11 +4,13 @@ import hashlib
 import json
 import logging
 from datetime import datetime
+from os.path import exists
 from typing import List, Any, Optional, Dict
 from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
+from marshmallow.exceptions import ValidationError
 from pydantic import BaseModel, validate_arguments
 
 import config
@@ -288,6 +290,7 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dictionary[key]
         return newdict
 
+    @validate_arguments
     def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         dictionary = self.__fix_class_key__(dictionary=dictionary)
         dictionary = self.__fix_aliases__(dictionary=dictionary)
@@ -316,6 +319,7 @@ class WikipediaPage(BaseModel):
         logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
 
+    @validate_arguments
     def __get_website_wcdqid_from_cache__(
         self, reference: WikipediaPageReference
     ) -> Optional[str]:
@@ -352,6 +356,25 @@ class WikipediaPage(BaseModel):
         else:
             raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
+
+    @validate_arguments
+    def __insert_website_in_cache__(
+        self, reference: WikipediaPageReference, wcdqid: str
+    ):
+        logger.debug("__insert_website_in_cache__: Running")
+        if self.cache is not None:
+            self.cache.add_website(reference=reference, wcdqid=wcdqid)
+        else:
+            raise ValueError("self.cache was None")
+        logger.info("Reference inserted into the hash database")
+
+    @validate_arguments
+    def __log_to_file__(self, message: str) -> None:
+        if not exists("parse_exceptions.log"):
+            with open("parse_exceptions.log", "x"):
+                pass
+        with open("parse_exceptions.log", "a") as f:
+            f.write(f"{message}\n")
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
@@ -393,16 +416,6 @@ class WikipediaPage(BaseModel):
                     logger.info("Skipping check if the page already exists")
                     return False
 
-    def __insert_website_in_cache__(
-        self, reference: WikipediaPageReference, wcdqid: str
-    ):
-        logger.debug("__insert_website_in_cache__: Running")
-        if self.cache is not None:
-            self.cache.add_website(reference=reference, wcdqid=wcdqid)
-        else:
-            raise ValueError("self.cache was None")
-        logger.info("Reference inserted into the hash database")
-
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
         if self.wikitext is None:
@@ -421,22 +434,43 @@ class WikipediaPage(BaseModel):
                 parsed_template["template_name"] = template_name.lower()
                 logger.debug(parsed_template)
                 schema = EnglishWikipediaPageReferenceSchema()
-                reference: WikipediaPageReference = schema.load(parsed_template)
-                reference.finish_parsing_and_generate_hash()
-                # Handle duplicates:
-                if reference.md5hash in [
-                    reference.md5hash
-                    for reference in self.references
-                    if reference.md5hash is not None
-                ]:
-                    logging.warning(
-                        "Skipping reference already present "
-                        "in the list to avoid duplicates"
+                try:
+                    reference: Optional[WikipediaPageReference] = schema.load(
+                        parsed_template
                     )
-                # if config.loglevel == logging.DEBUG:
-                #     console.print(reference.dict())
-                else:
-                    self.references.append(reference)
+                except ValidationError as error:
+                    logger.debug(f"Validation error: {error}")
+                    self.__log_to_file__(message=str(error))
+                    logger.error(
+                        "This reference was skipped because an unknown field was found"
+                    )
+                    reference = None
+                # DISABLED partial loading because it does not work :/
+                # if not reference:
+                #     logger.info("Trying now to deserialize the reference partially")
+                #     # Load partially (ie. ignore the unknown field)
+                #     reference: WikipediaPageReference = schema.load(
+                #         parsed_template, partial=True
+                #     )
+                # if not reference:
+                #     raise ValueError("This reference could not be deserialized. :/")
+                # else:
+                if reference:
+                    reference.finish_parsing_and_generate_hash()
+                    # Handle duplicates:
+                    if reference.md5hash in [
+                        reference.md5hash
+                        for reference in self.references
+                        if reference.md5hash is not None
+                    ]:
+                        logging.warning(
+                            "Skipping reference already present "
+                            "in the list to avoid duplicates"
+                        )
+                    # if config.loglevel == logging.DEBUG:
+                    #     console.print(reference.dict())
+                    else:
+                        self.references.append(reference)
             else:
                 if config.debug_unsupported_templates:
                     logger.debug(f"Template '{template_name.lower()}' not supported")
@@ -512,6 +546,7 @@ class WikipediaPage(BaseModel):
         else:
             raise ValueError("self.wikicitations was None")
 
+    @validate_arguments
     def __upload_website_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
@@ -568,7 +603,11 @@ class WikipediaPage(BaseModel):
         # First we check if this page has already been uploaded
         self.__generate_hash__()
         if not self.__page_has_already_been_uploaded__():
-            logger.info("This page is missing from WikiCitations")
+            console.print(
+                f"Importing {self.language_wcditem.name.title()} "
+                f"page '{self.title}'"
+            )
+            # logger.info("This page is missing from WikiCitations")
             self.__setup_wikicitations__()
             with console.status("Downloading page data"):
                 self.__fetch_page_data__(title=self.title)

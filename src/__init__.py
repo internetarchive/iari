@@ -7,8 +7,6 @@ from pydantic import BaseModel, validate_arguments
 import config
 from src.helpers import console
 from src.models.cache import Cache
-from src.models.exceptions import DebugExit
-from src.models.ssdb_database import SsdbDatabase
 from src.models.wikicitations import WCDItem, WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
@@ -178,6 +176,18 @@ class WcdImportBot(BaseModel):
         [page.extract_and_upload_to_wikicitations() for page in self.pages]
 
     @validate_arguments
+    def get_page_by_title(self, title: str):
+        with console.status("Downloading page information"):
+            self.pages = []
+            page = WikipediaPage(
+                language_code=self.language_code,
+                wikimedia_site=self.wikimedia_site,
+                language_wcditem=self.language_wcditem,
+            )
+            page.__get_wikipedia_page_from_title__(title=title)
+            self.pages.append(page)
+
+    @validate_arguments
     def get_pages_by_range(
         self, max_count: int = None, category_title: str = None
     ) -> None:
@@ -249,18 +259,6 @@ class WcdImportBot(BaseModel):
                             wikitext=page.text,
                         )
                     )
-
-    @validate_arguments
-    def get_page_by_title(self, title: str):
-        with console.status("Downloading page information"):
-            self.pages = []
-            page = WikipediaPage(
-                language_code=self.language_code,
-                wikimedia_site=self.wikimedia_site,
-                language_wcditem=self.language_wcditem,
-            )
-            page.__get_wikipedia_page_from_title__(title=title)
-            self.pages.append(page)
 
     @staticmethod
     @validate_arguments

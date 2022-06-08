@@ -132,6 +132,26 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference = EnglishWikipediaPageReferenceSchema().load(data)
         reference.finish_parsing_and_generate_hash()
         assert reference.first_level_domain_of_url == "stereogum.com"
+        assert (
+            reference.url
+            == "https://www.stereogum.com/1345401/turntable-interview/interviews/"
+        )
+
+    def test_extract_first_level_domain_bad_url(self):
+        data = {
+            "url": "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]",
+            "title": "Turntable Interview: !!!",
+            "last": "Locker",
+            "first": "Melissa",
+            "date": "May 9, 2013",
+            "website": "Stereogum",
+            "access_date": "May 24, 2021",
+            "template_name": "cite web",
+            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+        }
+        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference.finish_parsing_and_generate_hash()
+        assert reference.url is None
 
     def test_find_number(self):
         ref = EnglishWikipediaPageReference(template_name="test")
