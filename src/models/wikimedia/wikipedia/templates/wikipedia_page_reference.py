@@ -12,6 +12,7 @@ from marshmallow import (
 from marshmallow.fields import String
 from pydantic import BaseModel, validator, validate_arguments
 from tld import get_fld
+from tld.exceptions import TldBadUrl
 
 import config
 from src.models.exceptions import MoreThanOneNumberError
@@ -435,9 +436,21 @@ class WikipediaPageReference(BaseModel):
     def __extract_first_level_domain__(self):
         logger.info("Extracting first level domain from 2 attributes")
         if self.url is not None:
-            self.first_level_domain_of_url = get_fld(self.url)
+            self.first_level_domain_of_url = self.__get_first_level_domain__(
+                url=self.url
+            )
         if self.archive_url is not None:
-            self.first_level_domain_of_archive_url = get_fld(self.archive_url)
+            self.first_level_domain_of_archive_url = self.__get_first_level_domain__(
+                url=self.archive_url
+            )
+
+    @validate_arguments
+    def __get_first_level_domain__(self, url: str):
+        try:
+            get_fld(url)
+        except TldBadUrl as message:
+            logger.warning(f"Bad url {url} encountered")
+            self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
 
     @staticmethod
     @validate_arguments
@@ -755,12 +768,11 @@ class WikipediaPageReference(BaseModel):
     #  and refactor the log_name since it is now
     #  used in 2 classes
     @validate_arguments
-    def __log_to_file__(self, message: str) -> None:
-        log_name = "isbn_exceptions.log"
-        if not exists(log_name):
-            with open(log_name, "x"):
+    def __log_to_file__(self, message: str, file_name: str) -> None:
+        if not exists(file_name):
+            with open(file_name, "x"):
                 pass
-        with open(log_name, "a") as f:
+        with open(file_name, "a") as f:
             f.write(f"{message}\n")
         logger.error("This reference was skipped " "because an unknown field was found")
 
@@ -870,7 +882,7 @@ class WikipediaPageReference(BaseModel):
                     f"removing the dashes"
                 )
                 logger.warning(message)
-                self.__log_to_file__(message=message)
+                self.__log_to_file__(message=message, file_name="isbn_exceptions.log")
 
     @validate_arguments
     def __parse_known_role_persons__(
