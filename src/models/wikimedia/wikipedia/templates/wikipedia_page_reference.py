@@ -663,7 +663,7 @@ class WikipediaPageReference(BaseModel):
                     person.number_in_sequence = number
                     return person
                 else:
-                    logger.warning(
+                    logger.debug(
                         f"Discarded {person} because it did not have both given- and surnames or name_string"
                     )
                     return None
@@ -707,7 +707,7 @@ class WikipediaPageReference(BaseModel):
                     person.number_in_sequence = number
                     return person
                 else:
-                    logger.warning(
+                    logger.debug(
                         f"Discarded {person} because it did not have both given- and surnames or name_string"
                     )
                     return None

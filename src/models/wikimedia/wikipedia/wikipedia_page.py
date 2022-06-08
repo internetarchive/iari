@@ -463,7 +463,7 @@ class WikipediaPage(BaseModel):
                         for reference in self.references
                         if reference.md5hash is not None
                     ]:
-                        logging.warning(
+                        logging.debug(
                             "Skipping reference already present "
                             "in the list to avoid duplicates"
                         )
