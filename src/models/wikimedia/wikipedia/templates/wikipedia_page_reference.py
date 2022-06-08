@@ -821,7 +821,9 @@ class WikipediaPageReference(BaseModel):
                         f"removing the dashes"
                     )
                     logger.warning(message)
-                    self.__log_to_file__(message=message, file_name="isbn_exceptions.log")
+                    self.__log_to_file__(
+                        message=message, file_name="isbn_exceptions.log"
+                    )
 
     @validate_arguments
     def __parse_known_role_persons__(
