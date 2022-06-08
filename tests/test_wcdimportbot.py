@@ -43,26 +43,22 @@ class TestWcdImportBot(TestCase):
 
     # DISABLED because we don't want to rinse all items every time we run all tests
     # FIXME test against a test Wikibase instance so Mark can play with the production one himself
-    def test_rinse_all_items_and_cache(self):
-        bot = WcdImportBot()
-        bot.rinse_all_items_and_cache()
-        console.print(
-            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
-        )
-        sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikiCitations()
-        items = wc.__extract_item_ids__(sparql_result=wc.__get_all_page_items__())
-        if items is not None and len(items) > 0:
-            self.fail()
-        items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
-        if items is not None and len(items) > 0:
-            self.fail()
+    # def test_rinse_all_items_and_cache(self):
+    #     bot = WcdImportBot()
+    #     bot.rinse_all_items_and_cache()
+    #     console.print(
+    #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+    #     )
+    #     sleep(config.sparql_sync_waiting_time_in_seconds)
+    #     wc = WikiCitations()
+    #     # How can we test this?
+    #     items = wc.__extract_item_ids__(sparql_result=wc.__get_all_page_items__())
+    #     items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
 
     def test_delete_one_page(self):
         bot = WcdImportBot()
         bot.rinse_all_items_and_cache()
-        bot.get_page_by_title(title="Test")
-        bot.extract_and_upload_all_pages_to_wikicitations()
+        bot.get_and_extract_page_by_title(title="Test")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
@@ -75,11 +71,9 @@ class TestWcdImportBot(TestCase):
 
     def test_import_the_same_page_twice(self):
         bot = WcdImportBot()
-        bot.get_page_by_title(title="Test")
-        bot.extract_and_upload_all_pages_to_wikicitations()
+        bot.get_and_extract_page_by_title(title="Test")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        bot.extract_and_upload_all_pages_to_wikicitations()
         bot.rinse_all_items_and_cache()
