@@ -753,7 +753,7 @@ class WikipediaPageReference(BaseModel):
     # TODO consider creating a
     #  new WcdBaseModel with this method
     #  and refactor the log_name since it is now
-    # used in 2 classes
+    #  used in 2 classes
     @validate_arguments
     def __log_to_file__(self, message: str) -> None:
         log_name = "isbn_exceptions.log"
