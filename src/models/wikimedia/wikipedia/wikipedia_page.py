@@ -375,7 +375,6 @@ class WikipediaPage(BaseModel):
                 pass
         with open("parse_exceptions.log", "a") as f:
             f.write(f"{message}\n")
-        logger.error("This reference was skipped " "because an unknown field was found")
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
@@ -440,18 +439,21 @@ class WikipediaPage(BaseModel):
                         parsed_template
                     )
                 except ValidationError as error:
-                    logger.exception(f"Validation error: {error}")
+                    logger.debug(f"Validation error: {error}")
                     self.__log_to_file__(message=str(error))
+                    logger.error("This reference was skipped because an unknown field was found")
                     reference = None
-                if not reference:
-                    logger.info("Trying now to deserialize the reference partially")
-                    # Load partially (ie. ignore the unknown field)
-                    reference: WikipediaPageReference = schema.load(
-                        parsed_template, partial=True
-                    )
-                if not reference:
-                    raise ValueError("This reference could not be deserialized. :/")
-                else:
+                # DISABLED partial loading because it does not work :/
+                # if not reference:
+                #     logger.info("Trying now to deserialize the reference partially")
+                #     # Load partially (ie. ignore the unknown field)
+                #     reference: WikipediaPageReference = schema.load(
+                #         parsed_template, partial=True
+                #     )
+                # if not reference:
+                #     raise ValueError("This reference could not be deserialized. :/")
+                # else:
+                if reference:
                     reference.finish_parsing_and_generate_hash()
                     # Handle duplicates:
                     if reference.md5hash in [
