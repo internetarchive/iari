@@ -575,6 +575,13 @@ class WikiCitations(BaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
+        if page_reference.archive_url:
+            archive_url = datatypes.URL(
+                prop_nr=WCDProperty.ARCHIVE_URL.value,
+                value=page_reference.archive_url,
+            )
+        else:
+            archive_url = None
         if page_reference.doi:
             doi = datatypes.ExternalID(
                 prop_nr=WCDProperty.DOI.value,
