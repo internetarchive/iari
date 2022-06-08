@@ -7,6 +7,11 @@ repos:
     entry: black --check
     types: [python]
 
+  - id: bandit
+    name: bandit
+    language: system
+    entry: bandit --recursive --skip B101,B324 src  # B101 is assert statements
+    types: [python]
 #  - id: isort
 #    name: isort
 #    language: system
