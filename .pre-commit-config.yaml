@@ -19,3 +19,13 @@ repos:
     entry: isort
     args: ["--profile", "black", "--filter-files"]
     types: [python]
+
+# https://flake8.pycqa.org/en/latest/user/using-hooks.html
+  - id: flake8
+    name: flake8
+    language: system
+    entry: flake8
+    args: ["--ignore=C408,C416,F401,F541,R501,R502,R503,R504,W503",
+           "--max-complexity=21", "--max-line-length=162", "--show-source",
+           "--statistics"]
+    types: [ python ]
