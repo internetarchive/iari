@@ -4,7 +4,7 @@ repos:
   - id: black
     name: black
     language: system
-    entry: black --check
+    entry: black .
     types: [python]
 
   - id: bandit
@@ -12,8 +12,10 @@ repos:
     language: system
     entry: bandit --recursive --skip B101,B324 src  # B101 is assert statements
     types: [python]
-#  - id: isort
-#    name: isort
-#    language: system
-#    entry: isort --check-only
-#    types: [python]
+
+  - id: isort
+    name: isort
+    language: system
+    entry: isort
+    args: ["--profile", "black", "--filter-files"]
+    types: [python]
