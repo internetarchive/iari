@@ -1025,8 +1025,14 @@ class WikipediaPageReference(BaseModel):
         self.__parse_isbn__()
         self.__parse_persons__()
         self.__parse_urls__()
+        self.__detect_archive_urls__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
+
+    def __detect_archive_urls__(self):
+        """Try to detect if self.url contains first level
+        domain from a known web archiver"""
+        pass
 
 
 class WikipediaPageReferenceSchema(Schema):
