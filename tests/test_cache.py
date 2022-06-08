@@ -1,12 +1,8 @@
 import logging
-from typing import List
 from unittest import TestCase
 
 import config
-from src import Cache, WcdImportBot, WCDItem, console
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
-    WikipediaPageReference,
-)
+from src import Cache
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -25,39 +21,39 @@ class TestCache(TestCase):
     #     database.drop()
     #     # self.fail()
 
-    def test_add_reference(self):
-        if config.use_cache:
-            bot = WcdImportBot(
-                language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-            )
-            bot.get_page_by_title(
-                title="!Action Pact!",
-            )
-            [page.__parse_templates__() for page in bot.pages]
-            bot.print_statistics()
-            pages = [page for page in bot.pages]
-            references: List[WikipediaPageReference] = []
-            for page in pages:
-                if len(page.references) > 0:
-                    references.extend(page.references)
-            hashed_references = [
-                reference for reference in references if reference.md5hash
-            ]
-            if len(hashed_references) > 0:
-                logger.info(f"found {len(hashed_references)} hashed references")
-                reference = hashed_references[0]
-                console.print(reference)
-                cache = Cache()
-                cache.connect()
-                cache.add_reference(reference=reference, wcdqid="test")
-                check = cache.check_reference_and_get_wikicitations_qid(
-                    reference=reference
-                )
-                print(f"check:{check}")
-                # assert check is not None
-                assert check == "test"
-            else:
-                raise ValueError("No hashed references found")
+    # def test_add_reference(self):
+    #     if config.use_cache:
+    #         bot = WcdImportBot(
+    #             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+    #         )
+    #         bot.get_and_extract_page_by_title(
+    #             title="!Action Pact!",
+    #         )
+    #         [page.__parse_templates__() for page in bot.pages]
+    #         bot.print_statistics()
+    #         pages = [page for page in bot.pages]
+    #         references: List[WikipediaPageReference] = []
+    #         for page in pages:
+    #             if len(page.references) > 0:
+    #                 references.extend(page.references)
+    #         hashed_references = [
+    #             reference for reference in references if reference.md5hash
+    #         ]
+    #         if len(hashed_references) > 0:
+    #             logger.info(f"found {len(hashed_references)} hashed references")
+    #             reference = hashed_references[0]
+    #             console.print(reference)
+    #             cache = Cache()
+    #             cache.connect()
+    #             cache.add_reference(reference=reference, wcdqid="test")
+    #             check = cache.check_reference_and_get_wikicitations_qid(
+    #                 reference=reference
+    #             )
+    #             print(f"check:{check}")
+    #             # assert check is not None
+    #             assert check == "test"
+    #         else:
+    #             raise ValueError("No hashed references found")
 
     def test_get_cache_information(self):
         if config.use_cache:

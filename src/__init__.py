@@ -1,6 +1,6 @@
 import argparse
 import logging
-from typing import Any, List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, validate_arguments
 
@@ -23,7 +23,6 @@ class WcdImportBot(BaseModel):
     language_code: str = "en"
     max_count: int = 10
     total_number_of_hashed_references: Optional[int]
-    pages: Optional[List[Any]]
     percent_references_hashed_in_total: Optional[int]
     title: Optional[str]
     total_number_of_references: Optional[int]
@@ -38,23 +37,23 @@ class WcdImportBot(BaseModel):
     # create page_reference objects for each one
     # generate item in wcd
 
-    def __calculate_statistics__(self):
-        """We want to have an overview while the bot is running
-        about how many references could be imported"""
-        self.total_number_of_hashed_references = sum(
-            page.number_of_hashed_references for page in self.pages
-        )
-        self.total_number_of_references = sum(
-            page.number_of_references for page in self.pages
-        )
-        if self.total_number_of_references == 0:
-            self.percent_references_hashed_in_total = 0
-        else:
-            self.percent_references_hashed_in_total = int(
-                self.total_number_of_hashed_references
-                * 100
-                / self.total_number_of_references
-            )
+    # def __calculate_statistics__(self):
+    #     """We want to have an overview while the bot is running
+    #     about how many references could be imported"""
+    #     self.total_number_of_hashed_references = sum(
+    #         page.number_of_hashed_references for page in self.pages
+    #     )
+    #     self.total_number_of_references = sum(
+    #         page.number_of_references for page in self.pages
+    #     )
+    #     if self.total_number_of_references == 0:
+    #         self.percent_references_hashed_in_total = 0
+    #     else:
+    #         self.percent_references_hashed_in_total = int(
+    #             self.total_number_of_hashed_references
+    #             * 100
+    #             / self.total_number_of_references
+    #         )
 
     @staticmethod
     def __setup_argparse_and_return_args__():
@@ -76,7 +75,7 @@ class WcdImportBot(BaseModel):
     Example importing 5 pages (any page on the Wiki):
     '$ ./wcdimportbot.py --numerical-range 5'
 
-    Example importing 5 pages from a specific category_title:
+    Example importing 5 pages from a specific category title (recursively):
     '$ ./wcdimportbot.py --numerical-range 5 --category "World War II"'
 
     Example rinsing the Wikibase and the cache:
@@ -86,7 +85,7 @@ class WcdImportBot(BaseModel):
         parser.add_argument(
             "-c",
             "--category",
-            help="Import range of pages from a specific category_title",
+            help="Import range of pages from a specific category title recursively",
         )
         parser.add_argument(
             "-d",
@@ -172,30 +171,24 @@ class WcdImportBot(BaseModel):
                         "Try increasing the waiting time in config.py"
                     )
 
-    def extract_and_upload_all_pages_to_wikicitations(self):
-        [page.extract_and_upload_to_wikicitations() for page in self.pages]
-
     @validate_arguments
-    def get_page_by_title(self, title: str):
+    def get_and_extract_page_by_title(self, title: str):
         with console.status("Downloading page information"):
-            self.pages = []
             page = WikipediaPage(
                 language_code=self.language_code,
                 wikimedia_site=self.wikimedia_site,
                 language_wcditem=self.language_wcditem,
             )
             page.__get_wikipedia_page_from_title__(title=title)
-            self.pages.append(page)
+            page.extract_and_upload_to_wikicitations()
 
     @validate_arguments
-    def get_pages_by_range(
+    def get_and_extract_pages_by_range(
         self, max_count: int = None, category_title: str = None
     ) -> None:
         """
         This method gets all pages in the main namespace up to max_count
         It uses pywikibot
-        Caveat: the vanilla pywikibot is terribly verbose by default
-        TODO: fork pywikibot and disable the verbose messages
         """
         from pywikibot import Category, Site  # type: ignore
 
@@ -204,14 +197,13 @@ class WcdImportBot(BaseModel):
         if max_count is not None:
             logger.debug(f"Setting max_count to {max_count}")
             self.max_count = int(max_count)
-        self.pages = []
         count: int = 0
         # https://stackoverflow.com/questions/59605802/
         # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
         site = Site(code=self.language_code, fam=self.wikimedia_site.value)
         if category_title:
             category_page = Category(title=category_title, source=site)
-            for page in site.categorymembers(category_page, member_type="page"):
+            for page in category_page.articles(recurse=True):
                 if count >= self.max_count:
                     logger.debug("breaking now")
                     break
@@ -224,18 +216,17 @@ class WcdImportBot(BaseModel):
                         f"{page.pageid} {page.title()} Redirect:{page.isRedirectPage()}"
                     )
                     # raise DebugExit()
-                    self.pages.append(
-                        WikipediaPage(
-                            language_code=self.language_code,
-                            language_wcditem=self.language_wcditem,
-                            latest_revision_date=page.editTime(),
-                            latest_revision_id=page.latest_revision_id,
-                            page_id=page.pageid,
-                            title=str(page.title()),
-                            wikimedia_site=self.wikimedia_site,
-                            wikitext=page.text,
-                        )
+                    wikipedia_page = WikipediaPage(
+                        language_code=self.language_code,
+                        language_wcditem=self.language_wcditem,
+                        latest_revision_date=page.editTime(),
+                        latest_revision_id=page.latest_revision_id,
+                        page_id=page.pageid,
+                        title=str(page.title()),
+                        wikimedia_site=self.wikimedia_site,
+                        wikitext=page.text,
                     )
+                    wikipedia_page.extract_and_upload_to_wikicitations()
         else:
             for page in site.allpages(namespace=0):
                 if count >= self.max_count:
@@ -244,22 +235,19 @@ class WcdImportBot(BaseModel):
                 if not page.isRedirectPage():
                     count += 1
                     # console.print(count)
-                    logger.info(
-                        f"{page.pageid} {page.title()} Redirect:{page.isRedirectPage()}"
-                    )
+                    logger.info(f"{page.pageid} {page.title()}")
                     # raise DebugExit()
-                    self.pages.append(
-                        WikipediaPage(
-                            language_code=self.language_code,
-                            language_wcditem=self.language_wcditem,
-                            latest_revision_date=page.editTime(),
-                            latest_revision_id=page.latest_revision_id,
-                            page_id=page.pageid,
-                            title=str(page.title()),
-                            wikimedia_site=self.wikimedia_site,
-                            wikitext=page.text,
-                        )
+                    wikipedia_page = WikipediaPage(
+                        language_code=self.language_code,
+                        language_wcditem=self.language_wcditem,
+                        latest_revision_date=page.editTime(),
+                        latest_revision_id=page.latest_revision_id,
+                        page_id=page.pageid,
+                        title=str(page.title()),
+                        wikimedia_site=self.wikimedia_site,
+                        wikitext=page.text,
                     )
+                    wikipedia_page.extract_and_upload_to_wikicitations()
 
     @staticmethod
     @validate_arguments
@@ -292,14 +280,14 @@ class WcdImportBot(BaseModel):
         else:
             console.print("SPARQL: Not found", style="red")
 
-    def print_statistics(self):
-        self.__calculate_statistics__()
-        logger.info(
-            f"A total of {self.total_number_of_references} references "
-            f"has been processed and {self.total_number_of_hashed_references} "
-            f"({self.percent_references_hashed_in_total}%) could be hashed on "
-            f"a total of {len(self.pages)} pages."
-        )
+    # def print_statistics(self):
+    #     self.__calculate_statistics__()
+    #     logger.info(
+    #         f"A total of {self.total_number_of_references} references "
+    #         f"has been processed and {self.total_number_of_hashed_references} "
+    #         f"({self.percent_references_hashed_in_total}%) could be hashed on "
+    #         f"a total of {len(self.pages)} pages."
+    #     )
 
     @staticmethod
     def rinse_all_items_and_cache():
@@ -321,19 +309,16 @@ class WcdImportBot(BaseModel):
             self.rinse_all_items_and_cache()
         elif args.import_title is not None:
             logger.info(f"importing title {args.import_title}")
-            self.get_page_by_title(title=args.import_title)
-            self.extract_and_upload_all_pages_to_wikicitations()
+            self.get_and_extract_page_by_title(title=args.import_title)
         elif args.delete_page is not None:
             logger.info("deleting page")
             self.delete_one_page(title=args.delete_page)
         elif args.numerical_range is not None:
             logger.info("Importing range of pages")
             max_count = args.numerical_range
-            with console.status(f"Downloading {max_count} pages..."):
-                self.get_pages_by_range(
-                    max_count=max_count, category_title=args.category
-                )
-            self.extract_and_upload_all_pages_to_wikicitations()
+            self.get_and_extract_pages_by_range(
+                max_count=max_count, category_title=args.category
+            )
         elif args.lookup_md5hash is not None:
             # We strip here to avoid errors caused by spaces
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
