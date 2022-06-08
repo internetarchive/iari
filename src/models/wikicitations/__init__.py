@@ -576,10 +576,28 @@ class WikiCitations(BaseModel):
                 ),
             )
         if page_reference.archive_url:
-            archive_url = datatypes.URL(
-                prop_nr=WCDProperty.ARCHIVE_URL.value,
-                value=page_reference.archive_url,
-            )
+            if page_reference.detected_archive_of_archive_url:
+                archive_url = datatypes.URL(
+                    prop_nr=WCDProperty.ARCHIVE_URL.value,
+                    value=page_reference.archive_url,
+                    qualifiers=[
+                        datatypes.Item(
+                            prop_nr=WCDProperty.ARCHIVE.value,
+                            value=WCDItem[
+                                page_reference.detected_archive_of_archive_url.name.upper().replace(
+                                    ".", "_"
+                                )
+                            ].value,
+                        )
+                    ],
+                )
+            else:
+                logger.warning(f"No archive detected for {page_reference.archive_url}")
+                # TODO log to file
+                archive_url = datatypes.URL(
+                    prop_nr=WCDProperty.ARCHIVE_URL.value,
+                    value=page_reference.archive_url,
+                )
         else:
             archive_url = None
         if page_reference.doi:
