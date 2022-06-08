@@ -438,26 +438,26 @@ class WikipediaPage(BaseModel):
                 schema = EnglishWikipediaPageReferenceSchema()
                 try:
                     reference: Optional[WikipediaPageReference] = schema.load(parsed_template)
-                except ValidationError as e:
-                    logger.exception(f"Validation error: {e}")
-                    self.__log_to_file__(message=str(e))
-                    reference = None
-                if reference:
-                    reference.finish_parsing_and_generate_hash()
-                    # Handle duplicates:
-                    if reference.md5hash in [
-                        reference.md5hash
-                        for reference in self.references
-                        if reference.md5hash is not None
-                    ]:
-                        logging.warning(
-                            "Skipping reference already present "
-                            "in the list to avoid duplicates"
-                        )
-                    # if config.loglevel == logging.DEBUG:
-                    #     console.print(reference.dict())
-                    else:
-                        self.references.append(reference)
+                except ValidationError as error:
+                    logger.exception(f"Validation error: {error}")
+                    self.__log_to_file__(message=str(error))
+                    # Load partially (ie. ignore the unknown field)
+                    reference: WikipediaPageReference = schema.load(parsed_template, partial=True)
+                reference.finish_parsing_and_generate_hash()
+                # Handle duplicates:
+                if reference.md5hash in [
+                    reference.md5hash
+                    for reference in self.references
+                    if reference.md5hash is not None
+                ]:
+                    logging.warning(
+                        "Skipping reference already present "
+                        "in the list to avoid duplicates"
+                    )
+                # if config.loglevel == logging.DEBUG:
+                #     console.print(reference.dict())
+                else:
+                    self.references.append(reference)
             else:
                 if config.debug_unsupported_templates:
                     logger.debug(f"Template '{template_name.lower()}' not supported")
