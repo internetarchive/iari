@@ -441,7 +441,9 @@ class WikipediaPage(BaseModel):
                 except ValidationError as error:
                     logger.debug(f"Validation error: {error}")
                     self.__log_to_file__(message=str(error))
-                    logger.error("This reference was skipped because an unknown field was found")
+                    logger.error(
+                        "This reference was skipped because an unknown field was found"
+                    )
                     reference = None
                 # DISABLED partial loading because it does not work :/
                 # if not reference:
