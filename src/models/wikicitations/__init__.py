@@ -535,28 +535,38 @@ class WikiCitations(BaseModel):
         else:
             access_date = None
         if page_reference.archive_url:
-            if page_reference.detected_archive_of_archive_url:
-                archive_url = datatypes.URL(
-                    prop_nr=WCDProperty.ARCHIVE_URL.value,
-                    value=page_reference.archive_url,
-                    qualifiers=[
-                        datatypes.Item(
-                            prop_nr=WCDProperty.ARCHIVE.value,
-                            value=WCDItem[
-                                page_reference.detected_archive_of_archive_url.name.upper().replace(
-                                    ".", "_"
-                                )
-                            ].value,
-                        )
-                    ],
+            if len(page_reference.url) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
                 )
+                archive_url = None
             else:
-                logger.warning(f"No archive detected for {page_reference.archive_url}")
-                # TODO log to file
-                archive_url = datatypes.URL(
-                    prop_nr=WCDProperty.ARCHIVE_URL.value,
-                    value=page_reference.archive_url,
-                )
+                if page_reference.detected_archive_of_archive_url:
+                    archive_url = datatypes.URL(
+                        prop_nr=WCDProperty.ARCHIVE_URL.value,
+                        value=page_reference.archive_url,
+                        qualifiers=[
+                            datatypes.Item(
+                                prop_nr=WCDProperty.ARCHIVE.value,
+                                value=WCDItem[
+                                    page_reference.detected_archive_of_archive_url.name.upper().replace(
+                                        ".", "_"
+                                    )
+                                ].value,
+                            )
+                        ],
+                    )
+                else:
+                    logger.warning(
+                        f"No archive detected for {page_reference.archive_url}"
+                    )
+                    # TODO log to file
+                    archive_url = datatypes.URL(
+                        prop_nr=WCDProperty.ARCHIVE_URL.value,
+                        value=page_reference.archive_url,
+                    )
         else:
             archive_url = None
         if page_reference.doi:
@@ -642,10 +652,18 @@ class WikiCitations(BaseModel):
         else:
             title = None
         if page_reference.url:
-            url = datatypes.URL(
-                prop_nr=WCDProperty.URL.value,
-                value=page_reference.url,
-            )
+            if len(page_reference.url) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
+                )
+                url = None
+            else:
+                url = datatypes.URL(
+                    prop_nr=WCDProperty.URL.value,
+                    value=page_reference.url,
+                )
         else:
             url = None
         if page_reference.website:
