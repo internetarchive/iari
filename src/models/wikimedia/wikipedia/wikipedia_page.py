@@ -290,6 +290,7 @@ class WikipediaPage(BaseModel):
                 newdict[key] = dictionary[key]
         return newdict
 
+    @validate_arguments
     def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
         dictionary = self.__fix_class_key__(dictionary=dictionary)
         dictionary = self.__fix_aliases__(dictionary=dictionary)
@@ -318,6 +319,7 @@ class WikipediaPage(BaseModel):
         logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
 
+    @validate_arguments
     def __get_website_wcdqid_from_cache__(
         self, reference: WikipediaPageReference
     ) -> Optional[str]:
@@ -354,6 +356,27 @@ class WikipediaPage(BaseModel):
         else:
             raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
+
+    @validate_arguments
+    def __insert_website_in_cache__(
+        self, reference: WikipediaPageReference, wcdqid: str
+    ):
+        logger.debug("__insert_website_in_cache__: Running")
+        if self.cache is not None:
+            self.cache.add_website(reference=reference, wcdqid=wcdqid)
+        else:
+            raise ValueError("self.cache was None")
+        logger.info("Reference inserted into the hash database")
+
+    @validate_arguments
+    def __log_to_file__(self, message: str) -> None:
+        if not exists("parse_exceptions.log"):
+            with open("parse_exceptions.log", "x"):
+                pass
+        with open("parse_exceptions.log", "a") as f:
+            f.write(f"{message}\n")
+        logger.error("This reference was skipped "
+                     "because an unknown field was found")
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
@@ -394,26 +417,6 @@ class WikipediaPage(BaseModel):
                 else:
                     logger.info("Skipping check if the page already exists")
                     return False
-
-    def __insert_website_in_cache__(
-        self, reference: WikipediaPageReference, wcdqid: str
-    ):
-        logger.debug("__insert_website_in_cache__: Running")
-        if self.cache is not None:
-            self.cache.add_website(reference=reference, wcdqid=wcdqid)
-        else:
-            raise ValueError("self.cache was None")
-        logger.info("Reference inserted into the hash database")
-
-    @validate_arguments
-    def __log_to_file__(self, message: str) -> None:
-        if not exists("parse_exceptions.log"):
-            with open("parse_exceptions.log", "x"):
-                pass
-        with open("parse_exceptions.log", "a") as f:
-            f.write(f"{message}\n")
-        logger.error("This reference was skipped "
-                     "because an unknown field was found")
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -530,6 +533,7 @@ class WikipediaPage(BaseModel):
         else:
             raise ValueError("self.wikicitations was None")
 
+    @validate_arguments
     def __upload_website_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
