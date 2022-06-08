@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 from datetime import datetime
+from os.path import exists
 from typing import List, Any, Optional, Dict
 from urllib.parse import quote
 
@@ -426,7 +427,10 @@ class WikipediaPage(BaseModel):
                     reference: Optional[WikipediaPageReference] = schema.load(parsed_template)
                 except ValidationError as e:
                     logger.exception(f"Validation error: {e}")
-                    with open("parse_exceptions.log") as f:
+                    if not exists("parse_exceptions.log"):
+                        with open("parse_exceptions.log", "x"):
+                            pass
+                    with open("parse_exceptions.log", "a") as f:
                         f.write(str(e))
                     logger.error("This reference was skipped "
                                  "because an unknown field was found")
