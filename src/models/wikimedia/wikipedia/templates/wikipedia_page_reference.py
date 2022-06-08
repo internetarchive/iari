@@ -938,7 +938,9 @@ class WikipediaPageReference(BaseModel):
             else:
                 skipped_url = self.url
                 self.url = None
-                logger.warning(f"Skipped the URL '{skipped_url}' because of missing scheme")
+                logger.warning(
+                    f"Skipped the URL '{skipped_url}' because of missing scheme"
+                )
         if self.archive_url is not None:
             self.archive_url = urlparse(self.archive_url).geturl()
         if self.lay_url is not None:
