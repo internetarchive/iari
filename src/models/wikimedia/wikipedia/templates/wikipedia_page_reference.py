@@ -872,18 +872,21 @@ class WikipediaPageReference(BaseModel):
     def __parse_isbn__(self) -> None:
         if self.isbn is not None:
             stripped_isbn = self.isbn.replace("-", "")
-            if len(stripped_isbn) == 13:
-                self.isbn_13 = self.isbn
-            elif len(stripped_isbn) == 10:
-                self.isbn_10 = self.isbn
+            if stripped_isbn in ["", " "]:
+                self.isbn = None
             else:
-                message = (
-                    f"isbn: {self.isbn} was not "
-                    f"10 or 13 chars long after "
-                    f"removing the dashes"
-                )
-                logger.warning(message)
-                self.__log_to_file__(message=message, file_name="isbn_exceptions.log")
+                if len(stripped_isbn) == 13:
+                    self.isbn_13 = self.isbn
+                elif len(stripped_isbn) == 10:
+                    self.isbn_10 = self.isbn
+                else:
+                    message = (
+                        f"isbn: {self.isbn} was not "
+                        f"10 or 13 chars long after "
+                        f"removing the dashes"
+                    )
+                    logger.warning(message)
+                    self.__log_to_file__(message=message, file_name="isbn_exceptions.log")
 
     @validate_arguments
     def __parse_known_role_persons__(
