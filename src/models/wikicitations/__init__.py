@@ -654,7 +654,7 @@ class WikiCitations(BaseModel):
             website_item = None
         if page_reference.wikidata_qid:
             wikidata_qid = datatypes.ExternalID(
-                prop_nr=WCDProperty.PMID.value,
+                prop_nr=WCDProperty.WIKIDATA_QID.value,
                 value=page_reference.wikidata_qid,
             )
         else:
