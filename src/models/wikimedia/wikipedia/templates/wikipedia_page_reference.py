@@ -2,13 +2,12 @@ import hashlib
 import logging
 import re
 from datetime import datetime
-from os.path import exists
 from typing import Any, List, Optional
 from urllib.parse import urlparse
 
 from marshmallow import Schema
 from marshmallow.fields import String
-from pydantic import BaseModel, validate_arguments, validator
+from pydantic import validate_arguments, validator
 from tld import get_fld
 from tld.exceptions import TldBadUrl
 
@@ -18,6 +17,7 @@ from src.models.person import Person
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
+from wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # https://github.com/samuelcolvin/pydantic/discussions/3855
 
 
-class WikipediaPageReference(BaseModel):
+class WikipediaPageReference(WcdBaseModel):
     """This models any page_reference on a Wikipedia page
 
     As we move to support more than one Wikipedia this model should be generalized further.
@@ -809,19 +809,6 @@ class WikipediaPageReference(BaseModel):
     #         raise ValueError(
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
-
-    # TODO consider creating a
-    #  new WcdBaseModel with this method
-    #  and refactor the log_name since it is now
-    #  used in 2 classes
-    @validate_arguments
-    def __log_to_file__(self, message: str, file_name: str) -> None:
-        if not exists(file_name):
-            with open(file_name, "x"):
-                pass
-        with open(file_name, "a") as f:
-            f.write(f"{message}\n")
-        logger.error("This reference was skipped " "because an unknown field was found")
 
     def __parse_first_parameter__(self) -> None:
         # pseudo code

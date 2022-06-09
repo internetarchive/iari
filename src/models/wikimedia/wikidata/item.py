@@ -9,7 +9,7 @@
 # from src.models.wikimedia.wikidata.entity_id import EntityId
 #
 #
-# class Item(BaseModel):
+# class Item(WcdBaseModel):
 #     qid: Optional[EntityId]
 #     __item: Optional[EntityItem]
 #     __aliases: Optional[List[str]]

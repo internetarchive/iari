@@ -2,7 +2,7 @@ import argparse
 import logging
 from typing import Optional
 
-from pydantic import BaseModel, validate_arguments
+from pydantic import validate_arguments
 
 import config
 from src.helpers import console
@@ -10,12 +10,13 @@ from src.models.cache import Cache
 from src.models.wikicitations import WCDItem, WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+from wcd_base_model import WcdBaseModel
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class WcdImportBot(BaseModel):
+class WcdImportBot(WcdBaseModel):
     """This class controls the import bot
 
     The language code is the one used by Wikimedia Foundation"""

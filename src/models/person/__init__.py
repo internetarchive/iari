@@ -1,11 +1,10 @@
 from typing import Any, Optional
 
-from pydantic import BaseModel
-
 # from src.models.wikimedia.wikipedia.templates.enums import WikipediaTemplatePersonRole
+from wcd_base_model import WcdBaseModel
 
 
-class Person(BaseModel):
+class Person(WcdBaseModel):
     """Model a person mentioned in a page_reference
     Sometimes they are stated as "editor=John Niel"
     and we save that as name_string for later disambiguation"""
