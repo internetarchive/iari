@@ -521,7 +521,7 @@ class WikiCitations(BaseModel):
             raise ValueError("page_reference.md5hash was None")
         # Optional claims
         if page_reference.archive_url:
-            if len(page_reference.url) > 500:
+            if len(page_reference.archive_url) > 500:
                 # TODO log to file also
                 logger.error(
                     f"Skipping statement for this URL because it "
