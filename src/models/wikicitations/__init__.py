@@ -329,6 +329,7 @@ class WikiCitations(BaseModel):
         #     # exit()
         return item
 
+    @validate_arguments
     def __prepare_new_website_item__(
         self, page_reference: WikipediaPageReference, wikipedia_page: WikipediaPage
     ) -> ItemEntity:
@@ -519,21 +520,6 @@ class WikiCitations(BaseModel):
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
         # Optional claims
-        if page_reference.access_date:
-            access_date = datatypes.Time(
-                prop_nr=WCDProperty.ACCESS_DATE.value,
-                time=(
-                    page_reference.access_date.replace(tzinfo=timezone.utc)
-                    .replace(
-                        hour=0,
-                        minute=0,
-                        second=0,
-                    )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
-                ),
-            )
-        else:
-            access_date = None
         if page_reference.archive_url:
             if len(page_reference.url) > 500:
                 # TODO log to file also
@@ -617,21 +603,6 @@ class WikiCitations(BaseModel):
             )
         else:
             pmid = None
-        if page_reference.publication_date:
-            publication_date = datatypes.Time(
-                prop_nr=WCDProperty.PUBLICATION_DATE.value,
-                time=(
-                    page_reference.publication_date.replace(tzinfo=timezone.utc)
-                    .replace(
-                        hour=0,
-                        minute=0,
-                        second=0,
-                    )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
-                ),
-            )
-        else:
-            publication_date = None
         if page_reference.publisher:
             publisher = datatypes.String(
                 prop_nr=WCDProperty.PUBLISHER_STRING.value,
@@ -690,7 +661,6 @@ class WikiCitations(BaseModel):
             wikidata_qid = None
         claims: List[Claim] = []
         for claim in (
-            access_date,
             archive_url,
             doi,
             isbn_10,
@@ -699,7 +669,6 @@ class WikiCitations(BaseModel):
             lumped_authors,
             orcid,
             pmid,
-            publication_date,
             publisher,
             title,
             url,
@@ -709,10 +678,17 @@ class WikiCitations(BaseModel):
         ):
             if claim:
                 claims.append(claim)
-        return claims + self.__prepare_single_value_reference_claims_always_present__(
-            page_reference=page_reference
+        return (
+            claims
+            + self.__prepare_single_value_reference_claims_always_present__(
+                page_reference=page_reference
+            )
+            + self.__prepare_single_value_reference_claims_with_dates__(
+                page_reference=page_reference
+            )
         )
 
+    @validate_arguments
     def __prepare_single_value_reference_claims_always_present__(
         self,
         page_reference: WikipediaPageReference,
@@ -754,6 +730,44 @@ class WikiCitations(BaseModel):
             template_string,
         ]
 
+    @staticmethod
+    @validate_arguments
+    def __prepare_single_value_reference_claims_with_dates__(
+        page_reference: WikipediaPageReference,
+    ) -> List[Claim]:
+        if page_reference.access_date:
+            access_date = datatypes.Time(
+                prop_nr=WCDProperty.ACCESS_DATE.value,
+                time=(
+                    page_reference.access_date.replace(tzinfo=timezone.utc)
+                    .replace(
+                        hour=0,
+                        minute=0,
+                        second=0,
+                    )
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
+                ),
+            )
+        else:
+            access_date = None
+        if page_reference.publication_date:
+            publication_date = datatypes.Time(
+                prop_nr=WCDProperty.PUBLICATION_DATE.value,
+                time=(
+                    page_reference.publication_date.replace(tzinfo=timezone.utc)
+                    .replace(
+                        hour=0,
+                        minute=0,
+                        second=0,
+                    )
+                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
+                ),
+            )
+        else:
+            publication_date = None
+        return [access_date, publication_date]
+
+    @validate_arguments
     def __prepare_single_value_website_claims__(
         self,
         page_reference: WikipediaPageReference,
@@ -913,6 +927,7 @@ class WikiCitations(BaseModel):
         )
         return string_citation
 
+    @validate_arguments
     def __prepare_string_citation_qualifiers__(
         self, page_reference: WikipediaPageReference
     ) -> List[Claim]:
@@ -1014,6 +1029,7 @@ class WikiCitations(BaseModel):
                 claims.append(claim)
         return claims
 
+    @validate_arguments
     def __prepare_string_citations__(
         self, wikipedia_page: WikipediaPage
     ) -> List[Claim]:
