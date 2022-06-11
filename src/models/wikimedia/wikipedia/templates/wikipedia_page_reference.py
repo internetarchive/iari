@@ -17,7 +17,7 @@ from src.models.person import Person
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
-from wcd_base_model import WcdBaseModel
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ from src.models.cache import Cache
 from src.models.wikicitations import WCDItem, WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
-from wcd_base_model import WcdBaseModel
+from src.wcd_base_model import WcdBaseModel
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)

@@ -8,7 +8,7 @@ from src.models.ssdb_database import SsdbDatabase
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
-from wcd_base_model import WcdBaseModel
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 

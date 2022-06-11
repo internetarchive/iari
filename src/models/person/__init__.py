@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 # from src.models.wikimedia.wikipedia.templates.enums import WikipediaTemplatePersonRole
-from wcd_base_model import WcdBaseModel
+from src.wcd_base_model import WcdBaseModel
 
 
 class Person(WcdBaseModel):

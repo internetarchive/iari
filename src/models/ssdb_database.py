@@ -4,7 +4,7 @@ from typing import Any, Optional
 import pyssdb  # type: ignore
 from pydantic import validate_arguments
 
-from wcd_base_model import WcdBaseModel
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
