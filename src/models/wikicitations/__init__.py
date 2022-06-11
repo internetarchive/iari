@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from time import sleep
 from typing import Any, Dict, Iterable, List, Optional
 
-from pydantic import BaseModel, NoneStr, validate_arguments
+from pydantic import NoneStr, validate_arguments
 from wikibaseintegrator import datatypes  # type: ignore
 from wikibaseintegrator import WikibaseIntegrator, wbi_config, wbi_login
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
@@ -27,11 +27,12 @@ from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
 from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikiCitations(BaseModel):
+class WikiCitations(WcdBaseModel):
     """This class models the WikiCitations Wikibase
     and handles all uploading to it
 

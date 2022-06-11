@@ -4,14 +4,13 @@ import hashlib
 import json
 import logging
 from datetime import datetime
-from os.path import exists
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
 from marshmallow.exceptions import ValidationError
-from pydantic import BaseModel, validate_arguments
+from pydantic import validate_arguments
 
 import config
 from src import console
@@ -26,11 +25,12 @@ from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference i
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikipediaPage(BaseModel):
+class WikipediaPage(WcdBaseModel):
     """Models a WMF Wikipedia page"""
 
     cache: Optional[Cache]
@@ -368,14 +368,6 @@ class WikipediaPage(BaseModel):
             raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
 
-    @validate_arguments
-    def __log_to_file__(self, message: str) -> None:
-        if not exists("parse_exceptions.log"):
-            with open("parse_exceptions.log", "x"):
-                pass
-        with open("parse_exceptions.log", "a") as f:
-            f.write(f"{message}\n")
-
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
         with console.status(
@@ -440,7 +432,9 @@ class WikipediaPage(BaseModel):
                     )
                 except ValidationError as error:
                     logger.debug(f"Validation error: {error}")
-                    self.__log_to_file__(message=str(error))
+                    self.__log_to_file__(
+                        message=str(error), file_name="schema_errors.log"
+                    )
                     logger.error(
                         "This reference was skipped because an unknown field was found"
                     )

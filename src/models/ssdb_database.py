@@ -2,12 +2,14 @@ import logging
 from typing import Any, Optional
 
 import pyssdb  # type: ignore
-from pydantic import BaseModel, validate_arguments
+from pydantic import validate_arguments
+
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class SsdbDatabase(BaseModel):
+class SsdbDatabase(WcdBaseModel):
     """Class modeling the SSDB database
 
     SSDB has an auth command for authentication but

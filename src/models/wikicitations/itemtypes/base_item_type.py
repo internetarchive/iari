@@ -1,5 +1,5 @@
-from pydantic import BaseModel
+from src.wcd_base_model import WcdBaseModel
 
 
-class BaseItemType(BaseModel):
+class BaseItemType(WcdBaseModel):
     pass

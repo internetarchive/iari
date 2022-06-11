@@ -1,18 +1,19 @@
 import logging
 from typing import Any, Optional
 
-from pydantic import BaseModel, validate_arguments
+from pydantic import validate_arguments
 
 from src import console
 from src.models.ssdb_database import SsdbDatabase
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class Cache(BaseModel):
+class Cache(WcdBaseModel):
     ssdb: Optional[SsdbDatabase]
 
     @validate_arguments
