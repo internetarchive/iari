@@ -12,9 +12,9 @@ from tld import get_fld
 from tld.exceptions import TldBadUrl
 
 import config
-from models.wikibase import Wikibase
 from src.models.exceptions import MoreThanOneNumberError
 from src.models.person import Person
+from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
@@ -438,7 +438,9 @@ class WikipediaPageReference(WcdBaseModel):
     @property
     def wikicitations_url(self) -> str:
         if self.wikibase:
-            return f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+            return (
+                f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+            )
         else:
             raise ValueError("self.wikibase was None")
 
