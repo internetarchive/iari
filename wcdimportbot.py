@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 
-from models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
+from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 
 try:
     import config

@@ -5,11 +5,11 @@ e.g. using a json file on disk which is read every time the bot runs.
 We keep it simple and using a class will enable typing for the developer which is
 a big plus :)
 """
-from wikibaseintegrator import WikibaseIntegrator, wbi_login
+from wikibaseintegrator import WikibaseIntegrator, wbi_login # type: ignore
 
-from models.wikibase.dictionaries import wcd_properties
-from models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.exceptions import DebugExit
+from src.models.wikibase.dictionaries import wcd_properties
+from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikicitations import WikiCitations
 
 # iterate over the dictionary and create all the properties

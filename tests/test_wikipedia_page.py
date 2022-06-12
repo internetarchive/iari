@@ -6,8 +6,8 @@ from unittest import TestCase
 import pytest
 
 import config
-from models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.helpers import console
+from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
 
 logging.basicConfig(level=config.loglevel)

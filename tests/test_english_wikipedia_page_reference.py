@@ -2,9 +2,9 @@ import logging
 from unittest import TestCase
 
 import config
-from models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.helpers import console
 from src.models.exceptions import MoreThanOneNumberError
+from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
     EnglishWikipediaPageReferenceSchema,

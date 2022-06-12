@@ -5,9 +5,9 @@ from typing import Optional
 from pydantic import validate_arguments
 
 import config
-from models.wikibase import Wikibase
 from src.helpers import console
 from src.models.cache import Cache
+from src.models.wikibase import Wikibase
 from src.models.wikicitations import WCDItem, WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
@@ -130,7 +130,7 @@ class WcdImportBot(WcdBaseModel):
     def delete_one_page(self, title: str) -> str:
         """Deletes one page from WikiCitations"""
         with console.status(f"Deleting {title}"):
-            from models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+            from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
             page = WikipediaPage(
                 wikibase=self.wikibase,
@@ -179,7 +179,7 @@ class WcdImportBot(WcdBaseModel):
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
         with console.status("Downloading page information"):
-            from models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+            from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
             page = WikipediaPage(
                 wikibase=self.wikibase,

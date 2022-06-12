@@ -1,4 +1,4 @@
-from models.wikibase.enums import PropertyDatatype
+from src.models.wikibase.enums import PropertyDatatype
 
 # This dictionary is the master of all the properties we need for WikiCitations
 wcd_properties = dict(
