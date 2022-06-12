@@ -437,7 +437,10 @@ class WikipediaPageReference(WcdBaseModel):
 
     @property
     def wikicitations_url(self) -> str:
-        return f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+        if self.wikibase:
+            return f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+        else:
+            raise ValueError("self.wikibase was None")
 
     def __detect_archive_urls__(self):
         """Try to detect if self.url contains first level

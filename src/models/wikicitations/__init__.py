@@ -1178,7 +1178,7 @@ class WikiCitations(WcdBaseModel):
     def prepare_and_upload_website_item(
         self,
         page_reference: WikipediaPageReference,
-        wikipedia_page,  # type: WikipediaPage,
+        wikipedia_page,  # type: WikipediaPage
     ) -> str:
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_website_item__(
