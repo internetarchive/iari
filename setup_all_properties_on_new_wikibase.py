@@ -5,10 +5,14 @@ e.g. using a json file on disk which is read every time the bot runs.
 We keep it simple and using a class will enable typing for the developer which is
 a big plus :)
 """
-from wikibaseintegrator import WikibaseIntegrator, wbi_login # type: ignore
+from typing import Any, Dict
+
+from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
+from wikibaseintegrator.models import LanguageValue  # type: ignore
 
 from src.models.exceptions import DebugExit
 from src.models.wikibase.dictionaries import wcd_properties
+from src.models.wikibase.enums import PropertyDatatype
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikicitations import WikiCitations
 
@@ -25,11 +29,13 @@ wbi = WikibaseIntegrator(
     )
 )
 for entry in wcd_properties:
-    data = wcd_properties[entry]
-    datatype = data["type"]
+    data: Dict[Any, Any] = wcd_properties[entry]
+    datatype: PropertyDatatype = data["datatype"]
     description = data["description"]
     draft_property = wbi.property.new(
-        datadatatype=type, label=entry.title(), description=description
+        datatype=datatype.value,
+        labels=LanguageValue(language="en", value=entry.title()),
+        descriptions=LanguageValue(language="en", value=description),
     )
     property = draft_property.write()
     print(

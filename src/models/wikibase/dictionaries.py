@@ -3,7 +3,7 @@ from src.models.wikibase.enums import PropertyDatatype
 # This dictionary is the master of all the properties we need for WikiCitations
 wcd_properties = dict(
     ACCESS_DATE=dict(
-        datatype=PropertyDatatype.DATE, description="date of access of the resource"
+        datatype=PropertyDatatype.TIME, description="date of access of the resource"
     ),
     ARCHIVE=dict(datatype=PropertyDatatype.ITEM, description=""),
     ARCHIVE_DATE=dict(datatype=PropertyDatatype.STRING, description=""),
@@ -26,7 +26,7 @@ wcd_properties = dict(
     ISBN_13=dict(datatype=PropertyDatatype.EXTERNAL_ID, description=""),
     ISSUE=dict(datatype=PropertyDatatype.STRING, description=""),
     LAST_UPDATE=dict(
-        datatype=PropertyDatatype.DATE, description="date of last update of this item?"
+        datatype=PropertyDatatype.TIME, description="date of last update of this item?"
     ),
     LOCATION_STRING=dict(datatype=PropertyDatatype.STRING, description=""),
     LUMPED_AUTHORS=dict(datatype=PropertyDatatype.STRING, description=""),
@@ -40,13 +40,13 @@ wcd_properties = dict(
     PAGES=dict(datatype=PropertyDatatype.STRING, description=""),
     PMID=dict(datatype=PropertyDatatype.EXTERNAL_ID, description=""),
     PUBLICATION_DATE=dict(
-        datatype=PropertyDatatype.DATE,
+        datatype=PropertyDatatype.TIME,
         description="date of publication of the resource",
     ),
     PUBLISHED_IN=dict(datatype=PropertyDatatype.STRING, description=""),
     PUBLISHER_STRING=dict(datatype=PropertyDatatype.STRING, description=""),
     RETRIEVED_DATE=dict(
-        datatype=PropertyDatatype.DATE, description="date of retrieval of the resource"
+        datatype=PropertyDatatype.TIME, description="date of retrieval of the resource"
     ),
     PAGE_REVISION_ID=dict(datatype=PropertyDatatype.STRING, description=""),
     SERIES_ORDINAL=dict(datatype=PropertyDatatype.QUANTITY, description=""),
