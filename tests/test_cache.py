@@ -2,7 +2,7 @@ import logging
 from unittest import TestCase
 
 import config
-from src import Cache
+from src.models.cache import Cache
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
