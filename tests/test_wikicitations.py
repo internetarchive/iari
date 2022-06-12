@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import logging
 from os import getenv
 from time import sleep
-from typing import List
+from typing import TYPE_CHECKING, List
 from unittest import TestCase
 
 import pytest  # type: ignore
@@ -11,12 +13,15 @@ from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
 import config
-from src import WcdImportBot, WCDItem, console
-from src.models.wikicitations import WCDProperty, WikiCitations
+from src import WcdImportBot, console
+from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
 )
-from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
+if TYPE_CHECKING:
+    from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -25,14 +30,8 @@ logger = logging.getLogger(__name__)
 class TestWikiCitations(TestCase):
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item(self):
-        from src.models.wikicitations import WikiCitations
-
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
             **{
@@ -55,18 +54,12 @@ class TestWikiCitations(TestCase):
             page_reference=reference, wikipedia_page=wppage
         )
         console.print(item.get_json())
-        assert item.claims.get(property=WCDProperty.FULL_NAME_STRING.value) is not None
+        assert item.claims.get(property=wc.wikibase.FULL_NAME_STRING) is not None
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item_with_very_long_title(self):
-        from src.models.wikicitations import WikiCitations
-
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Test")
         reference = EnglishWikipediaPageReference(
             **{
@@ -100,14 +93,8 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
-        from src.models.wikicitations import WikiCitations
-
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
             **{
@@ -139,14 +126,7 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_wikipedia_page_item_valid_qid(self):
-        from src.models.wikicitations import WikiCitations
-
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         reference = EnglishWikipediaPageReference(
@@ -170,25 +150,22 @@ class TestWikiCitations(TestCase):
         wppage.references.append(reference)
         wppage.__generate_hash__()
         # with self.assertRaises(ValueError):
+        wc = WikiCitations(wikibase=SandboxWikibase())
         item = wc.__prepare_new_wikipedia_page_item__(
             wikipedia_page=wppage,
         )
         # console.print(item.get_json())
         # assert item.labels.get("en") == title
-        citations: List[Claim] = item.claims.get(WCDProperty.CITATIONS.value)
+        citations: List[Claim] = item.claims.get(wc.wikibase.CITATIONS)
         # console.print(citations[0].mainsnak.datavalue["value"]["id"])
         assert citations[0].mainsnak.datavalue["value"]["id"] == "Q1"
         # logger.info(f"url: {wppage.wikicitations_url}")
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
         wc.delete_imported_items()
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -228,41 +205,41 @@ class TestWikiCitations(TestCase):
     #         # max_number_of_item_citations_to_upload=1,
     #     )
     #     page.__get_wikipedia_page_from_title__(title="Culture change")
-    #     page.extract_and_upload_to_wikicitations()
+    #     page.extract_and_upload_to_WikiCitations(wikibase=SandboxWikibase())
 
     # def test_delete_all_page_items(self):
     #     wc = WikiCitations(
-    #         language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+    #         wikibase=SandboxWikibase()
     #     )
     #     wc.__delete_all_page_items__()
     #
     # def test_delete_all_reference_items(self):
     #     wc = WikiCitations(
-    #         language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
+    #         wikibase=SandboxWikibase()
     #     )
     #     wc.__delete_all_reference_items__()
 
     def test_entity_url(self):
-        wc = WikiCitations()
+        wc = WikiCitations(wikibase=SandboxWikibase())
         result = wc.entity_url(qid="Q1")
         assert result == "https://wikicitations.wiki.opencura.com/wiki/Item:Q1"
 
     def test_entity_url_missing_arguments(self):
-        wc = WikiCitations()
+        wc = WikiCitations(wikibase=SandboxWikibase())
         with self.assertRaises(ValidationError):
             wc.entity_url()
 
     @pytest.mark.skipif(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_get_all_page_items(self):
         # first import a page to make sure there is at least one to be found
-        bot = WcdImportBot()
+        bot = WcdImportBot(wikibase=SandboxWikibase())
         # this page has no references
         bot.get_and_extract_page_by_title(title="Test")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikiCitations()
+        wc = WikiCitations(wikibase=SandboxWikibase())
         result = wc.__get_all_page_items__()
         console.print(result)
         assert len(result) > 0
@@ -276,14 +253,14 @@ class TestWikiCitations(TestCase):
     def test_get_all_reference_items(self):
         # first import a page with at least one reference
         # to make sure there is at least one to be found
-        bot = WcdImportBot()
+        bot = WcdImportBot(wikibase=SandboxWikibase())
         # this page has no references
         bot.get_and_extract_page_by_title(title="Muskö naval base")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikiCitations()
+        wc = WikiCitations(wikibase=SandboxWikibase())
         result = wc.__get_all_reference_items__()
         console.print(result)
         assert len(result) > 0
@@ -294,18 +271,14 @@ class TestWikiCitations(TestCase):
         #     self.fail("Got no items")
 
     def test_get_items_via_sparql(self):
-        wc = WikiCitations()
+        wc = WikiCitations(wikibase=SandboxWikibase())
         with self.assertRaises(HTTPError):
             wc.__get_items_via_sparql__(query="test")
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_and_upload_website_item(self):
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -324,18 +297,14 @@ class TestWikiCitations(TestCase):
             page_reference=reference, wikipedia_page=wppage
         )
         assert wcdqid is not None
-        bot = WcdImportBot()
+        bot = WcdImportBot(wikibase=SandboxWikibase())
         bot.rinse_all_items_and_cache()
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_uploading_a_page_reference_and_website_item(self):
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
         wc.delete_imported_items()
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -365,13 +334,9 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_uploading_a_page_reference_and_website_item_twice(self):
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
         wc.delete_imported_items()
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -416,17 +381,13 @@ class TestWikiCitations(TestCase):
         )
         reference = EnglishWikipediaPageReference(**data)
         reference.finish_parsing_and_generate_hash()
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
-        wppage = WikipediaPage(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=SandboxWikibase())
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         item = wc.__prepare_new_reference_item__(
             page_reference=reference, wikipedia_page=wppage
         )
-        assert item.claims.get(property=WCDProperty.PUBLISHER_STRING.value) is not None
-        assert item.claims.get(property=WCDProperty.LOCATION_STRING.value) is not None
+        assert item.claims.get(property=wc.wikibase.PUBLISHER_STRING) is not None
+        assert item.claims.get(property=wc.wikibase.LOCATION_STRING) is not None

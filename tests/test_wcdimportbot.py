@@ -5,6 +5,7 @@ from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ig
 
 import config
 from src import WcdImportBot, WikiCitations, console
+from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 
 
 class TestWcdImportBot(TestCase):
@@ -44,7 +45,7 @@ class TestWcdImportBot(TestCase):
     # DISABLED because we don't want to rinse all items every time we run all tests
     # FIXME test against a test Wikibase instance so Mark can play with the production one himself
     # def test_rinse_all_items_and_cache(self):
-    #     bot = WcdImportBot()
+    #     bot = WcdImportBot(wikibase=SandboxWikibase())
     #     bot.rinse_all_items_and_cache()
     #     console.print(
     #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
@@ -56,7 +57,7 @@ class TestWcdImportBot(TestCase):
     #     items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
 
     def test_delete_one_page(self):
-        bot = WcdImportBot()
+        bot = WcdImportBot(wikibase=SandboxWikibase())
         bot.rinse_all_items_and_cache()
         bot.get_and_extract_page_by_title(title="Test")
         console.print(
@@ -64,13 +65,13 @@ class TestWcdImportBot(TestCase):
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
         deleted_item_id = bot.delete_one_page(title="Test")
-        wc = WikiCitations()
+        wc = WikiCitations(wikibase=SandboxWikibase())
         with self.assertRaises(NonExistentEntityError):
             wc.get_item(item_id=deleted_item_id)
             # assert item is None
 
     def test_import_the_same_page_twice(self):
-        bot = WcdImportBot()
+        bot = WcdImportBot(wikibase=SandboxWikibase())
         bot.get_and_extract_page_by_title(title="Test")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"

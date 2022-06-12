@@ -4,6 +4,10 @@ import logging
 user = ""
 pwd = ""
 
+# Login credentials to sandbox.wiki
+sandbox_user = ""
+sandbox_pwd = ""
+
 # Settings:
 assume_persons_without_role_are_authors = True
 debug_unsupported_templates = False

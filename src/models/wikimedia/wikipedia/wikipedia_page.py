@@ -13,10 +13,11 @@ from marshmallow.exceptions import ValidationError
 from pydantic import validate_arguments
 
 import config
-from src import console
+from src.helpers import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
+from src.models.wikibase import Wikibase
 from src.models.wikicitations.enums import WCDItem
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
@@ -49,6 +50,7 @@ class WikipediaPage(WcdBaseModel):
     ]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     wikitext: Optional[str]
+    wikibase: Wikibase
 
     class Config:
         arbitrary_types_allowed = True
@@ -96,7 +98,7 @@ class WikipediaPage(WcdBaseModel):
 
     @property
     def wikicitations_url(self):
-        return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+        return f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
 
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
@@ -143,7 +145,7 @@ class WikipediaPage(WcdBaseModel):
         if self.wikicitations is None:
             from src import WikiCitations
 
-            self.wikicitations = WikiCitations()
+            self.wikicitations = WikiCitations(wikibase=self.wikibase)
         if self.wikicitations is not None:
             wcdqids = self.wikicitations.__get_wcdqids_from_hash__(md5hash=md5hash)
             if wcdqids is not None:
@@ -370,43 +372,39 @@ class WikipediaPage(WcdBaseModel):
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
-        with console.status(
-            f"Checking if the page '{self.title}' has already been uploaded"
-        ):
-            if config.use_cache:
-                if self.cache is None:
-                    self.__setup_cache__()
-                if self.cache is not None:
-                    wcdqid = self.cache.check_page_and_get_wikicitations_qid(
-                        wikipedia_page=self
-                    )
-                else:
-                    raise ValueError("self.cache was None")
-                if wcdqid is None:
-                    logger.debug("Page not found in the cache")
-                    return False
-                else:
-                    logger.debug("Page found in the cache")
-                    return True
+        console.print(f"Checking if the page '{self.title}' has already been uploaded")
+        if config.use_cache:
+            if self.cache is None:
+                self.__setup_cache__()
+            if self.cache is not None:
+                wcdqid = self.cache.check_page_and_get_wikicitations_qid(
+                    wikipedia_page=self
+                )
             else:
-                if config.check_if_page_has_been_uploaded_via_sparql:
-                    logger.info(
-                        "Not using the cache. Falling back to lookup via SPARQL"
+                raise ValueError("self.cache was None")
+            if wcdqid is None:
+                logger.debug("Page not found in the cache")
+                return False
+            else:
+                logger.debug("Page found in the cache")
+                return True
+        else:
+            if config.check_if_page_has_been_uploaded_via_sparql:
+                logger.info("Not using the cache. Falling back to lookup via SPARQL")
+                if self.md5hash is not None:
+                    wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
+                        md5hash=self.md5hash
                     )
-                    if self.md5hash is not None:
-                        wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
-                            md5hash=self.md5hash
-                        )
-                    else:
-                        raise ValueError("self.md5hash was None")
-                    if wcdqid is not None:
-                        self.wikicitations_qid = wcdqid
-                        return True
-                    else:
-                        return False
                 else:
-                    logger.info("Skipping check if the page already exists")
+                    raise ValueError("self.md5hash was None")
+                if wcdqid is not None:
+                    self.wikicitations_qid = wcdqid
+                    return True
+                else:
                     return False
+            else:
+                logger.info("Skipping check if the page already exists")
+                return False
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -483,7 +481,9 @@ class WikipediaPage(WcdBaseModel):
         from src.models.wikicitations import WikiCitations
 
         self.wikicitations = WikiCitations(
-            language_code=self.language_code, language_wcditem=self.language_wcditem
+            language_code=self.language_code,
+            language_wcditem=self.language_wcditem,
+            wikibase=self.wikibase,
         )
 
     @validate_arguments

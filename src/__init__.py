@@ -5,11 +5,11 @@ from typing import Optional
 from pydantic import validate_arguments
 
 import config
+from models.wikibase import Wikibase
 from src.helpers import console
 from src.models.cache import Cache
 from src.models.wikicitations import WCDItem, WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 from src.wcd_base_model import WcdBaseModel
 
 logging.basicConfig(level=config.loglevel)
@@ -29,6 +29,7 @@ class WcdImportBot(WcdBaseModel):
     total_number_of_references: Optional[int]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
+    wikibase: Wikibase
 
     # pseudo code
     # for each pageid in range(1,1000)
@@ -129,7 +130,10 @@ class WcdImportBot(WcdBaseModel):
     def delete_one_page(self, title: str) -> str:
         """Deletes one page from WikiCitations"""
         with console.status(f"Deleting {title}"):
+            from models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
             page = WikipediaPage(
+                wikibase=self.wikibase,
                 language_code=self.language_code,
                 wikimedia_site=self.wikimedia_site,
                 language_wcditem=self.language_wcditem,
@@ -151,7 +155,7 @@ class WcdImportBot(WcdBaseModel):
                 else:
                     raise ValueError("page.md5hash was None")
             if item_id:
-                wc = WikiCitations()
+                wc = WikiCitations(wikibase=self.wikibase)
                 wc.__delete_item__(item_id=item_id)
                 # delete from cache
                 if page.md5hash is not None:
@@ -175,7 +179,10 @@ class WcdImportBot(WcdBaseModel):
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
         with console.status("Downloading page information"):
+            from models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
             page = WikipediaPage(
+                wikibase=self.wikibase,
                 language_code=self.language_code,
                 wikimedia_site=self.wikimedia_site,
                 language_wcditem=self.language_wcditem,
@@ -218,6 +225,7 @@ class WcdImportBot(WcdBaseModel):
                     )
                     # raise DebugExit()
                     wikipedia_page = WikipediaPage(
+                        wikibase=self.wikibase,
                         language_code=self.language_code,
                         language_wcditem=self.language_wcditem,
                         latest_revision_date=page.editTime(),
@@ -247,17 +255,15 @@ class WcdImportBot(WcdBaseModel):
                         title=str(page.title()),
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
+                        wikibase=self.wikibase,
                     )
                     wikipedia_page.extract_and_upload_to_wikicitations()
 
-    @staticmethod
     @validate_arguments
-    def lookup_md5hash(md5hash: str):
+    def lookup_md5hash(self, md5hash: str):
         """Lookup a md5hash and show the result to the user"""
         console.print(f"Lookup of md5hash {md5hash}")
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=self.wikibase)
         if config.use_cache:
             cache = Cache()
             cache.connect()
@@ -290,12 +296,9 @@ class WcdImportBot(WcdBaseModel):
     #         f"a total of {len(self.pages)} pages."
     #     )
 
-    @staticmethod
-    def rinse_all_items_and_cache():
+    def rinse_all_items_and_cache(self):
         """Delete all page and reference items and clear the SSDB cache"""
-        wc = WikiCitations(
-            language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
-        )
+        wc = WikiCitations(wikibase=self.wikibase)
         wc.delete_imported_items()
         if config.use_cache:
             cache = Cache()

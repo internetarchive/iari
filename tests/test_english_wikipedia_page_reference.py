@@ -2,7 +2,8 @@ import logging
 from unittest import TestCase
 
 import config
-from src import console
+from models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.helpers import console
 from src.models.exceptions import MoreThanOneNumberError
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
@@ -158,7 +159,10 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         assert reference.url is None
 
     def test_find_number(self):
-        ref = EnglishWikipediaPageReference(template_name="test")
+        ref = EnglishWikipediaPageReference(
+            template_name="test",
+            wikibase=SandboxWikibase(),
+        )
         with self.assertRaises(MoreThanOneNumberError):
             ref.__find_number__(string="123one123")
         assert ref.__find_number__(string="1one") == 1
@@ -213,7 +217,8 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         # )
         # reference.finish_parsing_and_generate_hash()
         reference = EnglishWikipediaPageReference(
-            archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            wikibase=SandboxWikibase(),
+            archive_url="https:/web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
             template_name="test",
         )
         reference.__extract_first_level_domain__()
@@ -221,7 +226,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         logger.debug(reference.detected_archive_of_url)
         logger.debug(reference.detected_archive_of_archive_url)
         assert reference.detected_archive_of_url is None
-        # from models.wikicitations.enums import KnownArchiveUrl
+        # from src.models.wikicitations.enums import KnownArchiveUrl
 
         # FIXME this fails for some reason :/
         # assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
