@@ -143,7 +143,7 @@ class WikipediaPage(WcdBaseModel):
         logger.debug("__get_wcdqid_from_hash_via_sparql__: Running")
         logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
         if self.wikicitations is None:
-            from src import WikiCitations
+            from src.models.wikicitations import WikiCitations
 
             self.wikicitations = WikiCitations(wikibase=self.wikibase)
         if self.wikicitations is not None:

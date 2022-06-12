@@ -13,7 +13,8 @@ from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
 import config
-from src import WcdImportBot, console
+from src import WcdImportBot
+from src.helpers import console
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (

@@ -9,8 +9,8 @@ from wikibaseintegrator import WikibaseIntegrator, wbi_login
 
 from models.wikibase.dictionaries import wcd_properties
 from models.wikibase.sandbox_wikibase import SandboxWikibase
-from src import WikiCitations
 from src.models.exceptions import DebugExit
+from src.models.wikicitations import WikiCitations
 
 # iterate over the dictionary and create all the properties
 # output in a form that can be copy-pasted into a Wikibase class

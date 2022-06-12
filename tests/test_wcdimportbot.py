@@ -4,8 +4,10 @@ from unittest import TestCase
 from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
 
 import config
-from src import WcdImportBot, WikiCitations, console
+from src import WcdImportBot
+from src.helpers import console
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikicitations import WikiCitations
 
 
 class TestWcdImportBot(TestCase):
