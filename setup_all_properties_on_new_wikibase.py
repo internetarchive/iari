@@ -34,8 +34,12 @@ for entry in wcd_properties:
     description = data["description"]
     draft_property = wbi.property.new(
         datatype=datatype.value,
-        labels=Labels().add(language_value=LanguageValue(language="en", value=entry.title())),
-        descriptions=Descriptions().add(language_value=LanguageValue(language="en", value=description)),
+        labels=Labels().add(
+            language_value=LanguageValue(language="en", value=entry.title())
+        ),
+        descriptions=Descriptions().add(
+            language_value=LanguageValue(language="en", value=description)
+        ),
     )
     property = draft_property.write()
     print(
