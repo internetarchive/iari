@@ -223,7 +223,7 @@ class TestWikiCitations(TestCase):
     def test_entity_url(self):
         wc = WikiCitations(wikibase=SandboxWikibase())
         result = wc.entity_url(qid="Q1")
-        assert result == "https://wikicitations.wiki.opencura.com/wiki/Item:Q1"
+        assert result == f"https://sandbox.wiki/wiki/Item:Q1"
 
     def test_entity_url_missing_arguments(self):
         wc = WikiCitations(wikibase=SandboxWikibase())
