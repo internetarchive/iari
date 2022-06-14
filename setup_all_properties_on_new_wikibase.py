@@ -8,7 +8,7 @@ a big plus :)
 from typing import Any, Dict
 
 from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
-from wikibaseintegrator.models import LanguageValue  # type: ignore
+from wikibaseintegrator.models import LanguageValue, Labels, Descriptions  # type: ignore
 
 from src.models.exceptions import DebugExit
 from src.models.wikibase.dictionaries import wcd_properties
@@ -34,8 +34,12 @@ for entry in wcd_properties:
     description = data["description"]
     draft_property = wbi.property.new(
         datatype=datatype.value,
-        labels=LanguageValue(language="en", value=entry.title()),
-        descriptions=LanguageValue(language="en", value=description),
+        labels=Labels().add(
+            language_value=LanguageValue(language="en", value=entry.title())
+        ),
+        descriptions=Descriptions().add(
+            language_value=LanguageValue(language="en", value=description)
+        ),
     )
     property = draft_property.write()
     print(
