@@ -5,16 +5,25 @@ e.g. using a json file on disk which is read every time the bot runs.
 We keep it simple and using a class will enable typing for the developer which is
 a big plus :)
 """
+import logging
 from typing import Any, Dict
 
 from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
-from wikibaseintegrator.models import LanguageValue, Labels, Descriptions  # type: ignore
+from wikibaseintegrator.models import (  # type: ignore
+    Descriptions,
+    Labels,
+    LanguageValue,
+)
+from wikibaseintegrator.wbi_enums import WikibaseDatatype  # type: ignore
+from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
-from src.models.exceptions import DebugExit
+import config
 from src.models.wikibase.dictionaries import wcd_properties
-from src.models.wikibase.enums import PropertyDatatype
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikicitations import WikiCitations
+
+logging.basicConfig(level=config.loglevel)
+logger = logging.getLogger(__name__)
 
 # iterate over the dictionary and create all the properties
 # output in a form that can be copy-pasted into a Wikibase class
@@ -28,22 +37,28 @@ wbi = WikibaseIntegrator(
         mediawiki_api_url=wc.wikibase.mediawiki_api_url,
     )
 )
+count = 1
 for entry in wcd_properties:
-    data: Dict[Any, Any] = wcd_properties[entry]
-    datatype: PropertyDatatype = data["datatype"]
-    description = data["description"]
-    draft_property = wbi.property.new(
-        datatype=datatype.value,
-        labels=Labels().add(
-            language_value=LanguageValue(language="en", value=entry.title())
-        ),
-        descriptions=Descriptions().add(
-            language_value=LanguageValue(language="en", value=description)
-        ),
-    )
-    property = draft_property.write()
-    print(
-        f'{entry} = "{property.id}" # datatype: {datatype} description: {description}'
-    )
-    DebugExit()
+    if count <= 3:
+        data: Dict[Any, Any] = wcd_properties[entry]
+        datatype: WikibaseDatatype = data["datatype"]
+        description = data["description"]
+        label = entry.replace("_", " ").title()
+        draft_property = wbi.property.new(
+            datatype=datatype.value,
+            labels=Labels().add(
+                language_value=LanguageValue(language="en", value=label)
+            ),
+            descriptions=Descriptions().add(
+                language_value=LanguageValue(language="en", value=description)
+            ),
+        )
+        try:
+            property = draft_property.write()
+            print(
+                f'{entry} = "{property.id}" # datatype: {datatype} description: {description}'
+            )
+        except MWApiError as e:
+            logger.error(f"Got error: {e} from the Wikibase")
+        count += 1
 # manually copy-paste the output into a subclass of Wikibase
