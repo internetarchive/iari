@@ -1,6 +1,27 @@
 # This dictionary is the master of all the properties we need for WikiCitations
 from wikibaseintegrator.wbi_enums import WikibaseDatatype  # type: ignore
 
+wcd_archive_items = dict(
+    ARCHIVE_IS=dict(label="Archive.is", description="web archive"),
+    ARCHIVE_ORG=dict(label="Archive.org", description="web archive"),
+)
+
+wcd_items = dict(
+    ENGLISH_WIKIPEDIA=dict(
+        label="English Wikipedia", description="language version of Wikipedia"
+    ),
+    WEBSITE=dict(
+        label="Website", description="first level domain website found in Wikipedia"
+    ),
+    WIKIPEDIA_PAGE=dict(
+        label="Wikipedia page", description="page in a language version of Wikipedia"
+    ),
+    WIKIPEDIA_REFERENCE=dict(
+        label="Wikipedia reference", description="reference on a page in Wikipedia"
+    ),
+)
+
+
 wcd_properties = dict(
     ACCESS_DATE=dict(
         datatype=WikibaseDatatype.TIME, description="date of access of the resource"
