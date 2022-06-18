@@ -5,6 +5,7 @@ e.g. using a json file on disk which is read every time the bot runs.
 We keep it simple and using a class will enable typing for the developer which is
 a big plus :)
 """
+import argparse
 import logging
 from typing import Any, Dict
 
@@ -93,6 +94,23 @@ class SetupNewWikibase(BaseModel):
                 count += 1
         # then save the QID of archive_item in memory
 
+    @staticmethod
+    def __setup_argparse_and_return_args__() -> argparse.Namespace:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "-i",
+            "--items",
+            action="store_true",
+            help="Import the semantic items we need",
+        )
+        parser.add_argument(
+            "-p",
+            "--properties",
+            action="store_true",
+            help="Import the properties we need",
+        )
+        return parser.parse_args()
+
     def __setup_other_items__(self):
         # first create the wikipedia items
         wc = WikiCitations(wikibase=self.wikibase)
@@ -126,6 +144,17 @@ class SetupNewWikibase(BaseModel):
                 except MWApiError as e:
                     logger.error(f"Got error: {e} from the Wikibase")
                 count += 1
+
+    def run(self):
+        args = self.__setup_argparse_and_return_args__()
+        if args.items is True:
+            self.setup_items()
+        if args.properties is True:
+            self.setup_properties()
+            input(
+                f"Now copy the above output into the {snw.wikibase.__repr_name__()} "
+                f"class. Afterwards kill and run this script again."
+            )
 
     def setup_items(self):
         self.__setup_other_items__()
@@ -172,10 +201,6 @@ class SetupNewWikibase(BaseModel):
 
 
 if __name__ == "__main__":
+    print("First setup the properties and then the items. Use -h to see help.")
     snw = SetupNewWikibase()
-    snw.setup_properties()
-    input(
-        f"Now copy the above output into the {snw.wikibase.__repr_name__()} "
-        f"class and kill and run this script again."
-    )
-    snw.setup_items()
+    snw.run()
