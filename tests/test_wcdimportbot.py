@@ -4,6 +4,7 @@ from unittest import TestCase
 from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
 
 import config
+from models.wikibase.wikicitations_wikibase import WikiCitationsWikibase  # type: ignore
 from src import WcdImportBot
 from src.helpers import console
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
@@ -80,3 +81,7 @@ class TestWcdImportBot(TestCase):
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
         bot.rinse_all_items_and_cache()
+
+    def test__gather_statistics__(self):
+        bot = WcdImportBot(wikibase=WikiCitationsWikibase())
+        bot.__gather_statistics__()
