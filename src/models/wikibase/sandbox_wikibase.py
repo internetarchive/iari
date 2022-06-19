@@ -8,12 +8,8 @@ class SandboxWikibase(Wikibase):
     user_name = config.sandbox_user
     botpassword = config.sandbox_pwd
 
-    wikibase_url = "https://sandbox.wiki"
     query_service_url = "https://query.sandbox.wiki"
-    mediawiki_api_url: str = wikibase_url + "/w/api.php"
-    mediawiki_index_url: str = wikibase_url + "/w/index.php"
-    rdf_entity_prefix: str = wikibase_url + "/entity/"
-    sparql_endpoint_url: str = query_service_url + "/query/sparql"
+    wikibase_url = "https://sandbox.wiki"
 
     ACCESS_DATE = ""
     ARCHIVE = ""
