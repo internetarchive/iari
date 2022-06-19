@@ -481,7 +481,6 @@ class WikipediaPageReference(WcdBaseModel):
                 url_archive = KnownArchiveUrl(self.first_level_domain_of_url)
             except ValueError:
                 pass
-            # We don't care if the archive url is from self.url or self.archive_url.
             if url_archive:
                 self.detected_archive_of_url = url_archive
 
