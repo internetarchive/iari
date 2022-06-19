@@ -466,6 +466,11 @@ class WikipediaPageReference(WcdBaseModel):
                 pass
             if archive_url_archive:
                 self.detected_archive_of_archive_url = archive_url_archive
+            else:
+                self.__log_to_file__(
+                    message=f"No archive detected for {self.archive_url}",
+                    file_name="undetected_archive.log",
+                )
         # URL
         if self.first_level_domain_of_url:
             url_archive = None
