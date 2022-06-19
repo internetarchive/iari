@@ -1,8 +1,10 @@
 import argparse
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from pydantic import validate_arguments
+from wikibaseintegrator import wbi_config  # type: ignore
+from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
 from src.helpers import console
@@ -31,31 +33,61 @@ class WcdImportBot(WcdBaseModel):
     language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
     wikibase: Wikibase
 
-    # pseudo code
-    # for each pageid in range(1,1000)
-    # get wikipedia page
-    # extract templates
-    # iterate templates we support
-    # create page_reference objects for each one
-    # generate item in wcd
+    @validate_arguments
+    def __execute_query__(self, query: str):
+        self.__setup_wikibase_integrator_configuration__()
+        logger.debug(
+            f"Trying to use this endpoint: {self.wikibase.sparql_endpoint_url}"
+        )
+        return execute_sparql_query(
+            query=query, endpoint=self.wikibase.sparql_endpoint_url
+        )
 
-    # def __calculate_statistics__(self):
-    #     """We want to have an overview while the bot is running
-    #     about how many references could be imported"""
-    #     self.total_number_of_hashed_references = sum(
-    #         page.number_of_hashed_references for page in self.pages
-    #     )
-    #     self.total_number_of_references = sum(
-    #         page.number_of_references for page in self.pages
-    #     )
-    #     if self.total_number_of_references == 0:
-    #         self.percent_references_hashed_in_total = 0
-    #     else:
-    #         self.percent_references_hashed_in_total = int(
-    #             self.total_number_of_hashed_references
-    #             * 100
-    #             / self.total_number_of_references
-    #         )
+    @staticmethod
+    def __extract_count_from_first_binding__(
+        sparql_result: Dict[Any, Any]
+    ) -> Optional[int]:
+        """Get count from a sparql result"""
+        logger.debug("__extract_count__: Running")
+        sparql_variable = "count"
+        if sparql_result:
+            if sparql_result["results"] and sparql_result["results"]["bindings"]:
+                first_binding = sparql_result["results"]["bindings"][0]
+                return int(first_binding[sparql_variable]["value"])
+            else:
+                return None
+        else:
+            return None
+
+    def __gather_statistics__(self):
+        pages = self.__get_number_of_pages__()
+        console.print(f"Number of pages: {pages}")
+        references = self.__get_number_of_references__()
+        console.print(f"Number of references: {references}")
+
+    def __get_number_of_pages__(self):
+        query = f"""
+        prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+        prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            SELECT (COUNT(?item) as ?count) WHERE {{
+              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_PAGE.value}.
+            }}
+        """
+        return self.__extract_count_from_first_binding__(
+            self.__execute_query__(query=query)
+        )
+
+    def __get_number_of_references__(self):
+        query = f"""
+        prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+        prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            SELECT (COUNT(?item) as ?count) WHERE {{
+              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_REFERENCE.value}.
+            }}
+        """
+        return self.__extract_count_from_first_binding__(
+            self.__execute_query__(query=query)
+        )
 
     @staticmethod
     def __setup_argparse_and_return_args__():
@@ -124,7 +156,21 @@ class WcdImportBot(WcdBaseModel):
             action="store_true",
             help="Rinse all page and reference items and delete the cache",
         )
+        parser.add_argument(
+            "--statistics",
+            action="store_true",
+            help="Show statistics about the database",
+        )
         return parser.parse_args()
+
+    def __setup_wikibase_integrator_configuration__(
+        self,
+    ) -> None:
+        wbi_config.config["USER_AGENT"] = "wcdimportbot"
+        wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
+        wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
+        wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
+        wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     @validate_arguments
     def delete_one_page(self, title: str) -> str:
@@ -326,5 +372,25 @@ class WcdImportBot(WcdBaseModel):
         elif args.lookup_md5hash is not None:
             # We strip here to avoid errors caused by spaces
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
+        elif args.statistics is not None:
+            self.__gather_statistics__()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
+
+    # def __calculate_statistics__(self):
+    #     """We want to have an overview while the bot is running
+    #     about how many references could be imported"""
+    #     self.total_number_of_hashed_references = sum(
+    #         page.number_of_hashed_references for page in self.pages
+    #     )
+    #     self.total_number_of_references = sum(
+    #         page.number_of_references for page in self.pages
+    #     )
+    #     if self.total_number_of_references == 0:
+    #         self.percent_references_hashed_in_total = 0
+    #     else:
+    #         self.percent_references_hashed_in_total = int(
+    #             self.total_number_of_hashed_references
+    #             * 100
+    #             / self.total_number_of_references
+    #         )
