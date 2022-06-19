@@ -14,6 +14,7 @@ from tld.exceptions import TldBadUrl
 import config
 from src.models.exceptions import MoreThanOneNumberError
 from src.models.person import Person
+from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
@@ -63,6 +64,7 @@ class WikipediaPageReference(WcdBaseModel):
     translators_list: Optional[List[Person]]
     wikicitations_qid: Optional[str]
     wikidata_qid: Optional[str]
+    wikibase: Optional[Wikibase]
 
     # These are all the parameters in the supported templates
     #######################
@@ -435,7 +437,12 @@ class WikipediaPageReference(WcdBaseModel):
 
     @property
     def wikicitations_url(self) -> str:
-        return f"{config.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+        if self.wikibase:
+            return (
+                f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+            )
+        else:
+            raise ValueError("self.wikibase was None")
 
     def __detect_archive_urls__(self):
         """Try to detect if self.url contains first level

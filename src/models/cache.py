@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 from pydantic import validate_arguments
 
-from src import console
+from src.helpers import console
 from src.models.ssdb_database import SsdbDatabase
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
