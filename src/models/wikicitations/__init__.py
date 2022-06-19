@@ -173,12 +173,12 @@ class WikiCitations(WcdBaseModel):
         """Get all wcdqids for wikipedia pages using sparql"""
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
-                """
-            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
-            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
-            SELECT ?item WHERE {
-              ?item wcdt:P10 wcd:Q6
-            }
+                f"""
+            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            SELECT ?item WHERE {{
+              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_PAGE.value}
+            }}
             """
             )
         )
@@ -187,12 +187,12 @@ class WikiCitations(WcdBaseModel):
         """Get all wcdqids for references using sparql"""
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
-                """
-            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
-            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
-            SELECT ?item WHERE {
-                ?item wcdt:P10 wcd:Q4
-            }
+                f"""
+            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            SELECT ?item WHERE {{
+                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_REFERENCE.value}
+            }}
             """
             )
         )
@@ -201,12 +201,12 @@ class WikiCitations(WcdBaseModel):
         """Get all wcdqids for website items using sparql"""
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
-                """
-            prefix wcd: <http://wikicitations.wiki.opencura.com/entity/>
-            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
-            SELECT ?item WHERE {
-                ?item wcdt:P10 wcd:Q145
-            }
+                f"""
+            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            SELECT ?item WHERE {{
+                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WEBSITE.value}
+            }}
             """
             )
         )
@@ -240,9 +240,9 @@ class WikiCitations(WcdBaseModel):
         used when config.use_cache is False"""
         logger.debug("__get_wcdqid_from_hash__: running")
         query = f"""
-            prefix wcdt: <http://wikicitations.wiki.opencura.com/prop/direct/>
+            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT ?item WHERE {{
-              ?item wcdt:P30 "{md5hash}".
+              ?item wcdt:{self.wikibase.HASH} "{md5hash}".
             }}
         """
         return list(
@@ -1133,7 +1133,6 @@ class WikiCitations(WcdBaseModel):
             if not page_reference.has_hash
         ]
 
-    @validate_arguments
     def __setup_wikibase_integrator_configuration__(
         self,
     ) -> None:

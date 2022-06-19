@@ -8,10 +8,7 @@ class Wikibase(WcdBaseModel):
     user_name: str
     botpassword: str
     wikibase_url: str
-    mediawiki_api_url: str
-    mediawiki_index_url: str
-    rdf_entity_prefix: str
-    sparql_endpoint_url: str
+    query_service_url: str
 
     ACCESS_DATE: str  # date
     ARCHIVE: str  # item
@@ -62,3 +59,23 @@ class Wikibase(WcdBaseModel):
     WEBSITE: str  # item
     WEBSITE_STRING: str  # string
     WIKIDATA_QID: str  # external id
+
+    @property
+    def mediawiki_api_url(self):
+        return self.wikibase_url + "/w/api.php"
+
+    @property
+    def mediawiki_index_url(self):
+        return self.wikibase_url + "/w/index.php"
+
+    @property
+    def rdf_entity_prefix(self):
+        return self.rdf_prefix + "/entity/"
+
+    @property
+    def rdf_prefix(self):
+        return self.wikibase_url.replace("https", "http")
+
+    @property
+    def sparql_endpoint_url(self):
+        return self.query_service_url + "/query/sparql"

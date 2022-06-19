@@ -6,10 +6,7 @@ class WikiCitationsWikibase(Wikibase):
     user_name = config.user
     botpassword = config.pwd
     wikibase_url = "https://wikicitations.wiki.opencura.com"
-    mediawiki_api_url: str = wikibase_url + "/w/api.php"
-    mediawiki_index_url: str = wikibase_url + "/w/index.php"
-    rdf_entity_prefix: str = wikibase_url + "/entity/"
-    sparql_endpoint_url: str = wikibase_url + "/query/sparql"
+    query_service_url = wikibase_url
 
     ACCESS_DATE = "P37"
     ARCHIVE = "P52"
