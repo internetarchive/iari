@@ -26,6 +26,7 @@ from src.models.wikibase.dictionaries import (
     wcd_archive_items,
     wcd_items,
     wcd_properties,
+    wcd_url_properties,
 )
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikicitations import WikiCitations
@@ -174,7 +175,7 @@ class SetupNewWikibase(BaseModel):
             )
         )
         count = 1
-        for entry in wcd_properties:
+        for entry in wcd_properties + wcd_url_properties:
             if count <= 3:
                 data: Dict[Any, Any] = wcd_properties[entry]
                 datatype: WikibaseDatatype = data["datatype"]
@@ -195,7 +196,7 @@ class SetupNewWikibase(BaseModel):
                         f'{entry} = "{property.id}" # datatype: {datatype} description: {description}'
                     )
                 except MWApiError as e:
-                    logger.error(f"Got error: {e} from the Wikibase")
+                    logger.warning(f"Got error: {e} from the Wikibase")
                 count += 1
         # manually copy-paste the output into a subclass of Wikibase
 

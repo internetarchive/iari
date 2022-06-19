@@ -56,3 +56,8 @@ class WikiCitationsWikibase(Wikibase):
     WEBSITE = "P13"
     WEBSITE_STRING = "P35"
     WIKIDATA_QID = "P44"  # external id
+
+    CHAPTER_URL = ""
+    CONFERENCE_URL = ""
+    LAY_URL = ""
+    TRANSCRIPT_URL = ""
