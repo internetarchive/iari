@@ -60,3 +60,8 @@ class SandboxWikibase(Wikibase):
     WEBSITE = ""
     WEBSITE_STRING = ""
     WIKIDATA_QID = ""  # external id
+
+    CHAPTER_URL = ""
+    CONFERENCE_URL = ""
+    LAY_URL = ""
+    TRANSCRIPT_URL = ""

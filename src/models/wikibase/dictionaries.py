@@ -28,7 +28,6 @@ wcd_properties = dict(
     ),
     ARCHIVE=dict(datatype=WikibaseDatatype.ITEM, description=""),
     ARCHIVE_DATE=dict(datatype=WikibaseDatatype.TIME, description=""),
-    ARCHIVE_URL=dict(datatype=WikibaseDatatype.URL, description=""),
     AUTHOR=dict(datatype=WikibaseDatatype.ITEM, description=""),
     FULL_NAME_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     DOI=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
@@ -76,9 +75,16 @@ wcd_properties = dict(
     TEMPLATE_NAME=dict(datatype=WikibaseDatatype.STRING, description=""),
     TITLE=dict(datatype=WikibaseDatatype.STRING, description=""),
     TRANSLATOR_NAME_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
-    URL=dict(datatype=WikibaseDatatype.URL, description=""),
     VOLUME=dict(datatype=WikibaseDatatype.STRING, description=""),
     WEBSITE=dict(datatype=WikibaseDatatype.ITEM, description=""),
     WEBSITE_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     WIKIDATA_QID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
+)
+wcd_url_properties = dict(
+    ARCHIVE_URL=dict(datatype=WikibaseDatatype.URL, description=""),
+    CHAPTER_URL=dict(datatype=WikibaseDatatype.URL, description=""),
+    CONFERENCE_URL=dict(datatype=WikibaseDatatype.URL, description=""),
+    LAY_URL=dict(datatype=WikibaseDatatype.URL, description=""),
+    TRANSCRIPT_URL=dict(datatype=WikibaseDatatype.URL, description=""),
+    URL=dict(datatype=WikibaseDatatype.URL, description=""),
 )

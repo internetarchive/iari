@@ -18,15 +18,17 @@ class Wikibase(WcdBaseModel):
     ARCHIVE_DATE: str  # date
     ARCHIVE_URL: str  # url
     AUTHOR: str  # item
-    FULL_NAME_STRING: str  # string
+    CHAPTER_URL: str
+    CITATIONS: str  # item
+    CONFERENCE_URL: str
     DOI: str  # external-id
     EDITOR: str  # item
     EDITOR_NAME_STRING: str  # string
     FAMILY_NAME: str  # string
-    GIVEN_NAME: str  # string
-    CITATIONS: str  # item
     FIRST_LEVEL_DOMAIN_STRING: str  # string
+    FULL_NAME_STRING: str  # string
     FULL_WORK_AVAILABLE_AT_URL: str  # url
+    GIVEN_NAME: str  # string
     HASH: str  # string
     HOST_STRING: str  # string
     INSTANCE_OF: str  # item
@@ -35,23 +37,25 @@ class Wikibase(WcdBaseModel):
     ISBN_13: str  # external-id
     ISSUE: str  # string
     LAST_UPDATE: str  # date
+    LAY_URL: str
     LOCATION_STRING: str  # string
     LUMPED_AUTHORS: str  # string
     MEDIAWIKI_PAGE_ID: str  # string # FIXME should be external-id
     NAME_MASK: str  # string
     ORCID: str  # external-id
     PAGES: str  # string
+    PAGE_REVISION_ID: str  # string
     PMID: str  # external-id
     PUBLICATION_DATE: str  # date
     PUBLISHED_IN: str  # ?
     PUBLISHER_STRING: str  # string
     RETRIEVED_DATE: str  # date
-    PAGE_REVISION_ID: str  # string
     SERIES_ORDINAL: str  # aka author position # quantity
     SOURCE_WIKIPEDIA: str  # item
     STRING_CITATIONS: str  # string
     TEMPLATE_NAME: str  # string
     TITLE: str  # monolingual text
+    TRANSCRIPT_URL: str
     TRANSLATOR_NAME_STRING: str  # string
     URL: str  # url
     VOLUME: str  # string

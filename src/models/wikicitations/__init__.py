@@ -550,41 +550,6 @@ class WikiCitations(WcdBaseModel):
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
         # Optional claims
-        if page_reference.archive_url:
-            if len(page_reference.archive_url) > 500:
-                # TODO log to file also
-                logger.error(
-                    f"Skipping statement for this URL because it "
-                    f"is too long for Wikibase currently to store :/"
-                )
-                archive_url = None
-            else:
-                if page_reference.detected_archive_of_archive_url:
-                    archive_url = datatypes.URL(
-                        prop_nr=self.wikibase.ARCHIVE_URL,
-                        value=page_reference.archive_url,
-                        qualifiers=[
-                            datatypes.Item(
-                                prop_nr=self.wikibase.ARCHIVE,
-                                value=WCDItem[
-                                    page_reference.detected_archive_of_archive_url.name.upper().replace(
-                                        ".", "_"
-                                    )
-                                ].value,
-                            )
-                        ],
-                    )
-                else:
-                    logger.warning(
-                        f"No archive detected for {page_reference.archive_url}"
-                    )
-                    # TODO log to file
-                    archive_url = datatypes.URL(
-                        prop_nr=self.wikibase.ARCHIVE_URL,
-                        value=page_reference.archive_url,
-                    )
-        else:
-            archive_url = None
         if page_reference.doi:
             doi = datatypes.ExternalID(
                 prop_nr=self.wikibase.DOI,
@@ -652,21 +617,6 @@ class WikiCitations(WcdBaseModel):
             )
         else:
             title = None
-        if page_reference.url:
-            if len(page_reference.url) > 500:
-                # TODO log to file also
-                logger.error(
-                    f"Skipping statement for this URL because it "
-                    f"is too long for Wikibase currently to store :/"
-                )
-                url = None
-            else:
-                url = datatypes.URL(
-                    prop_nr=self.wikibase.URL,
-                    value=page_reference.url,
-                )
-        else:
-            url = None
         if page_reference.website:
             website_string = datatypes.String(
                 prop_nr=self.wikibase.WEBSITE_STRING,
@@ -691,7 +641,6 @@ class WikiCitations(WcdBaseModel):
             wikidata_qid = None
         claims: List[Claim] = []
         for claim in (
-            archive_url,
             doi,
             isbn_10,
             isbn_13,
@@ -701,7 +650,6 @@ class WikiCitations(WcdBaseModel):
             pmid,
             publisher,
             title,
-            url,
             website_item,
             website_string,
             wikidata_qid,
@@ -714,6 +662,9 @@ class WikiCitations(WcdBaseModel):
                 page_reference=page_reference
             )
             + self.__prepare_single_value_reference_claims_with_dates__(
+                page_reference=page_reference
+            )
+            + self.__prepare_single_value_reference_claims_with_urls__(
                 page_reference=page_reference
             )
         )
@@ -796,6 +747,120 @@ class WikiCitations(WcdBaseModel):
         else:
             publication_date = None
         return [access_date, publication_date]
+
+    def __prepare_single_value_reference_claims_with_urls__(
+        self, page_reference
+    ) -> List[Claim]:
+        if page_reference.archive_url:
+            if len(page_reference.archive_url) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
+                )
+                archive_url = None
+            else:
+                if page_reference.detected_archive_of_archive_url:
+                    archive_url = datatypes.URL(
+                        prop_nr=self.wikibase.ARCHIVE_URL,
+                        value=page_reference.archive_url,
+                        qualifiers=[
+                            datatypes.Item(
+                                prop_nr=self.wikibase.ARCHIVE,
+                                value=WCDItem[
+                                    page_reference.detected_archive_of_archive_url.name.upper().replace(
+                                        ".", "_"
+                                    )
+                                ].value,
+                            )
+                        ],
+                    )
+                else:
+                    logger.warning(
+                        f"No archive detected for {page_reference.archive_url}"
+                    )
+                    archive_url = datatypes.URL(
+                        prop_nr=self.wikibase.ARCHIVE_URL,
+                        value=page_reference.archive_url,
+                    )
+        else:
+            archive_url = None
+        if page_reference.url:
+            if len(page_reference.url) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
+                )
+                url = None
+            else:
+                url = datatypes.URL(
+                    prop_nr=self.wikibase.URL,
+                    value=page_reference.url,
+                )
+        else:
+            url = None
+        if page_reference.chapter_url:
+            if len(page_reference.chapter_url) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
+                )
+                chapter_url = None
+            else:
+                chapter_url = datatypes.URL(
+                    prop_nr=self.wikibase.CHAPTER_URL,
+                    value=page_reference.chapter_url,
+                )
+        else:
+            chapter_url = None
+        if page_reference.conference_url:
+            if len(page_reference.conference_url) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
+                )
+                conference_url = None
+            else:
+                conference_url = datatypes.URL(
+                    prop_nr=self.wikibase.CONFERENCE_URL,
+                    value=page_reference.conference_url,
+                )
+        else:
+            conference_url = None
+        if page_reference.lay_url:
+            if len(page_reference.lay_url) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
+                )
+                lay_url = None
+            else:
+                lay_url = datatypes.URL(
+                    prop_nr=self.wikibase.LAY_URL,
+                    value=page_reference.lay_url,
+                )
+        else:
+            lay_url = None
+        if page_reference.transcripturl:
+            if len(page_reference.transcripturl) > 500:
+                # TODO log to file also
+                logger.error(
+                    f"Skipping statement for this URL because it "
+                    f"is too long for Wikibase currently to store :/"
+                )
+                transcripturl = None
+            else:
+                transcripturl = datatypes.URL(
+                    prop_nr=self.wikibase.TRANSCRIPT_URL,
+                    value=page_reference.transcripturl,
+                )
+        else:
+            transcripturl = None
+        return [archive_url, chapter_url, conference_url, lay_url, transcripturl, url]
 
     @validate_arguments
     def __prepare_single_value_website_claims__(
