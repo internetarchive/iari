@@ -72,51 +72,54 @@ class WikiCitations(WcdBaseModel):
     def __delete_all_page_items__(self) -> None:
         """Get all items and delete them one by one"""
         items = self.__get_all_page_items__() or []
-        if number_of_items := len(items):
-            logger.info(f"Got {number_of_items} bindings to delete")
+        if items:
             self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting {number_of_items} page items"):
+            with console.status(f"Deleting all page items"):
+                count = 0
                 for item_id in items:
                     logger.info(f"Deleting {item_id}")
                     self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
                         input("continue?")
-            console.print(f"Done deleting all {number_of_items} page items")
+                    count += 1
+                console.print(f"Done deleting a total of {count} page items")
         else:
             console.print("Got no page items from the WCD Query Service.")
 
     def __delete_all_reference_items__(self) -> None:
         """Get all items and delete them one by one"""
         items = self.__get_all_reference_items__() or []
-        if number_of_items := len(items):
-            logger.info(f"Got {number_of_items} bindings to delete")
+        if items:
             self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting {number_of_items} reference items"):
+            with console.status(f"Deleting all reference items"):
+                count = 0
                 for item_id in items:
                     logger.info(f"Deleting {item_id}")
                     self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
                         input("continue?")
-            console.print(f"Done deleting all {number_of_items} reference items")
+                    count += 1
+            console.print(f"Done deleting a total of {count} reference items")
         else:
             console.print("Got no reference items from the WCD Query Service.")
 
     def __delete_all_website_items__(self):
         """Get all items and delete them one by one"""
         items = self.__get_all_website_items__() or []
-        if number_of_items := len(items):
-            logger.info(f"Got {number_of_items} bindings to delete")
+        if items:
             self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting {number_of_items} website items"):
+            with console.status(f"Deleting all website items"):
+                count = 0
                 for item_id in items:
                     logger.info(f"Deleting {item_id}")
                     self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
                         input("continue?")
-            console.print(f"Done deleting all {number_of_items} website items")
+                    count += 1
+            console.print(f"Done deleting a total of {count} website items")
         else:
             console.print("Got no website items from the WCD Query Service.")
 
@@ -736,31 +739,35 @@ class WikiCitations(WcdBaseModel):
     ) -> List[Claim]:
         claims = []
         if page_reference.access_date:
-            claims.append(datatypes.Time(
-                prop_nr=self.wikibase.ACCESS_DATE,
-                time=(
-                    page_reference.access_date.replace(tzinfo=timezone.utc)
-                    .replace(
-                        hour=0,
-                        minute=0,
-                        second=0,
-                    )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
-                ),
-            ))
+            claims.append(
+                datatypes.Time(
+                    prop_nr=self.wikibase.ACCESS_DATE,
+                    time=(
+                        page_reference.access_date.replace(tzinfo=timezone.utc)
+                        .replace(
+                            hour=0,
+                            minute=0,
+                            second=0,
+                        )
+                        .strftime("+%Y-%m-%dT%H:%M:%SZ")
+                    ),
+                )
+            )
         if page_reference.publication_date:
-            claims.append(datatypes.Time(
-                prop_nr=self.wikibase.PUBLICATION_DATE,
-                time=(
-                    page_reference.publication_date.replace(tzinfo=timezone.utc)
-                    .replace(
-                        hour=0,
-                        minute=0,
-                        second=0,
-                    )
-                    .strftime("+%Y-%m-%dT%H:%M:%SZ")
-                ),
-            ))
+            claims.append(
+                datatypes.Time(
+                    prop_nr=self.wikibase.PUBLICATION_DATE,
+                    time=(
+                        page_reference.publication_date.replace(tzinfo=timezone.utc)
+                        .replace(
+                            hour=0,
+                            minute=0,
+                            second=0,
+                        )
+                        .strftime("+%Y-%m-%dT%H:%M:%SZ")
+                    ),
+                )
+            )
         return claims
 
     def __prepare_single_value_reference_claims_with_urls__(
@@ -776,28 +783,32 @@ class WikiCitations(WcdBaseModel):
                 )
             else:
                 if page_reference.detected_archive_of_archive_url:
-                    claims.append(datatypes.URL(
-                        prop_nr=self.wikibase.ARCHIVE_URL,
-                        value=page_reference.archive_url,
-                        qualifiers=[
-                            datatypes.Item(
-                                prop_nr=self.wikibase.ARCHIVE,
-                                value=self.wikibase.__getattribute__(
-                                    page_reference.detected_archive_of_archive_url.name.upper().replace(
-                                        ".", "_"
-                                    )
-                                ),
-                            )
-                        ],
-                    ))
+                    claims.append(
+                        datatypes.URL(
+                            prop_nr=self.wikibase.ARCHIVE_URL,
+                            value=page_reference.archive_url,
+                            qualifiers=[
+                                datatypes.Item(
+                                    prop_nr=self.wikibase.ARCHIVE,
+                                    value=self.wikibase.__getattribute__(
+                                        page_reference.detected_archive_of_archive_url.name.upper().replace(
+                                            ".", "_"
+                                        )
+                                    ),
+                                )
+                            ],
+                        )
+                    )
                 else:
                     logger.warning(
                         f"No archive detected for {page_reference.archive_url}"
                     )
-                    claims.append(datatypes.URL(
-                        prop_nr=self.wikibase.ARCHIVE_URL,
-                        value=page_reference.archive_url,
-                    ))
+                    claims.append(
+                        datatypes.URL(
+                            prop_nr=self.wikibase.ARCHIVE_URL,
+                            value=page_reference.archive_url,
+                        )
+                    )
         if page_reference.url:
             if len(page_reference.url) > 500:
                 # TODO log to file also
@@ -806,10 +817,12 @@ class WikiCitations(WcdBaseModel):
                     f"is too long for Wikibase currently to store :/"
                 )
             else:
-                claims.append(datatypes.URL(
-                    prop_nr=self.wikibase.URL,
-                    value=page_reference.url,
-                ))
+                claims.append(
+                    datatypes.URL(
+                        prop_nr=self.wikibase.URL,
+                        value=page_reference.url,
+                    )
+                )
         if page_reference.chapter_url:
             if len(page_reference.chapter_url) > 500:
                 # TODO log to file also
@@ -818,10 +831,12 @@ class WikiCitations(WcdBaseModel):
                     f"is too long for Wikibase currently to store :/"
                 )
             else:
-                claims.append(datatypes.URL(
-                    prop_nr=self.wikibase.CHAPTER_URL,
-                    value=page_reference.chapter_url,
-                ))
+                claims.append(
+                    datatypes.URL(
+                        prop_nr=self.wikibase.CHAPTER_URL,
+                        value=page_reference.chapter_url,
+                    )
+                )
         if page_reference.conference_url:
             if len(page_reference.conference_url) > 500:
                 # TODO log to file also
@@ -830,10 +845,12 @@ class WikiCitations(WcdBaseModel):
                     f"is too long for Wikibase currently to store :/"
                 )
             else:
-                claims.append(datatypes.URL(
-                    prop_nr=self.wikibase.CONFERENCE_URL,
-                    value=page_reference.conference_url,
-                ))
+                claims.append(
+                    datatypes.URL(
+                        prop_nr=self.wikibase.CONFERENCE_URL,
+                        value=page_reference.conference_url,
+                    )
+                )
         if page_reference.lay_url:
             if len(page_reference.lay_url) > 500:
                 # TODO log to file also
@@ -842,10 +859,12 @@ class WikiCitations(WcdBaseModel):
                     f"is too long for Wikibase currently to store :/"
                 )
             else:
-                claims.append(datatypes.URL(
-                    prop_nr=self.wikibase.LAY_URL,
-                    value=page_reference.lay_url,
-                ))
+                claims.append(
+                    datatypes.URL(
+                        prop_nr=self.wikibase.LAY_URL,
+                        value=page_reference.lay_url,
+                    )
+                )
         if page_reference.transcripturl:
             if len(page_reference.transcripturl) > 500:
                 # TODO log to file also
@@ -854,10 +873,12 @@ class WikiCitations(WcdBaseModel):
                     f"is too long for Wikibase currently to store :/"
                 )
             else:
-                claims.append(datatypes.URL(
-                    prop_nr=self.wikibase.TRANSCRIPT_URL,
-                    value=page_reference.transcripturl,
-                ))
+                claims.append(
+                    datatypes.URL(
+                        prop_nr=self.wikibase.TRANSCRIPT_URL,
+                        value=page_reference.transcripturl,
+                    )
+                )
         return claims
 
     @validate_arguments
