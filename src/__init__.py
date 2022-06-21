@@ -27,13 +27,13 @@ class WcdImportBot(WcdBaseModel):
     The language code is the one used by Wikimedia Foundation"""
 
     language_code: str = "en"
-    max_count: int = 10
-    total_number_of_hashed_references: Optional[int]
+    max_count: int = 0  # 0 means disabled
     percent_references_hashed_in_total: Optional[int]
     title: Optional[str]
+    total_number_of_hashed_references: Optional[int]
     total_number_of_references: Optional[int]
-    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     wikibase: Wikibase
+    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 
     @validate_arguments
     def __execute_query__(self, query: str):
@@ -122,10 +122,13 @@ class WcdImportBot(WcdBaseModel):
     '$ ./wcdimportbot.py --lookup-md5hash e98adc5b05cb993cd0c884a28098096c'
 
     Example importing 5 pages (any page on the Wiki):
-    '$ ./wcdimportbot.py --numerical-range 5'
+    '$ ./wcdimportbot.py --max-range 5'
 
     Example importing 5 pages from a specific category title (recursively):
-    '$ ./wcdimportbot.py --numerical-range 5 --category "World War II"'
+    '$ ./wcdimportbot.py --max-range 5 --category "World War II"'
+
+    Example importing all pages from a specific category title (recursively):
+    '$ ./wcdimportbot.py --category "World War II"'
 
     Example rinsing the Wikibase and the cache:
     '$ ./wcdimportbot.py --rinse'
@@ -148,8 +151,8 @@ class WcdImportBot(WcdBaseModel):
         )
         parser.add_argument(
             "-r",
-            "--numerical-range",
-            help="Import range of pages",
+            "--max-range",
+            help="Import max range of pages",
         )
         parser.add_argument(
             "-i",
@@ -172,9 +175,10 @@ class WcdImportBot(WcdBaseModel):
             help="Rinse all page and reference items and delete the cache",
         )
         parser.add_argument(
+            "-s",
             "--statistics",
             action="store_true",
-            help="Show statistics about the database",
+            help="Show statistics about the supported Wikibase instances",
         )
         return parser.parse_args()
 
@@ -271,7 +275,7 @@ class WcdImportBot(WcdBaseModel):
         if category_title:
             category_page = Category(title=category_title, source=site)
             for page in category_page.articles(recurse=True):
-                if count >= self.max_count:
+                if self.max_count and count >= self.max_count:
                     logger.debug("breaking now")
                     break
                 # page: Page = page
@@ -374,11 +378,10 @@ class WcdImportBot(WcdBaseModel):
         elif args.delete_page is not None:
             logger.info("deleting page")
             self.delete_one_page(title=args.delete_page)
-        elif args.numerical_range is not None:
+        elif args.max_range is not None or args.category is not None:
             logger.info("Importing range of pages")
-            max_count = args.numerical_range
             self.get_and_extract_pages_by_range(
-                max_count=max_count, category_title=args.category
+                max_count=args.max_range, category_title=args.category
             )
         elif args.lookup_md5hash is not None:
             # We strip here to avoid errors caused by spaces
