@@ -61,21 +61,23 @@ class Wikibase(WcdBaseModel):
     WIKIDATA_QID: str  # external id
 
     @property
-    def mediawiki_api_url(self):
+    def mediawiki_api_url(self) -> str:
         return self.wikibase_url + "/w/api.php"
 
     @property
-    def mediawiki_index_url(self):
+    def mediawiki_index_url(self) -> str:
         return self.wikibase_url + "/w/index.php"
 
     @property
-    def rdf_entity_prefix(self):
+    def rdf_entity_prefix(self) -> str:
         return self.rdf_prefix + "/entity/"
 
     @property
-    def rdf_prefix(self):
+    def rdf_prefix(self) -> str:
         return self.wikibase_url.replace("https", "http")
 
     @property
-    def sparql_endpoint_url(self):
-        return self.query_service_url + "/query/sparql"
+    def sparql_endpoint_url(self) -> str:
+        """This is the default Wikibase endpoint url
+        Thanks to Myst for finding/documenting it."""
+        return self.query_service_url + "/proxy/wdqs/bigdata/namespace/wdq/sparql"
