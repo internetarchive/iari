@@ -86,6 +86,7 @@ class TestWcdImportBot(TestCase):
         console.print("sandbox.wiki:")
         bot = WcdImportBot(wikibase=SandboxWikibase())
         bot.__gather_statistics__()
-        console.print("wikicitaitons:")
-        bot = WcdImportBot(wikibase=WikiCitationsWikibase())
-        bot.__gather_statistics__()
+        # disabled because of bug with sparql endpoint url
+        # console.print("wikicitaitons:")
+        # bot = WcdImportBot(wikibase=WikiCitationsWikibase())
+        # bot.__gather_statistics__()

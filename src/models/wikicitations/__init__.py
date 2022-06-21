@@ -28,8 +28,6 @@ from src.helpers import console
 from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
-from src.models.wikicitations.enums import WCDItem
-from src.models.wikicitations.itemtypes.base_item_type import BaseItemType
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
@@ -57,7 +55,6 @@ class WikiCitations(WcdBaseModel):
     The language code is the one used by Wikimedia Foundation"""
 
     language_code: str = "en"
-    language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
     reference_claim: Optional[References]
     wikibase: Wikibase
 
@@ -164,9 +161,8 @@ class WikiCitations(WcdBaseModel):
         )
 
     # TODO refactor these get all functions
-    #  using BaseItemType and use the wcditem attribute value in the query
     @validate_arguments
-    def __get_all_items__(self, item_type: BaseItemType):
+    def __get_all_items__(self, item_type):
         pass
 
     def __get_all_page_items__(self):
@@ -179,7 +175,7 @@ class WikiCitations(WcdBaseModel):
             prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
             prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT ?item WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_PAGE.value}
+              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_PAGE}
             }}
             """
             )
@@ -195,7 +191,7 @@ class WikiCitations(WcdBaseModel):
             prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
             prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT ?item WHERE {{
-                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_REFERENCE.value}
+                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_REFERENCE}
             }}
             """
             )
@@ -211,7 +207,7 @@ class WikiCitations(WcdBaseModel):
             prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
             prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT ?item WHERE {{
-                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WEBSITE.value}
+                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WEBSITE}
             }}
             """
             )
@@ -363,9 +359,9 @@ class WikiCitations(WcdBaseModel):
         if persons:
             item.add_claims(persons)
         item.add_claims(
-            self.__prepare_single_value_reference_claims__(
+            claims=self.__prepare_single_value_reference_claims__(
                 page_reference=page_reference
-            ),
+            )
         )
         # if config.loglevel == logging.DEBUG:
         #     logger.debug("Printing the item data")
@@ -567,7 +563,7 @@ class WikiCitations(WcdBaseModel):
     def __prepare_single_value_reference_claims__(
         self,
         page_reference: WikipediaPageReference,
-    ) -> Optional[List[Claim]]:
+    ) -> List[Claim]:
         logger.info("Preparing single value claims")
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
@@ -698,7 +694,7 @@ class WikiCitations(WcdBaseModel):
     ) -> List[Claim]:
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
-            value=WCDItem.WIKIPEDIA_REFERENCE.value,
+            value=self.wikibase.WIKIPEDIA_REFERENCE,
         )
         hash_claim = datatypes.String(
             prop_nr=self.wikibase.HASH, value=page_reference.md5hash
@@ -723,7 +719,7 @@ class WikiCitations(WcdBaseModel):
         )
         source_wikipedia = datatypes.Item(
             prop_nr=self.wikibase.SOURCE_WIKIPEDIA,
-            value=self.language_wcditem.value,
+            value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
         )
         return [
             hash_claim,
@@ -738,8 +734,9 @@ class WikiCitations(WcdBaseModel):
         self,
         page_reference: WikipediaPageReference,
     ) -> List[Claim]:
+        claims = []
         if page_reference.access_date:
-            access_date = datatypes.Time(
+            claims.append(datatypes.Time(
                 prop_nr=self.wikibase.ACCESS_DATE,
                 time=(
                     page_reference.access_date.replace(tzinfo=timezone.utc)
@@ -750,11 +747,9 @@ class WikiCitations(WcdBaseModel):
                     )
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
-            )
-        else:
-            access_date = None
+            ))
         if page_reference.publication_date:
-            publication_date = datatypes.Time(
+            claims.append(datatypes.Time(
                 prop_nr=self.wikibase.PUBLICATION_DATE,
                 time=(
                     page_reference.publication_date.replace(tzinfo=timezone.utc)
@@ -765,14 +760,13 @@ class WikiCitations(WcdBaseModel):
                     )
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
-            )
-        else:
-            publication_date = None
-        return [access_date, publication_date]
+            ))
+        return claims
 
     def __prepare_single_value_reference_claims_with_urls__(
         self, page_reference
     ) -> List[Claim]:
+        claims = []
         if page_reference.archive_url:
             if len(page_reference.archive_url) > 500:
                 # TODO log to file also
@@ -780,33 +774,30 @@ class WikiCitations(WcdBaseModel):
                     f"Skipping statement for this URL because it "
                     f"is too long for Wikibase currently to store :/"
                 )
-                archive_url = None
             else:
                 if page_reference.detected_archive_of_archive_url:
-                    archive_url = datatypes.URL(
+                    claims.append(datatypes.URL(
                         prop_nr=self.wikibase.ARCHIVE_URL,
                         value=page_reference.archive_url,
                         qualifiers=[
                             datatypes.Item(
                                 prop_nr=self.wikibase.ARCHIVE,
-                                value=WCDItem[
+                                value=self.wikibase.__getattribute__(
                                     page_reference.detected_archive_of_archive_url.name.upper().replace(
                                         ".", "_"
                                     )
-                                ].value,
+                                ),
                             )
                         ],
-                    )
+                    ))
                 else:
                     logger.warning(
                         f"No archive detected for {page_reference.archive_url}"
                     )
-                    archive_url = datatypes.URL(
+                    claims.append(datatypes.URL(
                         prop_nr=self.wikibase.ARCHIVE_URL,
                         value=page_reference.archive_url,
-                    )
-        else:
-            archive_url = None
+                    ))
         if page_reference.url:
             if len(page_reference.url) > 500:
                 # TODO log to file also
@@ -814,14 +805,11 @@ class WikiCitations(WcdBaseModel):
                     f"Skipping statement for this URL because it "
                     f"is too long for Wikibase currently to store :/"
                 )
-                url = None
             else:
-                url = datatypes.URL(
+                claims.append(datatypes.URL(
                     prop_nr=self.wikibase.URL,
                     value=page_reference.url,
-                )
-        else:
-            url = None
+                ))
         if page_reference.chapter_url:
             if len(page_reference.chapter_url) > 500:
                 # TODO log to file also
@@ -829,14 +817,11 @@ class WikiCitations(WcdBaseModel):
                     f"Skipping statement for this URL because it "
                     f"is too long for Wikibase currently to store :/"
                 )
-                chapter_url = None
             else:
-                chapter_url = datatypes.URL(
+                claims.append(datatypes.URL(
                     prop_nr=self.wikibase.CHAPTER_URL,
                     value=page_reference.chapter_url,
-                )
-        else:
-            chapter_url = None
+                ))
         if page_reference.conference_url:
             if len(page_reference.conference_url) > 500:
                 # TODO log to file also
@@ -844,14 +829,11 @@ class WikiCitations(WcdBaseModel):
                     f"Skipping statement for this URL because it "
                     f"is too long for Wikibase currently to store :/"
                 )
-                conference_url = None
             else:
-                conference_url = datatypes.URL(
+                claims.append(datatypes.URL(
                     prop_nr=self.wikibase.CONFERENCE_URL,
                     value=page_reference.conference_url,
-                )
-        else:
-            conference_url = None
+                ))
         if page_reference.lay_url:
             if len(page_reference.lay_url) > 500:
                 # TODO log to file also
@@ -859,14 +841,11 @@ class WikiCitations(WcdBaseModel):
                     f"Skipping statement for this URL because it "
                     f"is too long for Wikibase currently to store :/"
                 )
-                lay_url = None
             else:
-                lay_url = datatypes.URL(
+                claims.append(datatypes.URL(
                     prop_nr=self.wikibase.LAY_URL,
                     value=page_reference.lay_url,
-                )
-        else:
-            lay_url = None
+                ))
         if page_reference.transcripturl:
             if len(page_reference.transcripturl) > 500:
                 # TODO log to file also
@@ -874,15 +853,12 @@ class WikiCitations(WcdBaseModel):
                     f"Skipping statement for this URL because it "
                     f"is too long for Wikibase currently to store :/"
                 )
-                transcripturl = None
             else:
-                transcripturl = datatypes.URL(
+                claims.append(datatypes.URL(
                     prop_nr=self.wikibase.TRANSCRIPT_URL,
                     value=page_reference.transcripturl,
-                )
-        else:
-            transcripturl = None
-        return [archive_url, chapter_url, conference_url, lay_url, transcripturl, url]
+                ))
+        return claims
 
     @validate_arguments
     def __prepare_single_value_website_claims__(
@@ -893,11 +869,11 @@ class WikiCitations(WcdBaseModel):
         # Claims always present
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
-            value=WCDItem.WEBSITE.value,
+            value=self.wikibase.WEBSITE,
         )
         source_wikipedia = datatypes.Item(
             prop_nr=self.wikibase.SOURCE_WIKIPEDIA,
-            value=self.language_wcditem.value,
+            value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
         )
         first_level_domain_string = datatypes.String(
             prop_nr=self.wikibase.FIRST_LEVEL_DOMAIN_STRING,
@@ -935,7 +911,7 @@ class WikiCitations(WcdBaseModel):
         )
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
-            value=WCDItem.WIKIPEDIA_PAGE.value,
+            value=self.wikibase.WIKIPEDIA_PAGE,
         )
         last_update = datatypes.Time(
             prop_nr=self.wikibase.LAST_UPDATE,
@@ -956,7 +932,7 @@ class WikiCitations(WcdBaseModel):
         )
         published_in = datatypes.Item(
             prop_nr=self.wikibase.PUBLISHED_IN,
-            value=self.language_wcditem.value,
+            value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
         )
         if wikipedia_page.title is None:
             raise ValueError("wikipedia_page.item_id was None")
