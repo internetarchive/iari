@@ -3,6 +3,9 @@ from src.models.wikibase import Wikibase
 
 
 class WikiCitationsWikibase(Wikibase):
+    """This models the properties and items on wikicitations.wiki.opencura.com"""
+
+    title = "wikicitations.wiki.opencura.com"
     user_name = config.user
     botpassword = config.pwd
     wikibase_url = "https://wikicitations.wiki.opencura.com"
@@ -58,3 +61,14 @@ class WikiCitationsWikibase(Wikibase):
     CONFERENCE_URL = ""
     LAY_URL = ""
     TRANSCRIPT_URL = ""
+
+    ARCHIVE_IS = "Q5830"
+    ARCHIVE_ORG = "Q5660"
+    ARCHIVE_PH = "Q5830"
+    ARCHIVE_TODAY = ""
+    ENGLISH_WIKIPEDIA = "Q3"
+    MEMENTOWEB_ORG = ""
+    WEBCITATION_ORG = ""
+    WEBSITE_ITEM = "Q145"
+    WIKIPEDIA_PAGE = "Q6"
+    WIKIPEDIA_REFERENCE = "Q4"

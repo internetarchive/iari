@@ -9,7 +9,10 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 import config
 from src.helpers import console
 from src.models.cache import Cache
+from src.models.exceptions import MissingInformationError
 from src.models.wikibase import Wikibase
+from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
@@ -59,12 +62,19 @@ class WcdImportBot(WcdBaseModel):
             return None
 
     def __gather_statistics__(self):
+        console.print(self.wikibase.title)
         pages = self.__get_number_of_pages__()
         console.print(f"Number of pages: {pages}")
         references = self.__get_number_of_references__()
         console.print(f"Number of references: {references}")
 
     def __get_number_of_pages__(self):
+        if not self.wikibase.INSTANCE_OF:
+            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
+        if not self.wikibase.WIKIPEDIA_PAGE:
+            raise MissingInformationError(
+                "self.wikibase.WIKIPEDIA_PAGE was empty string"
+            )
         query = f"""
         prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
         prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
@@ -77,6 +87,12 @@ class WcdImportBot(WcdBaseModel):
         )
 
     def __get_number_of_references__(self):
+        if not self.wikibase.INSTANCE_OF:
+            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
+        if not self.wikibase.WIKIPEDIA_REFERENCE:
+            raise MissingInformationError(
+                "self.wikibase.WIKIPEDIA_REFERENCE was empty string"
+            )
         query = f"""
         prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
         prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
@@ -368,7 +384,10 @@ class WcdImportBot(WcdBaseModel):
             # We strip here to avoid errors caused by spaces
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
         elif args.statistics is not None:
-            self.__gather_statistics__()
+            bot = WcdImportBot(wikibase=SandboxWikibase())
+            bot.__gather_statistics__()
+            bot = WcdImportBot(wikibase=WikiCitationsWikibase())
+            bot.__gather_statistics__()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
