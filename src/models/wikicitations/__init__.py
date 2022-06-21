@@ -627,14 +627,13 @@ class WikiCitations(WcdBaseModel):
         else:
             publisher = None
         if page_reference.title:
-            # Wikibase has a default limit of 400 chars for MonolingualText
+            # Wikibase has a default limit of 400 chars for String
             shortened_title = textwrap.shorten(
                 page_reference.title, width=400, placeholder="..."
             )
-            title = datatypes.MonolingualText(
+            title = datatypes.String(
                 prop_nr=self.wikibase.TITLE,
-                text=shortened_title,
-                language=self.language_code,
+                value=shortened_title,
             )
         else:
             title = None
@@ -720,6 +719,10 @@ class WikiCitations(WcdBaseModel):
             )
             .strftime("+%Y-%m-%dT%H:%M:%SZ"),
         )
+        if not self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on:
+            raise MissingInformationError(
+                "self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on was None"
+            )
         source_wikipedia = datatypes.Item(
             prop_nr=self.wikibase.SOURCE_WIKIPEDIA,
             value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
@@ -892,6 +895,10 @@ class WikiCitations(WcdBaseModel):
             prop_nr=self.wikibase.INSTANCE_OF,
             value=self.wikibase.WEBSITE,
         )
+        if not self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on:
+            raise MissingInformationError(
+                "self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on was None"
+            )
         source_wikipedia = datatypes.Item(
             prop_nr=self.wikibase.SOURCE_WIKIPEDIA,
             value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
@@ -951,16 +958,19 @@ class WikiCitations(WcdBaseModel):
             prop_nr=self.wikibase.MEDIAWIKI_PAGE_ID,
             value=str(wikipedia_page.page_id),
         )
+        if not self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on:
+            raise MissingInformationError(
+                "self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on was None"
+            )
         published_in = datatypes.Item(
             prop_nr=self.wikibase.PUBLISHED_IN,
             value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
         )
         if wikipedia_page.title is None:
             raise ValueError("wikipedia_page.item_id was None")
-        title = datatypes.MonolingualText(
+        title = datatypes.String(
             prop_nr=self.wikibase.TITLE,
-            text=wikipedia_page.title,
-            language=self.language_code,
+            value=wikipedia_page.title,
         )
         return [
             absolute_url,
@@ -1110,7 +1120,7 @@ class WikiCitations(WcdBaseModel):
                 ),
             )
         if page_reference.title:
-            title = datatypes.MonolingualText(
+            title = datatypes.String(
                 prop_nr=self.wikibase.TITLE,
                 text=page_reference.title,
                 language=self.language_code,
@@ -1169,7 +1179,6 @@ class WikiCitations(WcdBaseModel):
         if config.loglevel == logging.DEBUG:
             logger.debug("Finished item JSON")
             console.print(item.get_json())
-            # exit()
         try:
             new_item = item.write(summary="New item imported from Wikipedia")
             print(f"Added new item {self.entity_url(new_item.id)}")
@@ -1178,35 +1187,11 @@ class WikiCitations(WcdBaseModel):
             logger.debug(f"returning new wcdqid: {new_item.id}")
             return str(new_item.id)
         except ModificationFailed as modification_failed:
-            """Catch, extract and return the conflicting WCDQID
-            Example response:
-            {
-              'error': {
-                'code': 'modification-failed',
-                'info': 'Item [[Item:Q562|Q562]] already has label "google.com" associated
-                with language code en, using the same description text.',
-                'messages': [
-                  {
-                    'name': 'wikibase-validator-label-with-description-conflict',
-                    'parameters': [
-                      'google.com',
-                      'en',
-                      '[[Item:Q562|Q562]]'
-                    ],
-                    'html': {
-                      '*': 'Item <a href="/wiki/Item:Q562" title="Item:Q562">Q562</a> already has
-                      label "google.com" associated with language code en, using the same description text.'
-                    }
-                  }
-                ],
-                '*': 'See   tps://wikicitations.wiki.opencura.com/w/api.php for
-                API usage. Subscribe to the mediawiki-api-announce mailing list
-                at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt;
-                for notice of API deprecations and breaking changes.'
-              }
-            }"""
+            """Catch, extract and return the conflicting WCDQID"""
             logger.info(modification_failed)
             wcdqid = modification_failed.get_conflicting_entity_id
+            if wcdqid is None:
+                raise MissingInformationError("wcdqid was None")
             return str(wcdqid)
 
     @staticmethod
