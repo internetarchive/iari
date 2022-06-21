@@ -16,9 +16,9 @@ from wikibaseintegrator import (  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.models import Qualifiers  # type: ignore
 from wikibaseintegrator.models import Claim, Reference, References
-from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
 from wikibaseintegrator.wbi_exceptions import (  # type: ignore
-    NonUniqueLabelDescriptionPairError,
+    ModificationFailed,
+    NonExistentEntityError,
 )
 from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
@@ -171,6 +171,8 @@ class WikiCitations(WcdBaseModel):
 
     def __get_all_page_items__(self):
         """Get all wcdqids for wikipedia pages using sparql"""
+        if not self.wikibase.INSTANCE_OF:
+            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
                 f"""
@@ -185,6 +187,8 @@ class WikiCitations(WcdBaseModel):
 
     def __get_all_reference_items__(self):
         """Get all wcdqids for references using sparql"""
+        if not self.wikibase.INSTANCE_OF:
+            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
                 f"""
@@ -199,6 +203,8 @@ class WikiCitations(WcdBaseModel):
 
     def __get_all_website_items__(self):
         """Get all wcdqids for website items using sparql"""
+        if not self.wikibase.INSTANCE_OF:
+            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
                 f"""
@@ -239,6 +245,8 @@ class WikiCitations(WcdBaseModel):
         """This is a slower SPARQL-powered fallback helper method
         used when config.use_cache is False"""
         logger.debug("__get_wcdqid_from_hash__: running")
+        if not self.wikibase.HASH:
+            raise MissingInformationError("self.wikibase.HASH was empty string")
         query = f"""
             prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT ?item WHERE {{
@@ -255,6 +263,20 @@ class WikiCitations(WcdBaseModel):
     def __prepare_all_person_claims__(
         self, page_reference: WikipediaPageReference
     ) -> List[Claim]:
+        if not self.wikibase.FULL_NAME_STRING:
+            raise MissingInformationError(
+                "self.wikibase.FULL_NAME_STRING was empty string"
+            )
+        if not self.wikibase.EDITOR_NAME_STRING:
+            raise MissingInformationError(
+                "self.wikibase.EDITOR_NAME_STRING was empty string"
+            )
+        if not self.wikibase.HOST_STRING:
+            raise MissingInformationError("self.wikibase.HOST_STRING was empty string")
+        if not self.wikibase.INTERVIEWER_STRING:
+            raise MissingInformationError(
+                "self.wikibase.INTERVIEWER_STRING was empty string"
+            )
         authors = self.__prepare_person_claims__(
             use_list=page_reference.authors_list,
             property=self.wikibase.FULL_NAME_STRING,
@@ -1158,7 +1180,7 @@ class WikiCitations(WcdBaseModel):
                 input("press enter to continue")
             logger.debug(f"returning new wcdqid: {new_item.id}")
             return str(new_item.id)
-        except NonUniqueLabelDescriptionPairError as non_unique_label_description_pair_error:
+        except ModificationFailed as modification_failed:
             """Catch, extract and return the conflicting WCDQID
             Example response:
             {
@@ -1186,11 +1208,8 @@ class WikiCitations(WcdBaseModel):
                 for notice of API deprecations and breaking changes.'
               }
             }"""
-            logger.info(non_unique_label_description_pair_error)
-            # We remove the prefix because of https://github.com/LeMyst/WikibaseIntegrator/issues/343
-            wcdqid = non_unique_label_description_pair_error.get_conflicting_item_qid().replace(
-                "Item:", ""
-            )
+            logger.info(modification_failed)
+            wcdqid = modification_failed.get_conflicting_entity_id
             return str(wcdqid)
 
     @staticmethod
