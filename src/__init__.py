@@ -229,7 +229,7 @@ class WcdImportBot(WcdBaseModel):
                 wikibase=self.wikibase,
                 language_code=self.language_code,
                 wikimedia_site=self.wikimedia_site,
-                )
+            )
             page.__get_wikipedia_page_from_title__(title=title)
             page.extract_and_upload_to_wikicitations()
 
