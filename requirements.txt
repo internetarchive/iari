@@ -12,6 +12,8 @@ tld~=0.12.6
 #git+http://github.com/LeMyst/WikibaseIntegrator@189b102bfa33ed66bea26e0de50674c062410542#egg=wikibaseintegrator
 # This implements https://github.com/LeMyst/WikibaseIntegrator/pull/341
 #git+https://github.com/dpriskorn/WikibaseIntegrator.git@patch-7#egg=wikibaseintegrator
-git+http://github.com/LeMyst/WikibaseIntegrator@541da2ea02e9c386c4a1b83e15781869ea57d0cf#egg=wikibaseintegrator
-#pywikibot~=7.2.0 we use the fork below to avoid annoying logging for the user
+#git+http://github.com/LeMyst/WikibaseIntegrator@541da2ea02e9c386c4a1b83e15781869ea57d0cf#egg=wikibaseintegrator
+# This reintroduce something we need
+git+https://github.com/dpriskorn/WikibaseIntegrator.git@reintroduce_getting_conflicting_entity#egg=wikibaseintegrator
+#pywikibot~=7.2.0 we use the fork below to avoid annoying logging in the CLI
 git+http://github.com/dpriskorn/pywikibot@remove-verbose-logging#egg=pywikibot
