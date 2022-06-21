@@ -5,6 +5,7 @@ class Wikibase(WcdBaseModel):
     """This is a parent class for the wikibases we support
     We define all the properties here to be able to use them in the subclasses"""
 
+    title: str
     user_name: str
     botpassword: str
     wikibase_url: str

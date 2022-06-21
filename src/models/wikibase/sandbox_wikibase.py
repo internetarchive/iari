@@ -5,10 +5,10 @@ from src.models.wikibase import Wikibase
 class SandboxWikibase(Wikibase):
     """This models the properties and items on sandbox.wiki"""
 
-    user_name = config.sandbox_user
     botpassword = config.sandbox_pwd
-
     query_service_url = "https://query.sandbox.wiki"
+    title = "sandbox.wiki"
+    user_name = config.sandbox_user
     wikibase_url = "https://sandbox.wiki"
 
     ACCESS_DATE = "P10"  # datatype: WikibaseDatatype.TIME description: date of access of the resource

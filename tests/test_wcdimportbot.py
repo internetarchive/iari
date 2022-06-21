@@ -1,3 +1,4 @@
+import logging
 from time import sleep
 from unittest import TestCase
 
@@ -9,6 +10,9 @@ from src import WcdImportBot
 from src.helpers import console
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikicitations import WikiCitations
+
+logging.basicConfig(level=config.loglevel)
+logger = logging.getLogger(__name__)
 
 
 class TestWcdImportBot(TestCase):
@@ -83,10 +87,7 @@ class TestWcdImportBot(TestCase):
         bot.rinse_all_items_and_cache()
 
     def test__gather_statistics__(self):
-        console.print("sandbox.wiki:")
         bot = WcdImportBot(wikibase=SandboxWikibase())
         bot.__gather_statistics__()
-        # disabled because of bug with sparql endpoint url
-        # console.print("wikicitaitons:")
-        # bot = WcdImportBot(wikibase=WikiCitationsWikibase())
-        # bot.__gather_statistics__()
+        bot2 = WcdImportBot(wikibase=WikiCitationsWikibase())
+        bot2.__gather_statistics__()
