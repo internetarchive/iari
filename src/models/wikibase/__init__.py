@@ -79,7 +79,7 @@ class Wikibase(WcdBaseModel):
     WEBCITATION_ORG = ""  # label: Webcitation.org description: web archive
 
     # This must come last to avoid errors
-    wcdqid_language_edition_of_wikipedia_to_work_on = ENGLISH_WIKIPEDIA
+    wcdqid_language_edition_of_wikipedia_to_work_on: str = ""
 
     @property
     def mediawiki_api_url(self) -> str:

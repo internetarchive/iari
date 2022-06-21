@@ -70,7 +70,7 @@ wcd_properties = dict(
         datatype=WikibaseDatatype.TIME,
         description="date of publication of the resource",
     ),
-    PUBLISHED_IN=dict(datatype=WikibaseDatatype.STRING, description=""),
+    PUBLISHED_IN=dict(datatype=WikibaseDatatype.ITEM, description=""),
     PUBLISHER_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     RETRIEVED_DATE=dict(
         datatype=WikibaseDatatype.TIME, description="date of retrieval of the resource"
