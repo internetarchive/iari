@@ -99,6 +99,10 @@ class Wikibase(WcdBaseModel):
 
     @property
     def sparql_endpoint_url(self) -> str:
-        """This is the default Wikibase endpoint url
-        Thanks to Myst for finding/documenting it."""
-        return self.query_service_url + "/proxy/wdqs/bigdata/namespace/wdq/sparql"
+        if self.__class__.__name__ == "WikiCitationsWikibase":
+            """This is the default endpoint url for Wikibase.cloud"""
+            return self.query_service_url + "/query/sparql"
+        else:
+            """This is the default docker Wikibase endpoint url
+            Thanks to @Myst for finding/documenting it."""
+            return self.query_service_url + "/proxy/wdqs/bigdata/namespace/wdq/sparql"
