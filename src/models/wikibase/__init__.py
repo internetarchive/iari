@@ -60,6 +60,27 @@ class Wikibase(WcdBaseModel):
     WEBSITE_STRING: str  # string
     WIKIDATA_QID: str  # external id
 
+    ENGLISH_WIKIPEDIA = (
+        ""  # label: English Wikipedia description: language version of Wikipedia
+    )
+    WEBSITE_ITEM = (
+        ""  # label: Website description: first level domain website found in Wikipedia
+    )
+    WIKIPEDIA_PAGE = (
+        ""  # label: Wikipedia page description: page in a language version of Wikipedia
+    )
+    WIKIPEDIA_REFERENCE = (
+        ""  # label: Wikipedia reference description: reference on a page in Wikipedia
+    )
+    ARCHIVE_ITEM = ""  # label: Archive description: web archive
+    ARCHIVE_IS = ""  # label: Archive.is description: web archive
+    ARCHIVE_ORG = ""  # label: Archive.org description: web archive
+    ARCHIVE_TODAY = ""  # label: Archive.today description: web archive
+    WEBCITATION_ORG = ""  # label: Webcitation.org description: web archive
+
+    # This must come last to avoid errors
+    wcdqid_language_edition_of_wikipedia_to_work_on = ENGLISH_WIKIPEDIA
+
     @property
     def mediawiki_api_url(self) -> str:
         return self.wikibase_url + "/w/api.php"

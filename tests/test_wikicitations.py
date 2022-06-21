@@ -383,6 +383,8 @@ class TestWikiCitations(TestCase):
         reference = EnglishWikipediaPageReference(**data)
         reference.finish_parsing_and_generate_hash()
         wc = WikiCitations(wikibase=SandboxWikibase())
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
@@ -392,3 +394,7 @@ class TestWikiCitations(TestCase):
         )
         assert item.claims.get(property=wc.wikibase.PUBLISHER_STRING) is not None
         assert item.claims.get(property=wc.wikibase.LOCATION_STRING) is not None
+        claim: List[Claim] = item.claims.get(property=wc.wikibase.ARCHIVE_URL)
+        assert claim[0] is not None
+        # print(claim[0].qualifiers)
+        assert claim[0].qualifiers is not None

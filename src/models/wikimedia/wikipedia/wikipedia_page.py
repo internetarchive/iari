@@ -18,7 +18,6 @@ from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
 from src.models.wikibase import Wikibase
-from src.models.wikicitations.enums import WCDItem
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
@@ -36,7 +35,6 @@ class WikipediaPage(WcdBaseModel):
 
     cache: Optional[Cache]
     language_code: str = "en"
-    language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
     latest_revision_date: Optional[datetime]
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
@@ -482,7 +480,6 @@ class WikipediaPage(WcdBaseModel):
 
         self.wikicitations = WikiCitations(
             language_code=self.language_code,
-            language_wcditem=self.language_wcditem,
             wikibase=self.wikibase,
         )
 
@@ -597,17 +594,14 @@ class WikipediaPage(WcdBaseModel):
         # First we check if this page has already been uploaded
         self.__generate_hash__()
         if not self.__page_has_already_been_uploaded__():
-            console.print(
-                f"Importing {self.language_wcditem.name.title()} "
-                f"page '{self.title}'"
-            )
+            console.print(f"Importing page '{self.title}'")
             # logger.info("This page is missing from WikiCitations")
             self.__setup_wikicitations__()
-            with console.status("Downloading page data"):
-                self.__fetch_page_data__(title=self.title)
+            # with console.status("Downloading page data"):
+            self.__fetch_page_data__(title=self.title)
             # extract references and create items for the missing ones first
-            with console.status("Extracting information from the references"):
-                self.__extract_and_parse_references__()
+            # with console.status("Extracting information from the references"):
+            self.__extract_and_parse_references__()
             self.__upload_references_and_websites_if_missing__()
             # upload a new item for the page with links to all the page_reference items
             self.wikicitations_qid = (

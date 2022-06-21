@@ -1,4 +1,9 @@
-# This dictionary is the master of all the properties we need for WikiCitations
+"""
+This file holds all the data about our needed properties and semantic "base" items.
+
+One item is missing here and hardcoded into
+setup_all_properties_and_items_on_new_wikibase.py for now
+"""
 from wikibaseintegrator.wbi_enums import WikibaseDatatype  # type: ignore
 
 wcd_archive_items = dict(
@@ -12,7 +17,7 @@ wcd_items = dict(
     ENGLISH_WIKIPEDIA=dict(
         label="English Wikipedia", description="language version of Wikipedia"
     ),
-    WEBSITE=dict(
+    WEBSITE_ITEM=dict(
         label="Website", description="first level domain website found in Wikipedia"
     ),
     WIKIPEDIA_PAGE=dict(
@@ -82,6 +87,7 @@ wcd_properties = dict(
     WEBSITE_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     WIKIDATA_QID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
 )
+
 wcd_url_properties = dict(
     ARCHIVE_URL=dict(datatype=WikibaseDatatype.URL, description=""),
     CHAPTER_URL=dict(datatype=WikibaseDatatype.URL, description=""),

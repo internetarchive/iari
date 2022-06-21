@@ -10,7 +10,7 @@ import config
 from src.helpers import console
 from src.models.cache import Cache
 from src.models.wikibase import Wikibase
-from src.models.wikicitations import WCDItem, WikiCitations
+from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
 
@@ -30,7 +30,6 @@ class WcdImportBot(WcdBaseModel):
     title: Optional[str]
     total_number_of_references: Optional[int]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
-    language_wcditem: WCDItem = WCDItem.ENGLISH_WIKIPEDIA
     wikibase: Wikibase
 
     @validate_arguments
@@ -70,7 +69,7 @@ class WcdImportBot(WcdBaseModel):
         prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
         prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT (COUNT(?item) as ?count) WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_PAGE.value}.
+              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_PAGE}.
             }}
         """
         return self.__extract_count_from_first_binding__(
@@ -82,7 +81,7 @@ class WcdImportBot(WcdBaseModel):
         prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
         prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT (COUNT(?item) as ?count) WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{WCDItem.WIKIPEDIA_REFERENCE.value}.
+              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_REFERENCE}.
             }}
         """
         return self.__extract_count_from_first_binding__(
@@ -182,7 +181,6 @@ class WcdImportBot(WcdBaseModel):
                 wikibase=self.wikibase,
                 language_code=self.language_code,
                 wikimedia_site=self.wikimedia_site,
-                language_wcditem=self.language_wcditem,
             )
             page.__get_wikipedia_page_from_title__(title=title)
             page.__generate_hash__()
@@ -231,7 +229,6 @@ class WcdImportBot(WcdBaseModel):
                 wikibase=self.wikibase,
                 language_code=self.language_code,
                 wikimedia_site=self.wikimedia_site,
-                language_wcditem=self.language_wcditem,
             )
             page.__get_wikipedia_page_from_title__(title=title)
             page.extract_and_upload_to_wikicitations()
@@ -273,7 +270,6 @@ class WcdImportBot(WcdBaseModel):
                     wikipedia_page = WikipediaPage(
                         wikibase=self.wikibase,
                         language_code=self.language_code,
-                        language_wcditem=self.language_wcditem,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
                         page_id=page.pageid,
@@ -294,7 +290,6 @@ class WcdImportBot(WcdBaseModel):
                     # raise DebugExit()
                     wikipedia_page = WikipediaPage(
                         language_code=self.language_code,
-                        language_wcditem=self.language_wcditem,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
                         page_id=page.pageid,

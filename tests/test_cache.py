@@ -24,7 +24,6 @@ class TestCache(TestCase):
     # def test_add_reference(self):
     #     if config.use_cache:
     #         bot = WcdImportBot(
-    #             language_code="en", language_wcditem=WCDItem.ENGLISH_WIKIPEDIA
     #         )
     #         bot.get_and_extract_page_by_title(
     #             title="!Action Pact!",

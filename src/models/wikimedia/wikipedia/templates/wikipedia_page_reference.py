@@ -461,7 +461,6 @@ class WikipediaPageReference(WcdBaseModel):
                 archive_url_archive = KnownArchiveUrl(
                     self.first_level_domain_of_archive_url
                 )
-                # print(WCDItem[known_archive.name.upper().replace(".", "_")])
             except ValueError:
                 pass
             if archive_url_archive:
