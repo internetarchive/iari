@@ -83,5 +83,9 @@ class TestWcdImportBot(TestCase):
         bot.rinse_all_items_and_cache()
 
     def test__gather_statistics__(self):
+        console.print("sandbox.wiki:")
+        bot = WcdImportBot(wikibase=SandboxWikibase())
+        bot.__gather_statistics__()
+        console.print("wikicitaitons:")
         bot = WcdImportBot(wikibase=WikiCitationsWikibase())
         bot.__gather_statistics__()
