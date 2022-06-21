@@ -893,7 +893,7 @@ class WikiCitations(WcdBaseModel):
         # Claims always present
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
-            value=self.wikibase.WEBSITE,
+            value=self.wikibase.WEBSITE_ITEM,
         )
         if not self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on:
             raise MissingInformationError(
