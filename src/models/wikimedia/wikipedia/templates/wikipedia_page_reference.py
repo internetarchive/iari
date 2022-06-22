@@ -13,7 +13,10 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
+from src.models.exceptions import (
+    MissingInformationError,
+    MoreThanOneNumberError,
+)
 from src.models.person import Person
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.templates.enums import (
@@ -57,6 +60,7 @@ class WikipediaPageReference(WcdBaseModel):
     first_level_domain_of_url: Optional[str]
     first_level_domain_of_url_hash: Optional[str]
     first_level_domain_of_url_qid: Optional[str]
+    google_books: Optional[GoogleBooks]
     hosts_list: Optional[List[Person]]
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
@@ -855,13 +859,19 @@ class WikipediaPageReference(WcdBaseModel):
             self.isbn = self.first_parameter
 
     def __parse_google_books__(self):
-        """Parse the Google Books template that sometimes appear in self.url"""
+        """Parse the Google Books template that sometimes appear in self.url
+        and save the result in self.google_books and generate the URL
+        and store it in self.url"""
+        logger.debug("__parse_google_books__: Running")
         template_tuples = extract_templates_and_params(self.url, True)
-        for _template_name, content in template_tuples:
-            google_books: GoogleBooks = GoogleBooksSchema().load(content)
-            google_books.wikibase = self.wikibase
-            google_books.finish_parsing()
-            self.google_books = google_books
+        if template_tuples:
+            logger.info("Found Google books template")
+            for _template_name, content in template_tuples:
+                google_books: GoogleBooks = GoogleBooksSchema().load(content)
+                google_books.wikibase = self.wikibase
+                google_books.finish_parsing()
+                self.url = google_books.url
+                self.google_books = google_books
 
     def __parse_isbn__(self) -> None:
         if self.isbn is not None:
@@ -988,9 +998,12 @@ class WikipediaPageReference(WcdBaseModel):
         return persons
 
     def __parse_urls__(self) -> None:
-        """This function quotes the URL to avoid complaints from Wikibase"""
-        logger.debug("Parsing URLs")
-        if self.url is not None:
+        """This function looks for Google Books templates and
+        parse the URLs to avoid complaints from Wikibase"""
+        logger.debug("__parse_urls__: Running")
+        if self.url:
+            # If we find a GoogleBooks template we
+            # overwrite self.url with the generated URL
             self.__parse_google_books__()
             # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
             parsed_url = urlparse(self.url)
@@ -1001,15 +1014,15 @@ class WikipediaPageReference(WcdBaseModel):
                     f"Skipped the URL '{self.url}' because of missing scheme"
                 )
                 self.url = None
-        if self.archive_url is not None:
+        if self.archive_url:
             self.archive_url = urlparse(self.archive_url).geturl()
-        if self.lay_url is not None:
+        if self.lay_url:
             self.lay_url = urlparse(self.lay_url).geturl()
-        if self.chapter_url is not None:
+        if self.chapter_url:
             self.chapter_url = urlparse(self.chapter_url).geturl()
-        if self.conference_url is not None:
+        if self.conference_url:
             self.conference_url = urlparse(self.conference_url).geturl()
-        if self.transcripturl is not None:
+        if self.transcripturl:
             self.transcripturl = urlparse(self.transcripturl).geturl()
 
     @validator(
