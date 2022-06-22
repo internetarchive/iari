@@ -181,7 +181,8 @@ class WcdImportBot(WcdBaseModel):
             help="Show statistics about the supported Wikibase instances",
         )
         parser.add_argument(
-            "-wc" "--wikicitations",
+            "-wc",
+            "--wikicitations",
             help="Work against Wikicitations. The bot defaults to sandboxwikibase.",
         )
         return parser.parse_args()
