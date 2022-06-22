@@ -1,6 +1,8 @@
 from typing import Any, Optional
 
 # from src.models.wikimedia.wikipedia.templates.enums import WikipediaTemplatePersonRole
+from urllib.parse import urlparse
+
 from src.wcd_base_model import WcdBaseModel
 
 
@@ -41,3 +43,11 @@ class Person(WcdBaseModel):
     def has_number(self) -> bool:
         """This should return True if not None and False otherwise"""
         return bool(self.number_in_sequence)
+
+    @property
+    def url(self) -> str:
+        url = urlparse(self.link)
+        if url.scheme:
+            return str(url.geturl())
+        else:
+            return ""

@@ -518,12 +518,12 @@ class WikiCitations(WcdBaseModel):
                     value=person_object.orcid,
                 )
                 qualifiers.append(orcid)
-            if person_object.link:
-                link = datatypes.URL(
+            if person_object.url:
+                url = datatypes.URL(
                     prop_nr=self.wikibase.URL,
-                    value=person_object.link,
+                    value=person_object.url,
                 )
-                qualifiers.append(link)
+                qualifiers.append(url)
             if person_object.mask:
                 mask = datatypes.String(
                     prop_nr=self.wikibase.NAME_MASK,
