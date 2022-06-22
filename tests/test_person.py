@@ -35,3 +35,9 @@ class TestPerson(TestCase):
             role=EnglishWikipediaTemplatePersonRole.TRANSLATOR,
         )
         assert isinstance(p.role, WikipediaTemplatePersonRole)
+
+    def test_url(self):
+        p = Person(given="test", surname="test", link="test")
+        assert p.url == ""
+        p = Person(given="test", surname="test", link="https://en.wikipedia.org/")
+        assert p.url == "https://en.wikipedia.org/"
