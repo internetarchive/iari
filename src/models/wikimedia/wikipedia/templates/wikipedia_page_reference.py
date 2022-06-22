@@ -12,7 +12,7 @@ from tld import get_fld
 from tld.exceptions import TldBadUrl
 
 import config
-from src.models.exceptions import MoreThanOneNumberError
+from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.templates.enums import (
@@ -509,13 +509,17 @@ class WikipediaPageReference(WcdBaseModel):
             return None
 
     def __generate_first_level_domain_hash__(self):
+        """This is used as hash for all website items"""
         if self.first_level_domain_of_url is not None:
             str2hash = self.first_level_domain_of_url
             self.first_level_domain_of_url_hash = hashlib.md5(
-                str2hash.replace(" ", "").lower().encode()
+                f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
             ).hexdigest()
 
     def __generate_hashes__(self):
+        """Generate hashes for both website and reference items"""
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         self.__generate_reference_hash__()
         self.__generate_first_level_domain_hash__()
 
@@ -623,7 +627,7 @@ class WikipediaPageReference(WcdBaseModel):
         #     pass
         if str2hash is not None:
             self.md5hash = hashlib.md5(
-                str2hash.replace(" ", "").lower().encode()
+                f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
             ).hexdigest()
             logger.debug(self.md5hash)
         else:
