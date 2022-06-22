@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import logging
 
-from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
-
 try:
     import config
 except ModuleNotFoundError:
@@ -12,5 +10,5 @@ except ModuleNotFoundError:
 from src import WcdImportBot
 
 logging.basicConfig(level=config.loglevel)
-wcdimportbot = WcdImportBot(wikibase=WikiCitationsWikibase())
+wcdimportbot = WcdImportBot()
 wcdimportbot.run()
