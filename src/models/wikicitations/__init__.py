@@ -1122,8 +1122,7 @@ class WikiCitations(WcdBaseModel):
         if page_reference.title:
             title = datatypes.String(
                 prop_nr=self.wikibase.TITLE,
-                text=page_reference.title,
-                language=self.language_code,
+                value=page_reference.title,
             )
         if page_reference.url:
             url = datatypes.URL(
