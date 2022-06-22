@@ -13,10 +13,7 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.exceptions import (
-    MissingInformationError,
-    MoreThanOneNumberError,
-)
+from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.templates.enums import (
