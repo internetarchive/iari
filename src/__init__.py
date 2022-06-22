@@ -247,16 +247,16 @@ class WcdImportBot(WcdBaseModel):
 
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
-        with console.status("Downloading page information"):
-            from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        """Download and extract the page"""
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
-            page = WikipediaPage(
-                wikibase=self.wikibase,
-                language_code=self.language_code,
-                wikimedia_site=self.wikimedia_site,
-            )
-            page.__get_wikipedia_page_from_title__(title=title)
-            page.extract_and_upload_to_wikicitations()
+        page = WikipediaPage(
+            wikibase=self.wikibase,
+            language_code=self.language_code,
+            wikimedia_site=self.wikimedia_site,
+        )
+        page.__get_wikipedia_page_from_title__(title=title)
+        page.extract_and_upload_to_wikicitations()
 
     @validate_arguments
     def get_and_extract_pages_by_range(
