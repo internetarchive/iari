@@ -9,6 +9,7 @@ class KnownArchiveUrl(Enum):
     ARCHIVE_IS = "archive.is"
     ARCHIVE_ORG = "archive.org"
     ARCHIVE_PH = "archive.is"
-    MEMENTOWEB_ORG = "mementoweb.org"
     ARCHIVE_TODAY = "archive.today"
+    GHOSTARCHIVE_ORG = "ghostarchive.org"
+    MEMENTOWEB_ORG = "mementoweb.org"
     WEBCITATION_ORG = "webcitation.org"

@@ -77,6 +77,7 @@ class SandboxWikibase(Wikibase):
     ARCHIVE_IS = "Q27"  # label: Archive.is description: web archive
     ARCHIVE_ORG = "Q37"  # label: Archive.org description: web archive
     ARCHIVE_TODAY = "Q38"  # label: Archive.today description: web archive
+    GHOSTARCHIVE_ORG = "Q2589"  # label: Ghostarchive.org description: web archive
     WEBCITATION_ORG = "Q39"  # label: Webcitation.org description: web archive
 
     # This must come last to avoid errors

@@ -10,6 +10,7 @@ wcd_archive_items = dict(
     ARCHIVE_IS=dict(label="Archive.is", description="web archive"),
     ARCHIVE_ORG=dict(label="Archive.org", description="web archive"),
     ARCHIVE_TODAY=dict(label="Archive.today", description="web archive"),
+    GHOSTARCHIVE_ORG=dict(label="Ghostarchive.org", description="web archive"),
     WEBCITATION_ORG=dict(label="Webcitation.org", description="web archive"),
 )
 
