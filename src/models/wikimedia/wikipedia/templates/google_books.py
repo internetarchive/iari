@@ -1,11 +1,13 @@
 """Template data example: {{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}"""
+import hashlib
 from enum import Enum
 from typing import Optional, Union
 
 from marshmallow import Schema, post_load
 from marshmallow.fields import String
-from pydantic import constr
+from pydantic import ConstrainedStr
 
+from src import MissingInformationError, Wikibase
 from src.wcd_base_model import WcdBaseModel
 
 
@@ -19,18 +21,33 @@ class YesNoShort(Enum):
     NO = "n"
 
 
+class TwelveCharString(ConstrainedStr):
+    max_length=12
+    min_length=12
+
 class GoogleBooks(WcdBaseModel):
-    id: Optional[constr(max_length=12, min_length=12)]
+    first_parameter_id: Optional[TwelveCharString]
+    id: Optional[TwelveCharString]
     keywords: Optional[str]
+    md5hash: Optional[str]
     page: Optional[int]
     plainurl: Optional[Union[YesNo, YesNoShort]]
     text: Optional[str]
     title: Optional[str]
-    first_parameter_id: Optional[constr(max_length=12, min_length=12)]
+    wikibase: Optional[Wikibase]
 
     @property
     def url(self):
         return f"https://books.google.com/books?id={self.id}"
+
+    def __generate_hash__(self):
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
+        if self.id is not None:
+            str2hash = self.id
+            self.md5hash = hashlib.md5(
+                f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
+            ).hexdigest()
 
     def finish_parsing(self):
         if self.first_parameter_id:
@@ -38,6 +55,7 @@ class GoogleBooks(WcdBaseModel):
                 raise ValueError("Both self.id and self.first_parameter_id specified.")
             else:
                 self.id = self.first_parameter_id
+        self.__generate_hash__()
 
 
 class GoogleBooksSchema(Schema):
