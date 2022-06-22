@@ -1,3 +1,5 @@
+import logging
+import re
 from collections import OrderedDict
 from typing import List
 from typing import OrderedDict as OrderedDictType
@@ -6,8 +8,33 @@ from typing import Tuple
 import mwparserfromhell  # type: ignore
 
 # This code has been snipped from pywikibot 7.2.0 textlib.py to avoid forking the whole thing
+import config
 
 ETPType = List[Tuple[str, OrderedDictType[str, str]]]
+
+logging.basicConfig(level=config.loglevel)
+logger = logging.getLogger(__name__)
+
+
+def remove_comments(text: str):
+    """Remove html comments <!-- -->
+    Copyright Dennis Priskorn"""
+    # This regex tries to match text on both sides of
+    # the comment and join them or in the case no comment is found
+    # just return the whole thing.
+    regex = re.compile(r"(.*)<!--.*-->(.*)|(.*)")
+    matches = re.findall(pattern=regex, string=text)
+    if matches:
+        # print(match.groups())
+        string = ""
+        for match in matches:
+            # print(match)
+            if match:
+                for part in match:
+                    string += str(part)
+        return string.strip()
+    else:
+        return text
 
 
 def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
@@ -71,7 +98,6 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
         params = OrderedDict()
         for param in getattr(template, arguments):
             value = str(param.value)  # mwpfh needs upcast to str
-
             if strip:
                 key = param.name.strip()
                 if explicit(param):
@@ -80,7 +106,10 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
                     value = str(param.value)
             else:
                 key = str(param.name)
-
+            # Remove comments
+            # logger.debug(f"value before: {value}")
+            value = remove_comments(value)
+            # logger.debug(f"value after: {value}")
             params[key] = value
 
         result.append((template.name.strip(), params))
