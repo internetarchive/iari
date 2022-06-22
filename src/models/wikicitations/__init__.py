@@ -24,7 +24,7 @@ from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
-from src.helpers import console
+from src.helpers import console, press_enter_to_continue
 from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
@@ -81,7 +81,7 @@ class WikiCitations(WcdBaseModel):
                     self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
-                        input("continue?")
+                        press_enter_to_continue()
                     count += 1
                 console.print(f"Done deleting a total of {count} page items")
         else:
@@ -99,7 +99,7 @@ class WikiCitations(WcdBaseModel):
                     self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
-                        input("continue?")
+                        press_enter_to_continue()
                     count += 1
             console.print(f"Done deleting a total of {count} reference items")
         else:
@@ -117,7 +117,7 @@ class WikiCitations(WcdBaseModel):
                     self.__delete_item__(item_id=item_id)
                     # logger.debug(result)
                     if config.press_enter_to_continue:
-                        input("continue?")
+                        press_enter_to_continue()
                     count += 1
             console.print(f"Done deleting a total of {count} website items")
         else:
