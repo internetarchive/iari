@@ -32,7 +32,7 @@ class WcdImportBot(WcdBaseModel):
     percent_references_hashed_in_total: Optional[int]
     # total_number_of_hashed_references: Optional[int]
     # total_number_of_references: Optional[int]
-    wikibase: Wikibase
+    wikibase: Wikibase = SandboxWikibase()
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 
     @validate_arguments
@@ -179,6 +179,10 @@ class WcdImportBot(WcdBaseModel):
             "--statistics",
             action="store_true",
             help="Show statistics about the supported Wikibase instances",
+        )
+        parser.add_argument(
+            "-wc" "--wikicitations",
+            help="Work against Wikicitations. The bot defaults to sandboxwikibase.",
         )
         return parser.parse_args()
 
@@ -370,6 +374,8 @@ class WcdImportBot(WcdBaseModel):
         """This method handles running the bot
         based on the given command line arguments."""
         args = self.__setup_argparse_and_return_args__()
+        if args.wikicitations is not None:
+            self.wikibase = WikiCitationsWikibase()
         if args.rinse is True:
             self.rinse_all_items_and_cache()
         elif args.import_title is not None:
