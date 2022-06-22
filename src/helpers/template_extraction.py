@@ -1,3 +1,4 @@
+import re
 from collections import OrderedDict
 from typing import List
 from typing import OrderedDict as OrderedDictType
@@ -8,6 +9,16 @@ import mwparserfromhell  # type: ignore
 # This code has been snipped from pywikibot 7.2.0 textlib.py to avoid forking the whole thing
 
 ETPType = List[Tuple[str, OrderedDictType[str, str]]]
+
+
+def remove_comments(text: str):
+    """Remove html comments <!-- -->
+    Copyright Dennis Priskorn"""
+    regex = r"(.*)<\!--.*-->(.*)"
+    match = re.search(pattern=regex, string=text)
+    if match:
+        # print(match.groups())
+        return "".join(match.groups()).strip()
 
 
 def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
@@ -58,6 +69,7 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
     # references are probably never inside disabled parts like "nowiki".
     # if remove_disabled_parts:
     #     text = removeDisabledParts(text)
+    text = remove_comments(text)
 
     result = []
     parsed = mwparserfromhell.parse(text)
