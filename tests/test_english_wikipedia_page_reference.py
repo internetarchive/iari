@@ -9,6 +9,7 @@ from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference i
     EnglishWikipediaPageReference,
     EnglishWikipediaPageReferenceSchema,
 )
+from src.models.wikimedia.wikipedia.templates.google_books import GoogleBooks
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -236,3 +237,23 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
 
         # FIXME this fails for some reason :/
         # assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
+
+    def test_google_books(self):
+        data = {
+            "url": "{{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}",
+            "title": "Turntable Interview: !!!",
+            "last": "Locker",
+            "first": "Melissa",
+            "date": "May 9, 2013",
+            "website": "Stereogum",
+            "access_date": "May 24, 2021",
+            "template_name": "cite web",
+        }
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        # console.print(type(reference.google_books))
+        assert reference.first_level_domain_of_url == "google.com"
+        self.assertIsInstance(reference.google_books, GoogleBooks)
