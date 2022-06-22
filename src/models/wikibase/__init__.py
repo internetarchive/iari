@@ -78,6 +78,7 @@ class Wikibase(WcdBaseModel):
     ARCHIVE_ORG: str = ""  # label: Archive.org description: web archive
     ARCHIVE_TODAY: str = ""  # label: Archive.today description: web archive
     WEBCITATION_ORG: str = ""  # label: Webcitation.org description: web archive
+    GHOSTARCHIVE_ORG: str = ""
 
     # This must come last to avoid errors
     wcdqid_language_edition_of_wikipedia_to_work_on: str = ""
