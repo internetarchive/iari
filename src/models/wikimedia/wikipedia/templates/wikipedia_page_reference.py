@@ -12,11 +12,16 @@ from tld import get_fld
 from tld.exceptions import TldBadUrl
 
 import config
+from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
+)
+from src.models.wikimedia.wikipedia.templates.google_books import (
+    GoogleBooks,
+    GoogleBooksSchema,
 )
 from src.wcd_base_model import WcdBaseModel
 
@@ -849,6 +854,15 @@ class WikipediaPageReference(WcdBaseModel):
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
+    def __parse_google_books__(self):
+        """Parse the Google Books template that sometimes appear in self.url"""
+        template_tuples = extract_templates_and_params(self.url, True)
+        for _template_name, content in template_tuples:
+            google_books: GoogleBooks = GoogleBooksSchema().load(content)
+            google_books.wikibase = self.wikibase
+            google_books.finish_parsing()
+            self.google_books = google_books
+
     def __parse_isbn__(self) -> None:
         if self.isbn is not None:
             # Replace spaces with dashes to follow the ISBN standard
@@ -977,16 +991,16 @@ class WikipediaPageReference(WcdBaseModel):
         """This function quotes the URL to avoid complaints from Wikibase"""
         logger.debug("Parsing URLs")
         if self.url is not None:
+            self.__parse_google_books__()
             # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
             parsed_url = urlparse(self.url)
             if parsed_url.scheme:
                 self.url = parsed_url.geturl()
             else:
-                skipped_url = self.url
-                self.url = None
                 logger.warning(
-                    f"Skipped the URL '{skipped_url}' because of missing scheme"
+                    f"Skipped the URL '{self.url}' because of missing scheme"
                 )
+                self.url = None
         if self.archive_url is not None:
             self.archive_url = urlparse(self.archive_url).geturl()
         if self.lay_url is not None:
@@ -1069,11 +1083,11 @@ class WikipediaPageReference(WcdBaseModel):
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
         self.__parse_first_parameter__()
+        self.__parse_urls__()
+        self.__detect_archive_urls__()
         self.__extract_first_level_domain__()
         self.__parse_isbn__()
         self.__parse_persons__()
-        self.__parse_urls__()
-        self.__detect_archive_urls__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
 
