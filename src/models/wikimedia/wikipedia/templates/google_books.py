@@ -22,10 +22,13 @@ class YesNoShort(Enum):
 
 
 class TwelveCharString(ConstrainedStr):
-    max_length=12
-    min_length=12
+    max_length = 12
+    min_length = 12
+
 
 class GoogleBooks(WcdBaseModel):
+    """See https://en.wikipedia.org/wiki/Template:Google_books"""
+
     first_parameter_id: Optional[TwelveCharString]
     id: Optional[TwelveCharString]
     keywords: Optional[str]
