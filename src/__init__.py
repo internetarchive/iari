@@ -28,10 +28,10 @@ class WcdImportBot(WcdBaseModel):
 
     language_code: str = "en"
     max_count: int = 0  # 0 means disabled
+    page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
-    title: Optional[str]
-    total_number_of_hashed_references: Optional[int]
-    total_number_of_references: Optional[int]
+    # total_number_of_hashed_references: Optional[int]
+    # total_number_of_references: Optional[int]
     wikibase: Wikibase
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 
@@ -306,14 +306,14 @@ class WcdImportBot(WcdBaseModel):
                 if not page.isRedirectPage():
                     count += 1
                     # console.print(count)
-                    logger.info(f"{page.pageid} {page.title()}")
+                    logger.info(f"{page.pageid} {page.page_title()}")
                     # raise DebugExit()
                     wikipedia_page = WikipediaPage(
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
                         page_id=page.pageid,
-                        title=str(page.title()),
+                        title=str(page.page_title()),
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
                         wikibase=self.wikibase,
