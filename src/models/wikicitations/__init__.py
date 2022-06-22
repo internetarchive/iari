@@ -803,9 +803,8 @@ class WikiCitations(WcdBaseModel):
                         )
                     )
                 else:
-                    logger.warning(
-                        f"No archive detected for {page_reference.archive_url}"
-                    )
+                    message = f"No supported archive detected for {page_reference.archive_url}"
+                    self.__log_to_file__(message=message, file_name="undetected_archive.log")
                     claims.append(
                         datatypes.URL(
                             prop_nr=self.wikibase.ARCHIVE_URL,
