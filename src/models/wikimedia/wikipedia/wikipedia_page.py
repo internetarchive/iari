@@ -420,7 +420,10 @@ class WikipediaPage(WcdBaseModel):
             if template_name.lower() in config.supported_templates:
                 parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
                 parsed_template["template_name"] = template_name.lower()
-                logger.debug(parsed_template)
+                if config.loglevel == logging.DEBUG:
+                    logger.debug("parsed_template:")
+                    console.print(parsed_template)
+                    # press_enter_to_continue()
                 schema = EnglishWikipediaPageReferenceSchema()
                 try:
                     reference: Optional[WikipediaPageReference] = schema.load(
