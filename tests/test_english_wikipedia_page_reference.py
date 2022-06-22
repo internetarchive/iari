@@ -70,6 +70,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference: EnglishWikipediaPageReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
+        reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         console.print(reference)
         person = reference.persons_without_role[0]
@@ -93,6 +94,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference: EnglishWikipediaPageReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
+        reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         console.print(reference)
         person = reference.persons_without_role[0]
@@ -116,6 +118,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference: EnglishWikipediaPageReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
+        reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         console.print(reference)
         person = reference.persons_without_role[0]
@@ -135,6 +138,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
         reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.first_level_domain_of_url == "stereogum.com"
         assert (
@@ -155,6 +159,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
         reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.url is None
 
@@ -189,6 +194,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             access_date="2010-11-09",
         )
         reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.publisher == "Kungliga Motorbåt Klubben"
         assert reference.location == "Stockholm"
