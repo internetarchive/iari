@@ -7,7 +7,8 @@ from marshmallow import Schema, post_load
 from marshmallow.fields import String
 from pydantic import ConstrainedStr
 
-from src import MissingInformationError, Wikibase
+from src.models.exceptions import MissingInformationError
+from src.models.wikibase import Wikibase
 from src.wcd_base_model import WcdBaseModel
 
 
