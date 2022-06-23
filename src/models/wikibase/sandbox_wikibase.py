@@ -10,6 +10,7 @@ class SandboxWikibase(Wikibase):
     title = "sandbox.wiki"
     user_name = config.sandbox_user
     wikibase_url = "https://sandbox.wiki"
+    wikibase_cloud_wikibase = False
 
     ACCESS_DATE = "P10"  # datatype: WikibaseDatatype.TIME description: date of access of the resource
     ARCHIVE = "P23"  # datatype: WikibaseDatatype.ITEM description: None
