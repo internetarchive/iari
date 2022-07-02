@@ -9,7 +9,7 @@ class WikiCitationsWikibase(Wikibase):
     user_name = config.user
     botpassword = config.pwd
     wikibase_url = "https://wikicitations.wiki.opencura.com"
-    query_service_url = wikibase_url
+    query_service_url = wikibase_url + "/query/"
 
     ACCESS_DATE = "P37"
     ARCHIVE = "P52"

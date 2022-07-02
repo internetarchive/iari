@@ -5,11 +5,12 @@ class Wikibase(WcdBaseModel):
     """This is a parent class for the wikibases we support
     We define all the properties here to be able to use them in the subclasses"""
 
+    botpassword: str
+    query_service_url: str
     title: str
     user_name: str
-    botpassword: str
+    wikibase_cloud_wikibase: bool = True
     wikibase_url: str
-    query_service_url: str
 
     ACCESS_DATE: str  # date
     ARCHIVE: str  # item
@@ -101,9 +102,9 @@ class Wikibase(WcdBaseModel):
 
     @property
     def sparql_endpoint_url(self) -> str:
-        if self.__class__.__name__ == "WikiCitationsWikibase":
-            """This is the default endpoint url for Wikibase.cloud"""
-            return self.query_service_url + "/query/sparql"
+        if self.wikibase_cloud_wikibase:
+            """This is the default endpoint url for Wikibase.cloud instances"""
+            return self.wikibase_url + "/query/sparql"
         else:
             """This is the default docker Wikibase endpoint url
             Thanks to @Myst for finding/documenting it."""
