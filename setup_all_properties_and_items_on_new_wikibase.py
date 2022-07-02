@@ -25,6 +25,7 @@ import config
 from src import Wikibase, console
 from src.models.wikibase.dictionaries import (
     wcd_archive_items,
+    wcd_externalid_properties,
     wcd_item_properties,
     wcd_items,
     wcd_quantity_properties,
@@ -223,6 +224,7 @@ class SetupNewWikibase(BaseModel):
         output_text = []
         # We merge the dictionaries and loop through all entries
         properties = {
+            **wcd_externalid_properties,
             **wcd_item_properties,
             **wcd_quantity_properties,
             **wcd_string_properties,
@@ -232,7 +234,7 @@ class SetupNewWikibase(BaseModel):
         console.print(f"Setting up {len(properties)} properties")
         count = 1
         for entry in properties:
-            if count <= 50:
+            if count <= 150:
                 data: Dict[Any, Any] = properties[entry]
                 datatype: WikibaseDatatype = data["datatype"]
                 description = data["description"]
@@ -247,6 +249,7 @@ class SetupNewWikibase(BaseModel):
                     ),
                 )
                 try:
+                    logger.info(f"Trying to create {label}")
                     property = draft_property.write()
                     output_text.append(
                         f'{entry} = "{property.id}" # datatype: {datatype} description: {description}'
