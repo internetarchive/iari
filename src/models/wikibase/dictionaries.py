@@ -30,70 +30,81 @@ wcd_items = dict(
 )
 
 
-wcd_properties = dict(
-    ACCESS_DATE=dict(
-        datatype=WikibaseDatatype.TIME, description="date of access of the resource"
-    ),
-    ARCHIVE=dict(datatype=WikibaseDatatype.ITEM, description=""),
-    ARCHIVE_DATE=dict(datatype=WikibaseDatatype.TIME, description=""),
-    AUTHOR=dict(datatype=WikibaseDatatype.ITEM, description=""),
-    FULL_NAME_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
+wcd_externalid_properties = dict(
     DOI=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
-    EDITOR=dict(datatype=WikibaseDatatype.ITEM, description=""),
-    EDITOR_NAME_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
-    FAMILY_NAME=dict(datatype=WikibaseDatatype.STRING, description=""),
-    GIVEN_NAME=dict(datatype=WikibaseDatatype.STRING, description=""),
-    CITATIONS=dict(datatype=WikibaseDatatype.ITEM, description=""),
-    FIRST_LEVEL_DOMAIN_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
-    FULL_WORK_AVAILABLE_AT_URL=dict(datatype=WikibaseDatatype.URL, description=""),
-    HASH=dict(datatype=WikibaseDatatype.STRING, description=""),
-    HOST_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
-    INSTANCE_OF=dict(datatype=WikibaseDatatype.ITEM, description=""),
-    INTERVIEWER_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     ISBN_10=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
     ISBN_13=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
-    ISSUE=dict(datatype=WikibaseDatatype.STRING, description=""),
-    LAST_UPDATE=dict(
-        datatype=WikibaseDatatype.TIME, description="date of last update of this item?"
-    ),
-    LOCATION_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
-    LUMPED_AUTHORS=dict(datatype=WikibaseDatatype.STRING, description=""),
     MEDIAWIKI_PAGE_ID=dict(
         # this is string in WCD
         datatype=WikibaseDatatype.EXTERNALID,
         description="",
     ),
-    NAME_MASK=dict(datatype=WikibaseDatatype.STRING, description=""),
     ORCID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
-    PAGES=dict(datatype=WikibaseDatatype.STRING, description=""),
     PMID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
-    PUBLICATION_DATE=dict(
-        datatype=WikibaseDatatype.TIME,
-        description="date of publication of the resource",
-    ),
+    WIKIDATA_QID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
+)
+
+wcd_item_properties = dict(
+    ARCHIVE=dict(datatype=WikibaseDatatype.ITEM, description=""),
+    AUTHOR=dict(datatype=WikibaseDatatype.ITEM, description=""),
+    CITATIONS=dict(datatype=WikibaseDatatype.ITEM, description=""),
+    EDITOR=dict(datatype=WikibaseDatatype.ITEM, description=""),
+    INSTANCE_OF=dict(datatype=WikibaseDatatype.ITEM, description=""),
     PUBLISHED_IN=dict(datatype=WikibaseDatatype.ITEM, description=""),
-    PUBLISHER_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
-    RETRIEVED_DATE=dict(
-        datatype=WikibaseDatatype.TIME, description="date of retrieval of the resource"
-    ),
-    PAGE_REVISION_ID=dict(datatype=WikibaseDatatype.STRING, description=""),
-    SERIES_ORDINAL=dict(datatype=WikibaseDatatype.QUANTITY, description=""),
     SOURCE_WIKIPEDIA=dict(datatype=WikibaseDatatype.ITEM, description=""),
+    WEBSITE=dict(datatype=WikibaseDatatype.ITEM, description=""),
+)
+
+wcd_quantity_properties = dict(
+    SERIES_ORDINAL=dict(datatype=WikibaseDatatype.QUANTITY, description=""),
+)
+
+wcd_string_properties = dict(
+    EDITOR_NAME_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
+    FAMILY_NAME=dict(datatype=WikibaseDatatype.STRING, description=""),
+    FIRST_LEVEL_DOMAIN_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
+    FULL_NAME_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
+    GIVEN_NAME=dict(datatype=WikibaseDatatype.STRING, description=""),
+    HASH=dict(datatype=WikibaseDatatype.STRING, description=""),
+    HOST_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
+    INTERVIEWER_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
+    ISSUE=dict(datatype=WikibaseDatatype.STRING, description=""),
+    LOCATION_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
+    LUMPED_AUTHORS=dict(datatype=WikibaseDatatype.STRING, description=""),
+    NAME_MASK=dict(datatype=WikibaseDatatype.STRING, description=""),
+    PAGES=dict(datatype=WikibaseDatatype.STRING, description=""),
+    PAGE_REVISION_ID=dict(datatype=WikibaseDatatype.STRING, description=""),
+    PUBLISHER_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     STRING_CITATIONS=dict(datatype=WikibaseDatatype.STRING, description=""),
     TEMPLATE_NAME=dict(datatype=WikibaseDatatype.STRING, description=""),
     TITLE=dict(datatype=WikibaseDatatype.STRING, description=""),
     TRANSLATOR_NAME_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     VOLUME=dict(datatype=WikibaseDatatype.STRING, description=""),
-    WEBSITE=dict(datatype=WikibaseDatatype.ITEM, description=""),
     WEBSITE_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
-    WIKIDATA_QID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
 )
 
 wcd_url_properties = dict(
     ARCHIVE_URL=dict(datatype=WikibaseDatatype.URL, description=""),
     CHAPTER_URL=dict(datatype=WikibaseDatatype.URL, description=""),
     CONFERENCE_URL=dict(datatype=WikibaseDatatype.URL, description=""),
+    FULL_WORK_AVAILABLE_AT_URL=dict(datatype=WikibaseDatatype.URL, description=""),
     LAY_URL=dict(datatype=WikibaseDatatype.URL, description=""),
     TRANSCRIPT_URL=dict(datatype=WikibaseDatatype.URL, description=""),
     URL=dict(datatype=WikibaseDatatype.URL, description=""),
+)
+wcd_time_properties = dict(
+    ACCESS_DATE=dict(
+        datatype=WikibaseDatatype.TIME, description="date of access of the resource"
+    ),
+    ARCHIVE_DATE=dict(datatype=WikibaseDatatype.TIME, description=""),
+    LAST_UPDATE=dict(
+        datatype=WikibaseDatatype.TIME, description="date of last update of this item?"
+    ),
+    PUBLICATION_DATE=dict(
+        datatype=WikibaseDatatype.TIME,
+        description="date of publication of the resource",
+    ),
+    RETRIEVED_DATE=dict(
+        datatype=WikibaseDatatype.TIME, description="date of retrieval of the resource"
+    ),
 )

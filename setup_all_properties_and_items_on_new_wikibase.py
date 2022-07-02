@@ -25,8 +25,11 @@ import config
 from src import Wikibase, console
 from src.models.wikibase.dictionaries import (
     wcd_archive_items,
+    wcd_item_properties,
     wcd_items,
-    wcd_properties,
+    wcd_quantity_properties,
+    wcd_string_properties,
+    wcd_time_properties,
     wcd_url_properties,
 )
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
@@ -219,7 +222,12 @@ class SetupNewWikibase(BaseModel):
         )
         output_text = []
         # We merge the dictionaries and loop through all entries
-        properties = {**wcd_properties, **wcd_url_properties}
+        properties = {
+            **wcd_item_properties,
+            **wcd_quantity_properties**wcd_string_properties,
+            **wcd_time_properties,
+            **wcd_url_properties,
+        }
         console.print(f"Setting up {len(properties)} properties")
         count = 1
         for entry in properties:
