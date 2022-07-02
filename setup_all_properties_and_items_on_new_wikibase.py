@@ -224,7 +224,8 @@ class SetupNewWikibase(BaseModel):
         # We merge the dictionaries and loop through all entries
         properties = {
             **wcd_item_properties,
-            **wcd_quantity_properties**wcd_string_properties,
+            **wcd_quantity_properties,
+            **wcd_string_properties,
             **wcd_time_properties,
             **wcd_url_properties,
         }
