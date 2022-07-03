@@ -417,6 +417,8 @@ class WikipediaPageReference(WcdBaseModel):
     ]  # this appears in cite journal and is used to specify authors_list using the Vancouver system
     authors: Optional[str]
     place: Optional[str]
+    lang: Optional[str]
+    periodical: Optional[str]
 
     @property
     def has_first_level_domain_url_hash(self) -> bool:
@@ -877,8 +879,16 @@ class WikipediaPageReference(WcdBaseModel):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
+    def __log_language__(self):
+        """We log the languages to prepare for later implementation of parsing"""
+        if self.language:
+            self.__log_to_file__(message=self.language, file_name="languages.log")
+        if self.lang:
+            self.__log_to_file__(message=self.lang, file_name="languages.log")
+
     def __parse_first_parameter__(self) -> None:
-        # pseudo code
+        """We parse the first parameter which has different meaning
+        depending on the template in question"""
         if self.template_name in ("cite q", "citeq"):
             # We assume that the first parameter is the Wikidata QID
             if self.first_parameter:
@@ -1151,6 +1161,7 @@ class WikipediaPageReference(WcdBaseModel):
         self.__clean_wiki_markup_from_strings__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
+        self.__log_language__()
 
 
 class WikipediaPageReferenceSchema(Schema):
@@ -1230,6 +1241,8 @@ class WikipediaPageReferenceSchema(Schema):
             "vauthors",
             "authors",
             "place",
+            "lang",
+            "periodical",
             # dates,
             "access_date",
             "archive_date",
