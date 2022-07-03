@@ -257,3 +257,16 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         # console.print(type(reference.google_books))
         assert reference.first_level_domain_of_url == "google.com"
         self.assertIsInstance(reference.google_books, GoogleBooks)
+
+    def test_detect_internet_archive_id(self):
+        data = dict(
+            url="https://archive.org/details/catalogueofshipw0000wils/",
+            template_name="cite book",
+        )
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        # print(reference.internet_archive_id)
+        assert reference.internet_archive_id == "catalogueofshipw0000wils"

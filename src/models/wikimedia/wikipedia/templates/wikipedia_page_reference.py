@@ -62,6 +62,7 @@ class WikipediaPageReference(WcdBaseModel):
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
     isbn_13: Optional[str]
+    internet_archive_id: Optional[str]
     md5hash: Optional[str]
     numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
@@ -488,6 +489,17 @@ class WikipediaPageReference(WcdBaseModel):
                 pass
             if url_archive:
                 self.detected_archive_of_url = url_archive
+
+    def __detect_internet_archive_id__(self):
+        """We detect INTERNET_ARCHIVE_ID to populate the property later
+        Example: https://archive.org/details/catalogueofshipw0000wils/"""
+        if self.first_level_domain_of_url == "archive.org":
+            if "/details/" in self.url:
+                path = str(urlparse(self.url).path)
+                if path:
+                    self.internet_archive_id = path.split("/")[2]
+                else:
+                    raise ValueError(f"could not extract path from {self.url}")
 
     def __extract_first_level_domain__(self):
         logger.info("Extracting first level domain from 2 attributes")
@@ -1096,6 +1108,7 @@ class WikipediaPageReference(WcdBaseModel):
         self.__parse_urls__()
         self.__detect_archive_urls__()
         self.__extract_first_level_domain__()
+        self.__detect_internet_archive_id__()
         self.__parse_isbn__()
         self.__parse_persons__()
         # We generate the hash last because the parsing needs to be done first

@@ -398,3 +398,24 @@ class TestWikiCitations(TestCase):
         assert claim[0] is not None
         # print(claim[0].qualifiers)
         assert claim[0].qualifiers is not None
+
+
+    def test_internet_archive_id_statement(self):
+        data = dict(
+            url="https://archive.org/details/catalogueofshipw0000wils/",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        wc = WikiCitations(wikibase=SandboxWikibase())
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
+        title = "Test"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
+        item = wc.__prepare_new_reference_item__(
+            page_reference=reference, wikipedia_page=wppage
+        )
+        assert item.claims.get(property=wc.wikibase.INTERNET_ARCHIVE_ID) is not None

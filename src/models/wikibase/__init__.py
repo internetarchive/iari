@@ -31,6 +31,7 @@ class Wikibase(WcdBaseModel):
     HASH: str  # string
     HOST_STRING: str  # string
     INSTANCE_OF: str  # item
+    INTERNET_ARCHIVE_ID: str  # external-id
     INTERVIEWER_STRING: str  # string
     ISBN_10: str  # external-id
     ISBN_13: str  # external-id
