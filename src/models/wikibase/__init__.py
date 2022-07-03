@@ -28,6 +28,7 @@ class Wikibase(WcdBaseModel):
     FULL_NAME_STRING: str  # string
     FULL_WORK_AVAILABLE_AT_URL: str  # url
     GIVEN_NAME: str  # string
+    GOOGLE_BOOKS_ID: str  # external-id
     HASH: str  # string
     HOST_STRING: str  # string
     INSTANCE_OF: str  # item

@@ -12,7 +12,9 @@ class SandboxWikibase(Wikibase):
     wikibase_url = "https://sandbox.wiki"
     wikibase_cloud_wikibase = False
 
+    # Properties
     DOI = "P46"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    GOOGLE_BOOKS_ID = "P366"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books at Google.
     INTERNET_ARCHIVE_ID = "P316"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books and other resources at Internet Archive.
     ISBN_10 = "P58"  # datatype: WikibaseDatatype.EXTERNALID description: None
     ISBN_13 = "P59"  # datatype: WikibaseDatatype.EXTERNALID description: None
@@ -69,6 +71,7 @@ class SandboxWikibase(Wikibase):
     TRANSCRIPT_URL = "P131"  # datatype: WikibaseDatatype.URL description: None
     URL = "P132"  # datatype: WikibaseDatatype.URL description: None
 
+    # Items
     ENGLISH_WIKIPEDIA = (
         "Q2"  # label: English Wikipedia description: language version of Wikipedia
     )

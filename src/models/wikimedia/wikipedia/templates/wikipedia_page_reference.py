@@ -3,7 +3,7 @@ import logging
 import re
 from datetime import datetime
 from typing import Any, List, Optional
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from marshmallow import Schema
 from marshmallow.fields import String
@@ -58,6 +58,7 @@ class WikipediaPageReference(WcdBaseModel):
     first_level_domain_of_url_hash: Optional[str]
     first_level_domain_of_url_qid: Optional[str]
     google_books: Optional[GoogleBooks]
+    google_books_id: Optional[str]
     hosts_list: Optional[List[Person]]
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
@@ -490,11 +491,32 @@ class WikipediaPageReference(WcdBaseModel):
             if url_archive:
                 self.detected_archive_of_url = url_archive
 
+    def __detect_google_books_id__(self):
+        """We detect GOOGLE_BOOKS_ID to populate the property later
+        Example: https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431
+        NOTE: we don't parse the page number for now"""
+        if (
+            self.first_level_domain_of_url
+            and "google." in self.first_level_domain_of_url
+        ):
+            if self.url and "/books.google." in self.url:
+                query = str(urlparse(self.url).query)
+                parsed_query = parse_qs(query)
+                if parsed_query and "id" in parsed_query.keys():
+                    self.google_books_id = parsed_query["id"][0]
+                else:
+                    raise ValueError(
+                        f"could not extract query from {self.url} or no id found in the url"
+                    )
+
     def __detect_internet_archive_id__(self):
         """We detect INTERNET_ARCHIVE_ID to populate the property later
         Example: https://archive.org/details/catalogueofshipw0000wils/"""
-        if self.first_level_domain_of_url == "archive.org":
-            if "/details/" in self.url:
+        if (
+            self.first_level_domain_of_url
+            and self.first_level_domain_of_url == "archive.org"
+        ):
+            if self.url and "/details/" in self.url:
                 path = str(urlparse(self.url).path)
                 if path:
                     self.internet_archive_id = path.split("/")[2]
@@ -867,7 +889,7 @@ class WikipediaPageReference(WcdBaseModel):
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
-    def __parse_google_books__(self):
+    def __parse_google_books_template__(self):
         """Parse the Google Books template that sometimes appear in self.url
         and save the result in self.google_books and generate the URL
         and store it in self.url"""
@@ -880,6 +902,7 @@ class WikipediaPageReference(WcdBaseModel):
                 google_books.wikibase = self.wikibase
                 google_books.finish_parsing()
                 self.url = google_books.url
+                self.google_books_id = google_books.id
                 self.google_books = google_books
 
     def __parse_isbn__(self) -> None:
@@ -1013,7 +1036,7 @@ class WikipediaPageReference(WcdBaseModel):
         if self.url:
             # If we find a GoogleBooks template we
             # overwrite self.url with the generated URL
-            self.__parse_google_books__()
+            self.__parse_google_books_template__()
             # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
             parsed_url = urlparse(self.url)
             if parsed_url.scheme:
@@ -1109,6 +1132,7 @@ class WikipediaPageReference(WcdBaseModel):
         self.__detect_archive_urls__()
         self.__extract_first_level_domain__()
         self.__detect_internet_archive_id__()
+        self.__detect_google_books_id__()
         self.__parse_isbn__()
         self.__parse_persons__()
         # We generate the hash last because the parsing needs to be done first
