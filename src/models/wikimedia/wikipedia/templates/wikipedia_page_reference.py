@@ -459,9 +459,10 @@ class WikipediaPageReference(WcdBaseModel):
             if "[[" in self.publisher and "|" not in self.publisher:
                 self.publisher = self.publisher.replace("[[", "").replace("]]", "")
             if "[[" in self.publisher and "|" in self.publisher:
-                raise ValueError(
-                    f"could not clean complicated wiki markup "
-                    f"in self.publisher: {self.publisher}"
+                """We save the first part of the string only
+                e.g. [[University of California, Berkeley|Berkeley]]"""
+                self.publisher = (
+                    self.publisher.replace("[[", "").replace("]]", "").split("|")[0]
                 )
 
     def __detect_archive_urls__(self):

@@ -317,5 +317,5 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = SandboxWikibase()
-        with self.assertRaises(ValueError):
-            reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.publisher == "test"
