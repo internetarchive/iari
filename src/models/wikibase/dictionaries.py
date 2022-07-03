@@ -35,7 +35,7 @@ wcd_externalid_properties = dict(
     INTERNET_ARCHIVE_ID=dict(
         datatype=WikibaseDatatype.EXTERNALID,
         description="Identifier used to link books and "
-                    "other resources at Internet Archive.",
+        "other resources at Internet Archive.",
     ),
     ISBN_10=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
     ISBN_13=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
