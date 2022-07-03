@@ -452,6 +452,19 @@ class WikipediaPageReference(WcdBaseModel):
         else:
             raise ValueError("self.wikibase was None")
 
+    def __clean_wiki_markup_from_strings__(self):
+        """We clean away [[ and ]]
+        For now we only clean self.publisher"""
+        if self.publisher:
+            if "[[" in self.publisher and "|" not in self.publisher:
+                self.publisher = self.publisher.replace("[[", "").replace("]]", "")
+            if "[[" in self.publisher and "|" in self.publisher:
+                """We save the first part of the string only
+                e.g. [[University of California, Berkeley|Berkeley]]"""
+                self.publisher = (
+                    self.publisher.replace("[[", "").replace("]]", "").split("|")[0]
+                )
+
     def __detect_archive_urls__(self):
         """Try to detect if self.url contains first level
         domain from a known web archiver"""
@@ -1135,6 +1148,7 @@ class WikipediaPageReference(WcdBaseModel):
         self.__detect_google_books_id__()
         self.__parse_isbn__()
         self.__parse_persons__()
+        self.__clean_wiki_markup_from_strings__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
 

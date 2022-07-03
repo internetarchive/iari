@@ -283,3 +283,39 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash()
         # print(reference.internet_archive_id)
         assert reference.google_books_id == "on0TaPqFXbcC"
+
+    def test_clean_wiki_markup_from_strings(self):
+        data = dict(
+            publisher="[[test]]",
+            template_name="cite book",
+        )
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        # print(reference.internet_archive_id)
+        assert reference.publisher == "test"
+        data = dict(
+            # publisher="",
+            template_name="cite book",
+        )
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        # print(reference.internet_archive_id)
+        assert reference.publisher is None
+
+    def test_clean_wiki_markup_from_strings_complicated_markup(self):
+        data = dict(
+            publisher="[[test|test]]",
+            template_name="cite book",
+        )
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.publisher == "test"
