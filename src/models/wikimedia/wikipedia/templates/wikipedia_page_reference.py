@@ -453,14 +453,16 @@ class WikipediaPageReference(WcdBaseModel):
             raise ValueError("self.wikibase was None")
 
     def __clean_wiki_markup_from_strings__(self):
-        """We clean away [[ and ]]"""
-        if "[[" in self.publisher and "|" not in self.publisher:
-            self.publisher = self.publisher.replace("[[", "").replace("]]", "")
-        if "[[" in self.publisher and "|" in self.publisher:
-            raise ValueError(
-                f"could not clean complicated wiki markup "
-                f"in self.publisher: {self.publisher}"
-            )
+        """We clean away [[ and ]]
+        For now we only clean self.publisher"""
+        if self.publisher:
+            if "[[" in self.publisher and "|" not in self.publisher:
+                self.publisher = self.publisher.replace("[[", "").replace("]]", "")
+            if "[[" in self.publisher and "|" in self.publisher:
+                raise ValueError(
+                    f"could not clean complicated wiki markup "
+                    f"in self.publisher: {self.publisher}"
+                )
 
     def __detect_archive_urls__(self):
         """Try to detect if self.url contains first level
