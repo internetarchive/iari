@@ -11,6 +11,8 @@ class WikiCitationsWikibase(Wikibase):
     wikibase_url = "https://wikicitations.wiki.opencura.com"
     query_service_url = wikibase_url + "/query/"
 
+    GOOGLE_BOOKS_ID = ""
+    INTERNET_ARCHIVE_ID = ""
     ACCESS_DATE = "P37"
     ARCHIVE = "P52"
     ARCHIVE_DATE = "P39"
