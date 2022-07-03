@@ -399,6 +399,7 @@ class TestWikiCitations(TestCase):
         # print(claim[0].qualifiers)
         assert claim[0].qualifiers is not None
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_internet_archive_id_statement(self):
         data = dict(
             url="https://archive.org/details/catalogueofshipw0000wils/",
