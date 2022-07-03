@@ -571,6 +571,13 @@ class WikiCitations(WcdBaseModel):
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
         # Optional claims
+        if page_reference.internet_archive_id:
+            internet_archive_id = datatypes.ExternalID(
+                prop_nr=self.wikibase.INTERNET_ARCHIVE_ID,
+                value=page_reference.internet_archive_id,
+            )
+        else:
+            internet_archive_id = None
         if page_reference.doi:
             doi = datatypes.ExternalID(
                 prop_nr=self.wikibase.DOI,
@@ -662,6 +669,7 @@ class WikiCitations(WcdBaseModel):
         claims: List[Claim] = []
         for claim in (
             doi,
+            internet_archive_id,
             isbn_10,
             isbn_13,
             location,
