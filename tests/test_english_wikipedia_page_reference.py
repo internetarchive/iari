@@ -270,3 +270,16 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash()
         # print(reference.internet_archive_id)
         assert reference.internet_archive_id == "catalogueofshipw0000wils"
+
+    def test_detect_google_books_id(self):
+        data = dict(
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        # print(reference.internet_archive_id)
+        assert reference.google_books_id == "on0TaPqFXbcC"
