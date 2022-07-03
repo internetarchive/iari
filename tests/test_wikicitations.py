@@ -399,7 +399,6 @@ class TestWikiCitations(TestCase):
         # print(claim[0].qualifiers)
         assert claim[0].qualifiers is not None
 
-
     def test_internet_archive_id_statement(self):
         data = dict(
             url="https://archive.org/details/catalogueofshipw0000wils/",
