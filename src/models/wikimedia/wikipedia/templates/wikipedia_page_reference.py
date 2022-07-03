@@ -494,9 +494,12 @@ class WikipediaPageReference(WcdBaseModel):
     def __detect_google_books_id__(self):
         """We detect GOOGLE_BOOKS_ID to populate the property later
         Example: https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431
-        NOTE: we don't store the page number for now"""
-        if "google." in self.first_level_domain_of_url:
-            if "/books.google." in self.url:
+        NOTE: we don't parse the page number for now"""
+        if (
+            self.first_level_domain_of_url
+            and "google." in self.first_level_domain_of_url
+        ):
+            if self.url and "/books.google." in self.url:
                 query = str(urlparse(self.url).query)
                 parsed_query = parse_qs(query)
                 if parsed_query and "id" in parsed_query.keys():
@@ -509,8 +512,11 @@ class WikipediaPageReference(WcdBaseModel):
     def __detect_internet_archive_id__(self):
         """We detect INTERNET_ARCHIVE_ID to populate the property later
         Example: https://archive.org/details/catalogueofshipw0000wils/"""
-        if self.first_level_domain_of_url == "archive.org":
-            if "/details/" in self.url:
+        if (
+            self.first_level_domain_of_url
+            and self.first_level_domain_of_url == "archive.org"
+        ):
+            if self.url and "/details/" in self.url:
                 path = str(urlparse(self.url).path)
                 if path:
                     self.internet_archive_id = path.split("/")[2]
