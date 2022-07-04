@@ -879,19 +879,24 @@ class WikipediaPageReference(WcdBaseModel):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
-    def __handle_place_and_location__(self):
-        """Populate location with place if location is not  populated"""
-        if self.place and not self.location:
-            self.location = self.place
-
-    def __log_language__(self):
+    def __merge_lang_into_language__(self):
         """We merge lang into language or log if both are populated"""
         if self.lang and not self.language:
             self.language = self.lang
-        else:
+        elif self.lang and self.language:
             self.__log_to_file__(
                 message=f"both lang: '{self.lang}' and language: '{self.language} is populated",
-                file_name="languages.log",
+                file_name="lang.log",
+            )
+
+    def __merge_place_into_location__(self):
+        """Populate location with place if location is not  populated"""
+        if self.place and not self.location:
+            self.location = self.place
+        elif self.place and self.location:
+            self.__log_to_file__(
+                message=f"both place: '{self.place}' and location: '{self.location} is populated",
+                file_name="place.log",
             )
 
     def __parse_first_parameter__(self) -> None:
@@ -1167,8 +1172,8 @@ class WikipediaPageReference(WcdBaseModel):
         self.__parse_isbn__()
         self.__parse_persons__()
         self.__clean_wiki_markup_from_strings__()
-        self.__log_language__()
-        self.__handle_place_and_location__()
+        self.__merge_lang_into_language__()
+        self.__merge_place_into_location__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
 
