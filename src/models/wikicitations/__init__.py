@@ -342,35 +342,37 @@ class WikiCitations(WcdBaseModel):
             ),
         )
         item = wbi.item.new()
-        # We append the first 7 chars of the hash to the title
-        # to avoid label collision errors
-        assert page_reference.md5hash, "Assure mypy that it is not None"
-        # Wikibase does not allow a label longer than 250 characters maximum
-        if page_reference.title:
-            shortened_title = textwrap.shorten(
-                page_reference.title, width=240, placeholder="..."
+        if page_reference.md5hash:
+            # We append the first 7 chars of the hash to the title
+            # to avoid label collision errors
+            # Wikibase does not allow a label longer than 250 characters maximum
+            if page_reference.title:
+                shortened_title = textwrap.shorten(
+                    page_reference.title, width=240, placeholder="..."
+                )
+            else:
+                # Handle title being None
+                shortened_title = "Title missing"
+            label = f"{shortened_title} | {page_reference.md5hash[:7]}"
+            item.labels.set("en", label)
+            item.descriptions.set(
+                "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
             )
+            persons = self.__prepare_all_person_claims__(page_reference=page_reference)
+            if persons:
+                item.add_claims(persons)
+            item.add_claims(
+                claims=self.__prepare_single_value_reference_claims__(
+                    page_reference=page_reference
+                )
+            )
+            # if config.loglevel == logging.DEBUG:
+            #     logger.debug("Printing the item data")
+            #     print(item.get_json())
+            #     # exit()
+            return item
         else:
-            # Handle title being None
-            shortened_title = "Title missing"
-        label = f"{shortened_title} | {page_reference.md5hash[:7]}"
-        item.labels.set("en", label)
-        item.descriptions.set(
-            "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
-        )
-        persons = self.__prepare_all_person_claims__(page_reference=page_reference)
-        if persons:
-            item.add_claims(persons)
-        item.add_claims(
-            claims=self.__prepare_single_value_reference_claims__(
-                page_reference=page_reference
-            )
-        )
-        # if config.loglevel == logging.DEBUG:
-        #     logger.debug("Printing the item data")
-        #     print(item.get_json())
-        #     # exit()
-        return item
+            raise MissingInformationError("page_reference.md5hash was empty")
 
     @validate_arguments
     def __prepare_new_website_item__(
@@ -626,6 +628,13 @@ class WikiCitations(WcdBaseModel):
             )
         else:
             orcid = None
+        if page_reference.periodical:
+            periodical_string = datatypes.String(
+                prop_nr=self.wikibase.PERIODICAL_STRING,
+                value=page_reference.periodical,
+            )
+        else:
+            periodical_string = None
         if page_reference.pmid:
             pmid = datatypes.ExternalID(
                 prop_nr=self.wikibase.PMID,
@@ -683,6 +692,7 @@ class WikiCitations(WcdBaseModel):
             location,
             lumped_authors,
             orcid,
+            periodical_string,
             pmid,
             publisher,
             title,

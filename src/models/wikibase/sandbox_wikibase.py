@@ -47,6 +47,7 @@ class SandboxWikibase(Wikibase):
     NAME_MASK = "P65"  # datatype: WikibaseDatatype.STRING description: None
     PAGES = "P67"  # datatype: WikibaseDatatype.STRING description: None
     PAGE_REVISION_ID = "P73"  # datatype: WikibaseDatatype.STRING description: None
+    PERIODICAL_STRING = "P448"  # datatype: WikibaseDatatype.STRING description:
     PUBLISHER_STRING = "P71"  # datatype: WikibaseDatatype.STRING description: None
     STRING_CITATIONS = "P76"  # datatype: WikibaseDatatype.STRING description: None
     TEMPLATE_NAME = "P77"  # datatype: WikibaseDatatype.STRING description: None

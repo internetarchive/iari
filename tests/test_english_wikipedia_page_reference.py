@@ -343,3 +343,13 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.language == "English"
+
+    def test_periodical(self):
+        data = dict(
+            template_name="cite web",
+            periodical="test",
+        )
+        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.periodical == "test"
