@@ -331,3 +331,15 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.location == "Copenhagen"
+
+    def test_handle_lang(self):
+        data = dict(
+            lang="English",
+            template_name="cite book",
+        )
+        reference: EnglishWikipediaPageReference = (
+            EnglishWikipediaPageReferenceSchema().load(data)
+        )
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.language == "English"
