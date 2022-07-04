@@ -879,6 +879,11 @@ class WikipediaPageReference(WcdBaseModel):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
+    def __handle_place_and_location__(self):
+        """Populate location with place if location is not  populated"""
+        if self.place and not self.location:
+            self.location = self.place
+
     def __log_language__(self):
         """We log the languages to prepare for later implementation of parsing"""
         if self.language:
@@ -1159,9 +1164,10 @@ class WikipediaPageReference(WcdBaseModel):
         self.__parse_isbn__()
         self.__parse_persons__()
         self.__clean_wiki_markup_from_strings__()
+        self.__log_language__()
+        self.__handle_place_and_location__()
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
-        self.__log_language__()
 
 
 class WikipediaPageReferenceSchema(Schema):
