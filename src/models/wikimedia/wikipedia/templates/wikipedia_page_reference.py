@@ -880,10 +880,9 @@ class WikipediaPageReference(WcdBaseModel):
     #         )
 
     def __handle_place_and_location__(self):
-        """Populate location with place if location is not  populated """
+        """Populate location with place if location is not  populated"""
         if self.place and not self.location:
             self.location = self.place
-
 
     def __log_language__(self):
         """We log the languages to prepare for later implementation of parsing"""
