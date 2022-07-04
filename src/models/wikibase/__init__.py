@@ -46,6 +46,7 @@ class Wikibase(WcdBaseModel):
     ORCID: str  # external-id
     PAGES: str  # string
     PAGE_REVISION_ID: str  # string
+    PERIODICAL_STRING: str  # string
     PMID: str  # external-id
     PUBLICATION_DATE: str  # date
     PUBLISHED_IN: str  # ?

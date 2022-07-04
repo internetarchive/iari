@@ -13,6 +13,7 @@ class WikiCitationsWikibase(Wikibase):
 
     GOOGLE_BOOKS_ID = ""
     INTERNET_ARCHIVE_ID = ""
+    PERIODICAL_STRING = ""
     ACCESS_DATE = "P37"
     ARCHIVE = "P52"
     ARCHIVE_DATE = "P39"

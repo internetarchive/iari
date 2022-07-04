@@ -83,6 +83,7 @@ wcd_string_properties = dict(
     NAME_MASK=dict(datatype=WikibaseDatatype.STRING, description=""),
     PAGES=dict(datatype=WikibaseDatatype.STRING, description=""),
     PAGE_REVISION_ID=dict(datatype=WikibaseDatatype.STRING, description=""),
+    PERIODICAL_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     PUBLISHER_STRING=dict(datatype=WikibaseDatatype.STRING, description=""),
     STRING_CITATIONS=dict(datatype=WikibaseDatatype.STRING, description=""),
     TEMPLATE_NAME=dict(datatype=WikibaseDatatype.STRING, description=""),
