@@ -885,11 +885,14 @@ class WikipediaPageReference(WcdBaseModel):
             self.location = self.place
 
     def __log_language__(self):
-        """We log the languages to prepare for later implementation of parsing"""
-        if self.language:
-            self.__log_to_file__(message=self.language, file_name="languages.log")
-        if self.lang:
-            self.__log_to_file__(message=self.lang, file_name="languages.log")
+        """We merge lang into language or log if both are populated"""
+        if self.lang and not self.language:
+            self.language = self.lang
+        else:
+            self.__log_to_file__(
+                message=f"both lang: '{self.lang}' and language: '{self.language} is populated",
+                file_name="languages.log",
+            )
 
     def __parse_first_parameter__(self) -> None:
         """We parse the first parameter which has different meaning
