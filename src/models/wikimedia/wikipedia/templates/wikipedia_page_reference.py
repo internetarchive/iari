@@ -890,7 +890,7 @@ class WikipediaPageReference(WcdBaseModel):
             )
 
     def __merge_place_into_location__(self):
-        """Populate location with place if location is not  populated"""
+        """Merge place into location or log if both are populated"""
         if self.place and not self.location:
             self.location = self.place
         elif self.place and self.location:
