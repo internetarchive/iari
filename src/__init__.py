@@ -396,8 +396,9 @@ class WcdImportBot(WcdBaseModel):
         elif args.statistics is not None:
             bot = WcdImportBot(wikibase=SandboxWikibase())
             bot.__gather_statistics__()
-            bot = WcdImportBot(wikibase=WikiCitationsWikibase())
-            bot.__gather_statistics__()
+            # DISABLED because it returns 503 now.
+            # bot = WcdImportBot(wikibase=WikiCitationsWikibase())
+            # bot.__gather_statistics__()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
