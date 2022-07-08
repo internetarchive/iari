@@ -11,9 +11,10 @@ from src.helpers import console
 from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
 from src.models.wikibase import Wikibase
+from src.models.wikibase.crud.delete import WikibaseCrudDelete
+from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
-from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
 
@@ -224,7 +225,7 @@ class WcdImportBot(WcdBaseModel):
                 else:
                     raise ValueError("page.md5hash was None")
             if item_id:
-                wc = WikiCitations(wikibase=self.wikibase)
+                wc = WikibaseCrudDelete(wikibase=self.wikibase)
                 wc.__delete_item__(item_id=item_id)
                 # delete from cache
                 if page.md5hash is not None:
@@ -329,7 +330,7 @@ class WcdImportBot(WcdBaseModel):
     def lookup_md5hash(self, md5hash: str):
         """Lookup a md5hash and show the result to the user"""
         console.print(f"Lookup of md5hash {md5hash}")
-        wc = WikiCitations(wikibase=self.wikibase)
+        wc = WikibaseCrudRead(wikibase=self.wikibase)
         if config.use_cache:
             cache = Cache()
             cache.connect()
@@ -364,7 +365,7 @@ class WcdImportBot(WcdBaseModel):
 
     def rinse_all_items_and_cache(self):
         """Delete all page and reference items and clear the SSDB cache"""
-        wc = WikiCitations(wikibase=self.wikibase)
+        wc = WikibaseCrudDelete(wikibase=self.wikibase)
         wc.delete_imported_items()
         if config.use_cache:
             cache = Cache()

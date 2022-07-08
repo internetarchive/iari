@@ -15,8 +15,11 @@ from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 import config
 from src import WcdImportBot
 from src.helpers import console
+from src.models.wikibase.crud import WikibaseCrud
+from src.models.wikibase.crud.create import WikibaseCrudCreate
+from src.models.wikibase.crud.delete import WikibaseCrudDelete
+from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
-from src.models.wikicitations import WikiCitations
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
 )
@@ -31,7 +34,7 @@ logger = logging.getLogger(__name__)
 class TestWikiCitations(TestCase):
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
@@ -59,7 +62,7 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item_with_very_long_title(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Test")
         reference = EnglishWikipediaPageReference(
@@ -94,7 +97,7 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
@@ -151,7 +154,7 @@ class TestWikiCitations(TestCase):
         wppage.references.append(reference)
         wppage.__generate_hash__()
         # with self.assertRaises(ValueError):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         item = wc.__prepare_new_wikipedia_page_item__(
             wikipedia_page=wppage,
         )
@@ -164,8 +167,8 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
-        wc.delete_imported_items()
+        wcd = WikibaseCrudDelete(wikibase=SandboxWikibase())
+        wcd.delete_imported_items()
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
@@ -190,10 +193,12 @@ class TestWikiCitations(TestCase):
         reference.wikicitations_qid = test_qid
         wppage.references = []
         wppage.references.append(reference)
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         wc.prepare_and_upload_wikipedia_page_item(
             wikipedia_page=wppage,
         )
-        items = wc.__get_all_page_items__()
+        wcr = WikibaseCrudRead(wikibase=SandboxWikibase())
+        items = wcr.__get_all_page_items__()
         assert items and len(items) == 1
 
     # def test_P19_claims(self):
@@ -221,12 +226,12 @@ class TestWikiCitations(TestCase):
     #     wc.__delete_all_reference_items__()
 
     def test_entity_url(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrud(wikibase=SandboxWikibase())
         result = wc.entity_url(qid="Q1")
         assert result == f"https://sandbox.wiki/wiki/Item:Q1"
 
     def test_entity_url_missing_arguments(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrud(wikibase=SandboxWikibase())
         with self.assertRaises(ValidationError):
             wc.entity_url()
 
@@ -240,7 +245,7 @@ class TestWikiCitations(TestCase):
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
         result = wc.__get_all_page_items__()
         console.print(result)
         assert len(result) > 0
@@ -261,7 +266,7 @@ class TestWikiCitations(TestCase):
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
         result = wc.__get_all_reference_items__()
         console.print(result)
         assert len(result) > 0
@@ -272,13 +277,13 @@ class TestWikiCitations(TestCase):
         #     self.fail("Got no items")
 
     def test_get_items_via_sparql(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
         with self.assertRaises(HTTPError):
             wc.__get_items_via_sparql__(query="test")
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_and_upload_website_item(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
@@ -303,8 +308,8 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_uploading_a_page_reference_and_website_item(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
-        wc.delete_imported_items()
+        wcd = WikibaseCrudDelete(wikibase=SandboxWikibase())
+        wcd.delete_imported_items()
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
@@ -328,6 +333,7 @@ class TestWikiCitations(TestCase):
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
+        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
         items = wc.__get_all_website_items__()
         assert len(items) == 1
         ref_items = wc.__get_all_reference_items__()
@@ -335,8 +341,8 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_uploading_a_page_reference_and_website_item_twice(self):
-        wc = WikiCitations(wikibase=SandboxWikibase())
-        wc.delete_imported_items()
+        wcd = WikibaseCrudDelete(wikibase=SandboxWikibase())
+        wcd.delete_imported_items()
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
@@ -382,7 +388,7 @@ class TestWikiCitations(TestCase):
         )
         reference = EnglishWikipediaPageReference(**data)
         reference.finish_parsing_and_generate_hash()
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         wppage = WikipediaPage(wikibase=SandboxWikibase())
@@ -408,7 +414,7 @@ class TestWikiCitations(TestCase):
         reference = EnglishWikipediaPageReference(**data)
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         wppage = WikipediaPage(wikibase=SandboxWikibase())
@@ -429,7 +435,7 @@ class TestWikiCitations(TestCase):
         reference = EnglishWikipediaPageReference(**data)
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         wppage = WikipediaPage(wikibase=SandboxWikibase())
@@ -451,7 +457,7 @@ class TestWikiCitations(TestCase):
         reference = EnglishWikipediaPageReference(**data)
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         wppage = WikipediaPage(wikibase=SandboxWikibase())
@@ -473,7 +479,7 @@ class TestWikiCitations(TestCase):
         reference = EnglishWikipediaPageReference(**data)
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         wppage = WikipediaPage(wikibase=SandboxWikibase())

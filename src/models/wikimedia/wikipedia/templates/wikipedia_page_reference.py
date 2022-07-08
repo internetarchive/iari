@@ -471,7 +471,7 @@ class WikipediaPageReference(WcdBaseModel):
         """Try to detect if self.url contains first level
         domain from a known web archiver"""
         logger.debug("__detect_archive_urls__: Running")
-        from src.models.wikicitations.enums import KnownArchiveUrl
+        from src.models.wikibase.enums import KnownArchiveUrl
 
         # ARCHIVE_URL
         if self.first_level_domain_of_archive_url:

@@ -5,11 +5,10 @@ from unittest import TestCase
 from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
 
 import config
-from models.wikibase.wikicitations_wikibase import WikiCitationsWikibase  # type: ignore
 from src import WcdImportBot
 from src.helpers import console
+from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
-from src.models.wikicitations import WikiCitations
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -72,7 +71,7 @@ class TestWcdImportBot(TestCase):
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
         deleted_item_id = bot.delete_one_page(title="Test")
-        wc = WikiCitations(wikibase=SandboxWikibase())
+        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
         with self.assertRaises(NonExistentEntityError):
             wc.get_item(item_id=deleted_item_id)
             # assert item is None

@@ -1,263 +1,34 @@
-from __future__ import annotations
-
 import logging
 import textwrap
 from datetime import datetime, timezone
-from time import sleep
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
-from pydantic import NoneStr, validate_arguments
-from wikibaseintegrator import (  # type: ignore
-    WikibaseIntegrator,
-    datatypes,
-    wbi_config,
-    wbi_login,
-)
+from pydantic import validate_arguments
+from wikibaseintegrator import WikibaseIntegrator, datatypes, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
-from wikibaseintegrator.models import Qualifiers  # type: ignore
-from wikibaseintegrator.models import Claim, Reference, References
-from wikibaseintegrator.wbi_exceptions import (  # type: ignore
-    ModificationFailed,
-    NonExistentEntityError,
+from wikibaseintegrator.models import (  # type: ignore
+    Claim,
+    Qualifiers,
+    Reference,
+    References,
 )
-from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
-from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
+from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 import config
-from src.helpers import console, press_enter_to_continue
-from src.models.exceptions import MissingInformationError
+from src import MissingInformationError, console
 from src.models.person import Person
-from src.models.wikibase import Wikibase
+from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
-from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
     from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
-
 logger = logging.getLogger(__name__)
 
 
-class WikiCitations(WcdBaseModel):
-    """This class models the WikiCitations Wikibase
-    and handles all uploading to it
-
-    We want to create items for all Wikipedia pages
-    and references with a unique hash
-
-    Terminology:
-    page_reference is a reference that appear in a Wikipedia page
-    reference_claim is a datastructure from WBI that contains the
-    revision id and retrieved date of the statement
-
-    The language code is the one used by Wikimedia Foundation"""
-
-    language_code: str = "en"
-    reference_claim: Optional[References]
-    wikibase: Wikibase
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    @validate_arguments
-    def __convert_wcd_entity_id_to_item_entity__(self, entity_id: str) -> ItemEntity:
-        """Convert and get the item using WBI"""
-        self.__setup_wikibase_integrator_configuration__()
-        wbi = WikibaseIntegrator()
-        return wbi.item.get(entity_id)
-
-    # TODO refactor delete_* methods into one using a BaseItemType
-    def __delete_all_page_items__(self) -> None:
-        """Get all items and delete them one by one"""
-        items = self.__get_all_page_items__() or []
-        if items:
-            self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting all page items"):
-                count = 0
-                for item_id in items:
-                    logger.info(f"Deleting {item_id}")
-                    self.__delete_item__(item_id=item_id)
-                    # logger.debug(result)
-                    if config.press_enter_to_continue:
-                        press_enter_to_continue()
-                    count += 1
-                console.print(f"Done deleting a total of {count} page items")
-        else:
-            console.print("Got no page items from the WCD Query Service.")
-
-    def __delete_all_reference_items__(self) -> None:
-        """Get all items and delete them one by one"""
-        items = self.__get_all_reference_items__() or []
-        if items:
-            self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting all reference items"):
-                count = 0
-                for item_id in items:
-                    logger.info(f"Deleting {item_id}")
-                    self.__delete_item__(item_id=item_id)
-                    # logger.debug(result)
-                    if config.press_enter_to_continue:
-                        press_enter_to_continue()
-                    count += 1
-            console.print(f"Done deleting a total of {count} reference items")
-        else:
-            console.print("Got no reference items from the WCD Query Service.")
-
-    def __delete_all_website_items__(self):
-        """Get all items and delete them one by one"""
-        items = self.__get_all_website_items__() or []
-        if items:
-            self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting all website items"):
-                count = 0
-                for item_id in items:
-                    logger.info(f"Deleting {item_id}")
-                    self.__delete_item__(item_id=item_id)
-                    # logger.debug(result)
-                    if config.press_enter_to_continue:
-                        press_enter_to_continue()
-                    count += 1
-            console.print(f"Done deleting a total of {count} website items")
-        else:
-            console.print("Got no website items from the WCD Query Service.")
-
-    @validate_arguments
-    def __delete_item__(self, item_id: str):
-        if config.press_enter_to_continue:
-            input(f"Do you want to delete {item_id}?")
-        logger.debug(f"trying to log in to the wikibase as {self.wikibase.user_name}")
-        self.__setup_wikibase_integrator_configuration__()
-        try:
-            return delete_page(
-                title=f"Item:{item_id}",
-                # deletetalk=True,
-                login=wbi_login.Login(
-                    user=self.wikibase.user_name,
-                    password=self.wikibase.botpassword,
-                    mediawiki_api_url=self.wikibase.mediawiki_api_url,
-                ),
-            )
-        except NonExistentEntityError:
-            return
-
-    @validate_arguments
-    def __extract_item_ids__(self, sparql_result: Optional[Dict]) -> Iterable[str]:
-        """Yield item ids from a sparql result"""
-        if sparql_result:
-            yielded = 0
-            for binding in sparql_result["results"]["bindings"]:
-                if item_id := self.__extract_wcdqs_json_entity_id__(data=binding):
-                    yielded += 1
-                    yield item_id
-            if number_of_bindings := len(sparql_result["results"]["bindings"]):
-                logger.info(f"Yielded {yielded} bindings out of {number_of_bindings}")
-
-    @validate_arguments
-    def __extract_wcdqs_json_entity_id__(
-        self, data: Dict, sparql_variable: str = "item"
-    ) -> str:
-        """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
-        return str(
-            data[sparql_variable]["value"].replace(self.wikibase.rdf_entity_prefix, "")
-        )
-
-    # TODO refactor these get all functions
-    @validate_arguments
-    def __get_all_items__(self, item_type):
-        pass
-
-    def __get_all_page_items__(self):
-        """Get all wcdqids for wikipedia pages using sparql"""
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        return self.__extract_item_ids__(
-            sparql_result=self.__get_items_via_sparql__(
-                f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT ?item WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_PAGE}
-            }}
-            """
-            )
-        )
-
-    def __get_all_reference_items__(self):
-        """Get all wcdqids for references using sparql"""
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        return self.__extract_item_ids__(
-            sparql_result=self.__get_items_via_sparql__(
-                f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT ?item WHERE {{
-                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_REFERENCE}
-            }}
-            """
-            )
-        )
-
-    def __get_all_website_items__(self):
-        """Get all wcdqids for website items using sparql"""
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        return self.__extract_item_ids__(
-            sparql_result=self.__get_items_via_sparql__(
-                f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT ?item WHERE {{
-                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WEBSITE}
-            }}
-            """
-            )
-        )
-
-    @validate_arguments
-    def __get_item_entity_from_wcdqs_json__(
-        self, data: Dict, sparql_variable: str = "item"
-    ) -> ItemEntity:
-        return self.__convert_wcd_entity_id_to_item_entity__(
-            self.__extract_wcdqs_json_entity_id__(
-                data=data, sparql_variable=sparql_variable
-            )
-        )
-
-    @validate_arguments
-    def __get_items_via_sparql__(self, query: str) -> Any:
-        """This is the lowest level function
-        that executes the query with WBI after setting it up"""
-        self.__setup_wikibase_integrator_configuration__()
-        self.__wait_for_wcdqs_to_sync__()
-        logger.debug(
-            f"Trying to use this endpoint: {self.wikibase.sparql_endpoint_url}"
-        )
-        return execute_sparql_query(
-            query=query, endpoint=self.wikibase.sparql_endpoint_url
-        )
-
-    @validate_arguments
-    def __get_wcdqids_from_hash__(self, md5hash: str) -> List[str]:
-        """This is a slower SPARQL-powered fallback helper method
-        used when config.use_cache is False"""
-        logger.debug("__get_wcdqid_from_hash__: running")
-        if not self.wikibase.HASH:
-            raise MissingInformationError("self.wikibase.HASH was empty string")
-        query = f"""
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT ?item WHERE {{
-              ?item wcdt:{self.wikibase.HASH} "{md5hash}".
-            }}
-        """
-        return list(
-            self.__extract_item_ids__(
-                sparql_result=self.__get_items_via_sparql__(query=query)
-            )
-        )
-
+class WikibaseCrudCreate(WikibaseCrud):
     @validate_arguments
     def __prepare_all_person_claims__(
         self, page_reference: WikipediaPageReference
@@ -1196,63 +967,6 @@ class WikiCitations(WcdBaseModel):
             if not page_reference.has_hash
         ]
 
-    def __setup_wikibase_integrator_configuration__(
-        self,
-    ) -> None:
-        wbi_config.config["USER_AGENT"] = "wcdimportbot"
-        wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
-        wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
-        wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
-        wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
-
-    @validate_arguments(config=dict(arbitrary_types_allowed=True))
-    def __upload_new_item__(self, item: ItemEntity) -> str:
-        """Upload the new item to WikiCitations"""
-        if item is None:
-            raise ValueError("Did not get what we need")
-        if config.loglevel == logging.DEBUG:
-            logger.debug("Finished item JSON")
-            console.print(item.get_json())
-        try:
-            new_item = item.write(summary="New item imported from Wikipedia")
-            print(f"Added new item {self.entity_url(new_item.id)}")
-            if config.press_enter_to_continue:
-                input("press enter to continue")
-            logger.debug(f"returning new wcdqid: {new_item.id}")
-            return str(new_item.id)
-        except ModificationFailed as modification_failed:
-            """Catch, extract and return the conflicting WCDQID"""
-            logger.info(modification_failed)
-            wcdqid = modification_failed.get_conflicting_entity_id
-            if wcdqid is None:
-                raise MissingInformationError("wcdqid was None")
-            return str(wcdqid)
-
-    @staticmethod
-    def __wait_for_wcdqs_to_sync__():
-        logger.info(
-            f"Sleeping {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
-        )
-        sleep(config.sparql_sync_waiting_time_in_seconds)
-
-    def delete_imported_items(self):
-        """This function deletes all the imported items in WikiCitations"""
-        console.print("Deleting all imported items")
-        self.__delete_all_page_items__()
-        self.__delete_all_reference_items__()
-        self.__delete_all_website_items__()
-
-    @validate_arguments
-    def entity_url(self, qid: str):
-        return f"{self.wikibase.wikibase_url}/wiki/Item:{qid}"
-
-    @validate_arguments
-    def get_item(self, item_id: str) -> Optional[ItemEntity]:
-        """Get one item from WikiCitations"""
-        self.__setup_wikibase_integrator_configuration__()
-        wbi = WikibaseIntegrator()
-        return wbi.item.get(item_id)
-
     @validate_arguments
     def prepare_and_upload_reference_item(
         self,
@@ -1287,7 +1001,9 @@ class WikiCitations(WcdBaseModel):
         return wcdqid
 
     @validate_arguments
-    def prepare_and_upload_wikipedia_page_item(self, wikipedia_page: Any) -> NoneStr:
+    def prepare_and_upload_wikipedia_page_item(
+        self, wikipedia_page: Any
+    ) -> Optional[str]:
         logging.debug("prepare_and_upload_wikipedia_page_item: Running")
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
@@ -1297,3 +1013,26 @@ class WikiCitations(WcdBaseModel):
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
         wcdqid = self.__upload_new_item__(item=item)
         return wcdqid
+
+    @validate_arguments(config=dict(arbitrary_types_allowed=True))
+    def __upload_new_item__(self, item: ItemEntity) -> str:
+        """Upload the new item to WikiCitations"""
+        if item is None:
+            raise ValueError("Did not get what we need")
+        if config.loglevel == logging.DEBUG:
+            logger.debug("Finished item JSON")
+            console.print(item.get_json())
+        try:
+            new_item = item.write(summary="New item imported from Wikipedia")
+            print(f"Added new item {self.entity_url(new_item.id)}")
+            if config.press_enter_to_continue:
+                input("press enter to continue")
+            logger.debug(f"returning new wcdqid: {new_item.id}")
+            return str(new_item.id)
+        except ModificationFailed as modification_failed:
+            """Catch, extract and return the conflicting WCDQID"""
+            logger.info(modification_failed)
+            wcdqid = modification_failed.get_conflicting_entity_id
+            if wcdqid is None:
+                raise MissingInformationError("wcdqid was None")
+            return str(wcdqid)

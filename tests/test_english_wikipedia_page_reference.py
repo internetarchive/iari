@@ -233,7 +233,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         logger.debug(reference.detected_archive_of_url)
         logger.debug(reference.detected_archive_of_archive_url)
         assert reference.detected_archive_of_url is None
-        # from src.models.wikicitations.enums import KnownArchiveUrl
+        # from src.models.wikibase.crud.enums import KnownArchiveUrl
 
         # FIXME this fails for some reason :/
         # assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG

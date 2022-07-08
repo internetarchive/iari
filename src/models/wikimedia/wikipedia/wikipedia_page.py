@@ -141,9 +141,9 @@ class WikipediaPage(WcdBaseModel):
         logger.debug("__get_wcdqid_from_hash_via_sparql__: Running")
         logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
         if self.wikicitations is None:
-            from src.models.wikicitations import WikiCitations
+            from src.models.wikibase.crud import WikibaseCrud
 
-            self.wikicitations = WikiCitations(wikibase=self.wikibase)
+            self.wikicitations = WikibaseCrud(wikibase=self.wikibase)
         if self.wikicitations is not None:
             wcdqids = self.wikicitations.__get_wcdqids_from_hash__(md5hash=md5hash)
             if wcdqids is not None:
@@ -480,9 +480,9 @@ class WikipediaPage(WcdBaseModel):
         self.cache.connect()
 
     def __setup_wikicitations__(self):
-        from src.models.wikicitations import WikiCitations
+        from src.models.wikibase.crud import WikibaseCrud
 
-        self.wikicitations = WikiCitations(
+        self.wikicitations = WikibaseCrud(
             language_code=self.language_code,
             wikibase=self.wikibase,
         )
@@ -531,7 +531,7 @@ class WikipediaPage(WcdBaseModel):
         if self.wikicitations is None:
             self.__setup_wikicitations__()
         if self.wikicitations is not None:
-            # from src.models.wikicitations import WikiCitations
+            # from src.models.wikibase.crud import WikiCitations
             # self.wikicitations: WikiCitations
             return str(
                 self.wikicitations.prepare_and_upload_website_item(
