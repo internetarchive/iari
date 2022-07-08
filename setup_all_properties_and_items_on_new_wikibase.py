@@ -23,6 +23,7 @@ from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
 import config
 from src import Wikibase, console
+from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.dictionaries import (
     wcd_archive_items,
     wcd_externalid_properties,
@@ -34,7 +35,6 @@ from src.models.wikibase.dictionaries import (
     wcd_url_properties,
 )
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
-from src.models.wikicitations import WikiCitations
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class SetupNewWikibase(BaseModel):
         # They rely on each other so they have to be created in a certain order it seems
         # then the instance_of=archive item
         output_text = []
-        wc = WikiCitations(wikibase=self.wikibase)
+        wc = WikibaseCrud(wikibase=self.wikibase)
         wc.__setup_wikibase_integrator_configuration__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(
@@ -146,7 +146,7 @@ class SetupNewWikibase(BaseModel):
     def __setup_other_items__(self) -> List[str]:
         # first create the wikipedia items
         output_text = []
-        wc = WikiCitations(wikibase=self.wikibase)
+        wc = WikibaseCrud(wikibase=self.wikibase)
         wc.__setup_wikibase_integrator_configuration__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(
@@ -212,7 +212,7 @@ class SetupNewWikibase(BaseModel):
         # iterate over the dictionary and create all the properties
         # output in a form that can be copy-pasted into a Wikibase class
         # (ie 'author = "P1"\nauthor_name_string = "P2"'
-        wc = WikiCitations(wikibase=self.wikibase)
+        wc = WikibaseCrud(wikibase=self.wikibase)
         wc.__setup_wikibase_integrator_configuration__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(
