@@ -262,8 +262,12 @@ class SetupNewWikibase(BaseModel):
                     )
                     # logger.warning(f"Got error: {e} from the Wikibase")
                 count += 1
-        for line in output_text:
-            print(line)
+        if len(output_text) != len(properties):
+            raise ValueError("Could not setup all properties.")
+        else:
+            # console.print(output_text)
+            for line in output_text:
+                print(line)
 
 
 if __name__ == "__main__":
