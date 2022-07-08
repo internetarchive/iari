@@ -68,6 +68,8 @@ class WcdImportBot(WcdBaseModel):
         console.print(f"Number of pages: {pages}")
         references = self.__get_number_of_references__()
         console.print(f"Number of references: {references}")
+        websites = self.__get_number_of_websites__()
+        console.print(f"Number of websites: {websites}")
 
     def __get_number_of_pages__(self):
         if not self.wikibase.INSTANCE_OF:
@@ -99,6 +101,22 @@ class WcdImportBot(WcdBaseModel):
         prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
             SELECT (COUNT(?item) as ?count) WHERE {{
               ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_REFERENCE}.
+            }}
+        """
+        return self.__extract_count_from_first_binding__(
+            self.__execute_query__(query=query)
+        )
+
+    def __get_number_of_websites__(self):
+        if not self.wikibase.INSTANCE_OF:
+            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
+        if not self.wikibase.WEBSITE_ITEM:
+            raise MissingInformationError("self.wikibase.WEBSITE_ITEM was empty string")
+        query = f"""
+        prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+        prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            SELECT (COUNT(?item) as ?count) WHERE {{
+              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WEBSITE_ITEM}.
             }}
         """
         return self.__extract_count_from_first_binding__(
