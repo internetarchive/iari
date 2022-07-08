@@ -462,3 +462,25 @@ class TestWikiCitations(TestCase):
             page_reference=reference, wikipedia_page=wppage
         )
         assert item.claims.get(property=wc.wikibase.PERIODICAL_STRING) is not None
+
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
+    def test_oclc_statement(self):
+        data = dict(
+            oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        wc = WikiCitations(wikibase=SandboxWikibase())
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
+        title = "Test"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
+        item = wc.__prepare_new_reference_item__(
+            page_reference=reference, wikipedia_page=wppage
+        )
+        assert item.claims.get(property=wc.wikibase.OCLC_CONTROL_NUMBER) is not None

@@ -621,6 +621,13 @@ class WikiCitations(WcdBaseModel):
             )
         else:
             lumped_authors = None
+        if page_reference.oclc:
+            oclc = datatypes.ExternalID(
+                prop_nr=self.wikibase.OCLC_CONTROL_NUMBER,
+                value=page_reference.oclc,
+            )
+        else:
+            oclc = None
         if page_reference.orcid:
             orcid = datatypes.ExternalID(
                 prop_nr=self.wikibase.ORCID,
@@ -691,6 +698,7 @@ class WikiCitations(WcdBaseModel):
             isbn_13,
             location,
             lumped_authors,
+            oclc,
             orcid,
             periodical_string,
             pmid,

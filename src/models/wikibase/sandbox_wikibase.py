@@ -19,6 +19,7 @@ class SandboxWikibase(Wikibase):
     ISBN_10 = "P58"  # datatype: WikibaseDatatype.EXTERNALID description: None
     ISBN_13 = "P59"  # datatype: WikibaseDatatype.EXTERNALID description: None
     MEDIAWIKI_PAGE_ID = "P64"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    OCLC_CONTROL_NUMBER = "P474"  # datatype: WikibaseDatatype.EXTERNALID description: Online Computer Library Centers kontrollnummer i Worldcat
     ORCID = "P66"  # datatype: WikibaseDatatype.EXTERNALID description: None
     PMID = "P68"  # datatype: WikibaseDatatype.EXTERNALID description: None
     WIKIDATA_QID = "P83"  # datatype: WikibaseDatatype.EXTERNALID description: None
@@ -47,7 +48,7 @@ class SandboxWikibase(Wikibase):
     NAME_MASK = "P65"  # datatype: WikibaseDatatype.STRING description: None
     PAGES = "P67"  # datatype: WikibaseDatatype.STRING description: None
     PAGE_REVISION_ID = "P73"  # datatype: WikibaseDatatype.STRING description: None
-    PERIODICAL_STRING = "P448"  # datatype: WikibaseDatatype.STRING description:
+    PERIODICAL_STRING = "P448"  # datatype: WikibaseDatatype.STRING description: None
     PUBLISHER_STRING = "P71"  # datatype: WikibaseDatatype.STRING description: None
     STRING_CITATIONS = "P76"  # datatype: WikibaseDatatype.STRING description: None
     TEMPLATE_NAME = "P77"  # datatype: WikibaseDatatype.STRING description: None

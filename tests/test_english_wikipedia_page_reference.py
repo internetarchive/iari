@@ -353,3 +353,14 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.periodical == "test"
+
+    def test_oclc(self):
+        data = dict(
+            oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.oclc == "test"
