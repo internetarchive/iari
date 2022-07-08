@@ -43,6 +43,7 @@ class Wikibase(WcdBaseModel):
     LUMPED_AUTHORS: str  # string
     MEDIAWIKI_PAGE_ID: str  # string # FIXME should be external-id
     NAME_MASK: str  # string
+    OCLC_CONTROL_NUMBER: str  # external-id
     ORCID: str  # external-id
     PAGES: str  # string
     PAGE_REVISION_ID: str  # string

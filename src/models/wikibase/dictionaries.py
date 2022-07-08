@@ -48,6 +48,10 @@ wcd_externalid_properties = dict(
         datatype=WikibaseDatatype.EXTERNALID,
         description="",
     ),
+    OCLC_CONTROL_NUMBER=dict(
+        datatype=WikibaseDatatype.EXTERNALID,
+        description="Online Computer Library Centers control number in Worldcat",
+    ),
     ORCID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
     PMID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
     WIKIDATA_QID=dict(datatype=WikibaseDatatype.EXTERNALID, description=""),
