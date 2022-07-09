@@ -9,19 +9,24 @@ import config
 from src.helpers import console, press_enter_to_continue
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
+from src.models.wikibase.enums import SupportedItemType
 
 logger = logging.getLogger(__name__)
 
 
 class WikibaseCrudDelete(WikibaseCrud):
-    # TODO refactor delete_* methods into one using a BaseItemType
-    def __delete_all_page_items__(self) -> None:
-        """Get all items and delete them one by one"""
+    @validate_arguments
+    def __delete_items__(self, item_type: SupportedItemType):
+        """Delete items of by type one by one
+        Wikibase is currently lacking an API to mass delete"""
         read = WikibaseCrudRead(wikibase=self.wikibase)
-        items = read.__get_all_page_items__() or []
+        items = (
+            read.__get_all_items__(item_type=getattr(self.wikibase, item_type.name))
+            or []
+        )
         if items:
             self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting all page items"):
+            with console.status(f"Deleting all {item_type.name.title()} items"):
                 count = 0
                 for item_id in items:
                     logger.info(f"Deleting {item_id}")
@@ -30,47 +35,11 @@ class WikibaseCrudDelete(WikibaseCrud):
                     if config.press_enter_to_continue:
                         press_enter_to_continue()
                     count += 1
-                console.print(f"Done deleting a total of {count} page items")
+                console.print(f"Done deleting a total of {count} items")
         else:
-            console.print("Got no page items from the WCD Query Service.")
-
-    def __delete_all_reference_items__(self) -> None:
-        """Get all items and delete them one by one"""
-        read = WikibaseCrudRead(wikibase=self.wikibase)
-        items = read.__get_all_reference_items__() or []
-        if items:
-            self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting all reference items"):
-                count = 0
-                for item_id in items:
-                    logger.info(f"Deleting {item_id}")
-                    self.__delete_item__(item_id=item_id)
-                    # logger.debug(result)
-                    if config.press_enter_to_continue:
-                        press_enter_to_continue()
-                    count += 1
-            console.print(f"Done deleting a total of {count} reference items")
-        else:
-            console.print("Got no reference items from the WCD Query Service.")
-
-    def __delete_all_website_items__(self):
-        """Get all items and delete them one by one"""
-        read = WikibaseCrudRead(wikibase=self.wikibase)
-        items = read.__get_all_website_items__() or []
-        if items:
-            self.__setup_wikibase_integrator_configuration__()
-            with console.status(f"Deleting all website items"):
-                count = 0
-                for item_id in items:
-                    logger.info(f"Deleting {item_id}")
-                    self.__delete_item__(item_id=item_id)
-                    # logger.debug(result)
-                    if config.press_enter_to_continue:
-                        press_enter_to_continue()
-                    count += 1
-            console.print(f"Done deleting a total of {count} website items")
-        else:
-            console.print("Got no website items from the WCD Query Service.")
+            console.print(
+                f"Got no {item_type.name.title()} items from the WCD Query Service."
+            )
 
     @validate_arguments
     def __delete_item__(self, item_id: str):
@@ -94,6 +63,6 @@ class WikibaseCrudDelete(WikibaseCrud):
     def delete_imported_items(self):
         """This function deletes all the imported items in WikiCitations"""
         console.print("Deleting all imported items")
-        self.__delete_all_page_items__()
-        self.__delete_all_reference_items__()
-        self.__delete_all_website_items__()
+        self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_PAGE)
+        self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_PAGE)
+        self.__delete_items__(item_type=SupportedItemType.WEBSITE_ITEM)

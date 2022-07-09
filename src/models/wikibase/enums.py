@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 # WCD = WikiCitations Database
 
@@ -13,3 +13,11 @@ class KnownArchiveUrl(Enum):
     GHOSTARCHIVE_ORG = "ghostarchive.org"
     MEMENTOWEB_ORG = "mementoweb.org"
     WEBCITATION_ORG = "webcitation.org"
+
+
+class SupportedItemType(Enum):
+    """The names of this enum must match the attributes in the Wikibase class"""
+
+    WIKIPEDIA_PAGE = auto()
+    WIKIPEDIA_REFERENCE = auto()
+    WEBSITE_ITEM = auto()
