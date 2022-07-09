@@ -12,7 +12,10 @@ from src.models.cache import Cache
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
-from src.models.wikibase.dictionaries import wcd_externalid_properties, wcd_string_properties
+from src.models.wikibase.dictionaries import (
+    wcd_externalid_properties,
+    wcd_string_properties,
+)
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
