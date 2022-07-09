@@ -197,8 +197,9 @@ class TestWikiCitations(TestCase):
         wc.prepare_and_upload_wikipedia_page_item(
             wikipedia_page=wppage,
         )
-        wcr = WikibaseCrudRead(wikibase=SandboxWikibase())
-        items = wcr.__get_all_page_items__()
+        wikibase = SandboxWikibase()
+        wcr = WikibaseCrudRead(wikibase=wikibase)
+        items = wcr.__get_all_items__(item_type=wikibase.WIKIPEDIA_PAGE)
         assert items and len(items) == 1
 
     # def test_P19_claims(self):
@@ -245,8 +246,9 @@ class TestWikiCitations(TestCase):
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
-        result = wc.__get_all_page_items__()
+        wikibase = SandboxWikibase()
+        wcr = WikibaseCrudRead(wikibase=wikibase)
+        result = wcr.__get_all_items__(item_type=wikibase.WIKIPEDIA_PAGE)
         console.print(result)
         assert len(result) > 0
         bot.rinse_all_items_and_cache()
@@ -266,8 +268,8 @@ class TestWikiCitations(TestCase):
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
-        result = wc.__get_all_reference_items__()
+        wcr = WikibaseCrudRead(wikibase=SandboxWikibase())
+        result = wcr.__get_all_items__(item_type=SandboxWikibase().WIKIPEDIA_REFERENCE)
         console.print(result)
         assert len(result) > 0
         bot.rinse_all_items_and_cache()
@@ -333,10 +335,12 @@ class TestWikiCitations(TestCase):
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
-        items = wc.__get_all_website_items__()
+        wcr = WikibaseCrudRead(wikibase=SandboxWikibase())
+        items = wcr.__get_all_items__(item_type=SandboxWikibase().WEBSITE_ITEM)
         assert len(items) == 1
-        ref_items = wc.__get_all_reference_items__()
+        ref_items = wcr.__get_all_items__(
+            item_type=SandboxWikibase().WIKIPEDIA_REFERENCE
+        )
         assert len(ref_items) == 1
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
