@@ -1,6 +1,6 @@
 import argparse
 import logging
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from pydantic import validate_arguments
 from wikibaseintegrator import wbi_config  # type: ignore
@@ -9,10 +9,13 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 import config
 from src.helpers import console
 from src.models.cache import Cache
-from src.models.exceptions import MissingInformationError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
+from src.models.wikibase.dictionaries import (
+    wcd_externalid_properties,
+    wcd_string_properties,
+)
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
@@ -36,92 +39,19 @@ class WcdImportBot(WcdBaseModel):
     wikibase: Wikibase = SandboxWikibase()
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 
-    @validate_arguments
-    def __execute_query__(self, query: str):
-        self.__setup_wikibase_integrator_configuration__()
-        logger.debug(
-            f"Trying to use this endpoint: {self.wikibase.sparql_endpoint_url}"
-        )
-        return execute_sparql_query(
-            query=query, endpoint=self.wikibase.sparql_endpoint_url
-        )
-
-    @staticmethod
-    def __extract_count_from_first_binding__(
-        sparql_result: Dict[Any, Any]
-    ) -> Optional[int]:
-        """Get count from a sparql result"""
-        logger.debug("__extract_count__: Running")
-        sparql_variable = "count"
-        if sparql_result:
-            if sparql_result["results"] and sparql_result["results"]["bindings"]:
-                first_binding = sparql_result["results"]["bindings"][0]
-                return int(first_binding[sparql_variable]["value"])
-            else:
-                return None
-        else:
-            return None
-
-    def __gather_statistics__(self):
+    def __gather_and_print_statistics__(self):
         console.print(self.wikibase.title)
-        pages = self.__get_number_of_pages__()
-        console.print(f"Number of pages: {pages}")
-        references = self.__get_number_of_references__()
-        console.print(f"Number of references: {references}")
-        websites = self.__get_number_of_websites__()
-        console.print(f"Number of websites: {websites}")
-
-    def __get_number_of_pages__(self):
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        if not self.wikibase.WIKIPEDIA_PAGE:
-            raise MissingInformationError(
-                "self.wikibase.WIKIPEDIA_PAGE was empty string"
-            )
-        query = f"""
-        prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-        prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT (COUNT(?item) as ?count) WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_PAGE}.
-            }}
-        """
-        return self.__extract_count_from_first_binding__(
-            self.__execute_query__(query=query)
-        )
-
-    def __get_number_of_references__(self):
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        if not self.wikibase.WIKIPEDIA_REFERENCE:
-            raise MissingInformationError(
-                "self.wikibase.WIKIPEDIA_REFERENCE was empty string"
-            )
-        query = f"""
-        prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-        prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT (COUNT(?item) as ?count) WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_REFERENCE}.
-            }}
-        """
-        return self.__extract_count_from_first_binding__(
-            self.__execute_query__(query=query)
-        )
-
-    def __get_number_of_websites__(self):
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        if not self.wikibase.WEBSITE_ITEM:
-            raise MissingInformationError("self.wikibase.WEBSITE_ITEM was empty string")
-        query = f"""
-        prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-        prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT (COUNT(?item) as ?count) WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WEBSITE_ITEM}.
-            }}
-        """
-        return self.__extract_count_from_first_binding__(
-            self.__execute_query__(query=query)
-        )
+        wcr = WikibaseCrudRead(wikibase=self.wikibase)
+        console.print(f"Number of pages: {wcr.number_of_pages}")
+        console.print(f"Number of references: {wcr.number_of_references}")
+        console.print(f"Number of websites: {wcr.number_of_website_items}")
+        attributes = [a for a in dir(self.wikibase)]
+        for attribute in attributes:
+            if attribute in {**wcd_externalid_properties, **wcd_string_properties}:
+                value = wcr.get_external_identifier_statistic(
+                    property=getattr(self.wikibase, attribute)
+                )
+                console.print(f"Number of {attribute}: {value}")
 
     @staticmethod
     def __setup_argparse_and_return_args__():
@@ -414,7 +344,7 @@ class WcdImportBot(WcdBaseModel):
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
         elif args.statistics is not None:
             bot = WcdImportBot(wikibase=SandboxWikibase())
-            bot.__gather_statistics__()
+            bot.__gather_and_print_statistics__()
             # DISABLED because it returns 503 now.
             # bot = WcdImportBot(wikibase=WikiCitationsWikibase())
             # bot.__gather_statistics__()

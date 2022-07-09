@@ -15,7 +15,8 @@ from wikibaseintegrator.models import (  # type: ignore
 from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 import config
-from src import MissingInformationError, console
+from src.helpers import console
+from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (

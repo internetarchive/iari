@@ -87,6 +87,6 @@ class TestWcdImportBot(TestCase):
 
     def test__gather_statistics__(self):
         bot = WcdImportBot(wikibase=SandboxWikibase())
-        bot.__gather_statistics__()
+        bot.__gather_and_print_statistics__()
         # bot2 = WcdImportBot(wikibase=WikiCitationsWikibase())
         # bot2.__gather_statistics__()

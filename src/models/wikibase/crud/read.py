@@ -13,56 +13,65 @@ logger = logging.getLogger(__name__)
 
 
 class WikibaseCrudRead(WikibaseCrud):
-    # TODO refactor these get all functions
+    """This models al reading of data from the Wikibase"""
+
+    @property
+    def number_of_pages(self):
+        return self.__get_statistic__(
+            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_PAGE
+        )
+
+    @property
+    def number_of_references(self):
+        return self.__get_statistic__(
+            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_REFERENCE
+        )
+
+    @property
+    def number_of_website_items(self):
+        return self.__get_statistic__(
+            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WEBSITE_ITEM
+        )
+
     @validate_arguments
-    def __get_all_items__(self, item_type):
-        pass
-
-    def __get_all_page_items__(self):
-        """Get all wcdqids for wikipedia pages using sparql"""
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        return self.__extract_item_ids__(
-            sparql_result=self.__get_items_via_sparql__(
-                f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT ?item WHERE {{
-              ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_PAGE}
-            }}
-            """
-            )
+    def __execute_query__(self, query: str):
+        self.__setup_wikibase_integrator_configuration__()
+        logger.debug(
+            f"Trying to use this endpoint: {self.wikibase.sparql_endpoint_url}"
+        )
+        return execute_sparql_query(
+            query=query, endpoint=self.wikibase.sparql_endpoint_url
         )
 
-    def __get_all_reference_items__(self):
-        """Get all wcdqids for references using sparql"""
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
-        return self.__extract_item_ids__(
-            sparql_result=self.__get_items_via_sparql__(
-                f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT ?item WHERE {{
-                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WIKIPEDIA_REFERENCE}
-            }}
-            """
-            )
-        )
+    @staticmethod
+    def __extract_count_from_first_binding__(
+        sparql_result: Dict[Any, Any]
+    ) -> Optional[int]:
+        """Get count from a sparql result"""
+        logger.debug("__extract_count__: Running")
+        sparql_variable = "count"
+        if sparql_result:
+            if sparql_result["results"] and sparql_result["results"]["bindings"]:
+                first_binding = sparql_result["results"]["bindings"][0]
+                return int(first_binding[sparql_variable]["value"])
+            else:
+                return None
+        else:
+            return None
 
-    def __get_all_website_items__(self):
-        """Get all wcdqids for website items using sparql"""
-        if not self.wikibase.INSTANCE_OF:
-            raise MissingInformationError("self.wikibase.INSTANCE_OF was empty string")
+    @validate_arguments
+    def __get_all_items__(self, item_type: str):
+        """Get all items of a certain type
+        item_type must be a QID"""
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
                 f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
-            SELECT ?item WHERE {{
-                ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{self.wikibase.WEBSITE}
-            }}
-            """
+                    prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+                    prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+                    SELECT ?item WHERE {{
+                      ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{item_type}
+                    }}
+                    """
             )
         )
 
@@ -90,6 +99,30 @@ class WikibaseCrudRead(WikibaseCrud):
         )
 
     @validate_arguments
+    def __get_statistic__(self, property: str, value: str, prefix: bool = True):
+        if prefix and (len(property) < 3 or len(value) < 3):
+            raise ValueError("Either property or value was too short.")
+        if prefix:
+            query = f"""
+            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+                SELECT (COUNT(?item) as ?count) WHERE {{
+                  ?item wcdt:{property} wcd:{value}.
+                }}
+            """
+        else:
+            query = f"""
+            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+                SELECT (COUNT(?item) as ?count) WHERE {{
+                  ?item wcdt:{property} {value}.
+                }}
+            """
+        return self.__extract_count_from_first_binding__(
+            self.__execute_query__(query=query)
+        )
+
+    @validate_arguments
     def __get_wcdqids_from_hash__(self, md5hash: str) -> List[str]:
         """This is a slower SPARQL-powered fallback helper method
         used when config.use_cache is False"""
@@ -107,6 +140,10 @@ class WikibaseCrudRead(WikibaseCrud):
                 sparql_result=self.__get_items_via_sparql__(query=query)
             )
         )
+
+    @validate_arguments
+    def get_external_identifier_statistic(self, property: str):
+        return self.__get_statistic__(property=property, value="[]", prefix=False)
 
     @validate_arguments
     def get_item(self, item_id: str) -> Optional[ItemEntity]:
