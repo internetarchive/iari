@@ -201,28 +201,8 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         assert reference.location == "Stockholm"
 
     def test_detect_archive_urls(self):
-        # data = dict(
-        #     template_name="cite web",
-        #     url="http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
-        #     archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
-        #     url_status="dead",
-        #     archive_date="2010-08-12",
-        #     title="Musköbasen 40 år",
-        #     first="Helene",
-        #     last="Skoglund",
-        #     author2="Nynäshamns Posten",
-        #     date="January 2010",
-        #     publisher="Kungliga Motorbåt Klubben",
-        #     location="Stockholm",
-        #     pages="4–7",
-        #     language="Swedish",
-        #     trans_title="Muskö Naval Base 40 years",
-        #     access_date="2010-11-09",
-        # )
-        # reference: EnglishWikipediaPageReference = (
-        #     EnglishWikipediaPageReferenceSchema().load(data)
-        # )
-        # reference.finish_parsing_and_generate_hash()
+        from src.models.wikibase.enums import KnownArchiveUrl
+
         reference = EnglishWikipediaPageReference(
             wikibase=SandboxWikibase(),
             archive_url="https:/web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
@@ -233,10 +213,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         logger.debug(reference.detected_archive_of_url)
         logger.debug(reference.detected_archive_of_archive_url)
         assert reference.detected_archive_of_url is None
-        # from src.models.wikibase.crud.enums import KnownArchiveUrl
-
-        # FIXME this fails for some reason :/
-        # assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
+        assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
 
     def test_google_books(self):
         data = {
