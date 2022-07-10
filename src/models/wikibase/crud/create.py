@@ -337,6 +337,7 @@ class WikibaseCrudCreate(WikibaseCrud):
         self.reference_claim = References()
         self.reference_claim.add(citation_reference)
 
+    @validate_arguments
     def __prepare_single_value_reference_claims__(
         self,
         page_reference: WikipediaPageReference,
@@ -344,108 +345,6 @@ class WikibaseCrudCreate(WikibaseCrud):
         logger.info("Preparing single value claims")
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
-        # Optional claims
-        if page_reference.google_books_id:
-            google_books_id = datatypes.ExternalID(
-                prop_nr=self.wikibase.GOOGLE_BOOKS_ID,
-                value=page_reference.google_books_id,
-            )
-        else:
-            google_books_id = None
-        if page_reference.internet_archive_id:
-            internet_archive_id = datatypes.ExternalID(
-                prop_nr=self.wikibase.INTERNET_ARCHIVE_ID,
-                value=page_reference.internet_archive_id,
-            )
-        else:
-            internet_archive_id = None
-        if page_reference.doi:
-            doi = datatypes.ExternalID(
-                prop_nr=self.wikibase.DOI,
-                value=page_reference.doi,
-            )
-        else:
-            doi = None
-        if page_reference.isbn_10:
-            isbn_10 = datatypes.ExternalID(
-                prop_nr=self.wikibase.ISBN_10,
-                value=page_reference.isbn_10,
-            )
-        else:
-            isbn_10 = None
-        if page_reference.isbn_13:
-            isbn_13 = datatypes.ExternalID(
-                prop_nr=self.wikibase.ISBN_13,
-                value=page_reference.isbn_13,
-            )
-        else:
-            isbn_13 = None
-        if page_reference.location:
-            location = datatypes.String(
-                prop_nr=self.wikibase.LOCATION_STRING, value=page_reference.location
-            )
-        else:
-            location = None
-        if page_reference.vauthors:
-            lumped_authors = datatypes.String(
-                prop_nr=self.wikibase.LUMPED_AUTHORS,
-                value=page_reference.vauthors,
-            )
-        else:
-            lumped_authors = None
-        if page_reference.oclc:
-            oclc = datatypes.ExternalID(
-                prop_nr=self.wikibase.OCLC_CONTROL_NUMBER,
-                value=page_reference.oclc,
-            )
-        else:
-            oclc = None
-        if page_reference.orcid:
-            orcid = datatypes.ExternalID(
-                prop_nr=self.wikibase.ORCID,
-                value=page_reference.orcid,
-            )
-        else:
-            orcid = None
-        if page_reference.periodical:
-            periodical_string = datatypes.String(
-                prop_nr=self.wikibase.PERIODICAL_STRING,
-                value=page_reference.periodical,
-            )
-        else:
-            periodical_string = None
-        if page_reference.pmid:
-            pmid = datatypes.ExternalID(
-                prop_nr=self.wikibase.PMID,
-                value=page_reference.pmid,
-            )
-        else:
-            pmid = None
-        if page_reference.publisher:
-            publisher = datatypes.String(
-                prop_nr=self.wikibase.PUBLISHER_STRING,
-                value=page_reference.publisher,
-            )
-        else:
-            publisher = None
-        if page_reference.title:
-            # Wikibase has a default limit of 400 chars for String
-            shortened_title = textwrap.shorten(
-                page_reference.title, width=400, placeholder="..."
-            )
-            title = datatypes.String(
-                prop_nr=self.wikibase.TITLE,
-                value=shortened_title,
-            )
-        else:
-            title = None
-        if page_reference.website:
-            website_string = datatypes.String(
-                prop_nr=self.wikibase.WEBSITE_STRING,
-                value=page_reference.website,
-            )
-        else:
-            website_string = None
         # Website item
         if page_reference.first_level_domain_of_url_qid:
             website_item = datatypes.Item(
@@ -454,37 +353,19 @@ class WikibaseCrudCreate(WikibaseCrud):
             )
         else:
             website_item = None
-        if page_reference.wikidata_qid:
-            wikidata_qid = datatypes.ExternalID(
-                prop_nr=self.wikibase.WIKIDATA_QID,
-                value=page_reference.wikidata_qid,
-            )
-        else:
-            wikidata_qid = None
         claims: List[Claim] = []
-        for claim in (
-            doi,
-            google_books_id,
-            internet_archive_id,
-            isbn_10,
-            isbn_13,
-            location,
-            lumped_authors,
-            oclc,
-            orcid,
-            periodical_string,
-            pmid,
-            publisher,
-            title,
-            website_item,
-            website_string,
-            wikidata_qid,
-        ):
+        for claim in (website_item,):
             if claim:
                 claims.append(claim)
         return (
             claims
             + self.__prepare_single_value_reference_claims_always_present__(
+                page_reference=page_reference
+            )
+            + self.__prepare_single_value_reference_external_identifier_claims__(
+                page_reference=page_reference
+            )
+            + self.__prepare_single_value_reference_string_claims__(
                 page_reference=page_reference
             )
             + self.__prepare_single_value_reference_claims_with_dates__(
@@ -540,6 +421,153 @@ class WikibaseCrudCreate(WikibaseCrud):
             source_wikipedia,
             template_string,
         ]
+
+    @validate_arguments
+    def __prepare_single_value_reference_external_identifier_claims__(
+        self,
+        page_reference: WikipediaPageReference,
+    ) -> List[Claim]:
+        if page_reference.google_books_id:
+            google_books_id = datatypes.ExternalID(
+                prop_nr=self.wikibase.GOOGLE_BOOKS_ID,
+                value=page_reference.google_books_id,
+            )
+        else:
+            google_books_id = None
+        if page_reference.internet_archive_id:
+            internet_archive_id = datatypes.ExternalID(
+                prop_nr=self.wikibase.INTERNET_ARCHIVE_ID,
+                value=page_reference.internet_archive_id,
+            )
+        else:
+            internet_archive_id = None
+        if page_reference.doi:
+            doi = datatypes.ExternalID(
+                prop_nr=self.wikibase.DOI,
+                value=page_reference.doi,
+            )
+        else:
+            doi = None
+        if page_reference.isbn_10:
+            isbn_10 = datatypes.ExternalID(
+                prop_nr=self.wikibase.ISBN_10,
+                value=page_reference.isbn_10,
+            )
+        else:
+            isbn_10 = None
+        if page_reference.isbn_13:
+            isbn_13 = datatypes.ExternalID(
+                prop_nr=self.wikibase.ISBN_13,
+                value=page_reference.isbn_13,
+            )
+        else:
+            isbn_13 = None
+        if page_reference.oclc:
+            oclc = datatypes.ExternalID(
+                prop_nr=self.wikibase.OCLC_CONTROL_NUMBER,
+                value=page_reference.oclc,
+            )
+        else:
+            oclc = None
+        if page_reference.orcid:
+            orcid = datatypes.ExternalID(
+                prop_nr=self.wikibase.ORCID,
+                value=page_reference.orcid,
+            )
+        else:
+            orcid = None
+        if page_reference.pmid:
+            pmid = datatypes.ExternalID(
+                prop_nr=self.wikibase.PMID,
+                value=page_reference.pmid,
+            )
+        else:
+            pmid = None
+        if page_reference.wikidata_qid:
+            wikidata_qid = datatypes.ExternalID(
+                prop_nr=self.wikibase.WIKIDATA_QID,
+                value=page_reference.wikidata_qid,
+            )
+        else:
+            wikidata_qid = None
+        claims: List[Claim] = []
+        for claim in (
+            doi,
+            google_books_id,
+            internet_archive_id,
+            isbn_10,
+            isbn_13,
+            oclc,
+            orcid,
+            pmid,
+            wikidata_qid,
+        ):
+            if claim:
+                claims.append(claim)
+        return claims
+
+    @validate_arguments
+    def __prepare_single_value_reference_string_claims__(
+        self,
+        page_reference: WikipediaPageReference,
+    ) -> List[Claim]:
+        if page_reference.location:
+            location = datatypes.String(
+                prop_nr=self.wikibase.LOCATION_STRING, value=page_reference.location
+            )
+        else:
+            location = None
+        if page_reference.vauthors:
+            lumped_authors = datatypes.String(
+                prop_nr=self.wikibase.LUMPED_AUTHORS,
+                value=page_reference.vauthors,
+            )
+        else:
+            lumped_authors = None
+        if page_reference.periodical:
+            periodical_string = datatypes.String(
+                prop_nr=self.wikibase.PERIODICAL_STRING,
+                value=page_reference.periodical,
+            )
+        else:
+            periodical_string = None
+        if page_reference.publisher:
+            publisher = datatypes.String(
+                prop_nr=self.wikibase.PUBLISHER_STRING,
+                value=page_reference.publisher,
+            )
+        else:
+            publisher = None
+        if page_reference.title:
+            # Wikibase has a default limit of 400 chars for String
+            shortened_title = textwrap.shorten(
+                page_reference.title, width=400, placeholder="..."
+            )
+            title = datatypes.String(
+                prop_nr=self.wikibase.TITLE,
+                value=shortened_title,
+            )
+        else:
+            title = None
+        if page_reference.website:
+            website_string = datatypes.String(
+                prop_nr=self.wikibase.WEBSITE_STRING,
+                value=page_reference.website,
+            )
+        else:
+            website_string = None
+        claims: List[Claim] = []
+        for claim in (
+            location,
+            lumped_authors,
+            periodical_string,
+            publisher,
+            title,
+            website_string,
+        ):
+            if claim:
+                claims.append(claim)
+        return claims
 
     @validate_arguments
     def __prepare_single_value_reference_claims_with_dates__(
