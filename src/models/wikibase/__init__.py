@@ -41,7 +41,7 @@ class Wikibase(WcdBaseModel):
     LAY_URL: str
     LOCATION_STRING: str  # string
     LUMPED_AUTHORS: str  # string
-    MEDIAWIKI_PAGE_ID: str  # string # FIXME should be external-id
+    MEDIAWIKI_PAGE_ID: str  # string
     NAME_MASK: str  # string
     OCLC_CONTROL_NUMBER: str  # external-id
     ORCID: str  # external-id

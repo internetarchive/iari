@@ -595,10 +595,6 @@ class WikipediaPage(WcdBaseModel):
             count += 1
         self.references = updated_references
 
-    def export_to_dataframe(self):
-        # TODO make it easy to quantify the references with pandas
-        raise NotImplementedError("To be written")
-
     def extract_and_upload_to_wikicitations(self):
         """Extract the references and upload first
         the references and then the page to WikiCitations"""

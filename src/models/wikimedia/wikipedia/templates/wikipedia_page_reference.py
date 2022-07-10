@@ -78,7 +78,6 @@ class WikipediaPageReference(WcdBaseModel):
     #######################
     # Names
     #######################
-    # FIXME of what?
     first1: Optional[str]
     first2: Optional[str]
     first3: Optional[str]
@@ -709,7 +708,9 @@ class WikipediaPageReference(WcdBaseModel):
             else:
                 message = f"Bad url {url} encountered"
                 logger.warning(message)
-                self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
+                self.__log_to_file__(
+                    message=str(message), file_name="url_exceptions.log"
+                )
                 return None
 
     @validate_arguments
