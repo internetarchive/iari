@@ -78,7 +78,6 @@ class WikipediaPageReference(WcdBaseModel):
     #######################
     # Names
     #######################
-    # FIXME of what?
     first1: Optional[str]
     first2: Optional[str]
     first3: Optional[str]
@@ -539,7 +538,7 @@ class WikipediaPageReference(WcdBaseModel):
                     raise ValueError(f"could not extract path from {self.url}")
 
     def __extract_first_level_domain__(self):
-        logger.info("Extracting first level domain from 2 attributes")
+        logger.info("Extracting first level domain from self.url and self.archive_url")
         if self.url is not None:
             self.first_level_domain_of_url = self.__get_first_level_domain__(
                 url=self.url
@@ -703,10 +702,16 @@ class WikipediaPageReference(WcdBaseModel):
                 logger.debug(f"Found FLD: {fld}")
             return fld
         except TldBadUrl:
-            message = f"Bad url {url} encountered"
-            logger.warning(message)
-            self.__log_to_file__(message=str(message), file_name="url_exceptions.log")
-            return None
+            """The library does not support archive.org URLs"""
+            if "web.archive.org" in url:
+                return "archive.org"
+            else:
+                message = f"Bad url {url} encountered"
+                logger.warning(message)
+                self.__log_to_file__(
+                    message=str(message), file_name="url_exceptions.log"
+                )
+                return None
 
     @validate_arguments
     def __get_numbered_person__(
