@@ -31,7 +31,6 @@ import config
 from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
-from src.models.wikibase.crud.create import WikibaseCrudCreate
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
@@ -1093,8 +1092,10 @@ class WikibaseCrud(WcdBaseModel):
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
         )
+        from src.models.wikibase.crud.create import WikibaseCrudCreate
+
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return = wcc.upload_new_item(item=item)
+        wikibase_return: WikibaseReturn = wcc.upload_new_item(item=item)
         return wikibase_return
 
     @validate_arguments
@@ -1110,8 +1111,10 @@ class WikibaseCrud(WcdBaseModel):
         item = self.__prepare_new_website_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
         )
+        from src.models.wikibase.crud.create import WikibaseCrudCreate
+
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return = wcc.upload_new_item(item=item)
+        wikibase_return: WikibaseReturn = wcc.upload_new_item(item=item)
         return wikibase_return
 
     @validate_arguments
@@ -1128,6 +1131,8 @@ class WikibaseCrud(WcdBaseModel):
             raise ValueError("did not get a WikipediaPage object")
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)
+        from src.models.wikibase.crud.create import WikibaseCrudCreate
+
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return = wcc.upload_new_item(item=item)
+        wikibase_return: WikibaseReturn = wcc.upload_new_item(item=item)
         return wikibase_return
