@@ -15,12 +15,7 @@ import config
 from src.helpers import console
 from src.models.exceptions import MissingInformationError
 from src.models.wikibase.crud import WikibaseCrud
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
-    WikipediaPageReference,
-)
-
-if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+from src.models.wikibase.wikibase_return import WikibaseReturn
 
 logger = logging.getLogger(__name__)
 
