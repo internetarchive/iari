@@ -16,6 +16,7 @@ from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
+from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
@@ -70,7 +71,7 @@ class WikipediaPageReference(WcdBaseModel):
     persons_without_role: Optional[List[Person]]
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
-    wikicitations_qid: Optional[str]
+    wikibase_return: Optional[WikibaseReturn]
     wikidata_qid: Optional[str]
     wikibase: Optional[Wikibase]
 
@@ -445,13 +446,15 @@ class WikipediaPageReference(WcdBaseModel):
         return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
 
     @property
-    def wikicitations_url(self) -> str:
-        if self.wikibase:
-            return (
-                f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
-            )
-        else:
+    def wikibase_url(self) -> str:
+        if not self.wikibase:
             raise ValueError("self.wikibase was None")
+        if not self.wikibase_return:
+            raise ValueError("self.wikibase_return was None")
+        return (
+            f"{self.wikibase.wikibase_url}/"
+            f"wiki/Item:{self.wikibase_return.item_qid}"
+        )
 
     def __clean_wiki_markup_from_strings__(self):
         """We clean away [[ and ]]
@@ -1013,7 +1016,7 @@ class WikipediaPageReference(WcdBaseModel):
     def __parse_persons__(self) -> None:
         """Parse all person related data into Person objects"""
         # find all the attributes but exclude the properties as they lead to weird errors
-        properties = ["has_hash", "isodate", "template_url", "wikicitations_url"]
+        properties = ["has_hash", "isodate", "template_url", "wikibase_url"]
         attributes = [
             a
             for a in dir(self)
