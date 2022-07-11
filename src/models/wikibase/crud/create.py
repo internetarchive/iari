@@ -26,7 +26,7 @@ class WikibaseCrudCreate(WikibaseCrud):
         """Upload the new item to WikiCitations"""
         if item is None:
             raise ValueError("Did not get what we need")
-        if config.loglevel == logging.DEBUG:
+        if config.loglevel == logging.DEBUG and config.print_debug_json:
             logger.debug("Finished item JSON")
             console.print(item.get_json())
         try:

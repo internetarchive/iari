@@ -18,6 +18,7 @@ use_cache = False
 user_agent = "wcdimportbot 2.0.0-alpha3"
 sparql_sync_waiting_time_in_seconds = 5
 check_if_page_has_been_uploaded_via_sparql = True
+print_debug_json = False
 
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
