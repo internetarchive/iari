@@ -234,17 +234,24 @@ class WikipediaPage(WcdBaseModel):
         self.__parse_templates__()
         self.__print_hash_statistics__()
 
-    @validate_arguments
-    def __fetch_page_data__(self, title: str) -> None:
+    def __fetch_page_data__(self, title: str = "") -> None:
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
+        logger.debug("__fetch_page_data__: Running")
         if (
-            self.latest_revision_id
-            or self.latest_revision_date
-            or self.wikitext
-            or self.page_id
-        ) is None:
-            self.title = title
+            not self.latest_revision_id
+            or not self.latest_revision_date
+            or not self.wikitext
+            or not self.page_id
+        ):
+            if not title and self.title:
+                title = self.title
+            elif not title and not self.title:
+                raise MissingInformationError(
+                    "Both self.title and title are empty or None"
+                )
+            else:
+                self.title = title
             url = f"https://en.wikipedia.org/w/rest.php/v1/page/{title}"
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
