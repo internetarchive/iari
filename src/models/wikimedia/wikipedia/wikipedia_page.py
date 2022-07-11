@@ -41,11 +41,12 @@ class WikipediaPage(WcdBaseModel):
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: Optional[int]
-    references: Optional[List[WikipediaPageReference]]
+    references: List[WikipediaPageReference] = []
     title: Optional[str]
     wikibase_crud_create: Optional[WikibaseCrudCreate]
     wikibase_crud_read: Optional[WikibaseCrudRead]
-    wikicitations_qid: Optional[str]
+    wikibase_crud_update: Optional[WikibaseCrudUpdate]
+    wikibase_return: Optional[WikibaseReturn]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
@@ -108,7 +109,7 @@ class WikipediaPage(WcdBaseModel):
         raise NotImplementedError("To be written")
 
     @validate_arguments
-    def __check_and_upload_reference_item_to_wikicitations_if_missing__(
+    def __check_and_upload_reference_item_to_wikibase_if_missing__(
         self, reference: WikipediaPageReference
     ):
         logger.debug(
@@ -167,7 +168,7 @@ class WikipediaPage(WcdBaseModel):
         return None
 
     @validate_arguments
-    def __check_and_upload_website_item_to_wikicitations_if_missing__(
+    def __check_and_upload_website_item_to_wikibase_if_missing__(
         self, reference: WikipediaPageReference
     ):
         """This method checks if a website item is present
@@ -498,7 +499,7 @@ class WikipediaPage(WcdBaseModel):
             )
 
     @validate_arguments
-    def __upload_reference_to_wikicitations__(
+    def __upload_reference_to_wikibase__(
         self, reference: WikipediaPageReference
     ) -> str:
         """This method tries to upload the reference to WikiCitations
@@ -534,7 +535,7 @@ class WikipediaPage(WcdBaseModel):
         return reference
 
     @validate_arguments
-    def __upload_website_to_wikicitations__(
+    def __upload_website_to_wikibase__(
         self, reference: WikipediaPageReference
     ) -> str:
         """This is a lower level method that only handles uploading the website item"""
@@ -598,7 +599,7 @@ class WikipediaPage(WcdBaseModel):
             count += 1
         self.references = updated_references
 
-    def extract_and_upload_to_wikicitations(self):
+    def extract_and_upload_to_wikibase(self) -> None:
         """Extract the references and upload first
         the references and then the page to WikiCitations"""
         # First we check if this page has already been uploaded
