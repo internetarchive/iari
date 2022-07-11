@@ -349,7 +349,7 @@ class WikipediaPage(WcdBaseModel):
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            wcdqid = self.cache.check_reference_and_get_wikicitations_qid(
+            wcdqid = self.cache.check_reference_and_get_wikibase_qid(
                 reference=reference
             )
         else:
@@ -390,9 +390,7 @@ class WikipediaPage(WcdBaseModel):
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            wcdqid = self.cache.check_website_and_get_wikicitations_qid(
-                reference=reference
-            )
+            wcdqid = self.cache.check_website_and_get_wikibase_qid(reference=reference)
         else:
             raise ValueError("self.cache was None")
         logger.debug(f"result from the cache:{wcdqid}")
@@ -463,9 +461,7 @@ class WikipediaPage(WcdBaseModel):
             if self.cache is None:
                 self.__setup_cache__()
             if self.cache is not None:
-                wcdqid = self.cache.check_page_and_get_wikicitations_qid(
-                    wikipedia_page=self
-                )
+                wcdqid = self.cache.check_page_and_get_wikibase_qid(wikipedia_page=self)
             else:
                 raise ValueError("self.cache was None")
             if wcdqid is None:
