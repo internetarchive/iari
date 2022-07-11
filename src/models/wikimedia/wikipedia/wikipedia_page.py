@@ -500,7 +500,6 @@ class WikipediaPage(WcdBaseModel):
         logger.info(
             f"Parsing {number_of_templates} templates from {self.title}, see {self.url}"
         )
-        self.references = []
         for template_name, content in template_tuples:
             # logger.debug(f"working on {template_name}")
             if template_name.lower() in config.supported_templates:
