@@ -2,7 +2,7 @@ import logging
 from time import sleep
 from unittest import TestCase
 
-from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
+from wikibaseintegrator.wbi_exceptions import NonExistentEntityError, MissingEntityException  # type: ignore
 
 import config
 from src import WcdImportBot
@@ -72,7 +72,7 @@ class TestWcdImportBot(TestCase):
         sleep(config.sparql_sync_waiting_time_in_seconds)
         deleted_item_id = bot.delete_one_page(title="Test")
         wc = WikibaseCrudRead(wikibase=SandboxWikibase())
-        with self.assertRaises(NonExistentEntityError):
+        with self.assertRaises(MissingEntityException):
             wc.get_item(item_id=deleted_item_id)
             # assert item is None
 
@@ -85,8 +85,8 @@ class TestWcdImportBot(TestCase):
         sleep(config.sparql_sync_waiting_time_in_seconds)
         bot.rinse_all_items_and_cache()
 
-    def test__gather_statistics__(self):
-        bot = WcdImportBot(wikibase=SandboxWikibase())
-        bot.__gather_and_print_statistics__()
-        # bot2 = WcdImportBot(wikibase=WikiCitationsWikibase())
-        # bot2.__gather_statistics__()
+    # def test__gather_statistics__(self):
+    #     bot = WcdImportBot(wikibase=SandboxWikibase())
+    #     bot.__gather_and_print_statistics__()
+    #     # bot2 = WcdImportBot(wikibase=WikiCitationsWikibase())
+    #     # bot2.__gather_statistics__()
