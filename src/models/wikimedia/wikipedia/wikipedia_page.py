@@ -480,7 +480,9 @@ class WikipediaPage(WcdBaseModel):
                 else:
                     raise ValueError("self.md5hash was None")
                 if wcdqid is not None:
-                    self.wikicitations_qid = wcdqid
+                    self.wikibase_return = WikibaseReturn(
+                        item_qid=wcdqid, uploaded_now=False
+                    )
                     return True
                 else:
                     return False
@@ -587,7 +589,7 @@ class WikipediaPage(WcdBaseModel):
     @validate_arguments
     def __upload_reference_to_wikibase__(
         self, reference: WikipediaPageReference
-    ) -> str:
+    ) -> WikibaseReturn:
         """This method tries to upload the reference to WikiCitations
         and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists."""
@@ -595,11 +597,13 @@ class WikipediaPage(WcdBaseModel):
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create:
-            wcdqid = self.wikibase_crud_create.prepare_and_upload_reference_item(
-                page_reference=reference, wikipedia_page=self
+            wikibase_return = (
+                self.wikibase_crud_create.prepare_and_upload_reference_item(
+                    page_reference=reference, wikipedia_page=self
+                )
             )
-            if wcdqid:
-                return str(wcdqid)
+            if wikibase_return:
+                return wikibase_return
             else:
                 raise MissingInformationError(
                     "Got None instead of WCDQID when trying to upload to WikiCitations"
@@ -612,28 +616,28 @@ class WikipediaPage(WcdBaseModel):
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
         # Here we get the reference back with WCDQID
-        wcdqid = self.__upload_reference_to_wikicitations__(reference=reference)
+        wikibase_return = self.__upload_reference_to_wikibase__(reference=reference)
         if config.use_cache:
-            if not wcdqid or not reference.md5hash:
+            if not wikibase_return or not reference.md5hash:
                 raise MissingInformationError("hash or WCDQID was None")
-            self.__insert_reference_in_cache__(reference=reference, wcdqid=wcdqid)
-        reference.wikicitations_qid = wcdqid
+            self.__insert_reference_in_cache__(
+                reference=reference, wcdqid=wikibase_return.item_qid
+            )
+        reference.wikibase_return = wikibase_return
         return reference
 
     @validate_arguments
     def __upload_website_to_wikibase__(
         self, reference: WikipediaPageReference
-    ) -> str:
+    ) -> WikibaseReturn:
         """This is a lower level method that only handles uploading the website item"""
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create is not None:
             # from src.models.wikibase.crud import WikiCitations
             # self.wikicitations: WikiCitations
-            return str(
-                self.wikibase_crud_create.prepare_and_upload_website_item(
-                    page_reference=reference, wikipedia_page=self
-                )
+            return self.wikibase_crud_create.prepare_and_upload_website_item(
+                page_reference=reference, wikipedia_page=self
             )
         else:
             raise ValueError("self.wikicitations was None")
@@ -642,7 +646,8 @@ class WikipediaPage(WcdBaseModel):
     def __upload_website_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
-        wcdqid = self.__upload_website_to_wikicitations__(reference=reference)
+        wikibase_return = self.__upload_website_to_wikibase__(reference=reference)
+        wcdqid = wikibase_return.item_qid
         if config.use_cache:
             if wcdqid is None:
                 raise ValueError("WCDQID was None")
@@ -672,14 +677,18 @@ class WikipediaPage(WcdBaseModel):
                     f"with link to {reference.first_level_domain_of_url}"
                 ):
                     # Here we get the reference with the first_level_domain_of_url WCDQID back
-                    reference = self.__check_and_upload_website_item_to_wikicitations_if_missing__(
-                        reference=reference
+                    reference = (
+                        self.__check_and_upload_website_item_to_wikibase_if_missing__(
+                            reference=reference
+                        )
                     )
             if reference.has_hash:
                 with console.status(f"Creating the reference item itself"):
                     # Here we get the reference with its own WCDQID back
-                    reference = self.__check_and_upload_reference_item_to_wikicitations_if_missing__(
-                        reference=reference
+                    reference = (
+                        self.__check_and_upload_reference_item_to_wikibase_if_missing__(
+                            reference=reference
+                        )
                     )
             updated_references.append(reference)
             count += 1
