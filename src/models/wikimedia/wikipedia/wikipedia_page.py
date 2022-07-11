@@ -111,7 +111,7 @@ class WikipediaPage(WcdBaseModel):
     @validate_arguments
     def __check_and_upload_reference_item_to_wikibase_if_missing__(
         self, reference: WikipediaPageReference
-    ):
+    ) -> WikipediaPageReference:
         logger.debug(
             "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
         )
@@ -120,20 +120,23 @@ class WikipediaPage(WcdBaseModel):
             wcdqid = self.__get_reference_wcdqid_from_cache__(reference=reference)
             if wcdqid:
                 logger.debug(f"Got wcdqid:{wcdqid} from the cache")
-                reference.wikicitations_qid = wcdqid
+                reference.wikibase_return = WikibaseReturn(
+                    item_qid=wcdqid, uploaded_now=False
+                )
             else:
                 logger.info(
                     f"Could not find reference with {reference.md5hash} in the cache"
                 )
-                reference = (
-                    self.__upload_reference_and_insert_in_the_cache_if_enabled__(
-                        reference=reference
-                    )
+                (
+                    reference
+                ) = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
+                    reference=reference
                 )
         if wcdqid:
             # We got a WCDQID from the cache
             logger.debug(f"Got wcdqid:{wcdqid} from the cache/SPARQL")
-            reference.wikicitations_qid = wcdqid
+            wikibase_return = WikibaseReturn(item_qid=wcdqid, uploaded_now=False)
+            reference.wikibase_return = wikibase_return
         else:
             # We did not get a WCDQID, so try uploading
             reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
