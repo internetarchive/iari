@@ -13,13 +13,15 @@ from marshmallow.exceptions import ValidationError
 from pydantic import validate_arguments
 
 import config
-from src import WikibaseCrudRead
 from src.helpers import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import Cache
-from src.models.exceptions import MissingInformationError
+from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.create import WikibaseCrudCreate
+from src.models.wikibase.crud.read import WikibaseCrudRead
+from src.models.wikibase.crud.update import WikibaseCrudUpdate
+from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
@@ -143,32 +145,6 @@ class WikipediaPage(WcdBaseModel):
                 reference=reference
             )
         return reference
-
-    @validate_arguments
-    def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
-        """Looks up the WCDQID in WikiCitaitons and returns
-        it if only one found and complains if more than one was found"""
-        logger.debug("__get_wcdqid_from_hash_via_sparql__: Running")
-        logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
-        if self.wikibase_crud_read is None:
-            self.wikibase_crud_read = WikibaseCrudRead(wikibase=self.wikibase)
-        if self.wikibase_crud_read is not None:
-            wcdqids = self.wikibase_crud_read.__get_wcdqids_from_hash__(md5hash=md5hash)
-            if wcdqids is not None:
-                if len(wcdqids) > 1:
-                    raise ValueError(
-                        "Got more than one WCDQID for a hash. This should never happen"
-                    )
-                elif len(wcdqids) == 1:
-                    first_wcdqid = str(wcdqids[0])
-                    logger.debug(f"Returning WCDQID {first_wcdqid}")
-                    return first_wcdqid
-            else:
-                logger.debug("Got no match from SPARQL")
-                return None
-        else:
-            raise ValueError("self.wikicitations was None")
-        return None
 
     @validate_arguments
     def __check_and_upload_website_item_to_wikibase_if_missing__(
@@ -367,6 +343,32 @@ class WikipediaPage(WcdBaseModel):
             raise ValueError("self.cache was None")
         logger.debug(f"result from the cache:{wcdqid}")
         return wcdqid
+
+    @validate_arguments
+    def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
+        """Looks up the WCDQID in WikiCitaitons and returns
+        it if only one found and complains if more than one was found"""
+        logger.debug("__get_wcdqid_from_hash_via_sparql__: Running")
+        logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
+        if self.wikibase_crud_read is None:
+            self.wikibase_crud_read = WikibaseCrudRead(wikibase=self.wikibase)
+        if self.wikibase_crud_read is not None:
+            wcdqids = self.wikibase_crud_read.__get_wcdqids_from_hash__(md5hash=md5hash)
+            if wcdqids is not None:
+                if len(wcdqids) > 1:
+                    raise ValueError(
+                        "Got more than one WCDQID for a hash. This should never happen"
+                    )
+                elif len(wcdqids) == 1:
+                    first_wcdqid = str(wcdqids[0])
+                    logger.debug(f"Returning WCDQID {first_wcdqid}")
+                    return first_wcdqid
+            else:
+                logger.debug("Got no match from SPARQL")
+                return None
+        else:
+            raise ValueError("self.wikicitations was None")
+        return None
 
     @validate_arguments
     def __get_website_wcdqid_from_cache__(
