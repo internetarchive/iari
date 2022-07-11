@@ -175,15 +175,21 @@ class WikibaseCrud(WcdBaseModel):
         self,
         page_reference: WikipediaPageReference,
         wikipedia_page,  # type: WikipediaPage
+        testing: bool = False,
     ) -> ItemEntity:
         """This method converts a page_reference into a new reference item"""
-        self.__setup_wikibase_integrator_configuration__()
-        logger.debug(f"Trying to log in to the Wikibase as {self.wikibase.user_name}")
-        wbi = WikibaseIntegrator(
-            login=wbi_login.Login(
-                user=self.wikibase.user_name, password=self.wikibase.botpassword
-            ),
-        )
+        if testing:
+            wbi = WikibaseIntegrator()
+        else:
+            self.__setup_wikibase_integrator_configuration__()
+            logger.debug(
+                f"Trying to log in to the Wikibase as {self.wikibase.user_name}"
+            )
+            wbi = WikibaseIntegrator(
+                login=wbi_login.Login(
+                    user=self.wikibase.user_name, password=self.wikibase.botpassword
+                ),
+            )
         item = wbi.item.new()
         if page_reference.md5hash:
             # We append the first 7 chars of the hash to the title
