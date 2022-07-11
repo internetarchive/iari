@@ -162,9 +162,7 @@ class WcdImportBot(WcdBaseModel):
             if config.use_cache:
                 cache = Cache()
                 cache.connect()
-                item_id = cache.check_page_and_get_wikicitations_qid(
-                    wikipedia_page=page
-                )
+                item_id = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
             else:
                 if page.md5hash is not None:
                     item_id = page.__get_wcdqid_from_hash_via_sparql__(
@@ -186,13 +184,11 @@ class WcdImportBot(WcdBaseModel):
                     raise ValueError("md5hash was None")
             else:
                 if config.use_cache:
-                    raise ValueError("got no item id from the cache")
+                    logger.error("Got no item id from the cache")
+                    return ""
                 else:
-                    raise ValueError(
-                        "Got no item id from sparql, "
-                        "probably because WCDQS did not have time sync. "
-                        "Try increasing the waiting time in config.py"
-                    )
+                    logger.error("Got no item id from sparql")
+                    return ""
 
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
