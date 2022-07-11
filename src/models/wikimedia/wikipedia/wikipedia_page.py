@@ -697,45 +697,17 @@ class WikipediaPage(WcdBaseModel):
         """Extract the references and upload first
         the references and then the page to WikiCitations"""
         # First we check if this page has already been uploaded
+        logger.debug("extract_and_upload_to_wikibase: Running")
+        self.__fetch_page_data__()
         self.__generate_hash__()
+        self.__setup_wikibase_crud_create__()
+        self.__extract_and_parse_references__()
+        self.__upload_references_and_websites_if_missing__()
         if not self.__page_has_already_been_uploaded__():
-            console.print(f"Importing page '{self.title}'")
-            # logger.info("This page is missing from WikiCitations")
-            self.__setup_wikibase_crud_create__()
-            # with console.status("Downloading page data"):
-            self.__fetch_page_data__(title=self.title)
-            # extract references and create items for the missing ones first
-            # with console.status("Extracting information from the references"):
-            self.__extract_and_parse_references__()
-            self.__upload_references_and_websites_if_missing__()
-            # upload a new item for the page with links to all the page_reference items
-            self.wikicitations_qid = (
-                self.wikibase_crud_create.prepare_and_upload_wikipedia_page_item(
-                    wikipedia_page=self,
-                )
-            )
-            if config.use_cache:
-                if self.wikicitations_qid is None:
-                    raise ValueError("wcdqid was None")
-                self.cache.add_page(wikipedia_page=self, wcdqid=self.wikicitations_qid)
-            console.print(
-                f"Finished uploading {self.title} to WikiCitations, "
-                f"see {self.url} and {self.wikicitations_url}"
-            )
+            self.__import_page_and_references__()
         else:
-            console.print(
-                f"This page has already been uploaded to WikiCitations, "
-                f"see {self.url} and {self.wikicitations_url}"
-            )
+            self.__compare_data_and_update__()
 
-    # def __match_subjects__(self):
-    #     logger.info(f"Matching subjects from {len(self.dois) - self.number_of_missing_dois} DOIs")
-    #     [doi.wikidata_scientific_item.crossref_engine.work.match_subjects_to_qids() for doi in self.dois
-    #      if (
-    #              doi.wikidata_scientific_item.doi_found_in_wikidata and
-    #              doi.wikidata_scientific_item.crossref_engine is not None and
-    #              doi.wikidata_scientific_item.crossref_engine.work is not None
-    #      )]
     # def __get_title_from_event__(self):
     #     self.title = self.wikimedia_event.page_title
     #     if self.title is None or self.title == "":
