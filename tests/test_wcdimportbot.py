@@ -64,7 +64,7 @@ class TestWcdImportBot(TestCase):
 
     def test_delete_one_page(self):
         bot = WcdImportBot(wikibase=SandboxWikibase())
-        bot.rinse_all_items_and_cache()
+        # bot.rinse_all_items_and_cache()
         bot.get_and_extract_page_by_title(title="Test")
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
@@ -76,14 +76,10 @@ class TestWcdImportBot(TestCase):
             wc.get_item(item_id=deleted_item_id)
             # assert item is None
 
-    def test_import_one_page(self):
-        bot = WcdImportBot(wikibase=SandboxWikibase())
-        bot.get_and_extract_page_by_title(title="Test")
-        console.print(
-            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
-        )
-        sleep(config.sparql_sync_waiting_time_in_seconds)
-        bot.rinse_all_items_and_cache()
+    # def test_import_one_page(self):
+    #     bot = WcdImportBot(wikibase=SandboxWikibase())
+    #     bot.get_and_extract_page_by_title(title="Test")
+    #     bot.
 
     # def test__gather_statistics__(self):
     #     bot = WcdImportBot(wikibase=SandboxWikibase())
