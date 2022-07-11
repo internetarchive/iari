@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from pydantic import validate_arguments
-from wikibaseintegrator import WikibaseIntegrator  # type: ignore
+from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
@@ -149,5 +149,9 @@ class WikibaseCrudRead(WikibaseCrud):
     def get_item(self, item_id: str) -> Optional[ItemEntity]:
         """Get one item from WikiCitations"""
         self.__setup_wikibase_integrator_configuration__()
-        wbi = WikibaseIntegrator()
+        wbi = WikibaseIntegrator(
+            login=wbi_login.Login(
+                user=self.wikibase.user_name, password=self.wikibase.botpassword
+            ),
+        )
         return wbi.item.get(item_id)
