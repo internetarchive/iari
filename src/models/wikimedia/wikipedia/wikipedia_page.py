@@ -98,8 +98,11 @@ class WikipediaPage(WcdBaseModel):
         )
 
     @property
-    def wikicitations_url(self):
-        return f"{self.wikibase.wikibase_url}/" f"wiki/Item:{self.wikicitations_qid}"
+    def wikibase_url(self):
+        if self.wikibase.item_prefixed_wikibase:
+            return f"{self.wikibase.wikibase_url}/wiki/Item:{self.wikibase_return.item_qid}"
+        else:
+            return f"{self.wikibase.wikibase_url}/wiki/{self.wikibase_return.item_qid}"
 
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")

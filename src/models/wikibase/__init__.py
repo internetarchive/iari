@@ -6,6 +6,7 @@ class Wikibase(WcdBaseModel):
     We define all the properties here to be able to use them in the subclasses"""
 
     botpassword: str
+    item_prefixed_wikibase = True
     query_service_url: str
     title: str
     user_name: str
