@@ -200,6 +200,47 @@ class WikipediaPage(WcdBaseModel):
             )
         return reference
 
+    def __compare_and_update_all_references__(self) -> None:
+        """Compare and update all the references.
+        We don't know if all the references are already present in Wikibase"""
+        logger.debug("__compare_and_update_all_references__: Running")
+        if not self.references:
+            logger.info("No references found. Skipping comparison of references")
+            # raise MissingInformationError("self.references was empty or None")
+        else:
+            self.__setup_wikibase_crud_update__()
+            if self.wikibase_crud_update:
+                count = 0
+                total = len(self.references)
+                for reference in self.references:
+                    count += 1
+                    console.print(f"Comparing references {count}/{total}")
+                    new_reference = (
+                        self.__upload_reference_and_insert_in_the_cache_if_enabled__(
+                            reference=reference
+                        )
+                    )
+                    self.wikibase_crud_update.compare_and_update_claims(
+                        entity=new_reference, wikipedia_page=self
+                    )
+            else:
+                raise WikibaseError()
+
+    def __compare_and_update_page__(self):
+        logger.debug("__compare_and_update_page__: Running")
+        self.__setup_wikibase_crud_update__()
+        self.wikibase_crud_update.compare_and_update_claims(entity=self)
+
+    def __compare_data_and_update__(self):
+        """We compare and update all references and the page data"""
+        logger.debug("__compare_data_and_update__: Running")
+        self.__compare_and_update_all_references__()
+        self.__compare_and_update_page__()
+        # console.print(
+        #     f"This page has already been uploaded to WikiCitations, "
+        #     f"see {self.url} and {self.wikicitations_url}"
+        # )
+
     def __extract_and_parse_references__(self):
         logger.info("Extracting references now")
         # if self.wikimedia_event is not None:
@@ -345,8 +386,32 @@ class WikipediaPage(WcdBaseModel):
         logger.info("Fetching the page data")
         self.__fetch_page_data__(title=title)
 
-        # this id is useful when talking to WikipediaCitations because it is unique
-        # self.page_id = int(self.pywikibot_page.pageid)
+    def __import_page_and_references__(self):
+        console.print(f"Importing page '{self.title}'")
+        # upload a new item for the page with links to all the page_reference items
+        self.__setup_wikibase_crud_create__()
+        self.wikibase_return = (
+            self.wikibase_crud_create.prepare_and_upload_wikipedia_page_item(
+                wikipedia_page=self,
+            )
+        )
+        if config.use_cache:
+            if self.wikibase_return is None:
+                raise ValueError("wcdqid was None")
+            self.cache.add_page(
+                wikipedia_page=self, wcdqid=self.wikibase_return.item_qid
+            )
+        if self.wikibase_return.uploaded_now:
+            console.print(
+                f"Finished uploading {self.title} to WikiCitations, "
+                f"see {self.url} and {self.wikibase_url}"
+            )
+        else:
+            console.print(
+                f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
+                f"see {self.url} and {self.wikibase_url}"
+            )
+            raise ValueError("this should never happen")
 
     @validate_arguments
     def __insert_reference_in_cache__(
@@ -487,6 +552,13 @@ class WikipediaPage(WcdBaseModel):
     def __setup_wikibase_crud_create__(self):
         if not self.wikibase_crud_create:
             self.wikibase_crud_create = WikibaseCrudCreate(
+                language_code=self.language_code,
+                wikibase=self.wikibase,
+            )
+
+    def __setup_wikibase_crud_update__(self):
+        if not self.wikibase_crud_update:
+            self.wikibase_crud_update = WikibaseCrudUpdate(
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
