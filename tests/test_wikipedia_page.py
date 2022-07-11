@@ -72,6 +72,7 @@ class TestWikipediaPage(TestCase):
         print(wcdqid, check_wcdqid)
         assert wcdqid == check_wcdqid
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_data_and_update_additional_reference(self):
         """First delete the test page, then upload it with one reference.
         Then"""
@@ -109,6 +110,7 @@ class TestWikipediaPage(TestCase):
         console.print(wp2.references)
         wp2.extract_and_upload_to_wikibase()
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_data_and_update_removed_reference(self):
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
