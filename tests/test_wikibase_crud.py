@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class TestWikiCitations(TestCase):
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item(self):
-        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
+        wc = WikibaseCrud(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
@@ -62,7 +62,7 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item_with_very_long_title(self):
-        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
+        wc = WikibaseCrud(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Test")
         reference = EnglishWikipediaPageReference(
@@ -97,7 +97,7 @@ class TestWikiCitations(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
-        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
+        wc = WikibaseCrud(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
         reference = EnglishWikipediaPageReference(
@@ -193,12 +193,11 @@ class TestWikiCitations(TestCase):
         reference.wikicitations_qid = test_qid
         wppage.references = []
         wppage.references.append(reference)
-        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
-        wc.prepare_and_upload_wikipedia_page_item(
-            wikipedia_page=wppage,
-        )
         wikibase = SandboxWikibase()
         wcr = WikibaseCrudRead(wikibase=wikibase)
+        wcr.prepare_and_upload_wikipedia_page_item(
+            wikipedia_page=wppage,
+        )
         items = wcr.__get_all_items__(item_type=wikibase.WIKIPEDIA_PAGE)
         assert items and len(items) == 1
 
@@ -317,7 +316,6 @@ class TestWikiCitations(TestCase):
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
-        # TODO replace with a hashable one?
         reference = EnglishWikipediaPageReference(
             **{
                 "agency": "Oxford University Press",
