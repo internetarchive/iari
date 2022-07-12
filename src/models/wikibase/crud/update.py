@@ -47,9 +47,9 @@ class WikibaseCrudUpdate(WikibaseCrud):
             wikibase_item.claims.remove(property=self.wikibase.CITATIONS)
             wikibase_item.claims.remove(property=self.wikibase.STRING_CITATIONS)
         claims_to_be_added = []
-        property_numbers = set([
+        property_numbers = {
             claim.mainsnak.property_number for claim in wikibase_item.claims
-        ])
+        }
         logger.debug(f"Found these property numbers {property_numbers}")
         for claim in new_item.claims:
             # For now we only update statements that are completely missing
