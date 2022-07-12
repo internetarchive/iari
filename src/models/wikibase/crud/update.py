@@ -104,8 +104,8 @@ class WikibaseCrudUpdate(WikibaseCrud):
 
     def compare_and_update_claims(
         self,
-        entity: Union["WikipediaPage", WikipediaPageReference],
-        wikipedia_page: Optional["WikipediaPage"] = None,
+        entity: Union[WikipediaPage, WikipediaPageReference],
+        wikipedia_page: Optional[WikipediaPage] = None,
         wikibase_item: Optional[ItemEntity] = None,
     ) -> None:
         """Entity is the entity to work on.
