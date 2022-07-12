@@ -81,10 +81,9 @@ class TestWikibaseCrudUpdate(TestCase):
             testing=True,
         )
         # console.print(claims_to_be_added)
-        assert len(claims_to_be_added) == 2
-        assert claims_to_be_added[0].mainsnak.property_number == wikibase.HASH
+        assert len(claims_to_be_added) == 1
         assert (
-            claims_to_be_added[1].mainsnak.property_number
+            claims_to_be_added[0].mainsnak.property_number
             == wikibase.OCLC_CONTROL_NUMBER
         )
-        assert claims_to_be_added[1].mainsnak.datavalue["value"] == "test"
+        assert claims_to_be_added[0].mainsnak.datavalue["value"] == "test"
