@@ -71,6 +71,7 @@ class TestWikibaseCrudUpdate(TestCase):
         # because the hash is different after adding oclc because it is used for hashing
         # over self.url.
         claims_to_be_added = wcu.__compare_claims_and_upload__(
+            entity=EnglishWikipediaPageReference,
             new_item=wcu.__prepare_new_reference_item__(
                 page_reference=new_reference, wikipedia_page=wppage, testing=True
             ),

@@ -16,3 +16,13 @@ class TestWikibaseCrudRead(TestCase):
         wc = WikibaseCrudRead(wikibase=SandboxWikibase())
         with self.assertRaises(HTTPError):
             wc.__get_items_via_sparql__(query="test")
+
+    def test_get_all_items_and_hashes(self):
+        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
+        result = wc.__get_all_items_and_hashes__()
+        count = 0
+        for entry in result:
+            count += 1
+            print(entry)
+            if count >= 10:
+                break

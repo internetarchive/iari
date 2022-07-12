@@ -4,7 +4,7 @@ import logging
 import textwrap
 from datetime import datetime, timezone
 from time import sleep
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple
 
 from pydantic import validate_arguments
 from wikibaseintegrator import (  # type: ignore
@@ -80,6 +80,23 @@ class WikibaseCrud(WcdBaseModel):
                 if item_id := self.__extract_wcdqs_json_entity_id__(data=binding):
                     yielded += 1
                     yield item_id
+            if number_of_bindings := len(sparql_result["results"]["bindings"]):
+                logger.info(f"Yielded {yielded} bindings out of {number_of_bindings}")
+
+    @validate_arguments
+    def __extract_item_ids_and_hashes__(
+        self, sparql_result: Optional[Dict]
+    ) -> Iterable[Tuple[str, str]]:
+        """Yield item ids and hashes from a sparql result"""
+        if sparql_result:
+            yielded = 0
+            for binding in sparql_result["results"]["bindings"]:
+                if item_id := self.__extract_wcdqs_json_entity_id__(data=binding):
+                    if hash_value := self.__extract_wcdqs_json_entity_id__(
+                        data=binding, sparql_variable="hash"
+                    ):
+                        yielded += 1
+                        yield item_id, hash_value
             if number_of_bindings := len(sparql_result["results"]["bindings"]):
                 logger.info(f"Yielded {yielded} bindings out of {number_of_bindings}")
 

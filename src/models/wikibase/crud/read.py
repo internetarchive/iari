@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from pydantic import validate_arguments
 from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
@@ -60,7 +60,7 @@ class WikibaseCrudRead(WikibaseCrud):
             return None
 
     @validate_arguments
-    def __get_all_items__(self, item_type: str):
+    def __get_all_items__(self, item_type: str) -> Iterable[str]:
         """Get all items of a certain type
         item_type must be a QID"""
         return self.__extract_item_ids__(
@@ -70,6 +70,26 @@ class WikibaseCrudRead(WikibaseCrud):
                     prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
                     SELECT ?item WHERE {{
                       ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{item_type}
+                    }}
+                    """
+            )
+        )
+
+    def __get_all_items_and_hashes__(self) -> Iterable[Tuple[str, str]]:
+        """Get all item qids and hashes"""
+        return self.__extract_item_ids_and_hashes__(
+            sparql_result=self.__get_items_via_sparql__(
+                f"""
+                    prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
+                    prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+                    SELECT ?item ?hash WHERE {{
+                      VALUES ?values {{
+                        wcd:{self.wikibase.WIKIPEDIA_PAGE}
+                        wcd:{self.wikibase.WIKIPEDIA_REFERENCE}
+                        wcd:{self.wikibase.WEBSITE_ITEM}
+                      }}
+                      ?item wcdt:{self.wikibase.INSTANCE_OF} ?values;
+                            wcdt:{self.wikibase.HASH} ?hash.
                     }}
                     """
             )
