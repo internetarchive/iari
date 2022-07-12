@@ -51,9 +51,12 @@ class WikibaseCrudUpdate(WikibaseCrud):
             # For now we only update statements that are completely missing
             # We thus do not add/remove qualifiers or references
             # nor update any values on existing statements
-            if claim not in wikibase_item.claims:
+            property_numbers = [claim.mainsnak.property_number for claim in wikibase_item.claims]
+            logger.debug(f"Found these property numbers {property_numbers}")
+            if claim.mainsnak.property_number not in property_numbers:
                 # For now we don't update the hash even though adding
                 # oclc, pmid, doi, isbn cause the hash to change
+                logger.debug(f"Adding missing claim {claim}")
                 wikibase_item.claims.add(claim, action_if_exists=ActionIfExists.KEEP)
                 claims_to_be_added.append(claim)
         number_of_added_claims = len(claims_to_be_added)
