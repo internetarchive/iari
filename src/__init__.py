@@ -206,7 +206,9 @@ class WcdImportBot(WcdBaseModel):
                         if config.use_cache:
                             cache.delete_key(key=page.md5hash)
                             logger.info(f"Deleted {title} from the cache")
-                        console.print(f"Deleted {title} from {self.wikibase.__repr_name__()}")
+                        console.print(
+                            f"Deleted {title} from {self.wikibase.__repr_name__()}"
+                        )
                         return result
                     else:
                         raise ValueError("md5hash was None")
