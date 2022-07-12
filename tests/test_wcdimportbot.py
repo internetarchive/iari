@@ -30,8 +30,9 @@ class TestWcdImportBot(TestCase):
             # assert item is None
 
     def test_rebuild_cache(self):
-        bot = WcdImportBot(wikibase=SandboxWikibase())
-        bot.__rebuild_cache__()
+        if config.use_cache:
+            bot = WcdImportBot(wikibase=SandboxWikibase())
+            bot.__rebuild_cache__()
 
     # def test_import_one_page(self):
     #     bot = WcdImportBot(wikibase=SandboxWikibase())
