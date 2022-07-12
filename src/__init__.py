@@ -53,6 +53,24 @@ class WcdImportBot(WcdBaseModel):
                 )
                 console.print(f"Number of {attribute}: {value}")
 
+    def __rebuild_cache__(self):
+        """Flush and rebuild the cache"""
+        cache = Cache()
+        cache.connect()
+        cache.flush_database()
+        logger.info("Flushed the cache")
+        wcr = WikibaseCrudRead(wikibase=self.wikibase)
+        hashes = wcr.__get_all_items_and_hashes__()
+        logger.info("Rebuilding the cache")
+        count = 1
+        for entry in hashes:
+            hash_value = entry[1]
+            wcdqid = entry[0]
+            logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
+            cache.ssdb.set_value(key=hash_value, value=wcdqid)
+            count += 1
+        logger.info(f"Inserted {count} entries into the cache")
+
     @staticmethod
     def __setup_argparse_and_return_args__():
         # TODO add possibility to specify the wikipedia language version to work on
@@ -81,7 +99,9 @@ class WcdImportBot(WcdBaseModel):
 
     Example rinsing the Wikibase and the cache:
     '$ ./wcdimportbot.py --rinse'
-        """,
+
+    Example rebuild the cache:
+    '$ ./wcdimportbot.py --rebuild-cache'""",
         )
         parser.add_argument(
             "-c",
@@ -118,6 +138,11 @@ class WcdImportBot(WcdBaseModel):
                 "and WikiCitations via SPARQL (used mainly for debugging)"
             ),
         )
+        parser.add_argument(
+            "--rebuild-cache",
+            action="store_true",
+            help="Get all imported items from SPARQL and rebuild the cache",
+        ),
         parser.add_argument(
             "--rinse",
             action="store_true",
@@ -324,6 +349,8 @@ class WcdImportBot(WcdBaseModel):
             self.wikibase = WikiCitationsWikibase()
         if args.rinse is True:
             self.rinse_all_items_and_cache()
+        elif args.rebuild_cache:
+            self.__rebuild_cache__()
         elif args.import_title is not None:
             logger.info(f"importing title {args.import_title}")
             self.get_and_extract_page_by_title(title=args.import_title)

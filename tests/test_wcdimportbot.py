@@ -29,6 +29,10 @@ class TestWcdImportBot(TestCase):
             wc.get_item(item_id=deleted_item_id)
             # assert item is None
 
+    def test_rebuild_cache(self):
+        bot = WcdImportBot(wikibase=SandboxWikibase())
+        bot.__rebuild_cache__()
+
     # def test_import_one_page(self):
     #     bot = WcdImportBot(wikibase=SandboxWikibase())
     #     bot.get_and_extract_page_by_title(title="Test")
