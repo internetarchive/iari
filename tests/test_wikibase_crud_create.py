@@ -140,6 +140,7 @@ class TestWikibaseCrudCreate(TestCase):
                 "template_name": "cite book",
             }
         )
+        reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         reference.wikibase_return = WikibaseReturn(item_qid="Q1", uploaded_now=False)
         wppage.references = []
