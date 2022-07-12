@@ -7,7 +7,7 @@ from wikibaseintegrator.wbi_exceptions import MissingEntityException  # type: ig
 import config
 from src import WcdImportBot
 from src.helpers import console
-from src.models.wikibase.crud.read import WikibaseCrudRead
+from src.models.wikibase.enums import Result
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 
 logging.basicConfig(level=config.loglevel)
@@ -23,11 +23,8 @@ class TestWcdImportBot(TestCase):
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )
         sleep(config.sparql_sync_waiting_time_in_seconds)
-        deleted_item_id = bot.delete_one_page(title="Test")
-        wc = WikibaseCrudRead(wikibase=SandboxWikibase())
-        with self.assertRaises(MissingEntityException):
-            wc.get_item(item_id=deleted_item_id)
-            # assert item is None
+        result = bot.delete_one_page(title="Test")
+        assert result == Result.SUCCESSFUL
 
     def test_rebuild_cache(self):
         if config.use_cache:
