@@ -51,7 +51,9 @@ class WikibaseCrudUpdate(WikibaseCrud):
             # For now we only update statements that are completely missing
             # We thus do not add/remove qualifiers or references
             # nor update any values on existing statements
-            property_numbers = [claim.mainsnak.property_number for claim in wikibase_item.claims]
+            property_numbers = [
+                claim.mainsnak.property_number for claim in wikibase_item.claims
+            ]
             logger.debug(f"Found these property numbers {property_numbers}")
             if claim.mainsnak.property_number not in property_numbers:
                 # For now we don't update the hash even though adding
