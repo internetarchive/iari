@@ -173,8 +173,8 @@ class WcdImportBot(WcdBaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     @validate_arguments
-    def delete_one_page(self, title: str) -> str:
-        """Deletes one page from WikiCitations"""
+    def delete_one_page(self, title: str) -> Result:
+        """Deletes one page from the Wikibase and from the cache"""
         with console.status(f"Deleting {title}"):
             from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
@@ -198,16 +198,16 @@ class WcdImportBot(WcdBaseModel):
                 else:
                     raise ValueError("page.md5hash was None")
             if item_id:
+                logger.debug(f"Found {item_id} and trying to delete it now")
                 wc = WikibaseCrudDelete(wikibase=self.wikibase)
                 result = wc.__delete_item__(item_id=item_id)
                 if result == Result.SUCCESSFUL:
-                    # delete from cache
                     if page.md5hash is not None:
                         if config.use_cache:
                             cache.delete_key(key=page.md5hash)
-                            console.print(f"Deleted {title} from the cache")
-                        console.print(f"Deleted {title} from WikiCitations")
-                        return item_id
+                            logger.info(f"Deleted {title} from the cache")
+                        console.print(f"Deleted {title} from {self.wikibase.__repr_name__()}")
+                        return result
                     else:
                         raise ValueError("md5hash was None")
                 else:
@@ -215,10 +215,10 @@ class WcdImportBot(WcdBaseModel):
             else:
                 if config.use_cache:
                     logger.error("Got no item id from the cache")
-                    return ""
+                    return Result.FAILED
                 else:
                     logger.error("Got no item id from sparql")
-                    return ""
+                    return Result.FAILED
 
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
