@@ -9,6 +9,7 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 import config
 from src.helpers import console
 from src.models.cache import Cache
+from src.models.exceptions import WikibaseError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
@@ -16,6 +17,7 @@ from src.models.wikibase.dictionaries import (
     wcd_externalid_properties,
     wcd_string_properties,
 )
+from src.models.wikibase.enums import Result
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
@@ -197,16 +199,19 @@ class WcdImportBot(WcdBaseModel):
                     raise ValueError("page.md5hash was None")
             if item_id:
                 wc = WikibaseCrudDelete(wikibase=self.wikibase)
-                wc.__delete_item__(item_id=item_id)
-                # delete from cache
-                if page.md5hash is not None:
-                    if config.use_cache:
-                        cache.delete_key(key=page.md5hash)
-                        console.print(f"Deleted {title} from the cache")
-                    console.print(f"Deleted {title} from WikiCitations")
-                    return item_id
+                result = wc.__delete_item__(item_id=item_id)
+                if result == Result.SUCCESSFUL:
+                    # delete from cache
+                    if page.md5hash is not None:
+                        if config.use_cache:
+                            cache.delete_key(key=page.md5hash)
+                            console.print(f"Deleted {title} from the cache")
+                        console.print(f"Deleted {title} from WikiCitations")
+                        return item_id
+                    else:
+                        raise ValueError("md5hash was None")
                 else:
-                    raise ValueError("md5hash was None")
+                    raise WikibaseError("Could not delete the page")
             else:
                 if config.use_cache:
                     logger.error("Got no item id from the cache")
