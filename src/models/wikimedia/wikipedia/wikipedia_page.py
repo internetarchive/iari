@@ -184,7 +184,7 @@ class WikipediaPage(WcdBaseModel):
         We don't know if all the references are already present in Wikibase"""
         logger.debug("__compare_and_update_all_references__: Running")
         if not self.references:
-            logger.info("No references found. Skipping comparison of references")
+            console.print("No references found. Skipping comparison of references")
             # raise MissingInformationError("self.references was empty or None")
         else:
             self.__setup_wikibase_crud_update__()
@@ -193,7 +193,9 @@ class WikipediaPage(WcdBaseModel):
                 total = len(self.references)
                 for reference in self.references:
                     count += 1
-                    console.print(f"Comparing reference {count}/{total} on page '{self.title}")
+                    console.print(
+                        f"Comparing reference {count}/{total} on page '{self.title}'"
+                    )
                     new_reference = (
                         self.__upload_reference_and_insert_in_the_cache_if_enabled__(
                             reference=reference
@@ -401,6 +403,7 @@ class WikipediaPage(WcdBaseModel):
 
     def __import_page_and_references__(self):
         console.print(f"Importing page '{self.title}'")
+        self.__upload_references_and_websites_if_missing__()
         # upload a new item for the page with links to all the page_reference items
         self.__setup_wikibase_crud_create__()
         self.wikibase_return = (
@@ -513,11 +516,11 @@ class WikipediaPage(WcdBaseModel):
                     )
                 except ValidationError as error:
                     logger.debug(f"Validation error: {error}")
-                    self.__log_to_file__(
-                        message=str(error), file_name="schema_errors.log"
-                    )
+                    schema_log_file = "schema_errors.log"
+                    self.__log_to_file__(message=str(error), file_name=schema_log_file)
                     logger.error(
-                        "This reference was skipped because an unknown field was found"
+                        f"This reference was skipped because an unknown "
+                        f"field was found. See the file '{schema_log_file}' for details"
                     )
                     reference = None
                 # DISABLED partial loading because it does not work :/
