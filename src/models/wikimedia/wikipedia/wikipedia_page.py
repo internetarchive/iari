@@ -687,10 +687,17 @@ class WikipediaPage(WcdBaseModel):
             count += 1
         self.references = updated_references
 
-    def extract_and_upload_to_wikibase(self) -> None:
+    def extract_and_parse_and_upload_missing_items_to_wikibase(self) -> None:
         """Extract the references and upload first
-        the references and then the page to Wikibase"""
-        # First we check if this page has already been uploaded
+        the references and then the page to Wikibase
+
+        First we fetch the page data and generate the hash,
+        then we setup the Wikibase and extract and parse
+        the references.
+
+        Then we upload the references and websites if missing
+        and lastly we either upload the page or if missing
+        compare and upload any missing claims."""
         logger.debug("extract_and_upload_to_wikibase: Running")
         self.__fetch_page_data__()
         self.__generate_hash__()

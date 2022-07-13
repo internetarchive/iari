@@ -237,7 +237,7 @@ class WcdImportBot(WcdBaseModel):
             wikimedia_site=self.wikimedia_site,
         )
         page.__get_wikipedia_page_from_title__(title=title)
-        page.extract_and_upload_to_wikibase()
+        page.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
     def get_and_extract_pages_by_range(
@@ -283,7 +283,7 @@ class WcdImportBot(WcdBaseModel):
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
                     )
-                    wikipedia_page.extract_and_upload_to_wikibase()
+                    wikipedia_page.extract_and_parse_and_upload_missing_items_to_wikibase()
         else:
             for page in site.allpages(namespace=0):
                 if count >= self.max_count:
@@ -304,7 +304,7 @@ class WcdImportBot(WcdBaseModel):
                         wikitext=page.text,
                         wikibase=self.wikibase,
                     )
-                    wikipedia_page.extract_and_upload_to_wikibase()
+                    wikipedia_page.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
     def lookup_md5hash(self, md5hash: str):

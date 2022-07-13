@@ -62,7 +62,7 @@ class TestWikipediaPage(TestCase):
             title="Test",
         )
         # page.__fetch_page_data__(title="Test")
-        page.extract_and_upload_to_wikibase()
+        page.extract_and_parse_and_upload_missing_items_to_wikibase()
         wcdqid = page.wikibase_return.item_qid
         console.print(
             f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
@@ -108,7 +108,7 @@ class TestWikipediaPage(TestCase):
         reference2.finish_parsing_and_generate_hash()
         wp2.references.append(reference2)
         console.print(wp2.references)
-        wp2.extract_and_upload_to_wikibase()
+        wp2.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_data_and_update_removed_reference(self):
@@ -133,7 +133,7 @@ class TestWikipediaPage(TestCase):
         wp = WikipediaPage(title="Test", wikibase=SandboxWikibase())
         wp.__fetch_page_data__()
         wp.__generate_hash__()
-        wp.extract_and_upload_to_wikibase()
+        wp.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     def test_compare_and_update_page(self):
         # TODO upload a test page with some statement
