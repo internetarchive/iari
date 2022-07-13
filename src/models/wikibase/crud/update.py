@@ -130,8 +130,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 if not wikipedia_page:
                     raise MissingInformationError("wikipedia_page was None")
                 logger.info(
-                    f"Comparing {entity.template_name} "
-                    f"reference with title '{entity.title}"
+                    f"See {self.wikibase.entity_url(item_id=entity.wikibase_return.item_qid)}"
                 )
                 new_item = wcr.__prepare_new_reference_item__(
                     page_reference=entity, wikipedia_page=wikipedia_page
