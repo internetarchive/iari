@@ -207,6 +207,7 @@ class WikipediaPage(WcdBaseModel):
 
     def __compare_and_update_page__(self):
         logger.debug("__compare_and_update_page__: Running")
+        console.print(f"Comparing the page '{self.title}'")
         self.__setup_wikibase_crud_update__()
         self.wikibase_crud_update.compare_and_update_claims(entity=self)
 
@@ -215,10 +216,6 @@ class WikipediaPage(WcdBaseModel):
         logger.debug("__compare_data_and_update__: Running")
         self.__compare_and_update_all_references__()
         self.__compare_and_update_page__()
-        # console.print(
-        #     f"This page has already been uploaded to WikiCitations, "
-        #     f"see {self.url} and {self.wikicitations_url}"
-        # )
 
     def __extract_and_parse_references__(self):
         logger.info("Extracting references now")
