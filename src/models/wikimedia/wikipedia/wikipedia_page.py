@@ -129,9 +129,7 @@ class WikipediaPage(WcdBaseModel):
                 logger.info(
                     f"Could not find reference with {reference.md5hash} in the cache"
                 )
-                (
-                    reference
-                ) = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
+                reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
                     reference=reference
                 )
         if wcdqid:
@@ -192,7 +190,7 @@ class WikipediaPage(WcdBaseModel):
                 count = 0
                 total = len(self.references)
                 for reference in self.references:
-                    """We go through each reference in the object 
+                    """We go through each reference in the object
                     and compare it to the existing one in Wikibase"""
                     count += 1
                     console.print(
@@ -414,7 +412,7 @@ class WikipediaPage(WcdBaseModel):
             )
         if self.wikibase_return.uploaded_now:
             console.print(
-                f"Finished uploading {self.title} to WikiCitations, "
+                f"Finished uploading {self.title} to Wikibase, "
                 f"see {self.url} and {self.wikibase_url}"
             )
         else:
@@ -584,7 +582,7 @@ class WikipediaPage(WcdBaseModel):
     def __upload_reference_to_wikibase__(
         self, reference: WikipediaPageReference
     ) -> WikibaseReturn:
-        """This method tries to upload the reference to WikiCitations
+        """This method tries to upload the reference to Wikibase
         and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists."""
         logger.debug("__upload_reference_to_wikicitations__: Running")
@@ -600,7 +598,7 @@ class WikipediaPage(WcdBaseModel):
                 return wikibase_return
             else:
                 raise MissingInformationError(
-                    "Got None instead of WCDQID when trying to upload to WikiCitations"
+                    "Got None instead of WCDQID when trying to upload to Wikibase"
                 )
         else:
             raise ValueError("self.wikibase_crud_create was None")
@@ -628,8 +626,6 @@ class WikipediaPage(WcdBaseModel):
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create is not None:
-            # from src.models.wikibase.crud import WikiCitations
-            # self.wikicitations: WikiCitations
             return self.wikibase_crud_create.prepare_and_upload_website_item(
                 page_reference=reference, wikipedia_page=self
             )
