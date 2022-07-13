@@ -193,7 +193,7 @@ class WikipediaPage(WcdBaseModel):
                 total = len(self.references)
                 for reference in self.references:
                     count += 1
-                    console.print(f"Comparing references {count}/{total}")
+                    console.print(f"Comparing reference {count}/{total} on page '{self.title}")
                     new_reference = (
                         self.__upload_reference_and_insert_in_the_cache_if_enabled__(
                             reference=reference
