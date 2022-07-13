@@ -398,10 +398,8 @@ class WikipediaPage(WcdBaseModel):
         logger.info("Fetching the page data")
         self.__fetch_page_data__(title=title)
 
-    def __import_page_and_references__(self):
+    def __upload_page_and_references__(self):
         console.print(f"Importing page '{self.title}'")
-        self.__upload_references_and_websites_if_missing__()
-        # upload a new item for the page with links to all the page_reference items
         self.__setup_wikibase_crud_create__()
         self.wikibase_return = (
             self.wikibase_crud_create.prepare_and_upload_wikipedia_page_item(
@@ -701,7 +699,7 @@ class WikipediaPage(WcdBaseModel):
         self.__extract_and_parse_references__()
         self.__upload_references_and_websites_if_missing__()
         if not self.__page_has_already_been_uploaded__():
-            self.__import_page_and_references__()
+            self.__upload_page_and_references__()
         else:
             self.__compare_data_and_update__()
 
