@@ -121,8 +121,9 @@ class WikibaseCrudUpdate(WikibaseCrud):
         wikipedia_page: Optional[WikipediaPage] = None,
         wikibase_item: Optional[ItemEntity] = None,
     ) -> None:
-        """Entity is the entity to work on.
-        :param entity is the entity to compare
+        """We compare and update claims that are completely missing from the Wikibase item.
+        We also remove reference claims no longer present in the Wikipedia page.
+        :param entity is the entity to compare. Either a WikipediaPage or a WikipediaPageReference
         :param wikibase_item is used for offline testing only
         :param wikipedia_page is the page the reference belongs to"""
         logger.debug("compare_and_update_claims: Running")
