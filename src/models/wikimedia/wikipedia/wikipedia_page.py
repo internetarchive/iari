@@ -659,7 +659,8 @@ class WikipediaPage(WcdBaseModel):
         return reference
 
     def __upload_references_and_websites_if_missing__(self):
-        """Go through each reference and upload if missing to WikiCitations"""
+        """Go through each reference and upload if missing to Wikibase"""
+        logger.debug("__upload_references_and_websites_if_missing__: Running")
         updated_references = []
         count = 1
         total = len(self.references)
@@ -690,7 +691,7 @@ class WikipediaPage(WcdBaseModel):
 
     def extract_and_upload_to_wikibase(self) -> None:
         """Extract the references and upload first
-        the references and then the page to WikiCitations"""
+        the references and then the page to Wikibase"""
         # First we check if this page has already been uploaded
         logger.debug("extract_and_upload_to_wikibase: Running")
         self.__fetch_page_data__()
