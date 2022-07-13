@@ -207,6 +207,11 @@ class WikipediaPage(WcdBaseModel):
     def __compare_and_update_page__(self):
         logger.debug("__compare_and_update_page__: Running")
         console.print(f"Comparing the page '{self.title}'")
+        if not self.wikibase_return:
+            raise MissingInformationError(
+                "self.wikibase_return was None and is needed "
+                "to judge whether to compare or not"
+            )
         self.__setup_wikibase_crud_update__()
         self.wikibase_crud_update.compare_and_update_claims(entity=self)
 
@@ -233,6 +238,7 @@ class WikipediaPage(WcdBaseModel):
     def __fetch_page_data__(self, title: str = "") -> None:
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
+        # TODO refactor this into new class?
         logger.debug("__fetch_page_data__: Running")
         if (
             not self.latest_revision_id
@@ -248,6 +254,8 @@ class WikipediaPage(WcdBaseModel):
                 )
             else:
                 self.title = title
+            # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base
+            title = title.replace(" ", "_")
             url = f"https://en.wikipedia.org/w/rest.php/v1/page/{title}"
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
