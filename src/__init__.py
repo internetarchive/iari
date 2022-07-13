@@ -224,7 +224,11 @@ class WcdImportBot(WcdBaseModel):
 
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
-        """Download and extract the page"""
+        """Download and extract the page and the references
+        and then upload it to Wikibase. If the page is already
+        present in the Wikibase then compare it and all its
+        references to make sure we the data is reflecting changes
+        made in Wikipedia"""
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         page = WikipediaPage(
