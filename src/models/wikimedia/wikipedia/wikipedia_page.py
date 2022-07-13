@@ -181,7 +181,7 @@ class WikipediaPage(WcdBaseModel):
 
     def __compare_and_update_all_references__(self) -> None:
         """Compare and update all the references.
-        We don't know if all the references are already present in Wikibase"""
+        We assume all references have already been uploaded to Wikibase"""
         logger.debug("__compare_and_update_all_references__: Running")
         if not self.references:
             console.print("No references found. Skipping comparison of references")
@@ -192,17 +192,14 @@ class WikipediaPage(WcdBaseModel):
                 count = 0
                 total = len(self.references)
                 for reference in self.references:
+                    """We go through each reference in the object 
+                    and compare it to the existing one in Wikibase"""
                     count += 1
                     console.print(
                         f"Comparing reference {count}/{total} on page '{self.title}'"
                     )
-                    new_reference = (
-                        self.__upload_reference_and_insert_in_the_cache_if_enabled__(
-                            reference=reference
-                        )
-                    )
                     self.wikibase_crud_update.compare_and_update_claims(
-                        entity=new_reference, wikipedia_page=self
+                        entity=reference, wikipedia_page=self
                     )
             else:
                 raise WikibaseError()
