@@ -129,8 +129,10 @@ class WikipediaPage(WcdBaseModel):
                 logger.info(
                     f"Could not find reference with {reference.md5hash} in the cache"
                 )
-                reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
-                    reference=reference
+                reference = (
+                    self.__upload_reference_and_insert_in_the_cache_if_enabled__(
+                        reference=reference
+                    )
                 )
         if wcdqid:
             # We got a WCDQID from the cache
