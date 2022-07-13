@@ -396,32 +396,6 @@ class WikipediaPage(WcdBaseModel):
         logger.info("Fetching the page data")
         self.__fetch_page_data__(title=title)
 
-    def __upload_page_and_references__(self):
-        console.print(f"Importing page '{self.title}'")
-        self.__setup_wikibase_crud_create__()
-        self.wikibase_return = (
-            self.wikibase_crud_create.prepare_and_upload_wikipedia_page_item(
-                wikipedia_page=self,
-            )
-        )
-        if config.use_cache:
-            if self.wikibase_return is None:
-                raise ValueError("wcdqid was None")
-            self.cache.add_page(
-                wikipedia_page=self, wcdqid=self.wikibase_return.item_qid
-            )
-        if self.wikibase_return.uploaded_now:
-            console.print(
-                f"Finished uploading {self.title} to Wikibase, "
-                f"see {self.url} and {self.wikibase_url}"
-            )
-        else:
-            console.print(
-                f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
-                f"see {self.url} and {self.wikibase_url}"
-            )
-            raise ValueError("this should never happen")
-
     @validate_arguments
     def __insert_reference_in_cache__(
         self, reference: WikipediaPageReference, wcdqid: str
@@ -577,6 +551,32 @@ class WikipediaPage(WcdBaseModel):
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
+
+    def __upload_page_and_references__(self):
+        console.print(f"Importing page '{self.title}'")
+        self.__setup_wikibase_crud_create__()
+        self.wikibase_return = (
+            self.wikibase_crud_create.prepare_and_upload_wikipedia_page_item(
+                wikipedia_page=self,
+            )
+        )
+        if config.use_cache:
+            if self.wikibase_return is None:
+                raise ValueError("wcdqid was None")
+            self.cache.add_page(
+                wikipedia_page=self, wcdqid=self.wikibase_return.item_qid
+            )
+        if self.wikibase_return.uploaded_now:
+            console.print(
+                f"Finished uploading {self.title} to Wikibase, "
+                f"see {self.url} and {self.wikibase_url}"
+            )
+        else:
+            console.print(
+                f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
+                f"see {self.url} and {self.wikibase_url}"
+            )
+            raise ValueError("this should never happen")
 
     @validate_arguments
     def __upload_reference_to_wikibase__(
