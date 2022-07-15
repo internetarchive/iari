@@ -48,7 +48,7 @@ class WcdImportBot(WcdBaseModel):
             self.cache.flush_database()
         else:
             console.print(
-                "No flushing done since the cache is not enabled in the config.py"
+                "No flushing done since the cache is not enabled in config.py"
             )
 
     def __gather_and_print_statistics__(self):
@@ -70,7 +70,7 @@ class WcdImportBot(WcdBaseModel):
         self.__flush_cache__()
         if not config.use_cache:
             console.print(
-                "No rebuilding done since the cache is not enabled in the config.py"
+                "No rebuilding done since the cache is not enabled in config.py"
             )
         if self.cache:
             wcr = WikibaseCrudRead(wikibase=self.wikibase)
