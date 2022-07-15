@@ -8,6 +8,7 @@ from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_enums import ActionIfExists  # type: ignore
+from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 from src import console
 from src.models.exceptions import MissingInformationError
@@ -69,16 +70,24 @@ class WikibaseCrudUpdate(WikibaseCrud):
             if number_of_added_claims > 0:
                 if not testing:
                     self.__setup_wikibase_integrator_configuration__()
-                    wikibase_item.write(
-                        summary=(
-                            f"Updated the item with {number_of_added_claims} more claims "
-                            "based on changes in Wikipedia"
+                    try:
+                        wikibase_item.write(
+                            summary=(
+                                f"Updated the item with {number_of_added_claims} more claims "
+                                "based on changes in Wikipedia"
+                            )
                         )
-                    )
-                    console.print(
-                        f"Added {number_of_added_claims} new claims to this item"
-                    )
-                    return claims_to_be_added
+                        console.print(
+                            f"Added {number_of_added_claims} new claims to this item"
+                        )
+                        return claims_to_be_added
+                    except ModificationFailed as e:
+                        message = f"The {entity.__repr_name__()} item {wikibase_item.id} could not be updated because of this error: {e}"
+                        logger.error(message)
+                        self.__log_to_file__(
+                            message=message, file_name="update-failed.log"
+                        )
+                        return []
                 else:
                     logger.info(
                         f"Found {number_of_added_claims} claims to be added to this item"
