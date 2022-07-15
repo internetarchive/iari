@@ -46,7 +46,9 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 # deprecate the ones that are now gone.
                 # This collides with the following user story:
                 # "as a user I want to know if a reference has disappeared from the page and when"
-                logger.debug("__compare_claims__: deleting all reference and WEBSITE_ITEM claims")
+                logger.debug(
+                    "__compare_claims__: deleting all reference and WEBSITE_ITEM claims"
+                )
                 wikibase_item.claims.remove(property=self.wikibase.CITATIONS)
                 wikibase_item.claims.remove(property=self.wikibase.STRING_CITATIONS)
                 wikibase_item.claims.remove(property=self.wikibase.WEBSITE_ITEM)
