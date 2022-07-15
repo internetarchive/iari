@@ -31,6 +31,11 @@ class TestWcdImportBot(TestCase):
             bot = WcdImportBot(wikibase=SandboxWikibase())
             bot.__rebuild_cache__()
 
+    def test_flush_cache(self):
+        if config.use_cache:
+            bot = WcdImportBot(wikibase=SandboxWikibase())
+            bot.__flush_cache__()
+
     # def test_import_one_page(self):
     #     bot = WcdImportBot(wikibase=SandboxWikibase())
     #     bot.get_and_extract_page_by_title(title="Test")
