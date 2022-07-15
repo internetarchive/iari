@@ -32,6 +32,7 @@ class WcdImportBot(WcdBaseModel):
 
     The language code is the one used by Wikimedia Foundation"""
 
+    cache: Optional[Cache]
     language_code: str = "en"
     max_count: int = 0  # 0 means disabled
     page_title: Optional[str]
@@ -40,6 +41,10 @@ class WcdImportBot(WcdBaseModel):
     # total_number_of_references: Optional[int]
     wikibase: Wikibase = SandboxWikibase()
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+
+    def __flush_cache__(self):
+        if config.use_cache:
+            self.cache.flush_database()
 
     def __gather_and_print_statistics__(self):
         console.print(self.wikibase.title)
@@ -57,10 +62,7 @@ class WcdImportBot(WcdBaseModel):
 
     def __rebuild_cache__(self):
         """Flush and rebuild the cache"""
-        cache = Cache()
-        cache.connect()
-        cache.flush_database()
-        logger.info("Flushed the cache")
+        self.__flush_cache__()
         wcr = WikibaseCrudRead(wikibase=self.wikibase)
         hashes = wcr.__get_all_items_and_hashes__()
         logger.info("Rebuilding the cache")
@@ -69,7 +71,7 @@ class WcdImportBot(WcdBaseModel):
             hash_value = entry[1]
             wcdqid = entry[0]
             logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
-            cache.ssdb.set_value(key=hash_value, value=wcdqid)
+            self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
             count += 1
         logger.info(f"Inserted {count} entries into the cache")
 
@@ -102,7 +104,10 @@ class WcdImportBot(WcdBaseModel):
     Example rinsing the Wikibase and the cache:
     '$ ./wcdimportbot.py --rinse'
 
-    Example rebuild the cache:
+    Example flush the cache:
+    '$ ./wcdimportbot.py --flush-cache'
+
+    Example flush and rebuild the cache:
     '$ ./wcdimportbot.py --rebuild-cache'""",
         )
         parser.add_argument(
@@ -124,7 +129,12 @@ class WcdImportBot(WcdBaseModel):
             "-r",
             "--max-range",
             help="Import max range of pages",
-        )
+        ),
+        parser.add_argument(
+            "--flush-cache",
+            action="store_true",
+            help="Remove all items from the cache",
+        ),
         parser.add_argument(
             "-i",
             "--import-title",
@@ -162,6 +172,11 @@ class WcdImportBot(WcdBaseModel):
             help="Work against Wikicitations. The bot defaults to sandboxwikibase.",
         )
         return parser.parse_args()
+
+    def __setup_cache__(self):
+        if not self.cache:
+            cache = Cache()
+            cache.connect()
 
     def __setup_wikibase_integrator_configuration__(
         self,
@@ -347,10 +362,7 @@ class WcdImportBot(WcdBaseModel):
         """Delete all page and reference items and clear the SSDB cache"""
         wc = WikibaseCrudDelete(wikibase=self.wikibase)
         wc.delete_imported_items()
-        if config.use_cache:
-            cache = Cache()
-            cache.connect()
-            cache.flush_database()
+        self.__flush_cache__()
 
     def run(self):
         """This method handles running the bot
@@ -362,6 +374,8 @@ class WcdImportBot(WcdBaseModel):
             self.rinse_all_items_and_cache()
         elif args.rebuild_cache:
             self.__rebuild_cache__()
+        elif args.flush_cache:
+            self.__flush_cache__()
         elif args.import_title is not None:
             logger.info(f"importing title {args.import_title}")
             self.get_and_extract_page_by_title(title=args.import_title)
