@@ -44,7 +44,12 @@ class WcdImportBot(WcdBaseModel):
 
     def __flush_cache__(self):
         if config.use_cache:
+            self.__setup_cache__()
             self.cache.flush_database()
+        else:
+            console.print(
+                "No flushing done since the cache is not enabled in the config.py"
+            )
 
     def __gather_and_print_statistics__(self):
         console.print(self.wikibase.title)
@@ -63,17 +68,22 @@ class WcdImportBot(WcdBaseModel):
     def __rebuild_cache__(self):
         """Flush and rebuild the cache"""
         self.__flush_cache__()
-        wcr = WikibaseCrudRead(wikibase=self.wikibase)
-        hashes = wcr.__get_all_items_and_hashes__()
-        logger.info("Rebuilding the cache")
-        count = 1
-        for entry in hashes:
-            hash_value = entry[1]
-            wcdqid = entry[0]
-            logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
-            self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
-            count += 1
-        logger.info(f"Inserted {count} entries into the cache")
+        if not config.use_cache:
+            console.print(
+                "No rebuilding done since the cache is not enabled in the config.py"
+            )
+        if self.cache:
+            wcr = WikibaseCrudRead(wikibase=self.wikibase)
+            hashes = wcr.__get_all_items_and_hashes__()
+            logger.info("Rebuilding the cache")
+            count = 1
+            for entry in hashes:
+                hash_value = entry[1]
+                wcdqid = entry[0]
+                logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
+                self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
+                count += 1
+            logger.info(f"Inserted {count} entries into the cache")
 
     @staticmethod
     def __setup_argparse_and_return_args__():
