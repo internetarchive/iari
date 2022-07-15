@@ -51,7 +51,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 )
                 wikibase_item.claims.remove(property=self.wikibase.CITATIONS)
                 wikibase_item.claims.remove(property=self.wikibase.STRING_CITATIONS)
-                wikibase_item.claims.remove(property=self.wikibase.WEBSITE_ITEM)
+                wikibase_item.claims.remove(property=self.wikibase.WEBSITE)
             claims_to_be_added = []
             property_numbers = {
                 claim.mainsnak.property_number for claim in wikibase_item.claims
