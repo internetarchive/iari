@@ -446,6 +446,9 @@ class WikipediaPage(WcdBaseModel):
                 return False
             else:
                 logger.debug("Page found in the cache")
+                self.wikibase_return = WikibaseReturn(
+                    item_qid=wcdqid, uploaded_now=False
+                )
                 return True
         else:
             if config.check_if_page_has_been_uploaded_via_sparql:
