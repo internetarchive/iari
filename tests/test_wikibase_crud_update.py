@@ -1,5 +1,8 @@
 import logging
+from os import getenv
 from unittest import TestCase
+
+import pytest
 
 import config
 from src import SandboxWikibase
@@ -89,6 +92,7 @@ class TestWikibaseCrudUpdate(TestCase):
         )
         assert claims_to_be_added[0].mainsnak.datavalue["value"] == "test"
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_that_wbi_can_remove_claims(self):
         wikibase = SandboxWikibase()
         data = dict(
