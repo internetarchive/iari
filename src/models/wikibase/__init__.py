@@ -120,6 +120,6 @@ class Wikibase(WcdBaseModel):
     @validate_arguments
     def entity_url(self, item_id: str):
         if self.item_prefixed_wikibase:
-            return f"{self.wikibase_url}/Item:{item_id}"
+            return f"{self.wikibase_url}/wiki/Item:{item_id}"
         else:
-            return f"{self.wikibase_url}/{item_id}"
+            return f"{self.wikibase_url}/wiki/{item_id}"
