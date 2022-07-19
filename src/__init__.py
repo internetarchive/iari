@@ -186,8 +186,9 @@ class WcdImportBot(WcdBaseModel):
 
     def __setup_cache__(self) -> None:
         """Setup the cache"""
-        self.cache = Cache()
-        self.cache.connect()
+        if not self.cache:
+            self.cache = Cache()
+            self.cache.connect()
 
     def __setup_wikibase_integrator_configuration__(
         self,
