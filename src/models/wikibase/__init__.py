@@ -120,7 +120,9 @@ class Wikibase(WcdBaseModel):
     @validate_arguments
     def entity_history_url(self, item_id: str):
         if self.item_prefixed_wikibase:
-            return f"{self.wikibase_url}/w/index.php?title=Item:{item_id}&action=history"
+            return (
+                f"{self.wikibase_url}/w/index.php?title=Item:{item_id}&action=history"
+            )
         else:
             return f"{self.wikibase_url}/w/index.php?title={item_id}&action=history"
 
