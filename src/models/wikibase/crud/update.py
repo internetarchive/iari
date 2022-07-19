@@ -11,7 +11,7 @@ from wikibaseintegrator.wbi_enums import ActionIfExists  # type: ignore
 from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 from src import console
-from src.models.exceptions import MissingInformationError, DebugExit
+from src.models.exceptions import MissingInformationError
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
@@ -44,7 +44,9 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 # This collides with the following user story:
                 # "as a user I want to know if a reference has disappeared from the page and when"
                 logger.debug(
-                    "__compare_claims__: deleting all reference and WEBSITE_ITEM claims"
+                    "__compare_claims__: Deleting all reference claims from the "
+                    f"Wikibase items to make sure we always update them and thus avoid "
+                    f"ModificationErrors caused by deleted items"
                 )
                 wikibase_item.claims.remove(property=self.wikibase.CITATIONS)
                 wikibase_item.claims.remove(property=self.wikibase.STRING_CITATIONS)
@@ -52,15 +54,10 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 """This is needed to fix https://github.com/internetarchive/wcdimportbot/issues/85"""
                 logger.debug(
                     f"Deleting WEBSITE ({self.wikibase.WEBSITE}) claims from the "
-                    f"Wikibase items to make sure we always update it"
+                    f"Wikibase items to make sure we always update them and thus avoid "
+                    f"ModificationErrors caused by deleted items"
                 )
                 wikibase_item.claims.remove(property=self.wikibase.WEBSITE)
-                website_claims = wikibase_item.claims.get(self.wikibase.WEBSITE)
-                if website_claims:
-                    console.print(website_claims)
-                    raise DebugExit(
-                        "All website claims could not be deleted. :/ This is a bug."
-                    )
             claims_to_be_added = []
             current_property_numbers = {
                 claim.mainsnak.property_number for claim in wikibase_item.claims
@@ -82,8 +79,13 @@ class WikibaseCrudUpdate(WikibaseCrud):
                     # For now we don't update the hash even though adding
                     # oclc, pmid, doi, isbn cause the hash to change
                     logger.debug(f"Adding missing claim {claim}")
+                    # We replace all to avoid having statements
+                    # to deleted items in Wikibase.
+                    # Another way to fix this is to have a separate bot
+                    # like in Wikibase which removes all Item-statements which link to
+                    # deleted items.
                     wikibase_item.claims.add(
-                        claim, action_if_exists=ActionIfExists.KEEP
+                        claim, action_if_exists=ActionIfExists.REPLACE_ALL
                     )
                     claims_to_be_added.append(claim)
             number_of_added_claims = len(claims_to_be_added)

@@ -1,8 +1,12 @@
 import logging
+from os import getenv
 from unittest import TestCase
+
+import pytest
 
 import config
 from src import SandboxWikibase
+from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.update import WikibaseCrudUpdate
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
@@ -87,3 +91,26 @@ class TestWikibaseCrudUpdate(TestCase):
             == wikibase.OCLC_CONTROL_NUMBER
         )
         assert claims_to_be_added[0].mainsnak.datavalue["value"] == "test"
+
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
+    def test_that_wbi_can_remove_claims(self):
+        wikibase = SandboxWikibase()
+        data = dict(
+            # oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        reference.wikibase = wikibase
+        reference.finish_parsing_and_generate_hash()
+        wppage = WikipediaPage(wikibase=wikibase)
+        title = "Test"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
+        wc = WikibaseCrud(wikibase=wikibase)
+        item = wc.__prepare_new_reference_item__(
+            page_reference=reference, wikipedia_page=wppage
+        )
+        item.claims.remove(property=wikibase.HASH)
+        with self.assertRaises(KeyError):
+            item.claims.get(wikibase.HASH)
