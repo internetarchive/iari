@@ -51,6 +51,8 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 )
                 wikibase_item.claims.remove(property=self.wikibase.CITATIONS)
                 wikibase_item.claims.remove(property=self.wikibase.STRING_CITATIONS)
+            if isinstance(entity, WikipediaPageReference):
+                """This is needed to fix https://github.com/internetarchive/wcdimportbot/issues/85"""
                 wikibase_item.claims.remove(property=self.wikibase.WEBSITE)
             claims_to_be_added = []
             property_numbers = {
