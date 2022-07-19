@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import Any, List, Optional
 
 from pydantic import validate_arguments
 from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
@@ -17,9 +17,6 @@ from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
     WikipediaPageReference,
 )
-
-if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
 logger = logging.getLogger(__name__)
 
