@@ -548,16 +548,16 @@ class WikipediaPage(WcdBaseModel):
                 wikibase=self.wikibase,
             )
 
-    def __setup_wikibase_crud_update__(self):
-        if not self.wikibase_crud_update:
-            self.wikibase_crud_update = WikibaseCrudUpdate(
+    def __setup_wikibase_crud_read__(self):
+        if not self.wikibase_crud_read:
+            self.wikibase_crud_read = WikibaseCrudRead(
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
 
-    def __setup_wikibase_crud_read__(self):
-        if not self.wikibase_crud_read:
-            self.wikibase_crud_read = WikibaseCrudRead(
+    def __setup_wikibase_crud_update__(self):
+        if not self.wikibase_crud_update:
+            self.wikibase_crud_update = WikibaseCrudUpdate(
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
