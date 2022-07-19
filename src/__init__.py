@@ -74,10 +74,11 @@ class WcdImportBot(WcdBaseModel):
             )
         if self.cache:
             wcr = WikibaseCrudRead(wikibase=self.wikibase)
-            hashes = wcr.__get_all_items_and_hashes__()
+            data = wcr.__get_all_items_and_hashes__()
             logger.info("Rebuilding the cache")
             count = 1
-            for entry in hashes:
+            for entry in data:
+                self.__log_to_file__(message=str(entry), file_name="cache-content.log")
                 hash_value = entry[1]
                 wcdqid = entry[0]
                 logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
