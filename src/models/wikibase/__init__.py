@@ -127,4 +127,3 @@ class Wikibase(WcdBaseModel):
             return f"{self.wikibase_url}/wiki/Item:{item_id}"
         else:
             return f"{self.wikibase_url}/wiki/{item_id}"
-
