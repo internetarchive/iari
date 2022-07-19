@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from pydantic import validate_arguments
 from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
@@ -11,7 +11,7 @@ from wikibaseintegrator.wbi_enums import ActionIfExists  # type: ignore
 from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 from src import console
-from src.models.exceptions import MissingInformationError
+from src.models.exceptions import MissingInformationError, DebugExit
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
@@ -53,8 +53,17 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 wikibase_item.claims.remove(property=self.wikibase.STRING_CITATIONS)
             if isinstance(entity, WikipediaPageReference):
                 """This is needed to fix https://github.com/internetarchive/wcdimportbot/issues/85"""
-                logger.debug("Deleting the WEBSITE claim")
+                logger.debug(
+                    f"Deleting WEBSITE ({self.wikibase.WEBSITE}) claims from the "
+                    f"Wikibase items to make sure we always update it"
+                )
                 wikibase_item.claims.remove(property=self.wikibase.WEBSITE)
+                website_claims = wikibase_item.claims.get(self.wikibase.WEBSITE)
+                if website_claims:
+                    console.print(website_claims)
+                    raise DebugExit(
+                        "All website claims could not be deleted. :/ This is a bug."
+                    )
             claims_to_be_added = []
             current_property_numbers = {
                 claim.mainsnak.property_number for claim in wikibase_item.claims
@@ -138,14 +147,16 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 )
                 return []
 
+    @validate_arguments(config=dict(arbitrary_types_allowed=True))
     def compare_and_update_claims(
         self,
-        entity: Union[WikipediaPage, WikipediaPageReference],
-        wikipedia_page: Optional[WikipediaPage] = None,
+        entity: Any,
+        wikipedia_page: Optional[Any] = None,
         wikibase_item: Optional[ItemEntity] = None,
     ) -> None:
         """We compare and update claims that are completely missing from the Wikibase item.
         We also remove reference claims no longer present in the Wikipedia page.
+
         :param entity is the entity to compare. Either a WikipediaPage or a WikipediaPageReference
         :param wikibase_item is used for offline testing only
         :param wikipedia_page is the page the reference belongs to"""
