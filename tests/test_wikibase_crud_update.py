@@ -2,7 +2,7 @@ import logging
 from unittest import TestCase
 
 import config
-from src import SandboxWikibase
+from src import SandboxWikibase, WikibaseCrudRead
 from src.models.wikibase.crud.update import WikibaseCrudUpdate
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
@@ -87,3 +87,11 @@ class TestWikibaseCrudUpdate(TestCase):
             == wikibase.OCLC_CONTROL_NUMBER
         )
         assert claims_to_be_added[0].mainsnak.datavalue["value"] == "test"
+
+    def test_that_wbi_can_delete_website_claims(self):
+        wikibase = SandboxWikibase()
+        wcr = WikibaseCrudRead(wikibase=wikibase)
+        item = wcr.get_item(item_id="Q2635")
+        item.claims.remove(property=wikibase.WEBSITE)
+        with self.assertRaises(KeyError):
+            item.claims.get(wikibase.WEBSITE)
