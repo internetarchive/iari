@@ -81,10 +81,10 @@ class WcdImportBot(WcdBaseModel):
                 self.__log_to_file__(message=str(entry), file_name="cache-content.log")
                 hash_value = entry[1]
                 wcdqid = entry[0]
-                logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
+                #logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
                 self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
                 count += 1
-            logger.info(f"Inserted {count} entries into the cache")
+            console.print(f"Inserted {count} entries into the cache")
 
     @staticmethod
     def __setup_argparse_and_return_args__():
