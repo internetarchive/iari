@@ -26,3 +26,8 @@ class SupportedItemType(Enum):
 class Result(Enum):
     SUCCESSFUL = auto()
     FAILED = auto()
+
+
+class WriteRequired(Enum):
+    YES = auto()
+    NO = auto()

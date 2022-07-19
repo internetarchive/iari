@@ -199,7 +199,7 @@ class WikipediaPage(WcdBaseModel):
                         f"Comparing reference {count}/{total} on page '{self.title}'"
                     )
                     self.wikibase_crud_update.compare_and_update_claims(
-                        entity=reference, wikipedia_page=self
+                        entity=reference
                     )
             else:
                 raise WikibaseError()
@@ -564,6 +564,7 @@ class WikipediaPage(WcdBaseModel):
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
+        self.wikibase_crud_update.wikipedia_page = self
 
     def __upload_page_and_references__(self):
         console.print(f"Importing page '{self.title}'")

@@ -5,9 +5,11 @@ from unittest import TestCase
 import pytest
 
 import config
-from src import SandboxWikibase
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.update import WikibaseCrudUpdate
+from src.models.wikibase.enums import WriteRequired
+from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
 )
@@ -66,31 +68,31 @@ class TestWikibaseCrudUpdate(TestCase):
         new_reference = EnglishWikipediaPageReference(**new_data)
         new_reference.wikibase = wikibase
         new_reference.finish_parsing_and_generate_hash()
+        new_reference.wikibase_return = WikibaseReturn(uploaded_now=False, item_qid="")
         wppage = WikipediaPage(wikibase=wikibase)
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
-        wcu = WikibaseCrudUpdate(wikibase=wikibase)
+        wcu = WikibaseCrudUpdate(wikibase=wikibase, testing=True, wikipedia_page=wppage)
+        wcu.new_item = wcu.__prepare_new_reference_item__(
+            page_reference=new_reference, wikipedia_page=wppage, testing=True
+        )
+        wcu.wikibase_item = wcu.__prepare_new_reference_item__(
+            page_reference=old_reference, wikipedia_page=wppage, testing=True
+        )
         # We expect 1 claims to be added but 2 in the list
         # because the hash is different after adding oclc because it is used for hashing
         # over self.url.
-        claims_to_be_added = wcu.__compare_claims_and_upload__(
-            entity=EnglishWikipediaPageReference,
-            new_item=wcu.__prepare_new_reference_item__(
-                page_reference=new_reference, wikipedia_page=wppage, testing=True
-            ),
-            wikibase_item=wcu.__prepare_new_reference_item__(
-                page_reference=old_reference, wikipedia_page=wppage, testing=True
-            ),
-            testing=True,
+        assert WriteRequired.YES == wcu.compare_and_update_claims(
+            entity=new_reference,
         )
         # console.print(claims_to_be_added)
-        assert len(claims_to_be_added) == 1
-        assert (
-            claims_to_be_added[0].mainsnak.property_number
-            == wikibase.OCLC_CONTROL_NUMBER
-        )
-        assert claims_to_be_added[0].mainsnak.datavalue["value"] == "test"
+        # assert len(claims_to_be_added) == 1
+        # assert (
+        #     claims_to_be_added[0].mainsnak.property_number
+        #     == wikibase.OCLC_CONTROL_NUMBER
+        # )
+        # assert claims_to_be_added[0].mainsnak.datavalue["value"] == "test"
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_that_wbi_can_remove_claims(self):
