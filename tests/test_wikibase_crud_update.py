@@ -104,7 +104,9 @@ class TestWikibaseCrudUpdate(TestCase):
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         wc = WikibaseCrud(wikibase=wikibase)
-        item = wc.__prepare_new_reference_item__(page_reference=reference, wikipedia_page=wppage)
+        item = wc.__prepare_new_reference_item__(
+            page_reference=reference, wikipedia_page=wppage
+        )
         item.claims.remove(property=wikibase.HASH)
         with self.assertRaises(KeyError):
             item.claims.get(wikibase.HASH)
