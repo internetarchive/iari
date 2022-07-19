@@ -88,6 +88,7 @@ class WikibaseCrud(WcdBaseModel):
         self, sparql_result: Optional[Dict]
     ) -> Iterable[Tuple[str, str]]:
         """Yield item ids and hashes from a sparql result"""
+        logger.debug("__extract_item_ids_and_hashes__: Running")
         if sparql_result:
             yielded = 0
             for binding in sparql_result["results"]["bindings"]:

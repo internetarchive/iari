@@ -77,6 +77,7 @@ class WikibaseCrudRead(WikibaseCrud):
 
     def __get_all_items_and_hashes__(self) -> Iterable[Tuple[str, str]]:
         """Get all item qids and hashes"""
+        logger.debug("__get_all_items_and_hashes__: Running")
         return self.__extract_item_ids_and_hashes__(
             sparql_result=self.__get_items_via_sparql__(
                 f"""
