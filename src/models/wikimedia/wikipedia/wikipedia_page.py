@@ -625,8 +625,8 @@ class WikipediaPage(WcdBaseModel):
     def __upload_reference_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
-        """Upload the reference and insert into the cache if enabled. Always add """
-        # Here we get the reference back with WCDQID
+        """Upload the reference and insert into the cache if enabled. Always add wikibase_return"""
+        logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
         wikibase_return = self.__upload_reference_to_wikibase__(reference=reference)
         if config.use_cache:
             if not wikibase_return or not reference.md5hash:
