@@ -3,6 +3,7 @@ from os import getenv
 from unittest import TestCase
 
 import pytest
+from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
 from src.models.wikibase.crud import WikibaseCrud
@@ -77,7 +78,7 @@ class TestWikibaseCrudUpdate(TestCase):
         wcu.new_item = wcu.__prepare_new_reference_item__(
             page_reference=new_reference, wikipedia_page=wppage, testing=True
         )
-        wcu.wikibase_item = wcu.__prepare_new_reference_item__(
+        wcu.existing_wikibase_item = wcu.__prepare_new_reference_item__(
             page_reference=old_reference, wikipedia_page=wppage, testing=True
         )
         # We expect 1 claims to be added but 2 in the list
@@ -96,6 +97,7 @@ class TestWikibaseCrudUpdate(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_that_wbi_can_remove_claims(self):
+        """This tests that WBI correctly marks claims as removed"""
         wikibase = SandboxWikibase()
         data = dict(
             # oclc="test",
@@ -114,5 +116,23 @@ class TestWikibaseCrudUpdate(TestCase):
             page_reference=reference, wikipedia_page=wppage
         )
         item.claims.remove(property=wikibase.HASH)
+        # We get a keyerror because WBI knows the item is only in memory and not from
+        # a Wikibase and can thus be removed directly
         with self.assertRaises(KeyError):
             item.claims.get(wikibase.HASH)
+
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
+    def test_write_required(self):
+        wikibase = SandboxWikibase()
+        wcu = WikibaseCrudUpdate(wikibase=wikibase)
+        # get the wikibase_item
+        wcu.__setup_wikibase_integrator_configuration__()
+        # We don't need to login to get an item
+        wbi = WikibaseIntegrator()
+        wcu.existing_wikibase_item = wbi.item.get(entity_id="Q6662")
+        # delete the hash
+        wcu.existing_wikibase_item.claims.remove(property=wikibase.HASH)
+        claims = wcu.existing_wikibase_item.claims.get(wikibase.HASH)
+        assert len(claims) == 1
+        assert claims[0].removed is True
+        assert wcu.write_required is True

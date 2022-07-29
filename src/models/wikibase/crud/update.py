@@ -11,6 +11,7 @@ from wikibaseintegrator.models import Claim, Claims  # type: ignore
 from wikibaseintegrator.wbi_enums import ActionIfExists  # type: ignore
 from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
+import config
 from src import console
 from src.models.exceptions import DebugExit, MissingInformationError
 from src.models.wikibase.crud import WikibaseCrud
@@ -41,6 +42,20 @@ class WikibaseCrudUpdate(WikibaseCrud):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def write_required(self):
+        """This property method determines whether write is required for self.wikibase_item"""
+        logger.debug("write_required: running")
+        base_filter = []
+        properties = Properties()
+        property_names = properties.get_all_property_names()
+        for name in property_names:
+            base_filter.append(BaseDataType(prop_nr=getattr(self.wikibase, name)))
+        if config.loglevel == logging.DEBUG:
+            logger.debug("Basefilter:")
+            console.print(base_filter)
+        return self.existing_wikibase_item.write_required(base_filter=base_filter)
 
     def __compare_claims_and_upload__(
         self,
@@ -108,14 +123,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
             # Update the item with the updated claims
             self.existing_wikibase_item.claims = self.updated_claims
             # self.__print_claim_statistics__()
-            base_filter = []
-            properties = Properties()
-            property_names = properties.get_all_property_names()
-            for name in property_names:
-                base_filter.append(BaseDataType(prop_nr=getattr(self.wikibase, name)))
-            # console.print(base_filter)
-            write_required = self.wikibase_item.write_required(base_filter=base_filter)
-            if write_required:
+            if self.write_required:
                 if not self.testing:
                     self.__setup_wikibase_integrator_configuration__()
                     try:
