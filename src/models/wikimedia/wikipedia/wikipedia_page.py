@@ -158,6 +158,9 @@ class WikipediaPage(WcdBaseModel):
         """This method checks if a website item is present
         using the first_level_domain_of_url_hash and the cache if
         enabled and uploads a new item if not"""
+        logger.debug(
+            "__check_and_upload_website_item_to_wikibase_if_missing__: Running"
+        )
         if reference.first_level_domain_of_url_hash is None:
             raise ValueError("reference.first_level_domain_of_url_hash was None")
         logger.debug("Checking and uploading website item")
@@ -700,11 +703,11 @@ class WikipediaPage(WcdBaseModel):
                             reference=reference
                         )
                     )
-            if not reference.wikibase_return:
-                raise MissingInformationError(
-                    "reference.wikibase_return was None and is needed "
-                    "to judge whether to compare or not"
-                )
+                    if not reference.wikibase_return:
+                        raise MissingInformationError(
+                            "reference.wikibase_return was None and is needed "
+                            "to judge whether to compare or not"
+                        )
             updated_references.append(reference)
             count += 1
         self.references = updated_references
