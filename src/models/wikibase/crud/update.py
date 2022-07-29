@@ -195,9 +195,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         # The old claims have now been designated for removal.
         # Now we add the new claim.
         logger.debug(f"Adding missing claim on single-value property {new_claim}")
-        self.updated_claims.add(
-            claims=new_claim, action_if_exists=ActionIfExists.REPLACE_ALL
-        )
+        self.updated_claims.add(claims=new_claim)
 
     @validate_arguments(config=dict(arbitrary_types_allowed=True))
     def compare_and_update_claims(self, entity=Any) -> WriteRequired:
