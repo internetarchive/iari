@@ -1110,8 +1110,7 @@ class WikibaseCrud(WcdBaseModel):
         wikipedia_page,  # type: WikipediaPage
     ) -> WikibaseReturn:
         """This method prepares and then tries to upload the reference to WikiCitations
-        and returns the WCDQID either if successful upload or from the
-        Wikibase error if an item with the exact same label/hash already exists."""
+        and returns a WikibaseReturn."""
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_page=wikipedia_page
