@@ -200,21 +200,22 @@ class WikipediaPage(WcdBaseModel):
                 count = 0
                 total = len(self.references)
                 for reference in self.references:
-                    """We go through each reference in the object
+                    """We go through each reference that has a hash
                     and compare it to the existing one in Wikibase"""
-                    if not reference.wikibase_return:
-                        logger.debug(f"reference: {reference}")
-                        raise MissingInformationError(
-                            "reference.wikibase_return was None and is needed "
-                            f"to judge whether to compare or not"
+                    if reference.has_hash:
+                        if not reference.wikibase_return:
+                            logger.debug(f"reference: {reference}")
+                            raise MissingInformationError(
+                                "reference.wikibase_return was None and is needed "
+                                f"to judge whether to compare or not"
+                            )
+                        count += 1
+                        console.print(
+                            f"Comparing reference {count}/{total} on page '{self.title}'"
                         )
-                    count += 1
-                    console.print(
-                        f"Comparing reference {count}/{total} on page '{self.title}'"
-                    )
-                    self.wikibase_crud_update.compare_and_update_claims(
-                        entity=reference
-                    )
+                        self.wikibase_crud_update.compare_and_update_claims(
+                            entity=reference
+                        )
             else:
                 raise WikibaseError()
 
