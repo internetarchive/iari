@@ -188,18 +188,16 @@ class WikibaseCrudUpdate(WikibaseCrud):
             f"claims to remove with property {new_property_id}."
         )
         # If REPLACE_ALL works as it is supposed the following should not be neccessary:
-        for claim in current_claims:
-            logger.debug(f"Removing existing claim on single-value property {claim}")
-            claim.remove()
-            if not claim.removed:
-                logger.error("Removed claim without removed=True, this is a bug")
-                console.print(claim)
-                raise DebugExit()
-            self.updated_claims.add(claim)
+        # for claim in current_claims:
+        #     logger.debug(f"Removing existing claim on single-value property {claim}")
+        #     claim.remove()
+        #     self.updated_claims.add(claim)
         # The old claims have now been designated for removal.
         # Now we add the new claim.
         logger.debug(f"Adding missing claim on single-value property {new_claim}")
-        self.updated_claims.add(claims=new_claim, action_if_exists=ActionIfExists.REPLACE_ALL)
+        self.updated_claims.add(
+            claims=new_claim, action_if_exists=ActionIfExists.REPLACE_ALL
+        )
 
     @validate_arguments(config=dict(arbitrary_types_allowed=True))
     def compare_and_update_claims(self, entity=Any) -> WriteRequired:
