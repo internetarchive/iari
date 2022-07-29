@@ -36,7 +36,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
     new_item: Optional[ItemEntity] = None
     testing: bool = False
     updated_claims: Claims = Claims()
-    wikibase_item: Optional[ItemEntity] = None
+    existing_wikibase_item: Optional[ItemEntity] = None
     wikipedia_page: Optional[Any] = None
 
     class Config:
@@ -59,7 +59,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         a claim is outdated in all other properties like WEBSITE, etc."""
         if not self.new_item:
             raise MissingInformationError("self.new_item was None")
-        if not self.wikibase_item:
+        if not self.existing_wikibase_item:
             raise MissingInformationError("self.wikibase_item was None")
         with console.status("Comparing claims and uploading the result to Wikibase..."):
             from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
@@ -70,7 +70,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                     self.wikibase.STRING_CITATIONS,
                 ]
                 for new_claim in self.new_item.claims:
-                    if new_claim not in self.wikibase_item.claims:
+                    if new_claim not in self.existing_wikibase_item.claims:
                         new_property_id = new_claim.mainsnak.property_number
                         # TODO fetch property_label to enable a better UI
                         # This means we might have an updated WEBSITE claim
@@ -89,7 +89,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 logger.debug("Going through reference claims")
                 # There currently are no multi-value properties in use on references
                 for new_claim in self.new_item.claims:
-                    if new_claim not in self.wikibase_item.claims:
+                    if new_claim not in self.existing_wikibase_item.claims:
                         self.__replace_single_value_property_claim__(
                             new_claim=new_claim
                         )
@@ -106,7 +106,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
             else:
                 raise ValueError("Not a supported entity type")
             # Update the item with the updated claims
-            self.wikibase_item.claims = self.updated_claims
+            self.existing_wikibase_item.claims = self.updated_claims
             # self.__print_claim_statistics__()
             base_filter = []
             properties = Properties()
@@ -119,17 +119,17 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 if not self.testing:
                     self.__setup_wikibase_integrator_configuration__()
                     try:
-                        self.wikibase_item.write(
+                        self.existing_wikibase_item.write(
                             summary=f"Updated the item based on changes in Wikipedia"
                         )
                         console.print(
                             f"Updated the item based on changes in Wikipedia, "
-                            f"see {self.wikibase.entity_history_url(item_id=self.wikibase_item.id)}"
+                            f"see {self.wikibase.entity_history_url(item_id=self.existing_wikibase_item.id)}"
                         )
                         return WriteRequired.YES
                     except ModificationFailed as e:
                         message = (
-                            f"The {self.entity.__repr_name__()} item {self.wikibase_item.id} "
+                            f"The {self.entity.__repr_name__()} item {self.existing_wikibase_item.id} "
                             f"could not be updated because of this error: {e}"
                         )
                         logger.error(message)
@@ -166,13 +166,13 @@ class WikibaseCrudUpdate(WikibaseCrud):
     def __replace_single_value_property_claim__(self, new_claim: Claim):
         """This method replaces a claim on a single-value property"""
         logger.debug("__replace_single_value_property_claim__: Running")
-        if not self.wikibase_item:
+        if not self.existing_wikibase_item:
             raise MissingInformationError("self.wikibase_item was None")
         new_property_id = new_claim.mainsnak.property_number
         # The new claim should replace the current one since it is a single value property.
         current_claims = [
             claim
-            for claim in self.wikibase_item.claims
+            for claim in self.existing_wikibase_item.claims
             if claim.mainsnak.property_number == new_property_id
         ]
         logger.info(
@@ -240,17 +240,17 @@ class WikibaseCrudUpdate(WikibaseCrud):
             )
         if not self.testing:
             # We always overwrite the item if not testing
-            self.wikibase_item = wcr.get_item(
+            self.existing_wikibase_item = wcr.get_item(
                 item_id=self.entity.wikibase_return.item_qid
             )
-            if not self.wikibase_item:
+            if not self.existing_wikibase_item:
                 raise ValueError(
                     "Cannot compare because the "
                     "item was not found in the Wikibase. "
                     "This should never happen."
                 )
         else:
-            if not self.wikibase_item:
+            if not self.existing_wikibase_item:
                 raise ValueError(
                     "Cannot compare because the " "wikibase_item was not set"
                 )
