@@ -187,11 +187,6 @@ class WikipediaPage(WcdBaseModel):
             console.print("No references found. Skipping comparison of references")
             # raise MissingInformationError("self.references was empty or None")
         else:
-            if not self.wikibase_return:
-                raise MissingInformationError(
-                    "self.wikibase_return was None and is needed "
-                    "to judge whether to compare or not"
-                )
             self.__setup_wikibase_crud_update__()
             if self.wikibase_crud_update:
                 count = 0
@@ -199,6 +194,12 @@ class WikipediaPage(WcdBaseModel):
                 for reference in self.references:
                     """We go through each reference in the object
                     and compare it to the existing one in Wikibase"""
+                    if not reference.wikibase_return:
+                        logger.debug("refernce: {reference}")
+                        raise MissingInformationError(
+                            "reference.wikibase_return was None and is needed "
+                            f"to judge whether to compare or not"
+                        )
                     count += 1
                     console.print(
                         f"Comparing reference {count}/{total} on page '{self.title}'"
