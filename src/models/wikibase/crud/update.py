@@ -79,39 +79,39 @@ class WikibaseCrudUpdate(WikibaseCrud):
         with console.status("Comparing claims and uploading the result to Wikibase..."):
             from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
+            updated_claims = self.existing_wikibase_item.claims
             if isinstance(self.entity, WikipediaPage):
                 multiple_values_properties = [
                     self.wikibase.CITATIONS,
                     self.wikibase.STRING_CITATIONS,
                 ]
                 for new_claim in self.new_item.claims:
-                    if new_claim not in self.existing_wikibase_item.claims:
-                        new_property_id = new_claim.mainsnak.property_number
-                        # TODO fetch property_label to enable a better UI
-                        # This means we might have an updated WEBSITE claim
-                        if new_property_id not in multiple_values_properties:
-                            self.__replace_single_value_property_claim__(
-                                new_claim=new_claim
-                            )
-                        else:
-                            # The property in question is a multi-value property and we simply add a new value
-                            # and hope for the best.
-                            logger.debug(
-                                f"Adding missing claim on multi-value property {new_claim}"
-                            )
-                            self.updated_claims.add(new_claim)
+                    new_property_id = new_claim.mainsnak.property_number
+                    # TODO fetch property_label to enable a better UI
+                    if new_property_id not in multiple_values_properties:
+                        # Replace all claims for properties which we don't want to keep multiple values for
+                        # logger.debug(
+                        #     f"Replacing claim on single-value property {new_claim}"
+                        # )
+                        updated_claims.add(claims=new_claim)
+                    else:
+                        # The property in question is a multi-value property so we append/replace
+                        # logger.debug(
+                        #     f"Appending or replacing claim on multi-value property {new_claim}"
+                        # )
+                        self.updated_claims.add(
+                            claims=new_claim,
+                            action_if_exists=ActionIfExists.APPEND_OR_REPLACE,
+                        )
             elif isinstance(self.entity, WikipediaPageReference):
                 logger.debug("Going through reference claims")
                 # There currently are no multi-value properties in use on references
-                for new_claim in self.new_item.claims:
-                    if new_claim not in self.existing_wikibase_item.claims:
-                        self.__replace_single_value_property_claim__(
-                            new_claim=new_claim
-                        )
+                # so we simply replace them all
+                updated_claims.add(claims=self.new_item.claims)
                 # debug check to see if we only have one website value left on P81
                 website_claims = [
                     claim
-                    for claim in self.updated_claims
+                    for claim in updated_claims
                     if claim.mainsnak.property_number == self.wikibase.WEBSITE
                     and claim.removed is False
                 ]
@@ -121,7 +121,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
             else:
                 raise ValueError("Not a supported entity type")
             # Update the item with the updated claims
-            self.existing_wikibase_item.claims = self.updated_claims
+            self.existing_wikibase_item.claims = updated_claims
             # self.__print_claim_statistics__()
             if self.write_required:
                 if not self.testing:
@@ -169,33 +169,6 @@ class WikibaseCrudUpdate(WikibaseCrud):
     #     # logger.info(
     #     #     f"Found these property numbers {new_property_numbers} on the newly prepared item"
     #     # )
-
-    @validate_arguments(config=dict(arbitrary_types_allowed=True))
-    def __replace_single_value_property_claim__(self, new_claim: Claim):
-        """This method replaces a claim on a single-value property"""
-        logger.debug("__replace_single_value_property_claim__: Running")
-        if not self.existing_wikibase_item:
-            raise MissingInformationError("self.existing_wikibase_item was None")
-        new_property_id = new_claim.mainsnak.property_number
-        # The new claim should replace the current one since it is a single value property.
-        current_claims = [
-            claim
-            for claim in self.existing_wikibase_item.claims
-            if claim.mainsnak.property_number == new_property_id
-        ]
-        logger.info(
-            f"Found {len(current_claims)} single value "
-            f"claims to remove with property {new_property_id}."
-        )
-        # If REPLACE_ALL works as it is supposed the following should not be neccessary:
-        # for claim in current_claims:
-        #     logger.debug(f"Removing existing claim on single-value property {claim}")
-        #     claim.remove()
-        #     self.updated_claims.add(claim)
-        # The old claims have now been designated for removal.
-        # Now we add the new claim.
-        logger.debug(f"Adding missing claim on single-value property {new_claim}")
-        self.updated_claims.add(claims=new_claim)
 
     @validate_arguments(config=dict(arbitrary_types_allowed=True))
     def compare_and_update_claims(self, entity=Any) -> WriteRequired:
