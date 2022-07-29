@@ -114,6 +114,8 @@ class WikipediaPage(WcdBaseModel):
     def __check_and_upload_reference_item_to_wikibase_if_missing__(
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
+        """Check and upload reference item to Wikibase if missing and return an
+        updated reference with the attribute wikibase_return set"""
         logger.debug(
             "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
         )
@@ -137,12 +139,15 @@ class WikipediaPage(WcdBaseModel):
         if wcdqid:
             # We got a WCDQID from the cache
             logger.debug(f"Got wcdqid:{wcdqid} from the cache/SPARQL")
-            wikibase_return = WikibaseReturn(item_qid=wcdqid, uploaded_now=False)
-            reference.wikibase_return = wikibase_return
         else:
             # We did not get a WCDQID, so try uploading
             reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
                 reference=reference
+            )
+        if not reference.wikibase_return:
+            raise MissingInformationError(
+                "self.wikibase_return was None and is needed "
+                "to judge whether to compare or not"
             )
         return reference
 
@@ -195,7 +200,7 @@ class WikipediaPage(WcdBaseModel):
                     """We go through each reference in the object
                     and compare it to the existing one in Wikibase"""
                     if not reference.wikibase_return:
-                        logger.debug("refernce: {reference}")
+                        logger.debug(f"reference: {reference}")
                         raise MissingInformationError(
                             "reference.wikibase_return was None and is needed "
                             f"to judge whether to compare or not"
@@ -603,23 +608,16 @@ class WikipediaPage(WcdBaseModel):
         self, reference: WikipediaPageReference
     ) -> WikibaseReturn:
         """This method tries to upload the reference to Wikibase
-        and returns the WCDQID either if successful upload or from the
-        Wikibase error if an item with the exact same label/hash already exists."""
+        and returns a WikibaseReturn."""
         logger.debug("__upload_reference_to_wikicitations__: Running")
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create:
-            wikibase_return = (
+            return (
                 self.wikibase_crud_create.prepare_and_upload_reference_item(
                     page_reference=reference, wikipedia_page=self
                 )
             )
-            if wikibase_return:
-                return wikibase_return
-            else:
-                raise MissingInformationError(
-                    "Got None instead of WCDQID when trying to upload to Wikibase"
-                )
         else:
             raise ValueError("self.wikibase_crud_create was None")
 
@@ -627,6 +625,7 @@ class WikipediaPage(WcdBaseModel):
     def __upload_reference_and_insert_in_the_cache_if_enabled__(
         self, reference: WikipediaPageReference
     ) -> WikipediaPageReference:
+        """Upload the reference and insert into the cache if enabled. Always add """
         # Here we get the reference back with WCDQID
         wikibase_return = self.__upload_reference_to_wikibase__(reference=reference)
         if config.use_cache:
@@ -701,6 +700,11 @@ class WikipediaPage(WcdBaseModel):
                             reference=reference
                         )
                     )
+            if not reference.wikibase_return:
+                raise MissingInformationError(
+                    "reference.wikibase_return was None and is needed "
+                    "to judge whether to compare or not"
+                )
             updated_references.append(reference)
             count += 1
         self.references = updated_references

@@ -1119,8 +1119,7 @@ class WikibaseCrud(WcdBaseModel):
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return: WikibaseReturn = wcc.upload_new_item(item=item)
-        return wikibase_return
+        return wcc.upload_new_item(item=item)
 
     @validate_arguments
     def prepare_and_upload_website_item(

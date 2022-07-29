@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class WikibaseCrudCreate(WikibaseCrud):
     @validate_arguments(config=dict(arbitrary_types_allowed=True))
     def upload_new_item(self, item: ItemEntity) -> WikibaseReturn:
-        """Upload the new item to WikiCitations"""
+        """Upload the new item to WikiCitations and return a WikibaseReturn"""
         if item is None:
             raise ValueError("Did not get what we need")
         if config.loglevel == logging.DEBUG and config.print_debug_json:
