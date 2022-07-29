@@ -616,10 +616,8 @@ class WikipediaPage(WcdBaseModel):
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create:
-            return (
-                self.wikibase_crud_create.prepare_and_upload_reference_item(
-                    page_reference=reference, wikipedia_page=self
-                )
+            return self.wikibase_crud_create.prepare_and_upload_reference_item(
+                page_reference=reference, wikipedia_page=self
             )
         else:
             raise ValueError("self.wikibase_crud_create was None")
@@ -697,7 +695,7 @@ class WikipediaPage(WcdBaseModel):
                     )
             if reference.has_hash:
                 with console.status(f"Creating the reference item itself"):
-                    # Here we get the reference with its own WCDQID back
+                    # Here we get the reference with WikibaseReturn back
                     reference = (
                         self.__check_and_upload_reference_item_to_wikibase_if_missing__(
                             reference=reference
