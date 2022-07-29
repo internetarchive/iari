@@ -175,7 +175,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         """This method replaces a claim on a single-value property"""
         logger.debug("__replace_single_value_property_claim__: Running")
         if not self.existing_wikibase_item:
-            raise MissingInformationError("self.wikibase_item was None")
+            raise MissingInformationError("self.existing_wikibase_item was None")
         new_property_id = new_claim.mainsnak.property_number
         # The new claim should replace the current one since it is a single value property.
         current_claims = [
