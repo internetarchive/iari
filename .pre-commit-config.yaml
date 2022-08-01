@@ -7,6 +7,12 @@ repos:
     entry: black .
     types: [python]
 
+  - id: codespell
+    name: codespell
+    language: system
+    entry: codespell
+    types: [python]
+
   - id: bandit
     name: bandit
     language: system
