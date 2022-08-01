@@ -16,6 +16,6 @@ tld~=0.12.6
 #git+http://github.com/LeMyst/WikibaseIntegrator@541da2ea02e9c386c4a1b83e15781869ea57d0cf#egg=wikibaseintegrator
 # This reintroduce something we need
 #git+https://github.com/dpriskorn/WikibaseIntegrator.git@fix_remove_claims#egg=wikibaseintegrator
-git+https://github.com/dpriskorn/WikibaseIntegrator.git@modification-failed-fix#egg=wikibaseintegrator
+git+https://github.com/dpriskorn/WikibaseIntegrator.git@dpriskorn-modification-failed-fix#egg=wikibaseintegrator
 #pywikibot~=7.2.0 we use the fork below to avoid annoying logging in the CLI
 git+http://github.com/dpriskorn/pywikibot@remove-verbose-logging#egg=pywikibot
