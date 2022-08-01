@@ -40,6 +40,7 @@ class WikibaseCrudCreate(WikibaseCrud):
             """Catch, extract and return the conflicting WCDQID"""
             logger.info(modification_failed)
             # We pick the first one only for now
+
             wcdqid = modification_failed.get_conflicting_entity_ids[0].replace(
                 "Item:", ""
             )

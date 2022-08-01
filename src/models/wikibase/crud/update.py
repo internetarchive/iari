@@ -29,7 +29,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
     """This class handles all comparing and updating of Wikibase items
 
     entity: is the entity to compare. Either a WikipediaPage or a WikipediaPageReference
-    new_item: new item based on fresh data from Wikpedia
+    new_item: new item based on fresh data from Wikipedia
     wikibase_item: current item in the Wikibase
     wikipedia_page: is the page the reference belongs to"""
 
