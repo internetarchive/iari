@@ -51,6 +51,7 @@ class TestWikibaseCrudUpdate(TestCase):
     #         ),
     #     )
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_claims_on_references(self):
         wikibase = SandboxWikibase()
         old_data = dict(
