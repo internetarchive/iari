@@ -195,7 +195,7 @@ class WikibaseCrud(WcdBaseModel):
         wikipedia_page,  # type: WikipediaPage
         testing: bool = False,
     ) -> ItemEntity:
-        """This method converts a page_reference into a new reference item"""
+        """This method converts a page_reference into a new reference wikibase item"""
         if testing:
             wbi = WikibaseIntegrator()
         else:
