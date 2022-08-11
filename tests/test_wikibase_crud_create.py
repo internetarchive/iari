@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 class TestWikibaseCrudCreate(TestCase):
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item(self):
+        """This tests both full name string generation and archive qualifier generation"""
         wc = WikibaseCrud(wikibase=SandboxWikibase())
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
@@ -39,16 +40,28 @@ class TestWikibaseCrudCreate(TestCase):
                 "doi": "10.1007/978-3-030-39691-6",
                 "s2cid": "216190330",
                 "template_name": "cite book",
+                "archive_url": "https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
             }
         )
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
+        logger.debug(
+            f"reference.detected_archive_of_archive_url: {reference.detected_archive_of_archive_url}"
+        )
+        assert reference.detected_archive_of_archive_url is not None
         assert len(reference.persons_without_role) > 0
         item = wc.__prepare_new_reference_item__(
             page_reference=reference, wikipedia_page=wppage
         )
         console.print(item.get_json())
         assert item.claims.get(property=wc.wikibase.FULL_NAME_STRING) is not None
+        assert item.claims.get(property=wc.wikibase.ARCHIVE_URL) is not None
+        assert (
+            item.claims.get(property=wc.wikibase.ARCHIVE_URL)[0].qualifiers.get(
+                property=wc.wikibase.ARCHIVE
+            )
+            is not None
+        )
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_prepare_new_reference_item_with_very_long_title(self):
