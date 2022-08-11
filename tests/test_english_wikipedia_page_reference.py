@@ -205,11 +205,10 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
 
         reference = EnglishWikipediaPageReference(
             wikibase=SandboxWikibase(),
-            archive_url="https:/web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            archive_url="https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
             template_name="test",
         )
-        reference.__extract_first_level_domain__()
-        reference.__detect_archive_urls__()
+        reference.finish_parsing_and_generate_hash()
         logger.debug(reference.detected_archive_of_url)
         logger.debug(reference.detected_archive_of_archive_url)
         assert reference.detected_archive_of_url is None

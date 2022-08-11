@@ -195,7 +195,7 @@ class WikibaseCrud(WcdBaseModel):
         wikipedia_page,  # type: WikipediaPage
         testing: bool = False,
     ) -> ItemEntity:
-        """This method converts a page_reference into a new reference item"""
+        """This method converts a page_reference into a new reference wikibase item"""
         if testing:
             wbi = WikibaseIntegrator()
         else:
@@ -705,16 +705,18 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_claims_with_urls__(
         self, page_reference
     ) -> List[Claim]:
+        logger.debug("__prepare_single_value_reference_claims_with_urls__: Running")
         claims = []
         if page_reference.archive_url:
             if len(page_reference.archive_url) > 500:
                 # TODO log to file also
                 logger.error(
-                    f"Skipping statement for this URL because it "
-                    f"is too long for Wikibase currently to store :/"
+                    f"Skipping statement for the URL '{page_reference.archive_url}' because it "
+                    f"is longer than 500 characters which this Wikibase currently do not support :/"
                 )
             else:
                 if page_reference.detected_archive_of_archive_url:
+                    logger.debug("Adding qualifier linking to the detected archive")
                     claims.append(
                         datatypes.URL(
                             prop_nr=self.wikibase.ARCHIVE_URL,
@@ -733,6 +735,7 @@ class WikibaseCrud(WcdBaseModel):
                     )
                 else:
                     message = f"No supported archive detected for {page_reference.archive_url}"
+                    logger.debug(message)
                     self.__log_to_file__(
                         message=message, file_name="undetected_archive.log"
                     )
