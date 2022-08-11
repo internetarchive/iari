@@ -13,7 +13,10 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
+from src.models.exceptions import (
+    MissingInformationError,
+    MoreThanOneNumberError,
+)
 from src.models.person import Person
 from src.models.wikibase import Wikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
@@ -478,35 +481,32 @@ class WikipediaPageReference(WcdBaseModel):
         # ARCHIVE_URL
         if self.first_level_domain_of_archive_url:
             logger.debug("__detect_archive_urls__: Working on self.archive_url")
-            archive_url_archive = None
             try:
                 logger.debug(
                     f"Trying to detect archive from {self.first_level_domain_of_archive_url}"
                 )
-                archive_url_archive = KnownArchiveUrl(
+                self.detected_archive_of_archive_url = KnownArchiveUrl(
                     self.first_level_domain_of_archive_url
                 )
             except ValueError:
-                pass
-            if archive_url_archive:
-                self.detected_archive_of_archive_url = archive_url_archive
-            else:
                 self.__log_to_file__(
                     message=f"No archive detected for {self.archive_url}",
                     file_name="undetected_archive.log",
                 )
+
         # URL
         if self.first_level_domain_of_url:
-            url_archive = None
             try:
                 logger.debug(
                     f"Trying to detect archive from {self.first_level_domain_of_url}"
                 )
-                url_archive = KnownArchiveUrl(self.first_level_domain_of_url)
+                self.detected_archive_of_url = KnownArchiveUrl(
+                    self.first_level_domain_of_url
+                )
             except ValueError:
+                # We don't log this because it would clog the
+                # log file very quickly and not yield anything useful
                 pass
-            if url_archive:
-                self.detected_archive_of_url = url_archive
 
     def __detect_google_books_id__(self):
         """We detect GOOGLE_BOOKS_ID to populate the property later
