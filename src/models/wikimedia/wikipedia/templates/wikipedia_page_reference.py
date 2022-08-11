@@ -1184,8 +1184,9 @@ class WikipediaPageReference(WcdBaseModel):
         # We parse the first parameter before isbn
         self.__parse_first_parameter__()
         self.__parse_urls__()
-        self.__detect_archive_urls__()
+        # FLD detection is needed for the detection methods
         self.__extract_first_level_domain__()
+        self.__detect_archive_urls__()
         self.__detect_internet_archive_id__()
         self.__detect_google_books_id__()
         self.__parse_isbn__()
