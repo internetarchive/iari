@@ -190,8 +190,6 @@ class WikibaseCrudUpdate(WikibaseCrud):
         We also remove reference claims no longer present in the Wikipedia page."""
         logger.debug("compare_and_update_claims: Running")
         self.entity = entity
-        # We reset this to avoid polution-bugs.
-        self.updated_claims = Claims()
         if not self.wikipedia_page:
             raise MissingInformationError("self.wikipedia_page was None")
         if not self.entity.wikibase_return:
