@@ -36,7 +36,6 @@ class WikibaseCrudUpdate(WikibaseCrud):
     entity: Any  # Union["WikipediaPage", WikipediaPageReference],
     new_item: Optional[ItemEntity] = None
     testing: bool = False
-    updated_claims: Claims = Claims()
     existing_wikibase_item: Optional[ItemEntity] = None
     wikipedia_page: Optional[Any] = None
 
@@ -85,6 +84,21 @@ class WikibaseCrudUpdate(WikibaseCrud):
                     self.wikibase.CITATIONS,
                     self.wikibase.STRING_CITATIONS,
                 ]
+                # First remove all old claims no longer present
+                for claim in updated_claims:
+                    # This comparison only looks at property number and datavalue
+                    if (
+                        claim not in self.new_item.claims
+                        and claim.mainsnak.property_number in multiple_values_properties
+                    ):
+                        logger.debug(
+                            f"Removing claim with property {claim.mainsnak.property_number} "
+                            f"and value {claim.mainsnak.datavalue} which is not "
+                            f"present in the page item anymore"
+                        )
+                        claim.remove()
+                        # raise DebugExit()
+                # Add new claims
                 for new_claim in self.new_item.claims:
                     new_property_id = new_claim.mainsnak.property_number
                     # TODO fetch property_label to enable a better UI
@@ -99,7 +113,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                         # logger.debug(
                         #     f"Appending or replacing claim on multi-value property {new_claim}"
                         # )
-                        self.updated_claims.add(
+                        updated_claims.add(
                             claims=new_claim,
                             action_if_exists=ActionIfExists.APPEND_OR_REPLACE,
                         )
@@ -176,8 +190,6 @@ class WikibaseCrudUpdate(WikibaseCrud):
         We also remove reference claims no longer present in the Wikipedia page."""
         logger.debug("compare_and_update_claims: Running")
         self.entity = entity
-        # We reset this to avoid polution-bugs.
-        self.updated_claims = Claims()
         if not self.wikipedia_page:
             raise MissingInformationError("self.wikipedia_page was None")
         if not self.entity.wikibase_return:
