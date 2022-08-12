@@ -87,7 +87,10 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 # First remove all old claims no longer present
                 for claim in updated_claims:
                     # This comparison only looks at property number and datavalue
-                    if claim not in self.new_item.claims:
+                    if (
+                        claim not in self.new_item.claims
+                        and claim.mainsnak.property_number in multiple_values_properties
+                    ):
                         logger.debug(
                             f"Removing claim with property {claim.mainsnak.property_number} "
                             f"and value {claim.mainsnak.datavalue} which is not "
