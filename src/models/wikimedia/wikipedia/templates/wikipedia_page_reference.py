@@ -991,7 +991,7 @@ class WikipediaPageReference(WcdBaseModel):
         person_without_number = [
             attribute
             for attribute in attributes
-            if self.__find_number__(attribute) is None and role.value in attribute
+            if self.__find_number__(attribute) is None and str(role.value) in attribute
         ]
         if len(person_without_number) > 0:
             person = Person(role=role)
@@ -1002,7 +1002,7 @@ class WikipediaPageReference(WcdBaseModel):
             for attribute in person_without_number:
                 # print(attribute, getattr(self, attribute))
                 if attribute == role.value:
-                    person.name_string = getattr(self, role.value)
+                    person.name_string = getattr(self, str(role.value))
                 if attribute == link:
                     person.link = getattr(self, link)
                 if attribute == mask:
@@ -1018,7 +1018,7 @@ class WikipediaPageReference(WcdBaseModel):
             self.__get_numbered_persons__(
                 attributes=attributes,
                 role=EnglishWikipediaTemplatePersonRole.AUTHOR,
-                search_string=role.value,
+                search_string=str(role.value),
             )
         )
         # console.print(f"{role.name}s: {persons}")
