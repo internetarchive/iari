@@ -601,11 +601,13 @@ class WikipediaPage(WcdBaseModel):
                 f"see {self.url} and {self.wikibase_url}"
             )
         else:
+            # This branch is hit e.g. when the cache has not been synced with the wikibase
             console.print(
                 f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
-                f"see {self.url} and {self.wikibase_url}"
+                f"see {self.url} and {self.wikibase_url}. \nPlease run the bot with --rebuild-cache "
+                f"to speed up the process."
             )
-            raise ValueError("this should never happen")
+            self.__compare_data_and_update__()
 
     @validate_arguments
     def __upload_reference_to_wikibase__(
