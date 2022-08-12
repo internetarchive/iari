@@ -97,7 +97,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                             f"present in the page item anymore"
                         )
                         claim.remove()
-                        raise DebugExit()
+                        # raise DebugExit()
                 # Add new claims
                 for new_claim in self.new_item.claims:
                     new_property_id = new_claim.mainsnak.property_number
