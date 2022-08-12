@@ -36,7 +36,6 @@ class WikibaseCrudUpdate(WikibaseCrud):
     entity: Any  # Union["WikipediaPage", WikipediaPageReference],
     new_item: Optional[ItemEntity] = None
     testing: bool = False
-    updated_claims: Claims = Claims()
     existing_wikibase_item: Optional[ItemEntity] = None
     wikipedia_page: Optional[Any] = None
 
@@ -99,7 +98,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                         # logger.debug(
                         #     f"Appending or replacing claim on multi-value property {new_claim}"
                         # )
-                        self.updated_claims.add(
+                        updated_claims.add(
                             claims=new_claim,
                             action_if_exists=ActionIfExists.APPEND_OR_REPLACE,
                         )
