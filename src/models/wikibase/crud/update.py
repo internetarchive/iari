@@ -84,6 +84,18 @@ class WikibaseCrudUpdate(WikibaseCrud):
                     self.wikibase.CITATIONS,
                     self.wikibase.STRING_CITATIONS,
                 ]
+                # First remove all old claims no longer present
+                for claim in updated_claims:
+                    # This comparison only looks at property number and datavalue
+                    if claim not in self.new_item.claims:
+                        logger.debug(
+                            f"Removing claim with property {claim.mainsnak.property_number} "
+                            f"and value {claim.mainsnak.datavalue} which is not "
+                            f"present in the page item anymore"
+                        )
+                        claim.remove()
+                        raise DebugExit()
+                # Add new claims
                 for new_claim in self.new_item.claims:
                     new_property_id = new_claim.mainsnak.property_number
                     # TODO fetch property_label to enable a better UI
