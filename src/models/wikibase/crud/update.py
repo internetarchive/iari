@@ -158,7 +158,8 @@ class WikibaseCrudUpdate(WikibaseCrud):
                         self.__log_to_file__(
                             message=message, file_name="update-failed.log"
                         )
-                        raise DebugExit()
+                        # raise DebugExit()
+                        return WriteRequired.YES
                 else:
                     console.print(
                         "Write required but skipping because of testing was True"
