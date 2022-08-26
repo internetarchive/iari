@@ -63,9 +63,9 @@ class GoogleBooks(WcdBaseModel):
 
 
 class GoogleBooksSchema(Schema):
-    """Marshmellow schema to load the attributes using aliases
+    """Marshmallow schema to load the attributes using aliases
 
-    We don't validate with marshmellow because it does not seem to work correctly."""
+    We don't validate with marshmallow because it does not seem to work correctly."""
 
     first_parameter_id = String(data_key="1")  # id
     title = String(data_key="2")  # title

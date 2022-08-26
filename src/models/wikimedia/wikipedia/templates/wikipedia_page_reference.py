@@ -1199,9 +1199,9 @@ class WikipediaPageReference(WcdBaseModel):
 
 
 class WikipediaPageReferenceSchema(Schema):
-    """Marshmellow schema to load the attributes using aliases
+    """Marshmallow schema to load the attributes using aliases
 
-    We don't validate with marshmellow because it does not seem to work correctly."""
+    We don't validate with marshmallow because it does not seem to work correctly."""
 
     first_parameter = String(data_key="1")
     second_parameter = String(data_key="2")
