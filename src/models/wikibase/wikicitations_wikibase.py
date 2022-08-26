@@ -3,7 +3,7 @@ from src.models.wikibase import Wikibase
 
 
 class WikiCitationsWikibase(Wikibase):
-    """This models the properties and items on wikicitations.wiki.opencura.com"""
+    """This models the properties and items on wikicitations.wikibase.cloud"""
 
     title = "wikicitations.wikibase.cloud"
     user_name = config.user
