@@ -22,18 +22,17 @@ from wikibaseintegrator.wbi_enums import WikibaseDatatype  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
 import config
-from src import Wikibase, console
+from src import Wikibase, console, WikiCitationsWikibase
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.dictionaries import wcd_archive_items, wcd_items
 from src.models.wikibase.properties import Properties
-from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
 class SetupNewWikibase(BaseModel):
-    wikibase: Wikibase = SandboxWikibase()
+    wikibase: Wikibase = WikiCitationsWikibase()
 
     def __setup_archive_items__(self) -> List[str]:
         # They rely on each other so they have to be created in a certain order it seems

@@ -180,6 +180,7 @@ class WcdImportBot(WcdBaseModel):
         parser.add_argument(
             "-wc",
             "--wikicitations",
+            action="store_true",
             help="Work against Wikicitations. The bot defaults to sandboxwikibase.",
         )
         return parser.parse_args()
@@ -284,7 +285,7 @@ class WcdImportBot(WcdBaseModel):
         count: int = 0
         # https://stackoverflow.com/questions/59605802/
         # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
-        site = Site(code=self.language_code, fam=self.wikimedia_site.value)
+        site = Site(code=self.language_code, fam=str(self.wikimedia_site.value))
         if category_title:
             category_page = Category(title=category_title, source=site)
             for page in category_page.articles(recurse=True):
@@ -380,9 +381,9 @@ class WcdImportBot(WcdBaseModel):
         """This method handles running the bot
         based on the given command line arguments."""
         args = self.__setup_argparse_and_return_args__()
-        if args.wikicitations is not None:
+        if args.wikicitations:
             self.wikibase = WikiCitationsWikibase()
-        if args.rinse is True:
+        if args.rinse:
             self.rinse_all_items_and_cache()
         elif args.rebuild_cache:
             self.__rebuild_cache__()

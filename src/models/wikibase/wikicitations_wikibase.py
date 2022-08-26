@@ -3,12 +3,12 @@ from src.models.wikibase import Wikibase
 
 
 class WikiCitationsWikibase(Wikibase):
-    """This models the properties and items on wikicitations.wiki.opencura.com"""
+    """This models the properties and items on wikicitations.wikibase.cloud"""
 
-    title = "wikicitations.wiki.opencura.com"
+    title = "wikicitations.wikibase.cloud"
     user_name = config.user
     botpassword = config.pwd
-    wikibase_url = "https://wikicitations.wiki.opencura.com"
+    wikibase_url = "https://wikicitations.wikibase.cloud"
     query_service_url = wikibase_url + "/query/"
 
     OCLC_CONTROL_NUMBER = ""
