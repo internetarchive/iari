@@ -34,8 +34,8 @@ class TestWikipediaPage(TestCase):
             if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
                 # console.print(ref.template_name)
                 if (
-                    ref.url
-                    == "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
+                        ref.url
+                        == "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
                 ):
                     console.print(ref.url, ref.archive_url)
 
@@ -97,7 +97,6 @@ class TestWikipediaPage(TestCase):
         wp2 = WikipediaPage(title="Test", wikibase=SandboxWikibase())
         wp2.__fetch_page_data__()
         wp2.__generate_hash__()
-        wp2.references.append(reference)
         data2 = dict(
             title="World War I",
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
@@ -139,3 +138,13 @@ class TestWikipediaPage(TestCase):
         # TODO upload a test page with some statement
         # then update it with a page with one more statement
         pass
+
+    def test_is_redirect(self):
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
+        wp = WikipediaPage(title="Easter island", wikibase=SandboxWikibase())
+        wp.__fetch_page_data__()
+        assert wp.is_redirect is True
+        wp = WikipediaPage(title="Easter Island", wikibase=SandboxWikibase())
+        wp.__fetch_page_data__()
+        assert wp.is_redirect is False

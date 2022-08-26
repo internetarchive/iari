@@ -87,6 +87,13 @@ class WikipediaPage(WcdBaseModel):
             )
 
     @property
+    def is_redirect(self) -> bool:
+        if "#REDIRECT" in str(self.wikitext)[:10]:
+            return True
+        else:
+            return False
+
+    @property
     def underscored_title(self):
         """Helper property"""
         if self.title is None:
@@ -726,14 +733,17 @@ class WikipediaPage(WcdBaseModel):
         compare and upload any missing claims."""
         logger.debug("extract_and_upload_to_wikibase: Running")
         self.__fetch_page_data__()
-        self.__generate_hash__()
-        self.__setup_wikibase_crud_create__()
-        self.__extract_and_parse_references__()
-        self.__upload_references_and_websites_if_missing__()
-        if not self.__page_has_already_been_uploaded__():
-            self.__upload_page_and_references__()
+        if not self.is_redirect:
+            self.__generate_hash__()
+            self.__setup_wikibase_crud_create__()
+            self.__extract_and_parse_references__()
+            self.__upload_references_and_websites_if_missing__()
+            if not self.__page_has_already_been_uploaded__():
+                self.__upload_page_and_references__()
+            else:
+                self.__compare_data_and_update__()
         else:
-            self.__compare_data_and_update__()
+            console.print("This page is a redirect to another page. Not importing.")
 
     # def __get_title_from_event__(self):
     #     self.title = self.wikimedia_event.page_title
