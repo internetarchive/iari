@@ -240,7 +240,8 @@ class WikipediaPage(WcdBaseModel):
     def __compare_data_and_update__(self):
         """We compare and update all references and the page data"""
         logger.debug("__compare_data_and_update__: Running")
-        self.__compare_and_update_all_references__()
+        if config.compare_references:
+            self.__compare_and_update_all_references__()
         self.__compare_and_update_page__()
 
     def __extract_and_parse_references__(self):
