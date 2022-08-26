@@ -1,0 +1,16 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+start
+:Add time of last update to the current information stored on the items;
+:Write new userscript which informs the user about problems found with the references;
+:Define a limited set of articles to keep up to date in the Wikibase until we are ready to scale up;
+:Define a datamodel for storing information we get from the event stream and populate a database;
+:Write a script to update the articles using the database on an agreed interval e.g. 30s;
+:Update the references themselves at most every 24h (because it can take a long time per article if there are many references);
+:Invite the community to provide feedback on the userscript;
+:Scale up to hundreds->thousands->millions of articles;
+:Define a process to let the community help guide what to improve iteratively;
+stop
+
+@enduml
