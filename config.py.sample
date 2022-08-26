@@ -9,6 +9,7 @@ sandbox_user = ""
 sandbox_pwd = ""
 
 # Settings:
+compare_references = False
 assume_persons_without_role_are_authors = True
 debug_unsupported_templates = False
 include_url_in_hash_algorithm = True
