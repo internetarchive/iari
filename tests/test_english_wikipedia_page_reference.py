@@ -202,6 +202,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         assert reference.location == "Stockholm"
 
     def test_detect_archive_urls(self):
+        # TODO test other archives also
         from src.models.wikibase.enums import KnownArchiveUrl
 
         reference = EnglishWikipediaPageReference(
@@ -210,8 +211,8 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="test",
         )
         reference.finish_parsing_and_generate_hash()
-        logger.debug(reference.detected_archive_of_url)
-        logger.debug(reference.detected_archive_of_archive_url)
+        # logger.debug(reference.detected_archive_of_url)
+        # logger.debug(reference.detected_archive_of_archive_url)
         assert reference.detected_archive_of_url is None
         assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
 
