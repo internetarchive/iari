@@ -3,8 +3,9 @@ from unittest import TestCase
 
 import config
 from src.helpers import console
-from src.models.exceptions import MoreThanOneNumberError
+from src.models.exceptions import MoreThanOneNumberError, MissingInformationError
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
     EnglishWikipediaPageReferenceSchema,
@@ -340,3 +341,42 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.wikibase = SandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.oclc == "test"
+
+    def test_has_first_level_domain_url_hash_and_has_hash(self):
+        data = dict(
+            oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        assert reference.has_first_level_domain_url_hash is False
+        assert reference.has_hash is False
+        reference.wikibase = SandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.has_first_level_domain_url_hash is True
+        assert reference.has_hash is True
+
+    def test_template_url(self):
+        data = dict(
+            oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        assert (
+            reference.template_url
+            == f"https://en.wikipedia.org/wiki/Template:cite book"
+        )
+
+    def test_wikibase_url(self):
+        data = dict(
+            oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaPageReference(**data)
+        reference.wikibase = SandboxWikibase()
+        with self.assertRaises(MissingInformationError):
+            print(reference.wikibase_url)
+        reference.wikibase_return = WikibaseReturn(item_qid="test", uploaded_now=False)
+        assert reference.wikibase_url == "https://sandbox.wiki/wiki/Item:test"
