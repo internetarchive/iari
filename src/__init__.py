@@ -18,7 +18,7 @@ from src.models.wikibase.dictionaries import (
     wcd_string_properties,
 )
 from src.models.wikibase.enums import Result
-from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
@@ -39,7 +39,7 @@ class WcdImportBot(WcdBaseModel):
     percent_references_hashed_in_total: Optional[int]
     # total_number_of_hashed_references: Optional[int]
     # total_number_of_references: Optional[int]
-    wikibase: Wikibase = SandboxWikibase()
+    wikibase: Wikibase = IASandboxWikibase()
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 
     def __flush_cache__(self):
@@ -404,11 +404,11 @@ class WcdImportBot(WcdBaseModel):
             # We strip here to avoid errors caused by spaces
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
         elif args.statistics is not None:
-            bot = WcdImportBot(wikibase=SandboxWikibase())
+            bot = WcdImportBot(wikibase=IASandboxWikibase())
             bot.__gather_and_print_statistics__()
             # DISABLED because it returns 503 now.
-            # bot = WcdImportBot(wikibase=WikiCitationsWikibase())
-            # bot.__gather_statistics__()
+            bot = WcdImportBot(wikibase=WikiCitationsWikibase())
+            bot.__gather_and_print_statistics__()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 

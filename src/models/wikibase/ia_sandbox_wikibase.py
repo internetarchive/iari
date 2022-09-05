@@ -2,15 +2,15 @@ import config
 from src.models.wikibase import Wikibase
 
 
-class SandboxWikibase(Wikibase):
-    """This models the properties and items on sandbox.wiki"""
+class IASandboxWikibase(Wikibase):
+    """This models the properties and items on ia-sandbox.wikibase.cloud/"""
 
     botpassword = config.sandbox_pwd
-    query_service_url = "https://query.sandbox.wiki"
-    title = "sandbox.wiki"
+    title = "ia-sandbox.wikibase.cloud/"
     user_name = config.sandbox_user
-    wikibase_url = "https://sandbox.wiki"
-    wikibase_cloud_wikibase = False
+    wikibase_url = "https://ia-sandbox.wikibase.cloud/"
+    wikibase_cloud_wikibase = True
+    query_service_url = wikibase_url + "/query/"
 
     # Properties
     DOI = "P46"  # datatype: WikibaseDatatype.EXTERNALID description: None
