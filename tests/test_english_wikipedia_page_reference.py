@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import config
 from src.helpers import console
-from src.models.exceptions import MoreThanOneNumberError, MissingInformationError
+from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.wikibase.sandbox_wikibase import SandboxWikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
