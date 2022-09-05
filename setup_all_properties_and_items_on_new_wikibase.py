@@ -22,7 +22,7 @@ from wikibaseintegrator.wbi_enums import WikibaseDatatype  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
 
 import config
-from src import Wikibase, console, WikiCitationsWikibase
+from src import Wikibase, WikiCitationsWikibase, console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.dictionaries import wcd_archive_items, wcd_items
 from src.models.wikibase.properties import Properties
