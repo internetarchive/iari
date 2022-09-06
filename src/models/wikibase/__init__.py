@@ -105,7 +105,8 @@ class Wikibase(WcdBaseModel):
 
     @property
     def rdf_prefix(self) -> str:
-        return self.wikibase_url.replace("https", "http")
+        """We only support wikibase.cloud Wikibase installations for now"""
+        return self.wikibase_url
 
     @property
     def sparql_endpoint_url(self) -> str:

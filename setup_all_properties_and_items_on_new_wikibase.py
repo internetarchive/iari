@@ -19,10 +19,13 @@ from wikibaseintegrator.models import (  # type: ignore
     LanguageValue,
 )
 from wikibaseintegrator.wbi_enums import WikibaseDatatype  # type: ignore
-from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
+from wikibaseintegrator.wbi_exceptions import (  # type: ignore
+    MissingEntityException,
+    MWApiError,
+)
 
 import config
-from src import Wikibase, console, WikiCitationsWikibase
+from src import Wikibase, WikiCitationsWikibase, console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.dictionaries import wcd_archive_items, wcd_items
 from src.models.wikibase.properties import Properties
@@ -34,6 +37,23 @@ logger = logging.getLogger(__name__)
 class SetupNewWikibase(BaseModel):
     wikibase: Wikibase = WikiCitationsWikibase()
 
+    # def __delete_old_properties__(self):
+    #     wc = WikibaseCrud(wikibase=self.wikibase)
+    #     wc.__setup_wikibase_integrator_configuration__()
+    #     wbi = WikibaseIntegrator(
+    #         login=wbi_login.Login(
+    #             user=wc.wikibase.user_name,
+    #             password=wc.wikibase.botpassword,
+    #             mediawiki_api_url=wc.wikibase.mediawiki_api_url,
+    #         )
+    #     )
+    #     for number in range(1,51):
+    #         try:
+    #             p = wbi.property.get(entity_id=f"P{number}")
+    #             p.delete()
+    #             console.print(f"Property {p.labels.get(language='en')} deleted")
+    #         except MissingEntityException:
+    #             pass
     def __setup_archive_items__(self) -> List[str]:
         # They rely on each other so they have to be created in a certain order it seems
         # then the instance_of=archive item
@@ -121,6 +141,12 @@ class SetupNewWikibase(BaseModel):
     def __setup_argparse_and_return_args__() -> argparse.Namespace:
         parser = argparse.ArgumentParser()
         parser.add_argument(
+            "-d",
+            "--delete",
+            action="store_true",
+            help="Delete old properties",
+        )
+        parser.add_argument(
             "-i",
             "--items",
             action="store_true",
@@ -184,6 +210,9 @@ class SetupNewWikibase(BaseModel):
             self.setup_items()
         if args.properties is True:
             self.setup_properties()
+        if args.delete is True:
+            console.print("We don't support this currently.")
+            # self.__delete_old_properties__()
         console.print(
             f"Now copy the above output into the {snw.wikibase.__repr_name__()} "
             f"class."
@@ -238,8 +267,10 @@ class SetupNewWikibase(BaseModel):
                         f'{entry} = "{property.id}" # datatype: {datatype} description: {description}'
                     )
                 except MWApiError as e:
+                    logger.debug(e)
                     existing_property = e.get_conflicting_entity_ids[0]
                     property = wbi.property.get(entity_id=existing_property)
+                    logger.debug(f"property id: {property.id}")
                     output_text.append(
                         f'{entry} = "{property.id}" # datatype: {datatype} description: {property.descriptions.get(language="en")}'
                     )
