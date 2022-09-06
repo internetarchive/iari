@@ -3,13 +3,15 @@
 
 start
 :Add time of last update to the current information stored on the items;
-:Write new userscript which informs the user about problems found with the references;
+:Add Wikidata QID to article items;
+:Write a small userscript that links to the Wikicitation item for the current article (if any);
+:Write a userscript which informs the user about problems found with the references;
 :Define a limited set of articles to keep up to date in the Wikibase until we are ready to scale up;
 :Find an existing Kafka cluster or set up our own;
 :Set up a Kafka connector to import all edits from enwiki into an event pool;
 :Decide which format to use e.g. JSON or Avro, the latter is more complex but perhaps more efficient and we have ~6M million events per month;
 :Add support for the bot to listen to and act on Kafka events;
-:Add support for the bot to publish to kafka topics whenever finishes an import succesfully;
+:Add support for the bot to publish to kafka topics whenever finishes an import successfully;
 :(nice to have) Publish all logging into topics in the event backbone;
 :Update the references themselves at most every 24h (because it can take a long time per article if there are many references);
 :Invite the community to provide feedback on the userscript;
