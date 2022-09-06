@@ -1,6 +1,8 @@
 import logging
 
+import pywikibot # type: ignore
 from pydantic import validate_arguments
+from pywikibot import Page
 from wikibaseintegrator import wbi_login  # type: ignore
 from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ignore
 from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
@@ -68,6 +70,17 @@ class WikibaseCrudDelete(WikibaseCrud):
     def delete_imported_items(self):
         """This function deletes all the imported items in WikiCitations"""
         console.print("Deleting all imported items")
-        self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_PAGE)
-        self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_PAGE)
-        self.__delete_items__(item_type=SupportedItemType.WEBSITE_ITEM)
+        # gather pages using pywikibot
+        site = pywikibot.Site(url="https://wikicitations.wikibase.cloud")
+        # for namespace in site.namespaces:
+        #     console.print(namespace)
+        self.__setup_wikibase_integrator_configuration__()
+        for page in site.allpages(namespace=120):
+            page: Page
+            console.print(page.title())
+            self.__delete_item__(item_id=page.title().replace("Item:", ""))
+            # page.delete(prompt=False)
+            #exit()
+        # self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_PAGE)
+        # self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_REFERENCE)
+        # self.__delete_items__(item_type=SupportedItemType.WEBSITE_ITEM)
