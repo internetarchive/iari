@@ -11,6 +11,17 @@ class WikiCitationsWikibase(Wikibase):
     wikibase_url = "https://wikicitations.wikibase.cloud"
     query_service_url = wikibase_url + "/query/"
 
+    DOI = "P53"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    GOOGLE_BOOKS_ID = "P54"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books at Google.
+    INTERNET_ARCHIVE_ID = "P55"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books and other resources at Internet Archive.
+    ISBN_10 = "P56"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    ISBN_13 = "P57"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    MEDIAWIKI_PAGE_ID = "P58"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    OCLC_CONTROL_NUMBER = "P59"  # datatype: WikibaseDatatype.EXTERNALID description: Online Computer Library Centers control number in Worldcat
+    ORCID = "P60"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    PMID = "P61"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    WIKIDATA_QID = "P62"  # datatype: WikibaseDatatype.EXTERNALID description: None
+    ARCHIVE = "P52"  # datatype: WikibaseDatatype.ITEM description: recognized web archive
     AUTHOR = "P64"  # datatype: WikibaseDatatype.ITEM description: None
     CITATIONS = "P65"  # datatype: WikibaseDatatype.ITEM description: None
     EDITOR = "P66"  # datatype: WikibaseDatatype.ITEM description: None
