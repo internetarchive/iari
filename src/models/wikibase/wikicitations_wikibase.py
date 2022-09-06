@@ -11,17 +11,6 @@ class WikiCitationsWikibase(Wikibase):
     wikibase_url = "https://wikicitations.wikibase.cloud"
     query_service_url = wikibase_url + "/query/"
 
-    DOI = "P53"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    GOOGLE_BOOKS_ID = "P54"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books at Google.
-    INTERNET_ARCHIVE_ID = "P55"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books and other resources at Internet Archive.
-    ISBN_10 = "P56"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    ISBN_13 = "P57"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    MEDIAWIKI_PAGE_ID = "P58"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    OCLC_CONTROL_NUMBER = "P59"  # datatype: WikibaseDatatype.EXTERNALID description: Online Computer Library Centers control number in Worldcat
-    ORCID = "P60"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    PMID = "P61"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    WIKIDATA_QID = "P62"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    ARCHIVE = "P52"  # datatype: WikibaseDatatype.ITEM description: recognized web archive
     AUTHOR = "P64"  # datatype: WikibaseDatatype.ITEM description: None
     CITATIONS = "P65"  # datatype: WikibaseDatatype.ITEM description: None
     EDITOR = "P66"  # datatype: WikibaseDatatype.ITEM description: None
@@ -65,16 +54,16 @@ class WikiCitationsWikibase(Wikibase):
     TRANSCRIPT_URL = "P104"  # datatype: WikibaseDatatype.URL description: None
     URL = "P105"  # datatype: WikibaseDatatype.URL description: None
 
-    ARCHIVE_IS = "Q5830"
-    ARCHIVE_ORG = "Q5660"
-    ARCHIVE_PH = "Q5830"
-    ARCHIVE_TODAY = ""
-    ENGLISH_WIKIPEDIA = "Q3"
-    MEMENTOWEB_ORG = ""
-    WEBCITATION_ORG = ""
-    WEBSITE_ITEM = "Q145"
-    WIKIPEDIA_PAGE = "Q6"
-    WIKIPEDIA_REFERENCE = "Q4"
+    ENGLISH_WIKIPEDIA = "Q7973"  # label: English Wikipedia description: language version of Wikipedia
+    WEBSITE_ITEM = "Q7974"  # label: Website description: first level domain website found in Wikipedia
+    WIKIPEDIA_PAGE = "Q7975"  # label: Wikipedia page description: page in a language version of Wikipedia
+    WIKIPEDIA_REFERENCE = "Q7976"  # label: Wikipedia reference description: reference on a page in Wikipedia
+    ARCHIVE_ITEM = "Q7977"  # label: Archive description: web archive
+    ARCHIVE_IS = "Q7978"  # label: Archive.is description: web archive
+    ARCHIVE_ORG = "Q7979"  # label: Archive.org description: web archive
+    ARCHIVE_TODAY = "Q7980"  # label: Archive.today description: web archive
+    GHOSTARCHIVE_ORG = "Q7981"  # label: Ghostarchive.org description: web archive
+    WEBCITATION_ORG = "Q7982"  # label: Webcitation.org description: web archive
 
     # This has to come last to work.
     wcdqid_language_edition_of_wikipedia_to_work_on = ENGLISH_WIKIPEDIA
