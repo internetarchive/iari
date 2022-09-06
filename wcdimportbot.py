@@ -10,5 +10,7 @@ except ModuleNotFoundError:
 from src import WcdImportBot
 
 logging.basicConfig(level=config.loglevel)
+# This hides exceptions about modification failed from wikibaseintegrator
+logging.getLogger("wikibaseintegrator").setLevel(level=logging.CRITICAL)
 wcdimportbot = WcdImportBot()
 wcdimportbot.run()
