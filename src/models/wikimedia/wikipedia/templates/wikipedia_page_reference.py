@@ -451,9 +451,9 @@ class WikipediaPageReference(WcdBaseModel):
     @property
     def wikibase_url(self) -> str:
         if not self.wikibase:
-            raise ValueError("self.wikibase was None")
+            raise MissingInformationError("self.wikibase was None")
         if not self.wikibase_return:
-            raise ValueError("self.wikibase_return was None")
+            raise MissingInformationError("self.wikibase_return was None")
         return (
             f"{self.wikibase.wikibase_url}/"
             f"wiki/Item:{self.wikibase_return.item_qid}"
