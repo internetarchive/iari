@@ -21,7 +21,9 @@ class WikiCitationsWikibase(Wikibase):
     ORCID = "P60"  # datatype: WikibaseDatatype.EXTERNALID description: None
     PMID = "P61"  # datatype: WikibaseDatatype.EXTERNALID description: None
     WIKIDATA_QID = "P62"  # datatype: WikibaseDatatype.EXTERNALID description: None
-    ARCHIVE = "P52"  # datatype: WikibaseDatatype.ITEM description: recognized web archive
+    ARCHIVE = (
+        "P52"  # datatype: WikibaseDatatype.ITEM description: recognized web archive
+    )
     AUTHOR = "P64"  # datatype: WikibaseDatatype.ITEM description: None
     CITATIONS = "P65"  # datatype: WikibaseDatatype.ITEM description: None
     EDITOR = "P66"  # datatype: WikibaseDatatype.ITEM description: None
@@ -32,7 +34,9 @@ class WikiCitationsWikibase(Wikibase):
     SERIES_ORDINAL = "P71"  # datatype: WikibaseDatatype.QUANTITY description: None
     EDITOR_NAME_STRING = "P72"  # datatype: WikibaseDatatype.STRING description: None
     FAMILY_NAME = "P73"  # datatype: WikibaseDatatype.STRING description: None
-    FIRST_LEVEL_DOMAIN_STRING = "P74"  # datatype: WikibaseDatatype.STRING description: None
+    FIRST_LEVEL_DOMAIN_STRING = (
+        "P74"  # datatype: WikibaseDatatype.STRING description: None
+    )
     FULL_NAME_STRING = "P75"  # datatype: WikibaseDatatype.STRING description: None
     GIVEN_NAME = "P76"  # datatype: WikibaseDatatype.STRING description: None
     HASH = "P77"  # datatype: WikibaseDatatype.STRING description: None
@@ -49,7 +53,9 @@ class WikiCitationsWikibase(Wikibase):
     STRING_CITATIONS = "P88"  # datatype: WikibaseDatatype.STRING description: None
     TEMPLATE_NAME = "P89"  # datatype: WikibaseDatatype.STRING description: None
     TITLE = "P90"  # datatype: WikibaseDatatype.STRING description: None
-    TRANSLATOR_NAME_STRING = "P91"  # datatype: WikibaseDatatype.STRING description: None
+    TRANSLATOR_NAME_STRING = (
+        "P91"  # datatype: WikibaseDatatype.STRING description: None
+    )
     VOLUME = "P92"  # datatype: WikibaseDatatype.STRING description: None
     WEBSITE_STRING = "P93"  # datatype: WikibaseDatatype.STRING description: None
     ACCESS_DATE = "P94"  # datatype: WikibaseDatatype.TIME description: date of access of the resource
@@ -60,12 +66,16 @@ class WikiCitationsWikibase(Wikibase):
     ARCHIVE_URL = "P99"  # datatype: WikibaseDatatype.URL description: None
     CHAPTER_URL = "P100"  # datatype: WikibaseDatatype.URL description: None
     CONFERENCE_URL = "P101"  # datatype: WikibaseDatatype.URL description: None
-    FULL_WORK_AVAILABLE_AT_URL = "P102"  # datatype: WikibaseDatatype.URL description: None
+    FULL_WORK_AVAILABLE_AT_URL = (
+        "P102"  # datatype: WikibaseDatatype.URL description: None
+    )
     LAY_URL = "P103"  # datatype: WikibaseDatatype.URL description: None
     TRANSCRIPT_URL = "P104"  # datatype: WikibaseDatatype.URL description: None
     URL = "P105"  # datatype: WikibaseDatatype.URL description: None
 
-    ENGLISH_WIKIPEDIA = "Q7973"  # label: English Wikipedia description: language version of Wikipedia
+    ENGLISH_WIKIPEDIA = (
+        "Q7973"  # label: English Wikipedia description: language version of Wikipedia
+    )
     WEBSITE_ITEM = "Q7974"  # label: Website description: first level domain website found in Wikipedia
     WIKIPEDIA_PAGE = "Q7975"  # label: Wikipedia page description: page in a language version of Wikipedia
     WIKIPEDIA_REFERENCE = "Q7976"  # label: Wikipedia reference description: reference on a page in Wikipedia
