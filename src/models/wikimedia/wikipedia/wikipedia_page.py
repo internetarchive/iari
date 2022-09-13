@@ -322,11 +322,17 @@ class WikipediaPage(WcdBaseModel):
                             # We only care about the first page
                             break
                     else:
-                        raise MissingInformationError(f"Did not get any pages from MediaWiki, see {url}")
+                        raise MissingInformationError(
+                            f"Did not get any pages from MediaWiki, see {url}"
+                        )
                 else:
-                    raise MissingInformationError(f"Did not get any pages-key from MediaWiki, see {url}")
+                    raise MissingInformationError(
+                        f"Did not get any pages-key from MediaWiki, see {url}"
+                    )
             else:
-                raise MissingInformationError(f"Did not get any query from MediaWiki, see {url}")
+                raise MissingInformationError(
+                    f"Did not get any query from MediaWiki, see {url}"
+                )
             logger.info(f"Found Wikidata QID: {self.wikidata_qid}")
 
     @staticmethod

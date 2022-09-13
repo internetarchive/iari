@@ -34,8 +34,8 @@ class TestWikipediaPage(TestCase):
             if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
                 # console.print(ref.template_name)
                 if (
-                        ref.url
-                        == "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
+                    ref.url
+                    == "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
                 ):
                     console.print(ref.url, ref.archive_url)
 
