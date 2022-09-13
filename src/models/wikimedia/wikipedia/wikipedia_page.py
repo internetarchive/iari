@@ -49,6 +49,7 @@ class WikipediaPage(WcdBaseModel):
     wikibase_crud_read: Optional[WikibaseCrudRead]
     wikibase_crud_update: Optional[WikibaseCrudUpdate]
     wikibase_return: Optional[WikibaseReturn]
+    wikidata_qid: str = ""
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
@@ -279,6 +280,7 @@ class WikipediaPage(WcdBaseModel):
                 self.title = title
             # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base
             title = title.replace(" ", "_")
+            # TODO avoid hard coding here
             url = f"https://en.wikipedia.org/w/rest.php/v1/page/{title}"
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
@@ -297,6 +299,35 @@ class WikipediaPage(WcdBaseModel):
             logger.debug(
                 "Not fetching via REST API. We have already got all the data we need"
             )
+
+    def __fetch_wikidata_qid__(self):
+        """Fetch the Wikidata QID so we can efficiently look up pages via JS"""
+        # TODO avoid hard coding here
+        url = f"https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&titles={quote(self.title)}&format=json"
+        headers = {"User-Agent": config.user_agent}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            # console.print(response.text)
+            data = response.json()
+            # console.print(data)
+            query = data.get("query")
+            if query:
+                pages = query.get("pages")
+                if pages:
+                    if len(pages):
+                        for page in pages:
+                            page_data = pages[page]
+                            # console.print(page_data)
+                            self.wikidata_qid = page_data["pageprops"]["wikibase_item"]
+                            # We only care about the first page
+                            break
+                    else:
+                        raise MissingInformationError(f"Did not get any pages from MediaWiki, see {url}")
+                else:
+                    raise MissingInformationError(f"Did not get any pages-key from MediaWiki, see {url}")
+            else:
+                raise MissingInformationError(f"Did not get any query from MediaWiki, see {url}")
+            logger.info(f"Found Wikidata QID: {self.wikidata_qid}")
 
     @staticmethod
     def __fix_class_key__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
@@ -735,6 +766,7 @@ class WikipediaPage(WcdBaseModel):
         logger.debug("extract_and_upload_to_wikibase: Running")
         self.__fetch_page_data__()
         if not self.is_redirect:
+            self.__fetch_wikidata_qid__()
             self.__generate_hash__()
             self.__setup_wikibase_crud_create__()
             self.__extract_and_parse_references__()
