@@ -1,4 +1,5 @@
 import logging
+import os
 
 # Login credentials
 user = ""
