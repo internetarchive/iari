@@ -420,6 +420,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         assert item.claims.get(property=wc.wikibase.OCLC_CONTROL_NUMBER) is not None
 
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_wikidata_qid_statement(self):
         wppage = WikipediaPage(wikibase=SandboxWikibase())
         title = "Democracy"
