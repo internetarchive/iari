@@ -13,7 +13,7 @@ from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 import config
 from src import console
-from src.models.exceptions import DebugExit, MissingInformationError
+from src.models.exceptions import MissingInformationError
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import WriteRequired
@@ -121,7 +121,11 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 logger.debug("Going through reference claims")
                 # There currently are no multi-value properties in use on references
                 # so we simply replace them all
-                updated_claims.add(claims=self.new_item.claims)
+                # TODO append only if we are not updating the references
+                updated_claims.add(
+                    claims=self.new_item.claims,
+                    action_if_exists=ActionIfExists.REPLACE_ALL,
+                )
                 # debug check to see if we only have one website value left on P81
                 website_claims = [
                     claim
@@ -131,7 +135,10 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 ]
                 if len(website_claims) > 1:
                     console.print(website_claims)
-                    raise DebugExit()
+                    raise Exception(
+                        "More than one website claim present "
+                        "in the generated item, this is a bug."
+                    )
             else:
                 raise ValueError("Not a supported entity type")
             # Update the item with the updated claims
