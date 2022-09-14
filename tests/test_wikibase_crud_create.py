@@ -5,9 +5,10 @@ from unittest import TestCase
 from wikibaseintegrator.models import Claim  # type: ignore
 
 import config
-from src import IASandboxWikibase, console
+from src.helpers import console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.create import WikibaseCrudCreate
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
