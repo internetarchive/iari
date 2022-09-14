@@ -3,17 +3,16 @@
 
 start
 :Add time of last update to the current information stored on the items;
-:Add Wikidata QID to article items;
+:Deploy wikicitations-api to AWS;
 :Write a small userscript that links to the Wikicitation item for the current article (if any);
 :Write a userscript which informs the user about problems found with the references;
 :Define a limited set of articles to keep up to date in the Wikibase until we are ready to scale up;
-:Find an existing Kafka cluster or set up our own;
 :Set up RabbitMQ in AWS and import all edits from enwiki according to our filter into a work queue;
-:Decide which format to use e.g. JSON or Avro, the latter is more complex but perhaps more efficient and we have ~6M million events per month;
 :Add support for the bot to consume events from the work queue;
-:Add support for the bot to publish to kafka topics when it starts and finishes an import successfully;
-:(nice to have) Publish all logging into topics in the event backbone;
-:Update the references themselves at most every 24h (because it can take a long time per article if there are many references);
+:Add support for the bot to publish the cache when it finishes an import successfully;
+:Add support for limiting updates to the references items at most every 24h (because it can take a long time per article if there are many references);
+:Add support for limiting updates to the article items at most every 2m;
+:(nice to have) Publish all logging into kafka topics;
 :Invite the community to provide feedback on the userscript;
 :Scale up to hundreds->thousands->millions of articles;
 :Define a process to let the community help guide what to improve iteratively;
