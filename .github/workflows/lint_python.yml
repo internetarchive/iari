@@ -3,6 +3,8 @@ on: [pull_request, push]
 jobs:
   lint_python:
     runs-on: ubuntu-latest
+    env:
+      ia_sandbox: ${{ secrets.ia_sandbox }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -21,7 +23,8 @@ jobs:
       - run: mkdir --parents --verbose .mypy_cache
       - run: mypy --ignore-missing-imports --install-types --non-interactive .
       - run: cp config.py.sample config.py
-      # Tests in test_wcdimportbot.py and test_wikicitations.py require a valid userid and password
-      - run: pytest --durations=10 --ignore=tests/test_wcdimportbot.py .
+        # https://docs.pytest.org/en/latest/how-to/usage.html#specifying-which-tests-to-run
+        # Run only one test while we test if the secret work
+      - run: pytest tests/test_wikibase_crud_create.py::TestWikibaseCrudCreate::test_prepare_and_upload_website_item #--durations=10 .
       - run: shopt -s globstar && pyupgrade --keep-runtime-typing --py37-plus **/*.py
       - run: safety check

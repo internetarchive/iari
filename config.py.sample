@@ -5,8 +5,9 @@ user = ""
 pwd = ""
 
 # Login credentials to sandbox.wiki
-sandbox_user = ""
-sandbox_pwd = ""
+sandbox_user = "So9q@test"
+# https://medium.datadriveninvestor.com/accessing-github-secrets-in-python-d3e758d8089b
+sandbox_pwd = os.environ["ia_sandbox"]
 
 # Settings:
 compare_references = False
