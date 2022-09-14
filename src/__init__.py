@@ -181,7 +181,8 @@ class WcdImportBot(WcdBaseModel):
             "-wc",
             "--wikicitations",
             action="store_true",
-            help="Work against Wikicitations. The bot defaults to sandboxwikibase.",
+            # TODO revert to defaulting to Wikicitaitons again
+            help="Work against Wikicitations. The bot defaults to IASandboxWikibase.",
         )
         return parser.parse_args()
 

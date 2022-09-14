@@ -8,7 +8,7 @@ import config
 from src import WcdImportBot
 from src.helpers import console
 from src.models.wikibase.enums import Result
-from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class TestWcdImportBot(TestCase):
     def test_delete_one_page(self):
-        bot = WcdImportBot(wikibase=SandboxWikibase())
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
         # bot.rinse_all_items_and_cache()
         bot.get_and_extract_page_by_title(title="Test")
         console.print(
@@ -28,21 +28,21 @@ class TestWcdImportBot(TestCase):
 
     def test_rebuild_cache(self):
         if config.use_cache:
-            bot = WcdImportBot(wikibase=SandboxWikibase())
+            bot = WcdImportBot(wikibase=IASandboxWikibase())
             bot.__rebuild_cache__()
 
     def test_flush_cache(self):
         if config.use_cache:
-            bot = WcdImportBot(wikibase=SandboxWikibase())
+            bot = WcdImportBot(wikibase=IASandboxWikibase())
             bot.__flush_cache__()
 
     # def test_import_one_page(self):
-    #     bot = WcdImportBot(wikibase=SandboxWikibase())
+    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
     #     bot.get_and_extract_page_by_title(title="Test")
     #     bot.
 
     # def test__gather_statistics__(self):
-    #     bot = WcdImportBot(wikibase=SandboxWikibase())
+    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
     #     bot.__gather_and_print_statistics__()
     #     # bot2 = WcdImportBot(wikibase=WikiCitationsWikibase())
     #     # bot2.__gather_statistics__()
@@ -83,7 +83,7 @@ class TestWcdImportBot(TestCase):
 # DISABLED because we don't want to rinse all items every time we run all tests
 # FIXME test against a test Wikibase instance so Mark can play with the production one himself
 # def test_rinse_all_items_and_cache(self):
-#     bot = WcdImportBot(wikibase=SandboxWikibase())
+#     bot = WcdImportBot(wikibase=IASandboxWikibase())
 #     bot.rinse_all_items_and_cache()
 #     console.print(
 #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"

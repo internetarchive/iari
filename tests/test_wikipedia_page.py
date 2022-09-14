@@ -1,14 +1,11 @@
 import logging
-from os import getenv
 from time import sleep
 from unittest import TestCase
-
-import pytest
 
 import config
 from src import WcdImportBot
 from src.helpers import console
-from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
@@ -23,7 +20,7 @@ class TestWikipediaPage(TestCase):
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         page = WikipediaPage(
-            wikibase=SandboxWikibase(),
+            wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
         )
@@ -43,7 +40,7 @@ class TestWikipediaPage(TestCase):
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         page = WikipediaPage(
-            wikibase=SandboxWikibase(),
+            wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
         )
@@ -51,12 +48,11 @@ class TestWikipediaPage(TestCase):
         assert page.page_id == 11089416
         assert page.title == "Test"
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_get_wcdqid_from_hash_via_sparql(self):
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
         page = WikipediaPage(
-            wikibase=SandboxWikibase(),
+            wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
             title="Test",
@@ -72,13 +68,12 @@ class TestWikipediaPage(TestCase):
         print(wcdqid, check_wcdqid)
         assert wcdqid == check_wcdqid
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_data_and_update_additional_reference(self):
         """First delete the test page, then upload it with one reference.
         Then"""
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
-        bot = WcdImportBot(wikibase=SandboxWikibase())
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
         bot.delete_one_page(title="Test")
         # exit()
         data = dict(
@@ -86,15 +81,15 @@ class TestWikipediaPage(TestCase):
             template_name="cite book",
         )
         reference = EnglishWikipediaPageReference(**data)
-        reference.wikibase = SandboxWikibase()
+        reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wp = WikipediaPage(title="Test", wikibase=SandboxWikibase())
+        wp = WikipediaPage(title="Test", wikibase=IASandboxWikibase())
         wp.__fetch_page_data__()
         wp.__generate_hash__()
         wp.references.append(reference)
         wp.__upload_page_and_references__()
         # press_enter_to_continue()
-        wp2 = WikipediaPage(title="Test", wikibase=SandboxWikibase())
+        wp2 = WikipediaPage(title="Test", wikibase=IASandboxWikibase())
         wp2.__fetch_page_data__()
         wp2.__generate_hash__()
         data2 = dict(
@@ -103,17 +98,16 @@ class TestWikipediaPage(TestCase):
             template_name="cite book",
         )
         reference2 = EnglishWikipediaPageReference(**data2)
-        reference2.wikibase = SandboxWikibase()
+        reference2.wikibase = IASandboxWikibase()
         reference2.finish_parsing_and_generate_hash()
         wp2.references.append(reference2)
         console.print(wp2.references)
         wp2.extract_and_parse_and_upload_missing_items_to_wikibase()
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_data_and_update_removed_reference(self):
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
-        bot = WcdImportBot(wikibase=SandboxWikibase())
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
         bot.delete_one_page(title="Test")
 
         data = dict(
@@ -121,15 +115,15 @@ class TestWikipediaPage(TestCase):
             template_name="cite book",
         )
         reference = EnglishWikipediaPageReference(**data)
-        reference.wikibase = SandboxWikibase()
+        reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wp = WikipediaPage(title="Test", wikibase=SandboxWikibase())
+        wp = WikipediaPage(title="Test", wikibase=IASandboxWikibase())
         wp.__fetch_page_data__()
         wp.__generate_hash__()
         wp.references.append(reference)
         wp.__upload_page_and_references__()
         # press_enter_to_continue()
-        wp = WikipediaPage(title="Test", wikibase=SandboxWikibase())
+        wp = WikipediaPage(title="Test", wikibase=IASandboxWikibase())
         wp.__fetch_page_data__()
         wp.__generate_hash__()
         wp.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -142,16 +136,16 @@ class TestWikipediaPage(TestCase):
     def test_is_redirect(self):
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
-        wp = WikipediaPage(title="Easter island", wikibase=SandboxWikibase())
+        wp = WikipediaPage(title="Easter island", wikibase=IASandboxWikibase())
         wp.__fetch_page_data__()
         assert wp.is_redirect is True
-        wp = WikipediaPage(title="Easter Island", wikibase=SandboxWikibase())
+        wp = WikipediaPage(title="Easter Island", wikibase=IASandboxWikibase())
         wp.__fetch_page_data__()
         assert wp.is_redirect is False
 
     def test_fetch_wikidata_qid(self):
         from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 
-        wp = WikipediaPage(title="Easter island", wikibase=SandboxWikibase())
+        wp = WikipediaPage(title="Easter island", wikibase=IASandboxWikibase())
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"

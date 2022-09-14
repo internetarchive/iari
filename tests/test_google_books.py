@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src import SandboxWikibase, console
+from src import IASandboxWikibase, console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.wikimedia.wikipedia.templates.google_books import (
     GoogleBooks,
@@ -14,7 +14,7 @@ class TestGoogleBooks(TestCase):
         template_tuples = extract_templates_and_params(data, True)
         for _template_name, content in template_tuples:
             gb: GoogleBooks = GoogleBooksSchema().load(content)
-            gb.wikibase = SandboxWikibase()
+            gb.wikibase = IASandboxWikibase()
             gb.finish_parsing()
             console.print(gb.dict())
             assert gb.url == "https://books.google.com/books?id=CDJpAAAAMAAJ"

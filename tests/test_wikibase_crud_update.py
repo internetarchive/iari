@@ -9,7 +9,7 @@ import config
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.update import WikibaseCrudUpdate
 from src.models.wikibase.enums import WriteRequired
-from src.models.wikibase.sandbox_wikibase import SandboxWikibase
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReference,
@@ -33,16 +33,16 @@ class TestWikibaseCrudUpdate(TestCase):
     #         template_name="cite book",
     #     )
     #     old_reference = EnglishWikipediaPageReference(**old_data)
-    #     old_reference.wikibase = SandboxWikibase()
+    #     old_reference.wikibase = IASandboxWikibase()
     #     old_reference.finish_parsing_and_generate_hash()
     #     new_reference = EnglishWikipediaPageReference(**new_data)
-    #     new_reference.wikibase = SandboxWikibase()
+    #     new_reference.wikibase = IASandboxWikibase()
     #     new_reference.finish_parsing_and_generate_hash()
-    #     wppage = WikipediaPage(wikibase=SandboxWikibase())
+    #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
     #     title = "Test"
     #     wppage.__get_wikipedia_page_from_title__(title=title)
     #     wppage.__generate_hash__()
-    #     wcu = WikibaseCrudUpdate(wikibase=SandboxWikibase())
+    #     wcu = WikibaseCrudUpdate(wikibase=IASandboxWikibase())
     #     wcu.compare_and_update_claims(
     #         entity=old_reference,
     #         wikipedia_page=wppage,
@@ -53,7 +53,7 @@ class TestWikibaseCrudUpdate(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_claims_on_references(self):
-        wikibase = SandboxWikibase()
+        wikibase = IASandboxWikibase()
         old_data = dict(
             # oclc="test",
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
@@ -99,7 +99,7 @@ class TestWikibaseCrudUpdate(TestCase):
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_that_wbi_can_remove_claims(self):
         """This tests that WBI correctly marks claims as removed"""
-        wikibase = SandboxWikibase()
+        wikibase = IASandboxWikibase()
         data = dict(
             # oclc="test",
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
@@ -124,7 +124,7 @@ class TestWikibaseCrudUpdate(TestCase):
 
     @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_write_required(self):
-        wikibase = SandboxWikibase()
+        wikibase = IASandboxWikibase()
         wcu = WikibaseCrudUpdate(wikibase=wikibase)
         # get the wikibase_item
         wcu.__setup_wikibase_integrator_configuration__()
