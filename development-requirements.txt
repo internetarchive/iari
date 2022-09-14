@@ -1,7 +1,9 @@
 bandit
-black
-codespell
-flake8
+black==22.6.0
+codespell==2.2.1
+coverage
+flake8==5.0.4
 isort
-mypy
-pre-commit
+mypy==0.971
+pre-commit==2.20.0
+pytest
