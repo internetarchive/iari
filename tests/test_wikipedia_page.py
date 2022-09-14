@@ -148,3 +148,10 @@ class TestWikipediaPage(TestCase):
         wp = WikipediaPage(title="Easter Island", wikibase=SandboxWikibase())
         wp.__fetch_page_data__()
         assert wp.is_redirect is False
+
+    def test_fetch_wikidata_qid(self):
+        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+
+        wp = WikipediaPage(title="Easter island", wikibase=SandboxWikibase())
+        wp.__fetch_wikidata_qid__()
+        assert wp.wikidata_qid == "Q14452"

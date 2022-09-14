@@ -419,3 +419,19 @@ class TestWikibaseCrudCreate(TestCase):
             page_reference=reference, wikipedia_page=wppage
         )
         assert item.claims.get(property=wc.wikibase.OCLC_CONTROL_NUMBER) is not None
+
+    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
+    def test_wikidata_qid_statement(self):
+        wppage = WikipediaPage(wikibase=SandboxWikibase())
+        title = "Democracy"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__fetch_wikidata_qid__()
+        wc = WikibaseCrudCreate(wikibase=SandboxWikibase())
+        item = wc.__prepare_new_wikipedia_page_item__(
+            wikipedia_page=wppage,
+        )
+        # console.print(item.get_json())
+        # assert item.labels.get("en") == title
+        wdqid: List[Claim] = item.claims.get(wc.wikibase.WIKIDATA_QID)
+        # console.print(citations[0].mainsnak.datavalue["value"]["id"])
+        assert wdqid[0].mainsnak.datavalue["value"]["id"] == "Q1"

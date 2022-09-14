@@ -905,6 +905,10 @@ class WikibaseCrud(WcdBaseModel):
             prop_nr=self.wikibase.TITLE,
             value=wikipedia_page.title,
         )
+        wikidata_qid = datatypes.String(
+            prop_nr=self.wikibase.WIKIDATA_QID,
+            value=wikipedia_page.wikidata_qid,
+        )
         return [
             absolute_url,
             hash_claim,
@@ -913,6 +917,7 @@ class WikibaseCrud(WcdBaseModel):
             page_id,
             published_in,
             title,
+            wikidata_qid,
         ]
 
     def __prepare_string_authors__(self, page_reference: WikipediaPageReference):
