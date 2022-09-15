@@ -380,4 +380,5 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         with self.assertRaises(MissingInformationError):
             print(reference.wikibase_url)
         reference.wikibase_return = WikibaseReturn(item_qid="test", uploaded_now=False)
-        assert reference.wikibase_url == "https://sandbox.wiki/wiki/Item:test"
+        # print(reference.wikibase_url)
+        assert reference.wikibase_url == f"https://ia-sandbox.wikibase.cloud/wiki/Item:test"
