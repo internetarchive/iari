@@ -204,6 +204,7 @@ class WcdImportBot(WcdBaseModel):
     @validate_arguments
     def delete_one_page(self, title: str) -> Result:
         """Deletes one page from the Wikibase and from the cache"""
+        logger.debug("delete_one_page: running")
         with console.status(f"Deleting {title}"):
             from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
 

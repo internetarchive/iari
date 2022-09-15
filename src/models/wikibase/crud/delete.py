@@ -45,6 +45,7 @@ class WikibaseCrudDelete(WikibaseCrud):
 
     @validate_arguments
     def __delete_item__(self, item_id: str) -> Result:
+        logger.debug("__delete_item__: running")
         if config.press_enter_to_continue:
             input(f"Do you want to delete {item_id}?")
         logger.debug(f"trying to log in to the wikibase as {self.wikibase.user_name}")
