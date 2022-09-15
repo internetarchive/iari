@@ -1,5 +1,4 @@
 import logging
-from time import sleep
 from unittest import TestCase
 
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
@@ -49,25 +48,25 @@ class TestWikipediaPage(TestCase):
         assert page.page_id == 11089416
         assert page.title == "Test"
 
-    def test_get_wcdqid_from_hash_via_sparql(self):
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
-
-        page = WikipediaPage(
-            wikibase=IASandboxWikibase(),
-            language_code="en",
-            wikimedia_site=WikimediaSite.WIKIPEDIA,
-            title="Test",
-        )
-        # page.__fetch_page_data__(title="Test")
-        page.extract_and_parse_and_upload_missing_items_to_wikibase()
-        wcdqid = page.wikibase_return.item_qid
-        console.print(
-            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
-        )
-        sleep(config.sparql_sync_waiting_time_in_seconds)
-        check_wcdqid = page.__get_wcdqid_from_hash_via_sparql__(md5hash=page.md5hash)
-        print(wcdqid, check_wcdqid)
-        assert wcdqid == check_wcdqid
+    # def test_get_wcdqid_from_hash_via_sparql(self):
+    #     from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+    #
+    #     page = WikipediaPage(
+    #         wikibase=IASandboxWikibase(),
+    #         language_code="en",
+    #         wikimedia_site=WikimediaSite.WIKIPEDIA,
+    #         title="Test",
+    #     )
+    #     # page.__fetch_page_data__(title="Test")
+    #     page.extract_and_parse_and_upload_missing_items_to_wikibase()
+    #     wcdqid = page.wikibase_return.item_qid
+    #     console.print(
+    #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+    #     )
+    #     sleep(config.sparql_sync_waiting_time_in_seconds)
+    #     check_wcdqid = page.__get_wcdqid_from_hash_via_sparql__(md5hash=page.md5hash)
+    #     print(wcdqid, check_wcdqid)
+    #     assert wcdqid == check_wcdqid
 
     def test_compare_data_and_update_additional_reference(self):
         """First delete the test page, then upload it with one reference.
