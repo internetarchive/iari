@@ -455,7 +455,7 @@ class WikipediaPageReference(WcdBaseModel):
         if not self.wikibase_return:
             raise MissingInformationError("self.wikibase_return was None")
         return (
-            f"{self.wikibase.wikibase_url}/"
+            f"{self.wikibase.wikibase_url}"
             f"wiki/Item:{self.wikibase_return.item_qid}"
         )
 

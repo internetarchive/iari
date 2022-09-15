@@ -13,7 +13,7 @@ class Wikibase(WcdBaseModel):
     title: str
     user_name: str
     wikibase_cloud_wikibase: bool = True
-    wikibase_url: str
+    wikibase_url: str  # we expect a slash in the end
 
     ACCESS_DATE: str  # date
     ARCHIVE: str  # item
