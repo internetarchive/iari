@@ -1,13 +1,10 @@
 import logging
-from time import sleep
 from unittest import TestCase
 
 from wikibaseintegrator.wbi_exceptions import MissingEntityException  # type: ignore
 
 import config
 from src import WcdImportBot
-from src.helpers import console
-from src.models.wikibase.enums import Result
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 
 logging.basicConfig(level=config.loglevel)
@@ -15,16 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 class TestWcdImportBot(TestCase):
-    def test_delete_one_page(self):
-        bot = WcdImportBot(wikibase=IASandboxWikibase())
-        # bot.rinse_all_items_and_cache()
-        bot.get_and_extract_page_by_title(title="Test")
-        console.print(
-            f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
-        )
-        sleep(config.sparql_sync_waiting_time_in_seconds)
-        result = bot.delete_one_page(title="Test")
-        assert result == Result.SUCCESSFUL
+    # def test_delete_one_page(self):
+    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     # bot.rinse_all_items_and_cache()
+    #     bot.get_and_extract_page_by_title(title="Test")
+    #     console.print(
+    #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+    #     )
+    #     sleep(config.sparql_sync_waiting_time_in_seconds)
+    #     result = bot.delete_one_page(title="Test")
+    #     assert result == Result.SUCCESSFUL
 
     def test_rebuild_cache(self):
         if config.use_cache:
