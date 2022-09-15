@@ -1,11 +1,11 @@
 marshmallow==3.17.1
-mwparserfromhell
-pydantic==1.9.2
-pyssdb~=0.4.2
+mwparserfromhell==0.6.4
+pydantic==1.10.2
+pyssdb==0.4.2
 python-dateutil~=2.8.2
 requests==2.28.1
 rich==12.5.1
-tld~=0.12.6
+tld==0.12.6
 #wikibaseintegrator~=0.12.0
 #git+http://github.com/LeMyst/WikibaseIntegrator@v0.12.0rc3#egg=wikibaseintegrator
 #git+http://github.com/LeMyst/WikibaseIntegrator@rewrite-wbi#egg=wikibaseintegrator
@@ -15,6 +15,7 @@ tld~=0.12.6
 #git+http://github.com/LeMyst/WikibaseIntegrator@541da2ea02e9c386c4a1b83e15781869ea57d0cf#egg=wikibaseintegrator
 # This reintroduce something we need
 #git+https://github.com/dpriskorn/WikibaseIntegrator.git@fix_remove_claims#egg=wikibaseintegrator
-git+https://github.com/dpriskorn/WikibaseIntegrator.git@dpriskorn-modification-failed-fix#egg=wikibaseintegrator
+#git+https://github.com/dpriskorn/WikibaseIntegrator.git@dpriskorn-modification-failed-fix#egg=wikibaseintegrator
+wikibaseintegrator==0.12.1
 #pywikibot~=7.2.0 we use the fork below to avoid annoying logging in the CLI
 git+http://github.com/dpriskorn/pywikibot@remove-verbose-logging#egg=pywikibot

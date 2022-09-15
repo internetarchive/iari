@@ -1,9 +1,9 @@
-bandit
-black==22.6.0
+bandit==1.7.4
+black==22.8.0
 codespell==2.2.1
-coverage
+coverage==6.4.4
 flake8==5.0.4
-isort
+isort==5.10.1
 mypy==0.971
 pre-commit==2.20.0
-pytest
+pytest==7.1.3
