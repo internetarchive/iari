@@ -41,9 +41,13 @@ class WikibaseCrudCreate(WikibaseCrud):
             logger.info(modification_failed)
             # We pick the first one only for now
 
-            wcdqid = modification_failed.get_conflicting_entity_ids[0].replace(
-                "Item:", ""
-            )
-            if wcdqid is None:
-                raise MissingInformationError("wcdqid was None")
-            return WikibaseReturn(item_qid=wcdqid, uploaded_now=False)
+            wcdqids = modification_failed.get_conflicting_entity_ids
+            if len(wcdqids):
+                wcdqid = wcdqids[0].replace("Item:", "")
+                if wcdqid is None:
+                    raise MissingInformationError("wcdqid was None")
+                return WikibaseReturn(item_qid=wcdqid, uploaded_now=False)
+            else:
+                raise MissingInformationError(
+                    "wcdqids was zero length, this is a bug :/"
+                )
