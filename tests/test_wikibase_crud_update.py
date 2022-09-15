@@ -1,8 +1,6 @@
 import logging
-from os import getenv
 from unittest import TestCase
 
-import pytest
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
@@ -51,7 +49,6 @@ class TestWikibaseCrudUpdate(TestCase):
     #         ),
     #     )
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_compare_claims_on_references(self):
         wikibase = IASandboxWikibase()
         old_data = dict(
@@ -96,7 +93,6 @@ class TestWikibaseCrudUpdate(TestCase):
         # )
         # assert claims_to_be_added[0].mainsnak.datavalue["value"] == "test"
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_that_wbi_can_remove_claims(self):
         """This tests that WBI correctly marks claims as removed"""
         wikibase = IASandboxWikibase()
@@ -122,7 +118,6 @@ class TestWikibaseCrudUpdate(TestCase):
         with self.assertRaises(KeyError):
             item.claims.get(wikibase.HASH)
 
-    @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     def test_write_required(self):
         wikibase = IASandboxWikibase()
         wcu = WikibaseCrudUpdate(wikibase=wikibase)
@@ -137,3 +132,5 @@ class TestWikibaseCrudUpdate(TestCase):
         assert len(claims) == 1
         assert claims[0].removed is True
         assert wcu.write_required is True
+
+    # TODO test update of title of reference works as expected
