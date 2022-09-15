@@ -111,7 +111,9 @@ class WikipediaPage(WcdBaseModel):
     @property
     def wikibase_url(self):
         if self.wikibase.item_prefixed_wikibase:
-            return f"{self.wikibase.wikibase_url}wiki/Item:{self.wikibase_return.item_qid}"
+            return (
+                f"{self.wikibase.wikibase_url}wiki/Item:{self.wikibase_return.item_qid}"
+            )
         else:
             return f"{self.wikibase.wikibase_url}wiki/{self.wikibase_return.item_qid}"
 

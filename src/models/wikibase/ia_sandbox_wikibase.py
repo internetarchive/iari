@@ -68,7 +68,9 @@ class IASandboxWikibase(Wikibase):
     URL = "P53"  # datatype: WikibaseDatatype.URL description:
 
     # Items
-    ENGLISH_WIKIPEDIA = "Q17"  # label: English Wikipedia description: language version of Wikipedia
+    ENGLISH_WIKIPEDIA = (
+        "Q17"  # label: English Wikipedia description: language version of Wikipedia
+    )
     WEBSITE_ITEM = "Q18"  # label: Website description: first level domain website found in Wikipedia
     WIKIPEDIA_PAGE = "Q19"  # label: Wikipedia page description: page in a language version of Wikipedia
     WIKIPEDIA_REFERENCE = "Q20"  # label: Wikipedia reference description: reference on a page in Wikipedia
