@@ -3,7 +3,9 @@ from unittest import TestCase
 
 import config
 from src.models.cache import Cache, CacheReturn
-from src.models.wikimedia.wikipedia.templates.wikipedia_reference import WikipediaReference
+from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
+    WikipediaReference,
+)
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -19,7 +21,9 @@ class TestCache(TestCase):
         cache.connect()
         reference = WikipediaReference(template_name="test")
         reference.first_level_domain_of_url_hash = "123"
-        assert isinstance(cache.check_website_and_get_wikibase_qid(reference=reference), CacheReturn)
+        assert isinstance(
+            cache.check_website_and_get_wikibase_qid(reference=reference), CacheReturn
+        )
 
     # def test_drop(self):
     #     database = Cache()
