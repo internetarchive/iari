@@ -193,44 +193,47 @@ class WcdImportBot(WcdBaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     @validate_arguments
-    def delete_one_page(self, title: str) -> Result:
+    def delete_one_page(self, title: str):
         """Deletes one page from the Wikibase and from the cache"""
-        logger.debug("delete_one_page: running")
-        with console.status(f"Deleting {title}"):
-            from src.models.wikimedia.wikipedia.wikipedia_article import (
-                WikipediaArticle,
-            )
-
-            page = WikipediaArticle(
-                wikibase=self.wikibase,
-                language_code=self.language_code,
-                wikimedia_site=self.wikimedia_site,
-            )
-            page.__get_wikipedia_page_from_title__(title=title)
-            page.__generate_hash__()
-            # delete from WCD
-            cache = Cache()
-            cache.connect()
-            cache_return = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
-            if cache_return.item_qid:
-                logger.debug(f"Found {cache_return.item_qid} and trying to delete it now")
-                wc = WikibaseCrudDelete(wikibase=self.wikibase)
-                result = wc.__delete_item__(item_id=cache_return.item_qid)
-                if result == Result.SUCCESSFUL:
-                    if page.md5hash is not None:
-                        cache.delete_key(key=page.md5hash)
-                        logger.info(f"Deleted {title} from the cache")
-                        console.print(
-                            f"Deleted {title} from {self.wikibase.__repr_name__()}"
-                        )
-                        return result
-                    else:
-                        raise ValueError("md5hash was None")
-                else:
-                    raise WikibaseError("Could not delete the page")
-            else:
-                logger.error("Got no item id from the cache")
-                return Result.FAILED
+        console.print("This has been disabled because we no longer delete items.")
+        # logger.debug("delete_one_page: running")
+        # with console.status(f"Deleting {title}"):
+        #     from src.models.wikimedia.wikipedia.wikipedia_article import (
+        #         WikipediaArticle,
+        #     )
+        #
+        #     page = WikipediaArticle(
+        #         wikibase=self.wikibase,
+        #         language_code=self.language_code,
+        #         wikimedia_site=self.wikimedia_site,
+        #     )
+        #     page.__get_wikipedia_page_from_title__(title=title)
+        #     page.__generate_hash__()
+        #     # delete from WCD
+        #     cache = Cache()
+        #     cache.connect()
+        #     cache_return = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
+        #     if cache_return.item_qid:
+        #         logger.debug(
+        #             f"Found {cache_return.item_qid} and trying to delete it now"
+        #         )
+        #         wc = WikibaseCrudDelete(wikibase=self.wikibase)
+        #         result = wc.__delete_item__(item_id=cache_return.item_qid)
+        #         if result == Result.SUCCESSFUL:
+        #             if page.md5hash is not None:
+        #                 cache.delete_key(key=page.md5hash)
+        #                 logger.info(f"Deleted {title} from the cache")
+        #                 console.print(
+        #                     f"Deleted {title} from {self.wikibase.__repr_name__()}"
+        #                 )
+        #                 return result
+        #             else:
+        #                 raise ValueError("md5hash was None")
+        #         else:
+        #             raise WikibaseError("Could not delete the page")
+        #     else:
+        #         logger.error("Got no item id from the cache")
+        #         return Result.FAILED
 
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
@@ -354,9 +357,10 @@ class WcdImportBot(WcdBaseModel):
 
     def rinse_all_items_and_cache(self):
         """Delete all page and reference items and clear the SSDB cache"""
-        wc = WikibaseCrudDelete(wikibase=self.wikibase)
-        wc.delete_imported_items()
-        self.__flush_cache__()
+        console.print("This has been disabled because we no longer delete items.")
+        # wc = WikibaseCrudDelete(wikibase=self.wikibase)
+        # wc.delete_imported_items()
+        # self.__flush_cache__()
 
     def run(self):
         """This method handles running the bot
