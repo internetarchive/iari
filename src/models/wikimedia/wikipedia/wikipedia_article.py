@@ -38,7 +38,6 @@ class WikipediaArticle(WcdItem):
     md5hash: Optional[str]
     page_id: Optional[int]
     references: List[WikipediaReference] = []
-    title: Optional[str]
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
@@ -166,7 +165,7 @@ class WikipediaArticle(WcdItem):
             console.print("No references found. Skipping comparison of references")
             # raise MissingInformationError("self.references was empty or None")
         else:
-            self.__setup_wikibase_crud_update__()
+            self.__setup_wikibase_crud_update__(wikipedia_article=self)
             if self.wikibase_crud_update:
                 count = 0
                 total = len(self.references)
@@ -198,7 +197,7 @@ class WikipediaArticle(WcdItem):
                 "self.return_ was None and is needed "
                 "to judge whether to compare or not"
             )
-        self.__setup_wikibase_crud_update__()
+        self.__setup_wikibase_crud_update__(wikipedia_article=self)
         self.wikibase_crud_update.compare_and_update_claims(entity=self)
 
     def __compare_data_and_update__(self):

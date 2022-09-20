@@ -144,6 +144,10 @@ class TestWikibaseCrudUpdate(TestCase):
 
     def test_update_of_title(self):
         wikibase = IASandboxWikibase()
+        wppage = WikipediaArticle(wikibase=wikibase)
+        title = "Test"
+        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__generate_hash__()
         title = "test title"
         data = dict(
             # oclc="test",
@@ -172,7 +176,7 @@ class TestWikibaseCrudUpdate(TestCase):
         reference.finish_parsing_and_generate_hash()
         # here we get he return_ set
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
-        reference.__setup_wikibase_crud_update__()
+        reference.__setup_wikibase_crud_update__(wikipedia_article=wppage)
         reference.wikibase_crud_update.compare_and_update_claims(entity=reference)
         wbi = WikibaseIntegrator()
         item = wbi.item.get(reference.return_.item_qid)

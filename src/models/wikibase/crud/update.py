@@ -20,6 +20,7 @@ from src.models.wikibase.enums import WriteRequired
 from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
     WikipediaReference,
 )
+from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
     wikibase_item: current item in the Wikibase
     wikipedia_article: is the page the reference belongs to"""
 
-    entity: Any  # Union["WikipediaPage", WikipediaReference],
+    entity: Optional[WcdItem] = None
     new_item: Optional[ItemEntity] = None
     testing: bool = False
     existing_wikibase_item: Optional[ItemEntity] = None
@@ -164,7 +165,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                     return WriteRequired.YES
                 except ModificationFailed as e:
                     message = (
-                        f"The {self.entity.__repr_name__()} item {self.existing_wikibase_item.id} "
+                        f"The {self.entity.__repr__()} item {self.existing_wikibase_item.id} "
                         f"could not be updated because of this error: {e}"
                     )
                     logger.error(message)
@@ -238,10 +239,13 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 page_reference=self.entity, wikipedia_article=self.wikipedia_article
             )
         else:
-            logger.info(f"Comparing page with title '{self.entity.title}")
-            self.new_item = wcr.__prepare_new_wikipedia_article_item__(
-                wikipedia_article=self.entity
-            )
+            if isinstance(self.entity, WikipediaArticle) and self.entity.title:
+                logger.info(f"Comparing page with title '{self.entity.title}")
+                self.new_item = wcr.__prepare_new_wikipedia_article_item__(
+                    wikipedia_article=self.entity
+                )
+            else:
+                raise MissingInformationError("entity or entity.title was None")
         if not self.testing:
             # We always overwrite the item if not testing
             self.existing_wikibase_item = wcr.get_item(

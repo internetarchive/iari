@@ -334,7 +334,7 @@ class WikipediaReference(WcdItem):
     subject: Optional[str]
     subject_mask: Optional[str]
     subscription: Optional[str]
-    title: Optional[str]
+    # title: Optional[str]
     title_link: Optional[str]
     trans_chapter: Optional[str]  # this is a translation of a chapter
     trans_quote: Optional[str]  # this is a translation of a quote

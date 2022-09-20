@@ -20,6 +20,7 @@ class WcdItem(WcdBaseModel):
     return_: Optional[Return] = None
     wikidata_qid: str = ""
     wikibase: Optional[Wikibase] = None
+    title: str = ""
 
     def __setup_cache__(self):
         from src.models.cache import Cache
@@ -45,7 +46,7 @@ class WcdItem(WcdBaseModel):
                 wikibase=self.wikibase,
             )
 
-    def __setup_wikibase_crud_update__(self):
+    def __setup_wikibase_crud_update__(self, wikipedia_article: "WcdItem"):
         from src.models.wikibase.crud.update import WikibaseCrudUpdate
 
         if not self.wikibase_crud_update:
@@ -53,4 +54,7 @@ class WcdItem(WcdBaseModel):
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
-        self.wikibase_crud_update.wikipedia_page = self
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        if not isinstance(wikipedia_article, WikipediaArticle):
+            raise TypeError("not a WikipediaArticle")
+        self.wikibase_crud_update.wikipedia_article = wikipedia_article
