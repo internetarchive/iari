@@ -177,12 +177,12 @@ class WikibaseCrud(WcdBaseModel):
         logger.info("Preparing item citations")
         claims = []
         for reference in wikipedia_page.references or []:
-            if reference.return_:
+            if reference.wikibase_return:
                 logger.debug("Appending to item-citations")
                 claims.append(
                     datatypes.Item(
                         prop_nr=self.wikibase.CITATIONS,
-                        value=reference.return_.item_qid,
+                        value=reference.wikibase_return.item_qid,
                         references=self.reference_claim,
                     )
                 )

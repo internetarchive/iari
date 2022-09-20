@@ -204,9 +204,9 @@ class WikibaseCrudUpdate(WikibaseCrud):
         self.entity = entity
         if not self.wikipedia_page:
             raise MissingInformationError("self.wikipedia_page was None")
-        if not self.entity.return_:
-            raise MissingInformationError("new_reference.return_ was None")
-        if self.entity.return_.uploaded_now:
+        if not self.entity.wikibase_return:
+            raise MissingInformationError("new_reference.wikibase_return was None")
+        if self.entity.wikibase_return.uploaded_now:
             logger.info("Skipping comparison because the reference was just uploaded")
             return WriteRequired.NO
         else:
@@ -229,7 +229,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                     f"reference with missing title"
                 )
             logger.info(
-                f"See {self.wikibase.entity_url(item_id=self.entity.return_.item_qid)}"
+                f"See {self.wikibase.entity_url(item_id=self.entity.wikibase_return.item_qid)}"
             )
             self.new_item = wcr.__prepare_new_reference_item__(
                 page_reference=self.entity, wikipedia_page=self.wikipedia_page
@@ -242,7 +242,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         if not self.testing:
             # We always overwrite the item if not testing
             self.existing_wikibase_item = wcr.get_item(
-                item_id=self.entity.return_.item_qid
+                item_id=self.entity.wikibase_return.item_qid
             )
             if not self.existing_wikibase_item:
                 raise ValueError(

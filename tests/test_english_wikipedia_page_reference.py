@@ -379,7 +379,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         reference.wikibase = IASandboxWikibase()
         with self.assertRaises(MissingInformationError):
             print(reference.wikibase_url)
-        reference.return_ = WikibaseReturn(item_qid="test", uploaded_now=False)
+        reference.wikibase_return = WikibaseReturn(item_qid="test", uploaded_now=False)
         # print(reference.wikibase_url)
         assert (
             reference.wikibase_url
