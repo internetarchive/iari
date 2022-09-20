@@ -64,18 +64,30 @@ class WcdImportBot(WcdBaseModel):
         """Flush and rebuild the cache"""
         self.__flush_cache__()
         if self.cache:
-            wcr = WikibaseCrudRead(wikibase=self.wikibase)
-            data = wcr.__get_all_items_and_hashes__()
+            wcrsandbox = WikibaseCrudRead(wikibase=IASandboxWikibase())
+            data = wcrsandbox.__get_all_items_and_hashes__()
             logger.info("Rebuilding the cache")
-            count = 1
+            count_sandbox = 1
             for entry in data:
                 self.__log_to_file__(message=str(entry), file_name="cache-content.log")
                 hash_value = entry[1]
                 wcdqid = entry[0]
                 # logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
                 self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
-                count += 1
-            console.print(f"Inserted {count} entries into the cache")
+                count_sandbox += 1
+            wcrswc = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
+            data = wcrswc.__get_all_items_and_hashes__()
+            logger.info("Rebuilding the cache")
+            count_wikicitations = 1
+            for entry in data:
+                self.__log_to_file__(message=str(entry), file_name="cache-content.log")
+                hash_value = entry[1]
+                wcdqid = entry[0]
+                # logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
+                self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
+                count_wikicitations += 1
+            console.print(f"Inserted a total of {count_sandbox+count_wikicitations} "
+                          f"entries into the cache")
 
     @staticmethod
     def __setup_argparse_and_return_args__():
