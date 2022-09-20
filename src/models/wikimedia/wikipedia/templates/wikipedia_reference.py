@@ -640,7 +640,7 @@ class WikipediaReference(WcdItem):
         #     """{{cite magazine |last= |first= |date= |title= |url=
         #     |magazine= |location= |publisher= |access-date=}}"""
         #     if self.doi is None:
-        #         # TODO clean URL first?
+        #         #  clean URL first?
         #         if (self.title) is not None:
         #             str2hash = self.title + self.isodate
         #         else:
@@ -651,7 +651,7 @@ class WikipediaReference(WcdItem):
         #         str2hash = self.doi
         # elif self.template_name == "cite news":
         #     if self.doi is None:
-        #         # TODO clean URL first?
+        #         #  clean URL first?
         #         if (self.title) is not None:
         #             str2hash = self.title + self.isodate
         #         else:
@@ -664,7 +664,7 @@ class WikipediaReference(WcdItem):
         #     if self.doi is None:
         #         # Many of these references lead to pages without any publication
         #         # dates unfortunately. e.g. https://www.billboard.com/artist/chk-chk-chk-2/chart-history/tlp/
-        #         # TODO clean URL first?
+        #         #  clean URL first?
         #         if self.url is not None:
         #             str2hash = self.url
         #         else:
@@ -676,7 +676,7 @@ class WikipediaReference(WcdItem):
         # elif self.template_name == "url":
         #     """Example:{{url|chkchkchk.net}}"""
         #     if self.doi is None:
-        #         # TODO clean URL first?
+        #         #  clean URL first?
         #         if self.first_parameter is not None:
         #             str2hash = self.first_parameter
         #         else:
