@@ -1214,10 +1214,9 @@ class WikipediaReference(WcdItem):
         """Upload the reference and insert into the cache if enabled. Always add wikibase_return"""
         logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
         wikibase_return = self.__upload_reference_to_wikibase__()
-        if config.use_cache:
-            if not wikibase_return or not self.md5hash:
-                raise MissingInformationError("hash or WCDQID was None")
-            self.__insert_reference_in_cache__(wcdqid=wikibase_return.item_qid)
+        if not wikibase_return or not self.md5hash:
+            raise MissingInformationError("hash or WCDQID was None")
+        self.__insert_reference_in_cache__(wcdqid=wikibase_return.item_qid)
         self.wikibase_return = wikibase_return
 
     def finish_parsing_and_generate_hash(self) -> None:

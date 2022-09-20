@@ -24,14 +24,12 @@ class TestWcdImportBot(TestCase):
     #     assert result == Result.SUCCESSFUL
 
     def test_rebuild_cache(self):
-        if config.use_cache:
-            bot = WcdImportBot(wikibase=IASandboxWikibase())
-            bot.__rebuild_cache__()
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
+        bot.__rebuild_cache__()
 
     def test_flush_cache(self):
-        if config.use_cache:
-            bot = WcdImportBot(wikibase=IASandboxWikibase())
-            bot.__flush_cache__()
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
+        bot.__flush_cache__()
 
     # def test_import_one_page(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())

@@ -11,13 +11,14 @@ sandbox_user = "So9q@test"
 sandbox_pwd = os.environ["ia_sandbox"]
 
 # Settings:
+cache_host: str = "127.0.0.1"
+cache_port: int = 8888
 compare_references = False
 assume_persons_without_role_are_authors = True
 debug_unsupported_templates = False
 include_url_in_hash_algorithm = True
 loglevel = logging.ERROR
 press_enter_to_continue = False
-use_cache = False
 user_agent = "wcdimportbot 2.0.0-alpha3"
 sparql_sync_waiting_time_in_seconds = 5
 check_if_page_has_been_uploaded_via_sparql = True

@@ -65,7 +65,6 @@ class TestCache(TestCase):
     #             raise ValueError("No hashed references found")
 
     def test_get_cache_information(self):
-        if config.use_cache:
-            cache = Cache()
-            cache.connect()
-            cache.get_cache_information()
+        cache = Cache()
+        cache.connect()
+        cache.get_cache_information()

@@ -43,13 +43,8 @@ class WcdImportBot(WcdBaseModel):
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 
     def __flush_cache__(self):
-        if config.use_cache:
-            self.__setup_cache__()
-            self.cache.flush_database()
-        else:
-            console.print(
-                "No flushing done since the cache is not enabled in config.py"
-            )
+        self.__setup_cache__()
+        self.cache.flush_database()
 
     def __gather_and_print_statistics__(self):
         console.print(self.wikibase.title)
@@ -68,10 +63,6 @@ class WcdImportBot(WcdBaseModel):
     def __rebuild_cache__(self):
         """Flush and rebuild the cache"""
         self.__flush_cache__()
-        if not config.use_cache:
-            console.print(
-                "No rebuilding done since the cache is not enabled in config.py"
-            )
         if self.cache:
             wcr = WikibaseCrudRead(wikibase=self.wikibase)
             data = wcr.__get_all_items_and_hashes__()
@@ -218,26 +209,17 @@ class WcdImportBot(WcdBaseModel):
             page.__get_wikipedia_page_from_title__(title=title)
             page.__generate_hash__()
             # delete from WCD
-            if config.use_cache:
-                cache = Cache()
-                cache.connect()
-                item_id = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
-            else:
-                if page.md5hash is not None:
-                    item_id = page.__get_wcdqid_from_hash_via_sparql__(
-                        md5hash=page.md5hash
-                    )
-                else:
-                    raise ValueError("page.md5hash was None")
-            if item_id:
-                logger.debug(f"Found {item_id} and trying to delete it now")
+            cache = Cache()
+            cache.connect()
+            cache_return = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
+            if cache_return.item_qid:
+                logger.debug(f"Found {cache_return.item_qid} and trying to delete it now")
                 wc = WikibaseCrudDelete(wikibase=self.wikibase)
-                result = wc.__delete_item__(item_id=item_id)
+                result = wc.__delete_item__(item_id=cache_return.item_qid)
                 if result == Result.SUCCESSFUL:
                     if page.md5hash is not None:
-                        if config.use_cache:
-                            cache.delete_key(key=page.md5hash)
-                            logger.info(f"Deleted {title} from the cache")
+                        cache.delete_key(key=page.md5hash)
+                        logger.info(f"Deleted {title} from the cache")
                         console.print(
                             f"Deleted {title} from {self.wikibase.__repr_name__()}"
                         )
@@ -247,12 +229,8 @@ class WcdImportBot(WcdBaseModel):
                 else:
                     raise WikibaseError("Could not delete the page")
             else:
-                if config.use_cache:
-                    logger.error("Got no item id from the cache")
-                    return Result.FAILED
-                else:
-                    logger.error("Got no item id from sparql")
-                    return Result.FAILED
+                logger.error("Got no item id from the cache")
+                return Result.FAILED
 
     @validate_arguments
     def get_and_extract_page_by_title(self, title: str):
@@ -343,20 +321,19 @@ class WcdImportBot(WcdBaseModel):
         """Lookup a md5hash and show the result to the user"""
         console.print(f"Lookup of md5hash {md5hash}")
         wc = WikibaseCrudRead(wikibase=self.wikibase)
-        if config.use_cache:
-            cache = Cache()
-            cache.connect()
-            if cache.ssdb:
-                cache_result = cache.lookup(key=md5hash)
-                if cache_result:
-                    console.print(
-                        f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",
-                        style="green",
-                    )
-                else:
-                    console.print("CACHE: Not found", style="red")
+        cache = Cache()
+        cache.connect()
+        if cache.ssdb:
+            cache_result = cache.lookup(key=md5hash)
+            if cache_result:
+                console.print(
+                    f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",
+                    style="green",
+                )
+            else:
+                console.print("CACHE: Not found", style="red")
         else:
-            console.print("Cache not in use.")
+            raise Exception("no ssdb in the cache instance")
         sparql_result = wc.__get_wcdqids_from_hash__(md5hash=md5hash)
         if sparql_result:
             console.print(
