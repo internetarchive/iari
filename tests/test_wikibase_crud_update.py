@@ -67,7 +67,7 @@ class TestWikibaseCrudUpdate(TestCase):
         new_reference = EnglishWikipediaReference(**new_data)
         new_reference.wikibase = wikibase
         new_reference.finish_parsing_and_generate_hash()
-        new_reference.wikibase_return = WikibaseReturn(uploaded_now=False, item_qid="")
+        new_reference.return_ = WikibaseReturn(uploaded_now=False, item_qid="")
         wppage = WikipediaArticle(wikibase=wikibase)
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
@@ -158,7 +158,7 @@ class TestWikibaseCrudUpdate(TestCase):
         reference.finish_parsing_and_generate_hash()
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
         wbi = WikibaseIntegrator()
-        item = wbi.item.get(reference.wikibase_return.item_qid)
+        item = wbi.item.get(reference.return_.item_qid)
         titles = item.claims.get(wikibase.TITLE)
         # console.print(titles)
         assert title == titles[0].mainsnak.datavalue["value"]
@@ -172,13 +172,13 @@ class TestWikibaseCrudUpdate(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = wikibase
         reference.finish_parsing_and_generate_hash()
-        # here we get he wikibase_return set
+        # here we get he return_ set
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
         reference.__setup_wikibase_crud_update__()
         # FIXME this gives a weird error related to pydantic
         reference.wikibase_crud_update.compare_and_update_claims(entity=self)
         wbi = WikibaseIntegrator()
-        item = wbi.item.get(reference.wikibase_return.item_qid)
+        item = wbi.item.get(reference.return_.item_qid)
         titles = item.claims.get(wikibase.TITLE)
         # console.print(titles)
         assert new_title == titles[0].mainsnak.datavalue["value"]
