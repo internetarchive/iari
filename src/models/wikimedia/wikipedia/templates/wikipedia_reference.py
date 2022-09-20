@@ -72,7 +72,6 @@ class WikipediaReference(WcdItem):
     persons_without_role: Optional[List[Person]]
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
-    wikibase_return: Optional[WikibaseReturn]
 
     # These are all the parameters in the supported templates
     #######################
@@ -448,10 +447,10 @@ class WikipediaReference(WcdItem):
     def wikibase_url(self) -> str:
         if not self.wikibase:
             raise MissingInformationError("self.wikibase was None")
-        if not self.wikibase_return:
+        if not self.return_:
             raise MissingInformationError("self.wikibase_return was None")
         return (
-            f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.wikibase_return.item_qid}"
+            f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
         )
 
     def __clean_wiki_markup_from_strings__(self):
