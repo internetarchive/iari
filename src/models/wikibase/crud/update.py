@@ -30,13 +30,13 @@ class WikibaseCrudUpdate(WikibaseCrud):
     entity: is the entity to compare. Either a WikipediaPage or a WikipediaReference
     new_item: new item based on fresh data from Wikipedia
     wikibase_item: current item in the Wikibase
-    wikipedia_page: is the page the reference belongs to"""
+    wikipedia_article: is the page the reference belongs to"""
 
     entity: Any  # Union["WikipediaPage", WikipediaReference],
     new_item: Optional[ItemEntity] = None
     testing: bool = False
     existing_wikibase_item: Optional[ItemEntity] = None
-    wikipedia_page: Optional[Any] = None
+    wikipedia_article: Optional[Any] = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -205,8 +205,8 @@ class WikibaseCrudUpdate(WikibaseCrud):
         if not isinstance(entity, WcdItem):
             raise TypeError("entity was not a WcdItem instance")
         self.entity = entity
-        if not self.wikipedia_page:
-            raise MissingInformationError("self.wikipedia_page was None")
+        if not self.wikipedia_article:
+            raise MissingInformationError("self.wikipedia_article was None")
         if not entity.return_:
             raise MissingInformationError("new_reference.return_ was None")
         if entity.return_.uploaded_now:
@@ -235,12 +235,12 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 f"See {self.wikibase.entity_url(item_id=self.entity.return_.item_qid)}"
             )
             self.new_item = wcr.__prepare_new_reference_item__(
-                page_reference=self.entity, wikipedia_page=self.wikipedia_page
+                page_reference=self.entity, wikipedia_article=self.wikipedia_article
             )
         else:
             logger.info(f"Comparing page with title '{self.entity.title}")
-            self.new_item = wcr.__prepare_new_wikipedia_page_item__(
-                wikipedia_page=self.entity
+            self.new_item = wcr.__prepare_new_wikipedia_article_item__(
+                wikipedia_article=self.entity
             )
         if not self.testing:
             # We always overwrite the item if not testing

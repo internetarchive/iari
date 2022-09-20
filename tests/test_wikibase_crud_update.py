@@ -40,9 +40,9 @@ class TestWikibaseCrudUpdate(TestCase):
     #     wcu = WikibaseCrudUpdate(wikibase=IASandboxWikibase())
     #     wcu.compare_and_update_claims(
     #         entity=old_reference,
-    #         wikipedia_page=wppage,
+    #         wikipedia_article=wppage,
     #         wikibase_item=wcu.__prepare_new_reference_item__(
-    #             page_reference=new_reference, wikipedia_page=wppage
+    #             page_reference=new_reference, wikipedia_article=wppage
     #         ),
     #     )
 
@@ -70,12 +70,12 @@ class TestWikibaseCrudUpdate(TestCase):
     #     title = "Test"
     #     wppage.__get_wikipedia_page_from_title__(title=title)
     #     wppage.__generate_hash__()
-    #     wcu = WikibaseCrudUpdate(wikibase=wikibase, testing=True, wikipedia_page=wppage)
+    #     wcu = WikibaseCrudUpdate(wikibase=wikibase, testing=True, wikipedia_article=wppage)
     #     wcu.new_item = wcu.__prepare_new_reference_item__(
-    #         page_reference=new_reference, wikipedia_page=wppage, testing=True
+    #         page_reference=new_reference, wikipedia_article=wppage, testing=True
     #     )
     #     wcu.existing_wikibase_item = wcu.__prepare_new_reference_item__(
-    #         page_reference=old_reference, wikipedia_page=wppage, testing=True
+    #         page_reference=old_reference, wikipedia_article=wppage, testing=True
     #     )
     #     # We expect 1 claims to be added but 2 in the list
     #     # because the hash is different after adding oclc because it is used for hashing
@@ -108,7 +108,7 @@ class TestWikibaseCrudUpdate(TestCase):
         wppage.__generate_hash__()
         wc = WikibaseCrud(wikibase=wikibase)
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         item.claims.remove(property=wikibase.HASH)
         # We get a keyerror because WBI knows the item is only in memory and not from

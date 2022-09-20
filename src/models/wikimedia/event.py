@@ -4,7 +4,7 @@
 # from urllib.parse import quote
 #
 # from src.models.wikimedia.enums import WikimediaEditType
-# from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+# from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaPage
 #
 #
 # class WikimediaEvent:
@@ -17,7 +17,7 @@
 #     namespace: Optional[int] = None
 #     page_title: Optional[str] = None
 #     server_name: Optional[str] = None
-#     wikipedia_page: Optional[WikipediaPage] = None
+#     wikipedia_article: Optional[WikipediaPage] = None
 #
 #     def __init__(self, event: Any = None,
 #                  event_stream: Any = None):
@@ -60,8 +60,8 @@
 #         if self.server_name.find(self.event_stream.event_site.value) != -1 and self.namespace == 0:
 #             logger.info("Found enwp article edit")
 #             self.__print_progress__()
-#             self.wikipedia_page = WikipediaPage(wikimedia_event=self)
-#             self.wikipedia_page.extract_references()
+#             self.wikipedia_article = WikipediaPage(wikimedia_event=self)
+#             self.wikipedia_article.extract_references()
 #         else:
 #             logger.debug(f"Skipping event from {self.server_name}")
 #

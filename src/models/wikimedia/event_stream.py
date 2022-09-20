@@ -52,10 +52,10 @@
 #                             logger.debug("Processing new event")
 #                             wmf_event.process()
 #                             self.earlier_events.add(wmf_event.page_title)
-#                             if wmf_event.wikipedia_page is not None:
-#                                 self.total_number_of_missing_dois += wmf_event.wikipedia_page.number_of_missing_dois
-#                                 self.total_number_of_dois += wmf_event.wikipedia_page.number_of_dois
-#                                 missing_dois = wmf_event.wikipedia_page.missing_dois
+#                             if wmf_event.wikipedia_article is not None:
+#                                 self.total_number_of_missing_dois += wmf_event.wikipedia_article.number_of_missing_dois
+#                                 self.total_number_of_dois += wmf_event.wikipedia_article.number_of_dois
+#                                 missing_dois = wmf_event.wikipedia_article.missing_dois
 #                                 if missing_dois is not None and len(missing_dois) > 0:
 #                                     self.missing_dois.extend(missing_dois)
 #                                 self.__print_statistics__()

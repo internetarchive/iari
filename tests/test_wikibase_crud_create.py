@@ -49,7 +49,7 @@ class TestWikibaseCrudCreate(TestCase):
         assert reference.detected_archive_of_archive_url is not None
         assert len(reference.persons_without_role) > 0
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         console.print(item.get_json())
         assert item.claims.get(property=wc.wikibase.FULL_NAME_STRING) is not None
@@ -91,7 +91,7 @@ class TestWikibaseCrudCreate(TestCase):
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         # console.print(item.get_json())
         assert len(item.labels.get(language="en")) == 250
@@ -122,7 +122,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.references.append(reference)
         with self.assertRaises(ValueError):
             wc.max_number_of_item_citations = 0
-            wc.__prepare_new_wikipedia_page_item__(
+            wc.__prepare_new_wikipedia_article_item__(
                 wikipedia_page=wppage,
             )
         # console.print(item.get_json())
@@ -156,7 +156,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.__generate_hash__()
         # with self.assertRaises(ValueError):
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        item = wc.__prepare_new_wikipedia_page_item__(
+        item = wc.__prepare_new_wikipedia_article_item__(
             wikipedia_page=wppage,
         )
         # console.print(item.get_json())
@@ -195,7 +195,7 @@ class TestWikibaseCrudCreate(TestCase):
     #     wikibase = IASandboxWikibase()
     #     wcr = WikibaseCrudRead(wikibase=wikibase)
     #     wcr.prepare_and_upload_wikipedia_page_item(
-    #         wikipedia_page=wppage,
+    #         wikipedia_article=wppage,
     #     )
     #     items = wcr.__get_all_items__(item_type=wikibase.WIKIPEDIA_PAGE)
     #     assert items and len(items) == 1
@@ -317,7 +317,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         assert item.claims.get(property=wc.wikibase.PUBLISHER_STRING) is not None
         assert item.claims.get(property=wc.wikibase.LOCATION_STRING) is not None
@@ -342,7 +342,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         assert item.claims.get(property=wc.wikibase.INTERNET_ARCHIVE_ID) is not None
 
@@ -362,7 +362,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         assert item.claims.get(property=wc.wikibase.GOOGLE_BOOKS_ID) is not None
 
@@ -383,7 +383,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         assert item.claims.get(property=wc.wikibase.PERIODICAL_STRING) is not None
 
@@ -404,7 +404,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_page=wppage
+            page_reference=reference, wikipedia_article=wppage
         )
         assert item.claims.get(property=wc.wikibase.OCLC_CONTROL_NUMBER) is not None
 
@@ -415,7 +415,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.__fetch_wikidata_qid__()
         wppage.__generate_hash__()
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        item = wc.__prepare_new_wikipedia_page_item__(
+        item = wc.__prepare_new_wikipedia_article_item__(
             wikipedia_page=wppage,
         )
         wdqids: List[Claim] = item.claims.get(wc.wikibase.WIKIDATA_QID)

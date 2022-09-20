@@ -82,6 +82,6 @@ class WikibaseCrudDelete(WikibaseCrud):
             self.__delete_item__(item_id=page.title().replace("Item:", ""))
             # page.delete(prompt=False)
             # exit()
-        # self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_PAGE)
+        # self.__delete_items__(item_type=SupportedItemType.wikipedia_article)
         # self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_REFERENCE)
         # self.__delete_items__(item_type=SupportedItemType.WEBSITE_ITEM)

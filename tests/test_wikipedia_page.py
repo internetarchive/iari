@@ -46,7 +46,7 @@ class TestWikipediaPage(TestCase):
         assert page.title == "Test"
 
     # def test_get_wcdqid_from_hash_via_sparql(self):
-    #     from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+    #     from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaPage
     #
     #     page = WikipediaPage(
     #         wikibase=IASandboxWikibase(),

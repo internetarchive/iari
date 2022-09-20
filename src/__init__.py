@@ -224,7 +224,7 @@ class WcdImportBot(WcdBaseModel):
         #     # delete from WCD
         #     cache = Cache()
         #     cache.connect()
-        #     cache_return = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
+        #     cache_return = cache.check_page_and_get_wikibase_qid(wikipedia_article=page)
         #     if cache_return.item_qid:
         #         logger.debug(
         #             f"Found {cache_return.item_qid} and trying to delete it now"
