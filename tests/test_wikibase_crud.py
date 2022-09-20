@@ -78,7 +78,7 @@ class TestWikibaseCrud(TestCase):
 #         wikimedia_site=WikimediaSite.WIKIPEDIA,
 #         # max_number_of_item_citations_to_upload=1,
 #     )
-#     page.__get_wikipedia_page_from_title__(title="Culture change")
+#     page.__get_wikipedia_article_from_title__(title="Culture change")
 #     page.extract_and_upload_to_WikiCitations(wikibase=IASandboxWikibase())
 
 # def test_delete_all_page_items(self):

@@ -3,9 +3,7 @@ from unittest import TestCase
 
 import config
 from src.models.cache import Cache, CacheReturn
-from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
-    WikipediaReference,
-)
+from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)

@@ -221,7 +221,7 @@ class WcdImportBot(WcdBaseModel):
         #         language_code=self.language_code,
         #         wikimedia_site=self.wikimedia_site,
         #     )
-        #     page.__get_wikipedia_page_from_title__(title=title)
+        #     page.__get_wikipedia_article_from_title__(title=title)
         #     page.__generate_hash__()
         #     # delete from WCD
         #     cache = Cache()
@@ -263,7 +263,7 @@ class WcdImportBot(WcdBaseModel):
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
         )
-        page.__get_wikipedia_page_from_title__(title=title)
+        page.__get_wikipedia_article_from_title__(title=title)
         page.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
@@ -300,7 +300,7 @@ class WcdImportBot(WcdBaseModel):
                         f"{page.pageid} {page.title()} Redirect:{page.isRedirectPage()}"
                     )
                     # raise DebugExit()
-                    wikipedia_page = WikipediaArticle(
+                    wikipedia_article = WikipediaArticle(
                         wikibase=self.wikibase,
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
@@ -310,7 +310,7 @@ class WcdImportBot(WcdBaseModel):
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
                     )
-                    wikipedia_page.extract_and_parse_and_upload_missing_items_to_wikibase()
+                    wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
         else:
             for page in site.allpages(namespace=0):
                 if count >= self.max_count:
@@ -321,7 +321,7 @@ class WcdImportBot(WcdBaseModel):
                     # console.print(count)
                     logger.info(f"{page.pageid} {page.page_title()}")
                     # raise DebugExit()
-                    wikipedia_page = WikipediaArticle(
+                    wikipedia_article = WikipediaArticle(
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
@@ -331,7 +331,7 @@ class WcdImportBot(WcdBaseModel):
                         wikitext=page.text,
                         wikibase=self.wikibase,
                     )
-                    wikipedia_page.extract_and_parse_and_upload_missing_items_to_wikibase()
+                    wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
     def lookup_md5hash(self, md5hash: str):

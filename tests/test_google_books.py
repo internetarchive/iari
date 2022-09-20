@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from src import IASandboxWikibase, console
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.wikimedia.wikipedia.templates.google_books import (
+from src.models.wikimedia.wikipedia.references.google_books import (
     GoogleBooks,
     GoogleBooksSchema,
 )

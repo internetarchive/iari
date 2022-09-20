@@ -1,5 +1,5 @@
 from src.models.person import Person
-from src.models.wikimedia.wikipedia.templates.enums import (
+from src.models.wikimedia.wikipedia.references.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
 

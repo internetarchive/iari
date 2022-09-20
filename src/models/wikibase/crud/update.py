@@ -17,9 +17,7 @@ from src.models.wcd_item import WcdItem
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import WriteRequired
-from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
-    WikipediaReference,
-)
+from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logger = logging.getLogger(__name__)

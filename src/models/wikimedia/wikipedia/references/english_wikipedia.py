@@ -1,6 +1,6 @@
 from marshmallow import post_load
 
-from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
+from src.models.wikimedia.wikipedia.references.wikipedia import (
     WikipediaPageReferenceSchema,
     WikipediaReference,
 )

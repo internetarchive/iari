@@ -10,10 +10,7 @@ from src.models.return_.cache_return import CacheReturn
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
-        WikipediaReference,
-    )
-    from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+    from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +19,14 @@ class Cache(WcdBaseModel):
     ssdb: Optional[SsdbDatabase]
 
     @validate_arguments
-    def add_page(self, wikipedia_page: Any, wcdqid: str):
+    def add_page(self, wikipedia_article: Any, wcdqid: str):
         logger.debug("add_page: Running")
         if self.ssdb:
-            if wikipedia_page.md5hash is not None and wcdqid is not None:
+            if wikipedia_article.md5hash is not None and wcdqid is not None:
                 # if type(reference.wikicitations_qid) is not str:
                 #     raise ValueError(f"{reference.wikicitations_qid} is not of type str")
                 logger.debug(f"Trying to set the value: {wcdqid}")
-                return self.ssdb.set_value(key=wikipedia_page.md5hash, value=wcdqid)
+                return self.ssdb.set_value(key=wikipedia_article.md5hash, value=wcdqid)
             else:
                 raise ValueError("did not get what we need")
         else:
@@ -78,14 +75,12 @@ class Cache(WcdBaseModel):
             raise ValueError("self.ssdb was None")
 
     # TODO refactor into one generic lookup function?
-    def check_page_and_get_wikibase_qid(
-        self, wikipedia_page  # type: WikipediaArticle
-    ) -> CacheReturn:
+    def check_page_and_get_wikibase_qid(self, wikipedia_article) -> CacheReturn:
         """We get binary from SSDB so we decode it"""
         if self.ssdb:
-            if wikipedia_page.md5hash is not None:
+            if wikipedia_article.md5hash is not None:
                 # https://stackoverflow.com/questions/55365543/
-                response = self.ssdb.get_value(key=wikipedia_page.md5hash)
+                response = self.ssdb.get_value(key=wikipedia_article.md5hash)
                 if response is None:
                     return CacheReturn()
                 else:

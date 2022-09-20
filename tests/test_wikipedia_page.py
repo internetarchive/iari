@@ -21,7 +21,7 @@ class TestWikipediaPage(TestCase):
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
         )
-        page.__get_wikipedia_page_from_title__(title="Easter Island")
+        page.__get_wikipedia_article_from_title__(title="Easter Island")
         page.__extract_and_parse_references__()
         logger.info(f"{len(page.references)} references found")
         for ref in page.references:
@@ -75,7 +75,7 @@ class TestWikipediaPage(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
+        from src.models.wikimedia.wikipedia.references.english_wikipedia import (
             EnglishWikipediaReference,
         )
 
@@ -136,7 +136,7 @@ class TestWikipediaPage(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
+        from src.models.wikimedia.wikipedia.references.english_wikipedia import (
             EnglishWikipediaReference,
         )
 

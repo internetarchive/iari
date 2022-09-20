@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-# from src.models.wikimedia.wikipedia.templates.enums import WikipediaTemplatePersonRole
+# from src.models.wikimedia.wikipedia.references.enums import WikipediaTemplatePersonRole
 from urllib.parse import urlparse
 
 from src.wcd_base_model import WcdBaseModel

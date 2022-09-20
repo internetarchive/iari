@@ -17,15 +17,13 @@ from src.helpers import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import CacheReturn
 from src.models.exceptions import MissingInformationError, WikibaseError
-from src.models.wcd_item import WcdItem
 from src.models.return_.wikibase_return import WikibaseReturn
+from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
+from src.models.wikimedia.wikipedia.references.english_wikipedia import (
     EnglishWikipediaPageReferenceSchema,
 )
-from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
-    WikipediaReference,
-)
+from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
 
 logger = logging.getLogger(__name__)
 
@@ -216,7 +214,7 @@ class WikipediaArticle(WcdItem):
         # elif self.title is not None:
         #     if self.pywikibot_site is None:
         #         raise ValueError("self.pywikibot_site was None")
-        #     self.__get_wikipedia_page_from_title__()
+        #     self.__get_wikipedia_article_from_title__()
         # else:
         self.__parse_templates__()
         self.__print_hash_statistics__()
@@ -399,7 +397,7 @@ class WikipediaArticle(WcdItem):
             raise ValueError("self.cache was None")
 
     @validate_arguments
-    def __get_wikipedia_page_from_title__(self, title: str):
+    def __get_wikipedia_article_from_title__(self, title: str):
         """Get the page from the Wikimedia site"""
         logger.info("Fetching the page data")
         self.__fetch_page_data__(title=title)
@@ -420,7 +418,7 @@ class WikipediaArticle(WcdItem):
             self.__setup_cache__()
         if self.cache is not None:
             cache_return = self.cache.check_page_and_get_wikibase_qid(
-                wikipedia_page=self
+                wikipedia_article=self
             )
         else:
             raise ValueError("self.cache was None")
@@ -435,14 +433,14 @@ class WikipediaArticle(WcdItem):
             return True
 
     def __parse_templates__(self):
-        """We parse all the templates into WikipediaPageReferences"""
+        """We parse all the references into WikipediaPageReferences"""
         if self.wikitext is None:
             raise ValueError("self.wikitext was None")
         # We use the pywikibot template extracting function
         template_tuples = extract_templates_and_params(self.wikitext, True)
         number_of_templates = len(template_tuples)
         logger.info(
-            f"Parsing {number_of_templates} templates from {self.title}, see {self.url}"
+            f"Parsing {number_of_templates} references from {self.title}, see {self.url}"
         )
         for template_name, content in template_tuples:
             # logger.debug(f"working on {template_name}")
@@ -507,12 +505,14 @@ class WikipediaArticle(WcdItem):
     def __upload_page_and_references__(self):
         console.print(f"Importing page '{self.title}'")
         self.__setup_wikibase_crud_create__()
-        self.return_ = self.wikibase_crud_create.prepare_and_upload_wikipedia_article_item(
-            wikipedia_page=self,
+        self.return_ = (
+            self.wikibase_crud_create.prepare_and_upload_wikipedia_article_item(
+                wikipedia_article=self,
+            )
         )
         if self.return_ is None:
             raise ValueError("wcdqid was None")
-        self.cache.add_page(wikipedia_page=self, wcdqid=self.return_.item_qid)
+        self.cache.add_page(wikipedia_article=self, wcdqid=self.return_.item_qid)
         if self.return_.uploaded_now:
             console.print(
                 f"Finished uploading {self.title} to Wikibase, "
@@ -537,7 +537,7 @@ class WikipediaArticle(WcdItem):
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create is not None:
             return_ = self.wikibase_crud_create.prepare_and_upload_website_item(
-                page_reference=reference, wikipedia_page=self
+                page_reference=reference, wikipedia_article=self
             )
             if isinstance(return_, WikibaseReturn):
                 return return_

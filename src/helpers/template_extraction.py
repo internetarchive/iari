@@ -38,7 +38,7 @@ def remove_comments(text: str):
 
 
 def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
-    """Return a list of templates found in text.
+    """Return a list of references found in text.
 
     Return value is a list of tuples. There is one tuple for each use of a
     template in the page, with the template title as the first entry and a
@@ -63,8 +63,8 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
     To replicate that behaviour, enable both `remove_disabled_parts`
     and `strip` parameters.
 
-    :param text: The wikitext from which templates are extracted
-    :param strip: If enabled, strip arguments and values of templates.
+    :param text: The wikitext from which references are extracted
+    :param strip: If enabled, strip arguments and values of references.
     :return: list of template name and params
 
     .. versionchanged:: 6.1

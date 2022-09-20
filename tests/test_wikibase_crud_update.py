@@ -6,7 +6,7 @@ from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 import config
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
+from src.models.wikimedia.wikipedia.references.english_wikipedia import (
     EnglishWikipediaReference,
 )
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
@@ -35,7 +35,7 @@ class TestWikibaseCrudUpdate(TestCase):
     #     new_reference.finish_parsing_and_generate_hash()
     #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
     #     title = "Test"
-    #     wppage.__get_wikipedia_page_from_title__(title=title)
+    #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()
     #     wcu = WikibaseCrudUpdate(wikibase=IASandboxWikibase())
     #     wcu.compare_and_update_claims(
@@ -68,7 +68,7 @@ class TestWikibaseCrudUpdate(TestCase):
     #     new_reference.return_ = WikibaseReturn(uploaded_now=False, item_qid="")
     #     wppage = WikipediaArticle(wikibase=wikibase)
     #     title = "Test"
-    #     wppage.__get_wikipedia_page_from_title__(title=title)
+    #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()
     #     wcu = WikibaseCrudUpdate(wikibase=wikibase, testing=True, wikipedia_article=wppage)
     #     wcu.new_item = wcu.__prepare_new_reference_item__(
@@ -104,7 +104,7 @@ class TestWikibaseCrudUpdate(TestCase):
         reference.finish_parsing_and_generate_hash()
         wppage = WikipediaArticle(wikibase=wikibase)
         title = "Test"
-        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__get_wikipedia_article_from_title__(title=title)
         wppage.__generate_hash__()
         wc = WikibaseCrud(wikibase=wikibase)
         item = wc.__prepare_new_reference_item__(
@@ -146,7 +146,7 @@ class TestWikibaseCrudUpdate(TestCase):
         wikibase = IASandboxWikibase()
         wppage = WikipediaArticle(wikibase=wikibase)
         title = "Test"
-        wppage.__get_wikipedia_page_from_title__(title=title)
+        wppage.__get_wikipedia_article_from_title__(title=title)
         wppage.__generate_hash__()
         title = "test title"
         data = dict(

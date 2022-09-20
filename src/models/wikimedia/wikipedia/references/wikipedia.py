@@ -17,10 +17,10 @@ from src.models.exceptions import MissingInformationError, MoreThanOneNumberErro
 from src.models.person import Person
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
-from src.models.wikimedia.wikipedia.templates.enums import (
+from src.models.wikimedia.wikipedia.references.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
-from src.models.wikimedia.wikipedia.templates.google_books import (
+from src.models.wikimedia.wikipedia.references.google_books import (
     GoogleBooks,
     GoogleBooksSchema,
 )
@@ -71,7 +71,7 @@ class WikipediaReference(WcdItem):
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
 
-    # These are all the parameters in the supported templates
+    # These are all the parameters in the supported references
     #######################
     # Names
     #######################
@@ -1075,7 +1075,7 @@ class WikipediaReference(WcdItem):
         return persons
 
     def __parse_urls__(self) -> None:
-        """This function looks for Google Books templates and
+        """This function looks for Google Books references and
         parse the URLs to avoid complaints from Wikibase"""
         logger.debug("__parse_urls__: Running")
         if self.url:
@@ -1170,7 +1170,9 @@ class WikipediaReference(WcdItem):
         return date
 
     @validate_arguments
-    def __upload_reference_to_wikibase__(self, wikipedia_article=None) -> WikibaseReturn:
+    def __upload_reference_to_wikibase__(
+        self, wikipedia_article=None
+    ) -> WikibaseReturn:
         """This method tries to upload the reference to Wikibase
         and returns a WikibaseReturn."""
         logger.debug("__upload_reference_to_wikicitations__: Running")
