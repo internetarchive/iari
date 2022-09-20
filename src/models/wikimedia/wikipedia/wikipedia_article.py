@@ -393,7 +393,9 @@ class WikipediaArticle(WcdItem):
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            cache_return = self.cache.check_website_and_get_wikibase_qid(reference=reference)
+            cache_return = self.cache.check_website_and_get_wikibase_qid(
+                reference=reference
+            )
             logger.debug(f"result from the cache:{cache_return.item_qid}")
             return cache_return
         else:
@@ -420,7 +422,9 @@ class WikipediaArticle(WcdItem):
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            cache_return = self.cache.check_page_and_get_wikibase_qid(wikipedia_page=self)
+            cache_return = self.cache.check_page_and_get_wikibase_qid(
+                wikipedia_page=self
+            )
         else:
             raise ValueError("self.cache was None")
         if not cache_return.item_qid:
@@ -513,9 +517,7 @@ class WikipediaArticle(WcdItem):
         )
         if self.wikibase_return is None:
             raise ValueError("wcdqid was None")
-        self.cache.add_page(
-            wikipedia_page=self, wcdqid=self.wikibase_return.item_qid
-        )
+        self.cache.add_page(wikipedia_page=self, wcdqid=self.wikibase_return.item_qid)
         if self.wikibase_return.uploaded_now:
             console.print(
                 f"Finished uploading {self.title} to Wikibase, "
