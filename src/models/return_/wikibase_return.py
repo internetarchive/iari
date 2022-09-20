@@ -7,7 +7,6 @@ from src.models.return_ import Return
 
 class WikibaseReturn(Return):
     item: Optional[ItemEntity]
-    uploaded_now: bool
 
     class Config:
         arbitrary_types_allowed = True

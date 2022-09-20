@@ -367,7 +367,8 @@ class WcdImportBot(WcdBaseModel):
     #         f"a total of {len(self.pages)} pages."
     #     )
 
-    def rinse_all_items_and_cache(self):
+    @staticmethod
+    def rinse_all_items_and_cache():
         """Delete all page and reference items and clear the SSDB cache"""
         console.print("This has been disabled because we no longer delete items.")
         # wc = WikibaseCrudDelete(wikibase=self.wikibase)

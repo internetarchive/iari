@@ -31,7 +31,7 @@ import config
 from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
-from src.models.wikibase.wikibase_return import WikibaseReturn
+from src.models.return_.wikibase_return import WikibaseReturn
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:

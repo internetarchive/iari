@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.models.ssdb_database import SsdbDatabase
+from src.models.cache.ssdb_database import SsdbDatabase
 
 
 class TestSsdbDatabase(TestCase):

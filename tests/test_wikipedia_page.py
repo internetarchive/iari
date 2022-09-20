@@ -93,7 +93,7 @@ class TestWikipediaPage(TestCase):
         wp.references.extend([reference, string_reference])
         wp.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
-        item = wbi.item.get(wp.wikibase_return.item_qid)
+        item = wbi.item.get(wp.return_.item_qid)
         citations = item.claims.get(property=IASandboxWikibase().CITATIONS)
         string_citations = item.claims.get(
             property=IASandboxWikibase().STRING_CITATIONS
@@ -121,7 +121,7 @@ class TestWikipediaPage(TestCase):
             [reference, reference2, string_reference, string_reference2]
         )
         wp2.extract_and_parse_and_upload_missing_items_to_wikibase()
-        item = wbi.item.get(wp2.wikibase_return.item_qid)
+        item = wbi.item.get(wp2.return_.item_qid)
         citations = item.claims.get(property=IASandboxWikibase().CITATIONS)
         string_citations = item.claims.get(
             property=IASandboxWikibase().STRING_CITATIONS
@@ -147,12 +147,12 @@ class TestWikipediaPage(TestCase):
         wp.references.append(reference)
         wp.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
-        item = wbi.item.get(wp.wikibase_return.item_qid)
+        item = wbi.item.get(wp.return_.item_qid)
         citations = item.claims.get(property=IASandboxWikibase().CITATIONS)
         assert len(citations) == 1
         wp = WikipediaArticle(title="Test", wikibase=IASandboxWikibase())
         wp.extract_and_parse_and_upload_missing_items_to_wikibase()
-        item = wbi.item.get(wp.wikibase_return.item_qid)
+        item = wbi.item.get(wp.return_.item_qid)
         with self.assertRaises(KeyError):
             item.claims.get(property=IASandboxWikibase().CITATIONS)
 

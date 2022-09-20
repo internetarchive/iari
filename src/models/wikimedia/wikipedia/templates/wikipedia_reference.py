@@ -16,7 +16,7 @@ from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
 from src.models.wcd_item import WcdItem
-from src.models.wikibase.wikibase_return import WikibaseReturn
+from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
