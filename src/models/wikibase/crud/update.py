@@ -13,6 +13,7 @@ from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 import config
 from src import console
 from src.models.exceptions import MissingInformationError
+from src.models.wcd_item import WcdItem
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import WriteRequired
@@ -197,16 +198,16 @@ class WikibaseCrudUpdate(WikibaseCrud):
     #     #     f"Found these property numbers {new_property_numbers} on the newly prepared item"
     #     # )
 
-    def compare_and_update_claims(self, entity=Any) -> WriteRequired:
+    def compare_and_update_claims(self, entity: WcdItem) -> WriteRequired:
         """We compare and update claims that are completely missing from the Wikibase item.
         We also remove reference claims no longer present in the Wikipedia page."""
         logger.debug("compare_and_update_claims: Running")
         self.entity = entity
         if not self.wikipedia_page:
             raise MissingInformationError("self.wikipedia_page was None")
-        if not self.entity.return_:
+        if not entity.return_:
             raise MissingInformationError("new_reference.return_ was None")
-        if self.entity.return_.uploaded_now:
+        if entity.return_.uploaded_now:
             logger.info("Skipping comparison because the reference was just uploaded")
             return WriteRequired.NO
         else:
