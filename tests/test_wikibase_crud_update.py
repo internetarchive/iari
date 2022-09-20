@@ -173,8 +173,7 @@ class TestWikibaseCrudUpdate(TestCase):
         # here we get he return_ set
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
         reference.__setup_wikibase_crud_update__()
-        # FIXME this gives a weird error related to pydantic
-        reference.wikibase_crud_update.compare_and_update_claims(entity=self)
+        reference.wikibase_crud_update.compare_and_update_claims(entity=reference)
         wbi = WikibaseIntegrator()
         item = wbi.item.get(reference.return_.item_qid)
         titles = item.claims.get(wikibase.TITLE)
