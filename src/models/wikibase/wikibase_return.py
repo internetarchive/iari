@@ -2,12 +2,11 @@ from typing import Optional
 
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 
-from src.wcd_base_model import WcdBaseModel
+from src.models.return_ import Return
 
 
-class WikibaseReturn(WcdBaseModel):
+class WikibaseReturn(Return):
     item: Optional[ItemEntity]
-    item_qid: str
     uploaded_now: bool
 
     class Config:

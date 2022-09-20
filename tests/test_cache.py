@@ -2,19 +2,25 @@ import logging
 from unittest import TestCase
 
 import config
-from src.models.cache import Cache
+from src.models.cache import Cache, CacheReturn
+from src.models.wikimedia.wikipedia.templates.wikipedia_reference import WikipediaReference
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
 class TestCache(TestCase):
-    # def test_initialize(self):
-    #     database = Cache()
-    #     database.connect()
-    #     database.initialize()
-    #     # self.fail()
-    #
+    def test_connect(self):
+        database = Cache()
+        database.connect(host="archive-wcd.aws.scatter.red")
+
+    def test_check_website_and_get_wikibase_qid(self):
+        cache = Cache()
+        cache.connect()
+        reference = WikipediaReference(template_name="test")
+        reference.first_level_domain_of_url_hash = "123"
+        assert isinstance(cache.check_website_and_get_wikibase_qid(reference=reference), CacheReturn)
+
     # def test_drop(self):
     #     database = Cache()
     #     database.connect()
@@ -31,7 +37,7 @@ class TestCache(TestCase):
     #         [page.__parse_templates__() for page in bot.pages]
     #         bot.print_statistics()
     #         pages = [page for page in bot.pages]
-    #         references: List[WikipediaPageReference] = []
+    #         references: List[WikipediaReference] = []
     #         for page in pages:
     #             if len(page.references) > 0:
     #                 references.extend(page.references)
