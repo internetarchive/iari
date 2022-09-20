@@ -221,7 +221,9 @@ class WikibaseCrud(WcdBaseModel):
                 shortened_title = "Title missing"
             label = f"{shortened_title} | {page_reference.md5hash[:7]}"
             item.labels.set("en", label)
-            if wikipedia_page:
+            if wikipedia_article:
+                if not isinstance(wikipedia_article, WikipediaArticle):
+                    raise TypeError("not a WikipediaArticle")
                 item.descriptions.set(
                     "en", f"reference from {wikipedia_article.wikimedia_site.name.title()}"
                 )
