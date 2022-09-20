@@ -15,6 +15,7 @@ from pydantic import validate_arguments
 import config
 from src.helpers import console
 from src.helpers.template_extraction import extract_templates_and_params
+from src.models.cache import CacheReturn
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.crud.read import WikibaseCrudRead
@@ -159,11 +160,12 @@ class WikipediaArticle(WcdItem):
         if reference is None:
             raise ValueError("reference was None")
         if config.use_cache:
-            wcdqid = self.__get_website_wcdqid_from_cache__(reference=reference)
-            if wcdqid is not None:
-                logger.debug(f"Got wcdqid:{wcdqid} from the cache")
-                reference.first_level_domain_of_url_qid = wcdqid
+            cache_return = self.__get_website_wcdqid_from_cache__(reference=reference)
+            if cache_return.item_qid is not None:
+                logger.debug(f"Got wcdqid:{cache_return.item_qid} from the cache")
+                reference.first_level_domain_of_url_qid = cache_return.item_qid
         else:
+            # TODO retire this
             wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
                 md5hash=reference.first_level_domain_of_url_hash
             )
@@ -393,17 +395,17 @@ class WikipediaArticle(WcdItem):
     @validate_arguments
     def __get_reference_wcdqid_from_cache__(
         self, reference: WikipediaReference
-    ) -> Optional[str]:
+    ) -> CacheReturn:
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            wcdqid = self.cache.check_reference_and_get_wikibase_qid(
+            cache_return: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
                 reference=reference
             )
+            logger.debug(f"result from the cache:{cache_return.item_qid}")
+            return cache_return
         else:
             raise ValueError("self.cache was None")
-        logger.debug(f"result from the cache:{wcdqid}")
-        return wcdqid
 
     @validate_arguments
     def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
@@ -434,15 +436,15 @@ class WikipediaArticle(WcdItem):
     @validate_arguments
     def __get_website_wcdqid_from_cache__(
         self, reference: WikipediaReference
-    ) -> Optional[str]:
+    ) -> CacheReturn:
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            wcdqid = self.cache.check_website_and_get_wikibase_qid(reference=reference)
+            cache_return = self.cache.check_website_and_get_wikibase_qid(reference=reference)
+            logger.debug(f"result from the cache:{cache_return.item_qid}")
+            return cache_return
         else:
             raise ValueError("self.cache was None")
-        logger.debug(f"result from the cache:{wcdqid}")
-        return wcdqid
 
     @validate_arguments
     def __get_wikipedia_page_from_title__(self, title: str):
@@ -466,19 +468,20 @@ class WikipediaArticle(WcdItem):
             if self.cache is None:
                 self.__setup_cache__()
             if self.cache is not None:
-                wcdqid = self.cache.check_page_and_get_wikibase_qid(wikipedia_page=self)
+                cache_return = self.cache.check_page_and_get_wikibase_qid(wikipedia_page=self)
             else:
                 raise ValueError("self.cache was None")
-            if wcdqid is None:
+            if not cache_return.item_qid:
                 logger.debug("Page not found in the cache")
                 return False
             else:
                 logger.debug("Page found in the cache")
                 self.wikibase_return = WikibaseReturn(
-                    item_qid=wcdqid, uploaded_now=False
+                    item_qid=cache_return.item_qid, uploaded_now=False
                 )
                 return True
         else:
+            # TODO retire this code
             if config.check_if_page_has_been_uploaded_via_sparql:
                 logger.info("Not using the cache. Falling back to lookup via SPARQL")
                 if self.md5hash is not None:
