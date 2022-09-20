@@ -86,8 +86,10 @@ class WcdImportBot(WcdBaseModel):
                 # logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
                 self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
                 count_wikicitations += 1
-            console.print(f"Inserted a total of {count_sandbox+count_wikicitations} "
-                          f"entries into the cache")
+            console.print(
+                f"Inserted a total of {count_sandbox+count_wikicitations} "
+                f"entries into the cache"
+            )
 
     @staticmethod
     def __setup_argparse_and_return_args__():

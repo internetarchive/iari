@@ -6,10 +6,10 @@ from wikibaseintegrator.models import Claim  # type: ignore
 
 import config
 from src.helpers import console
+from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.create import WikibaseCrudCreate
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaReference,
 )

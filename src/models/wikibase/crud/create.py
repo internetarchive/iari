@@ -14,8 +14,8 @@ from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 import config
 from src.helpers import console
 from src.models.exceptions import MissingInformationError
-from src.models.wikibase.crud import WikibaseCrud
 from src.models.return_.wikibase_return import WikibaseReturn
+from src.models.wikibase.crud import WikibaseCrud
 
 logger = logging.getLogger(__name__)
 

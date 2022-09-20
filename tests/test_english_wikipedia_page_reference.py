@@ -4,8 +4,8 @@ from unittest import TestCase
 import config
 from src.helpers import console
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
-from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.return_.wikibase_return import WikibaseReturn
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
     EnglishWikipediaReference,

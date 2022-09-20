@@ -15,8 +15,8 @@ import config
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
-from src.models.wcd_item import WcdItem
 from src.models.return_.wikibase_return import WikibaseReturn
+from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
@@ -25,8 +25,6 @@ from src.models.wikimedia.wikipedia.templates.google_books import (
     GoogleBooksSchema,
 )
 
-if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 logger = logging.getLogger(__name__)
 
 # We use marshmallow here because pydantic did not seem to support optional alias fields.
@@ -449,9 +447,7 @@ class WikipediaReference(WcdItem):
             raise MissingInformationError("self.wikibase was None")
         if not self.return_:
             raise MissingInformationError("self.wikibase_return was None")
-        return (
-            f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
-        )
+        return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
 
     def __clean_wiki_markup_from_strings__(self):
         """We clean away [[ and ]]
@@ -1174,9 +1170,7 @@ class WikipediaReference(WcdItem):
         return date
 
     @validate_arguments
-    def __upload_reference_to_wikibase__(
-        self, wikipedia_page=None  # type: Optional[WikipediaArticle]
-    ) -> WikibaseReturn:
+    def __upload_reference_to_wikibase__(self, wikipedia_article=None) -> WikibaseReturn:
         """This method tries to upload the reference to Wikibase
         and returns a WikibaseReturn."""
         logger.debug("__upload_reference_to_wikicitations__: Running")
@@ -1185,7 +1179,7 @@ class WikipediaReference(WcdItem):
         if self.wikibase_crud_create:
             wikibase_return = (
                 self.wikibase_crud_create.prepare_and_upload_reference_item(
-                    page_reference=self, wikipedia_page=wikipedia_page
+                    page_reference=self, wikipedia_article=wikipedia_article
                 )
             )
             if isinstance(wikibase_return, WikibaseReturn):
