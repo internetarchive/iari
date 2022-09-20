@@ -127,7 +127,8 @@ class WikipediaArticle(WcdItem):
             )
             reference.upload_reference_and_insert_in_the_cache()
         if isinstance(cache_return, Return):
-            reference.return_ = cache_return # mypy: ignore
+            # Weird mypy error here
+            reference.return_ = cache_return # type: ignore # mypy: ignore
             return reference
         else:
             raise TypeError("cache_return was not a CacheReturn instance")
