@@ -72,7 +72,7 @@ class WikipediaReference(WcdItem):
     persons_without_role: Optional[List[Person]]
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
-    return_: Optional[WikibaseReturn]
+    wikibase_return: Optional[WikibaseReturn]
 
     # These are all the parameters in the supported templates
     #######################
@@ -448,9 +448,11 @@ class WikipediaReference(WcdItem):
     def wikibase_url(self) -> str:
         if not self.wikibase:
             raise MissingInformationError("self.wikibase was None")
-        if not self.return_:
-            raise MissingInformationError("self.return_ was None")
-        return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
+        if not self.wikibase_return:
+            raise MissingInformationError("self.wikibase_return was None")
+        return (
+            f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.wikibase_return.item_qid}"
+        )
 
     def __clean_wiki_markup_from_strings__(self):
         """We clean away [[ and ]]
@@ -1208,14 +1210,15 @@ class WikipediaReference(WcdItem):
         logger.info("Reference inserted into the hash database")
 
     @validate_arguments
-    def upload_reference_and_insert_in_the_cache(self) -> None:
-        """Upload the reference and insert into the cache if enabled. Always add return_"""
+    def upload_reference_and_insert_in_the_cache_if_enabled(self) -> None:
+        """Upload the reference and insert into the cache if enabled. Always add wikibase_return"""
         logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
         wikibase_return = self.__upload_reference_to_wikibase__()
-        if not wikibase_return or not self.md5hash:
-            raise MissingInformationError("hash or WCDQID was None")
-        self.__insert_reference_in_cache__(wcdqid=wikibase_return.item_qid)
-        self.return_ = wikibase_return
+        if config.use_cache:
+            if not wikibase_return or not self.md5hash:
+                raise MissingInformationError("hash or WCDQID was None")
+            self.__insert_reference_in_cache__(wcdqid=wikibase_return.item_qid)
+        self.wikibase_return = wikibase_return
 
     def finish_parsing_and_generate_hash(self) -> None:
         """Parse the rest of the information and generate a hash"""

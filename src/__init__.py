@@ -218,15 +218,21 @@ class WcdImportBot(WcdBaseModel):
             page.__get_wikipedia_page_from_title__(title=title)
             page.__generate_hash__()
             # delete from WCD
-            cache = Cache()
-            cache.connect()
-            cache_return = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
-            if cache_return.item_qid:
-                logger.debug(
-                    f"Found {cache_return.item_qid} and trying to delete it now"
-                )
+            if config.use_cache:
+                cache = Cache()
+                cache.connect()
+                item_id = cache.check_page_and_get_wikibase_qid(wikipedia_page=page)
+            else:
+                if page.md5hash is not None:
+                    item_id = page.__get_wcdqid_from_hash_via_sparql__(
+                        md5hash=page.md5hash
+                    )
+                else:
+                    raise ValueError("page.md5hash was None")
+            if item_id:
+                logger.debug(f"Found {item_id} and trying to delete it now")
                 wc = WikibaseCrudDelete(wikibase=self.wikibase)
-                result = wc.__delete_item__(item_id=cache_return.item_qid)
+                result = wc.__delete_item__(item_id=item_id)
                 if result == Result.SUCCESSFUL:
                     if page.md5hash is not None:
                         if config.use_cache:

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
-from src.models.return_ import Return
 from src.models.wikibase import Wikibase
+from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ class WcdItem(WcdBaseModel):
     wikibase_crud_create: Optional["WikibaseCrudCreate"] = None
     wikibase_crud_read: Optional["WikibaseCrudRead"] = None
     wikibase_crud_update: Optional["WikibaseCrudUpdate"] = None
-    return_: Optional[Return] = None
+    wikibase_return: Optional[WikibaseReturn] = None
     wikidata_qid: str = ""
     wikibase: Optional[Wikibase] = None
 

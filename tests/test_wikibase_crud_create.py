@@ -117,7 +117,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        reference.return_ = WikibaseReturn(item_qid="test", uploaded_now=False)
+        reference.wikibase_return = WikibaseReturn(item_qid="test", uploaded_now=False)
         wppage.references = []
         wppage.references.append(reference)
         with self.assertRaises(ValueError):
@@ -150,7 +150,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        reference.return_ = WikibaseReturn(item_qid="Q1", uploaded_now=False)
+        reference.wikibase_return = WikibaseReturn(item_qid="Q1", uploaded_now=False)
         wppage.references = []
         wppage.references.append(reference)
         wppage.__generate_hash__()
