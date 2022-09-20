@@ -2,7 +2,7 @@ import hashlib
 import logging
 import re
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import Any, List, Optional
 from urllib.parse import parse_qs, urlparse
 
 from marshmallow import Schema
