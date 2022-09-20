@@ -32,13 +32,13 @@ from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.wikibase import Wikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
-    WikipediaPageReference,
-)
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+    from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
+        WikipediaReference,
+    )
+    from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logger = logging.getLogger(__name__)
 
@@ -120,9 +120,8 @@ class WikibaseCrud(WcdBaseModel):
         wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
         wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
-    @validate_arguments
     def __prepare_all_person_claims__(
-        self, page_reference: WikipediaPageReference
+        self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
         if not self.wikibase.FULL_NAME_STRING:
             raise MissingInformationError(
@@ -171,7 +170,7 @@ class WikibaseCrud(WcdBaseModel):
 
     @validate_arguments
     def __prepare_item_citations__(
-        self, wikipedia_page  # type: WikipediaPage
+        self, wikipedia_page  # type: WikipediaArticle
     ) -> List[Claim]:
         """Prepare the item citations and add a reference
         to in which revision it was found and the retrieval date"""
@@ -189,11 +188,10 @@ class WikibaseCrud(WcdBaseModel):
                 )
         return claims
 
-    @validate_arguments
     def __prepare_new_reference_item__(
         self,
-        page_reference: WikipediaPageReference,
-        wikipedia_page,  # type: WikipediaPage
+        page_reference,  # type: WikipediaReference
+        wikipedia_page,  # type: Optional[WikipediaArticle]
         testing: bool = False,
     ) -> ItemEntity:
         """This method converts a page_reference into a new reference wikibase item"""
@@ -223,9 +221,12 @@ class WikibaseCrud(WcdBaseModel):
                 shortened_title = "Title missing"
             label = f"{shortened_title} | {page_reference.md5hash[:7]}"
             item.labels.set("en", label)
-            item.descriptions.set(
-                "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
-            )
+            if wikipedia_page:
+                item.descriptions.set(
+                    "en", f"reference from {wikipedia_page.wikimedia_site.name.title()}"
+                )
+            else:
+                item.descriptions.set("en", f"reference uploaded for testing")
             persons = self.__prepare_all_person_claims__(page_reference=page_reference)
             if persons:
                 item.add_claims(persons)
@@ -242,11 +243,10 @@ class WikibaseCrud(WcdBaseModel):
         else:
             raise MissingInformationError("page_reference.md5hash was empty")
 
-    @validate_arguments
     def __prepare_new_website_item__(
         self,
-        page_reference: WikipediaPageReference,
-        wikipedia_page,  # type: WikipediaPage
+        page_reference,  # type: WikipediaReference
+        wikipedia_page,  # type: WikipediaArticle
     ) -> ItemEntity:
         """This method converts a page_reference into a new website item"""
         if page_reference.first_level_domain_of_url is None:
@@ -279,7 +279,7 @@ class WikibaseCrud(WcdBaseModel):
 
     @validate_arguments
     def __prepare_new_wikipedia_page_item__(
-        self, wikipedia_page  # type: WikipediaPage
+        self, wikipedia_page  # type: WikipediaArticle
     ) -> ItemEntity:
         """This method converts a page_reference into a new WikiCitations item"""
         logging.debug("__prepare_new_wikipedia_page_item__: Running")
@@ -404,7 +404,7 @@ class WikibaseCrud(WcdBaseModel):
 
     @validate_arguments
     def __prepare_reference_claim__(
-        self, wikipedia_page  # type: WikipediaPage
+        self, wikipedia_page=None  # type: Optional[WikipediaArticle]
     ):
         """This reference claim contains the current revision id and the current date
         This enables us to track references over time in the graph using SPARQL."""
@@ -421,11 +421,14 @@ class WikibaseCrud(WcdBaseModel):
             )
             .strftime("+%Y-%m-%dT%H:%M:%SZ"),
         )
-        revision_id = datatypes.String(
-            prop_nr=self.wikibase.PAGE_REVISION_ID,
-            value=str(wikipedia_page.latest_revision_id),
-        )
-        claims = [retrieved_date, revision_id]
+        if wikipedia_page:
+            revision_id = datatypes.String(
+                prop_nr=self.wikibase.PAGE_REVISION_ID,
+                value=str(wikipedia_page.latest_revision_id),
+            )
+            claims = [retrieved_date, revision_id]
+        else:
+            claims = [retrieved_date]
         citation_reference = Reference()
         for claim in claims:
             logger.debug(f"Adding reference {claim}")
@@ -433,10 +436,8 @@ class WikibaseCrud(WcdBaseModel):
         self.reference_claim = References()
         self.reference_claim.add(citation_reference)
 
-    @validate_arguments
     def __prepare_single_value_reference_claims__(
-        self,
-        page_reference: WikipediaPageReference,
+        self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
         logger.info("Preparing single value claims")
         if page_reference.md5hash is None:
@@ -472,10 +473,8 @@ class WikibaseCrud(WcdBaseModel):
             )
         )
 
-    @validate_arguments
     def __prepare_single_value_reference_claims_always_present__(
-        self,
-        page_reference: WikipediaPageReference,
+        self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
@@ -518,10 +517,8 @@ class WikibaseCrud(WcdBaseModel):
             template_string,
         ]
 
-    @validate_arguments
     def __prepare_single_value_reference_external_identifier_claims__(
-        self,
-        page_reference: WikipediaPageReference,
+        self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
         if page_reference.google_books_id:
             google_books_id = datatypes.ExternalID(
@@ -602,10 +599,8 @@ class WikibaseCrud(WcdBaseModel):
                 claims.append(claim)
         return claims
 
-    @validate_arguments
     def __prepare_single_value_reference_string_claims__(
-        self,
-        page_reference: WikipediaPageReference,
+        self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
         if page_reference.location:
             location = datatypes.String(
@@ -665,10 +660,8 @@ class WikibaseCrud(WcdBaseModel):
                 claims.append(claim)
         return claims
 
-    @validate_arguments
     def __prepare_single_value_reference_claims_with_dates__(
-        self,
-        page_reference: WikipediaPageReference,
+        self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
         claims = []
         if page_reference.access_date:
@@ -818,10 +811,8 @@ class WikibaseCrud(WcdBaseModel):
                 )
         return claims
 
-    @validate_arguments
     def __prepare_single_value_website_claims__(
-        self,
-        page_reference: WikipediaPageReference,
+        self, page_reference  # type: WikipediaReference
     ) -> Optional[List[Claim]]:
         logger.info("Preparing single value claims for the website item")
         # Claims always present
@@ -921,7 +912,7 @@ class WikibaseCrud(WcdBaseModel):
             wikidata_qid,
         ]
 
-    def __prepare_string_authors__(self, page_reference: WikipediaPageReference):
+    def __prepare_string_authors__(self, page_reference: WikipediaReference):
         authors = []
         for author in page_reference.authors_list or []:
             if author.full_name:
@@ -944,7 +935,7 @@ class WikibaseCrud(WcdBaseModel):
             authors.append(author)
         return authors or None
 
-    def __prepare_string_editors__(self, page_reference: WikipediaPageReference):
+    def __prepare_string_editors__(self, page_reference: WikipediaReference):
         persons = []
         for person in page_reference.editors_list or []:
             if person.full_name:
@@ -955,7 +946,7 @@ class WikibaseCrud(WcdBaseModel):
                 persons.append(person)
         return persons or None
 
-    def __prepare_string_translators__(self, page_reference: WikipediaPageReference):
+    def __prepare_string_translators__(self, page_reference: WikipediaReference):
         persons = []
         for person in page_reference.translators_list or []:
             if person.full_name:
@@ -966,9 +957,8 @@ class WikibaseCrud(WcdBaseModel):
                 persons.append(person)
         return persons or None
 
-    @validate_arguments()
     def __prepare_string_citation__(
-        self, page_reference: WikipediaPageReference
+        self, page_reference  # type: WikipediaReference
     ) -> Claim:
         """We import citations which could not be uniquely identified
         as strings directly on the wikipedia page item"""
@@ -987,9 +977,8 @@ class WikibaseCrud(WcdBaseModel):
         )
         return string_citation
 
-    @validate_arguments
     def __prepare_string_citation_qualifiers__(
-        self, page_reference: WikipediaPageReference
+        self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
         """Here we prepare all statements we normally
         would put on a unique separate page_reference item"""
@@ -1090,7 +1079,7 @@ class WikibaseCrud(WcdBaseModel):
 
     @validate_arguments
     def __prepare_string_citations__(
-        self, wikipedia_page  # type: WikipediaPage
+        self, wikipedia_page  # type: WikipediaArticle
     ) -> List[Claim]:
         # pseudo code
         # Return a citation for every page_reference that does not have a hash
@@ -1109,14 +1098,13 @@ class WikibaseCrud(WcdBaseModel):
 
     @validate_arguments
     def entity_url(self, qid: str):
-        return f"{self.wikibase.wikibase_url}/wiki/Item:{qid}"
+        return f"{self.wikibase.wikibase_url}wiki/Item:{qid}"
 
     # TODO: refactor these into one generic method
-    @validate_arguments
     def prepare_and_upload_reference_item(
         self,
-        page_reference: WikipediaPageReference,
-        wikipedia_page,  # type: WikipediaPage
+        page_reference,  # type: WikipediaReference
+        wikipedia_page: Optional[WikipediaArticle] = None,
     ) -> WikibaseReturn:
         """This method prepares and then tries to upload the reference to WikiCitations
         and returns a WikibaseReturn."""
@@ -1127,13 +1115,17 @@ class WikibaseCrud(WcdBaseModel):
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        return wcc.upload_new_item(item=item)
+        wikibase_return = wcc.upload_new_item(item=item)
+        if isinstance(wikibase_return, WikibaseReturn):
+            return wikibase_return
+        else:
+            raise ValueError(f"we did not get a WikibaseReturn back")
 
     @validate_arguments
     def prepare_and_upload_website_item(
         self,
-        page_reference: WikipediaPageReference,
-        wikipedia_page,  # type: WikipediaPage
+        page_reference,  # type: WikipediaReference
+        wikipedia_page,  # type: WikipediaArticle
     ) -> WikibaseReturn:
         """This method prepares and then tries to upload the website item to WikiCitations
         and returns the WCDQID either if successful upload or from the
@@ -1145,8 +1137,11 @@ class WikibaseCrud(WcdBaseModel):
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return: WikibaseReturn = wcc.upload_new_item(item=item)
-        return wikibase_return
+        wikibase_return = wcc.upload_new_item(item=item)
+        if isinstance(wikibase_return, WikibaseReturn):
+            return wikibase_return
+        else:
+            raise ValueError(f"we did not get a WikibaseReturn back")
 
     @validate_arguments
     def prepare_and_upload_wikipedia_page_item(
@@ -1156,9 +1151,9 @@ class WikibaseCrud(WcdBaseModel):
         and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists."""
         logging.debug("prepare_and_upload_wikipedia_page_item: Running")
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
-        if not isinstance(wikipedia_page, WikipediaPage):
+        if not isinstance(wikipedia_page, WikipediaArticle):
             raise ValueError("did not get a WikipediaPage object")
         self.__prepare_reference_claim__(wikipedia_page=wikipedia_page)
         item = self.__prepare_new_wikipedia_page_item__(wikipedia_page=wikipedia_page)

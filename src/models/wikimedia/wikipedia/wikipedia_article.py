@@ -15,47 +15,35 @@ from pydantic import validate_arguments
 import config
 from src.helpers import console
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError, WikibaseError
-from src.models.wikibase import Wikibase
-from src.models.wikibase.crud.create import WikibaseCrudCreate
+from src.models.wcd_item import WcdItem
 from src.models.wikibase.crud.read import WikibaseCrudRead
-from src.models.wikibase.crud.update import WikibaseCrudUpdate
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
     EnglishWikipediaPageReferenceSchema,
 )
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
-    WikipediaPageReference,
+from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
+    WikipediaReference,
 )
-from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikipediaPage(WcdBaseModel):
+class WikipediaArticle(WcdItem):
     """Models a WMF Wikipedia page"""
 
-    cache: Optional[Cache]
-    language_code: str = "en"
     latest_revision_date: Optional[datetime]
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: Optional[int]
-    references: List[WikipediaPageReference] = []
+    references: List[WikipediaReference] = []
     title: Optional[str]
-    wikibase_crud_create: Optional[WikibaseCrudCreate]
-    wikibase_crud_read: Optional[WikibaseCrudRead]
-    wikibase_crud_update: Optional[WikibaseCrudUpdate]
-    wikibase_return: Optional[WikibaseReturn]
-    wikidata_qid: str = ""
     wikimedia_event: Optional[
         Any  # We can't type this with WikimediaEvent because of pydantic
     ]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     wikitext: Optional[str]
-    wikibase: Wikibase
 
     class Config:
         arbitrary_types_allowed = True
@@ -122,8 +110,8 @@ class WikipediaPage(WcdBaseModel):
 
     @validate_arguments
     def __check_and_upload_reference_item_to_wikibase_if_missing__(
-        self, reference: WikipediaPageReference
-    ) -> WikipediaPageReference:
+        self, reference: WikipediaReference
+    ) -> WikipediaReference:
         """Check and upload reference item to Wikibase if missing and return an
         updated reference with the attribute wikibase_return set"""
         logger.debug(
@@ -141,19 +129,13 @@ class WikipediaPage(WcdBaseModel):
                 logger.info(
                     f"Could not find reference with {reference.md5hash} in the cache"
                 )
-                reference = (
-                    self.__upload_reference_and_insert_in_the_cache_if_enabled__(
-                        reference=reference
-                    )
-                )
+                reference.upload_reference_and_insert_in_the_cache_if_enabled()
         if wcdqid:
             # We got a WCDQID from the cache
             logger.debug(f"Got wcdqid:{wcdqid} from the cache/SPARQL")
         else:
             # We did not get a WCDQID, so try uploading
-            reference = self.__upload_reference_and_insert_in_the_cache_if_enabled__(
-                reference=reference
-            )
+            reference.upload_reference_and_insert_in_the_cache_if_enabled()
         if not reference.wikibase_return:
             raise MissingInformationError(
                 "self.wikibase_return was None and is needed "
@@ -163,7 +145,7 @@ class WikipediaPage(WcdBaseModel):
 
     @validate_arguments
     def __check_and_upload_website_item_to_wikibase_if_missing__(
-        self, reference: WikipediaPageReference
+        self, reference: WikipediaReference
     ):
         """This method checks if a website item is present
         using the first_level_domain_of_url_hash and the cache if
@@ -410,7 +392,7 @@ class WikipediaPage(WcdBaseModel):
 
     @validate_arguments
     def __get_reference_wcdqid_from_cache__(
-        self, reference: WikipediaPageReference
+        self, reference: WikipediaReference
     ) -> Optional[str]:
         if self.cache is None:
             self.__setup_cache__()
@@ -451,7 +433,7 @@ class WikipediaPage(WcdBaseModel):
 
     @validate_arguments
     def __get_website_wcdqid_from_cache__(
-        self, reference: WikipediaPageReference
+        self, reference: WikipediaReference
     ) -> Optional[str]:
         if self.cache is None:
             self.__setup_cache__()
@@ -469,23 +451,7 @@ class WikipediaPage(WcdBaseModel):
         self.__fetch_page_data__(title=title)
 
     @validate_arguments
-    def __insert_reference_in_cache__(
-        self, reference: WikipediaPageReference, wcdqid: str
-    ):
-        """Insert reference in the cache"""
-        logger.debug("__insert_in_cache__: Running")
-        if self.cache is None:
-            self.__setup_cache__()
-        if self.cache is not None:
-            self.cache.add_reference(reference=reference, wcdqid=wcdqid)
-        else:
-            raise ValueError("self.cache was None")
-        logger.info("Reference inserted into the hash database")
-
-    @validate_arguments
-    def __insert_website_in_cache__(
-        self, reference: WikipediaPageReference, wcdqid: str
-    ):
+    def __insert_website_in_cache__(self, reference: WikipediaReference, wcdqid: str):
         logger.debug("__insert_website_in_cache__: Running")
         if self.cache is not None:
             self.cache.add_website(reference=reference, wcdqid=wcdqid)
@@ -553,7 +519,7 @@ class WikipediaPage(WcdBaseModel):
                     # press_enter_to_continue()
                 schema = EnglishWikipediaPageReferenceSchema()
                 try:
-                    reference: Optional[WikipediaPageReference] = schema.load(
+                    reference: Optional[WikipediaReference] = schema.load(
                         parsed_template
                     )
                 except ValidationError as error:
@@ -569,7 +535,7 @@ class WikipediaPage(WcdBaseModel):
                 # if not reference:
                 #     logger.info("Trying now to deserialize the reference partially")
                 #     # Load partially (ie. ignore the unknown field)
-                #     reference: WikipediaPageReference = schema.load(
+                #     reference: WikipediaReference = schema.load(
                 #         parsed_template, partial=True
                 #     )
                 # if not reference:
@@ -602,32 +568,6 @@ class WikipediaPage(WcdBaseModel):
             f"{len(self.references)} references on page {self.title}"
         )
 
-    def __setup_cache__(self):
-        self.cache = Cache()
-        self.cache.connect()
-
-    def __setup_wikibase_crud_create__(self):
-        if not self.wikibase_crud_create:
-            self.wikibase_crud_create = WikibaseCrudCreate(
-                language_code=self.language_code,
-                wikibase=self.wikibase,
-            )
-
-    def __setup_wikibase_crud_read__(self):
-        if not self.wikibase_crud_read:
-            self.wikibase_crud_read = WikibaseCrudRead(
-                language_code=self.language_code,
-                wikibase=self.wikibase,
-            )
-
-    def __setup_wikibase_crud_update__(self):
-        if not self.wikibase_crud_update:
-            self.wikibase_crud_update = WikibaseCrudUpdate(
-                language_code=self.language_code,
-                wikibase=self.wikibase,
-            )
-        self.wikibase_crud_update.wikipedia_page = self
-
     def __upload_page_and_references__(self):
         console.print(f"Importing page '{self.title}'")
         self.__setup_wikibase_crud_create__()
@@ -656,56 +596,29 @@ class WikipediaPage(WcdBaseModel):
             )
             self.__compare_data_and_update__()
 
-    @validate_arguments
-    def __upload_reference_to_wikibase__(
-        self, reference: WikipediaPageReference
-    ) -> WikibaseReturn:
-        """This method tries to upload the reference to Wikibase
-        and returns a WikibaseReturn."""
-        logger.debug("__upload_reference_to_wikicitations__: Running")
-        if self.wikibase_crud_create is None:
-            self.__setup_wikibase_crud_create__()
-        if self.wikibase_crud_create:
-            return self.wikibase_crud_create.prepare_and_upload_reference_item(
-                page_reference=reference, wikipedia_page=self
-            )
-        else:
-            raise ValueError("self.wikibase_crud_create was None")
-
-    @validate_arguments
-    def __upload_reference_and_insert_in_the_cache_if_enabled__(
-        self, reference: WikipediaPageReference
-    ) -> WikipediaPageReference:
-        """Upload the reference and insert into the cache if enabled. Always add wikibase_return"""
-        logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
-        wikibase_return = self.__upload_reference_to_wikibase__(reference=reference)
-        if config.use_cache:
-            if not wikibase_return or not reference.md5hash:
-                raise MissingInformationError("hash or WCDQID was None")
-            self.__insert_reference_in_cache__(
-                reference=reference, wcdqid=wikibase_return.item_qid
-            )
-        reference.wikibase_return = wikibase_return
-        return reference
-
+    # TODO move these to the model they are concerning
     @validate_arguments
     def __upload_website_to_wikibase__(
-        self, reference: WikipediaPageReference
+        self, reference: WikipediaReference
     ) -> WikibaseReturn:
         """This is a lower level method that only handles uploading the website item"""
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create is not None:
-            return self.wikibase_crud_create.prepare_and_upload_website_item(
+            wikibase_return = self.wikibase_crud_create.prepare_and_upload_website_item(
                 page_reference=reference, wikipedia_page=self
             )
+            if isinstance(wikibase_return, WikibaseReturn):
+                return wikibase_return
+            else:
+                raise ValueError(f"we did not get a WikibaseReturn back")
         else:
             raise ValueError("self.wikicitations was None")
 
     @validate_arguments
     def __upload_website_and_insert_in_the_cache_if_enabled__(
-        self, reference: WikipediaPageReference
-    ) -> WikipediaPageReference:
+        self, reference: WikipediaReference
+    ) -> WikipediaReference:
         wikibase_return = self.__upload_website_to_wikibase__(reference=reference)
         wcdqid = wikibase_return.item_qid
         if config.use_cache:

@@ -7,8 +7,8 @@ from src.models.exceptions import MissingInformationError, MoreThanOneNumberErro
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
-    EnglishWikipediaPageReference,
     EnglishWikipediaPageReferenceSchema,
+    EnglishWikipediaReference,
 )
 from src.models.wikimedia.wikipedia.templates.google_books import GoogleBooks
 
@@ -69,7 +69,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite web",
         }
 
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -93,7 +93,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "doi_access": "free",
             "template_name": "cite journal",
         }
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -117,7 +117,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "s2cid": "216190330",
             "template_name": "cite book",
         }
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -166,7 +166,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         assert reference.url is None
 
     def test_find_number(self):
-        ref = EnglishWikipediaPageReference(
+        ref = EnglishWikipediaReference(
             template_name="test",
             wikibase=IASandboxWikibase(),
         )
@@ -205,7 +205,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         # TODO test other archives also
         from src.models.wikibase.enums import KnownArchiveUrl
 
-        reference = EnglishWikipediaPageReference(
+        reference = EnglishWikipediaReference(
             wikibase=IASandboxWikibase(),
             archive_url="https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
             template_name="test",
@@ -227,7 +227,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "access_date": "May 24, 2021",
             "template_name": "cite web",
         }
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -241,7 +241,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -254,7 +254,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -267,7 +267,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             publisher="[[test]]",
             template_name="cite book",
         )
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -278,7 +278,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             # publisher="",
             template_name="cite book",
         )
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -291,7 +291,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             publisher="[[test|test]]",
             template_name="cite book",
         )
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -303,7 +303,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             place="Copenhagen",
             template_name="cite book",
         )
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -315,7 +315,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             lang="English",
             template_name="cite book",
         )
-        reference: EnglishWikipediaPageReference = (
+        reference: EnglishWikipediaReference = (
             EnglishWikipediaPageReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
@@ -338,7 +338,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.oclc == "test"
@@ -349,7 +349,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         assert reference.has_first_level_domain_url_hash is False
         assert reference.has_hash is False
         reference.wikibase = IASandboxWikibase()
@@ -363,7 +363,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         assert (
             reference.template_url
             == f"https://en.wikipedia.org/wiki/Template:cite book"
@@ -375,7 +375,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         with self.assertRaises(MissingInformationError):
             print(reference.wikibase_url)

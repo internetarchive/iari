@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from unittest import TestCase
 
-import pytest  # type: ignore
 from pydantic import ValidationError
 from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_exceptions import MWApiError  # type: ignore
@@ -20,7 +19,7 @@ class TestWikibaseCrud(TestCase):
     def test_entity_url(self):
         wc = WikibaseCrud(wikibase=IASandboxWikibase())
         result = wc.entity_url(qid="Q1")
-        assert result == f"https://sandbox.wiki/wiki/Item:Q1"
+        assert result == f"https://ia-sandbox.wikibase.cloud/wiki/Item:Q1"
 
     def test_entity_url_missing_arguments(self):
         wc = WikibaseCrud(wikibase=IASandboxWikibase())

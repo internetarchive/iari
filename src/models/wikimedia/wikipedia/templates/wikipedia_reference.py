@@ -2,7 +2,7 @@ import hashlib
 import logging
 import re
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 from urllib.parse import parse_qs, urlparse
 
 from marshmallow import Schema
@@ -13,12 +13,9 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.exceptions import (
-    MissingInformationError,
-    MoreThanOneNumberError,
-)
+from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
-from src.models.wikibase import Wikibase
+from src.models.wcd_item import WcdItem
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.enums import (
     EnglishWikipediaTemplatePersonRole,
@@ -27,15 +24,16 @@ from src.models.wikimedia.wikipedia.templates.google_books import (
     GoogleBooks,
     GoogleBooksSchema,
 )
-from src.wcd_base_model import WcdBaseModel
 
+if TYPE_CHECKING:
+    from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 logger = logging.getLogger(__name__)
 
 # We use marshmallow here because pydantic did not seem to support optional alias fields.
 # https://github.com/samuelcolvin/pydantic/discussions/3855
 
 
-class WikipediaPageReference(WcdBaseModel):
+class WikipediaReference(WcdItem):
     """This models any page_reference on a Wikipedia page
 
     As we move to support more than one Wikipedia this model should be generalized further.
@@ -75,8 +73,6 @@ class WikipediaPageReference(WcdBaseModel):
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
     wikibase_return: Optional[WikibaseReturn]
-    wikidata_qid: Optional[str]
-    wikibase: Optional[Wikibase]
 
     # These are all the parameters in the supported templates
     #######################
@@ -1124,7 +1120,7 @@ class WikipediaPageReference(WcdBaseModel):
         "year",
         pre=True,
     )
-    def __validate_time__(cls, v) -> Optional[datetime]:
+    def __validate_time__(cls, v) -> Optional[datetime]: # type: ignore # mypy: ignore
         """Pydantic validator
         see https://stackoverflow.com/questions/66472255/"""
         date = None
@@ -1177,6 +1173,52 @@ class WikipediaPageReference(WcdBaseModel):
             # raise TimeParseException(f"date format '{v}' not supported yet")
             logger.warning(f"date format '{v}' not supported yet")
         return date
+
+    @validate_arguments
+    def __upload_reference_to_wikibase__(
+        self, wikipedia_page=None  # type: Optional[WikipediaArticle]
+    ) -> WikibaseReturn:
+        """This method tries to upload the reference to Wikibase
+        and returns a WikibaseReturn."""
+        logger.debug("__upload_reference_to_wikicitations__: Running")
+        if self.wikibase_crud_create is None:
+            self.__setup_wikibase_crud_create__()
+        if self.wikibase_crud_create:
+            wikibase_return = self.wikibase_crud_create.prepare_and_upload_reference_item(
+                page_reference=self, wikipedia_page=wikipedia_page
+            )
+            if isinstance(wikibase_return, WikibaseReturn):
+                return wikibase_return
+            else:
+                raise ValueError(f"we did not get a WikibaseReturn back")
+
+        else:
+            raise ValueError("self.wikibase_crud_create was None")
+
+    @validate_arguments
+    def __insert_reference_in_cache__(self, wcdqid: str):
+        """Insert reference in the cache"""
+        logger.debug("__insert_in_cache__: Running")
+        if self.cache is None:
+            self.__setup_cache__()
+        if self.cache is not None:
+            self.cache.add_reference(reference=self, wcdqid=wcdqid)
+        else:
+            raise ValueError("self.cache was None")
+        logger.info("Reference inserted into the hash database")
+
+    @validate_arguments
+    def upload_reference_and_insert_in_the_cache_if_enabled(self) -> None:
+        """Upload the reference and insert into the cache if enabled. Always add wikibase_return"""
+        logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
+        wikibase_return = self.__upload_reference_to_wikibase__()
+        if config.use_cache:
+            if not wikibase_return or not self.md5hash:
+                raise MissingInformationError("hash or WCDQID was None")
+            self.__insert_reference_in_cache__(
+                wcdqid=wikibase_return.item_qid
+            )
+        self.wikibase_return = wikibase_return
 
     def finish_parsing_and_generate_hash(self) -> None:
         """Parse the rest of the information and generate a hash"""

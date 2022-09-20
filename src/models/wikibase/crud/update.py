@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
-from pydantic import validate_arguments
 from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.datatypes import BaseDataType  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
@@ -17,9 +16,8 @@ from src.models.exceptions import MissingInformationError
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import WriteRequired
-from src.models.wikibase.properties import Properties
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
-    WikipediaPageReference,
+from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
+    WikipediaReference,
 )
 
 logger = logging.getLogger(__name__)
@@ -28,12 +26,12 @@ logger = logging.getLogger(__name__)
 class WikibaseCrudUpdate(WikibaseCrud):
     """This class handles all comparing and updating of Wikibase items
 
-    entity: is the entity to compare. Either a WikipediaPage or a WikipediaPageReference
+    entity: is the entity to compare. Either a WikipediaPage or a WikipediaReference
     new_item: new item based on fresh data from Wikipedia
     wikibase_item: current item in the Wikibase
     wikipedia_page: is the page the reference belongs to"""
 
-    entity: Any  # Union["WikipediaPage", WikipediaPageReference],
+    entity: Any  # Union["WikipediaPage", WikipediaReference],
     new_item: Optional[ItemEntity] = None
     testing: bool = False
     existing_wikibase_item: Optional[ItemEntity] = None
@@ -42,19 +40,19 @@ class WikibaseCrudUpdate(WikibaseCrud):
     class Config:
         arbitrary_types_allowed = True
 
-    @property
-    def write_required(self):
-        """This property method determines whether write is required for self.wikibase_item"""
-        logger.debug("write_required: running")
-        base_filter = []
-        properties = Properties()
-        property_names = properties.get_all_property_names()
-        for name in property_names:
-            base_filter.append(BaseDataType(prop_nr=getattr(self.wikibase, name)))
-        if config.loglevel == logging.DEBUG:
-            logger.debug("Basefilter:")
-            console.print(base_filter)
-        return self.existing_wikibase_item.write_required(base_filter=base_filter)
+    # @property
+    # def write_required(self):
+    #     """This property method determines whether write is required for self.wikibase_item"""
+    #     logger.debug("write_required: running")
+    #     base_filter = []
+    #     properties = Properties()
+    #     property_names = properties.get_all_property_names()
+    #     for name in property_names:
+    #         base_filter.append(BaseDataType(prop_nr=getattr(self.wikibase, name)))
+    #     if config.loglevel == logging.DEBUG:
+    #         logger.debug("Basefilter:")
+    #         console.print(base_filter)
+    #     return self.existing_wikibase_item.write_required(base_filter=base_filter)
 
     def __compare_claims_and_upload__(
         self,
@@ -76,10 +74,12 @@ class WikibaseCrudUpdate(WikibaseCrud):
         if not self.existing_wikibase_item:
             raise MissingInformationError("self.wikibase_item was None")
         with console.status("Comparing claims and uploading the result to Wikibase..."):
-            from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+            from src.models.wikimedia.wikipedia.wikipedia_article import (
+                WikipediaArticle,
+            )
 
             updated_claims = self.existing_wikibase_item.claims
-            if isinstance(self.entity, WikipediaPage):
+            if isinstance(self.entity, WikipediaArticle):
                 multiple_values_properties = [
                     self.wikibase.CITATIONS,
                     self.wikibase.STRING_CITATIONS,
@@ -117,15 +117,20 @@ class WikibaseCrudUpdate(WikibaseCrud):
                             claims=new_claim,
                             action_if_exists=ActionIfExists.APPEND_OR_REPLACE,
                         )
-            elif isinstance(self.entity, WikipediaPageReference):
+            elif isinstance(self.entity, WikipediaReference):
                 logger.debug("Going through reference claims")
                 # There currently are no multi-value properties in use on references
                 # so we simply replace them all
-                # TODO append only if we are not updating the references
-                updated_claims.add(
-                    claims=self.new_item.claims,
-                    action_if_exists=ActionIfExists.REPLACE_ALL,
-                )
+                if config.compare_references:
+                    updated_claims.add(
+                        claims=self.new_item.claims,
+                        action_if_exists=ActionIfExists.REPLACE_ALL,
+                    )
+                else:
+                    updated_claims.add(
+                        claims=self.new_item.claims,
+                        action_if_exists=ActionIfExists.APPEND_OR_REPLACE,
+                    )
                 # debug check to see if we only have one website value left on P81
                 website_claims = [
                     claim
@@ -144,37 +149,37 @@ class WikibaseCrudUpdate(WikibaseCrud):
             # Update the item with the updated claims
             self.existing_wikibase_item.claims = updated_claims
             # self.__print_claim_statistics__()
-            if self.write_required:
-                if not self.testing:
-                    self.__setup_wikibase_integrator_configuration__()
-                    try:
-                        self.existing_wikibase_item.write(
-                            summary=f"Updated the item based on changes in Wikipedia"
-                        )
-                        console.print(
-                            f"Updated the item based on changes in Wikipedia, "
-                            f"see {self.wikibase.entity_history_url(item_id=self.existing_wikibase_item.id)}"
-                        )
-                        return WriteRequired.YES
-                    except ModificationFailed as e:
-                        message = (
-                            f"The {self.entity.__repr_name__()} item {self.existing_wikibase_item.id} "
-                            f"could not be updated because of this error: {e}"
-                        )
-                        logger.error(message)
-                        self.__log_to_file__(
-                            message=message, file_name="update-failed.log"
-                        )
-                        # raise DebugExit()
-                        return WriteRequired.YES
-                else:
+            # if self.write_required:
+            if not self.testing:
+                self.__setup_wikibase_integrator_configuration__()
+                try:
+                    self.existing_wikibase_item.write(
+                        summary=f"Updated the item based on changes in Wikipedia"
+                    )
                     console.print(
-                        "Write required but skipping because of testing was True"
+                        f"Updated the item based on changes in Wikipedia, "
+                        f"see {self.wikibase.entity_history_url(item_id=self.existing_wikibase_item.id)}"
                     )
                     return WriteRequired.YES
+                except ModificationFailed as e:
+                    message = (
+                        f"The {self.entity.__repr_name__()} item {self.existing_wikibase_item.id} "
+                        f"could not be updated because of this error: {e}"
+                    )
+                    logger.error(message)
+                    self.__log_to_file__(message=message, file_name="update-failed.log")
+                    # raise DebugExit()
+                    return WriteRequired.YES
             else:
-                console.print("No write required according to WikibaseIntegrator")
                 return WriteRequired.NO
+            # else:
+            #         console.print(
+            #             "Write required but skipping because of testing was True"
+            #         )
+            #         return WriteRequired.YES
+            # else:
+            #     console.print("No write required according to WikibaseIntegrator")
+            #     return WriteRequired.NO
 
     # def __print_claim_statistics__(self):
     #     """We print the statistics of all the claims"""
@@ -192,7 +197,6 @@ class WikibaseCrudUpdate(WikibaseCrud):
     #     #     f"Found these property numbers {new_property_numbers} on the newly prepared item"
     #     # )
 
-    @validate_arguments(config=dict(arbitrary_types_allowed=True))
     def compare_and_update_claims(self, entity=Any) -> WriteRequired:
         """We compare and update claims that are completely missing from the Wikibase item.
         We also remove reference claims no longer present in the Wikipedia page."""
@@ -213,7 +217,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         """Fetch and prepare the information needed to perform a comparison"""
         logger.debug("__fetch_and_prepare_data_for_comparison__: Running")
         wcr = WikibaseCrudRead(wikibase=self.wikibase)
-        if isinstance(self.entity, WikipediaPageReference):
+        if isinstance(self.entity, WikipediaReference):
             if self.entity.title:
                 console.print(
                     f"Comparing {self.entity.template_name} "

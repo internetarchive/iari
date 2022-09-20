@@ -10,9 +10,9 @@ from src.models.wikibase.enums import WriteRequired
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
-    EnglishWikipediaPageReference,
+    EnglishWikipediaReference,
 )
-from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -30,10 +30,10 @@ class TestWikibaseCrudUpdate(TestCase):
     #         url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
     #         template_name="cite book",
     #     )
-    #     old_reference = EnglishWikipediaPageReference(**old_data)
+    #     old_reference = EnglishWikipediaReference(**old_data)
     #     old_reference.wikibase = IASandboxWikibase()
     #     old_reference.finish_parsing_and_generate_hash()
-    #     new_reference = EnglishWikipediaPageReference(**new_data)
+    #     new_reference = EnglishWikipediaReference(**new_data)
     #     new_reference.wikibase = IASandboxWikibase()
     #     new_reference.finish_parsing_and_generate_hash()
     #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
@@ -49,7 +49,7 @@ class TestWikibaseCrudUpdate(TestCase):
     #         ),
     #     )
 
-    def test_compare_claims_on_references(self):
+    def test_compare_claims_on_references_offline(self):
         wikibase = IASandboxWikibase()
         old_data = dict(
             # oclc="test",
@@ -61,14 +61,14 @@ class TestWikibaseCrudUpdate(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        old_reference = EnglishWikipediaPageReference(**old_data)
+        old_reference = EnglishWikipediaReference(**old_data)
         old_reference.wikibase = wikibase
         old_reference.finish_parsing_and_generate_hash()
-        new_reference = EnglishWikipediaPageReference(**new_data)
+        new_reference = EnglishWikipediaReference(**new_data)
         new_reference.wikibase = wikibase
         new_reference.finish_parsing_and_generate_hash()
         new_reference.wikibase_return = WikibaseReturn(uploaded_now=False, item_qid="")
-        wppage = WikipediaPage(wikibase=wikibase)
+        wppage = WikipediaArticle(wikibase=wikibase)
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -101,10 +101,10 @@ class TestWikibaseCrudUpdate(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = wikibase
         reference.finish_parsing_and_generate_hash()
-        wppage = WikipediaPage(wikibase=wikibase)
+        wppage = WikipediaArticle(wikibase=wikibase)
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -118,19 +118,67 @@ class TestWikibaseCrudUpdate(TestCase):
         with self.assertRaises(KeyError):
             item.claims.get(wikibase.HASH)
 
-    def test_write_required(self):
-        wikibase = IASandboxWikibase()
-        wcu = WikibaseCrudUpdate(wikibase=wikibase)
-        # get the wikibase_item
-        wcu.__setup_wikibase_integrator_configuration__()
-        # We don't need to login to get an item
-        wbi = WikibaseIntegrator()
-        wcu.existing_wikibase_item = wbi.item.get(entity_id="Q6662")
-        # delete the hash
-        wcu.existing_wikibase_item.claims.remove(property=wikibase.HASH)
-        claims = wcu.existing_wikibase_item.claims.get(wikibase.HASH)
-        assert len(claims) == 1
-        assert claims[0].removed is True
-        assert wcu.write_required is True
+    # def test_write_required(self):
+    #     wikibase = IASandboxWikibase()
+    #     wcu = WikibaseCrudUpdate(wikibase=wikibase)
+    #     # get the wikibase_item
+    #     wcu.__setup_wikibase_integrator_configuration__()
+    #     # We don't need to login to get an item
+    #     wbi = WikibaseIntegrator()
+    #     wcu.existing_wikibase_item = wbi.item.get(entity_id="Q148")
+    #     # delete the hash
+    #     wcu.existing_wikibase_item.claims.remove(property=wikibase.HASH)
+    #     claims = wcu.existing_wikibase_item.claims.get(wikibase.HASH)
+    #     assert len(claims) == 1
+    #     assert claims[0].removed is True
+    #     assert wcu.write_required is True
+    #
+    # def test_write_not_required(self):
+    #     wikibase = IASandboxWikibase()
+    #     wcu = WikibaseCrudUpdate(wikibase=wikibase)
+    #     # get the wikibase_item
+    #     wcu.__setup_wikibase_integrator_configuration__()
+    #     # We don't need to login to get an item
+    #     wbi = WikibaseIntegrator()
+    #     wcu.existing_wikibase_item = wbi.item.get(entity_id="Q148")
+    #     # delete the hash
+    #     assert wcu.write_required is False
 
-    # TODO test update of title of reference works as expected
+    def test_update_of_title(self):
+        wikibase = IASandboxWikibase()
+        title = "test title"
+        data = dict(
+            # oclc="test",
+            title=title,
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = wikibase
+        reference.finish_parsing_and_generate_hash()
+        reference.upload_reference_and_insert_in_the_cache_if_enabled()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(reference.wikibase_return.item_qid)
+        titles = item.claims.get(wikibase.TITLE)
+        # console.print(titles)
+        assert title == titles[0].mainsnak.datavalue["value"]
+        new_title = "new test title"
+        data = dict(
+            # oclc="test",
+            title=title,
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = wikibase
+        reference.finish_parsing_and_generate_hash()
+        # here we get he wikibase_return set
+        reference.upload_reference_and_insert_in_the_cache_if_enabled()
+        reference.__setup_wikibase_crud_update__()
+        # FIXME this gives a weird error related to pydantic
+        reference.wikibase_crud_update.compare_and_update_claims(entity=self)
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(reference.wikibase_return.item_qid)
+        titles = item.claims.get(wikibase.TITLE)
+        # console.print(titles)
+        assert new_title == titles[0].mainsnak.datavalue["value"]

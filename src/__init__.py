@@ -206,9 +206,11 @@ class WcdImportBot(WcdBaseModel):
         """Deletes one page from the Wikibase and from the cache"""
         logger.debug("delete_one_page: running")
         with console.status(f"Deleting {title}"):
-            from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+            from src.models.wikimedia.wikipedia.wikipedia_article import (
+                WikipediaArticle,
+            )
 
-            page = WikipediaPage(
+            page = WikipediaArticle(
                 wikibase=self.wikibase,
                 language_code=self.language_code,
                 wikimedia_site=self.wikimedia_site,
@@ -259,9 +261,9 @@ class WcdImportBot(WcdBaseModel):
         present in the Wikibase then compare it and all its
         references to make sure we the data is reflecting changes
         made in Wikipedia"""
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
-        page = WikipediaPage(
+        page = WikipediaArticle(
             wikibase=self.wikibase,
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
@@ -279,7 +281,7 @@ class WcdImportBot(WcdBaseModel):
         """
         from pywikibot import Category, Site  # type: ignore
 
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
         if max_count is not None:
             logger.debug(f"Setting max_count to {max_count}")
@@ -303,7 +305,7 @@ class WcdImportBot(WcdBaseModel):
                         f"{page.pageid} {page.title()} Redirect:{page.isRedirectPage()}"
                     )
                     # raise DebugExit()
-                    wikipedia_page = WikipediaPage(
+                    wikipedia_page = WikipediaArticle(
                         wikibase=self.wikibase,
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
@@ -324,7 +326,7 @@ class WcdImportBot(WcdBaseModel):
                     # console.print(count)
                     logger.info(f"{page.pageid} {page.page_title()}")
                     # raise DebugExit()
-                    wikipedia_page = WikipediaPage(
+                    wikipedia_page = WikipediaArticle(
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,

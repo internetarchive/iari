@@ -11,9 +11,9 @@ from src.models.wikibase.crud.create import WikibaseCrudCreate
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
-    EnglishWikipediaPageReference,
+    EnglishWikipediaReference,
 )
-from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -23,9 +23,9 @@ class TestWikibaseCrudCreate(TestCase):
     def test_prepare_new_reference_item(self):
         """This tests both full name string generation and archive qualifier generation"""
         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
-        reference = EnglishWikipediaPageReference(
+        reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
                 "first": "Andranik",
@@ -63,9 +63,9 @@ class TestWikibaseCrudCreate(TestCase):
 
     def test_prepare_new_reference_item_with_very_long_title(self):
         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Test")
-        reference = EnglishWikipediaPageReference(
+        reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
                 "first": "Andranik",
@@ -98,9 +98,9 @@ class TestWikibaseCrudCreate(TestCase):
 
     def test_prepare_new_wikipedia_page_item_invalid_qid(self):
         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         wppage.__get_wikipedia_page_from_title__(title="Democracy")
-        reference = EnglishWikipediaPageReference(
+        reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
                 "first": "Andranik",
@@ -130,10 +130,10 @@ class TestWikibaseCrudCreate(TestCase):
         # logger.info(f"url: {wppage.wikicitations_url}")
 
     def test_prepare_new_wikipedia_page_item_valid_qid(self):
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
-        reference = EnglishWikipediaPageReference(
+        reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
                 "first": "Andranik",
@@ -172,7 +172,7 @@ class TestWikibaseCrudCreate(TestCase):
     #     title = "Democracy"
     #     wppage.__get_wikipedia_page_from_title__(title=title)
     #     wppage.__generate_hash__()
-    #     reference = EnglishWikipediaPageReference(
+    #     reference = EnglishWikipediaReference(
     #         **{
     #             "last": "Tangian",
     #             "first": "Andranik",
@@ -202,12 +202,12 @@ class TestWikibaseCrudCreate(TestCase):
 
     def test_prepare_and_upload_website_item(self):
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
-        reference = EnglishWikipediaPageReference(
+        reference = EnglishWikipediaReference(
             **{
                 "agency": "Oxford University Press",
                 "access-date": "24 February 2021",
@@ -234,7 +234,7 @@ class TestWikibaseCrudCreate(TestCase):
     #     wppage.__get_wikipedia_page_from_title__(title=title)
     #     wppage.__generate_hash__()
     #     # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
-    #     reference = EnglishWikipediaPageReference(
+    #     reference = EnglishWikipediaReference(
     #         **{
     #             "agency": "Oxford University Press",
     #             "access-date": "24 February 2021",
@@ -263,12 +263,12 @@ class TestWikibaseCrudCreate(TestCase):
     def test_uploading_a_page_reference_and_website_item_twice(self):
         # wcd = WikibaseCrudDelete(wikibase=IASandboxWikibase())
         # wcd.delete_imported_items()
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
         # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
-        reference = EnglishWikipediaPageReference(
+        reference = EnglishWikipediaReference(
             **{
                 "agency": "Oxford University Press",
                 "access-date": "24 February 2021",
@@ -306,13 +306,13 @@ class TestWikibaseCrudCreate(TestCase):
             trans_title="Muskö Naval Base 40 years",
             access_date="2010-11-09",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -331,13 +331,13 @@ class TestWikibaseCrudCreate(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -351,13 +351,13 @@ class TestWikibaseCrudCreate(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -372,13 +372,13 @@ class TestWikibaseCrudCreate(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -393,13 +393,13 @@ class TestWikibaseCrudCreate(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference = EnglishWikipediaPageReference(**data)
+        reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_page import WikipediaPage
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Test"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__generate_hash__()
@@ -409,16 +409,14 @@ class TestWikibaseCrudCreate(TestCase):
         assert item.claims.get(property=wc.wikibase.OCLC_CONTROL_NUMBER) is not None
 
     def test_wikidata_qid_statement(self):
-        wppage = WikipediaPage(wikibase=IASandboxWikibase())
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
         title = "Democracy"
         wppage.__get_wikipedia_page_from_title__(title=title)
         wppage.__fetch_wikidata_qid__()
+        wppage.__generate_hash__()
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
         item = wc.__prepare_new_wikipedia_page_item__(
             wikipedia_page=wppage,
         )
-        # console.print(item.get_json())
-        # assert item.labels.get("en") == title
-        wdqid: List[Claim] = item.claims.get(wc.wikibase.WIKIDATA_QID)
-        # console.print(citations[0].mainsnak.datavalue["value"]["id"])
-        assert wdqid[0].mainsnak.datavalue["value"]["id"] == "Q1"
+        wdqids: List[Claim] = item.claims.get(wc.wikibase.WIKIDATA_QID)
+        assert wdqids[0].mainsnak.datavalue["value"] == "Q7174"
