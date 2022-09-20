@@ -1,14 +1,19 @@
 import logging
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import validate_arguments
 
 from src.helpers import console
+from src.models.cache.cache_return import CacheReturn
+from src.models.exceptions import MissingInformationError
 from src.models.ssdb_database import SsdbDatabase
-from src.models.wikimedia.wikipedia.templates.wikipedia_page_reference import (
-    WikipediaPageReference,
-)
 from src.wcd_base_model import WcdBaseModel
+
+if TYPE_CHECKING:
+    from src.models.wikimedia.wikipedia.templates.wikipedia_reference import (
+        WikipediaReference,
+    )
+    from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +36,11 @@ class Cache(WcdBaseModel):
             raise ValueError("self.ssdb was None")
 
     @validate_arguments
-    def add_reference(self, reference: WikipediaPageReference, wcdqid: str) -> Any:
+    def add_reference(
+        self,
+        reference,  # type: WikipediaReference
+        wcdqid: str,
+    ) -> Any:
         logger.debug("add_reference: Running")
         if self.ssdb:
             if reference.md5hash is not None and wcdqid is not None:
@@ -48,7 +57,11 @@ class Cache(WcdBaseModel):
             raise ValueError("self.ssdb was None")
 
     @validate_arguments
-    def add_website(self, reference: WikipediaPageReference, wcdqid: str):
+    def add_website(
+        self,
+        reference,  # type: WikipediaReference
+        wcdqid: str,
+    ):
         logger.debug("add_website: Running")
         if self.ssdb:
             if (
@@ -65,38 +78,36 @@ class Cache(WcdBaseModel):
             raise ValueError("self.ssdb was None")
 
     # TODO refactor into one generic lookup function?
-    @validate_arguments
     def check_page_and_get_wikibase_qid(
-        self,
-        wikipedia_page: Any,  # WikipediaPage
-    ) -> Optional[str]:
+        self, wikipedia_page  # type: WikipediaArticle
+    ) -> CacheReturn:
         """We get binary from SSDB so we decode it"""
         if self.ssdb:
             if wikipedia_page.md5hash is not None:
                 # https://stackoverflow.com/questions/55365543/
                 response = self.ssdb.get_value(key=wikipedia_page.md5hash)
                 if response is None:
-                    return None
+                    return CacheReturn()
                 else:
-                    return str(response.decode("UTF-8"))
+                    return CacheReturn(item_qid=str(response.decode("UTF-8")))
             else:
-                raise ValueError("md5hash was None")
+                raise MissingInformationError("md5hash was None")
         else:
             raise ValueError("self.ssdb was None")
 
     @validate_arguments
     def check_reference_and_get_wikibase_qid(
-        self, reference: WikipediaPageReference
-    ) -> Optional[str]:
+        self, reference  # type: WikipediaReference
+    ) -> CacheReturn:
         """We get binary from SSDB so we decode it"""
         if self.ssdb:
             if reference.md5hash is not None:
                 # https://stackoverflow.com/questions/55365543/
                 response = self.ssdb.get_value(key=reference.md5hash)
                 if response is None:
-                    return None
+                    return CacheReturn()
                 else:
-                    return str(response.decode("UTF-8"))
+                    return CacheReturn(item_qid=str(response.decode("UTF-8")))
             else:
                 raise ValueError("md5hash was None")
         else:
@@ -104,8 +115,8 @@ class Cache(WcdBaseModel):
 
     @validate_arguments
     def check_website_and_get_wikibase_qid(
-        self, reference: WikipediaPageReference
-    ) -> Optional[str]:
+        self, reference  # type: WikipediaReference
+    ) -> CacheReturn:
         """We get binary from SSDB so we decode it"""
         if self.ssdb:
             if reference.first_level_domain_of_url_hash is not None:
@@ -114,12 +125,12 @@ class Cache(WcdBaseModel):
                     key=reference.first_level_domain_of_url_hash
                 )
                 if response is None:
-                    return None
+                    return CacheReturn()
                 else:
-                    return str(response.decode("UTF-8"))
+                    return CacheReturn(item_qid=str(response.decode("UTF-8")))
             else:
                 # Not all references have urls so we fail silently
-                return None
+                return CacheReturn()
         else:
             raise ValueError("self.ssdb was None")
 
