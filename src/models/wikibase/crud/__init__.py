@@ -30,8 +30,8 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 import config
 from src.models.exceptions import MissingInformationError
 from src.models.person import Person
-from src.models.wikibase import Wikibase
 from src.models.return_.wikibase_return import WikibaseReturn
+from src.models.wikibase import Wikibase
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
@@ -222,10 +222,15 @@ class WikibaseCrud(WcdBaseModel):
             label = f"{shortened_title} | {page_reference.md5hash[:7]}"
             item.labels.set("en", label)
             if wikipedia_article:
+                from src.models.wikimedia.wikipedia.wikipedia_article import (
+                    WikipediaArticle,
+                )
+
                 if not isinstance(wikipedia_article, WikipediaArticle):
                     raise TypeError("not a WikipediaArticle")
                 item.descriptions.set(
-                    "en", f"reference from {wikipedia_article.wikimedia_site.name.title()}"
+                    "en",
+                    f"reference from {wikipedia_article.wikimedia_site.name.title()}",
                 )
             else:
                 item.descriptions.set("en", f"reference uploaded for testing")
@@ -1158,7 +1163,9 @@ class WikibaseCrud(WcdBaseModel):
         if not isinstance(wikipedia_article, WikipediaArticle):
             raise ValueError("did not get a WikipediaPage object")
         self.__prepare_reference_claim__(wikipedia_article=wikipedia_article)
-        item = self.__prepare_new_wikipedia_article_item__(wikipedia_article=wikipedia_article)
+        item = self.__prepare_new_wikipedia_article_item__(
+            wikipedia_article=wikipedia_article
+        )
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
