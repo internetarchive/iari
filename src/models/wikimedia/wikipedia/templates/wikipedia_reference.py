@@ -1120,7 +1120,7 @@ class WikipediaReference(WcdItem):
         "year",
         pre=True,
     )
-    def __validate_time__(cls, v) -> Optional[datetime]: # type: ignore # mypy: ignore
+    def __validate_time__(cls, v) -> Optional[datetime]:  # type: ignore # mypy: ignore
         """Pydantic validator
         see https://stackoverflow.com/questions/66472255/"""
         date = None
@@ -1184,8 +1184,10 @@ class WikipediaReference(WcdItem):
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create:
-            wikibase_return = self.wikibase_crud_create.prepare_and_upload_reference_item(
-                page_reference=self, wikipedia_page=wikipedia_page
+            wikibase_return = (
+                self.wikibase_crud_create.prepare_and_upload_reference_item(
+                    page_reference=self, wikipedia_page=wikipedia_page
+                )
             )
             if isinstance(wikibase_return, WikibaseReturn):
                 return wikibase_return
@@ -1215,9 +1217,7 @@ class WikipediaReference(WcdItem):
         if config.use_cache:
             if not wikibase_return or not self.md5hash:
                 raise MissingInformationError("hash or WCDQID was None")
-            self.__insert_reference_in_cache__(
-                wcdqid=wikibase_return.item_qid
-            )
+            self.__insert_reference_in_cache__(wcdqid=wikibase_return.item_qid)
         self.wikibase_return = wikibase_return
 
     def finish_parsing_and_generate_hash(self) -> None:
