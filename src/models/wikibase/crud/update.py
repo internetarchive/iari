@@ -202,6 +202,8 @@ class WikibaseCrudUpdate(WikibaseCrud):
         """We compare and update claims that are completely missing from the Wikibase item.
         We also remove reference claims no longer present in the Wikipedia page."""
         logger.debug("compare_and_update_claims: Running")
+        if not isinstance(entity, WcdItem):
+            raise TypeError("entity was not a WcdItem instance")
         self.entity = entity
         if not self.wikipedia_page:
             raise MissingInformationError("self.wikipedia_page was None")
