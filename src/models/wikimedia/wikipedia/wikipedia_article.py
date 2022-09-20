@@ -508,10 +508,8 @@ class WikipediaArticle(WcdItem):
     def __upload_page_and_references__(self):
         console.print(f"Importing page '{self.title}'")
         self.__setup_wikibase_crud_create__()
-        self.return_ = (
-            self.wikibase_crud_create.prepare_and_upload_wikipedia_page_item(
-                wikipedia_page=self,
-            )
+        self.return_ = self.wikibase_crud_create.prepare_and_upload_wikipedia_article_item(
+            wikipedia_page=self,
         )
         if self.return_ is None:
             raise ValueError("wcdqid was None")
