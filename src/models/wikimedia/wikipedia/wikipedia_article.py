@@ -17,8 +17,8 @@ from src.helpers import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.cache import CacheReturn
 from src.models.exceptions import MissingInformationError, WikibaseError
+from src.models.return_ import Return
 from src.models.wcd_item import WcdItem
-from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.wikibase_return import WikibaseReturn
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.templates.english_wikipedia_page_reference import (
@@ -114,35 +114,24 @@ class WikipediaArticle(WcdItem):
         self, reference: WikipediaReference
     ) -> WikipediaReference:
         """Check and upload reference item to Wikibase if missing and return an
-        updated reference with the attribute wikibase_return set"""
+        updated reference with the attribute return_ set"""
         logger.debug(
             "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
         )
-        wcdqid = None
-        if config.use_cache:
-            wcdqid = self.__get_reference_wcdqid_from_cache__(reference=reference)
-            if wcdqid:
-                logger.debug(f"Got wcdqid:{wcdqid} from the cache")
-                reference.wikibase_return = WikibaseReturn(
-                    item_qid=wcdqid, uploaded_now=False
-                )
-            else:
-                logger.info(
-                    f"Could not find reference with {reference.md5hash} in the cache"
-                )
-                reference.upload_reference_and_insert_in_the_cache_if_enabled()
-        if wcdqid:
-            # We got a WCDQID from the cache
-            logger.debug(f"Got wcdqid:{wcdqid} from the cache/SPARQL")
+        cache_return = self.__get_reference_wcdqid_from_cache__(reference=reference)
+        if cache_return.item_qid:
+            logger.debug(f"Got wcdqid:{cache_return.item_qid} from the cache")
         else:
-            # We did not get a WCDQID, so try uploading
-            reference.upload_reference_and_insert_in_the_cache_if_enabled()
-        if not reference.wikibase_return:
-            raise MissingInformationError(
-                "self.wikibase_return was None and is needed "
-                "to judge whether to compare or not"
+            logger.info(
+                f"Could not find reference with {reference.md5hash} in the cache"
             )
-        return reference
+            reference.upload_reference_and_insert_in_the_cache()
+        if isinstance(cache_return, Return):
+            # Weird mypy error here
+            reference.return_ = cache_return # type: ignore # mypy: ignore
+            return reference
+        else:
+            raise TypeError("cache_return was not a CacheReturn instance")
 
     @validate_arguments
     def __check_and_upload_website_item_to_wikibase_if_missing__(
@@ -159,17 +148,12 @@ class WikipediaArticle(WcdItem):
         logger.debug("Checking and uploading website item")
         if reference is None:
             raise ValueError("reference was None")
-        if config.use_cache:
-            cache_return = self.__get_website_wcdqid_from_cache__(reference=reference)
-            if cache_return.item_qid is not None:
-                logger.debug(f"Got wcdqid:{cache_return.item_qid} from the cache")
-                reference.first_level_domain_of_url_qid = cache_return.item_qid
+        cache_return = self.__get_website_wcdqid_from_cache__(reference=reference)
+        if cache_return.item_qid is not None:
+            logger.debug(f"Got wcdqid:{cache_return.item_qid} from the cache")
+            reference.first_level_domain_of_url_qid = cache_return.item_qid
         else:
-            # TODO retire this
-            wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
-                md5hash=reference.first_level_domain_of_url_hash
-            )
-            reference.first_level_domain_of_url_qid = wcdqid
+            logger.debug("Got no hit in the cache")
         if reference.first_level_domain_of_url_qid is None:
             reference = self.__upload_website_and_insert_in_the_cache_if_enabled__(
                 reference=reference
@@ -197,10 +181,10 @@ class WikipediaArticle(WcdItem):
                     """We go through each reference that has a hash
                     and compare it to the existing one in Wikibase"""
                     if reference.has_hash:
-                        if not reference.wikibase_return:
+                        if not reference.return_:
                             logger.debug(f"reference: {reference}")
                             raise MissingInformationError(
-                                "reference.wikibase_return was None and is needed "
+                                "reference.return_ was None and is needed "
                                 f"to judge whether to compare or not"
                             )
                         count += 1
@@ -218,7 +202,7 @@ class WikipediaArticle(WcdItem):
         console.print(f"Comparing the page '{self.title}'")
         if not self.wikibase_return:
             raise MissingInformationError(
-                "self.wikibase_return was None and is needed "
+                "self.return_ was None and is needed "
                 "to judge whether to compare or not"
             )
         self.__setup_wikibase_crud_update__()
@@ -408,39 +392,15 @@ class WikipediaArticle(WcdItem):
             raise ValueError("self.cache was None")
 
     @validate_arguments
-    def __get_wcdqid_from_hash_via_sparql__(self, md5hash: str) -> Optional[str]:
-        """Looks up the WCDQID in WikiCitaitons and returns
-        it if only one found and complains if more than one was found"""
-        logger.debug("__get_wcdqid_from_hash_via_sparql__: Running")
-        logger.info(f"Looking up the WCDQID via SPARQL by searching for: {md5hash}")
-        if self.wikibase_crud_read is None:
-            self.wikibase_crud_read = WikibaseCrudRead(wikibase=self.wikibase)
-        if self.wikibase_crud_read is not None:
-            wcdqids = self.wikibase_crud_read.__get_wcdqids_from_hash__(md5hash=md5hash)
-            if wcdqids is not None:
-                if len(wcdqids) > 1:
-                    raise ValueError(
-                        "Got more than one WCDQID for a hash. This should never happen"
-                    )
-                elif len(wcdqids) == 1:
-                    first_wcdqid = str(wcdqids[0])
-                    logger.debug(f"Returning WCDQID {first_wcdqid}")
-                    return first_wcdqid
-            else:
-                logger.debug("Got no match from SPARQL")
-                return None
-        else:
-            raise ValueError("self.wikicitations was None")
-        return None
-
-    @validate_arguments
     def __get_website_wcdqid_from_cache__(
         self, reference: WikipediaReference
     ) -> CacheReturn:
         if self.cache is None:
             self.__setup_cache__()
         if self.cache is not None:
-            cache_return = self.cache.check_website_and_get_wikibase_qid(reference=reference)
+            cache_return = self.cache.check_website_and_get_wikibase_qid(
+                reference=reference
+            )
             logger.debug(f"result from the cache:{cache_return.item_qid}")
             return cache_return
         else:
@@ -464,42 +424,21 @@ class WikipediaArticle(WcdItem):
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
         console.print(f"Checking if the page '{self.title}' has already been uploaded")
-        if config.use_cache:
-            if self.cache is None:
-                self.__setup_cache__()
-            if self.cache is not None:
-                cache_return = self.cache.check_page_and_get_wikibase_qid(wikipedia_page=self)
-            else:
-                raise ValueError("self.cache was None")
-            if not cache_return.item_qid:
-                logger.debug("Page not found in the cache")
-                return False
-            else:
-                logger.debug("Page found in the cache")
-                self.wikibase_return = WikibaseReturn(
-                    item_qid=cache_return.item_qid, uploaded_now=False
-                )
-                return True
+        if self.cache is None:
+            self.__setup_cache__()
+        if self.cache is not None:
+            cache_return = self.cache.check_page_and_get_wikibase_qid(
+                wikipedia_page=self
+            )
+            self.return_ = cache_return
         else:
-            # TODO retire this code
-            if config.check_if_page_has_been_uploaded_via_sparql:
-                logger.info("Not using the cache. Falling back to lookup via SPARQL")
-                if self.md5hash is not None:
-                    wcdqid = self.__get_wcdqid_from_hash_via_sparql__(
-                        md5hash=self.md5hash
-                    )
-                else:
-                    raise ValueError("self.md5hash was None")
-                if wcdqid is not None:
-                    self.wikibase_return = WikibaseReturn(
-                        item_qid=wcdqid, uploaded_now=False
-                    )
-                    return True
-                else:
-                    return False
-            else:
-                logger.info("Skipping check if the page already exists")
-                return False
+            raise ValueError("self.cache was None")
+        if not cache_return.item_qid:
+            logger.debug("Page not found in the cache")
+            return False
+        else:
+            logger.debug("Page found in the cache")
+            return True
 
     def __parse_templates__(self):
         """We parse all the templates into WikipediaPageReferences"""
@@ -667,9 +606,9 @@ class WikipediaArticle(WcdItem):
                             reference=reference
                         )
                     )
-                    if not reference.wikibase_return:
+                    if not reference.return_:
                         raise MissingInformationError(
-                            "reference.wikibase_return was None and is needed "
+                            "reference.return_ was None and is needed "
                             "to judge whether to compare or not"
                         )
             updated_references.append(reference)

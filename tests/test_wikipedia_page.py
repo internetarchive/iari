@@ -56,7 +56,7 @@ class TestWikipediaPage(TestCase):
     #     )
     #     # page.__fetch_page_data__(title="Test")
     #     page.extract_and_parse_and_upload_missing_items_to_wikibase()
-    #     wcdqid = page.wikibase_return.item_qid
+    #     wcdqid = page.return_.item_qid
     #     console.print(
     #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
     #     )
