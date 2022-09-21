@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest import TestCase
 
 from dateutil.parser import isoparse
@@ -185,12 +185,15 @@ class TestWikibaseCrudUpdate(TestCase):
         )
         publication_dates = item.claims.get(wikibase.PUBLICATION_DATE)
         # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
-        assert datetime(month=3, day=31, year=2007) == isoparse(
+        pd = isoparse(
             publication_dates[0].mainsnak.datavalue["value"]["time"].replace("+", "")
         )
+        console.print(pd)
+        exit()
+        assert datetime(month=3, day=31, year=2007, tzinfo=timezone.utc) == pd
         access_dates = item.claims.get(wikibase.ACCESS_DATE)
         # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
-        assert datetime(month=12, day=10, year=2020) == isoparse(
+        assert datetime(month=12, day=10, year=2020, tzinfo=timezone.utc) == isoparse(
             access_dates[0].mainsnak.datavalue["value"]["time"].replace("+", "")
         )
         new_title = "new test title"
