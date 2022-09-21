@@ -223,3 +223,4 @@ class TestWikibaseCrudUpdate(TestCase):
             new_first_author.full_name
             == new_full_name_strings[0].mainsnak.datavalue["value"]
         )
+        # TODO check that updating the dates also work
