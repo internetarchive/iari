@@ -176,10 +176,9 @@ class TestWikibaseCrudUpdate(TestCase):
         item = wbi.item.get(reference.return_.item_qid)
         titles = item.claims.get(wikibase.TITLE)
         assert title_ref == titles[0].mainsnak.datavalue["value"]
-        given_names = item.claims.get(wikibase.GIVEN_NAME)
-        assert first1 == given_names[0].mainsnak.datavalue["value"]
-        family_names = item.claims.get(wikibase.FAMILY_NAME)
-        assert last1 == family_names[0].mainsnak.datavalue["value"]
+        full_name_strings = item.claims.get(wikibase.FULL_NAME_STRING)
+        first_author = reference.authors_list[0]
+        assert first_author.full_name == full_name_strings[0].mainsnak.datavalue["value"]
         publication_dates = item.claims.get(wikibase.PUBLICATION_DATE)
         # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
         assert datetime(month=3, day=31, year=2007) == datetime.fromisoformat(
@@ -191,7 +190,7 @@ class TestWikibaseCrudUpdate(TestCase):
             access_dates[0].mainsnak.datavalue["value"]["time"]
         )
         new_title = "new test title"
-        data = dict(
+        new_data = dict(
             # oclc="test",
             title=new_title,
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
@@ -201,7 +200,7 @@ class TestWikibaseCrudUpdate(TestCase):
             access_date="December 10, 2020",
             date="March 31, 2007",
         )
-        reference = EnglishWikipediaReference(**data)
+        reference = EnglishWikipediaReference(**new_data)
         reference.wikibase = wikibase
         reference.finish_parsing_and_generate_hash()
         # here we get he return_ set
@@ -210,9 +209,8 @@ class TestWikibaseCrudUpdate(TestCase):
         reference.wikibase_crud_update.compare_and_update_claims(entity=reference)
         wbi = WikibaseIntegrator()
         item = wbi.item.get(reference.return_.item_qid)
-        titles = item.claims.get(wikibase.TITLE)
-        assert new_title == titles[0].mainsnak.datavalue["value"]
-        given_names = item.claims.get(wikibase.GIVEN_NAME)
-        assert f"{first1}-test" == given_names[0].mainsnak.datavalue["value"]
-        family_names = item.claims.get(wikibase.GIVEN_NAME)
-        assert f"{last1}-test" == family_names[0].mainsnak.datavalue["value"]
+        new_titles = item.claims.get(wikibase.TITLE)
+        assert new_title == new_titles[0].mainsnak.datavalue["value"]
+        new_full_name_strings = item.claims.get(wikibase.FULL_NAME_STRING)
+        new_first_author = reference.authors_list[0]
+        assert new_first_author.full_name == new_full_name_strings[0].mainsnak.datavalue["value"]
