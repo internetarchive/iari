@@ -67,7 +67,7 @@ class Website(WcdItem):
             raise ValueError("reference.first_level_domain_of_url_hash was None")
         logger.debug("Checking and uploading website item")
         self.get_website_wcdqid_from_cache()
-        if self.return_ and self.return_.item_qid is not None:
+        if self.return_ and self.return_.item_qid:
             logger.debug(f"Got wcdqid:{self.return_.item_qid} from the cache")
             self.reference.website_item = self
             logger.info(f"Added link to existing website item {self.return_.item_qid}")
@@ -79,9 +79,9 @@ class Website(WcdItem):
 
     @validate_arguments
     def get_website_wcdqid_from_cache(self) -> None:
-        if self.cache is None:
+        if not self.cache:
             self.__setup_cache__()
-        if self.cache is not None:
+        if self.cache:
             self.return_ = self.cache.check_website_and_get_wikibase_qid(
                 reference=self.reference
             )
