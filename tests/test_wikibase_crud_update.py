@@ -144,14 +144,15 @@ class TestWikibaseCrudUpdate(TestCase):
 
     def test_update_of_title(self):
         wikibase = IASandboxWikibase()
+        # instantiate a page to test on
         wppage = WikipediaArticle(wikibase=wikibase)
         title = "Test"
         wppage.__get_wikipedia_article_from_title__(title=title)
         wppage.__generate_hash__()
-        title = "test title"
+        title_ref = "test title"
         data = dict(
             # oclc="test",
-            title=title,
+            title=title_ref,
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
@@ -163,11 +164,11 @@ class TestWikibaseCrudUpdate(TestCase):
         item = wbi.item.get(reference.return_.item_qid)
         titles = item.claims.get(wikibase.TITLE)
         # console.print(titles)
-        assert title == titles[0].mainsnak.datavalue["value"]
+        assert title_ref == titles[0].mainsnak.datavalue["value"]
         new_title = "new test title"
         data = dict(
             # oclc="test",
-            title=title,
+            title=new_title,
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
