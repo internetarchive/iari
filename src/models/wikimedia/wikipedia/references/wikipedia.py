@@ -1179,10 +1179,8 @@ class WikipediaReference(WcdItem):
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create:
-            return_ = (
-                self.wikibase_crud_create.prepare_and_upload_reference_item(
-                    page_reference=self, wikipedia_article=wikipedia_article
-                )
+            return_ = self.wikibase_crud_create.prepare_and_upload_reference_item(
+                page_reference=self, wikipedia_article=wikipedia_article
             )
             if isinstance(return_, WikibaseReturn):
                 return return_
