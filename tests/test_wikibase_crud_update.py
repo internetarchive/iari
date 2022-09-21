@@ -188,8 +188,6 @@ class TestWikibaseCrudUpdate(TestCase):
         pd = isoparse(
             publication_dates[0].mainsnak.datavalue["value"]["time"].replace("+", "")
         )
-        console.print(pd)
-        exit()
         assert datetime(month=3, day=31, year=2007, tzinfo=timezone.utc) == pd
         access_dates = item.claims.get(wikibase.ACCESS_DATE)
         # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
