@@ -2,6 +2,7 @@ import logging
 
 from pydantic import validate_arguments
 
+from src.models.exceptions import MissingInformationError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
@@ -19,6 +20,8 @@ class Website(WcdItem):
     @validate_arguments
     def __insert_website_in_cache__(self, wcdqid: str):
         logger.debug("__insert_website_in_cache__: Running")
+        if self.cache is None:
+            self.__setup_cache__()
         if self.cache is not None:
             self.cache.add_website(reference=self.reference, wcdqid=wcdqid)
         else:
@@ -30,15 +33,16 @@ class Website(WcdItem):
         self, wikipedia_article: WcdItem
     ) -> WikibaseReturn:
         """This is a lower level method that only handles uploading the website item"""
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+
+        if not isinstance(wikipedia_article, WikipediaArticle):
+            raise TypeError("not a WikipediaArticle")
+        if not wikipedia_article.wikibase:
+            raise MissingInformationError("wikipedia_article.wikibase was None")
+        self.wikibase = wikipedia_article.wikibase
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create is not None:
-            from src.models.wikimedia.wikipedia.wikipedia_article import (
-                WikipediaArticle,
-            )
-
-            if not isinstance(wikipedia_article, WikipediaArticle):
-                raise TypeError("not a WikipediaArticle")
             return_ = self.wikibase_crud_create.prepare_and_upload_website_item(
                 page_reference=self.reference, wikipedia_article=wikipedia_article
             )
@@ -68,7 +72,7 @@ class Website(WcdItem):
             self.reference.website_item = self
             logger.info(f"Added link to existing website item {self.return_.item_qid}")
         else:
-            self.upload_website_and_insert_in_the_cache(
+            self.__upload_website_and_insert_in_the_cache__(
                 wikipedia_article=wikipedia_article
             )
             logger.info(f"Added website item to WCD")
@@ -87,7 +91,7 @@ class Website(WcdItem):
             raise ValueError("self.cache was None")
 
     @validate_arguments
-    def upload_website_and_insert_in_the_cache(
+    def __upload_website_and_insert_in_the_cache__(
         self, wikipedia_article: WcdItem
     ) -> None:
         self.return_ = self.__upload_website_to_wikibase__(
@@ -106,4 +110,3 @@ class Website(WcdItem):
             wcdqid=wcdqid,
         )
         self.reference.website_item = self
-

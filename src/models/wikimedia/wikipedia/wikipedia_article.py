@@ -451,7 +451,9 @@ class WikipediaArticle(WcdItem):
                     f"with link to {reference.first_level_domain_of_url}"
                 ):
                     # Here we get the reference with the first_level_domain_of_url WCDQID back
-                    reference.website_item = Website(reference=reference)
+                    reference.website_item = Website(
+                        reference=reference, wikibase=self.wikibase
+                    )
                     reference.website_item.check_and_upload_website_item_to_wikibase_if_missing(
                         wikipedia_article=self
                     )
