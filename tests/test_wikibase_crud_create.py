@@ -6,6 +6,7 @@ from wikibaseintegrator.models import Claim  # type: ignore
 
 import config
 from src.helpers import console
+from src.models.return_ import Return
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.create import WikibaseCrudCreate
@@ -218,10 +219,10 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wcdqid = wc.prepare_and_upload_website_item(
+        return_: Return = wc.prepare_and_upload_website_item(
             page_reference=reference, wikipedia_article=wppage
         )
-        assert wcdqid is not None
+        assert return_.item_qid is not None
         # bot = WcdImportBot(wikibase=IASandboxWikibase())
         # bot.rinse_all_items_and_cache()
 
