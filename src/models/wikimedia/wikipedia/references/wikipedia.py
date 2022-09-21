@@ -15,6 +15,7 @@ import config
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.person import Person
+from src.models.return_.cache_return import CacheReturn
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.references.enums import (
@@ -56,7 +57,7 @@ class WikipediaReference(WcdItem):
     first_level_domain_of_archive_url: Optional[str]
     first_level_domain_of_url: Optional[str]
     first_level_domain_of_url_hash: Optional[str]
-    first_level_domain_of_url_qid: Optional[str]
+    website_item: Optional[WcdItem]
     google_books: Optional[GoogleBooks]
     google_books_id: Optional[str]
     hosts_list: Optional[List[Person]]
@@ -448,6 +449,23 @@ class WikipediaReference(WcdItem):
         if not self.return_:
             raise MissingInformationError("self.return_ was None")
         return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
+
+    @validate_arguments
+    def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
+        """Check and upload reference item to Wikibase if missing and return an
+        updated reference with the attribute return_ set"""
+        logger.debug(
+            "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
+        )
+        self.get_wcdqid_from_cache()
+        if self.return_:
+            if not self.return_.item_qid:
+                logger.info(
+                    f"Could not find reference with {self.md5hash} in the cache"
+                )
+                self.upload_reference_and_insert_in_the_cache_if_enabled()
+        else:
+            raise MissingInformationError("self.return_ was None")
 
     def __clean_wiki_markup_from_strings__(self):
         """We clean away [[ and ]]
@@ -1189,6 +1207,18 @@ class WikipediaReference(WcdItem):
 
         else:
             raise ValueError("self.wikibase_crud_create was None")
+
+    @validate_arguments
+    def get_wcdqid_from_cache(self) -> None:
+        if self.cache is None:
+            self.__setup_cache__()
+        if self.cache is not None:
+            self.return_: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
+                reference=self
+            )
+            logger.debug(f"result from the cache:{self.return_.item_qid}")
+        else:
+            raise ValueError("self.cache was None")
 
     @validate_arguments
     def __insert_reference_in_cache__(self, wcdqid: str):

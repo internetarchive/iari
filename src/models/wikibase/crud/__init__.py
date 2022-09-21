@@ -43,13 +43,13 @@ logger = logging.getLogger(__name__)
 
 class WikibaseCrud(WcdBaseModel):
     """This class models the WikiCitations Wikibase
-    and handles all uploading to it
+    and handles all preparation of statements before uploading to it
 
-    We want to create items for all Wikipedia pages
+    We want to create items for all Wikipedia articles
     and references with a unique hash
 
     Terminology:
-    page_reference is a reference that appear in a Wikipedia page
+    wikipedia_reference is a reference that appear in a Wikipedia page
     reference_claim is a datastructure from WBI that contains the
     revision id and retrieved date of the statement
 
@@ -448,11 +448,17 @@ class WikibaseCrud(WcdBaseModel):
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
         # Website item
-        if page_reference.first_level_domain_of_url_qid:
-            website_item = datatypes.Item(
-                prop_nr=self.wikibase.WEBSITE,
-                value=page_reference.first_level_domain_of_url_qid,
-            )
+        if page_reference.website_item:
+            if page_reference.website_item.return_:
+                if page_reference.website_item.return_.item_qid:
+                    website_item = datatypes.Item(
+                        prop_nr=self.wikibase.WEBSITE,
+                        value=page_reference.website_item.return_.item_qid,
+                    )
+                else:
+                    raise MissingInformationError("no item_qid in the return_")
+            else:
+                raise MissingInformationError("no return_ in the website_item")
         else:
             website_item = None
         claims: List[Claim] = []
