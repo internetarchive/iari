@@ -1,9 +1,11 @@
 import logging
+from datetime import datetime
 from unittest import TestCase
 
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
+from src.helpers import console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.references.english_wikipedia import (
@@ -142,7 +144,7 @@ class TestWikibaseCrudUpdate(TestCase):
     #     # delete the hash
     #     assert wcu.write_required is False
 
-    def test_update_of_title(self):
+    def test_update_of_reference_statements(self):
         wikibase = IASandboxWikibase()
         # instantiate a page to test on
         wppage = WikipediaArticle(wikibase=wikibase)
@@ -150,29 +152,56 @@ class TestWikibaseCrudUpdate(TestCase):
         wppage.__get_wikipedia_article_from_title__(title=title)
         wppage.__generate_hash__()
         title_ref = "test title"
+        first1 = "Whitney"
+        last1 = "Dangerfield"
         data = dict(
             # oclc="test",
             title=title_ref,
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
+            first1=first1,
+            last1=last1,
+            access_date="December 10, 2020",
+            date="March 31, 2007",
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = wikibase
         reference.finish_parsing_and_generate_hash()
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
+        # Update existing
+        reference.__setup_wikibase_crud_update__(wikipedia_article=wppage)
+        reference.wikibase_crud_update.compare_and_update_claims(entity=reference)
+        console.print(f"See {reference.return_.item_qid}")
         wbi = WikibaseIntegrator()
         item = wbi.item.get(reference.return_.item_qid)
         titles = item.claims.get(wikibase.TITLE)
-        # console.print(titles)
         assert title_ref == titles[0].mainsnak.datavalue["value"]
+        full_name_strings = item.claims.get(wikibase.FULL_NAME_STRING)
+        assert len(reference.persons_without_role) == 1
+        first_author = reference.persons_without_role[0]
+        assert first_author.full_name == full_name_strings[0].mainsnak.datavalue["value"]
+        publication_dates = item.claims.get(wikibase.PUBLICATION_DATE)
+        # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
+        assert datetime(month=3, day=31, year=2007) == datetime.fromisoformat(
+            publication_dates[0].mainsnak.datavalue["value"]["time"]
+        )
+        access_dates = item.claims.get(wikibase.ACCESS_DATE)
+        # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
+        assert datetime(month=12, day=10, year=2020) == datetime.fromisoformat(
+            access_dates[0].mainsnak.datavalue["value"]["time"]
+        )
         new_title = "new test title"
-        data = dict(
+        new_data = dict(
             # oclc="test",
             title=new_title,
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
+            last1="Dangerfield-test",
+            first1="Whitney-test",
+            access_date="December 10, 2020",
+            date="March 31, 2007",
         )
-        reference = EnglishWikipediaReference(**data)
+        reference = EnglishWikipediaReference(**new_data)
         reference.wikibase = wikibase
         reference.finish_parsing_and_generate_hash()
         # here we get he return_ set
@@ -181,6 +210,9 @@ class TestWikibaseCrudUpdate(TestCase):
         reference.wikibase_crud_update.compare_and_update_claims(entity=reference)
         wbi = WikibaseIntegrator()
         item = wbi.item.get(reference.return_.item_qid)
-        titles = item.claims.get(wikibase.TITLE)
-        # console.print(titles)
-        assert new_title == titles[0].mainsnak.datavalue["value"]
+        new_titles = item.claims.get(wikibase.TITLE)
+        assert new_title == new_titles[0].mainsnak.datavalue["value"]
+        new_full_name_strings = item.claims.get(wikibase.FULL_NAME_STRING)
+        assert len(reference.persons_without_role) == 1
+        new_first_author = reference.persons_without_role[0]
+        assert new_first_author.full_name == new_full_name_strings[0].mainsnak.datavalue["value"]

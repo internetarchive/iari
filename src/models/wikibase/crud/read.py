@@ -96,15 +96,15 @@ class WikibaseCrudRead(WikibaseCrud):
             )
         )
 
-    @validate_arguments
-    def __get_item_entity_from_wcdqs_json__(
-        self, data: Dict, sparql_variable: str = "item"
-    ) -> ItemEntity:
-        return self.__convert_wcd_entity_id_to_item_entity__(
-            self.__extract_wcdqs_json_entity_id__(
-                data=data, sparql_variable=sparql_variable
-            )
-        )
+    # @validate_arguments
+    # def __get_item_entity_from_wcdqs_json__(
+    #     self, data: Dict, sparql_variable: str = "item"
+    # ) -> ItemEntity:
+    #     return self.__convert_wcd_entity_id_to_item_entity__(
+    #         self.__extract_wcdqs_json_entity_id__(
+    #             data=data, sparql_variable=sparql_variable
+    #         )
+    #     )
 
     @validate_arguments
     def __get_items_via_sparql__(self, query: str) -> Any:

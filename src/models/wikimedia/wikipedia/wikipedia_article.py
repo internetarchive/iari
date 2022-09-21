@@ -15,10 +15,10 @@ from pydantic import validate_arguments
 import config
 from src.helpers import console
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.cache import CacheReturn
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
+from src.models.wikibase.website import Website
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.references.english_wikipedia import (
     EnglishWikipediaPageReferenceSchema,
@@ -102,58 +102,6 @@ class WikipediaArticle(WcdItem):
 
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
-
-    @validate_arguments
-    def __check_and_upload_reference_item_to_wikibase_if_missing__(
-        self, reference: WikipediaReference
-    ) -> WikipediaReference:
-        """Check and upload reference item to Wikibase if missing and return an
-        updated reference with the attribute return_ set"""
-        logger.debug(
-            "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
-        )
-        cache_return = self.__get_reference_wcdqid_from_cache__(reference=reference)
-        if cache_return.item_qid:
-            logger.debug(f"Got wcdqid:{cache_return.item_qid} from the cache")
-            reference.return_ = WikibaseReturn(
-                item_qid=cache_return.item_qid, uploaded_now=False
-            )
-        else:
-            logger.info(
-                f"Could not find reference with {reference.md5hash} in the cache"
-            )
-            reference.upload_reference_and_insert_in_the_cache_if_enabled()
-        return reference
-
-    @validate_arguments
-    def __check_and_upload_website_item_to_wikibase_if_missing__(
-        self, reference: WikipediaReference
-    ):
-        """This method checks if a website item is present
-        using the first_level_domain_of_url_hash and the cache if
-        enabled and uploads a new item if not"""
-        logger.debug(
-            "__check_and_upload_website_item_to_wikibase_if_missing__: Running"
-        )
-        if reference.first_level_domain_of_url_hash is None:
-            raise ValueError("reference.first_level_domain_of_url_hash was None")
-        logger.debug("Checking and uploading website item")
-        if reference is None:
-            raise ValueError("reference was None")
-        cache_return = self.__get_website_wcdqid_from_cache__(reference=reference)
-        if cache_return.item_qid is not None:
-            logger.debug(f"Got wcdqid:{cache_return.item_qid} from the cache")
-            reference.first_level_domain_of_url_qid = cache_return.item_qid
-        if reference.first_level_domain_of_url_qid is None:
-            reference = self.__upload_website_and_insert_in_the_cache_if_enabled__(
-                reference=reference
-            )
-            logger.info(f"Added website item to WCD")
-        else:
-            logger.info(
-                f"Added link to existing website item {reference.first_level_domain_of_url_qid}"
-            )
-        return reference
 
     def __compare_and_update_all_references__(self) -> None:
         """Compare and update all the references.
@@ -367,49 +315,10 @@ class WikipediaArticle(WcdItem):
         logger.debug(self.md5hash)
 
     @validate_arguments
-    def __get_reference_wcdqid_from_cache__(
-        self, reference: WikipediaReference
-    ) -> CacheReturn:
-        if self.cache is None:
-            self.__setup_cache__()
-        if self.cache is not None:
-            cache_return: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
-                reference=reference
-            )
-            logger.debug(f"result from the cache:{cache_return.item_qid}")
-            return cache_return
-        else:
-            raise ValueError("self.cache was None")
-
-    @validate_arguments
-    def __get_website_wcdqid_from_cache__(
-        self, reference: WikipediaReference
-    ) -> CacheReturn:
-        if self.cache is None:
-            self.__setup_cache__()
-        if self.cache is not None:
-            cache_return = self.cache.check_website_and_get_wikibase_qid(
-                reference=reference
-            )
-            logger.debug(f"result from the cache:{cache_return.item_qid}")
-            return cache_return
-        else:
-            raise ValueError("self.cache was None")
-
-    @validate_arguments
     def __get_wikipedia_article_from_title__(self, title: str):
         """Get the page from the Wikimedia site"""
         logger.info("Fetching the page data")
         self.__fetch_page_data__(title=title)
-
-    @validate_arguments
-    def __insert_website_in_cache__(self, reference: WikipediaReference, wcdqid: str):
-        logger.debug("__insert_website_in_cache__: Running")
-        if self.cache is not None:
-            self.cache.add_website(reference=reference, wcdqid=wcdqid)
-        else:
-            raise ValueError("self.cache was None")
-        logger.info("Reference inserted into the hash database")
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
@@ -527,46 +436,6 @@ class WikipediaArticle(WcdItem):
             )
             self.__compare_data_and_update__()
 
-    # TODO move these to the model they are concerning
-    @validate_arguments
-    def __upload_website_to_wikibase__(
-        self, reference: WikipediaReference
-    ) -> WikibaseReturn:
-        """This is a lower level method that only handles uploading the website item"""
-        if self.wikibase_crud_create is None:
-            self.__setup_wikibase_crud_create__()
-        if self.wikibase_crud_create is not None:
-            return_ = self.wikibase_crud_create.prepare_and_upload_website_item(
-                page_reference=reference, wikipedia_article=self
-            )
-            if isinstance(return_, WikibaseReturn):
-                return return_
-            else:
-                raise ValueError(f"we did not get a WikibaseReturn back")
-        else:
-            raise ValueError("self.wikicitations was None")
-
-    @validate_arguments
-    def __upload_website_and_insert_in_the_cache_if_enabled__(
-        self, reference: WikipediaReference
-    ) -> WikipediaReference:
-        return_ = self.__upload_website_to_wikibase__(reference=reference)
-        wcdqid = return_.item_qid
-        if wcdqid is None:
-            raise ValueError("WCDQID was None")
-        if reference.first_level_domain_of_url_hash is None:
-            raise ValueError("first_level_domain_of_url_hash was None")
-        logger.debug(
-            f"Hash before insertion: {reference.first_level_domain_of_url_hash}. "
-            f"WCDQID before insertion: {wcdqid}"
-        )
-        self.__insert_website_in_cache__(
-            reference=reference,
-            wcdqid=wcdqid,
-        )
-        reference.first_level_domain_of_url_qid = wcdqid
-        return reference
-
     def __upload_references_and_websites_if_missing__(self):
         """Go through each reference and upload if missing to Wikibase"""
         logger.debug("__upload_references_and_websites_if_missing__: Running")
@@ -575,25 +444,24 @@ class WikipediaArticle(WcdItem):
         total = len(self.references)
         for reference in self.references:
             console.print(f"Working on reference {count}/{total}")
+            # Here we check for an existing website item
             if reference.has_first_level_domain_url_hash:
                 with console.status(
                     f"Linking to or uploading new website item for reference "
                     f"with link to {reference.first_level_domain_of_url}"
                 ):
                     # Here we get the reference with the first_level_domain_of_url WCDQID back
-                    reference = (
-                        self.__check_and_upload_website_item_to_wikibase_if_missing__(
-                            reference=reference
-                        )
+                    reference.website_item = Website(
+                        reference=reference, wikibase=self.wikibase
                     )
+                    reference.website_item.check_and_upload_website_item_to_wikibase_if_missing(
+                        wikipedia_article=self
+                    )
+            # Here we check for an existing reference item
             if reference.has_hash:
-                with console.status(f"Creating the reference item itself"):
+                with console.status(f"Creating the reference item if missing"):
                     # Here we get the reference with WikibaseReturn back
-                    reference = (
-                        self.__check_and_upload_reference_item_to_wikibase_if_missing__(
-                            reference=reference
-                        )
-                    )
+                    reference.check_and_upload_reference_item_to_wikibase_if_missing()
                     if not reference.return_:
                         raise MissingInformationError(
                             "reference.return_ was None and is needed "
