@@ -62,12 +62,12 @@ class WikibaseCrud(WcdBaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    @validate_arguments
-    def __convert_wcd_entity_id_to_item_entity__(self, entity_id: str) -> ItemEntity:
-        """Convert and get the item using WBI"""
-        self.__setup_wikibase_integrator_configuration__()
-        wbi = WikibaseIntegrator()
-        return wbi.item.get(entity_id)
+    # @validate_arguments
+    # def __convert_wcd_entity_id_to_item_entity__(self, entity_id: str) -> ItemEntity:
+    #     """Convert and get the item using WBI"""
+    #     self.__setup_wikibase_integrator_configuration__()
+    #     wbi = WikibaseIntegrator()
+    #     return wbi.item.get(entity_id)
 
     @validate_arguments
     def __extract_item_ids__(self, sparql_result: Optional[Dict]) -> Iterable[str]:
