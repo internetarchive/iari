@@ -910,7 +910,7 @@ class WikipediaReference(WcdItem):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
-    def __handle_date__(self):
+    def __merge_date_into_publication_date__(self):
         """Handle the possibly ambiguous self.date field"""
         if self.date and self.publication_date:
             if self.date != self.publication_date:
@@ -1270,7 +1270,7 @@ class WikipediaReference(WcdItem):
         self.__detect_google_books_id__()
         self.__parse_isbn__()
         self.__parse_persons__()
-        self.__handle_date__()
+        self.__merge_date_into_publication_date__()
         self.__clean_wiki_markup_from_strings__()
         self.__merge_lang_into_language__()
         self.__merge_place_into_location__()
