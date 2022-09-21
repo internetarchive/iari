@@ -1120,9 +1120,9 @@ class WikibaseCrud(WcdBaseModel):
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return = wcc.upload_new_item(item=item)
-        if isinstance(wikibase_return, WikibaseReturn):
-            return wikibase_return
+        return_ = wcc.upload_new_item(item=item)
+        if isinstance(return_, WikibaseReturn):
+            return return_
         else:
             raise ValueError(f"we did not get a WikibaseReturn back")
 
@@ -1142,9 +1142,9 @@ class WikibaseCrud(WcdBaseModel):
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return = wcc.upload_new_item(item=item)
-        if isinstance(wikibase_return, WikibaseReturn):
-            return wikibase_return
+        return_ = wcc.upload_new_item(item=item)
+        if isinstance(return_, WikibaseReturn):
+            return return_
         else:
             raise ValueError(f"we did not get a WikibaseReturn back")
 
@@ -1167,5 +1167,5 @@ class WikibaseCrud(WcdBaseModel):
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
-        wikibase_return: WikibaseReturn = wcc.upload_new_item(item=item)
-        return wikibase_return
+        return_: WikibaseReturn = wcc.upload_new_item(item=item)
+        return return_

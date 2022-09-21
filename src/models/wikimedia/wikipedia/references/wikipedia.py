@@ -446,7 +446,7 @@ class WikipediaReference(WcdItem):
         if not self.wikibase:
             raise MissingInformationError("self.wikibase was None")
         if not self.return_:
-            raise MissingInformationError("self.wikibase_return was None")
+            raise MissingInformationError("self.return_ was None")
         return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
 
     def __clean_wiki_markup_from_strings__(self):
@@ -1179,13 +1179,13 @@ class WikipediaReference(WcdItem):
         if self.wikibase_crud_create is None:
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create:
-            wikibase_return = (
+            return_ = (
                 self.wikibase_crud_create.prepare_and_upload_reference_item(
                     page_reference=self, wikipedia_article=wikipedia_article
                 )
             )
-            if isinstance(wikibase_return, WikibaseReturn):
-                return wikibase_return
+            if isinstance(return_, WikibaseReturn):
+                return return_
             else:
                 raise ValueError(f"we did not get a WikibaseReturn back")
 
@@ -1206,13 +1206,13 @@ class WikipediaReference(WcdItem):
 
     @validate_arguments
     def upload_reference_and_insert_in_the_cache_if_enabled(self) -> None:
-        """Upload the reference and insert into the cache if enabled. Always add wikibase_return"""
+        """Upload the reference and insert into the cache if enabled. Always add return_"""
         logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
-        wikibase_return = self.__upload_reference_to_wikibase__()
-        if not wikibase_return or not self.md5hash:
+        return_ = self.__upload_reference_to_wikibase__()
+        if not return_ or not self.md5hash:
             raise MissingInformationError("hash or WCDQID was None")
-        self.__insert_reference_in_cache__(wcdqid=wikibase_return.item_qid)
-        self.return_ = wikibase_return
+        self.__insert_reference_in_cache__(wcdqid=return_.item_qid)
+        self.return_ = return_
 
     def finish_parsing_and_generate_hash(self) -> None:
         """Parse the rest of the information and generate a hash"""
