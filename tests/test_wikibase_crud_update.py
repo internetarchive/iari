@@ -177,7 +177,8 @@ class TestWikibaseCrudUpdate(TestCase):
         titles = item.claims.get(wikibase.TITLE)
         assert title_ref == titles[0].mainsnak.datavalue["value"]
         full_name_strings = item.claims.get(wikibase.FULL_NAME_STRING)
-        first_author = reference.authors_list[0]
+        assert len(reference.persons_without_role) == 1
+        first_author = reference.persons_without_role[0]
         assert first_author.full_name == full_name_strings[0].mainsnak.datavalue["value"]
         publication_dates = item.claims.get(wikibase.PUBLICATION_DATE)
         # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
@@ -212,5 +213,6 @@ class TestWikibaseCrudUpdate(TestCase):
         new_titles = item.claims.get(wikibase.TITLE)
         assert new_title == new_titles[0].mainsnak.datavalue["value"]
         new_full_name_strings = item.claims.get(wikibase.FULL_NAME_STRING)
-        new_first_author = reference.authors_list[0]
+        assert len(reference.persons_without_role) == 1
+        new_first_author = reference.persons_without_role[0]
         assert new_first_author.full_name == new_full_name_strings[0].mainsnak.datavalue["value"]
