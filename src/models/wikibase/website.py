@@ -75,7 +75,6 @@ class Website(WcdItem):
             self.__upload_website_and_insert_in_the_cache__(
                 wikipedia_article=wikipedia_article
             )
-            logger.info(f"Added website item to WCD")
         return self.reference
 
     @validate_arguments
@@ -110,3 +109,4 @@ class Website(WcdItem):
             wcdqid=wcdqid,
         )
         self.reference.website_item = self
+        logger.info(f"Added website item {wcdqid} to WCD")
