@@ -8,7 +8,14 @@ from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 class TestWebsite(TestCase):
     def test___insert_website_in_cache__(self):
-        w = Website(reference=WikipediaReference(template_name="test"))
+        wikibase = IASandboxWikibase()
+        r = WikipediaReference(
+            template_name="test",
+            url="http://test.com",
+            wikibase=wikibase
+        )
+        r.finish_parsing_and_generate_hash()
+        w = Website(reference=r)
         w.__insert_website_in_cache__(wcdqid="test")
 
     def test___upload_website_to_wikibase__(self):
@@ -17,7 +24,6 @@ class TestWebsite(TestCase):
             template_name="test",
             url="http://test.com",
             wikibase=wikibase
-            # first_level_domain_of_url="test.test"
         )
         r.finish_parsing_and_generate_hash()
         w = Website(
