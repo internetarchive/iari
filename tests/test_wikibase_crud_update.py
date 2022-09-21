@@ -168,6 +168,9 @@ class TestWikibaseCrudUpdate(TestCase):
         reference.wikibase = wikibase
         reference.finish_parsing_and_generate_hash()
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
+        # Update existing
+        reference.__setup_wikibase_crud_update__(wikipedia_article=wppage)
+        reference.wikibase_crud_update.compare_and_update_claims(entity=reference)
         console.print(f"See {reference.return_.item_qid}")
         wbi = WikibaseIntegrator()
         item = wbi.item.get(reference.return_.item_qid)
