@@ -10,9 +10,7 @@ class TestWebsite(TestCase):
     def test___insert_website_in_cache__(self):
         wikibase = IASandboxWikibase()
         r = WikipediaReference(
-            template_name="test",
-            url="http://test.com",
-            wikibase=wikibase
+            template_name="test", url="http://test.com", wikibase=wikibase
         )
         r.finish_parsing_and_generate_hash()
         w = Website(reference=r)
@@ -21,9 +19,7 @@ class TestWebsite(TestCase):
     def test___upload_website_to_wikibase__(self):
         wikibase = IASandboxWikibase()
         r = WikipediaReference(
-            template_name="test",
-            url="http://test.com",
-            wikibase=wikibase
+            template_name="test", url="http://test.com", wikibase=wikibase
         )
         r.finish_parsing_and_generate_hash()
         w = Website(
