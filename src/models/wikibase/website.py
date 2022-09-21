@@ -17,6 +17,64 @@ class Website(WcdItem):
     reference: WikipediaReference
 
     @validate_arguments
+    def __insert_website_in_cache__(self, wcdqid: str):
+        logger.debug("__insert_website_in_cache__: Running")
+        if self.cache is not None:
+            self.cache.add_website(reference=self.reference, wcdqid=wcdqid)
+        else:
+            raise ValueError("self.cache was None")
+        logger.info("Reference inserted into the hash database")
+
+    @validate_arguments
+    def __upload_website_to_wikibase__(
+        self, wikipedia_article: WcdItem
+    ) -> WikibaseReturn:
+        """This is a lower level method that only handles uploading the website item"""
+        if self.wikibase_crud_create is None:
+            self.__setup_wikibase_crud_create__()
+        if self.wikibase_crud_create is not None:
+            from src.models.wikimedia.wikipedia.wikipedia_article import (
+                WikipediaArticle,
+            )
+
+            if not isinstance(wikipedia_article, WikipediaArticle):
+                raise TypeError("not a WikipediaArticle")
+            return_ = self.wikibase_crud_create.prepare_and_upload_website_item(
+                page_reference=self.reference, wikipedia_article=wikipedia_article
+            )
+            if isinstance(return_, WikibaseReturn):
+                return return_
+            else:
+                raise ValueError(f"we did not get a WikibaseReturn back")
+        else:
+            raise ValueError("self.wikicitations was None")
+
+    @validate_arguments
+    def check_and_upload_website_item_to_wikibase_if_missing(
+        self, wikipedia_article: WcdItem
+    ):
+        """This method checks if a website item is present
+        using the first_level_domain_of_url_hash and the cache if
+        enabled and uploads a new item if not"""
+        logger.debug("check_and_upload_website_item_to_wikibase_if_missing: Running")
+        if self.reference is None:
+            raise ValueError("reference was None")
+        if self.reference.first_level_domain_of_url_hash is None:
+            raise ValueError("reference.first_level_domain_of_url_hash was None")
+        logger.debug("Checking and uploading website item")
+        self.get_website_wcdqid_from_cache()
+        if self.return_ and self.return_.item_qid is not None:
+            logger.debug(f"Got wcdqid:{self.return_.item_qid} from the cache")
+            self.reference.website_item = self
+            logger.info(f"Added link to existing website item {self.return_.item_qid}")
+        else:
+            self.upload_website_and_insert_in_the_cache(
+                wikipedia_article=wikipedia_article
+            )
+            logger.info(f"Added website item to WCD")
+        return self.reference
+
+    @validate_arguments
     def get_website_wcdqid_from_cache(self) -> None:
         if self.cache is None:
             self.__setup_cache__()
@@ -49,60 +107,3 @@ class Website(WcdItem):
         )
         self.reference.website_item = self
 
-    @validate_arguments
-    def __upload_website_to_wikibase__(
-        self, wikipedia_article: WcdItem
-    ) -> WikibaseReturn:
-        """This is a lower level method that only handles uploading the website item"""
-        if self.wikibase_crud_create is None:
-            self.__setup_wikibase_crud_create__()
-        if self.wikibase_crud_create is not None:
-            from src.models.wikimedia.wikipedia.wikipedia_article import (
-                WikipediaArticle,
-            )
-
-            if not isinstance(wikipedia_article, WikipediaArticle):
-                raise TypeError("not a WikipediaArticle")
-            return_ = self.wikibase_crud_create.prepare_and_upload_website_item(
-                page_reference=self.reference, wikipedia_article=wikipedia_article
-            )
-            if isinstance(return_, WikibaseReturn):
-                return return_
-            else:
-                raise ValueError(f"we did not get a WikibaseReturn back")
-        else:
-            raise ValueError("self.wikicitations was None")
-
-    @validate_arguments
-    def __insert_website_in_cache__(self, wcdqid: str):
-        logger.debug("__insert_website_in_cache__: Running")
-        if self.cache is not None:
-            self.cache.add_website(reference=self.reference, wcdqid=wcdqid)
-        else:
-            raise ValueError("self.cache was None")
-        logger.info("Reference inserted into the hash database")
-
-    @validate_arguments
-    def check_and_upload_website_item_to_wikibase_if_missing(
-        self, wikipedia_article: WcdItem
-    ):
-        """This method checks if a website item is present
-        using the first_level_domain_of_url_hash and the cache if
-        enabled and uploads a new item if not"""
-        logger.debug("check_and_upload_website_item_to_wikibase_if_missing: Running")
-        if self.reference is None:
-            raise ValueError("reference was None")
-        if self.reference.first_level_domain_of_url_hash is None:
-            raise ValueError("reference.first_level_domain_of_url_hash was None")
-        logger.debug("Checking and uploading website item")
-        self.get_website_wcdqid_from_cache()
-        if self.return_ and self.return_.item_qid is not None:
-            logger.debug(f"Got wcdqid:{self.return_.item_qid} from the cache")
-            self.reference.website_item = self
-            logger.info(f"Added link to existing website item {self.return_.item_qid}")
-        else:
-            self.upload_website_and_insert_in_the_cache(
-                wikipedia_article=wikipedia_article
-            )
-            logger.info(f"Added website item to WCD")
-        return self.reference
