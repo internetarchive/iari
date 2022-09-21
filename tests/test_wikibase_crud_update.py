@@ -186,12 +186,12 @@ class TestWikibaseCrudUpdate(TestCase):
         publication_dates = item.claims.get(wikibase.PUBLICATION_DATE)
         # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
         assert datetime(month=3, day=31, year=2007) == isoparse(
-            publication_dates[0].mainsnak.datavalue["value"]["time"]
+            publication_dates[0].mainsnak.datavalue["value"]["time"].replace("+", "")
         )
         access_dates = item.claims.get(wikibase.ACCESS_DATE)
         # see https://doc.wikimedia.org/Wikibase/master/php/md_docs_topics_json.html
         assert datetime(month=12, day=10, year=2020) == isoparse(
-            access_dates[0].mainsnak.datavalue["value"]["time"]
+            access_dates[0].mainsnak.datavalue["value"]["time"].replace("+", "")
         )
         new_title = "new test title"
         new_data = dict(
