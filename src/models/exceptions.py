@@ -1,3 +1,7 @@
+class AmbiguousDateError(BaseException):
+    pass
+
+
 class DebugExit(BaseException):
     pass
 

@@ -13,7 +13,11 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
+from src.models.exceptions import (
+    AmbiguousDateError,
+    MissingInformationError,
+    MoreThanOneNumberError,
+)
 from src.models.person import Person
 from src.models.return_.cache_return import CacheReturn
 from src.models.return_.wikibase_return import WikibaseReturn
@@ -906,6 +910,18 @@ class WikipediaReference(WcdItem):
     #             f"did not get what we need to generate a hash, {self.dict()}"
     #         )
 
+    def __handle_date__(self):
+        """Handle the possibly ambiguous self.date field"""
+        if self.date and self.publication_date:
+            if self.date != self.publication_date:
+                raise AmbiguousDateError(
+                    f"got both a date and a publication_date and they differ"
+                )
+        if self.date and not self.publication_date:
+            # Assuming date is the publication date
+            self.publication_date = self.date
+            logger.debug("Assumed date == publication_data")
+
     def __merge_lang_into_language__(self):
         """We merge lang into language or log if both are populated"""
         if self.lang and not self.language:
@@ -1254,6 +1270,7 @@ class WikipediaReference(WcdItem):
         self.__detect_google_books_id__()
         self.__parse_isbn__()
         self.__parse_persons__()
+        self.__handle_date__()
         self.__clean_wiki_markup_from_strings__()
         self.__merge_lang_into_language__()
         self.__merge_place_into_location__()
