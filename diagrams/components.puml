@@ -1,0 +1,45 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+cloud "AWS" {
+    package "Docker compose" {
+        database "RabbitMQ container" {
+          [rabbitmq] as RM
+        }
+        [fastapi] as FA
+        [wikicitations-api] as WA
+        [WikibaseIntegrator] as WBI
+        [wcdimportbot ingestor] as WI
+        [Celery Worker] as CW1
+        [Celery Worker] as CW2
+        CW1 -- WBI : use
+        CW2 -- WBI : use
+        HTTP_PUBLISH_ENDPOINT -- RM
+        HTTP_WORKER_ENDPOINT --- RM
+        HTTP_WORKER_ENDPOINT <--> CW1 : get/post
+        HTTP_WORKER_ENDPOINT <--> CW2 : get/post
+        WA - FA : use
+        WA -> HTTP_PUBLISH_ENDPOINT : submit job
+        WA -- HTTP_ADD_ENDPOINT
+        WA -- HTTP_GET_FROM_WDQID_ENDPOINT
+        WI --> HTTP_PUBLISH_ENDPOINT : submit job
+        WI - WBI : use
+    }
+}
+
+cloud "Wikimedia"{
+  [Enterprise API] -- page_updates_API
+  WI -> page_updates_API : read stream
+  [Add job userscript] -> HTTP_ADD_ENDPOINT
+  [Go to WikiCitations item userscript] --> HTTP_GET_FROM_WDQID_ENDPOINT
+}
+
+database "Wikibase.cloud" {
+    [WikiCitations] as WC
+    WC - WB_HTTP_API
+    WC -- WB_SPARQL_API
+    WA -> WB_SPARQL_API : query
+    CW1 --> WB_HTTP_API
+    CW2 --> WB_HTTP_API
+}
+@enduml
