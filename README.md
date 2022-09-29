@@ -183,3 +183,6 @@ optional arguments:
                         debugging)
   --rinse               Rinse all page and reference items and delete the cache
 ```
+
+## License
+This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022
