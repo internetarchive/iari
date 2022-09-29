@@ -8,14 +8,14 @@ cloud "AWS" {
         }
         [fastapi] as FA
         [wikicitations-api] as WA
-        [WikibaseIntegrator] as WBI
+'        [WikibaseIntegrator] as WBI
         [wcdimportbot ingestor] as WI
-        [Celery Worker] as CW1
-        [Celery Worker] as CW2
-        CW1 -- WBI : use
-        CW2 -- WBI : use
+        [Wcdimportbot Celery Worker] as CW1
+        [Wcdimportbot Celery Worker] as CW2
+'        CW1 -- WBI : use
+'        CW2 -- WBI : use
         HTTP_PUBLISH_ENDPOINT -- RM
-        HTTP_WORKER_ENDPOINT --- RM
+        HTTP_WORKER_ENDPOINT --- RM : push jobs
         HTTP_WORKER_ENDPOINT <--> CW1 : get/post
         HTTP_WORKER_ENDPOINT <--> CW2 : get/post
         WA - FA : use
@@ -23,7 +23,15 @@ cloud "AWS" {
         WA -- HTTP_ADD_ENDPOINT
         WA -- HTTP_GET_FROM_WDQID_ENDPOINT
         WI --> HTTP_PUBLISH_ENDPOINT : submit job
-        WI - WBI : use
+'        WI - WBI : use
+    }
+    database "SSDB" {
+        [Cache] -- HTTP_SET
+        [Cache] -- HTTP_GET
+        CW1 -> HTTP_GET
+        CW2 -> HTTP_GET
+        CW1 -> HTTP_SET
+        CW2 -> HTTP_SET
     }
 }
 
