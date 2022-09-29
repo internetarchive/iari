@@ -6,7 +6,7 @@ cloud "AWS" {
         database "RabbitMQ container" {
           [rabbitmq] as RM
         }
-        [fastapi] as FA
+'        [fastapi] as FA
         [wikicitations-api] as WA
 '        [WikibaseIntegrator] as WBI
         [wcdimportbot ingestor] as WI
@@ -14,40 +14,43 @@ cloud "AWS" {
         [Wcdimportbot Celery Worker] as CW2
 '        CW1 -- WBI : use
 '        CW2 -- WBI : use
-        HTTP_PUBLISH_ENDPOINT -- RM
-        HTTP_WORKER_ENDPOINT --- RM : push jobs
-        HTTP_WORKER_ENDPOINT <--> CW1 : get/post
-        HTTP_WORKER_ENDPOINT <--> CW2 : get/post
-        WA - FA : use
-        WA -> HTTP_PUBLISH_ENDPOINT : submit job
-        WA -- HTTP_ADD_ENDPOINT
-        WA -- HTTP_GET_FROM_WDQID_ENDPOINT
-        WI --> HTTP_PUBLISH_ENDPOINT : submit job
+        PUBLISH -- RM
+        WORKER --- RM : push jobs
+        WORKER <--> CW1 : get/post
+        WORKER <--> CW2 : get/post
+'        WA - FA : use
+        WA -> PUBLISH : submit job
+        WA -- ADD_JOB
+        WA -- GET_FROM_WDQID
+        WA -- GET_ARTICLE_DETAILS
+        WI --> PUBLISH : submit job
 '        WI - WBI : use
     }
     database "SSDB" {
-        [Cache] -- HTTP_SET
-        [Cache] -- HTTP_GET
-        CW1 -> HTTP_GET
-        CW2 -> HTTP_GET
-        CW1 -> HTTP_SET
-        CW2 -> HTTP_SET
+        [Cache] -up- SET
+        [Cache] -- GET
+        CW1 -> GET
+        CW2 -> GET
+        CW1 -> SET
+        CW2 -> SET
     }
 }
 
 cloud "Wikimedia"{
-  [Enterprise API] -- page_updates_API
   WI -> page_updates_API : read stream
-  [Add job userscript] -> HTTP_ADD_ENDPOINT
-  [Go to WikiCitations item userscript] --> HTTP_GET_FROM_WDQID_ENDPOINT
+  [Add job userscript] -> ADD_JOB
+  [Issues userscript] --> GET_ARTICLE_DETAILS
+  [Issues userscript] --> GET_FROM_WDQID
+  [Go to WikiCitations item userscript] --> GET_FROM_WDQID
+  [Enterprise API] -left- page_updates_API
 }
 
 database "Wikibase.cloud" {
     [WikiCitations] as WC
-    WC - WB_HTTP_API
+    WC - WB_API
     WC -- WB_SPARQL_API
     WA -> WB_SPARQL_API : query
-    CW1 --> WB_HTTP_API
-    CW2 --> WB_HTTP_API
+    CW1 --> WB_API
+    CW2 --> WB_API
 }
 @enduml
