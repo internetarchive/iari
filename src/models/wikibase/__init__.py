@@ -1,4 +1,6 @@
+from dateutil.parser import isoparse
 from pydantic import validate_arguments
+from wikibaseintegrator.models import Claim  # type: ignore
 
 from src.wcd_base_model import WcdBaseModel
 
@@ -133,3 +135,7 @@ class Wikibase(WcdBaseModel):
             return f"{self.wikibase_url}/wiki/Item:{item_id}"
         else:
             return f"{self.wikibase_url}/wiki/{item_id}"
+
+    @staticmethod
+    def parse_time_from_claim(claim: Claim):
+        return isoparse(claim.mainsnak.datavalue["value"]["time"].replace("+", ""))

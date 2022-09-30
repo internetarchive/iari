@@ -1,7 +1,10 @@
 import logging
+from datetime import datetime
 from typing import List
 from unittest import TestCase
 
+from dateutil.parser import isoparse
+from wikibaseintegrator import WikibaseIntegrator # type: ignore
 from wikibaseintegrator.models import Claim  # type: ignore
 
 import config
@@ -290,42 +293,79 @@ class TestWikibaseCrudCreate(TestCase):
 
     def test_publisher_and_location_statements(self):
         data = dict(
-            template_name="cite web",
-            url="http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
-            archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
-            url_status="dead",
+            access_date="2010-11-09",
             archive_date="2010-08-12",
-            title="Musköbasen 40 år",
-            first="Helene",
-            last="Skoglund",
+            archive_url="https://web.archive.org/web/20100812051822/http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
             author2="Nynäshamns Posten",
             date="January 2010",
-            publisher="Kungliga Motorbåt Klubben",
+            first="Helene",
+            language="Swedish",  # not imported
+            last="Skoglund",
             location="Stockholm",
             pages="4–7",
-            language="Swedish",
-            trans_title="Muskö Naval Base 40 years",
-            access_date="2010-11-09",
+            publisher="Kungliga Motorbåt Klubben",
+            template_name="cite web",
+            title="Musköbasen 40 år",
+            trans_title="Muskö Naval Base 40 years",  # not imported
+            url="http://www.kmk.a.se/ImageUpload/kmkNytt0110.pdf",
+            url_status="dead",  # not imported
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
-
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Test"
-        wppage.__get_wikipedia_article_from_title__(title=title)
-        wppage.__generate_hash__()
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_article=wppage
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.references.append(reference)
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        wikibase_access_date = wppage.wikibase.parse_time_from_claim(
+            item.claims.get(wppage.wikibase.ACCESS_DATE)[0]
         )
-        assert item.claims.get(property=wc.wikibase.PUBLISHER_STRING) is not None
-        assert item.claims.get(property=wc.wikibase.LOCATION_STRING) is not None
-        claim: List[Claim] = item.claims.get(property=wc.wikibase.ARCHIVE_URL)
-        assert claim[0] is not None
-        # print(claim[0].qualifiers)
-        assert claim[0].qualifiers is not None
+        assert isoparse(data["archive_date"]) == wikibase_access_date
+        archive_url: List[Claim] = item.claims.get(property=wppage.wikibase.ARCHIVE_URL)
+        assert archive_url[0].mainsnak.datavalue["value"] == data["archive_url"]
+        # Check also that a qualifier is present
+        assert archive_url[0].qualifiers is not None
+        # assert item.claims.get(property=wppage.wikibase.LANGUAGE)[0].mainsnak.datavalue["value"] == data["language"]
+        assert (
+            item.claims.get(property=wppage.wikibase.LOCATION_STRING)[
+                0
+            ].mainsnak.datavalue["value"]
+            == data["location"]
+        )
+        assert (
+            item.claims.get(property=wppage.wikibase.PAGES)[0].mainsnak.datavalue[
+                "value"
+            ]
+            == data["pages"]
+        )
+        wikibase_publication_date = wppage.wikibase.parse_time_from_claim(
+            item.claims.get(wppage.wikibase.PUBLICATION_DATE)[0]
+        )
+        assert reference.publication_date == wikibase_publication_date
+        assert (
+            item.claims.get(property=wppage.wikibase.PUBLISHER_STRING)[
+                0
+            ].mainsnak.datavalue["value"]
+            == data["publisher"]
+        )
+        assert (
+            item.claims.get(property=wppage.wikibase.TEMPLATE_NAME)[
+                0
+            ].mainsnak.datavalue["value"]
+            == data["template_name"]
+        )
+        assert (
+            item.claims.get(property=wppage.wikibase.TITLE)[0].mainsnak.datavalue[
+                "value"
+            ]
+            == data["title"]
+        )
+        # assert item.claims.get(property=wppage.wikibase.TRANSLATED_TITLE)[0].mainsnak.datavalue["value"] == data["trans_title"]
+        assert (
+            item.claims.get(property=wppage.wikibase.URL)[0].mainsnak.datavalue["value"]
+            == data["url"]
+        )
 
     def test_internet_archive_id_statement(self):
         data = dict(
@@ -335,17 +375,17 @@ class TestWikibaseCrudCreate(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
-
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Test"
-        wppage.__get_wikipedia_article_from_title__(title=title)
-        wppage.__generate_hash__()
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_article=wppage
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.references.append(reference)
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.INTERNET_ARCHIVE_ID)[
+                0
+            ].mainsnak.datavalue["value"]
+            == reference.internet_archive_id
         )
-        assert item.claims.get(property=wc.wikibase.INTERNET_ARCHIVE_ID) is not None
 
     def test_google_books_id_statement(self):
         data = dict(
@@ -355,17 +395,17 @@ class TestWikibaseCrudCreate(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
-
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Test"
-        wppage.__get_wikipedia_article_from_title__(title=title)
-        wppage.__generate_hash__()
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_article=wppage
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.references.append(reference)
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.GOOGLE_BOOKS_ID)[
+                0
+            ].mainsnak.datavalue["value"]
+            == reference.google_books_id
         )
-        assert item.claims.get(property=wc.wikibase.GOOGLE_BOOKS_ID) is not None
 
     def test_periodical_string_statement(self):
         data = dict(
@@ -376,17 +416,17 @@ class TestWikibaseCrudCreate(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
-
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Test"
-        wppage.__get_wikipedia_article_from_title__(title=title)
-        wppage.__generate_hash__()
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_article=wppage
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.references.append(reference)
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.PERIODICAL_STRING)[
+                0
+            ].mainsnak.datavalue["value"]
+            == data["periodical"]
         )
-        assert item.claims.get(property=wc.wikibase.PERIODICAL_STRING) is not None
 
     def test_oclc_statement(self):
         data = dict(
@@ -397,27 +437,90 @@ class TestWikibaseCrudCreate(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
-
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Test"
-        wppage.__get_wikipedia_article_from_title__(title=title)
-        wppage.__generate_hash__()
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_article=wppage
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.references.append(reference)
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.OCLC_CONTROL_NUMBER)[
+                0
+            ].mainsnak.datavalue["value"]
+            == data["oclc"]
         )
-        assert item.claims.get(property=wc.wikibase.OCLC_CONTROL_NUMBER) is not None
+
+    def test_retrieved_date_statement(self):
+        data = dict(
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.references.append(reference)
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.RETRIEVED_DATE)[
+                0
+            ].mainsnak.datavalue["value"]
+            == datetime.today()
+        )
 
     def test_wikidata_qid_statement(self):
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Democracy"
-        wppage.__get_wikipedia_article_from_title__(title=title)
-        wppage.__fetch_wikidata_qid__()
-        wppage.__generate_hash__()
-        wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        item = wc.__prepare_new_wikipedia_article_item__(
-            wikipedia_article=wppage,
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.WIKIDATA_QID)[
+                0
+            ].mainsnak.datavalue["value"]
+            == "Q224615"
         )
-        wdqids: List[Claim] = item.claims.get(wc.wikibase.WIKIDATA_QID)
-        assert wdqids[0].mainsnak.datavalue["value"] == "Q7174"
+
+    def test_instance_of_statements(self):
+        data = dict(
+            oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.references.append(reference)
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0].mainsnak.datavalue[
+                "value"
+            ]
+            == wppage.wikibase.WIKIPEDIA_REFERENCE
+        )
+        item = wbi.item.get(wppage.return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0].mainsnak.datavalue[
+                "value"
+            ]
+            == wppage.wikibase.WIKIPEDIA_PAGE
+        )
+
+    def test_source_wikipedia_statement(self):
+        """This appears on website and reference items"""
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        wbi = WikibaseIntegrator()
+        item = wbi.item.get(wppage.return_.item_qid)
+        assert (
+            item.claims.get(property=wppage.wikibase.SOURCE_WIKIPEDIA)[
+                0
+            ].mainsnak.datavalue["value"]
+            == wppage.wikibase.ENGLISH_WIKIPEDIA
+        )
+
+    # TODO test page id for pages
+    # tODO test published in for pages

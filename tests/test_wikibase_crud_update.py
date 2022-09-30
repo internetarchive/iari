@@ -146,6 +146,8 @@ class TestWikibaseCrudUpdate(TestCase):
     #     assert wcu.write_required is False
 
     def test_update_of_reference_statements(self):
+        """We want to make sure that all fields except
+        URL/ISBN/DOI can be updated on the refernece"""
         wikibase = IASandboxWikibase()
         # instantiate a page to test on
         wppage = WikipediaArticle(wikibase=wikibase)
@@ -200,10 +202,10 @@ class TestWikibaseCrudUpdate(TestCase):
             title=new_title,
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
-            last1="Dangerfield-test",
-            first1="Whitney-test",
-            access_date="December 10, 2020",
-            date="March 31, 2007",
+            first1=f"{first1}-test",
+            last1=f"{last1}-test",
+            access_date="December 10, 2021",
+            date="March 31, 2008",
         )
         reference = EnglishWikipediaReference(**new_data)
         reference.wikibase = wikibase
@@ -212,7 +214,6 @@ class TestWikibaseCrudUpdate(TestCase):
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
         reference.__setup_wikibase_crud_update__(wikipedia_article=wppage)
         reference.wikibase_crud_update.compare_and_update_claims(entity=reference)
-        wbi = WikibaseIntegrator()
         item = wbi.item.get(reference.return_.item_qid)
         new_titles = item.claims.get(wikibase.TITLE)
         assert new_title == new_titles[0].mainsnak.datavalue["value"]
@@ -223,4 +224,12 @@ class TestWikibaseCrudUpdate(TestCase):
             new_first_author.full_name
             == new_full_name_strings[0].mainsnak.datavalue["value"]
         )
+        wikibase_access_date = wikibase.parse_time_from_claim(
+            item.claims.get(wikibase.ACCESS_DATE)[0]
+        )
+        assert reference.access_date == wikibase_access_date
+        wikibase_publication_date = wikibase.parse_time_from_claim(
+            item.claims.get(wikibase.PUBLICATION_DATE)[0]
+        )
+        assert reference.publication_date == wikibase_publication_date
         # TODO check that updating the dates also work
