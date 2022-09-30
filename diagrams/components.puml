@@ -3,54 +3,48 @@
 
 cloud "AWS" {
     package "Docker compose" {
-        database "RabbitMQ container" {
-          [rabbitmq] as RM
-        }
-'        [fastapi] as FA
+        [rabbitmq] as RM
+        [Celery] as C
         [wikicitations-api] as WA
-'        [WikibaseIntegrator] as WBI
         [wcdimportbot ingestor] as WI
-        [Wcdimportbot Celery Worker] as CW1
-        [Wcdimportbot Celery Worker] as CW2
-'        CW1 -- WBI : use
-'        CW2 -- WBI : use
-        PUBLISH -- RM
-        WORKER --- RM : push jobs
-        WORKER <--> CW1 : get/post
-        WORKER <--> CW2 : get/post
-'        WA - FA : use
-        WA -> PUBLISH : submit job
+        [wcdimportbot celery worker 1] as WW1
+        [wcdimportbot celery worker 2] as WW2
+        C - RM
+        ARTICLE_QUEUE -- RM : manage article jobs
+        ARTICLE_QUEUE <- WI : post job from the page update stream
+        ARTICLE_QUEUE -> WW1 : get article job
+        ARTICLE_QUEUE -> WW2 : get article job
+        WA -> ARTICLE_QUEUE : submit job
         WA -- ADD_JOB
         WA -- GET_FROM_WDQID
         WA -- GET_ARTICLE_DETAILS
-        WI --> PUBLISH : submit job
-'        WI - WBI : use
     }
     database "SSDB" {
         [Cache] -up- SET
         [Cache] -- GET
-        CW1 -> GET
-        CW2 -> GET
-        CW1 -> SET
-        CW2 -> SET
+        WW1 -> GET
+        WW2 -> GET
+        WW1 -> SET
+        WW2 -> SET
     }
 }
 
 cloud "Wikimedia"{
-  WI -> page_updates_API : read stream
+  WI -> page_updates : read stream
   [Add job userscript] -> ADD_JOB
   [Issues userscript] --> GET_ARTICLE_DETAILS
   [Issues userscript] --> GET_FROM_WDQID
   [Go to WikiCitations item userscript] --> GET_FROM_WDQID
-  [Enterprise API] -left- page_updates_API
+  [Enterprise API] -left- page_updates
 }
 
 database "Wikibase.cloud" {
     [WikiCitations] as WC
-    WC - WB_API
-    WC -- WB_SPARQL_API
-    WA -> WB_SPARQL_API : query
-    CW1 --> WB_API
-    CW2 --> WB_API
+    WC -- CIRRUSSEARCH_ENDPOINT : (disabled)
+    WC - HTTP_API
+    WC -- SPARQL_API
+    WA -----> SPARQL_API : query (slow)
+    WW1 --> HTTP_API
+    WW2 --> HTTP_API
 }
 @enduml
