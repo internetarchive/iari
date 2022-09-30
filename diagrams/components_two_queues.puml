@@ -1,0 +1,63 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+cloud "AWS" {
+    package "Docker compose" {
+        database "RabbitMQ container" {
+          [rabbitmq] as RM
+        }
+'        [fastapi] as FA
+        [wikicitations-api] as WA
+'        [WikibaseIntegrator] as WBI
+        [wcdimportbot ingestor] as WI
+        [wcdimportbot worker] as WW1
+        [wcdimportbot worker] as WW2
+        [Celery Worker] as CW1
+        [Celery Worker] as CW2
+'        CW1 -- WBI : use
+'        CW2 -- WBI : use
+        ARTICLE_QUEUE -- RM : manage article jobs
+        ARTICLE_QUEUE <- WI
+        ARTICLE_QUEUE -> WW1 : get article job
+        ARTICLE_QUEUE -> WW2 : get article job
+        CELERY_QUEUE <- WW1 : post celery job
+        CELERY_QUEUE <- WW2 : post celery job
+        CELERY_QUEUE -- RM : manage celery jobs
+        CELERY_QUEUE <--> CW1 : get/post
+        CELERY_QUEUE <--> CW2 : get/post
+'        WA - FA : use
+        WA -> ARTICLE_QUEUE : submit job
+        WA -- ADD_JOB
+        WA -- GET_FROM_WDQID
+        WA -- GET_ARTICLE_DETAILS
+        WI --> ARTICLE_QUEUE : submit job
+'        WI - WBI : use
+    }
+    database "SSDB" {
+        [Cache] -up- SET
+        [Cache] -- GET
+        CW1 -> GET
+        CW2 -> GET
+        CW1 -> SET
+        CW2 -> SET
+    }
+}
+
+cloud "Wikimedia"{
+  WI -> page_updates_API : read stream
+  [Add job userscript] -> ADD_JOB
+  [Issues userscript] --> GET_ARTICLE_DETAILS
+  [Issues userscript] --> GET_FROM_WDQID
+  [Go to WikiCitations item userscript] --> GET_FROM_WDQID
+  [Enterprise API] -left- page_updates_API
+}
+
+database "Wikibase.cloud" {
+    [WikiCitations] as WC
+    WC - HTTP_API
+    WC -- SPARQL_API
+    WA -> SPARQL_API : query
+    CW1 --> HTTP_API
+    CW2 --> HTTP_API
+}
+@enduml
