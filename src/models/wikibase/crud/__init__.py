@@ -188,9 +188,7 @@ class WikibaseCrud(WcdBaseModel):
 
     def __login_and_prepare_new_item__(self) -> ItemEntity:
         self.__setup_wikibase_integrator_configuration__()
-        logger.debug(
-            f"Trying to log in to the Wikibase as {self.wikibase.user_name}"
-        )
+        logger.debug(f"Trying to log in to the Wikibase as {self.wikibase.user_name}")
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(
                 user=self.wikibase.user_name, password=self.wikibase.botpassword
