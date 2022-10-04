@@ -20,6 +20,7 @@ class WorkQueue(WcdBaseModel):
     and when receiving a WDQID via the wikicitaitons-api"""
     connection: Optional[BlockingConnection]
     channel: Optional[BlockingChannel]
+    queue_name: str = "article_queue"
 
     class Config:
         arbitrary_types_allowed = True
@@ -45,15 +46,15 @@ class WorkQueue(WcdBaseModel):
         self.channel = self.connection.channel()
 
     def __create_queue__(self):
-        self.channel.queue_declare(queue="hello")
+        self.channel.queue_declare(queue=self.queue_name)
 
     def __close_connection__(self):
         self.connection.close()
 
     def __send_message__(self, message: bytes):
         if self.channel:
-            self.channel.basic_publish(exchange="", routing_key="hello", body=message)
-            print(" [x] Sent 'Hello World!'")
+            self.channel.basic_publish(exchange="", routing_key=self.queue_name, body=message)
+            print(" [x] Sent message!")
         else:
             raise NoChannelError()
 
@@ -62,7 +63,6 @@ class WorkQueue(WcdBaseModel):
         There can be multiple workers running at the same time listening to the work queue"""
         def callback(channel, method, properties, body):
             print(" [x] Received %r" % body)
-
             # Parse into OOP and do the work
             data = json.loads(body)
             message = Message(**data)
@@ -73,7 +73,7 @@ class WorkQueue(WcdBaseModel):
         self.__setup_channel__()
         self.__create_queue__()
         self.channel.basic_consume(
-            queue="hello", auto_ack=True, on_message_callback=callback
+            queue=self.queue_name, auto_ack=True, on_message_callback=callback
         )
         print(" [*] Waiting for messages. To exit press CTRL+C")
         self.channel.start_consuming()
