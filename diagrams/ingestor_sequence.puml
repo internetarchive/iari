@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor user
+control wcdimportbot_ingestor
+entity "Wikimedia Enterprise API - page updates" as enterprise_api
+entity RabbitMQ as rabbitmq
+
+user -> wcdimportbot_ingestor :start
+wcdimportbot_ingestor -> enterprise_api : listen for messages
+loop got message
+    wcdimportbot_ingestor -> wcdimportbot_ingestor : parse message
+    alt got enwiki article
+        wcdimportbot_ingestor -> wcdimportbot_ingestor : check if redirect
+        alt not redirect
+            wcdimportbot_ingestor -> rabbitmq : publish message
+        end
+    end
+end
+@enduml

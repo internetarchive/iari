@@ -7,7 +7,7 @@ from wikibaseintegrator import wbi_config  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
-from src.helpers import console
+from src.helpers.console import console
 from src.models.cache import Cache
 from src.models.exceptions import WikibaseError
 from src.models.wikibase import Wikibase
@@ -21,6 +21,7 @@ from src.models.wikibase.enums import Result
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
+from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
 
 logging.basicConfig(level=config.loglevel)
@@ -41,6 +42,8 @@ class WcdImportBot(WcdBaseModel):
     # total_number_of_references: Optional[int]
     wikibase: Wikibase = IASandboxWikibase()
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    work_queue: WorkQueue = WorkQueue()
+    wdqid: str = ""
 
     def __flush_cache__(self):
         self.__setup_cache__()
@@ -189,6 +192,11 @@ class WcdImportBot(WcdBaseModel):
             # TODO revert to defaulting to Wikicitaitons again
             help="Work against Wikicitations. The bot defaults to IASandboxWikibase.",
         )
+        parser.add_argument(
+            "--worker",
+            action="store_true",
+            help="Start as worker and consume messages from the work queue.",
+        )
         return parser.parse_args()
 
     def __setup_cache__(self) -> None:
@@ -250,7 +258,7 @@ class WcdImportBot(WcdBaseModel):
         #         return Result.FAILED
 
     @validate_arguments
-    def get_and_extract_page_by_title(self, title: str):
+    def get_and_extract_page_by_title(self):
         """Download and extract the page and the references
         and then upload it to Wikibase. If the page is already
         present in the Wikibase then compare it and all its
@@ -262,8 +270,9 @@ class WcdImportBot(WcdBaseModel):
             wikibase=self.wikibase,
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
+            title=self.page_title,
         )
-        page.__get_wikipedia_article_from_title__(title=title)
+        page.__get_wikipedia_article_from_title__()
         page.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
@@ -389,26 +398,31 @@ class WcdImportBot(WcdBaseModel):
             self.__rebuild_cache__()
         elif args.flush_cache:
             self.__flush_cache__()
-        elif args.import_title is not None:
+        elif args.import_title:
             logger.info(f"importing title {args.import_title}")
-            self.get_and_extract_page_by_title(title=args.import_title)
-        elif args.delete_page is not None:
+            self.page_title = args.import_title
+            self.get_and_extract_page_by_title()
+        elif args.delete_page:
             logger.info("deleting page")
             self.delete_one_page(title=args.delete_page)
-        elif args.max_range is not None or args.category is not None:
+        elif args.max_range or args.category:
             logger.info("Importing range of pages")
             self.get_and_extract_pages_by_range(
                 max_count=args.max_range, category_title=args.category
             )
-        elif args.lookup_md5hash is not None:
+        elif args.lookup_md5hash:
             # We strip here to avoid errors caused by spaces
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
-        elif args.statistics is not None:
+        elif args.statistics:
             bot = WcdImportBot(wikibase=IASandboxWikibase())
             bot.__gather_and_print_statistics__()
             # DISABLED because it returns 503 now.
             bot = WcdImportBot(wikibase=WikiCitationsWikibase())
             bot.__gather_and_print_statistics__()
+        elif args.worker is not None:
+            console.print("Worker started")
+            work_queue = WorkQueue()
+            work_queue.listen_to_queue()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
@@ -429,3 +443,17 @@ class WcdImportBot(WcdBaseModel):
     #             * 100
     #             / self.total_number_of_references
     #         )
+    def __receive_workloads__(self):
+        self.work_queue.listen_to_queue()
+
+    def get_and_extract_page_by_wdqid(self):
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+
+        page = WikipediaArticle(
+            wikibase=self.wikibase,
+            language_code=self.language_code,
+            wikimedia_site=self.wikimedia_site,
+            wdqid=self.wdqid
+        )
+        page.__get_wikipedia_article_from_wdqid__()
+        page.extract_and_parse_and_upload_missing_items_to_wikibase()

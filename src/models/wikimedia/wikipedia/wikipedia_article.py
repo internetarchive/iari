@@ -13,7 +13,7 @@ from marshmallow.exceptions import ValidationError
 from pydantic import validate_arguments
 
 import config
-from src.helpers import console
+from src import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.return_.wikibase_return import WikibaseReturn
@@ -28,6 +28,10 @@ from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReferen
 logger = logging.getLogger(__name__)
 
 
+class SitelinksNotDict(BaseException):
+    pass
+
+
 class WikipediaArticle(WcdItem):
     """Models a WMF Wikipedia page"""
 
@@ -36,11 +40,12 @@ class WikipediaArticle(WcdItem):
     md5hash: Optional[str]
     page_id: Optional[int]
     references: List[WikipediaReference] = []
-    wikimedia_event: Optional[
-        Any  # We can't type this with WikimediaEvent because of pydantic
-    ]
+    # wikimedia_event: Optional[
+    #     Any  # We can't type this with WikimediaEvent because of pydantic
+    # ]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     wikitext: Optional[str]
+    wdqid: str = ""
 
     class Config:
         arbitrary_types_allowed = True
@@ -188,8 +193,7 @@ class WikipediaArticle(WcdItem):
                 self.title = title
             # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base
             title = title.replace(" ", "_")
-            # TODO avoid hard coding here
-            url = f"https://en.wikipedia.org/w/rest.php/v1/page/{title}"
+            url = f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/rest.php/v1/page/{title}"
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
@@ -520,3 +524,52 @@ class WikipediaArticle(WcdItem):
     #     self.pywikibot_page = pywikibot.Page(
     #         self.wikimedia_event.event_stream.pywikibot_site, self.title
     #     )
+
+    @validate_arguments
+    def __get_wikipedia_article_from_wdqid__(self):
+        self.__get_title_from_wikidata__()
+        self.__get_wikipedia_article_from_title__()
+
+    def __get_title_from_wikidata__(self):
+        logger.debug("__get_title_from_wikidata__: Running")
+        from wikibaseintegrator import wbi_helpers # type: ignore
+
+        # https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q180736&props=sitelinks/urls&languages=az&languagefallback=&sitefilter=enwiki&formatversion=2
+        # TODO avoid hardcoding enwiki here
+        data = {
+            "action": "wbgetentities",
+            "props": "sitelinks/urls",
+            "ids": self.wdqid,
+            "sitefilter": "enwiki",
+        }
+        result = wbi_helpers.mediawiki_api_call_helper(
+            data=data, allow_anonymous=True, user_agent=config.user_agent
+        )
+        """{
+            "entities": {
+                "Q180736": {
+                    "type": "item",
+                    "id": "Q180736",
+                    "sitelinks": {
+                        "enwiki": {
+                            "site": "enwiki",
+                            "title": "Les Misérables",
+                            "badges": [],
+                            "url": "https://en.wikipedia.org/wiki/Les_Mis%C3%A9rables"
+                        }
+                    }
+                }
+            },
+            "success": 1
+        }"""
+        entities = result.get("entities")
+        if entities:
+            for entity in entities:
+                # console.print(entity)
+                # we only care about the first
+                sitelinks = entities[entity].get("sitelinks")
+                if sitelinks:
+                    enwiki = sitelinks.get("enwiki")
+                    if enwiki:
+                        self.title = enwiki.get("title")
+        logger.debug(f"got title: {self.title}")

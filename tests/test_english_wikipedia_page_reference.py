@@ -2,7 +2,7 @@ import logging
 from unittest import TestCase
 
 import config
-from src.helpers import console
+from src import console
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase

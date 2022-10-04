@@ -42,49 +42,53 @@ class TestWcdImportBot(TestCase):
     #     # bot2 = WcdImportBot(wikibase=WikiCitationsWikibase())
     #     # bot2.__gather_statistics__()
 
+    # def test_get_pages_by_range(self):
+    #     bot = WcdImportBot(
+    #         max_count=10,
+    #         wikibase_url="test",
+    #         mediawiki_api_url="test",
+    #         mediawiki_index_url="test",
+    #         sparql_endpoint_url="test",
+    #     )
+    #     pages = bot.get_pages_by_range()
+    #     if pages is None or len(pages) != 10:
+    #         self.fail()
 
-# def test_get_pages_by_range(self):
-#     bot = WcdImportBot(
-#         max_count=10,
-#         wikibase_url="test",
-#         mediawiki_api_url="test",
-#         mediawiki_index_url="test",
-#         sparql_endpoint_url="test",
-#     )
-#     pages = bot.get_pages_by_range()
-#     if pages is None or len(pages) != 10:
-#         self.fail()
+    # def test_get_pages_by_range_200(self):
+    #     bot = WcdImportBot(
+    #         max_count=200,
+    #         wikibase_url="test",
+    #         mediawiki_api_url="test",
+    #         mediawiki_index_url="test",
+    #         sparql_endpoint_url="test",
+    #     )
+    #     pages = bot.get_pages_by_range()
+    #     if pages is None or len(pages) != 200:
+    #         self.fail()
 
-# def test_get_pages_by_range_200(self):
-#     bot = WcdImportBot(
-#         max_count=200,
-#         wikibase_url="test",
-#         mediawiki_api_url="test",
-#         mediawiki_index_url="test",
-#         sparql_endpoint_url="test",
-#     )
-#     pages = bot.get_pages_by_range()
-#     if pages is None or len(pages) != 200:
-#         self.fail()
+    # def test_extract_references_from_20_pages(self):
+    #     bot = WcdImportBot(
+    #         max_count=20,
+    #     )
+    #     bot.get_pages_by_range()
+    #     [page.extract_and_upload_to_wikicitations() for page in bot.pages]
+    #     bot.print_statistics()
 
-# def test_extract_references_from_20_pages(self):
-#     bot = WcdImportBot(
-#         max_count=20,
-#     )
-#     bot.get_pages_by_range()
-#     [page.extract_and_upload_to_wikicitations() for page in bot.pages]
-#     bot.print_statistics()
+    # DISABLED because we don't want to rinse all items every time we run all tests
+    # FIXME test against a test Wikibase instance so Mark can play with the production one himself
+    # def test_rinse_all_items_and_cache(self):
+    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot.rinse_all_items_and_cache()
+    #     console.print(
+    #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
+    #     )
+    #     sleep(config.sparql_sync_waiting_time_in_seconds)
+    #     wc = WikiCitations()
+    #     # How can we test this?
+    #     items = wc.__extract_item_ids__(sparql_result=wc.__get_all_page_items__())
+    #     items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
 
-# DISABLED because we don't want to rinse all items every time we run all tests
-# FIXME test against a test Wikibase instance so Mark can play with the production one himself
-# def test_rinse_all_items_and_cache(self):
-#     bot = WcdImportBot(wikibase=IASandboxWikibase())
-#     bot.rinse_all_items_and_cache()
-#     console.print(
-#         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
-#     )
-#     sleep(config.sparql_sync_waiting_time_in_seconds)
-#     wc = WikiCitations()
-#     # How can we test this?
-#     items = wc.__extract_item_ids__(sparql_result=wc.__get_all_page_items__())
-#     items = wc.__extract_item_ids__(sparql_result=wc.__get_all_reference_items__())
+    def test_receive(self):
+        """We test that we can connect to rabbitmq and listen"""
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
+        bot.__receive_workloads__()

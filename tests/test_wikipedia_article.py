@@ -4,7 +4,7 @@ from unittest import TestCase
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
-from src.helpers import console
+from src import console
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
 
@@ -172,3 +172,10 @@ class TestWikipediaPage(TestCase):
         wp = WikipediaArticle(title="Easter island", wikibase=IASandboxWikibase())
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
+
+    def test_get_title_from_wikidata(self):
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+
+        wp = WikipediaArticle(wdqid="Q1", wikibase=IASandboxWikibase())
+        wp.__get_title_from_wikidata__()
+        assert wp.title == "Universe"

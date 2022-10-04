@@ -4,11 +4,11 @@ from typing import List
 from unittest import TestCase
 
 from dateutil.parser import isoparse
-from wikibaseintegrator import WikibaseIntegrator # type: ignore
+from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 from wikibaseintegrator.models import Claim  # type: ignore
 
 import config
-from src.helpers import console
+from src import console
 from src.models.return_ import Return
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
