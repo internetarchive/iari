@@ -52,21 +52,3 @@ class UpdateDelay(WcdBaseModel):
             )
         else:
             raise ValueError("self.time_of_last_update was None")
-
-    # def __get_update_timestamp__(self):
-    #     if not self.cache:
-    #         self.__setup_cache__()
-    #     if self.cache:
-    #         self.cache.lookup_title_or_wdqid_last_updated(
-    #             key=self.__calculate_update_hash__()
-    #         )
-    #     else:
-    #         raise CacheError()
-    #
-    # def __calculate_update_hash__(self) -> str:
-    #     hash_ = Hash_(
-    #         wikibase=self.wikibase,
-    #         language_code=self.language_code,
-    #         wikimedia_site=self.wikimedia_site,
-    #     )
-    #     return hash_.__entity_updated_hash__()
