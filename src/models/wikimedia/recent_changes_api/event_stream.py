@@ -7,7 +7,7 @@ from aiohttp import ClientPayloadError  # type: ignore
 from aiosseclient import aiosseclient  # type: ignore
 
 import config
-from src.models.wikimedia.enterprise_api.event import WikimediaEvent
+from src.models.wikimedia.recent_changes_api.event import WikimediaEvent
 from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
 

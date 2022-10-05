@@ -1,4 +1,4 @@
-from src.models.wikimedia.enterprise_api.event_stream import EventStream
+from src.models.wikimedia.recent_changes_api.event_stream import EventStream
 
 
 class TestEventStream:

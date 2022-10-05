@@ -1,4 +1,4 @@
-from src.models.wikimedia.enterprise_api.event import WikimediaEvent
+from src.models.wikimedia.recent_changes_api.event import WikimediaEvent
 
 
 class TestEvent:
