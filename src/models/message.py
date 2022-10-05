@@ -1,26 +1,37 @@
-from src.wcd_base_model import WcdBaseModel
-from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from datetime import datetime
+from typing import Optional
+
+from src import WikimediaSite, Wikibase
 from src.helpers.console import console
+from src.models.update_delay import UpdateDelay
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from src.wcd_base_model import WcdBaseModel
 
 
 class Message(WcdBaseModel):
-    """This models a message sent thorugh RabbitMQ"""
+    """This models a message sent through RabbitMQ"""
 
     title: str = ""
     # This is a Wikidata QID representing an article to work on
-    qid: str = ""
+    article_wikidata_qid: str = ""
+    wikibase: Wikibase = IASandboxWikibase()
+    language_code: str = "en"
+    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    time_of_last_update: Optional[datetime]
 
     def process_data(self):
-        if self.title or self.qid:
+        if self.title or self.article_wikidata_qid:
             from src import WcdImportBot
 
             bot = WcdImportBot(wikibase=IASandboxWikibase())
-            # TODO implement aborting if this article has recently been processed
-            if self.title:
-                bot.page_title = self.title
-                bot.get_and_extract_page_by_title()
-            if self.qid:
-                bot.wdqid = self.qid
-                bot.get_and_extract_page_by_wdqid()
+            update_delay = UpdateDelay(object_=self)
+            if update_delay.time_to_update:
+                if self.title:
+                    bot.page_title = self.title
+                    bot.get_and_extract_page_by_title()
+                if self.article_wikidata_qid:
+                    bot.wdqid = self.article_wikidata_qid
+                    bot.get_and_extract_page_by_wdqid()
         else:
-            console.print("Did not get a title or a qid")
+            console.print("Did not get a title or a article_wikidata_qid")
+

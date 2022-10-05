@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import validate_arguments
@@ -10,7 +11,7 @@ from src.models.return_.cache_return import CacheReturn
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
+    from src.models.wikimedia.wikipedia.reference import WikipediaReference
 
 logger = logging.getLogger(__name__)
 
@@ -167,9 +168,20 @@ class Cache(WcdBaseModel):
         else:
             raise ValueError("self.ssdb was None")
 
-    # def get_whole_table(self):
-    #     with self.connection.cursor() as cursor:
-    #         query = cursor.mogrify(f"SELECT * FROM hashdb.{self.table};")
-    #         logger.info(f"running query: {query}")
-    #         cursor.execute(query)
-    #         return cursor.fetchall()
+    def lookup_title_or_wdqid_last_updated(self, key: str) -> float:
+        """This looks up the last update date
+        of a given title in a
+        given Wikimediasite"""
+        if self.ssdb:
+            return float(self.ssdb.get_value(key=key))
+        else:
+            raise ValueError("self.ssdb was None")
+
+    def set_title_or_wdqid_last_updated(self, key: str) -> Any:
+        """This sets the update timestamp of an entity"""
+        if self.ssdb:
+            return self.ssdb.set_value(
+                key=key, value=str(datetime.timestamp(datetime.now()))
+            )
+        else:
+            raise ValueError("self.ssdb was None")

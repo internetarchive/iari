@@ -6,17 +6,15 @@ from src import console
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.references.english_wikipedia import (
-    EnglishWikipediaPageReferenceSchema,
-    EnglishWikipediaReference,
-)
-from src.models.wikimedia.wikipedia.references.google_books import GoogleBooks
+from src.models.wikimedia.wikipedia.reference.english import EnglishWikipediaReference
+from src.models.wikimedia.wikipedia.reference.english.google_books import GoogleBooks
+from src.models.wikimedia.wikipedia.reference.english.schema import EnglishWikipediaReferenceSchema
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class TestEnglishWikipediaPageReferenceSchema(TestCase):
+class TestEnglishWikipediaReferenceSchema(TestCase):
     def test_url_template1(self):
         data = {
             "url": "https://www.stereogum.com/1345401/turntable-interview/interviews/",
@@ -29,7 +27,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite web",
         }
 
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference = EnglishWikipediaReferenceSchema().load(data)
         console.print(reference)
 
     def test_url_template_with_archive_url(self):
@@ -45,7 +43,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
 
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference = EnglishWikipediaReferenceSchema().load(data)
         assert (
             reference.archive_url
             == "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
@@ -54,7 +52,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
 
     def test_url_template2(self):
         data = {"1": "chkchkchk.net", "template_name": "url"}
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference = EnglishWikipediaReferenceSchema().load(data)
         console.print(reference)
 
     def test_parse_persons_from_cite_web(self):
@@ -70,7 +68,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
         }
 
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -94,7 +92,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite journal",
         }
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -118,7 +116,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite book",
         }
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -139,7 +137,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite web",
             "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.first_level_domain_of_url == "stereogum.com"
@@ -160,7 +158,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite web",
             "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.url is None
@@ -195,7 +193,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             trans_title="Muskö Naval Base 40 years",
             access_date="2010-11-09",
         )
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.publisher == "Kungliga Motorbåt Klubben"
@@ -228,7 +226,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             "template_name": "cite web",
         }
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -242,7 +240,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -255,7 +253,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -268,7 +266,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -279,7 +277,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -292,7 +290,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -304,7 +302,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -316,7 +314,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = (
-            EnglishWikipediaPageReferenceSchema().load(data)
+            EnglishWikipediaReferenceSchema().load(data)
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -327,7 +325,7 @@ class TestEnglishWikipediaPageReferenceSchema(TestCase):
             template_name="cite web",
             periodical="test",
         )
-        reference = EnglishWikipediaPageReferenceSchema().load(data)
+        reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
         assert reference.periodical == "test"
