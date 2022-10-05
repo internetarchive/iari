@@ -5,12 +5,10 @@ cloud "AWS" {
     package "Docker compose" {
         [flower] as F
         [rabbitmq] as RM
-        [Celery] as C
         [wikicitations-api] as WA
         [wcdimportbot ingestor] as WI
-        [wcdimportbot celery worker 1] as WW1
-        [wcdimportbot celery worker 2] as WW2
-        C - RM
+        [wcdimportbot worker 1] as WW1
+        [wcdimportbot worker 2] as WW2
         F -RM : inspection/overview
         ARTICLE_QUEUE -- RM : manage article jobs
         ARTICLE_QUEUE <- WI : post job from the page update stream
