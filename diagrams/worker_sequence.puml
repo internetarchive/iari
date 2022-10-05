@@ -28,6 +28,7 @@ wcdimportbot_worker -> wikipediaapi : fetch data (based on title)
             alt successful upload
                 wcdimportbot_worker -> cache : add hash
                 wcdimportbot_worker -> cache : add time of update
+                wcdimportbot_worker -> rabbitmq : send acknowledge of completed job
             end
         end
     end
