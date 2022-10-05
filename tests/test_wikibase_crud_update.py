@@ -9,7 +9,7 @@ import config
 from src import console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.references.english_wikipedia import (
+from src.models.wikimedia.wikipedia.reference.english import (
     EnglishWikipediaReference,
 )
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle

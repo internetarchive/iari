@@ -5,7 +5,7 @@ from pydantic import validate_arguments
 from src.models.exceptions import MissingInformationError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
-from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
+from src.models.wikimedia.wikipedia.reference import WikipediaReference
 
 logger = logging.getLogger(__name__)
 

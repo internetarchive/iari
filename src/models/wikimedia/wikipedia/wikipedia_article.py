@@ -1,4 +1,4 @@
-from __future__ import annotations
+# from __future__ import annotations
 
 import hashlib
 import json
@@ -20,10 +20,10 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.references.english_wikipedia import (
-    EnglishWikipediaPageReferenceSchema,
+from src.models.wikimedia.wikipedia.reference.english.schema import (
+    EnglishWikipediaReferenceSchema,
 )
-from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
+from src.models.wikimedia.wikipedia.reference import WikipediaReference
 
 logger = logging.getLogger(__name__)
 
@@ -364,7 +364,7 @@ class WikipediaArticle(WcdItem):
                     logger.debug("parsed_template:")
                     console.print(parsed_template)
                     # press_enter_to_continue()
-                schema = EnglishWikipediaPageReferenceSchema()
+                schema = EnglishWikipediaReferenceSchema()
                 try:
                     reference: Optional[WikipediaReference] = schema.load(
                         parsed_template

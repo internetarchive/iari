@@ -17,7 +17,7 @@ from src.models.wcd_item import WcdItem
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import WriteRequired
-from src.models.wikimedia.wikipedia.references.wikipedia import WikipediaReference
+from src.models.wikimedia.wikipedia.reference import WikipediaReference
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logger = logging.getLogger(__name__)
@@ -220,6 +220,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         logger.debug("__fetch_and_prepare_data_for_comparison__: Running")
         wcr = WikibaseCrudRead(wikibase=self.wikibase)
         if isinstance(self.entity, WikipediaReference):
+            self.entity: WikipediaReference
             if self.entity.title:
                 console.print(
                     f"Comparing {self.entity.template_name} "
