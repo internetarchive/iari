@@ -20,6 +20,7 @@ from src.models.wikibase.dictionaries import (
 from src.models.wikibase.enums import Result
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
+from src.models.wikimedia.enterprise_api.event_stream import EventStream
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
@@ -197,6 +198,12 @@ class WcdImportBot(WcdBaseModel):
             action="store_true",
             help="Start as worker and consume messages from the work queue.",
         )
+        parser.add_argument(
+            "--ingestor",
+            action="store_true",
+            help="Start as ingestor and consume messages from the Wikimedia "
+            "Enterprise Page Updates API and publish to the article queue.",
+        )
         return parser.parse_args()
 
     def __setup_cache__(self) -> None:
@@ -220,7 +227,7 @@ class WcdImportBot(WcdBaseModel):
         console.print("This has been disabled because we no longer delete items.")
         # logger.debug("delete_one_page: running")
         # with console.status(f"Deleting {title}"):
-        #     from src.models.wikimedia.wikipedia.wikipedia_article import (
+        #     from src.models.wikimedia.wikipedia.article import (
         #         WikipediaArticle,
         #     )
         #
@@ -264,7 +271,7 @@ class WcdImportBot(WcdBaseModel):
         present in the Wikibase then compare it and all its
         references to make sure we the data is reflecting changes
         made in Wikipedia"""
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
             wikibase=self.wikibase,
@@ -285,7 +292,7 @@ class WcdImportBot(WcdBaseModel):
         """
         from pywikibot import Category, Site  # type: ignore
 
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if max_count is not None:
             logger.debug(f"Setting max_count to {max_count}")
@@ -419,41 +426,30 @@ class WcdImportBot(WcdBaseModel):
             # DISABLED because it returns 503 now.
             bot = WcdImportBot(wikibase=WikiCitationsWikibase())
             bot.__gather_and_print_statistics__()
-        elif args.worker is not None:
+        elif args.worker:
             console.print("Worker started")
             work_queue = WorkQueue()
             work_queue.listen_to_queue()
+        elif args.ingestor:
+            console.print("Ingestor started")
+            event_stream = EventStream()
+            event_stream.start_consuming()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
-    # def __calculate_statistics__(self):
-    #     """We want to have an overview while the bot is running
-    #     about how many references could be imported"""
-    #     self.total_number_of_hashed_references = sum(
-    #         page.number_of_hashed_references for page in self.pages
-    #     )
-    #     self.total_number_of_references = sum(
-    #         page.number_of_references for page in self.pages
-    #     )
-    #     if self.total_number_of_references == 0:
-    #         self.percent_references_hashed_in_total = 0
-    #     else:
-    #         self.percent_references_hashed_in_total = int(
-    #             self.total_number_of_hashed_references
-    #             * 100
-    #             / self.total_number_of_references
-    #         )
     def __receive_workloads__(self):
+        # We set it here to avoid bugs
+        self.work_queue.wikibase = self.wikibase
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
             wikibase=self.wikibase,
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
-            wdqid=self.wdqid
+            wdqid=self.wdqid,
         )
         page.__get_wikipedia_article_from_wdqid__()
         page.extract_and_parse_and_upload_missing_items_to_wikibase()
