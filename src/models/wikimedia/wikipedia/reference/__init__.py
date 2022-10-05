@@ -1263,7 +1263,7 @@ class WikipediaReference(WcdItem):
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
         update_delay = UpdateDelay(object_=self)
-        if update_delay.time_to_update():
+        if update_delay.time_to_update:
             self.__parse_first_parameter__()
             self.__parse_urls__()
             self.__parse_isbn__()
