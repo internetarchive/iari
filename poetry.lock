@@ -103,6 +103,7 @@ mypy-extensions = ">=0.4.3"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
 tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
+typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -691,7 +692,10 @@ develop = false
 
 [package.dependencies]
 requests = {version = ">=2.20.1", markers = "python_version >= \"3.6\""}
-setuptools = {version = ">=48.0.0", markers = "python_version >= \"3.10\""}
+setuptools = [
+    {version = ">=48.0.0", markers = "python_version >= \"3.10\""},
+    {version = ">=38.5.2", markers = "python_version >= \"3.7\" and python_version < \"3.10\""},
+]
 
 [package.extras]
 Google = ["google (>=1.7)"]
@@ -770,6 +774,7 @@ python-versions = ">=3.6.3,<4.0.0"
 [package.dependencies]
 commonmark = ">=0.9.0,<0.10.0"
 pygments = ">=2.6.0,<3.0.0"
+typing-extensions = {version = ">=4.0.0,<5.0", markers = "python_version < \"3.9\""}
 
 [package.extras]
 jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
@@ -799,7 +804,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "safety"
-version = "2.2.0"
+version = "2.2.1"
 description = "Checks installed dependencies for known vulnerabilities and licenses."
 category = "dev"
 optional = false
@@ -967,8 +972,8 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.10,<=3.11"
-content-hash = "875f33cecf638dc5609506985da7efb39af4cfb86de44230faefeba86ab91d33"
+python-versions = ">=3.8,<=3.11"
+content-hash = "31f41d740c5691ee806a7494af37eb2ad51ca229a23c7f5b2501e0fb5affedfd"
 
 [metadata.files]
 aiohttp = [
@@ -1652,8 +1657,8 @@ rich = [
     {file = "ruamel.yaml.clib-0.2.6.tar.gz", hash = "sha256:4ff604ce439abb20794f05613c374759ce10e3595d1867764dd1ae675b85acbd"},
 ]
 safety = [
-    {file = "safety-2.2.0-py3-none-any.whl", hash = "sha256:b1a0f4c34fb41c502a7a5c54774c18376da382bc9d866ee26b39b2c747c0de40"},
-    {file = "safety-2.2.0.tar.gz", hash = "sha256:6745de12acbd60a58001fe66cb540355187d7b991b30104d9ef14ff4e4826073"},
+    {file = "safety-2.2.1-py3-none-any.whl", hash = "sha256:b0049b3f0af4128834f6bc5e6cd23a20ccc28303d6c92cbc019b71f1f06bc038"},
+    {file = "safety-2.2.1.tar.gz", hash = "sha256:d8b48c46ac6628bb83441b7dddc4756cfe2582abe13a112ee6e4ef1a34aad032"},
 ]
 setuptools = [
     {file = "setuptools-65.4.1-py3-none-any.whl", hash = "sha256:1b6bdc6161661409c5f21508763dc63ab20a9ac2f8ba20029aaaa7fdb9118012"},
