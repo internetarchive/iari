@@ -16,7 +16,7 @@ class UpdateDelay(WcdBaseModel):
     time_of_last_update: Optional[datetime]
 
     @property
-    def time_to_update(self):
+    def time_to_update(self) -> bool:
         self.cache.connect()
         from src.models.message import Message
         if isinstance(self.object_, Message):
@@ -44,11 +44,14 @@ class UpdateDelay(WcdBaseModel):
         self.time_of_last_update = datetime.fromtimestamp(timestamp_string)
         return self.__delay_time_has_passed__()
 
-    def __delay_time_has_passed__(self):
+    def __delay_time_has_passed__(self) -> bool:
         """We return true if the delay has passed and False otherwise"""
-        return self.time_of_last_update < (
-            datetime.now() - timedelta(hours=config.article_update_delay_in_hours)
-        )
+        if self.time_of_last_update:
+            return self.time_of_last_update < (
+                datetime.now() - timedelta(hours=config.article_update_delay_in_hours)
+            )
+        else:
+            raise ValueError("self.time_of_last_update was None")
 
     # def __get_update_timestamp__(self):
     #     if not self.cache:
