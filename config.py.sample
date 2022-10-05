@@ -10,6 +10,10 @@ sandbox_user = "So9q@test"
 # https://medium.datadriveninvestor.com/accessing-github-secrets-in-python-d3e758d8089b
 sandbox_pwd = os.environ["ia_sandbox"]
 
+# Login to rabbitmq bitnami container
+rabbitmq_username = ""
+rabbitmq_password = ""
+
 # Settings:
 cache_host: str = "127.0.0.1"
 cache_port: int = 8888
@@ -23,6 +27,12 @@ user_agent = "wcdimportbot 2.0.0-alpha3"
 sparql_sync_waiting_time_in_seconds = 5
 check_if_page_has_been_uploaded_via_sparql = True
 print_debug_json = False
+article_update_delay_in_hours = 24
+reference_update_delay_in_hours = 24
+title_allow_list = [
+    "Easter island",
+]
+max_events = 10
 
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
