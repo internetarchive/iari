@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "wcdimportbot"
+version = "2.0.1"
+description = "Import and update architecture for the WikiCitations Database in Wikibase.cloud"
+authors = ["Dennis Priskorn <68460690+dpriskorn@users.noreply.github.com>"]
+license = "GPLv3+"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+marshmallow = "^3.18.0"
+mwparserfromhell = "^0.6.4"
+pydantic = "^1.10.2"
+pyssdb = "^0.4.2"
+python = ">=3.10,<=3.11"
+python-dateutil = "^2.8.2"
+pywikibot = { git = "http://github.com/dpriskorn/pywikibot", branch = "remove-verbose-logging" }
+requests = "^2.28.1"
+rich = "^12.6.0"
+tld = "^0.12.6"
+wikibaseintegrator = "^0.12.1"
+pika = "^1.3.0"
+aiohttp = "^3.8.3"
+aiosseclient = "^0.0.1"
+
+[tool.poetry.group.dev.dependencies]
+bandit = "^1.7.4"
+black = "^22.8.0"
+codespell = "^2.2.1"
+coverage = "^6.5.0"
+flake8 = "^5.0.4"
+flake8-2020 = "^1.7.0"
+flake8-bugbear = "^22.9.23"
+flake8-comprehensions = "^3.10.0"
+flake8-return = "^1.1.3"
+isort = "^5.10.1"
+mypy = "^0.981"
+pre-commit = "^2.20.0"
+pytest = "^7.1.3"
+pyupgrade = "^2.38.2"
+safety = "^2.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
