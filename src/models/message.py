@@ -35,4 +35,3 @@ class Message(WcdBaseModel):
                     bot.get_and_extract_page_by_wdqid()
         else:
             console.print("Did not get a title or a article_wikidata_qid")
-

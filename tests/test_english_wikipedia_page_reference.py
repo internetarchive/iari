@@ -8,7 +8,9 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.english import EnglishWikipediaReference
 from src.models.wikimedia.wikipedia.reference.english.google_books import GoogleBooks
-from src.models.wikimedia.wikipedia.reference.english.schema import EnglishWikipediaReferenceSchema
+from src.models.wikimedia.wikipedia.reference.english.schema import (
+    EnglishWikipediaReferenceSchema,
+)
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -67,8 +69,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "template_name": "cite web",
         }
 
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -91,8 +93,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "doi_access": "free",
             "template_name": "cite journal",
         }
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -115,8 +117,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "s2cid": "216190330",
             "template_name": "cite book",
         }
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -225,8 +227,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "access_date": "May 24, 2021",
             "template_name": "cite web",
         }
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -239,8 +241,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -252,8 +254,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
             template_name="cite book",
         )
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -265,8 +267,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             publisher="[[test]]",
             template_name="cite book",
         )
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -276,8 +278,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             # publisher="",
             template_name="cite book",
         )
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -289,8 +291,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             publisher="[[test|test]]",
             template_name="cite book",
         )
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -301,8 +303,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             place="Copenhagen",
             template_name="cite book",
         )
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
@@ -313,8 +315,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             lang="English",
             template_name="cite book",
         )
-        reference: EnglishWikipediaReference = (
-            EnglishWikipediaReferenceSchema().load(data)
+        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+            data
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()

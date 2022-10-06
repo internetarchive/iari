@@ -19,6 +19,7 @@ class UpdateDelay(WcdBaseModel):
     def time_to_update(self) -> bool:
         self.cache.connect()
         from src.models.message import Message
+
         if isinstance(self.object_, Message):
             hash_ = Hash_(
                 wikibase=self.object_.wikibase,
@@ -29,6 +30,7 @@ class UpdateDelay(WcdBaseModel):
             )
         else:
             from src.models.wikimedia.wikipedia.reference import WikipediaReference
+
             if not isinstance(self.object_, WikipediaReference):
                 raise ValueError("did not get Message or WikipediaReference")
             # Got reference

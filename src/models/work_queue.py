@@ -18,6 +18,7 @@ class WorkQueue(WcdBaseModel):
     """This models the RabbitMQ article queue
     We publish to this queue when ingesting page updates
     and when receiving a WDQID via the wikicitaitons-api"""
+
     connection: Optional[BlockingConnection]
     channel: Optional[BlockingChannel]
     queue_name: str = "article_queue"
@@ -53,7 +54,9 @@ class WorkQueue(WcdBaseModel):
 
     def __send_message__(self, message: bytes):
         if self.channel:
-            self.channel.basic_publish(exchange="", routing_key=self.queue_name, body=message)
+            self.channel.basic_publish(
+                exchange="", routing_key=self.queue_name, body=message
+            )
             print(" [x] Sent message!")
         else:
             raise NoChannelError()
@@ -61,6 +64,7 @@ class WorkQueue(WcdBaseModel):
     def listen_to_queue(self):
         """This function is run by the wcdimportbot worker
         There can be multiple workers running at the same time listening to the work queue"""
+
         def callback(channel, method, properties, body):
             print(" [x] Received %r" % body)
             # Parse into OOP and do the work
