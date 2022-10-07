@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import Optional
 
-from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikibase import Wikibase
 from src.helpers.console import console
 from src.models.update_delay import UpdateDelay
+from src.models.wikibase import Wikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
 
 

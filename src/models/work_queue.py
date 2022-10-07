@@ -5,6 +5,7 @@ from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel
 from pydantic import validate_arguments
 
+import config
 from src.helpers.console import console
 from src.models.message import Message
 from src.wcd_base_model import WcdBaseModel
@@ -39,7 +40,9 @@ class WorkQueue(WcdBaseModel):
         self.connection = BlockingConnection(
             ConnectionParameters(
                 "localhost",
-                credentials=PlainCredentials(username="user", password="bitnami"),
+                credentials=PlainCredentials(
+                    username=config.rabbitmq_username, password=config.rabbitmq_password
+                ),
             )
         )
 

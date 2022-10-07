@@ -35,7 +35,7 @@ from src.models.wikibase import Wikibase
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.reference import WikipediaReference
+    from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
     from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logger = logging.getLogger(__name__)

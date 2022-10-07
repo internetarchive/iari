@@ -2,14 +2,14 @@ import asyncio
 import json
 import logging
 from asyncio import AbstractEventLoop
-from typing import Set, Optional
+from typing import Optional, Set
 
 from aiohttp import ClientPayloadError  # type: ignore
 from aiosseclient import aiosseclient  # type: ignore
 
 import config
-from src.models.wikimedia.recent_changes_api.event import WikimediaEvent
 from src.models.wikimedia.enums import WikimediaSite
+from src.models.wikimedia.recent_changes_api.event import WikimediaEvent
 from src.wcd_base_model import WcdBaseModel
 
 

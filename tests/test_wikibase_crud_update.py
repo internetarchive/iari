@@ -9,9 +9,7 @@ import config
 from src import console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.reference.english import (
-    EnglishWikipediaReference,
-)
+from src.models.wikimedia.wikipedia.reference.english import EnglishWikipediaReference
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
@@ -147,7 +145,7 @@ class TestWikibaseCrudUpdate(TestCase):
 
     def test_update_of_reference_statements(self):
         """We want to make sure that all fields except
-        URL/ISBN/DOI can be updated on the refernece"""
+        URL/ISBN/DOI can be updated on the reference"""
         wikibase = IASandboxWikibase()
         # instantiate a page to test on
         wppage = WikipediaArticle(wikibase=wikibase)

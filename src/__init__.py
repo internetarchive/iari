@@ -20,8 +20,8 @@ from src.models.wikibase.dictionaries import (
 from src.models.wikibase.enums import Result
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
-from src.models.wikimedia.recent_changes_api.event_stream import EventStream
 from src.models.wikimedia.enums import WikimediaSite
+from src.models.wikimedia.recent_changes_api.event_stream import EventStream
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
 

@@ -20,7 +20,7 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.reference import WikipediaReference
+from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.reference.english.schema import (
     EnglishWikipediaReferenceSchema,
 )
