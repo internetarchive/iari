@@ -1,7 +1,8 @@
 import asyncio
 import json
 import logging
-from typing import Set
+from asyncio import AbstractEventLoop
+from typing import Set, Optional
 
 from aiohttp import ClientPayloadError  # type: ignore
 from aiosseclient import aiosseclient  # type: ignore
@@ -19,14 +20,21 @@ class EventStream(WcdBaseModel):
     event_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     event_count: int = 0
     earlier_events: Set[str] = set()
-    max_events: int = config.max_events
+    max_events: int = 0
+    testing_publish_count = 0
+    test_publishing = False
+    loop: Optional[AbstractEventLoop]
+
+    class Config:
+        arbitrary_types_allowed = True
 
     async def __get_events__(self):
         """Get events from the event stream until missing identifier limit"""
         logger = logging.getLogger(__name__)
         self.event_count = 0
         # We run in a while loop so we can continue even if we get a ClientPayloadError
-        while True:
+        run = True
+        while run:
             try:
                 async for event in aiosseclient(
                     "https://stream.wikimedia.org/v2/stream/recentchange",
@@ -43,9 +51,14 @@ class EventStream(WcdBaseModel):
                         and not wmf_event.bot
                     ):
                         self.event_count += 1
-                        if wmf_event.title in config.title_allow_list:
+                        # We import if in allow list or the first article we get which has a title
+                        if wmf_event.title in config.title_allow_list or (
+                            self.testing_publish_count == 0
+                            and self.test_publishing is True
+                        ):
                             # logger.info(f"Article in namespace main: {wmf_event.title}")
                             wmf_event.publish_to_article_queue()
+                            self.testing_publish_count += 1
                         else:
                             if wmf_event.title not in config.title_allow_list:
                                 logger.info(
@@ -53,21 +66,26 @@ class EventStream(WcdBaseModel):
                                 )
                     else:
                         logger.debug("skipped event")
-                    self.__quit_if_reached_max_events__()
+                    if self.__reached_max_events__:
+                        print("max events reached. breaking out of loop")
+                        return
+
             except ClientPayloadError:
                 logger.error("ClientPayloadError")
                 continue
-            self.__quit_if_reached_max_events__()
+            if self.__reached_max_events__:
+                print("Max events reached. Quitting")
+                self.loop.close()
 
     def start_consuming(
         self,
     ):
         if self.language_code is None or self.event_site is None:
             raise ValueError("did not get what we need")
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.__get_events__())
+        self.loop = asyncio.get_event_loop()
+        self.loop.run_until_complete(self.__get_events__())
 
-    def __quit_if_reached_max_events__(self):
-        if 0 < self.max_events <= self.event_count:
-            print("Max events reached. Quitting")
-            exit(0)
+    @property
+    def __reached_max_events__(self) -> bool:
+        """Check whether max events is more than 0 and if we reached it"""
+        return bool(0 < self.max_events <= self.event_count)
