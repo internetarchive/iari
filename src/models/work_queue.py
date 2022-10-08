@@ -1,11 +1,15 @@
 import json
+import logging
 from typing import Optional
 
+import backoff
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel
+from pika.exceptions import AMQPConnectionError
 from pydantic import validate_arguments
 
 from src.helpers.console import console
+from src.models.exceptions import NoChannelError
 from src.models.message import Message
 from src.wcd_base_model import WcdBaseModel
 
@@ -32,10 +36,11 @@ class WorkQueue(WcdBaseModel):
         self.__send_message__(message=message)
         self.__close_connection__()
 
+    @backoff.on_exception(backoff.expo, AMQPConnectionError, max_time=60)
     def __connect__(self):
         self.connection = BlockingConnection(
             ConnectionParameters(
-                "localhost",
+                "127.0.0.1",
                 credentials=PlainCredentials(username="user", password="bitnami"),
             )
         )
