@@ -20,7 +20,7 @@ class EventStream(WcdBaseModel):
     event_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     event_count: int = 0
     earlier_events: Set[str] = set()
-    max_events: int = 0
+    max_events_during_testing: int = 0
     testing_publish_count = 0
     test_publishing = False
     loop: Optional[AbstractEventLoop]
@@ -88,4 +88,4 @@ class EventStream(WcdBaseModel):
     @property
     def __reached_max_events__(self) -> bool:
         """Check whether max events is more than 0 and if we reached it"""
-        return bool(0 < self.max_events <= self.event_count)
+        return bool(0 < self.max_events_during_testing <= self.event_count)

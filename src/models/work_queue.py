@@ -16,6 +16,7 @@ from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
+
 class WorkQueue(WcdBaseModel):
     """This models the RabbitMQ article queue
     We publish to this queue when ingesting page updates
