@@ -57,8 +57,10 @@ services:
     depends_on:
       - rabbitmq
       - redis
+    # working_dir: "/app"
     volumes:
       - "./:/app"
+    # command: "sleep 30 ; timeout 20 bash -c '</dev/tcp/127.0.0.1/5672'  && echo 'connection success' || echo 'connection failed'"
     command: "poetry run python app/wcdimportbot.py --worker"
 
 #  ingestor:
