@@ -19,7 +19,7 @@ class EventStream(WcdBaseModel):
     event_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     event_count: int = 0
     earlier_events: Set[str] = set()
-    max_events: int = config.max_events
+    max_events_during_testing: int = config.max_events_during_testing
 
     async def __get_events__(self):
         """Get events from the event stream until missing identifier limit"""
@@ -68,6 +68,6 @@ class EventStream(WcdBaseModel):
         loop.run_until_complete(self.__get_events__())
 
     def __quit_if_reached_max_events__(self):
-        if 0 < self.max_events <= self.event_count:
+        if 0 < self.max_events_during_testing <= self.event_count:
             print("Max events reached. Quitting")
             exit(0)
