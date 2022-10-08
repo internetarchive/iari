@@ -24,3 +24,7 @@ class TimeParseException(BaseException):
 
 class WikibaseError(BaseException):
     pass
+
+
+class NoChannelError(BaseException):
+    pass

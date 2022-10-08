@@ -9,10 +9,7 @@ from src.helpers.console import console
 from src.models.message import Message
 from src.wcd_base_model import WcdBaseModel
 
-
-class NoChannelError(BaseException):
-    pass
-
+logger = logging.getLogger(__name__)
 
 class WorkQueue(WcdBaseModel):
     """This models the RabbitMQ article queue
