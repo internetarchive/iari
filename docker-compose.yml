@@ -23,23 +23,23 @@ services:
     volumes:
       - "redis_data:/bitnami/redis/data"
 
-  celery-flower:
-    image: gregsi/latest-celery-flower-docker:latest
-    environment:
-      - AMQP_USERNAME=user
-      - AMQP_PASSWORD=bitnami
-      - AMQP_ADMIN_USERNAME=user
-      - AMQP_ADMIN_PASSWORD=bitnami
-      - AMQP_HOST=rabbitmq
-      - AMQP_PORT=5672
-      - AMQP_ADMIN_HOST=rabbitmq
-      - AMQP_ADMIN_PORT=15672
-      - FLOWER_BASIC_AUTH=user:test
-    ports:
-      - "5555:5555"
-    depends_on:
-      - rabbitmq
-      - redis
+#  celery-flower:
+#    image: gregsi/latest-celery-flower-docker:latest
+#    environment:
+#      - AMQP_USERNAME=user
+#      - AMQP_PASSWORD=bitnami
+#      - AMQP_ADMIN_USERNAME=user
+#      - AMQP_ADMIN_PASSWORD=bitnami
+#      - AMQP_HOST=rabbitmq
+#      - AMQP_PORT=5672
+#      - AMQP_ADMIN_HOST=rabbitmq
+#      - AMQP_ADMIN_PORT=15672
+#      - FLOWER_BASIC_AUTH=user:test
+#    ports:
+#      - "5555:5555"
+#    depends_on:
+#      - rabbitmq
+#      - redis
 
 #  fastapi:
 #    build: .
@@ -52,14 +52,23 @@ services:
 #      - "./:/app"
 #    command: "poetry run hypercorn app/app/main:app --bind 0.0.0.0:8000 --reload"
 
-#  worker:
+  worker:
+    build: .
+    depends_on:
+      - rabbitmq
+      - redis
+    volumes:
+      - "./:/app"
+    command: "poetry run python app/wcdimportbot.py --worker"
+
+#  ingestor:
 #    build: .
 #    depends_on:
 #      - rabbitmq
 #      - redis
 #    volumes:
 #      - "./:/app"
-#    command: "poetry run celery -A app.app.worker.celery_worker worker -l info -Q test-queue -c 1"
+#    command: "poetry run python app/wcdimportbot.py --ingestor"
 
 volumes:
   rabbitmq_data:
