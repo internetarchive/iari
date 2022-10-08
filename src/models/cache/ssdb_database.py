@@ -22,6 +22,7 @@ class SsdbDatabase(WcdBaseModel):
     connection: Optional[Any]
 
     def connect(self):
+        # https://stackoverflow.com/questions/73973332/check-if-were-in-a-github-action-tracis-ci-circle-ci-etc-testing-environme
         if os.getenv("GITHUB_ACTIONS") == "true":
             # Use the Redis port for testing
             self.port = 6379
