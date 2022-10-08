@@ -8,6 +8,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.exceptions import AMQPConnectionError
 from pydantic import validate_arguments
 
+import config
 from src.helpers.console import console
 from src.models.exceptions import NoChannelError
 from src.models.message import Message
@@ -40,8 +41,10 @@ class WorkQueue(WcdBaseModel):
     def __connect__(self):
         self.connection = BlockingConnection(
             ConnectionParameters(
-                "127.0.0.1",
-                credentials=PlainCredentials(username="user", password="bitnami"),
+                "localhost",
+                credentials=PlainCredentials(
+                    username=config.rabbitmq_username, password=config.rabbitmq_password
+                ),
             )
         )
 

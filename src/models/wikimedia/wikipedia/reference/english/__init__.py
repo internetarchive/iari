@@ -1,4 +1,4 @@
-from src.models.wikimedia.wikipedia.reference import WikipediaReference
+from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
 
 class EnglishWikipediaReference(WikipediaReference):

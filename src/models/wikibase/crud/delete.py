@@ -8,8 +8,8 @@ from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ig
 from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
 
 import config
-from src.helpers.cli_input import press_enter_to_continue
 from src import console
+from src.helpers.cli_input import press_enter_to_continue
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import Result, SupportedItemType

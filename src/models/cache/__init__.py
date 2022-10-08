@@ -11,7 +11,7 @@ from src.models.return_.cache_return import CacheReturn
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
-    from src.models.wikimedia.wikipedia.reference import WikipediaReference
+    from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
 logger = logging.getLogger(__name__)
 

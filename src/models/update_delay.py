@@ -29,7 +29,7 @@ class UpdateDelay(WcdBaseModel):
                 wikimedia_site=self.object_.wikimedia_site,
             )
         else:
-            from src.models.wikimedia.wikipedia.reference import WikipediaReference
+            from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
             if not isinstance(self.object_, WikipediaReference):
                 raise ValueError("did not get Message or WikipediaReference")

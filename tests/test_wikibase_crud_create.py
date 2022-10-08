@@ -14,9 +14,7 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.create import WikibaseCrudCreate
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.reference.english import (
-    EnglishWikipediaReference,
-)
+from src.models.wikimedia.wikipedia.reference.english import EnglishWikipediaReference
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
