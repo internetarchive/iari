@@ -27,7 +27,9 @@ class SsdbDatabase(WcdBaseModel):
             # Use the Redis port for testing
             self.port = 6379
         else:
-            raise Exception(f'os.getenv("GITHUB_ACTIONS") was {os.getenv("GITHUB_ACTIONS")}')
+            raise Exception(
+                f'os.getenv("GITHUB_ACTIONS") was {os.getenv("GITHUB_ACTIONS")}'
+            )
         try:
             self.connection = pyssdb.Client(
                 host=self.host,
