@@ -6,7 +6,7 @@ in a [Wikibase](https://wikiba.se/) instance.
 This bot has been developed by James Hare (version 1.0.0) 
 and Dennis Priskorn (version 2) as part of the 
 Turn All References Blue project which is led by 
-Mark Graham head of The 
+Mark Graham, head of The 
 Wayback Machine department of the Internet Archive.
 
 A Wikibase with millions of references and edges between 
@@ -15,7 +15,7 @@ them and the Wikipedia page(s) they are used on is useful
  which websites are linked to which pages and used as references.
 
 This is part of a wider initiative help raise the quality of sources in 
-Wikipedia to and enable everyone in the world to make
+Wikipedia to enable everyone in the world to make
  decisions based on trustworthy information that is sourced by 
 trustworthy sources.
 
