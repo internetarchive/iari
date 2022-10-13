@@ -27,7 +27,7 @@ class SsdbDatabase(WcdBaseModel):
             # Use the Redis port for testing
             self.port = 6379
         else:
-            raise Exception(
+            logger.info(
                 f'os.getenv("GITHUB_ACTIONS") was {os.getenv("GITHUB_ACTIONS")}'
             )
         try:
