@@ -80,18 +80,18 @@ services:
             max-size: "50M"
             max-file: "2"
 
-  ingestor:
-    build: .
-    depends_on:
-      - rabbitmq
-      - redis
-    volumes:
-      - "./:/app"
-    command: "poetry run python app/wcdimportbot.py --ingestor"
-    logging:
-        options:
-            max-size: "50M"
-            max-file: "2"
+#  ingestor:
+#    build: .
+#    depends_on:
+#      - rabbitmq
+#      - redis
+#    volumes:
+#      - "./:/app"
+#    command: "poetry run python app/wcdimportbot.py --ingestor"
+#    logging:
+#        options:
+#            max-size: "50M"
+#            max-file: "2"
 
 volumes:
   rabbitmq_data:
