@@ -12,6 +12,7 @@ import config
 from src.helpers.console import console
 from src.models.exceptions import NoChannelError
 from src.models.message import Message
+from src.models.wikibase import Wikibase
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
