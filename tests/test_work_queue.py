@@ -13,5 +13,5 @@ class TestWorkQueue(TestCase):
         w.publish(message=message)
 
     def test_listen(self):
-        w = WorkQueue()
+        w = WorkQueue(testing=True)
         w.listen_to_queue()

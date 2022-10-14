@@ -28,6 +28,7 @@ class WorkQueue(WcdBaseModel):
     channel: Optional[BlockingChannel]
     queue_name: str = "article_queue"
     wikibase: Wikibase
+    testing: bool = False
 
     class Config:
         arbitrary_types_allowed = True
@@ -94,5 +95,6 @@ class WorkQueue(WcdBaseModel):
         self.channel.basic_consume(
             queue=self.queue_name, auto_ack=True, on_message_callback=callback
         )
-        print(" [*] Waiting for messages. To exit press CTRL+C")
-        self.channel.start_consuming()
+        if not self.testing:
+            print(" [*] Waiting for messages. To exit press CTRL+C")
+            self.channel.start_consuming()
