@@ -42,7 +42,7 @@ class WcdImportBot(WcdBaseModel):
     wikibase: Wikibase
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     # Use the Wikibase instance that the bot is instantiated with
-    work_queue: WorkQueue = WorkQueue(wikibase=wikibase)
+    work_queue: Optional[WorkQueue]
     wdqid: str = ""
 
     def __flush_cache__(self):
@@ -427,7 +427,7 @@ class WcdImportBot(WcdBaseModel):
             bot.__gather_and_print_statistics__()
         elif args.worker:
             console.print("Worker started")
-            work_queue = WorkQueue()
+            work_queue = WorkQueue(wikibase=self.wikibase)
             work_queue.listen_to_queue()
         elif args.ingestor:
             console.print("Ingestor started")
@@ -437,6 +437,7 @@ class WcdImportBot(WcdBaseModel):
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
     def __receive_workloads__(self):
+        self.work_queue = WorkQueue(wikibase=self.wikibase)
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):
