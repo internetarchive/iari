@@ -75,7 +75,8 @@ class WorkQueue(WcdBaseModel):
 
     def listen_to_queue(self):
         """This function is run by the wcdimportbot worker
-        There can be multiple workers running at the same time listening to the work queue"""
+        There can be multiple workers running at the same
+        time listening to the work queue"""
 
         def callback(channel, method, properties, body):
             logger.debug(" [x] Received %r" % body)
@@ -91,8 +92,8 @@ class WorkQueue(WcdBaseModel):
 
         self.__connect__()
         self.__setup_channel__()
-        self.__create_queue__()
         if not self.testing:
+            self.__create_queue__()
             self.channel.basic_consume(
                 queue=self.queue_name, auto_ack=True, on_message_callback=callback
             )
