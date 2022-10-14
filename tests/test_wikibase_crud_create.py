@@ -3,12 +3,13 @@ from datetime import datetime
 from typing import List
 from unittest import TestCase
 
-from dateutil.parser import isoparse
+from dateutil.parser import isoparse # type: ignore
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 from wikibaseintegrator.models import Claim  # type: ignore
 
 import config
-from src import console
+from src.helpers.console import console
+from src.helpers.wbi import get_item_value
 from src.models.return_ import Return
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
@@ -495,17 +496,15 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
         item = wbi.item.get(wppage.references[0].return_.item_qid)
-        assert (
-            item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0].mainsnak.datavalue[
-                "value"
-            ]
-            == wppage.wikibase.WIKIPEDIA_REFERENCE
+        instance_of_value = get_item_value(
+            item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0]
         )
+        assert instance_of_value == wppage.wikibase.WIKIPEDIA_REFERENCE
         item = wbi.item.get(wppage.return_.item_qid)
         assert (
-            item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0].mainsnak.datavalue[
-                "value"
-            ]
+            get_item_value(
+                claim=item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0]
+            )
             == wppage.wikibase.WIKIPEDIA_PAGE
         )
 
