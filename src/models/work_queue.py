@@ -64,7 +64,7 @@ class WorkQueue(WcdBaseModel):
     @validate_arguments
     def __send_message__(self, message: Message):
         if self.channel:
-            message_bytes = bytes(json.dumps(message.dict()), "utf-8")
+            message_bytes = bytes(json.dumps(message.json()), "utf-8")
             self.channel.basic_publish(
                 exchange="", routing_key=self.queue_name, body=message_bytes
             )
