@@ -75,7 +75,7 @@ class TestWikipediaArticle(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        from src.models.wikimedia.wikipedia.reference.english import (
+        from src.models.wikimedia.wikipedia.reference.english.english_reference import (
             EnglishWikipediaReference,
         )
 
@@ -136,7 +136,7 @@ class TestWikipediaArticle(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        from src.models.wikimedia.wikipedia.reference.english import (
+        from src.models.wikimedia.wikipedia.reference.english.english_reference import (
             EnglishWikipediaReference,
         )
 
