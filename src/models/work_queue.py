@@ -57,6 +57,7 @@ class WorkQueue(WcdBaseModel):
         self.channel = self.connection.channel()
 
     def __create_queue__(self):
+        """This is idempotent :)"""
         self.channel.queue_declare(queue=self.queue_name)
 
     def __close_connection__(self):
@@ -91,8 +92,8 @@ class WorkQueue(WcdBaseModel):
             message.process_data()
 
         self.__connect__()
-        self.__setup_channel__()
         if not self.testing:
+            self.__setup_channel__()
             self.__create_queue__()
             self.channel.basic_consume(
                 queue=self.queue_name, auto_ack=True, on_message_callback=callback
