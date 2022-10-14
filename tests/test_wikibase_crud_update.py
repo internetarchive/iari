@@ -34,7 +34,7 @@ class TestWikibaseCrudUpdate(TestCase):
     #     new_reference = EnglishWikipediaReference(**new_data)
     #     new_reference.wikibase = IASandboxWikibase()
     #     new_reference.finish_parsing_and_generate_hash()
-    #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
+    #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
     #     title = "Test"
     #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()

@@ -170,7 +170,7 @@ class TestWikibaseCrudCreate(TestCase):
 
     # @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     # def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
-    #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
+    #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
     #     title = "Democracy"
     #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()
@@ -231,7 +231,7 @@ class TestWikibaseCrudCreate(TestCase):
     # def test_uploading_a_page_reference_and_website_item(self):
     #     # wcd = WikibaseCrudDelete(wikibase=IASandboxWikibase())
     #     # wcd.delete_imported_items()
-    #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
+    #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
     #     title = "Democracy"
     #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()

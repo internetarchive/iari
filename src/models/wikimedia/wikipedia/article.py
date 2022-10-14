@@ -337,7 +337,7 @@ class WikipediaArticle(WcdItem):
             return True
 
     def __parse_templates__(self):
-        """We parse all the references into WikipediaPageReferences"""
+        """We parse all the references into WikipediaArticleReferences"""
         if self.wikitext is None:
             raise ValueError("self.wikitext was None")
         # We use the pywikibot template extracting function

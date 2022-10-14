@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class WikibaseCrudUpdate(WikibaseCrud):
     """This class handles all comparing and updating of Wikibase items
 
-    entity: is the entity to compare. Either a WikipediaPage or a WikipediaReference
+    entity: is the entity to compare. Either a WikipediaArticle or a WikipediaReference
     new_item: new item based on fresh data from Wikipedia
     wikibase_item: current item in the Wikibase
     wikipedia_article: is the page the reference belongs to"""
