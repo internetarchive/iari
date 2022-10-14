@@ -12,7 +12,7 @@ class TestEventStream(TestCase):
         es = EventStream(
             test_publishing=True,
             max_events_during_testing=config.max_events_during_testing,
-            wikibase=IASandboxWikibase()
+            wikibase=IASandboxWikibase(),
         )
         es.start_consuming()
         assert es.testing_publish_count == 1
