@@ -77,10 +77,13 @@ class WorkQueue(WcdBaseModel):
         There can be multiple workers running at the same time listening to the work queue"""
 
         def callback(channel, method, properties, body):
-            print(" [x] Received %r" % body)
+            logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
-            data = json.loads(body)
+            data = json.loads(str(body))
+            console.print(data)
             message = Message(**data)
+            print(f" [x] Received {message.title}")
+            # exit(0)
             message.wikibase = self.wikibase
             console.print(message.dict())
             message.process_data()
