@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.work_queue import WorkQueue
+from src.models.message import Message
 
 
 class TestWorkQueue(TestCase):
