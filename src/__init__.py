@@ -44,6 +44,7 @@ class WcdImportBot(WcdBaseModel):
     # Use the Wikibase instance that the bot is instantiated with
     work_queue: Optional[WorkQueue]
     wdqid: str = ""
+    testing: bool = False
 
     def __flush_cache__(self):
         self.__setup_cache__()
@@ -437,7 +438,7 @@ class WcdImportBot(WcdBaseModel):
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
     def __receive_workloads__(self):
-        self.work_queue = WorkQueue(wikibase=self.wikibase)
+        self.work_queue = WorkQueue(wikibase=self.wikibase, testing=self.testing)
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):

@@ -93,11 +93,11 @@ class WorkQueue(WcdBaseModel):
             message.process_data()
 
         self.__connect__()
+        self.__setup_channel__()
+        self.__create_queue__()
+        self.channel.basic_consume(
+            queue=self.queue_name, auto_ack=True, on_message_callback=callback
+        )
         if not self.testing:
-            self.__setup_channel__()
-            self.__create_queue__()
-            self.channel.basic_consume(
-                queue=self.queue_name, auto_ack=True, on_message_callback=callback
-            )
             print(" [*] Waiting for messages. To exit press CTRL+C")
             self.channel.start_consuming()
