@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List
 from unittest import TestCase
 
-from dateutil.parser import isoparse # type: ignore
+from dateutil.parser import isoparse  # type: ignore
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 from wikibaseintegrator.models import Claim  # type: ignore
 
@@ -497,7 +497,7 @@ class TestWikibaseCrudCreate(TestCase):
         wbi = WikibaseIntegrator()
         item = wbi.item.get(wppage.references[0].return_.item_qid)
         instance_of_value = get_item_value(
-            item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0]
+            claim=item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0]
         )
         assert instance_of_value == wppage.wikibase.WIKIPEDIA_REFERENCE
         item = wbi.item.get(wppage.return_.item_qid)
