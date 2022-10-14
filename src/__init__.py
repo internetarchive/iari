@@ -39,11 +39,10 @@ class WcdImportBot(WcdBaseModel):
     max_count: int = 0  # 0 means disabled
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
-    # total_number_of_hashed_references: Optional[int]
-    # total_number_of_references: Optional[int]
-    wikibase: Wikibase = IASandboxWikibase()
+    wikibase: Wikibase
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
-    work_queue: WorkQueue = WorkQueue()
+    # Use the Wikibase instance that the bot is instantiated with
+    work_queue: WorkQueue = WorkQueue(wikibase=wikibase)
     wdqid: str = ""
 
     def __flush_cache__(self):
@@ -438,8 +437,6 @@ class WcdImportBot(WcdBaseModel):
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
     def __receive_workloads__(self):
-        # We set it here to avoid bugs
-        self.work_queue.wikibase = self.wikibase
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):

@@ -20,11 +20,13 @@ logger = logging.getLogger(__name__)
 class WorkQueue(WcdBaseModel):
     """This models the RabbitMQ article queue
     We publish to this queue when ingesting page updates
-    and when receiving a WDQID via the wikicitaitons-api"""
+    and when receiving a title via the wikicitaitons-api
+    add-job endpoint"""
 
     connection: Optional[BlockingConnection]
     channel: Optional[BlockingChannel]
     queue_name: str = "article_queue"
+    wikibase: Wikibase
 
     class Config:
         arbitrary_types_allowed = True
@@ -76,6 +78,7 @@ class WorkQueue(WcdBaseModel):
             # Parse into OOP and do the work
             data = json.loads(body)
             message = Message(**data)
+            message.wikibase = self.wikibase
             console.print(message.dict())
             message.process_data()
 
