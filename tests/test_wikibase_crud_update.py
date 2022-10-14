@@ -9,7 +9,9 @@ import config
 from src import console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.reference.english.english_reference import EnglishWikipediaReference
+from src.models.wikimedia.wikipedia.reference.english.english_reference import (
+    EnglishWikipediaReference,
+)
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
