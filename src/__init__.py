@@ -431,7 +431,7 @@ class WcdImportBot(WcdBaseModel):
             work_queue.listen_to_queue()
         elif args.ingestor:
             console.print("Ingestor started")
-            event_stream = EventStream()
+            event_stream = EventStream(wikibase=self.wikibase)
             event_stream.start_consuming()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")

@@ -1,8 +1,12 @@
 import json
 import logging
 from datetime import datetime
+from typing import Optional
 from urllib.parse import quote
 
+from src.models.exceptions import MissingInformationError
+from src.models.message import Message
+from src.models.wikibase import Wikibase
 from src.models.wikimedia.enums import WikimediaEditType, WikimediaSite
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
@@ -27,6 +31,7 @@ class WikimediaEvent(WcdBaseModel):
     namespace: int
     title: str = ""
     event_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    wikibase: Optional[Wikibase]
 
     @property
     def domain(self):
@@ -49,6 +54,11 @@ class WikimediaEvent(WcdBaseModel):
 
     def publish_to_article_queue(self):
         logger.debug("publish_to_article_queue: Running")
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         logger.info(f"Publishing message with {self.title}")
-        work_queue = WorkQueue()
-        work_queue.publish(message=bytes(json.dumps(dict(title=self.title)), "utf-8"))
+        # TODO we should only create and connect
+        # to the work queue once so move this up to EventStream
+        work_queue = WorkQueue(wikibase=self.wikibase)
+        message = Message(title=self.title, wikibase=self.wikibase)
+        work_queue.publish(message=message)

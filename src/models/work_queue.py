@@ -33,7 +33,7 @@ class WorkQueue(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @validate_arguments
-    def publish(self, message: bytes):
+    def publish(self, message: Message):
         """This publishes a message to the default work queue"""
         self.__connect__()
         self.__setup_channel__()
@@ -61,10 +61,12 @@ class WorkQueue(WcdBaseModel):
     def __close_connection__(self):
         self.connection.close()
 
-    def __send_message__(self, message: bytes):
+    @validate_arguments
+    def __send_message__(self, message: Message):
         if self.channel:
+            message_bytes = bytes(json.dumps(message.dict()), "utf-8")
             self.channel.basic_publish(
-                exchange="", routing_key=self.queue_name, body=message
+                exchange="", routing_key=self.queue_name, body=message_bytes
             )
             print(" [x] Sent message!")
         else:
