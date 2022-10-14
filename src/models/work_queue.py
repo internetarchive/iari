@@ -54,6 +54,7 @@ class WorkQueue(WcdBaseModel):
         )
 
     def __setup_channel__(self):
+        """This is idempotent :)"""
         self.channel = self.connection.channel()
 
     def __create_queue__(self):
