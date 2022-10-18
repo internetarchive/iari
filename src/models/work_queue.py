@@ -2,7 +2,6 @@ import json
 import logging
 from typing import Optional
 
-import backoff
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.exceptions import AMQPConnectionError
@@ -34,15 +33,19 @@ class WorkQueue(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @validate_arguments
-    def publish(self, message: Message):
+    def publish(self, message: Message) -> bool:
         """This publishes a message to the default work queue"""
-        self.__connect__()
+        try:
+            self.__connect__()
+        except AMQPConnectionError:
+            return False
         self.__setup_channel__()
         self.__create_queue__()
         self.__send_message__(message=message)
         self.__close_connection__()
+        return True
 
-    @backoff.on_exception(backoff.expo, AMQPConnectionError, max_time=60)
+    #@backoff.on_exception(backoff.expo, AMQPConnectionError, max_time=60)
     def __connect__(self):
         self.connection = BlockingConnection(
             ConnectionParameters(

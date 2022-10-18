@@ -2,6 +2,8 @@ from unittest import TestCase
 
 from src.models.message import Message
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from pydantic import ValidationError
+
 from src.models.work_queue import WorkQueue
 
 
@@ -19,3 +21,8 @@ class TestWorkQueue(TestCase):
     def test_listen(self):
         w = WorkQueue(wikibase=IASandboxWikibase(), testing=True)
         w.listen_to_queue()
+
+    def test_publish_no_message(self):
+        wq = WorkQueue()
+        with self.assertRaises(ValidationError):
+            assert wq.publish() is True
