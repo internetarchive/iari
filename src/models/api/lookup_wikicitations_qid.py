@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 class LookupWikicitationsQid(BaseModel):
     wikibase = WikiCitationsWikibase()
     # lookup the wcdqid based on the wdqid
+
     @staticmethod
-    def __setup_wikibase_integrator_configuration__(
-    ) -> None:
+    def __setup_wikibase_integrator_configuration__() -> None:
         wikibase = WikiCitationsWikibase()
         wbi_config.config["USER_AGENT"] = config.user_agent
         wbi_config.config["WIKIBASE_URL"] = wikibase.wikibase_url
