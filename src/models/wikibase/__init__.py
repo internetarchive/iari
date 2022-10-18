@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Iterable
+from typing import Dict, Iterable, Optional
 
 from dateutil.parser import isoparse
 from pydantic import validate_arguments
@@ -8,6 +8,7 @@ from wikibaseintegrator.models import Claim  # type: ignore
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
+
 
 class Wikibase(WcdBaseModel):
     """This is a parent class for the wikibases we support

@@ -1,7 +1,7 @@
 from typing import Optional
 
-from flask import request # type: ignore
-from flask_restful import Resource, abort # type: ignore
+from flask import request  # type: ignore
+from flask_restful import Resource, abort  # type: ignore
 
 from app import logger
 from src.helpers.console import console

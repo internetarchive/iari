@@ -1,6 +1,6 @@
 from typing import Union
 
-from flask_restful import Resource # type: ignore
+from flask_restful import Resource  # type: ignore
 
 from src.models.api.enums import Return
 from src.models.api.lookup_wikicitations_qid import LookupWikicitationsQid

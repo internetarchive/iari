@@ -5,8 +5,8 @@ https://rapidapi.com/blog/how-to-build-an-api-in-python/
 """
 import logging
 
-from flask import Flask # type: ignore
-from flask_restful import Api # type: ignore
+from flask import Flask  # type: ignore
+from flask_restful import Api  # type: ignore
 
 import config
 from src.models.api.add_job_to_queue import AddJobToQueue
@@ -23,4 +23,4 @@ api.add_resource(
 )  # ?lang=<string:language_code>&site=<string:wikimedia_site>&title=<string:title>")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

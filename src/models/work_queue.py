@@ -45,7 +45,7 @@ class WorkQueue(WcdBaseModel):
         self.__close_connection__()
         return True
 
-    #@backoff.on_exception(backoff.expo, AMQPConnectionError, max_time=60)
+    # @backoff.on_exception(backoff.expo, AMQPConnectionError, max_time=60)
     def __connect__(self):
         self.connection = BlockingConnection(
             ConnectionParameters(
