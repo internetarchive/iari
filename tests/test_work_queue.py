@@ -21,7 +21,7 @@ class TestWorkQueue(TestCase):
     def test_publish_no_message(self):
         w = WorkQueue(wikibase=IASandboxWikibase())
         with self.assertRaises(ValidationError):
-            w.publish()
+            w.publish() # type: ignore
 
     def test_listen(self):
         w = WorkQueue(wikibase=IASandboxWikibase(), testing=True)
