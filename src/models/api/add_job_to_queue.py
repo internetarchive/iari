@@ -8,8 +8,11 @@ from src.helpers.console import console
 from src.models.api.add_job_schema import AddJobSchema
 from src.models.api.job import Job
 from src.models.api.send_job_to_article_queue import SendJobToArticleQueue
+from src.models.message import Message
+from src.models.wikimedia.enums import WikimediaSite
 
 logger = logging.getLogger(__name__)
+
 
 class AddJobToQueue(Resource):
     schema = AddJobSchema()
@@ -20,9 +23,11 @@ class AddJobToQueue(Resource):
         # TODO handle URL encoding of the title
         if self.job.lang == "en" and self.job.title and self.job.site == "wikipedia":
             queue = SendJobToArticleQueue(
-                language_code=self.job.lang,
-                title=self.job.title,
-                wikimedia_site=self.job.site,
+                message=Message(
+                    language_code=self.job.lang,
+                    title=self.job.title,
+                    wikimedia_site=WikimediaSite(self.job.site),
+                )
             )
             logger.info("Publishing to queue")
             if self.job.testing:
