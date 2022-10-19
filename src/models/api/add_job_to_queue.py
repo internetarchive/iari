@@ -1,14 +1,15 @@
+import logging
 from typing import Optional
 
 from flask import request  # type: ignore
 from flask_restful import Resource, abort  # type: ignore
 
-from app import logger
 from src.helpers.console import console
 from src.models.api.add_job_schema import AddJobSchema
 from src.models.api.job import Job
 from src.models.api.send_job_to_article_queue import SendJobToArticleQueue
 
+logger = logging.getLogger(__name__)
 
 class AddJobToQueue(Resource):
     schema = AddJobSchema()
