@@ -1,8 +1,6 @@
 import logging
 import os
 
-from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-
 # Login credentials to WikiCitations
 user = ""
 pwd = ""
@@ -35,7 +33,7 @@ title_allow_list = [
     "Easter island",
 ]
 max_events_during_testing = 10
-wikicitations_api_wikibase_backend = IASandboxWikibase()
+use_sandbox_wikibase_backend_for_wikicitations_api = True
 
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation

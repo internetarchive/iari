@@ -4,6 +4,9 @@ from pydantic import BaseModel
 
 import config
 from src.models.message import Message
+from src.models.wikibase import Wikibase
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.work_queue import WorkQueue
 
 logger = logging.getLogger(__name__)
@@ -17,7 +20,11 @@ class SendJobToArticleQueue(BaseModel):
         logger.debug("publish_to_article_queue: Running")
         logger.info(f"Publishing message with {self.message.dict()}")
         if not self.testing:
-            work_queue = WorkQueue(wikibase=config.wikicitations_api_wikibase_backend)
+            if config.use_sandbox_wikibase_backend_for_wikicitations_api:
+                wikibase: Wikibase = IASandboxWikibase()
+            else:
+                wikibase = WikiCitationsWikibase()
+            work_queue = WorkQueue(wikibase=wikibase)
             return work_queue.publish(message=self.message)
         else:
             return False
