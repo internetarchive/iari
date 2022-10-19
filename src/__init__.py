@@ -36,14 +36,13 @@ class WcdImportBot(WcdBaseModel):
 
     cache: Optional[Cache]
     language_code: str = "en"
-    max_count: int = 0  # 0 means disabled
+    event_max_count: int = 0  # 0 means disabled
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
     wikibase: Wikibase
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
-    # Use the Wikibase instance that the bot is instantiated with
     work_queue: Optional[WorkQueue]
-    wdqid: str = ""
+    wikidata_qid: str = ""
     testing: bool = False
 
     def __flush_cache__(self):
@@ -296,7 +295,7 @@ class WcdImportBot(WcdBaseModel):
 
         if max_count is not None:
             logger.debug(f"Setting max_count to {max_count}")
-            self.max_count = int(max_count)
+            self.event_max_count = int(max_count)
         count: int = 0
         # https://stackoverflow.com/questions/59605802/
         # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
@@ -304,7 +303,7 @@ class WcdImportBot(WcdBaseModel):
         if category_title:
             category_page = Category(title=category_title, source=site)
             for page in category_page.articles(recurse=True):
-                if self.max_count and count >= self.max_count:
+                if self.event_max_count and count >= self.event_max_count:
                     logger.debug("breaking now")
                     break
                 # page: Page = page
@@ -329,7 +328,7 @@ class WcdImportBot(WcdBaseModel):
                     wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
         else:
             for page in site.allpages(namespace=0):
-                if count >= self.max_count:
+                if count >= self.event_max_count:
                     break
                 # page: Page = page
                 if not page.isRedirectPage():
@@ -448,7 +447,7 @@ class WcdImportBot(WcdBaseModel):
             wikibase=self.wikibase,
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
-            wdqid=self.wdqid,
+            wdqid=self.wikidata_qid,
         )
         page.__get_wikipedia_article_from_wdqid__()
         page.extract_and_parse_and_upload_missing_items_to_wikibase()

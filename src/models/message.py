@@ -31,7 +31,7 @@ class Message(WcdBaseModel):
                     bot.page_title = self.title
                     bot.get_and_extract_page_by_title()
                 if self.article_wikidata_qid:
-                    bot.wdqid = self.article_wikidata_qid
+                    bot.wikidata_qid = self.article_wikidata_qid
                     bot.get_and_extract_page_by_wdqid()
         else:
             console.print("Did not get a title or a article_wikidata_qid")
