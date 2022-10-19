@@ -13,11 +13,11 @@ jobs:
         with:
           python-version: 3.x
           cache: 'poetry'
-      - name: Redis Server in GitHub Actions
-        uses: supercharge/redis-github-action@1.4.0
+#      - name: Redis Server in GitHub Actions
+#        uses: supercharge/redis-github-action@1.4.0
       - run: pip install --upgrade pip wheel
       - run: poetry install --with=dev
-      - run: poetry run bandit --recursive --skip B101,B324 .  # B101 is assert statements
+      - run: poetry run bandit --recursive --skip B101,B105,B324 .  # B101 is assert statements
       - run: poetry run black --check .
       - run: poetry run codespell  # --ignore-words-list="" --skip="*.css,*.js,*.lock"
       - run: poetry run flake8 --ignore=C408,C416,F401,F541,R501,R502,R503,R504,W503
