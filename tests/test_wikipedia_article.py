@@ -12,7 +12,7 @@ logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class TestWikipediaPage(TestCase):
+class TestWikipediaArticle(TestCase):
     def test_fix_dash(self):
         from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
@@ -46,9 +46,9 @@ class TestWikipediaPage(TestCase):
         assert page.title == "Test"
 
     # def test_get_wcdqid_from_hash_via_sparql(self):
-    #     from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaPage
+    #     from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
     #
-    #     page = WikipediaPage(
+    #     page = WikipediaArticle(
     #         wikibase=IASandboxWikibase(),
     #         language_code="en",
     #         wikimedia_site=WikimediaSite.WIKIPEDIA,
@@ -75,7 +75,7 @@ class TestWikipediaPage(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        from src.models.wikimedia.wikipedia.reference.english import (
+        from src.models.wikimedia.wikipedia.reference.english.english_reference import (
             EnglishWikipediaReference,
         )
 
@@ -136,7 +136,7 @@ class TestWikipediaPage(TestCase):
             url="https://archive.org/details/catalogueofshipw0000wils/",
             template_name="cite book",
         )
-        from src.models.wikimedia.wikipedia.reference.english import (
+        from src.models.wikimedia.wikipedia.reference.english.english_reference import (
             EnglishWikipediaReference,
         )
 

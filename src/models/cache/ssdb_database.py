@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any, Optional
 
 import pyssdb  # type: ignore
@@ -21,6 +22,14 @@ class SsdbDatabase(WcdBaseModel):
     connection: Optional[Any]
 
     def connect(self):
+        # https://stackoverflow.com/questions/73973332/check-if-were-in-a-github-action-tracis-ci-circle-ci-etc-testing-environme
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            # Use the Redis port for testing
+            self.port = 6379
+        else:
+            logger.info(
+                f'os.getenv("GITHUB_ACTIONS") was {os.getenv("GITHUB_ACTIONS")}'
+            )
         try:
             self.connection = pyssdb.Client(
                 host=self.host,

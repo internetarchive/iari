@@ -20,10 +20,10 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.reference.english.schema import (
     EnglishWikipediaReferenceSchema,
 )
+from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
 logger = logging.getLogger(__name__)
 
@@ -168,25 +168,20 @@ class WikipediaArticle(WcdItem):
         self.__parse_templates__()
         self.__print_hash_statistics__()
 
-    def __fetch_page_data__(self, title: str = "") -> None:
+    def __fetch_page_data__(self) -> None:
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
         # TODO refactor this into new class?
         logger.debug("__fetch_page_data__: Running")
+        if not self.title:
+            raise MissingInformationError("self.title was empty string")
         if (
             not self.latest_revision_id
             or not self.latest_revision_date
             or not self.wikitext
             or not self.page_id
         ):
-            if not title and self.title:
-                title = self.title
-            elif not title and not self.title:
-                raise MissingInformationError(
-                    "Both self.title and title are empty or None"
-                )
-            else:
-                self.title = title
+            title = self.title
             # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base
             title = title.replace(" ", "_")
             url = f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/rest.php/v1/page/{title}"
@@ -315,10 +310,10 @@ class WikipediaArticle(WcdItem):
         logger.debug(self.md5hash)
 
     @validate_arguments
-    def __get_wikipedia_article_from_title__(self, title: str):
+    def __get_wikipedia_article_from_title__(self):
         """Get the page from the Wikimedia site"""
         logger.info("Fetching the page data")
-        self.__fetch_page_data__(title=title)
+        self.__fetch_page_data__()
 
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
@@ -342,7 +337,7 @@ class WikipediaArticle(WcdItem):
             return True
 
     def __parse_templates__(self):
-        """We parse all the references into WikipediaPageReferences"""
+        """We parse all the references into WikipediaArticleReferences"""
         if self.wikitext is None:
             raise ValueError("self.wikitext was None")
         # We use the pywikibot template extracting function

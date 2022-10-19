@@ -173,7 +173,10 @@ class Cache(WcdBaseModel):
         of a given title in a
         given Wikimediasite"""
         if self.ssdb:
-            return float(self.ssdb.get_value(key=key))
+            try:
+                return float(self.ssdb.get_value(key=key))
+            except TypeError:
+                return 0.0
         else:
             raise ValueError("self.ssdb was None")
 

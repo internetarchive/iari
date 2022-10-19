@@ -61,6 +61,10 @@ class Website(WcdItem):
         using the first_level_domain_of_url_hash and the cache if
         enabled and uploads a new item if not"""
         logger.debug("check_and_upload_website_item_to_wikibase_if_missing: Running")
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+
+        if not isinstance(wikipedia_article, WikipediaArticle):
+            raise TypeError("not a WikipediaArticle")
         if self.reference is None:
             raise ValueError("reference was None")
         if self.reference.first_level_domain_of_url_hash is None:
@@ -93,6 +97,10 @@ class Website(WcdItem):
     def __upload_website_and_insert_in_the_cache__(
         self, wikipedia_article: WcdItem
     ) -> None:
+        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+
+        if not isinstance(wikipedia_article, WikipediaArticle):
+            raise TypeError("not a WikipediaArticle")
         self.return_ = self.__upload_website_to_wikibase__(
             wikipedia_article=wikipedia_article
         )

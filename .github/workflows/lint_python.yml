@@ -7,24 +7,27 @@ jobs:
       ia_sandbox: ${{ secrets.ia_sandbox }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
+          cache: 'poetry'
+#      - name: Redis Server in GitHub Actions
+#        uses: supercharge/redis-github-action@1.4.0
       - run: pip install --upgrade pip wheel
-      - run: pip install bandit black codespell flake8 flake8-2020 flake8-bugbear
-                         flake8-comprehensions flake8-return isort mypy pytest pyupgrade safety
-      - run: bandit --recursive --skip B101,B324 .  # B101 is assert statements
-      - run: black --check .
-      - run: codespell  # --ignore-words-list="" --skip="*.css,*.js,*.lock"
-      - run: flake8 --ignore=C408,C416,F401,F541,R501,R502,R503,R504,W503
+      - run: poetry install --with=dev
+      - run: poetry run bandit --recursive --skip B101,B105,B324 .  # B101 is assert statements
+      - run: poetry run black --check .
+      - run: poetry run codespell  # --ignore-words-list="" --skip="*.css,*.js,*.lock"
+      - run: poetry run flake8 --ignore=C408,C416,F401,F541,R501,R502,R503,R504,W503
                     --max-complexity=21 --max-line-length=162 --show-source --statistics .
-      - run: isort --check-only --profile black . || true
-      - run: pip install -r requirements.txt
+      - run: poetry run isort --check-only --profile black . || true
       - run: mkdir --parents --verbose .mypy_cache
-      - run: mypy --ignore-missing-imports --install-types --non-interactive .
-      - run: cp config.py.sample config.py
+      - run: poetry run mypy --ignore-missing-imports --install-types --non-interactive .
+      - run: cp config_sample.py config.py
         # https://docs.pytest.org/en/latest/how-to/usage.html#specifying-which-tests-to-run
         # Run only one test while we test if the secret work
-      - run: pytest tests/test_wikibase_crud_create.py::TestWikibaseCrudCreate::test_prepare_and_upload_website_item #--durations=10 .
-      - run: shopt -s globstar && pyupgrade --keep-runtime-typing --py37-plus **/*.py
-      - run: safety check
+      - run: poetry run pytest tests/test_wikibase_crud_create.py::TestWikibaseCrudCreate::test_prepare_and_upload_website_item #--durations=10 .
+      - run: shopt -s globstar && poetry run pyupgrade --keep-runtime-typing --py37-plus **/*.py
+      - run: poetry run safety check

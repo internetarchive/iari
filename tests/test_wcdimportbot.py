@@ -90,5 +90,5 @@ class TestWcdImportBot(TestCase):
 
     def test_receive(self):
         """We test that we can connect to rabbitmq and listen"""
-        bot = WcdImportBot(wikibase=IASandboxWikibase())
+        bot = WcdImportBot(wikibase=IASandboxWikibase(), testing=True)
         bot.__receive_workloads__()

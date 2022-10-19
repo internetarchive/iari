@@ -9,7 +9,9 @@ import config
 from src import console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.reference.english import EnglishWikipediaReference
+from src.models.wikimedia.wikipedia.reference.english.english_reference import (
+    EnglishWikipediaReference,
+)
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
@@ -34,7 +36,7 @@ class TestWikibaseCrudUpdate(TestCase):
     #     new_reference = EnglishWikipediaReference(**new_data)
     #     new_reference.wikibase = IASandboxWikibase()
     #     new_reference.finish_parsing_and_generate_hash()
-    #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
+    #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
     #     title = "Test"
     #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()

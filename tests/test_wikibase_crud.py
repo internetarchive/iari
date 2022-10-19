@@ -72,7 +72,7 @@ class TestWikibaseCrud(TestCase):
 # def test_P19_claims(self):
 #     site = pywikibot.Site(code="en", fam=WikimediaSite.WIKIPEDIA.value)
 #
-#     page = WikipediaPage(
+#     page = WikipediaArticle(
 #         pywikibot_site=site,
 #         language_code="en",
 #         wikimedia_site=WikimediaSite.WIKIPEDIA,

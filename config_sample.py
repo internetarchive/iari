@@ -1,7 +1,7 @@
 import logging
 import os
 
-# Login credentials
+# Login credentials to WikiCitations
 user = ""
 pwd = ""
 
@@ -32,7 +32,8 @@ reference_update_delay_in_hours = 24
 title_allow_list = [
     "Easter island",
 ]
-max_events = 10
+max_events_during_testing = 10
+use_sandbox_wikibase_backend_for_wikicitations_api = True
 
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation

@@ -14,7 +14,9 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.create import WikibaseCrudCreate
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.reference.english import EnglishWikipediaReference
+from src.models.wikimedia.wikipedia.reference.english.english_reference import (
+    EnglishWikipediaReference,
+)
 from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
@@ -170,7 +172,7 @@ class TestWikibaseCrudCreate(TestCase):
 
     # @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
     # def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
-    #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
+    #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
     #     title = "Democracy"
     #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()
@@ -231,7 +233,7 @@ class TestWikibaseCrudCreate(TestCase):
     # def test_uploading_a_page_reference_and_website_item(self):
     #     # wcd = WikibaseCrudDelete(wikibase=IASandboxWikibase())
     #     # wcd.delete_imported_items()
-    #     wppage = WikipediaPage(wikibase=IASandboxWikibase())
+    #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
     #     title = "Democracy"
     #     wppage.__get_wikipedia_article_from_title__(title=title)
     #     wppage.__generate_hash__()

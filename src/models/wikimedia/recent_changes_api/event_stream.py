@@ -8,6 +8,7 @@ from aiohttp import ClientPayloadError  # type: ignore
 from aiosseclient import aiosseclient  # type: ignore
 
 import config
+from src.models.wikibase import Wikibase
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.recent_changes_api.event import WikimediaEvent
 from src.wcd_base_model import WcdBaseModel
@@ -20,10 +21,11 @@ class EventStream(WcdBaseModel):
     event_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     event_count: int = 0
     earlier_events: Set[str] = set()
-    max_events: int = 0
+    max_events_during_testing: int = 0
     testing_publish_count = 0
     test_publishing = False
     loop: Optional[AbstractEventLoop]
+    wikibase: Wikibase
 
     class Config:
         arbitrary_types_allowed = True
@@ -44,6 +46,7 @@ class EventStream(WcdBaseModel):
                     # console.print(data)
                     wmf_event = WikimediaEvent(**data)
                     wmf_event.event_site = self.event_site
+                    wmf_event.wikibase = self.wikibase
                     if (
                         wmf_event.title
                         and wmf_event.is_enwiki
@@ -88,4 +91,4 @@ class EventStream(WcdBaseModel):
     @property
     def __reached_max_events__(self) -> bool:
         """Check whether max events is more than 0 and if we reached it"""
-        return bool(0 < self.max_events <= self.event_count)
+        return bool(0 < self.max_events_during_testing <= self.event_count)

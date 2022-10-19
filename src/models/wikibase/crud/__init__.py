@@ -1162,7 +1162,7 @@ class WikibaseCrud(WcdBaseModel):
         from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):
-            raise ValueError("did not get a WikipediaPage object")
+            raise ValueError("did not get a WikipediaArticle object")
         self.__prepare_reference_claim__(wikipedia_article=wikipedia_article)
         item = self.__prepare_new_wikipedia_article_item__(
             wikipedia_article=wikipedia_article

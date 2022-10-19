@@ -6,7 +6,9 @@ from src import console
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
-from src.models.wikimedia.wikipedia.reference.english import EnglishWikipediaReference
+from src.models.wikimedia.wikipedia.reference.english.english_reference import (
+    EnglishWikipediaReference,
+)
 from src.models.wikimedia.wikipedia.reference.english.google_books import GoogleBooks
 from src.models.wikimedia.wikipedia.reference.english.schema import (
     EnglishWikipediaReferenceSchema,
