@@ -9,7 +9,6 @@ class WcdWikibaseModel(WcdBaseModel):
     target_wikibase: SupportedWikibase = SupportedWikibase.IASandboxWikibase
     wikibase: Wikibase
 
-
     def setup_wikibase(self):
         if self.target_wikibase == SupportedWikibase.IASandboxWikibase:
             self.wikibase = IASandboxWikibase()
@@ -17,4 +16,3 @@ class WcdWikibaseModel(WcdBaseModel):
             self.wikibase = WikiCitationsWikibase()
         else:
             raise Exception("target_wikibase error")
-
