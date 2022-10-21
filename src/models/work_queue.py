@@ -86,6 +86,8 @@ class WorkQueue(WcdBaseModel):
         def callback(channel, method, properties, body):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
+            console.print(body)
+            exit(0)
             data = json.loads(str(body))
             console.print(data)
             message = Message(**data)
