@@ -93,18 +93,11 @@ class WorkQueue(WcdWikibaseModel):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
             decoded_body = body.decode("utf-8")
-            console.print(decoded_body)
-            print(type(decoded_body))
-            json_data = json.loads(decoded_body)
-            print(type(json_data))
-            console.print(json_data)
-            json_data2 = json.loads(json_data)
-            print(type(json_data2))
-            console.print(json_data2)
-            exit(0)
+            json_data_string = json.loads(decoded_body)
+            json_data_dict = json.loads(json_data_string)
             if config.loglevel == logging.DEBUG:
-                console.print(json_data)
-            message = Message(**json_data)
+                console.print(json_data_dict)
+            message = Message(**json_data_dict)
             print(f" [x] Received {message.title} job for {message.target_wikibase.name}")
             # We setup the message.wikibase here to make sure we work on the right instance
             message.setup_wikibase()
