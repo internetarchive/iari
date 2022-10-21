@@ -93,8 +93,9 @@ class WorkQueue(WcdWikibaseModel):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
             decoded_body = body.decode("utf-8")
-            json_data = dict(json.loads(decoded_body))
+            json_data = json.loads(decoded_body)
             print(type(json_data))
+            exit(0)
             if config.loglevel == logging.DEBUG:
                 console.print(json_data)
             message = Message(**json_data)
