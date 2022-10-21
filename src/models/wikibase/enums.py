@@ -34,5 +34,5 @@ class WriteRequired(Enum):
 
 
 class SupportedWikibase(Enum):
-    IASandboxWikibase = auto()
-    WikiCitationsWikibase = auto()
+    IASandboxWikibase = "ia-sandbox-wikibase"
+    WikiCitationsWikibase = "wiki-citations-wikibase"
