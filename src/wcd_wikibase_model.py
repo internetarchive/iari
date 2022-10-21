@@ -1,4 +1,4 @@
-from src import WcdBaseModel
+from src.wcd_base_model import WcdBaseModel
 from src.models.wikibase import Wikibase
 from src.models.wikibase.enums import SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
