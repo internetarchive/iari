@@ -67,11 +67,15 @@ class WorkQueue(WcdWikibaseModel):
 
     @validate_arguments
     def __send_message__(self, message: Message):
+        logger.debug("__send_message__: Running")
         if self.channel:
             # We remove this for security reasons because it contains a password
             # and it also lowers the number of transmitted and stored bytes which
             # is better for the environment.
-            delattr(message, "wikibase")
+            #delattr(message, "wikibase")
+            del message.wikibase
+            console.print(message.dict())
+            exit(0)
             message_bytes = bytes(json.dumps(message.json()), "utf-8")
             self.channel.basic_publish(
                 exchange="", routing_key=self.queue_name, body=message_bytes
@@ -89,18 +93,20 @@ class WorkQueue(WcdWikibaseModel):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
             decoded_body = body.decode("utf-8")
-            console.print(decoded_body)
+            # console.print(decoded_body)
             data = json.loads(decoded_body)
-            console.print(data)
-            exit(0)
+            # console.print(data)
+            # exit(0)
             message = Message(**data)
             print(f" [x] Received {message.title}")
             # exit(0)
-            message.wikibase = self.wikibase
-            console.print(message.dict())
+            # We setup the message.wikibase here to make sure we work on the right instance
+            message.setup_wikibase()
+            if config.loglevel == logging.DEBUG:
+                console.print(message.dict())
             message.process_data()
 
-        self.setup_wikibase()
+        # self.setup_wikibase()
         self.__connect__()
         self.__setup_channel__()
         self.__create_queue__()
