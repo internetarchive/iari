@@ -11,7 +11,7 @@ from wikibaseintegrator.wbi_enums import ActionIfExists  # type: ignore
 from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 import config
-from src import console
+from src.helpers.console import console
 from src.models.exceptions import MissingInformationError
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.crud import WikibaseCrud

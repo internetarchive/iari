@@ -8,10 +8,10 @@ from pika.exceptions import AMQPConnectionError
 from pydantic import validate_arguments
 
 import config
-from src import WcdWikibaseModel
 from src.helpers.console import console
 from src.models.exceptions import NoChannelError
 from src.models.message import Message
+from src.wcd_wikibase_model import WcdWikibaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class WorkQueue(WcdWikibaseModel):
         def callback(channel, method, properties, body):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
-            decoded_body = body.decode('utf-8')
+            decoded_body = body.decode("utf-8")
             console.print(decoded_body)
             data = json.loads(decoded_body)
             console.print(data)

@@ -13,7 +13,7 @@ from marshmallow.exceptions import ValidationError
 from pydantic import validate_arguments
 
 import config
-from src import console
+from src.helpers.console import console
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.return_.wikibase_return import WikibaseReturn

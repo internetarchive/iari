@@ -6,7 +6,7 @@ from dateutil.parser import isoparse
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
-from src import console
+from src.helpers.console import console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.english.english_reference import (

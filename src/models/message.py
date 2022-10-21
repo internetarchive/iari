@@ -1,14 +1,12 @@
 from datetime import datetime
 from typing import Optional
 
-from src import WcdWikibaseModel
 from src.helpers.console import console
 from src.models.update_delay import UpdateDelay
-from src.models.wikibase import Wikibase
 from src.models.wikibase.enums import SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
-from src.wcd_base_model import WcdBaseModel
+from src.wcd_wikibase_model import WcdWikibaseModel
 
 
 class Message(WcdWikibaseModel):
@@ -29,7 +27,9 @@ class Message(WcdWikibaseModel):
         if self.title or self.article_wikidata_qid:
             from src import WcdImportBot
 
-            bot = WcdImportBot(target_wikibase=self.target_wikibase, wikibase=self.wikibase)
+            bot = WcdImportBot(
+                target_wikibase=self.target_wikibase, wikibase=self.wikibase
+            )
             update_delay = UpdateDelay(object_=self)
             if update_delay.time_to_update:
                 if self.title:
