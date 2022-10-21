@@ -72,7 +72,7 @@ class WorkQueue(WcdWikibaseModel):
             # We remove this for security reasons because it contains a password
             # and it also lowers the number of transmitted and stored bytes which
             # is better for the environment.
-            #delattr(message, "wikibase")
+            # delattr(message, "wikibase")
             del message.wikibase
             if config.loglevel == logging.DEBUG:
                 console.print(message.dict())
@@ -98,7 +98,9 @@ class WorkQueue(WcdWikibaseModel):
             if config.loglevel == logging.DEBUG:
                 console.print(json_data_dict)
             message = Message(**json_data_dict)
-            print(f" [x] Received {message.title} job for {message.target_wikibase.name}")
+            print(
+                f" [x] Received {message.title} job for {message.target_wikibase.name}"
+            )
             # We setup the message.wikibase here to make sure we work on the right instance
             message.setup_wikibase()
             if config.loglevel == logging.DEBUG:

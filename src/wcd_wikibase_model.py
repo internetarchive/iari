@@ -1,8 +1,8 @@
-from src.wcd_base_model import WcdBaseModel
 from src.models.wikibase import Wikibase
 from src.models.wikibase.enums import SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
+from src.wcd_base_model import WcdBaseModel
 
 
 class WcdWikibaseModel(WcdBaseModel):
