@@ -74,8 +74,8 @@ class WorkQueue(WcdWikibaseModel):
             # is better for the environment.
             #delattr(message, "wikibase")
             del message.wikibase
-            console.print(message.dict())
-            exit(0)
+            if config.loglevel == logging.DEBUG:
+                console.print(message.dict())
             message_bytes = bytes(json.dumps(message.json()), "utf-8")
             self.channel.basic_publish(
                 exchange="", routing_key=self.queue_name, body=message_bytes
