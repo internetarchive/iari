@@ -11,13 +11,12 @@ import config
 from src.helpers.console import console
 from src.models.exceptions import NoChannelError
 from src.models.message import Message
-from src.models.wikibase import Wikibase
-from src.wcd_base_model import WcdBaseModel
+from src.wcd_wikibase_model import WcdWikibaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WorkQueue(WcdBaseModel):
+class WorkQueue(WcdWikibaseModel):
     """This models the RabbitMQ article queue
     We publish to this queue when ingesting page updates
     and when receiving a title via the wikicitaitons-api
@@ -26,7 +25,6 @@ class WorkQueue(WcdBaseModel):
     connection: Optional[BlockingConnection]
     channel: Optional[BlockingChannel]
     queue_name: str = "article_queue"
-    wikibase: Wikibase
     testing: bool = False
 
     class Config:
@@ -69,7 +67,15 @@ class WorkQueue(WcdBaseModel):
 
     @validate_arguments
     def __send_message__(self, message: Message):
+        logger.debug("__send_message__: Running")
         if self.channel:
+            # We remove this for security reasons because it contains a password
+            # and it also lowers the number of transmitted and stored bytes which
+            # is better for the environment.
+            # delattr(message, "wikibase")
+            del message.wikibase
+            if config.loglevel == logging.DEBUG:
+                console.print(message.dict())
             message_bytes = bytes(json.dumps(message.json()), "utf-8")
             self.channel.basic_publish(
                 exchange="", routing_key=self.queue_name, body=message_bytes
@@ -86,17 +92,22 @@ class WorkQueue(WcdBaseModel):
         def callback(channel, method, properties, body):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
-            console.print(body)
-            exit(0)
-            data = json.loads(str(body))
-            console.print(data)
-            message = Message(**data)
-            print(f" [x] Received {message.title}")
-            # exit(0)
-            message.wikibase = self.wikibase
-            console.print(message.dict())
+            decoded_body = body.decode("utf-8")
+            json_data_string = json.loads(decoded_body)
+            json_data_dict = json.loads(json_data_string)
+            if config.loglevel == logging.DEBUG:
+                console.print(json_data_dict)
+            message = Message(**json_data_dict)
+            print(
+                f" [x] Received {message.title} job for {message.target_wikibase.name}"
+            )
+            # We setup the message.wikibase here to make sure we work on the right instance
+            message.setup_wikibase()
+            if config.loglevel == logging.DEBUG:
+                console.print(message.dict())
             message.process_data()
 
+        # self.setup_wikibase()
         self.__connect__()
         self.__setup_channel__()
         self.__create_queue__()

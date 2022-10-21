@@ -10,7 +10,6 @@ from tld import get_fld
 from tld.exceptions import TldBadUrl
 
 import config
-from src import WikimediaSite
 from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import (
     AmbiguousDateError,
@@ -22,6 +21,7 @@ from src.models.return_.cache_return import CacheReturn
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.update_delay import UpdateDelay
 from src.models.wcd_item import WcdItem
+from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.reference.english.google_books import (
     GoogleBooks,
     GoogleBooksSchema,

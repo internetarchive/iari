@@ -31,3 +31,8 @@ class Result(Enum):
 class WriteRequired(Enum):
     YES = auto()
     NO = auto()
+
+
+class SupportedWikibase(Enum):
+    IASandboxWikibase = "ia-sandbox-wikibase"
+    WikiCitationsWikibase = "wiki-citations-wikibase"

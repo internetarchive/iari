@@ -17,19 +17,20 @@ from src.models.wikibase.dictionaries import (
     wcd_externalid_properties,
     wcd_string_properties,
 )
-from src.models.wikibase.enums import Result
+from src.models.wikibase.enums import Result, SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.recent_changes_api.event_stream import EventStream
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
+from src.wcd_wikibase_model import WcdWikibaseModel
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class WcdImportBot(WcdBaseModel):
+class WcdImportBot(WcdWikibaseModel):
     """This class controls the import bot
 
     The language code is the one used by Wikimedia Foundation"""
@@ -39,7 +40,6 @@ class WcdImportBot(WcdBaseModel):
     event_max_count: int = 0  # 0 means disabled
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
-    wikibase: Wikibase
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     work_queue: Optional[WorkQueue]
     wikidata_qid: str = ""
@@ -50,6 +50,8 @@ class WcdImportBot(WcdBaseModel):
         self.cache.flush_database()
 
     def __gather_and_print_statistics__(self):
+        if not self.wikibase:
+            self.setup_wikibase()
         console.print(self.wikibase.title)
         wcr = WikibaseCrudRead(wikibase=self.wikibase)
         console.print(f"Number of pages: {wcr.number_of_pages}")
@@ -270,6 +272,8 @@ class WcdImportBot(WcdBaseModel):
         present in the Wikibase then compare it and all its
         references to make sure we the data is reflecting changes
         made in Wikipedia"""
+        if not self.wikibase:
+            self.setup_wikibase()
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
@@ -289,6 +293,8 @@ class WcdImportBot(WcdBaseModel):
         This method gets all pages in the main namespace up to max_count
         It uses pywikibot
         """
+        if not self.wikibase:
+            self.setup_wikibase()
         from pywikibot import Category, Site  # type: ignore
 
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -351,6 +357,8 @@ class WcdImportBot(WcdBaseModel):
     @validate_arguments
     def lookup_md5hash(self, md5hash: str):
         """Lookup a md5hash and show the result to the user"""
+        if not self.wikibase:
+            self.setup_wikibase()
         console.print(f"Lookup of md5hash {md5hash}")
         wc = WikibaseCrudRead(wikibase=self.wikibase)
         cache = Cache()
@@ -426,12 +434,16 @@ class WcdImportBot(WcdBaseModel):
             bot = WcdImportBot(wikibase=WikiCitationsWikibase())
             bot.__gather_and_print_statistics__()
         elif args.worker:
-            console.print("Worker started")
+            if not self.wikibase:
+                self.setup_wikibase()
             work_queue = WorkQueue(wikibase=self.wikibase)
+            console.print("Starting worker")
             work_queue.listen_to_queue()
         elif args.ingestor:
-            console.print("Ingestor started")
+            if not self.wikibase:
+                self.setup_wikibase()
             event_stream = EventStream(wikibase=self.wikibase)
+            console.print("Starting ingestor")
             event_stream.start_consuming()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
