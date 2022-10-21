@@ -8,16 +8,15 @@ from pika.exceptions import AMQPConnectionError
 from pydantic import validate_arguments
 
 import config
+from src import WcdWikibaseModel
 from src.helpers.console import console
 from src.models.exceptions import NoChannelError
 from src.models.message import Message
-from src.models.wikibase import Wikibase
-from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WorkQueue(WcdBaseModel):
+class WorkQueue(WcdWikibaseModel):
     """This models the RabbitMQ article queue
     We publish to this queue when ingesting page updates
     and when receiving a title via the wikicitaitons-api
@@ -26,7 +25,6 @@ class WorkQueue(WcdBaseModel):
     connection: Optional[BlockingConnection]
     channel: Optional[BlockingChannel]
     queue_name: str = "article_queue"
-    wikibase: Wikibase
     testing: bool = False
 
     class Config:
@@ -70,6 +68,10 @@ class WorkQueue(WcdBaseModel):
     @validate_arguments
     def __send_message__(self, message: Message):
         if self.channel:
+            # We remove this for security reasons because it contains a password
+            # and it also lowers the number of transmitted and stored bytes which
+            # is better for the environment.
+            delattr(message, "wikibase")
             message_bytes = bytes(json.dumps(message.json()), "utf-8")
             self.channel.basic_publish(
                 exchange="", routing_key=self.queue_name, body=message_bytes
@@ -86,10 +88,11 @@ class WorkQueue(WcdBaseModel):
         def callback(channel, method, properties, body):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
-            console.print(body)
-            exit(0)
-            data = json.loads(str(body))
+            decoded_body = body.decode('utf-8')
+            console.print(decoded_body)
+            data = json.loads(decoded_body)
             console.print(data)
+            exit(0)
             message = Message(**data)
             print(f" [x] Received {message.title}")
             # exit(0)
@@ -97,6 +100,7 @@ class WorkQueue(WcdBaseModel):
             console.print(message.dict())
             message.process_data()
 
+        self.setup_wikibase()
         self.__connect__()
         self.__setup_channel__()
         self.__create_queue__()

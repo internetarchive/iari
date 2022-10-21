@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 class WcdBaseModel(BaseModel):
     """This base model has all methods that we
     want to use in more than one class"""
-
     @validate_arguments
     def __log_to_file__(self, message: str, file_name: str) -> None:
         if not exists(file_name):

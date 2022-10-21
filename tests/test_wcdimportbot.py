@@ -1,10 +1,11 @@
 import logging
 from unittest import TestCase
 
+from pydantic import ValidationError
 from wikibaseintegrator.wbi_exceptions import MissingEntityException  # type: ignore
 
 import config
-from src import WcdImportBot
+from src import WcdImportBot, SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 
 logging.basicConfig(level=config.loglevel)
@@ -92,3 +93,11 @@ class TestWcdImportBot(TestCase):
         """We test that we can connect to rabbitmq and listen"""
         bot = WcdImportBot(wikibase=IASandboxWikibase(), testing=True)
         bot.__receive_workloads__()
+
+    def test_target_wikibase_missing(self):
+        with self.assertRaises(ValidationError):
+            WcdImportBot(wikibase=IASandboxWikibase(), testing=True)
+
+    def test_target_wikibase_valid(self):
+        with self.assertRaises(ValidationError):
+            WcdImportBot(wikibase=IASandboxWikibase(), testing=True, target_wikibase=SupportedWikibase.IASandboxWikibase)
