@@ -95,11 +95,8 @@ class WorkQueue(WcdWikibaseModel):
             decoded_body = body.decode("utf-8")
             # console.print(decoded_body)
             data = json.loads(decoded_body)
-            # console.print(data)
-            # exit(0)
             message = Message(**data)
-            print(f" [x] Received {message.title}")
-            # exit(0)
+            print(f" [x] Received {message.title} job for {message.target_wikibase.name}")
             # We setup the message.wikibase here to make sure we work on the right instance
             message.setup_wikibase()
             if config.loglevel == logging.DEBUG:
