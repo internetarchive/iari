@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Optional, Dict
+from typing import Optional
 
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel
@@ -95,9 +95,12 @@ class WorkQueue(WcdWikibaseModel):
             decoded_body = body.decode("utf-8")
             console.print(decoded_body)
             print(type(decoded_body))
-            json_data: Dict = json.loads(decoded_body)
+            json_data = json.loads(decoded_body)
             print(type(json_data))
             console.print(json_data)
+            json_data2 = json.loads(json_data)
+            print(type(json_data2))
+            console.print(json_data2)
             exit(0)
             if config.loglevel == logging.DEBUG:
                 console.print(json_data)
