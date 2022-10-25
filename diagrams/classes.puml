@@ -22,46 +22,46 @@ package "Cache related" {
     WcdBaseModel <|-- Cache
     WcdBaseModel <|-- SsdbDatabase
     class Cache {
-    ssdb
-    add_()
-    add_reference()
-    add_website()
-    check__and_get_wikicitations_qid()
-    check_reference_and_get_wikicitations_qid()
-    check_website_and_get_wikicitations_qid()
-    connect()
-    delete_key()
-    flush_database()
-    get_cache_information()
+        ssdb
+        add_()
+        add_reference()
+        add_website()
+        check__and_get_wikicitations_qid()
+        check_reference_and_get_wikicitations_qid()
+        check_website_and_get_wikicitations_qid()
+        connect()
+        delete_key()
+        flush_database()
+        get_cache_information()
     }
 
     class SsdbDatabase{
-    connection
-    host
-    port
-    connect()
-    delete()
-    flush_database()
-    get_info()
-    get_value()
-    set_value()
+        connection
+        host
+        port
+        connect()
+        delete()
+        flush_database()
+        get_info()
+        get_value()
+        set_value()
     }
 }
 class WcdImportBot{
-__flush_cache__()
-__gather_and_print_statistics__()
-__rebuild_cache__()
-__receive_workloads__()
-__setup_argparse_and_return_args__()
-__setup_cache__()
-__setup_wikibase_integrator_configuration__()
-delete_one_page()
-get_and_extract_page_by_title()
-get_and_extract_page_by_wdqid()
-get_and_extract_pages_by_range()
-lookup_md5hash()
-rinse_all_items_and_cache()
-run()
+    __flush_cache__()
+    __gather_and_print_statistics__()
+    __rebuild_cache__()
+    __receive_workloads__()
+    __setup_argparse_and_return_args__()
+    __setup_cache__()
+    __setup_wikibase_integrator_configuration__()
+    delete_one_page()
+    get_and_extract_page_by_title()
+    get_and_extract_page_by_wdqid()
+    get_and_extract_pages_by_range()
+    lookup_md5hash()
+    rinse_all_items_and_cache()
+    run()
 }
 
 package Items {
@@ -103,90 +103,89 @@ package Items {
         }
         WCDItem <|-- WikipediaReference
         class WikipediaReference {
-        __clean_wiki_markup_from_strings__()
-        __detect_archive_urls__()
-        __detect_google_books_id__()
-        __detect_internet_archive_id__()
-        __extract_first_level_domain__()
-        __find_number__()
-        __generate_first_level_domain_hash__()
-        __generate_hashes__()
-        __generate_reference_hash__()
-        __get_first_level_domain__
-        __get_numbered_person__()
-        __get_numbered_persons__()
-        __insert_reference_in_cache__()
-        __merge_date_into_publication_date__()
-        __merge_lang_into_language__()
-        __merge_place_into_location__()
-        __parse_first_parameter__()
-        __parse_google_books_template__()
-        __parse_isbn__()
-        __parse_known_role_persons__()
-        __parse_persons__()
-        __parse_roleless_persons__()
-        __parse_urls__()
-        __upload_reference_to_wikibase__()
-        __validate_time__()
-        check_and_upload_reference_item_to_wikibase_if_missing()
-        finish_parsing_and_generate_hash()
-        get_wcdqid_from_cache()
-        has_first_level_domain_url_hash()
-        has_hash()
-        template_url()
-        upload_reference_and_insert_in_the_cache_if_enabled()
-        wikibase_url()
+            __clean_wiki_markup_from_strings__()
+            __detect_archive_urls__()
+            __detect_google_books_id__()
+            __detect_internet_archive_id__()
+            __extract_first_level_domain__()
+            __find_number__()
+            __generate_first_level_domain_hash__()
+            __generate_hashes__()
+            __generate_reference_hash__()
+            __get_first_level_domain__
+            __get_numbered_person__()
+            __get_numbered_persons__()
+            __insert_reference_in_cache__()
+            __merge_date_into_publication_date__()
+            __merge_lang_into_language__()
+            __merge_place_into_location__()
+            __parse_first_parameter__()
+            __parse_google_books_template__()
+            __parse_isbn__()
+            __parse_known_role_persons__()
+            __parse_persons__()
+            __parse_roleless_persons__()
+            __parse_urls__()
+            __upload_reference_to_wikibase__()
+            __validate_time__()
+            check_and_upload_reference_item_to_wikibase_if_missing()
+            finish_parsing_and_generate_hash()
+            get_wcdqid_from_cache()
+            has_first_level_domain_url_hash()
+            has_hash()
+            template_url()
+            upload_reference_and_insert_in_the_cache_if_enabled()
+            wikibase_url()
         }
     }
     class WikipediaArticle{
-    __calculate_hashed_template_distribution__()
-    __compare_and_update_all_references__()
-    __compare_and_update_page__()
-    __compare_data_and_update__()
-    __extract_and_parse_references__()
-    __fetch_page_data__()
-    __fetch_wikidata_qid__()
-    __fix_aliases__()
-    __fix_class_key__()
-    __fix_dash__()
-    __fix_keys__()
-    __generate_hash__()
-    __get_title_from_wikidata__()
-    __get_wikipedia_article_from_title__()
-    __get_wikipedia_article_from_wdqid__()
-    __page_has_already_been_uploaded__()
-    __parse_templates__()
-    __print_hash_statistics__()
-    __upload_page_and_references__()
-    __upload_references_and_websites_if_missing__()
-    absolute_url()
-    Config()
-    extract_and_parse_and_upload_missing_items_to_wikibase()
-    is_redirect()
-    number_of_hashed_references()
-    number_of_references()
-    percent_of_references_with_a_hash()
-    underscored_title()
-    url()
-    wikibase_url()
+        __calculate_hashed_template_distribution__()
+        __compare_and_update_all_references__()
+        __compare_and_update_page__()
+        __compare_data_and_update__()
+        __extract_and_parse_references__()
+        __fetch_page_data__()
+        __fetch_wikidata_qid__()
+        __fix_aliases__()
+        __fix_class_key__()
+        __fix_dash__()
+        __fix_keys__()
+        __generate_hash__()
+        __get_title_from_wikidata__()
+        __get_wikipedia_article_from_title__()
+        __get_wikipedia_article_from_wdqid__()
+        __page_has_already_been_uploaded__()
+        __parse_templates__()
+        __print_hash_statistics__()
+        __upload_page_and_references__()
+        __upload_references_and_websites_if_missing__()
+        absolute_url()
+        extract_and_parse_and_upload_missing_items_to_wikibase()
+        is_redirect()
+        number_of_hashed_references()
+        number_of_references()
+        percent_of_references_with_a_hash()
+        underscored_title()
+        url()
+        wikibase_url()
     }
 
     class Website{
-    __insert_website_in_cache__()
-    __upload_website_and_insert_in_the_cache__()
-    __upload_website_to_wikibase__()
-    check_and_upload_website_item_to_wikibase_if_missing()
-    get_website_wcdqid_from_cache()
+        __insert_website_in_cache__()
+        __upload_website_and_insert_in_the_cache__()
+        __upload_website_to_wikibase__()
+        check_and_upload_website_item_to_wikibase_if_missing()
+        get_website_wcdqid_from_cache()
     }
     WCDItem <|- Website
 }
 class UpdateDelay{
-__delay_time_has_passed__()
-time_to_update()
+    __delay_time_has_passed__()
+    time_to_update()
 }
 WcdBaseModel <|- UpdateDelay
 class Hash_{
-__entity_updated_hash__()
+    __entity_updated_hash__()
 }
 WcdBaseModel <|- Hash_
 package "Queue related" {
@@ -333,5 +332,49 @@ package "Recent changes API"{
     WcdBaseModel <|- EventStream
     class Meta
     WcdBaseModel <|- Meta
+}
+
+package "WikiCitations API" {
+    package "Flask" {
+        class Resource
+        class Schema
+    }
+    class AddJobToQueue{
+        __parse_into_job__()
+        __validate__()
+        __validate_and_get_job__()
+        get()
+    }
+    Resource <|-- AddJobToQueue
+    class AddJobSchema {
+        return_object()
+    }
+    Schema <|-- AddJobSchema
+    enum Return {
+        INVALID_QID
+        NO_MATCH
+        NO_QID
+    }
+    class Job{
+        lang
+        site
+        testing
+        title
+   }
+   BaseModel <|-- Job
+   class LookupByWikidataQid {
+        get()
+   }
+   Resource <|-- LookupByWikidataQid
+   class LookupWikicitationsQid {
+        __setup_wikibase_integrator_configuration__()
+        lookup_via_cirrussearch()
+        lookup_via_query_service()
+   }
+   Resource <|-- LookupWikicitationsQid
+   class SendJobToArticleQueue {
+        publish_to_article_queue()
+   }
+   BaseModel <|-- SendJobToArticleQueue
 }
 @enduml
