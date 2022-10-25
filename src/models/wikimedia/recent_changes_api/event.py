@@ -1,6 +1,4 @@
-import json
 import logging
-from datetime import datetime
 from typing import Optional
 from urllib.parse import quote
 
@@ -8,17 +6,11 @@ from src.models.exceptions import MissingInformationError
 from src.models.message import Message
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.enums import WikimediaEditType, WikimediaSite
+from src.models.wikimedia.recent_changes_api.meta import Meta
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
-
-
-class Meta(WcdBaseModel):
-    id: str
-    dt: datetime
-    domain: str
-    offset: int
 
 
 class WikimediaEvent(WcdBaseModel):

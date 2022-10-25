@@ -315,4 +315,23 @@ package "Exceptions" {
     BaseException <|-- TimeParseException
     BaseException <|-- WikibaseError
 }
+package "Recent changes API"{
+    class WikimediaEvent{
+        domain()
+        is_enwiki()
+        is_main_namespace()
+        language_code()
+        publish_to_article_queue()
+        url()
+    }
+    WcdBaseModel <|- WikimediaEvent
+    class EventStream {
+        __get_events__()
+        __reached_max_events__()
+        start_consuming()
+    }
+    WcdBaseModel <|- EventStream
+    class Meta
+    WcdBaseModel <|- Meta
+}
 @enduml
