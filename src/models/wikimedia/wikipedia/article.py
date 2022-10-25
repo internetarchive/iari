@@ -181,9 +181,8 @@ class WikipediaArticle(WcdItem):
             or not self.wikitext
             or not self.page_id
         ):
-            title = self.title
             # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base
-            title = title.replace(" ", "_")
+            title = self.title.replace(" ", "_")
             url = f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/rest.php/v1/page/{title}"
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)

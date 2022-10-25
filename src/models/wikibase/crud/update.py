@@ -18,7 +18,7 @@ from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import WriteRequired
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
-from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
     new_item: Optional[ItemEntity] = None
     testing: bool = False
     existing_wikibase_item: Optional[ItemEntity] = None
-    wikipedia_article: Optional[Any] = None
+    article: Optional[Any] = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -74,7 +74,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         if not self.existing_wikibase_item:
             raise MissingInformationError("self.wikibase_item was None")
         with console.status("Comparing claims and uploading the result to Wikibase..."):
-            from src.models.wikimedia.wikipedia.wikipedia_article import (
+            from src.models.wikimedia.wikipedia.article import (
                 WikipediaArticle,
             )
 
@@ -204,8 +204,8 @@ class WikibaseCrudUpdate(WikibaseCrud):
         if not isinstance(entity, WcdItem):
             raise TypeError("entity was not a WcdItem instance")
         self.entity = entity
-        if not self.wikipedia_article:
-            raise MissingInformationError("self.wikipedia_article was None")
+        if not self.article:
+            raise MissingInformationError("self.article was None")
         if not entity.return_:
             raise MissingInformationError("new_reference.return_ was None")
         if entity.return_.uploaded_now:
@@ -235,7 +235,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 f"See {self.wikibase.entity_url(item_id=self.entity.return_.item_qid)}"
             )
             self.new_item = wcr.__prepare_new_reference_item__(
-                page_reference=self.entity, wikipedia_article=self.wikipedia_article
+                page_reference=self.entity, wikipedia_article=self.article
             )
         else:
             if isinstance(self.entity, WikipediaArticle) and self.entity.title:

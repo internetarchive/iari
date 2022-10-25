@@ -54,8 +54,8 @@ class WcdItem(WcdBaseModel):
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):
             raise TypeError("not a WikipediaArticle")
-        self.wikibase_crud_update.wikipedia_article = wikipedia_article
+        self.wikibase_crud_update.article = wikipedia_article
