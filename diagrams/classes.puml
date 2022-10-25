@@ -17,6 +17,21 @@ package "Base models" {
 }
 WcdWikibaseModel <|--- WcdImportBot
 
+package "Returns" {
+    abstract class Return {
+        item_qid
+        uploaded_now
+    }
+    WcdBaseModel <|-- Return
+    class WikibaseReturn {
+        item()
+    }
+    Return <|-- WikibaseReturn
+    class CacheReturn {
+        uploaded_now()
+    }
+    Return <|-- CacheReturn
+}
 
 package "Cache related" {
     WcdBaseModel <|-- Cache
@@ -334,6 +349,10 @@ package "Recent changes API"{
     WcdBaseModel <|- Meta
 }
 
+
+
+
+
 package "WikiCitations API" {
     package "Flask" {
         class Resource
@@ -350,7 +369,7 @@ package "WikiCitations API" {
         return_object()
     }
     Schema <|-- AddJobSchema
-    enum Return {
+    enum LookupReturn {
         INVALID_QID
         NO_MATCH
         NO_QID
