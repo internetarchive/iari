@@ -7,7 +7,7 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
 from src.helpers.console import console
-from src.models.api.enums import Return
+from src.models.api.enums import LookupReturn
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class LookupWikicitationsQid(BaseModel):
         wbi_config.config["MEDIAWIKI_INDEX_URL"] = wikibase.mediawiki_index_url
         wbi_config.config["SPARQL_ENDPOINT_URL"] = wikibase.sparql_endpoint_url
 
-    def lookup_via_query_service(self, wdqid="") -> Union[Return, str]:
+    def lookup_via_query_service(self, wdqid="") -> Union[LookupReturn, str]:
         """This looks up the WDQID via the query service. It is slower than using cirrussearch"""
         if wdqid:
             if self.wikibase.is_valid_qid(qid=wdqid):
@@ -48,11 +48,11 @@ class LookupWikicitationsQid(BaseModel):
                 for wcdqid in wcdqids:
                     # We only ever care about the first
                     return wcdqid
-                return Return.NO_MATCH
+                return LookupReturn.NO_MATCH
             else:
-                return Return.INVALID_QID
+                return LookupReturn.INVALID_QID
         else:
-            return Return.NO_QID
+            return LookupReturn.NO_QID
 
     def lookup_via_cirrussearch(self, wdqid=""):
         """This does not work because the WikibaseCirrusSearch
