@@ -296,5 +296,23 @@ package "Wikibase related" {
     }
     WcdBaseModel <|-- Properties
 }
-
+package "Exceptions" {
+    class BaseException
+    class AmbiguousDateError
+    class DebugExit
+    class MissingInformationError
+    class MoreThanOneNumberError
+    class NoChannelError
+    class NotLoggedInError
+    class TimeParseException
+    class WikibaseError
+    BaseException <|-- AmbiguousDateError
+    BaseException <|-- DebugExit
+    BaseException <|-- MissingInformationError
+    BaseException <|-- MoreThanOneNumberError
+    BaseException <|-- NoChannelError
+    BaseException <|-- NotLoggedInError
+    BaseException <|-- TimeParseException
+    BaseException <|-- WikibaseError
+}
 @enduml
