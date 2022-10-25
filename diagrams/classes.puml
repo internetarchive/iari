@@ -1,17 +1,21 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-' We don't include attributes or exceptions in this diagram because it just clutters
+' We don't include attributes in this diagram because it just clutters
 ' everything.
 
-abstract class BaseModel
-abstract class WcdBaseModel
-BaseModel <|-- WcdBaseModel
-WcdWikibaseModel <|-- WcdImportBot
-
-class EnglishWikipediaReferenceSchema{
-return_object()
+package "Base models" {
+    abstract class BaseModel
+    abstract class WcdBaseModel{
+    __log_to_file__()
+    }
+    BaseModel <|-- WcdBaseModel
+    abstract class WcdWikibaseModel {
+    setup_wikibase()
+    }
+    WcdBaseModel <|-- WcdWikibaseModel
 }
+WcdWikibaseModel <|--- WcdImportBot
 
 
 package "Cache related" {
@@ -65,6 +69,9 @@ package Items {
     WcdBaseModel <|-- WCDItem
     WCDItem <|-- WikipediaArticle
     package "Reference related" {
+        class EnglishWikipediaReferenceSchema{
+        return_object()
+        }
         WcdBaseModel <|-- WikipediaReferenceSchema
         WikipediaReferenceSchema <|-- EnglishWikipediaReferenceSchema
         class WikipediaReferenceSchema{
@@ -187,8 +194,6 @@ package "Queue related" {
     process_data()
     }
     WcdWikibaseModel <|-- Message
-    abstract class WcdWikibaseModel {}
-    WcdBaseModel <|-- WcdWikibaseModel
     class WorkQueue{
     __close_connection__()
     __connect__()
