@@ -37,7 +37,7 @@ class WcdImportBot(WcdWikibaseModel):
 
     cache: Optional[Cache]
     language_code: str = "en"
-    event_max_count: int = 0  # 0 means disabled
+    range_max_count: int = 0  # 0 means disabled
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
@@ -301,7 +301,7 @@ class WcdImportBot(WcdWikibaseModel):
 
         if max_count is not None:
             logger.debug(f"Setting max_count to {max_count}")
-            self.event_max_count = int(max_count)
+            self.range_max_count = int(max_count)
         count: int = 0
         # https://stackoverflow.com/questions/59605802/
         # use-pywikibot-to-download-complete-list-of-pages-from-a-mediawiki-server-without
@@ -309,8 +309,8 @@ class WcdImportBot(WcdWikibaseModel):
         if category_title:
             category_page = Category(title=category_title, source=site)
             for page in category_page.articles(recurse=True):
-                if self.event_max_count and count >= self.event_max_count:
-                    logger.debug("breaking now")
+                if self.range_max_count and count >= self.range_max_count:
+                    logger.debug("max count reached")
                     break
                 # page: Page = page
                 #  and isinstance(page, Page)
@@ -334,7 +334,8 @@ class WcdImportBot(WcdWikibaseModel):
                     wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
         else:
             for page in site.allpages(namespace=0):
-                if count >= self.event_max_count:
+                if self.range_max_count and count >= self.range_max_count:
+                    logger.debug("max count reached")
                     break
                 # page: Page = page
                 if not page.isRedirectPage():
