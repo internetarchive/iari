@@ -6,8 +6,13 @@ from wikibaseintegrator import WikibaseIntegrator, wbi_login  # type: ignore
 from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
+from src.helpers.console import console
 from src.models.exceptions import MissingInformationError
 from src.models.wikibase.crud import WikibaseCrud
+from src.models.wikibase.dictionaries import (
+    wcd_externalid_properties,
+    wcd_string_properties,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +63,19 @@ class WikibaseCrudRead(WikibaseCrud):
                 return None
         else:
             return None
+
+    def gather_and_print_statistics(self):
+        console.print(self.wikibase.title)
+        console.print(f"Number of pages: {self.number_of_pages}")
+        console.print(f"Number of references: {self.number_of_references}")
+        console.print(f"Number of websites: {self.number_of_website_items}")
+        attributes = [a for a in dir(self.wikibase)]
+        for attribute in attributes:
+            if attribute in {**wcd_externalid_properties, **wcd_string_properties}:
+                value = self.get_external_identifier_statistic(
+                    property=getattr(self.wikibase, attribute)
+                )
+                console.print(f"Number of {attribute}: {value}")
 
     @validate_arguments
     def __get_all_items__(self, item_type: str) -> Iterable[str]:

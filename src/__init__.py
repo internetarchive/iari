@@ -13,10 +13,6 @@ from src.models.exceptions import WikibaseError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
-from src.models.wikibase.dictionaries import (
-    wcd_externalid_properties,
-    wcd_string_properties,
-)
 from src.models.wikibase.enums import Result, SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
@@ -49,22 +45,6 @@ class WcdImportBot(WcdWikibaseModel):
     def __flush_cache__(self):
         self.__setup_cache__()
         self.cache.flush_database()
-
-    def __gather_and_print_statistics__(self):
-        if not self.wikibase:
-            self.setup_wikibase()
-        console.print(self.wikibase.title)
-        wcr = WikibaseCrudRead(wikibase=self.wikibase)
-        console.print(f"Number of pages: {wcr.number_of_pages}")
-        console.print(f"Number of references: {wcr.number_of_references}")
-        console.print(f"Number of websites: {wcr.number_of_website_items}")
-        attributes = [a for a in dir(self.wikibase)]
-        for attribute in attributes:
-            if attribute in {**wcd_externalid_properties, **wcd_string_properties}:
-                value = wcr.get_external_identifier_statistic(
-                    property=getattr(self.wikibase, attribute)
-                )
-                console.print(f"Number of {attribute}: {value}")
 
     def __rebuild_cache__(self):
         """Flush and rebuild the cache"""
@@ -434,10 +414,10 @@ class WcdImportBot(WcdWikibaseModel):
             # We strip here to avoid errors caused by spaces
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
         elif args.statistics:
-            bot = WcdImportBot(wikibase=IASandboxWikibase())
-            bot.__gather_and_print_statistics__()
-            bot = WcdImportBot(wikibase=WikiCitationsWikibase())
-            bot.__gather_and_print_statistics__()
+            wcr = WikibaseCrudRead(wikibase=IASandboxWikibase())
+            wcr.gather_and_print_statistics()
+            wcr = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
+            wcr.gather_and_print_statistics()
         elif args.worker:
             if not self.wikibase:
                 self.setup_wikibase()
