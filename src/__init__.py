@@ -430,7 +430,6 @@ class WcdImportBot(WcdWikibaseModel):
         elif args.statistics:
             bot = WcdImportBot(wikibase=IASandboxWikibase())
             bot.__gather_and_print_statistics__()
-            # DISABLED because it returns 503 now.
             bot = WcdImportBot(wikibase=WikiCitationsWikibase())
             bot.__gather_and_print_statistics__()
         elif args.worker:
