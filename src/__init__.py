@@ -369,15 +369,6 @@ class WcdImportBot(WcdWikibaseModel):
         else:
             console.print("SPARQL: Not found", style="red")
 
-    # def print_statistics(self):
-    #     self.__calculate_statistics__()
-    #     logger.info(
-    #         f"A total of {self.total_number_of_references} references "
-    #         f"has been processed and {self.total_number_of_hashed_references} "
-    #         f"({self.percent_references_hashed_in_total}%) could be hashed on "
-    #         f"a total of {len(self.pages)} pages."
-    #     )
-
     @staticmethod
     def rinse_all_items_and_cache():
         """Delete all page and reference items and clear the SSDB cache"""
