@@ -40,6 +40,7 @@ class WcdImportBot(WcdWikibaseModel):
     range_max_count: int = 0  # 0 means disabled
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
+    processed_count: int = 0
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     work_queue: Optional[WorkQueue]
     wikidata_qid: str = ""
@@ -287,6 +288,7 @@ class WcdImportBot(WcdWikibaseModel):
         )
         page.__get_wikipedia_article_from_title__()
         page.extract_and_parse_and_upload_missing_items_to_wikibase()
+        self.processed_count = 1
 
     @validate_arguments
     def get_and_extract_pages_by_range(
@@ -312,13 +314,13 @@ class WcdImportBot(WcdWikibaseModel):
         if category_title:
             category_page = Category(title=category_title, source=site)
             for page in category_page.articles(recurse=True):
-                if self.range_max_count and count >= self.range_max_count:
+                if self.range_max_count and self.processed_count >= self.range_max_count:
                     logger.debug("max count reached")
                     break
                 # page: Page = page
                 #  and isinstance(page, Page)
                 if not page.isRedirectPage():
-                    count += 1
+                    self.processed_count += 1
                     # console.print(count)
                     logger.info(
                         f"{page.pageid} {page.title()}"
@@ -337,12 +339,12 @@ class WcdImportBot(WcdWikibaseModel):
                     wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
         else:
             for page in site.allpages(namespace=0):
-                if self.range_max_count and count >= self.range_max_count:
+                if self.range_max_count and self.processed_count >= self.range_max_count:
                     logger.debug("max count reached")
                     break
                 # page: Page = page
                 if not page.isRedirectPage():
-                    count += 1
+                    self.processed_count += 1
                     # console.print(count)
                     logger.info(f"{page.pageid} {page.page_title()}")
                     # raise DebugExit()
