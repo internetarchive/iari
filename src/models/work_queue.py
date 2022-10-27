@@ -69,11 +69,6 @@ class WorkQueue(WcdWikibaseModel):
     def __send_message__(self, message: Message):
         logger.debug("__send_message__: Running")
         if self.channel:
-            # We remove this for security reasons because it contains a password
-            # and it also lowers the number of transmitted and stored bytes which
-            # is better for the environment.
-            # delattr(message, "wikibase")
-            del message.wikibase
             if config.loglevel == logging.DEBUG:
                 console.print(message.dict())
             message_bytes = bytes(json.dumps(message.json()), "utf-8")
