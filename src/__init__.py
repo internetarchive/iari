@@ -216,11 +216,14 @@ class WcdImportBot(WcdWikibaseModel):
     def __setup_wikibase_integrator_configuration__(
         self,
     ) -> None:
-        wbi_config.config["USER_AGENT"] = "wcdimportbot"
-        wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
-        wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
-        wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
-        wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
+        if not self.wikibase:
+            self.setup_wikibase()
+        if self.wikibase:
+            wbi_config.config["USER_AGENT"] = "wcdimportbot"
+            wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
+            wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
+            wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
+            wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     @validate_arguments
     def delete_one_page(self, title: str):
@@ -290,7 +293,7 @@ class WcdImportBot(WcdWikibaseModel):
         self, max_count: int = None, category_title: str = None
     ) -> None:
         """
-        This method gets all pages in the main namespace up to max_count
+        This method gets all pages in the main namespace up to range_max_count
         It uses pywikibot
         """
         if not self.wikibase:
@@ -318,7 +321,7 @@ class WcdImportBot(WcdWikibaseModel):
                     count += 1
                     # console.print(count)
                     logger.info(
-                        f"{page.pageid} {page.title()} Redirect:{page.isRedirectPage()}"
+                        f"{page.pageid} {page.title()}"
                     )
                     # raise DebugExit()
                     wikipedia_article = WikipediaArticle(
