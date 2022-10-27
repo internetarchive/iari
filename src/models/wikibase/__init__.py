@@ -119,11 +119,11 @@ class Wikibase(WcdBaseModel):
     def sparql_endpoint_url(self) -> str:
         if self.wikibase_cloud_wikibase:
             """This is the default endpoint url for Wikibase.cloud instances"""
-            return self.wikibase_url + "/query/sparql"
+            return self.wikibase_url + "query/sparql"
         else:
             """This is the default docker Wikibase endpoint url
             Thanks to @Myst for finding/documenting it."""
-            return self.query_service_url + "/proxy/wdqs/bigdata/namespace/wdq/sparql"
+            return self.query_service_url + "proxy/wdqs/bigdata/namespace/wdq/sparql"
 
     @validate_arguments
     def entity_history_url(self, item_id: str):
