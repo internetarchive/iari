@@ -36,10 +36,13 @@ Github Actions so that does not work)
 * An updated diagram of all classes is desireable to get an overview
 * An updated diagram of the workflow is desireable to get an overview
 
-## Test coverage
+## Tests
+### Coverage
 Run
-`python -m coverage run -m unittest`
-`python -m coverage report`
+`python -m coverage run -m unittest && python -m coverage report`
+### Find slow tests
+Run 
+`python -m pytest --durations=10`
 
 [//]: # (# Class diagram)
 
