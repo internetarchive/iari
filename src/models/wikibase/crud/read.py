@@ -22,18 +22,28 @@ class WikibaseCrudRead(WikibaseCrud):
 
     @property
     def number_of_pages(self):
-        return self.__get_statistic__(
-            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_PAGE
-        )
+        if not self.wikibase:
+            self.setup_wikibase()
+        if self.wikibase:
+            return self.__get_statistic__(
+                property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_PAGE
+            )
 
     @property
     def number_of_references(self):
-        return self.__get_statistic__(
-            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_REFERENCE
-        )
+        if not self.wikibase:
+            self.setup_wikibase()
+        if self.wikibase:
+            return self.__get_statistic__(
+                property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_REFERENCE
+            )
 
     @property
     def number_of_website_items(self):
+        if not self.wikibase:
+            self.setup_wikibase()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         return self.__get_statistic__(
             property=self.wikibase.INSTANCE_OF, value=self.wikibase.WEBSITE_ITEM
         )
@@ -65,6 +75,10 @@ class WikibaseCrudRead(WikibaseCrud):
             return None
 
     def gather_and_print_statistics(self):
+        if not self.wikibase:
+            self.setup_wikibase()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         console.print(self.wikibase.title)
         console.print(f"Number of pages: {self.number_of_pages}")
         console.print(f"Number of references: {self.number_of_references}")
@@ -139,6 +153,10 @@ class WikibaseCrudRead(WikibaseCrud):
 
     @validate_arguments
     def __get_statistic__(self, property: str, value: str, prefix: bool = True):
+        if not self.wikibase:
+            self.setup_wikibase()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         if prefix and (len(property) < 3 or len(value) < 3):
             raise ValueError("Either property or value was too short.")
         if prefix:

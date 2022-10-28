@@ -69,6 +69,10 @@ class WikibaseCrudUpdate(WikibaseCrud):
 
         If we know which properties can have multiple values, then we can detect when
         a claim is outdated in all other properties like WEBSITE, etc."""
+        if not self.wikibase:
+            self.setup_wikibase()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         if not self.new_item:
             raise MissingInformationError("self.new_item was None")
         if not self.existing_wikibase_item:
