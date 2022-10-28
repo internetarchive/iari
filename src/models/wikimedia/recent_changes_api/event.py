@@ -2,7 +2,6 @@ import logging
 from urllib.parse import quote
 
 from src.models.message import Message
-from src.models.wikibase.enums import SupportedWikibase
 from src.models.wikimedia.enums import WikimediaEditType, WikimediaSite
 from src.models.wikimedia.recent_changes_api.meta import Meta
 from src.models.work_queue import WorkQueue
@@ -21,7 +20,6 @@ class WikimediaEvent(WcdBaseModel):
     namespace: int
     title: str = ""
     event_site: WikimediaSite = WikimediaSite.WIKIPEDIA
-    target_wikibase: SupportedWikibase
 
     @property
     def domain(self):
