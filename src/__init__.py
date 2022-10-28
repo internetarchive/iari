@@ -9,7 +9,7 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 import config
 from src.helpers.console import console
 from src.models.cache import Cache
-from src.models.exceptions import WikibaseError
+from src.models.exceptions import WikibaseError, MissingInformationError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
@@ -17,7 +17,7 @@ from src.models.wikibase.enums import Result, SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.recent_changes_api.event_stream import EventStream
+from src.models.wikimedia.recent_changes_api import RecentChangesApi
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
 
@@ -40,6 +40,7 @@ class WcdImportBot(WcdBaseModel):
     work_queue: Optional[WorkQueue]
     wikidata_qid: str = ""
     testing: bool = False
+    wikibase: Optional[Wikibase]
 
     def __flush_cache__(self):
         self.__setup_cache__()
@@ -193,17 +194,18 @@ class WcdImportBot(WcdBaseModel):
             self.cache = Cache()
             self.cache.connect()
 
-    def __setup_wikibase_integrator_configuration__(
-        self,
-    ) -> None:
-        if not self.wikibase:
-            self.setup_wikibase()
-        if self.wikibase:
-            wbi_config.config["USER_AGENT"] = "wcdimportbot"
-            wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
-            wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
-            wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
-            wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
+    # def __setup_wikibase_integrator_configuration__(
+    #     self,
+    # ) -> None:
+    #     if not self.wikibase:
+    #         self.setup_wikibase()
+    #     if not self.wikibase:
+    #         MissingInformationError("self.wikibase was None")
+    #     wbi_config.config["USER_AGENT"] = "wcdimportbot"
+    #     wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
+    #     wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
+    #     wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
+    #     wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     @validate_arguments
     def delete_one_page(self, title: str):
@@ -255,12 +257,10 @@ class WcdImportBot(WcdBaseModel):
         present in the Wikibase then compare it and all its
         references to make sure we the data is reflecting changes
         made in Wikipedia"""
-        if not self.wikibase:
-            self.setup_wikibase()
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
-            wikibase=self.wikibase,
+            target_wikibase=self.target_wikibase,
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
             title=self.page_title,
@@ -277,8 +277,6 @@ class WcdImportBot(WcdBaseModel):
         This method gets all pages in the main namespace up to range_max_count
         It uses pywikibot
         """
-        if not self.wikibase:
-            self.setup_wikibase()
         from pywikibot import Category, Site  # type: ignore
 
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -306,7 +304,7 @@ class WcdImportBot(WcdBaseModel):
                     )
                     # raise DebugExit()
                     wikipedia_article = WikipediaArticle(
-                        wikibase=self.wikibase,
+                        target_wikibase=self.target_wikibase,
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
@@ -408,14 +406,14 @@ class WcdImportBot(WcdBaseModel):
             console.print("Starting worker")
             work_queue.listen_to_queue()
         elif args.ingestor:
-            event_stream = EventStream(target_wikibase=self.target_wikibase)
+            event_stream = RecentChangesApi(target_wikibase=self.target_wikibase)
             console.print("Starting ingestor")
             event_stream.start_consuming()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
     def __receive_workloads__(self):
-        self.work_queue = WorkQueue(wikibase=self.wikibase, testing=self.testing)
+        self.work_queue = WorkQueue(target_wikibase=self.target_wikibase, testing=self.testing)
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):
@@ -430,7 +428,8 @@ class WcdImportBot(WcdBaseModel):
         page.__get_wikipedia_article_from_wdqid__()
         page.extract_and_parse_and_upload_missing_items_to_wikibase()
 
-    def __gather_statistics__(self):
+    @staticmethod
+    def __gather_statistics__():
         wcr = WikibaseCrudRead(wikibase=IASandboxWikibase())
         wcr.gather_and_print_statistics()
         wcr = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
