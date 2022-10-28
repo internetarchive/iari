@@ -297,14 +297,16 @@ class WikipediaArticle(WcdItem):
     def __generate_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
+        if not self.target_wikibase:
+            MissingInformationError("self.target_wikibase was None")
         logger.debug(
             f"Generating hash based on: "
-            f"{self.wikibase.title}{self.language_code}{self.page_id}"
+            f"{self.target_wikibase.name}{self.language_code}{self.page_id}"
         )
         if not self.page_id:
             raise MissingInformationError("self.page_id was None")
         self.md5hash = hashlib.md5(
-            f"{self.wikibase.title}{self.language_code}{self.page_id}".encode()
+            f"{self.target_wikibase.name}{self.language_code}{self.page_id}".encode()
         ).hexdigest()
         logger.debug(self.md5hash)
 
