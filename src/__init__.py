@@ -323,14 +323,14 @@ class WcdImportBot(WcdBaseModel):
                 if not page.isRedirectPage():
                     self.processed_count += 1
                     # console.print(count)
-                    logger.info(f"{page.pageid} {page.page_title()}")
+                    logger.info(f"{page.pageid} {page.title()}")
                     # raise DebugExit()
                     wikipedia_article = WikipediaArticle(
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
                         page_id=page.pageid,
-                        title=str(page.page_title()),
+                        title=str(page.title()),
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
                         wikibase=self.wikibase,
