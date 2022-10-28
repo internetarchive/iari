@@ -1,6 +1,6 @@
-from src.wcd_base_model import WcdBaseModel
+from pydantic import BaseModel
 
 
-class Return(WcdBaseModel):
+class Return(BaseModel):
     item_qid: str = ""
     uploaded_now: bool
