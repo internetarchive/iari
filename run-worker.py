@@ -1,4 +1,4 @@
-from src import IASandboxWikibase, WorkQueue
+from src import WorkQueue, SupportedWikibase
 
-wq = WorkQueue(wikibase=IASandboxWikibase())
+wq = WorkQueue(target_wikibase=SupportedWikibase.IASandboxWikibase)
 wq.listen_to_queue()
