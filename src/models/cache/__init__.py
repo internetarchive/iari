@@ -2,13 +2,12 @@ import logging
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
-from pydantic import validate_arguments
+from pydantic import validate_arguments, BaseModel
 
 from src.helpers.console import console
 from src.models.cache.ssdb_database import SsdbDatabase
 from src.models.exceptions import MissingInformationError
 from src.models.return_.cache_return import CacheReturn
-from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
     from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class Cache(WcdBaseModel):
+class Cache(BaseModel):
     ssdb: Optional[SsdbDatabase]
 
     @validate_arguments
