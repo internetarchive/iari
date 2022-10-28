@@ -10,6 +10,7 @@ from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
 import config
 from src.helpers.cli_input import press_enter_to_continue
 from src.helpers.console import console
+from src.models.exceptions import MissingInformationError
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import Result, SupportedItemType
@@ -22,6 +23,7 @@ class WikibaseCrudDelete(WikibaseCrud):
     def __delete_items__(self, item_type: SupportedItemType):
         """Delete items of by type one by one
         Wikibase is currently lacking an API to mass delete"""
+        self.__setup_wikibase_integrator_configuration__()
         read = WikibaseCrudRead(wikibase=self.wikibase)
         items = (
             read.__get_all_items__(item_type=getattr(self.wikibase, item_type.name))

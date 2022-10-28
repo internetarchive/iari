@@ -28,6 +28,9 @@ from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
+from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
+from src.models.wikibase.enums import SupportedWikibase
+from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.exceptions import MissingInformationError
 from src.models.person import Person
 from src.models.return_.wikibase_return import WikibaseReturn
@@ -57,7 +60,15 @@ class WikibaseCrud(WcdBaseModel):
 
     language_code: str = "en"
     reference_claim: Optional[References]
-    wikibase: Wikibase
+    wikibase: Optional[Wikibase]
+
+    def setup_wikibase(self):
+        if self.target_wikibase == SupportedWikibase.IASandboxWikibase:
+            self.wikibase = IASandboxWikibase()
+        elif self.target_wikibase == SupportedWikibase.IASandboxWikibase:
+            self.wikibase = WikiCitationsWikibase()
+        else:
+            raise Exception("target_wikibase error")
 
     class Config:
         arbitrary_types_allowed = True
@@ -103,8 +114,11 @@ class WikibaseCrud(WcdBaseModel):
     def __extract_wcdqs_json_entity_id__(
         self, data: Dict, sparql_variable: str = "item"
     ) -> str:
-        # TODO rename to include "from_binding"
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
+        # TODO rename to include "from_binding"
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         return str(
             data[sparql_variable]["value"].replace(self.wikibase.rdf_entity_prefix, "")
         )
@@ -112,15 +126,24 @@ class WikibaseCrud(WcdBaseModel):
     def __setup_wikibase_integrator_configuration__(
         self,
     ) -> None:
-        wbi_config.config["USER_AGENT"] = "wcdimportbot"
-        wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
-        wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
-        wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
-        wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
+        if not self.wikibase:
+            self.setup_wikibase()
+        if self.wikibase:
+            wbi_config.config["USER_AGENT"] = "wcdimportbot"
+            wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
+            wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
+            wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
+            wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
+        else:
+            raise MissingInformationError("self.wikibase was None")
+
 
     def __prepare_all_person_claims__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         if not self.wikibase.FULL_NAME_STRING:
             raise MissingInformationError(
                 "self.wikibase.FULL_NAME_STRING was empty string"
@@ -172,6 +195,9 @@ class WikibaseCrud(WcdBaseModel):
     ) -> List[Claim]:
         """Prepare the item citations and add a reference
         to in which revision it was found and the retrieval date"""
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         logger.info("Preparing item citations")
         claims = []
         for reference in wikipedia_article.references or []:
@@ -188,6 +214,8 @@ class WikibaseCrud(WcdBaseModel):
 
     def __login_and_prepare_new_item__(self) -> ItemEntity:
         self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         logger.debug(f"Trying to log in to the Wikibase as {self.wikibase.user_name}")
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(
@@ -255,10 +283,12 @@ class WikibaseCrud(WcdBaseModel):
             raise MissingInformationError(
                 "page_reference.first_level_domain_of_url was None"
             )
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         logger.info(
             f"Creating website item: {page_reference.first_level_domain_of_url}"
         )
-        self.__setup_wikibase_integrator_configuration__()
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(
                 user=self.wikibase.user_name, password=self.wikibase.botpassword
@@ -286,6 +316,10 @@ class WikibaseCrud(WcdBaseModel):
         """This method converts a page_reference into a new WikiCitations item"""
         logging.debug("__prepare_new_wikipedia_article_item__: Running")
         self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         wbi = WikibaseIntegrator(
             login=wbi_login.Login(
                 user=self.wikibase.user_name, password=self.wikibase.botpassword
@@ -359,6 +393,9 @@ class WikibaseCrud(WcdBaseModel):
 
     @validate_arguments
     def __prepare_person_qualifiers__(self, person_object: Person):
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         qualifiers = []
         if (
             person_object.given
@@ -410,6 +447,9 @@ class WikibaseCrud(WcdBaseModel):
     ):
         """This reference claim contains the current revision id and the current date
         This enables us to track references over time in the graph using SPARQL."""
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         logger.info("Preparing reference claim")
         # Prepare page_reference
         retrieved_date = datatypes.Time(
@@ -441,6 +481,9 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_claims__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         logger.info("Preparing single value claims")
         if page_reference.md5hash is None:
             raise ValueError("page_reference.md5hash was None")
@@ -484,6 +527,9 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_claims_always_present__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
             value=self.wikibase.WIKIPEDIA_REFERENCE,
@@ -528,6 +574,9 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_external_identifier_claims__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         if page_reference.google_books_id:
             google_books_id = datatypes.ExternalID(
                 prop_nr=self.wikibase.GOOGLE_BOOKS_ID,
@@ -610,6 +659,9 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_string_claims__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         if page_reference.location:
             location = datatypes.String(
                 prop_nr=self.wikibase.LOCATION_STRING, value=page_reference.location
@@ -671,6 +723,9 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_claims_with_dates__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         claims = []
         if page_reference.access_date:
             claims.append(
@@ -708,6 +763,9 @@ class WikibaseCrud(WcdBaseModel):
         self, page_reference
     ) -> List[Claim]:
         logger.debug("__prepare_single_value_reference_claims_with_urls__: Running")
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         claims = []
         if page_reference.archive_url:
             if len(page_reference.archive_url) > 500:
@@ -822,6 +880,9 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_website_claims__(
         self, page_reference  # type: WikipediaReference
     ) -> Optional[List[Claim]]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         logger.info("Preparing single value claims for the website item")
         # Claims always present
         instance_of = datatypes.Item(
@@ -860,6 +921,9 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_wikipedia_article_claims__(
         self, wikipedia_article
     ) -> List[Claim]:
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         # There are no optional claims for Wikipedia Pages
         absolute_url = datatypes.URL(
             prop_nr=self.wikibase.URL,
@@ -921,6 +985,9 @@ class WikibaseCrud(WcdBaseModel):
         ]
 
     def __prepare_string_authors__(self, page_reference: WikipediaReference):
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         authors = []
         for author in page_reference.authors_list or []:
             if author.full_name:
@@ -944,6 +1011,9 @@ class WikibaseCrud(WcdBaseModel):
         return authors or None
 
     def __prepare_string_editors__(self, page_reference: WikipediaReference):
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         persons = []
         for person in page_reference.editors_list or []:
             if person.full_name:
@@ -955,6 +1025,9 @@ class WikibaseCrud(WcdBaseModel):
         return persons or None
 
     def __prepare_string_translators__(self, page_reference: WikipediaReference):
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         persons = []
         for person in page_reference.translators_list or []:
             if person.full_name:
@@ -970,6 +1043,9 @@ class WikibaseCrud(WcdBaseModel):
     ) -> Claim:
         """We import citations which could not be uniquely identified
         as strings directly on the wikipedia page item"""
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         qualifiers = self.__prepare_string_citation_qualifiers__(
             page_reference=page_reference
         )
@@ -990,6 +1066,9 @@ class WikibaseCrud(WcdBaseModel):
     ) -> List[Claim]:
         """Here we prepare all statements we normally
         would put on a unique separate page_reference item"""
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         claims = []
         string_authors = self.__prepare_string_authors__(page_reference=page_reference)
         if string_authors:
@@ -1116,6 +1195,9 @@ class WikibaseCrud(WcdBaseModel):
     ) -> WikibaseReturn:
         """This method prepares and then tries to upload the reference to WikiCitations
         and returns a WikibaseReturn."""
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         self.__prepare_reference_claim__(wikipedia_article=wikipedia_article)
         item = self.__prepare_new_reference_item__(
             page_reference=page_reference, wikipedia_article=wikipedia_article
@@ -1138,6 +1220,9 @@ class WikibaseCrud(WcdBaseModel):
         """This method prepares and then tries to upload the website item to WikiCitations
         and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists."""
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         self.__prepare_reference_claim__(wikipedia_article=wikipedia_article)
         item = self.__prepare_new_website_item__(
             page_reference=page_reference, wikipedia_article=wikipedia_article
@@ -1159,6 +1244,9 @@ class WikibaseCrud(WcdBaseModel):
         and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists."""
         logging.debug("prepare_and_upload_wikipedia_article_item: Running")
+        self.__setup_wikibase_integrator_configuration__()
+        if not self.wikibase:
+            raise MissingInformationError("self.wikibase was None")
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):

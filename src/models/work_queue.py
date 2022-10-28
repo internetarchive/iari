@@ -11,12 +11,12 @@ import config
 from src.helpers.console import console
 from src.models.exceptions import NoChannelError
 from src.models.message import Message
-from src.wcd_wikibase_model import WcdWikibaseModel
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WorkQueue(WcdWikibaseModel):
+class WorkQueue(WcdBaseModel):
     """This models the RabbitMQ article queue
     We publish to this queue when ingesting page updates
     and when receiving a title via the wikicitaitons-api

@@ -3,12 +3,15 @@ from os.path import exists
 
 from pydantic import BaseModel, validate_arguments
 
+from src.models.wikibase.enums import SupportedWikibase
+
 logger = logging.getLogger(__name__)
 
 
 class WcdBaseModel(BaseModel):
     """This base model has all methods that we
     want to use in more than one class"""
+    target_wikibase: SupportedWikibase = SupportedWikibase.IASandboxWikibase
 
     @validate_arguments
     def __log_to_file__(self, message: str, file_name: str) -> None:

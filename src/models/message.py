@@ -6,10 +6,10 @@ from src.models.update_delay import UpdateDelay
 from src.models.wikibase.enums import SupportedWikibase
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
-from src.wcd_wikibase_model import WcdWikibaseModel
+from src.wcd_base_model import WcdBaseModel
 
 
-class Message(WcdWikibaseModel):
+class Message(WcdBaseModel):
     """This models a message sent through RabbitMQ.
 
     We default to IASandboxWikibase for now"""

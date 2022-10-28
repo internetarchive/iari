@@ -64,11 +64,12 @@ class TestWcdImportBot(TestCase):
             testing=True,
         )
 
-    def test___gather_and_print_statistics__(self):
-        bot = WcdImportBot(
-            testing=True,
-        )
-        bot.__gather_and_print_statistics__()
+    # def test__gather_statistics__(self):
+    #     """Todo make this test less slow"""
+    #     bot = WcdImportBot(
+    #         testing=True,
+    #     )
+    #     bot.__gather_statistics__()
 
     # DISABLED because we no longer delete pages
     # def test_delete_one_page(self):

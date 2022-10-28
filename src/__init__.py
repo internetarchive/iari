@@ -20,13 +20,12 @@ from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.recent_changes_api.event_stream import EventStream
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
-from src.wcd_wikibase_model import WcdWikibaseModel
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class WcdImportBot(WcdWikibaseModel):
+class WcdImportBot(WcdBaseModel):
     """This class controls the import bot
 
     The language code is the one used by Wikimedia Foundation"""
@@ -343,10 +342,8 @@ class WcdImportBot(WcdWikibaseModel):
     @validate_arguments
     def lookup_md5hash(self, md5hash: str):
         """Lookup a md5hash and show the result to the user"""
-        if not self.wikibase:
-            self.setup_wikibase()
         console.print(f"Lookup of md5hash {md5hash}")
-        wc = WikibaseCrudRead(wikibase=self.wikibase)
+        wc = WikibaseCrudRead(target_wikibase=self.target_wikibase)
         cache = Cache()
         cache.connect()
         if cache.ssdb:
@@ -382,7 +379,7 @@ class WcdImportBot(WcdWikibaseModel):
         based on the given command line arguments."""
         args = self.__setup_argparse_and_return_args__()
         if args.wikicitations:
-            self.wikibase = WikiCitationsWikibase()
+            self.target_wikibase = SupportedWikibase.WikiCitationsWikibase
         if args.rinse:
             self.rinse_all_items_and_cache()
         elif args.rebuild_cache:
@@ -405,20 +402,13 @@ class WcdImportBot(WcdWikibaseModel):
             # We strip here to avoid errors caused by spaces
             self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
         elif args.statistics:
-            wcr = WikibaseCrudRead(wikibase=IASandboxWikibase())
-            wcr.gather_and_print_statistics()
-            wcr = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
-            wcr.gather_and_print_statistics()
+            self.__gather_statistics__()
         elif args.worker:
-            if not self.wikibase:
-                self.setup_wikibase()
-            work_queue = WorkQueue(wikibase=self.wikibase)
+            work_queue = WorkQueue(target_wikibase=self.target_wikibase)
             console.print("Starting worker")
             work_queue.listen_to_queue()
         elif args.ingestor:
-            if not self.wikibase:
-                self.setup_wikibase()
-            event_stream = EventStream(wikibase=self.wikibase)
+            event_stream = EventStream(target_wikibase=self.target_wikibase)
             console.print("Starting ingestor")
             event_stream.start_consuming()
         else:
@@ -439,3 +429,10 @@ class WcdImportBot(WcdWikibaseModel):
         )
         page.__get_wikipedia_article_from_wdqid__()
         page.extract_and_parse_and_upload_missing_items_to_wikibase()
+
+    def __gather_statistics__(self):
+        wcr = WikibaseCrudRead(wikibase=IASandboxWikibase())
+        wcr.gather_and_print_statistics()
+        wcr = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
+        wcr.gather_and_print_statistics()
+
