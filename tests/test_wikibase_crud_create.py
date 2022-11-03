@@ -472,11 +472,10 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
         item = wbi.item.get(wppage.references[0].return_.item_qid)
-        time_in_wikibase = wppage.wikibase.parse_time_from_claim(item.claims.get(property=wppage.wikibase.RETRIEVED_DATE)[0])
-        assert (
-            time_in_wikibase.date()
-            == date.today()
+        time_in_wikibase = wppage.wikibase.parse_time_from_claim(
+            item.claims.get(property=wppage.wikibase.RETRIEVED_DATE)[0]
         )
+        assert time_in_wikibase.date() == date.today()
 
     def test_wikidata_qid_statement(self):
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
