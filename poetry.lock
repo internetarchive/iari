@@ -71,7 +71,7 @@ python-versions = ">=3.5"
 dev = ["cloudpickle", "coverage[toml] (>=5.0.2)", "furo", "hypothesis", "mypy (>=0.900,!=0.940)", "pre-commit", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "sphinx", "sphinx-notfound-page", "zope.interface"]
 docs = ["furo", "sphinx", "sphinx-notfound-page", "zope.interface"]
 tests = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "zope.interface"]
-tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins"]
+tests-no-zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins"]
 
 [[package]]
 name = "backoff"
@@ -147,7 +147,7 @@ optional = false
 python-versions = ">=3.6.0"
 
 [package.extras]
-unicode_backport = ["unicodedata2"]
+unicode-backport = ["unicodedata2"]
 
 [[package]]
 name = "click"
@@ -444,9 +444,9 @@ python-versions = ">=3.6.1,<4.0"
 
 [package.extras]
 colors = ["colorama (>=0.4.3,<0.5.0)"]
-pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
+pipfile-deprecated-finder = ["pipreqs", "requirementslib"]
 plugins = ["setuptools"]
-requirements_deprecated_finder = ["pip-api", "pipreqs"]
+requirements-deprecated-finder = ["pip-api", "pipreqs"]
 
 [[package]]
 name = "itsdangerous"
@@ -817,12 +817,11 @@ setuptools = [
 ]
 
 [package.extras]
-Google = ["google (>=1.7)"]
-Graphviz = ["pydot (>=1.2)"]
-Tkinter = ["Pillow (>=8.1.1)"]
-"commons_information.py" = ["mwparserfromhell (>=0.5.0)"]
+commons-information-py = ["mwparserfromhell (>=0.5.0)"]
 eventstreams = ["sseclient (>=0.0.18,!=0.0.23,!=0.0.24)"]
 flake8 = ["darglint", "flake8 (>=3.9.1)", "flake8-bugbear (!=21.4.1,!=21.11.28)", "flake8-coding", "flake8-colors (>=0.1.9)", "flake8-comprehensions (>=2.2.0)", "flake8-comprehensions (>=3.1.4)", "flake8-docstrings (>=1.3.1)", "flake8-mock (>=0.3)", "flake8-no-u-prefixed-strings (>=0.2)", "flake8-print (>=2.0.1)", "flake8-quotes (>=2.0.1)", "flake8-string-format", "flake8-tuple (>=0.2.8)", "pep8-naming (>=0.7)", "pydocstyle (>=4.0.0)", "pyflakes (>=2.1.0)"]
+google = ["google (>=1.7)"]
+graphviz = ["pydot (>=1.2)"]
 hacking = ["hacking"]
 html = ["BeautifulSoup4"]
 http = ["fake_useragent"]
@@ -830,9 +829,10 @@ isbn = ["python-stdnum (>=1.17)"]
 mwoauth = ["mwoauth (>=0.2.4,!=0.3.1)"]
 mwparserfromhell = ["mwparserfromhell (>=0.5.0)"]
 mysql = ["PyMySQL (>=0.7.11,<1.0.0)", "PyMySQL (>=1.0.0)"]
-"patrol.py" = ["mwparserfromhell (>=0.5.0)"]
+patrol-py = ["mwparserfromhell (>=0.5.0)"]
 scripts = ["memento_client (>=0.5.1,!=0.6.0)", "mwparserfromhell (>=0.5.0)"]
-"weblinkchecker.py" = ["memento_client (>=0.5.1,!=0.6.0)"]
+tkinter = ["Pillow (>=8.1.1)"]
+weblinkchecker-py = ["memento_client (>=0.5.1,!=0.6.0)"]
 wikitextparser = ["wikitextparser (>=0.47.0)", "wikitextparser (>=0.47.5)"]
 
 [package.source]
@@ -865,7 +865,7 @@ urllib3 = ">=1.21.1,<1.27"
 
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
-use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
+use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "requests-oauthlib"
@@ -1014,6 +1014,25 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "types-requests"
+version = "2.28.11.2"
+description = "Typing stubs for requests"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+types-urllib3 = "<1.27"
+
+[[package]]
+name = "types-urllib3"
+version = "1.26.25.1"
+description = "Typing stubs for urllib3"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.4.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -1122,7 +1141,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<=3.11"
-content-hash = "7f8a33fbb6dea05781d40aa933929b84676b3db7b5916f6eefbfd8655c87447d"
+content-hash = "7b3f8e930fd8a01bf8622ffb8bef8148744214a81557cedd864c4348387811d9"
 
 [metadata.files]
 aiohttp = [
@@ -1917,6 +1936,14 @@ toml = [
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+types-requests = [
+    {file = "types-requests-2.28.11.2.tar.gz", hash = "sha256:fdcd7bd148139fb8eef72cf4a41ac7273872cad9e6ada14b11ff5dfdeee60ed3"},
+    {file = "types_requests-2.28.11.2-py3-none-any.whl", hash = "sha256:14941f8023a80b16441b3b46caffcbfce5265fd14555844d6029697824b5a2ef"},
+]
+types-urllib3 = [
+    {file = "types-urllib3-1.26.25.1.tar.gz", hash = "sha256:a948584944b2412c9a74b9cf64f6c48caf8652cb88b38361316f6d15d8a184cd"},
+    {file = "types_urllib3-1.26.25.1-py3-none-any.whl", hash = "sha256:f6422596cc9ee5fdf68f9d547f541096a20c2dcfd587e37c804c9ea720bf5cb2"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.4.0-py3-none-any.whl", hash = "sha256:16fa4864408f655d35ec496218b85f79b3437c829e93320c7c9215ccfd92489e"},
