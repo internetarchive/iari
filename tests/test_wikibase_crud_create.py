@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import date, timezone
 from typing import List
 from unittest import TestCase
 
@@ -318,11 +318,16 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
-        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        wcdqid = wppage.references[0].return_.item_qid
+        console.print(wppage.wikibase.entity_url(item_id=wcdqid))
+        item = wbi.item.get(wcdqid)
         wikibase_access_date = wppage.wikibase.parse_time_from_claim(
             item.claims.get(wppage.wikibase.ACCESS_DATE)[0]
         )
-        assert isoparse(data["archive_date"]) == wikibase_access_date
+        # https://docs.python.org/3.10/library/datetime.html#datetime.datetime.astimezone
+        access_date = isoparse(data["access_date"]).replace(tzinfo=timezone.utc)
+        console.print(access_date)
+        assert access_date == wikibase_access_date
         archive_url: List[Claim] = item.claims.get(property=wppage.wikibase.ARCHIVE_URL)
         assert archive_url[0].mainsnak.datavalue["value"] == data["archive_url"]
         # Check also that a qualifier is present
@@ -334,12 +339,13 @@ class TestWikibaseCrudCreate(TestCase):
             ].mainsnak.datavalue["value"]
             == data["location"]
         )
-        assert (
-            item.claims.get(property=wppage.wikibase.PAGES)[0].mainsnak.datavalue[
-                "value"
-            ]
-            == data["pages"]
-        )
+        # Not implemented yet
+        # assert (
+        #     item.claims.get(property=wppage.wikibase.PAGES)[0].mainsnak.datavalue[
+        #         "value"
+        #     ]
+        #     == data["pages"]
+        # )
         wikibase_publication_date = wppage.wikibase.parse_time_from_claim(
             item.claims.get(wppage.wikibase.PUBLICATION_DATE)[0]
         )
@@ -420,8 +426,11 @@ class TestWikibaseCrudCreate(TestCase):
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+
         wbi = WikibaseIntegrator()
-        item = wbi.item.get(wppage.references[0].return_.item_qid)
+        wcdqid = wppage.references[0].return_.item_qid
+        print(wcdqid)
+        item = wbi.item.get(wcdqid)
         assert (
             item.claims.get(property=wppage.wikibase.PERIODICAL_STRING)[
                 0
@@ -463,12 +472,10 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
         item = wbi.item.get(wppage.references[0].return_.item_qid)
-        assert (
-            item.claims.get(property=wppage.wikibase.RETRIEVED_DATE)[
-                0
-            ].mainsnak.datavalue["value"]
-            == datetime.today()
+        time_in_wikibase = wppage.wikibase.parse_time_from_claim(
+            item.claims.get(property=wppage.wikibase.RETRIEVED_DATE)[0]
         )
+        assert time_in_wikibase.date() == date.today()
 
     def test_wikidata_qid_statement(self):
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
@@ -508,18 +515,20 @@ class TestWikibaseCrudCreate(TestCase):
             == wppage.wikibase.WIKIPEDIA_PAGE
         )
 
-    def test_source_wikipedia_statement(self):
+    def test_published_in_wikipedia_statement_on_article_item(self):
         """This appears on website and reference items"""
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
-        item = wbi.item.get(wppage.return_.item_qid)
+        wcdqid = wppage.return_.item_qid
+        console.print(wcdqid)
+        item = wbi.item.get(wcdqid)
         assert (
-            item.claims.get(property=wppage.wikibase.SOURCE_WIKIPEDIA)[
+            item.claims.get(property=wppage.wikibase.PUBLISHED_IN)[
                 0
-            ].mainsnak.datavalue["value"]
+            ].mainsnak.datavalue["value"]["id"]
             == wppage.wikibase.ENGLISH_WIKIPEDIA
         )
 
-    # TODO test page id for pages
-    # tODO test published in for pages
+    # TODO test page id for articles
+    # tODO test published in for references

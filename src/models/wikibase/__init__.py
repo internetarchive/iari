@@ -143,7 +143,9 @@ class Wikibase(WcdBaseModel):
 
     @staticmethod
     def parse_time_from_claim(claim: Claim):
-        return isoparse(claim.mainsnak.datavalue["value"]["time"].replace("+", ""))
+        return isoparse(
+            claim.mainsnak.datavalue["value"]["time"].replace("+", "")
+        )  # .astimezone(timezone.utc)
 
     @validate_arguments
     def is_valid_qid(self, qid: str) -> bool:
