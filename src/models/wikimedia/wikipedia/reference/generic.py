@@ -1,7 +1,7 @@
 import hashlib
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, List, Optional
 from urllib.parse import parse_qs, urlparse
 
@@ -1156,47 +1156,47 @@ class WikipediaReference(WcdItem):
         date = None
         # Support "2013-01-01"
         try:
-            date = datetime.strptime(v, "%Y-%m-%d")
+            date = datetime.strptime(v, "%Y-%m-%d").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "May 9, 2013"
         try:
-            date = datetime.strptime(v, "%B %d, %Y")
+            date = datetime.strptime(v, "%B %d, %Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "Jul 9, 2013"
         try:
-            date = datetime.strptime(v, "%b %d, %Y")
+            date = datetime.strptime(v, "%b %d, %Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "May 25, 2012a"
         try:
-            date = datetime.strptime(v[:-1], "%b %d, %Y")
+            date = datetime.strptime(v[:-1], "%b %d, %Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "1 September 2003"
         try:
-            date = datetime.strptime(v, "%d %B %Y")
+            date = datetime.strptime(v, "%d %B %Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "26 Dec 1996"
         try:
-            date = datetime.strptime(v, "%d %b %Y")
+            date = datetime.strptime(v, "%d %b %Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "September 2003"
         try:
-            date = datetime.strptime(v, "%B %Y")
+            date = datetime.strptime(v, "%B %Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "Sep 2003"
         try:
-            date = datetime.strptime(v, "%b %Y")
+            date = datetime.strptime(v, "%b %Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         # Support "2003"
         try:
-            date = datetime.strptime(v, "%Y")
+            date = datetime.strptime(v, "%Y").replace(tzinfo=timezone.utc)
         except ValueError:
             pass
         if date is None:
