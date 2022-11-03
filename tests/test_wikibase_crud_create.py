@@ -515,7 +515,7 @@ class TestWikibaseCrudCreate(TestCase):
             == wppage.wikibase.WIKIPEDIA_PAGE
         )
 
-    def test_source_wikipedia_statement(self):
+    def test_published_in_wikipedia_statement_on_article_item(self):
         """This appears on website and reference items"""
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -524,11 +524,11 @@ class TestWikibaseCrudCreate(TestCase):
         console.print(wcdqid)
         item = wbi.item.get(wcdqid)
         assert (
-            item.claims.get(property=wppage.wikibase.SOURCE_WIKIPEDIA)[
+            item.claims.get(property=wppage.wikibase.PUBLISHED_IN)[
                 0
-            ].mainsnak.datavalue["value"]
+            ].mainsnak.datavalue["value"]["id"]
             == wppage.wikibase.ENGLISH_WIKIPEDIA
         )
 
-    # TODO test page id for pages
-    # tODO test published in for pages
+    # TODO test page id for articles
+    # tODO test published in for references
