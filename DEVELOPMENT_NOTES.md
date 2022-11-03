@@ -33,8 +33,8 @@ Decisions and principles guiding the design:
 Github Actions so that does not work)
 * One class one concern (separation of concern)
 * Docker compose is used to bring up most of the architecture
-* An updated diagram of all classes is desireable to get an overview
-* An updated diagram of the workflow is desireable to get an overview
+* An updated diagram of all classes is desirable to get an overview
+* An updated diagram of the workflow is desirable to get an overview
 
 ## Tests
 ### Coverage
