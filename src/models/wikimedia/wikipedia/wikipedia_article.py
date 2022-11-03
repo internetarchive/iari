@@ -568,6 +568,7 @@ class WikipediaArticle(WcdItem):
                 # console.print(entity)
                 # we only care about the first
                 sitelinks = entities[entity].get("sitelinks")
+                # console.print(sitelinks)
                 if sitelinks:
                     enwiki = sitelinks.get("enwiki")
                     if enwiki:
