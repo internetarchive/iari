@@ -574,7 +574,9 @@ class WikipediaArticle(WcdItem):
                         logger.debug(f"got title: {self.title}")
                         self.title = enwiki.get("title")
                     else:
-                        raise MissingInformationError("no enwiki sitelink from Wikidata")
+                        raise MissingInformationError(
+                            "no enwiki sitelink from Wikidata"
+                        )
                 else:
                     raise MissingInformationError("no sitelinks from Wikidata")
         else:
