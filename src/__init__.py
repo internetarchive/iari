@@ -39,7 +39,7 @@ class WcdImportBot(WcdBaseModel):
     event_max_count: int = 0  # 0 means disabled
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
-    wikibase: Wikibase
+    wikibase: Wikibase = IASandboxWikibase()
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     work_queue: Optional[WorkQueue]
     wikidata_qid: str = ""

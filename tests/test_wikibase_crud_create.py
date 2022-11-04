@@ -18,7 +18,7 @@ from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.english.english_reference import (
     EnglishWikipediaReference,
 )
-from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)

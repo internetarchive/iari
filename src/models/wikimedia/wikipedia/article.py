@@ -559,8 +559,17 @@ class WikipediaArticle(WcdItem):
                 # console.print(entity)
                 # we only care about the first
                 sitelinks = entities[entity].get("sitelinks")
+                # console.print(sitelinks)
                 if sitelinks:
                     enwiki = sitelinks.get("enwiki")
                     if enwiki:
+                        logger.debug(f"got title: {self.title}")
                         self.title = enwiki.get("title")
-        logger.debug(f"got title: {self.title}")
+                    else:
+                        raise MissingInformationError(
+                            "no enwiki sitelink from Wikidata"
+                        )
+                else:
+                    raise MissingInformationError("no sitelinks from Wikidata")
+        else:
+            raise MissingInformationError("no entities from Wikidata")

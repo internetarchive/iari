@@ -36,7 +36,7 @@ from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
     from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
-    from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+    from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
 logger = logging.getLogger(__name__)
 
@@ -217,7 +217,7 @@ class WikibaseCrud(WcdBaseModel):
             label = f"{shortened_title} | {page_reference.md5hash[:7]}"
             item.labels.set("en", label)
             if wikipedia_article:
-                from src.models.wikimedia.wikipedia.wikipedia_article import (
+                from src.models.wikimedia.wikipedia.article import (
                     WikipediaArticle,
                 )
 
@@ -1159,7 +1159,7 @@ class WikibaseCrud(WcdBaseModel):
         and returns the WCDQID either if successful upload or from the
         Wikibase error if an item with the exact same label/hash already exists."""
         logging.debug("prepare_and_upload_wikipedia_article_item: Running")
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):
             raise ValueError("did not get a WikipediaArticle object")

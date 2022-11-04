@@ -3,7 +3,7 @@ from unittest import TestCase
 from src import IASandboxWikibase
 from src.models.wikibase.website import Website
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
-from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
 
 class TestWebsite(TestCase):

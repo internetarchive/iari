@@ -18,7 +18,7 @@ from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import WriteRequired
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
-from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
         if not self.existing_wikibase_item:
             raise MissingInformationError("self.wikibase_item was None")
         with console.status("Comparing claims and uploading the result to Wikibase..."):
-            from src.models.wikimedia.wikipedia.wikipedia_article import (
+            from src.models.wikimedia.wikipedia.article import (
                 WikipediaArticle,
             )
 
