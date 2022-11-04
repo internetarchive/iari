@@ -1,3 +1,7 @@
+class AmbiguousDateError(BaseException):
+    pass
+
+
 class DebugExit(BaseException):
     pass
 
@@ -19,4 +23,8 @@ class TimeParseException(BaseException):
 
 
 class WikibaseError(BaseException):
+    pass
+
+
+class NoChannelError(BaseException):
     pass

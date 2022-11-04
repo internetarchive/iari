@@ -12,10 +12,10 @@ from wikibaseintegrator.models import (  # type: ignore
 from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 import config
-from src.helpers import console
+from src import console
 from src.models.exceptions import MissingInformationError
+from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
-from src.models.wikibase.wikibase_return import WikibaseReturn
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +39,15 @@ class WikibaseCrudCreate(WikibaseCrud):
         except ModificationFailed as modification_failed:
             """Catch, extract and return the conflicting WCDQID"""
             logger.info(modification_failed)
-            # We pick the first one only for now
 
-            wcdqid = modification_failed.get_conflicting_entity_ids[0].replace(
-                "Item:", ""
-            )
-            if wcdqid is None:
-                raise MissingInformationError("wcdqid was None")
-            return WikibaseReturn(item_qid=wcdqid, uploaded_now=False)
+            wcdqids = modification_failed.get_conflicting_entity_ids
+            if len(wcdqids):
+                # We pick the first one only for now
+                wcdqid = wcdqids[0].replace("Item:", "")
+                if wcdqid is None:
+                    raise MissingInformationError("wcdqid was None")
+                return WikibaseReturn(item_qid=wcdqid, uploaded_now=False)
+            else:
+                raise MissingInformationError(
+                    "wcdqids was zero length, this is a bug :/"
+                )

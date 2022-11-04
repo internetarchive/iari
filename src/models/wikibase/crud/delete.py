@@ -8,7 +8,8 @@ from wikibaseintegrator.wbi_exceptions import NonExistentEntityError  # type: ig
 from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
 
 import config
-from src.helpers import console, press_enter_to_continue
+from src import console
+from src.helpers.cli_input import press_enter_to_continue
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.enums import Result, SupportedItemType
@@ -45,6 +46,7 @@ class WikibaseCrudDelete(WikibaseCrud):
 
     @validate_arguments
     def __delete_item__(self, item_id: str) -> Result:
+        logger.debug("__delete_item__: running")
         if config.press_enter_to_continue:
             input(f"Do you want to delete {item_id}?")
         logger.debug(f"trying to log in to the wikibase as {self.wikibase.user_name}")
@@ -81,6 +83,6 @@ class WikibaseCrudDelete(WikibaseCrud):
             self.__delete_item__(item_id=page.title().replace("Item:", ""))
             # page.delete(prompt=False)
             # exit()
-        # self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_PAGE)
+        # self.__delete_items__(item_type=SupportedItemType.wikipedia_article)
         # self.__delete_items__(item_type=SupportedItemType.WIKIPEDIA_REFERENCE)
         # self.__delete_items__(item_type=SupportedItemType.WEBSITE_ITEM)

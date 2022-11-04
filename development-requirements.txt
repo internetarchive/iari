@@ -1,7 +1,0 @@
-bandit
-black
-codespell
-flake8
-isort
-mypy
-pre-commit

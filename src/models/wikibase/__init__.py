@@ -1,6 +1,13 @@
+import logging
+from typing import Dict, Iterable, Optional
+
+from dateutil.parser import isoparse
 from pydantic import validate_arguments
+from wikibaseintegrator.models import Claim  # type: ignore
 
 from src.wcd_base_model import WcdBaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class Wikibase(WcdBaseModel):
@@ -13,7 +20,7 @@ class Wikibase(WcdBaseModel):
     title: str
     user_name: str
     wikibase_cloud_wikibase: bool = True
-    wikibase_url: str
+    wikibase_url: str  # we expect a slash in the end
 
     ACCESS_DATE: str  # date
     ARCHIVE: str  # item
@@ -133,3 +140,37 @@ class Wikibase(WcdBaseModel):
             return f"{self.wikibase_url}/wiki/Item:{item_id}"
         else:
             return f"{self.wikibase_url}/wiki/{item_id}"
+
+    @staticmethod
+    def parse_time_from_claim(claim: Claim):
+        return isoparse(
+            claim.mainsnak.datavalue["value"]["time"].replace("+", "")
+        )  # .astimezone(timezone.utc)
+
+    @validate_arguments
+    def is_valid_qid(self, qid: str) -> bool:
+        """Validate the qid"""
+        if qid[:1].upper() == "Q" and qid[1:].isnumeric():
+            return True
+        else:
+            return False
+
+    # TODO the following 2 methods are redundant
+    @validate_arguments
+    def extract_item_ids(self, sparql_result: Optional[Dict]) -> Iterable[str]:
+        """Yield item ids from a sparql result"""
+        if sparql_result:
+            yielded = 0
+            for binding in sparql_result["results"]["bindings"]:
+                if item_id := self.__extract_wcdqs_json_entity_id__(data=binding):
+                    yielded += 1
+                    yield item_id
+            if number_of_bindings := len(sparql_result["results"]["bindings"]):
+                logger.info(f"Yielded {yielded} bindings out of {number_of_bindings}")
+
+    @validate_arguments
+    def __extract_wcdqs_json_entity_id__(
+        self, data: Dict, sparql_variable: str = "item"
+    ) -> str:
+        """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
+        return str(data[sparql_variable]["value"].replace(self.rdf_entity_prefix, ""))

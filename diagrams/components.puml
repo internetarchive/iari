@@ -1,0 +1,50 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+cloud "AWS" {
+    package "Docker compose" {
+        [flower] as F
+        [rabbitmq] as RM
+        [wikicitations-api] as WA
+        [wcdimportbot ingestor] as WI
+        [wcdimportbot worker 1] as WW1
+        [wcdimportbot worker 2] as WW2
+        F -RM : inspection/overview
+        ARTICLE_QUEUE -- RM : manage article jobs
+        ARTICLE_QUEUE <- WI : post job from the page update stream
+        ARTICLE_QUEUE -> WW1 : get article job
+        ARTICLE_QUEUE -> WW2 : get article job
+        WA -> ARTICLE_QUEUE : submit job
+        WA -- ADD_JOB
+        WA -- GET_FROM_WDQID
+        WA -- GET_ARTICLE_DETAILS
+    }
+    database "SSDB" {
+        [Cache] -up- SET
+        [Cache] -- GET
+        WW1 -> GET
+        WW2 -> GET
+        WW1 -> SET
+        WW2 -> SET
+    }
+}
+
+cloud "Wikimedia"{
+  WI -> page_updates : read stream
+  [Add job userscript] -> ADD_JOB
+  [Issues userscript] --> GET_ARTICLE_DETAILS
+  [Issues userscript] --> GET_FROM_WDQID
+  [Go to WikiCitations item userscript] --> GET_FROM_WDQID
+  [Enterprise API] -left- page_updates
+}
+
+database "Wikibase.cloud" {
+    [WikiCitations] as WC
+    WC -- CIRRUSSEARCH_ENDPOINT : (disabled)
+    WC - HTTP_API
+    WC -- SPARQL_API
+    WA -----> SPARQL_API : query (slow)
+    WW1 --> HTTP_API
+    WW2 --> HTTP_API
+}
+@enduml
