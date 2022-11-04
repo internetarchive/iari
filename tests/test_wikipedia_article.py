@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class TestWikipediaArticle(TestCase):
     def test_fix_dash(self):
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
             wikibase=IASandboxWikibase(),
@@ -34,19 +34,20 @@ class TestWikipediaArticle(TestCase):
                     console.print(ref.url, ref.archive_url)
 
     def test_fetch_page_data_and_parse_the_wikitext(self):
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
             wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
+            title="Test",
         )
-        page.__fetch_page_data__(title="Test")
+        page.__fetch_page_data__()
         assert page.page_id == 11089416
         assert page.title == "Test"
 
     # def test_get_wcdqid_from_hash_via_sparql(self):
-    #     from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+    #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     page = WikipediaArticle(
     #         wikibase=IASandboxWikibase(),
@@ -68,7 +69,7 @@ class TestWikipediaArticle(TestCase):
     def test_compare_data_and_update_additional_reference(self):
         """First delete the test page, then upload it with one reference.
         Then verify that the data in the Wikibase is correct"""
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         data = dict(
             title="Test book",
@@ -130,7 +131,7 @@ class TestWikipediaArticle(TestCase):
         assert len(string_citations) == 2
 
     def test_compare_data_and_update_removed_reference(self):
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         data = dict(
             url="https://archive.org/details/catalogueofshipw0000wils/",
@@ -157,7 +158,7 @@ class TestWikipediaArticle(TestCase):
             item.claims.get(property=IASandboxWikibase().CITATIONS)
 
     def test_is_redirect(self):
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         wp = WikipediaArticle(title="Easter island", wikibase=IASandboxWikibase())
         wp.__fetch_page_data__()
@@ -167,14 +168,14 @@ class TestWikipediaArticle(TestCase):
         assert wp.is_redirect is False
 
     def test_fetch_wikidata_qid(self):
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         wp = WikipediaArticle(title="Easter island", wikibase=IASandboxWikibase())
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
 
     def test_get_title_from_wikidata(self):
-        from src.models.wikimedia.wikipedia.wikipedia_article import WikipediaArticle
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         wp = WikipediaArticle(wdqid="Q1", wikibase=IASandboxWikibase())
         wp.__get_title_from_wikidata__()
