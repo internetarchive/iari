@@ -15,10 +15,10 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.crud.create import WikibaseCrudCreate
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.models.wikimedia.wikipedia.reference.english.english_reference import (
     EnglishWikipediaReference,
 )
-from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)

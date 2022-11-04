@@ -40,7 +40,7 @@ class TestWikipediaArticle(TestCase):
             wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
-            title="Test"
+            title="Test",
         )
         page.__fetch_page_data__()
         assert page.page_id == 11089416
