@@ -1,3 +1,4 @@
+# https://aur.archlinux.org/packages/scc-bin <- the software used here
 echo src/models:
 scc src/models
 echo src/helpers:
