@@ -86,15 +86,15 @@ class WorkQueue(WcdBaseModel):
         def callback(channel, method, properties, body):
             logger.debug(" [x] Received %r" % body)
             # Parse into OOP and do the work
-            console.print(body)
-            exit(0)
-            data = json.loads(str(body))
-            console.print(data)
-            message = Message(**data)
-            print(f" [x] Received {message.title}")
-            # exit(0)
-            message.wikibase = self.wikibase
-            console.print(message.dict())
+            decoded_body = body.decode("utf-8")
+            json_data_string = json.loads(decoded_body)
+            json_data_dict = json.loads(json_data_string)
+            if config.loglevel == logging.DEBUG:
+                console.print(json_data_dict)
+            message = Message(**json_data_dict)
+            print(f" [x] Received {message.title} job for {message.wikibase.title}")
+            if config.loglevel == logging.DEBUG:
+                console.print(message.dict())
             message.process_data()
 
         self.__connect__()
