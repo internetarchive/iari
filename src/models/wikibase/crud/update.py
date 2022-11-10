@@ -99,7 +99,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 # Add new claims
                 for new_claim in self.new_item.claims:
                     new_property_id = new_claim.mainsnak.property_number
-                    # TODO fetch property_label to enable a better readabilty during debugging
+                    # TODO fetch property_label to enable a better readability during debugging
                     if new_property_id not in multiple_values_properties:
                         # Replace all claims for properties which we don't want to keep multiple values for
                         # logger.debug(
