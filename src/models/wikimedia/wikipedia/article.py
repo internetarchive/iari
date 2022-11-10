@@ -1,5 +1,3 @@
-# from __future__ import annotations
-
 import hashlib
 import json
 import logging
@@ -15,7 +13,11 @@ from pydantic import validate_arguments
 import config
 from src import console
 from src.helpers.template_extraction import extract_templates_and_params
-from src.models.exceptions import MissingInformationError, WikibaseError
+from src.models.exceptions import (
+    MissingInformationError,
+    WikibaseError,
+    WikipediaApiFetchError,
+)
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
@@ -194,13 +196,17 @@ class WikipediaArticle(WcdItem):
                 self.latest_revision_date = isoparse(data["latest"]["timestamp"])
                 self.page_id = int(data["id"])
                 self.wikitext = data["source"]
+            elif response.status_code == 404:
+                logger.error(
+                    f"Could not fetch page data from Wikipedia because of 404. Got {response.status_code} from {url}"
+                )
             else:
-                raise ValueError(
+                raise WikipediaApiFetchError(
                     f"Could not fetch page data. Got {response.status_code} from {url}"
                 )
         else:
-            logger.debug(
-                "Not fetching via REST API. We have already got all the data we need"
+            logger.info(
+                "Not fetching data via the Wikipedia REST API. We have already got all the data we need"
             )
 
     def __fetch_wikidata_qid__(self):
