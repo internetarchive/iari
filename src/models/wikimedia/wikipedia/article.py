@@ -44,6 +44,7 @@ class WikipediaArticle(WcdItem):
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     wikitext: Optional[str]
     wdqid: str = ""
+    found_in_wikipedia: bool = True
 
     class Config:
         arbitrary_types_allowed = True
@@ -197,8 +198,9 @@ class WikipediaArticle(WcdItem):
                 self.page_id = int(data["id"])
                 self.wikitext = data["source"]
             elif response.status_code == 404:
+                self.found_in_wikipedia = False
                 logger.error(
-                    f"Could not fetch page data from Wikipedia because of 404. Got {response.status_code} from {url}"
+                    f"Could not fetch page data from {self.wikimedia_site.name} because of 404. See {url}"
                 )
             else:
                 raise WikipediaApiFetchError(
@@ -488,7 +490,7 @@ class WikipediaArticle(WcdItem):
         compare and upload any missing claims."""
         logger.debug("extract_and_upload_to_wikibase: Running")
         self.__fetch_page_data__()
-        if not self.is_redirect:
+        if not self.is_redirect and self.found_in_wikipedia:
             self.__fetch_wikidata_qid__()
             self.__generate_hash__()
             self.__setup_wikibase_crud_create__()
@@ -500,7 +502,8 @@ class WikipediaArticle(WcdItem):
                 self.__compare_data_and_update__()
             # TODO insert timestamp into ssdb
         else:
-            console.print("This page is a redirect to another page. Not importing.")
+            if self.is_redirect:
+                console.print("This page is a redirect to another page. Not importing.")
 
     # def __get_title_from_event__(self):
     #     self.title = self.wikimedia_event.page_title

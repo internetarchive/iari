@@ -45,6 +45,19 @@ class TestWikipediaArticle(TestCase):
         page.__fetch_page_data__()
         assert page.page_id == 11089416
         assert page.title == "Test"
+        assert page.found_in_wikipedia is True
+
+    def test_fetch_page_data_invalid_title(self):
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        page = WikipediaArticle(
+            wikibase=IASandboxWikibase(),
+            language_code="en",
+            wikimedia_site=WikimediaSite.WIKIPEDIA,
+            title="Test2",
+        )
+        page.__fetch_page_data__()
+        assert page.found_in_wikipedia is False
 
     # def test_get_wcdqid_from_hash_via_sparql(self):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
