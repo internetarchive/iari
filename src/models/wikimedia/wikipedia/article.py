@@ -205,7 +205,7 @@ class WikipediaArticle(WcdItem):
 
     def __fetch_wikidata_qid__(self):
         """Fetch the Wikidata QID so we can efficiently look up pages via JS"""
-        # TODO avoid hard coding here
+        # TODO avoid hardcoding enwiki here
         url = f"https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&titles={quote(self.title)}&format=json"
         headers = {"User-Agent": config.user_agent}
         response = requests.get(url, headers=headers)
