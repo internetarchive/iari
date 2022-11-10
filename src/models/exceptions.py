@@ -26,5 +26,9 @@ class WikibaseError(BaseException):
     pass
 
 
+class WikipediaApiFetchError(BaseException):
+    pass
+
+
 class NoChannelError(BaseException):
     pass
