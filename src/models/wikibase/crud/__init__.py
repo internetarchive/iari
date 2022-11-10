@@ -103,7 +103,7 @@ class WikibaseCrud(WcdBaseModel):
     def __extract_wcdqs_json_entity_id__(
         self, data: Dict, sparql_variable: str = "item"
     ) -> str:
-        # TODO rename to include "from_binding"
+        # TODO rename to include "from_sparql_variable"
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
         return str(
             data[sparql_variable]["value"].replace(self.wikibase.rdf_entity_prefix, "")

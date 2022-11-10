@@ -155,7 +155,8 @@ class Wikibase(WcdBaseModel):
         else:
             return False
 
-    # TODO the following 2 methods are redundant
+    # TODO the following 2 methods are redundant and should be removed
+    #  they are only here because we integrated wikicitations-api quickly
     @validate_arguments
     def extract_item_ids(self, sparql_result: Optional[Dict]) -> Iterable[str]:
         """Yield item ids from a sparql result"""

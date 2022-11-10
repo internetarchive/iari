@@ -46,6 +46,9 @@ class WcdImportBot(WcdBaseModel):
     testing: bool = False
 
     def __flush_cache__(self):
+        # TODO deprecate flushing the cache, since we will loose the last
+        #  update information if doing so and we cannot currently populate
+        #  it with a query because the timestamp is not uploaded to wikibase
         self.__setup_cache__()
         self.cache.flush_database()
 

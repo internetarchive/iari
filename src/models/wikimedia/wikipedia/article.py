@@ -407,6 +407,7 @@ class WikipediaArticle(WcdItem):
         )
 
     def __upload_page_and_references__(self):
+        # TODO rename this method to "__upload_new_article_item__"
         console.print(f"Importing page '{self.title}'")
         self.__setup_wikibase_crud_create__()
         self.return_ = (
@@ -423,6 +424,7 @@ class WikipediaArticle(WcdItem):
                 f"see {self.url} and {self.wikibase_url}"
             )
         else:
+            # TODO comment out the below code and fail with an exception instead
             # This branch is hit e.g. when the cache has not been synced with the wikibase
             console.print(
                 f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
@@ -463,6 +465,7 @@ class WikipediaArticle(WcdItem):
                             "to judge whether to compare or not"
                         )
             updated_references.append(reference)
+            # TODO insert timestamp into ssdb
             count += 1
         self.references = updated_references
 
@@ -489,6 +492,7 @@ class WikipediaArticle(WcdItem):
                 self.__upload_page_and_references__()
             else:
                 self.__compare_data_and_update__()
+            # TODO insert timestamp into ssdb
         else:
             console.print("This page is a redirect to another page. Not importing.")
 

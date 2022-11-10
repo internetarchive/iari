@@ -75,7 +75,6 @@ class TestWcdImportBot(TestCase):
     #     bot.print_statistics()
 
     # DISABLED because we don't want to rinse all items every time we run all tests
-    # FIXME test against a test Wikibase instance so Mark can play with the production one himself
     # def test_rinse_all_items_and_cache(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())
     #     bot.rinse_all_items_and_cache()

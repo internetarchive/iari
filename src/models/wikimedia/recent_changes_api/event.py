@@ -1,4 +1,3 @@
-import json
 import logging
 from datetime import datetime
 from typing import Optional
@@ -57,8 +56,7 @@ class WikimediaEvent(WcdBaseModel):
         if not self.wikibase:
             raise MissingInformationError("self.wikibase was None")
         logger.info(f"Publishing message with {self.title}")
-        # TODO we should only create and connect
-        # to the work queue once so move this up to EventStream
+        # TODO we should only create and connect to the work queue once so move this up to EventStream
         work_queue = WorkQueue(wikibase=self.wikibase)
         message = Message(title=self.title, wikibase=self.wikibase)
         work_queue.publish(message=message)
