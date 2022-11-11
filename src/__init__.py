@@ -444,13 +444,14 @@ class WcdImportBot(WcdBaseModel):
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):
-        from src.models.wikimedia.wikipedia.article import WikipediaArticle
-
-        page = WikipediaArticle(
-            wikibase=self.wikibase,
-            language_code=self.language_code,
-            wikimedia_site=self.wikimedia_site,
-            wdqid=self.wikidata_qid,
-        )
-        page.__get_wikipedia_article_from_wdqid__()
-        page.extract_and_parse_and_upload_missing_items_to_wikibase()
+        raise DeprecationWarning("deprecated because of failed test since 2.1.0-alpha2")
+        # from src.models.wikimedia.wikipedia.article import WikipediaArticle
+        #
+        # page = WikipediaArticle(
+        #     wikibase=self.wikibase,
+        #     language_code=self.language_code,
+        #     wikimedia_site=self.wikimedia_site,
+        #     wdqid=self.wikidata_qid,
+        # )
+        # page.__get_wikipedia_article_from_wdqid__()
+        # page.extract_and_parse_and_upload_missing_items_to_wikibase()
