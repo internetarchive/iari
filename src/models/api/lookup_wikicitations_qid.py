@@ -31,13 +31,13 @@ class LookupWikicitationsQid(BaseModel):
         if wdqid:
             if self.wikibase.is_valid_qid(qid=wdqid):
                 self.__setup_wikibase_integrator_configuration__()
-                property = self.wikibase.WIKIDATA_QID
+                wikibase_property = self.wikibase.WIKIDATA_QID
                 # We uppercase the QID because the SPARQL string matching is probably case-sensitive
                 query = f"""
                 prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
                 prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
                     SELECT ?item WHERE {{
-                      ?item wcdt:{property} "{wdqid.upper()}".
+                      ?item wcdt:{wikibase_property} "{wdqid.upper()}".
                     }}
                 """
                 result = execute_sparql_query(query=query)
