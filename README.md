@@ -1,16 +1,16 @@
 # WikiCitations Import Bot
 This bot is capable of fetching and storing 
-reference information from Wikipedia pages as structured data 
-in a [Wikibase](https://wikiba.se/) instance. 
+reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700) 
+in a [Wikibase.cloud](https://wikibase.cloud/) instance. 
 
-This bot has been developed by James Hare (version 1.0.0) 
-and Dennis Priskorn (version 2) as part of the 
-Turn All References Blue project which is led by 
+It has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) (version 1.0.0) 
+and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2) as part of the 
+[Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by 
 Mark Graham, head of The 
-Wayback Machine department of the Internet Archive.
+[Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the [Internet Archive](https://www.wikidata.org/wiki/Q461).
 
 A Wikibase with millions of references and edges between 
-them and the Wikipedia page(s) they are used on is useful
+them and the Wikipedia article(s) they are used on is useful
  for both Wikimedians and researchers who wish to understand
  which websites are linked to which pages and used as references.
 
@@ -27,10 +27,12 @@ maintained by them as of this writing.
 
 # Why store the data about references in a graph database?
 The advantages of having access to this data in a graph are many.
-* Overview and visualization of references across (whole categories) of Wikipedia pages becomes possible.
-* Overview of most cited websites in the world
+* Globally unique and persistent identifiers for as many references in Wikipedia as possible. (see F1 in the [FAIR data principles](https://www.wikidata.org/wiki/Q29032644))
+* Overview and visualization of references across Wikipedia articles and language editions becomes possible.
+* Overview of most cited websites in the world (see also [bestref.net](https://bestref.net/) 
+which is based on data extraction from the dump files)
 * Insight into how many references have URLs, authors and other valuable information.
-* Using SPARQL it becomes easy to e.g. pinpoint pages with less trustworthy sources
+* Using SPARQL it becomes trivial for anyone to e.g. pinpoint pages with less trustworthy sources
 * Using the data over time can help follow and understand changes in patterns of referencing.
 * and more...
 
@@ -126,63 +128,24 @@ If you want to delete items from the Wikibase, ask an administrator of the Wikib
 
 # Features
 Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
+
 ## Import one or more pages
-The bot can import any Wikipedia page (in English Wikipedia)
+The bot can import any Wikipedia article (in English Wikipedia)
 
-`$ python wcdimportbot.py --import "title of page"` 
+`$ python wcdimportbot.py --import "title of article"` 
 
-## Delete a page
-The bot can delete any page item (Defaults to English Wikipedia)
+## Import range
+The bot can import ranges of Wikipedia articles (in English Wikipedia) in the order A-Z
 
-`$ python wcdimportbot.py --delete-page "title of page"` 
+`$ python wcdimportbot.py --max-range 10` 
 
-## Rinse all items from the Wikibase
-To delete all the imported items e.g. after changes in the data model run
+## Import range based on category
+The bot can import ranges of Wikipedia articles (in English Wikipedia)
 
-`$ python wcdimportbot.py --rinse`
+`$ python wcdimportbot.py --category "title of category"` 
 
 # Help
-```
-usage: wcdimportbot.py [-h] [-c CATEGORY] [-d DELETE_PAGE] [-r NUMERICAL_RANGE] [-i IMPORT_TITLE] [-l LOOKUP_MD5HASH]
-                       [--rinse]
-
-    WCD Import Bot imports references and pages from Wikipedia
-
-    Example adding one page:
-    '$ ./wcdimportbot.py --import-title "Easter Island"'
-
-    Example deleting one page:
-    '$ ./wcdimportbot.py --delete-page "Easter Island"'
-
-    Example looking up a md5hash:
-    '$ ./wcdimportbot.py --lookup-md5hash e98adc5b05cb993cd0c884a28098096c'
-
-    Example importing 5 pages (any page on the Wiki):
-    '$ ./wcdimportbot.py --numerical-range 5'
-
-    Example importing 5 pages from a specific category_title:
-    '$ ./wcdimportbot.py --numerical-range 5 --category "World War II"'
-
-    Example rinsing the Wikibase and the cache:
-    '$ ./wcdimportbot.py --rinse'
-
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -c CATEGORY, --category CATEGORY
-                        Import range of pages from a specific category_title
-  -d DELETE_PAGE, --delete-page DELETE_PAGE
-                        Delete a single page from WikiCitations and the cache by title (Defaults to English Wikipedia
-                        for now). Note: This does not delete the reference items associated with the page.
-  -r NUMERICAL_RANGE, --numerical-range NUMERICAL_RANGE
-                        Import range of pages
-  -i IMPORT_TITLE, --import-title IMPORT_TITLE
-                        Title to import from a Wikipedia (Defaults to English Wikipedia for now)
-  -l LOOKUP_MD5HASH, --lookup-md5hash LOOKUP_MD5HASH
-                        Lookup md5hash in the cache (if enabled) and WikiCitations via SPARQL (used mainly for
-                        debugging)
-  --rinse               Rinse all page and reference items and delete the cache
-```
+Run `$ python wcdimportbot.py --help` to see a list of all supported commands
 
 ## License
 This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022

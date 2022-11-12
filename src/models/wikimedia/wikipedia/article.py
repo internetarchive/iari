@@ -531,58 +531,61 @@ class WikipediaArticle(WcdItem):
 
     @validate_arguments
     def __get_wikipedia_article_from_wdqid__(self):
-        self.__get_title_from_wikidata__()
-        self.__get_wikipedia_article_from_title__()
+        raise DeprecationWarning("deprecated because of failed test since 2.1.0-alpha2")
+        # self.__get_title_from_wikidata__()
+        # self.__get_wikipedia_article_from_title__()
 
     def __get_title_from_wikidata__(self):
-        logger.debug("__get_title_from_wikidata__: Running")
-        from wikibaseintegrator import wbi_helpers  # type: ignore
-
-        # https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q180736&props=sitelinks/urls&languages=az&languagefallback=&sitefilter=enwiki&formatversion=2
-        # TODO avoid hardcoding enwiki here
-        data = {
-            "action": "wbgetentities",
-            "props": "sitelinks/urls",
-            "ids": self.wdqid,
-            "sitefilter": "enwiki",
-        }
-        result = wbi_helpers.mediawiki_api_call_helper(
-            data=data, allow_anonymous=True, user_agent=config.user_agent
-        )
-        """{
-            "entities": {
-                "Q180736": {
-                    "type": "item",
-                    "id": "Q180736",
-                    "sitelinks": {
-                        "enwiki": {
-                            "site": "enwiki",
-                            "title": "Les Misérables",
-                            "badges": [],
-                            "url": "https://en.wikipedia.org/wiki/Les_Mis%C3%A9rables"
-                        }
-                    }
-                }
-            },
-            "success": 1
-        }"""
-        entities = result.get("entities")
-        if entities:
-            for entity in entities:
-                # console.print(entity)
-                # we only care about the first
-                sitelinks = entities[entity].get("sitelinks")
-                # console.print(sitelinks)
-                if sitelinks:
-                    enwiki = sitelinks.get("enwiki")
-                    if enwiki:
-                        logger.debug(f"got title: {self.title}")
-                        self.title = enwiki.get("title")
-                    else:
-                        raise MissingInformationError(
-                            "no enwiki sitelink from Wikidata"
-                        )
-                else:
-                    raise MissingInformationError("no sitelinks from Wikidata")
-        else:
-            raise MissingInformationError("no entities from Wikidata")
+        raise DeprecationWarning("deprecated because of failed test since 2.1.0-alpha2")
+        # logger.debug("__get_title_from_wikidata__: Running")
+        # from wikibaseintegrator import wbi_helpers  # type: ignore
+        #
+        # # https://www.wikidata.org/w/api.php?action=wbgetentities
+        # &ids=Q180736&props=sitelinks/urls&languages=az&languagefallback=&sitefilter=enwiki&formatversion=2
+        # # TODO avoid hardcoding enwiki here
+        # data = {
+        #     "action": "wbgetentities",
+        #     "props": "sitelinks/urls",
+        #     "ids": self.wdqid,
+        #     "sitefilter": "enwiki",
+        # }
+        # result = wbi_helpers.mediawiki_api_call_helper(
+        #     data=data, allow_anonymous=True, user_agent=config.user_agent
+        # )
+        # """{
+        #     "entities": {
+        #         "Q180736": {
+        #             "type": "item",
+        #             "id": "Q180736",
+        #             "sitelinks": {
+        #                 "enwiki": {
+        #                     "site": "enwiki",
+        #                     "title": "Les Misérables",
+        #                     "badges": [],
+        #                     "url": "https://en.wikipedia.org/wiki/Les_Mis%C3%A9rables"
+        #                 }
+        #             }
+        #         }
+        #     },
+        #     "success": 1
+        # }"""
+        # entities = result.get("entities")
+        # if entities:
+        #     for entity in entities:
+        #         # console.print(entity)
+        #         # we only care about the first
+        #         sitelinks = entities[entity].get("sitelinks")
+        #         # console.print(sitelinks)
+        #         if sitelinks:
+        #             enwiki = sitelinks.get("enwiki")
+        #             if enwiki:
+        #                 logger.debug(f"got title: {self.title}")
+        #                 self.title = enwiki.get("title")
+        #             else:
+        #                 raise MissingInformationError(
+        #                     "no enwiki sitelink from Wikidata"
+        #                 )
+        #         else:
+        #             raise MissingInformationError(f"no sitelinks from Wikidata, got {entities}")
+        # else:
+        #     raise MissingInformationError("no entities from Wikidata")

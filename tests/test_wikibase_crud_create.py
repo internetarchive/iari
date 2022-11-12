@@ -28,8 +28,8 @@ class TestWikibaseCrudCreate(TestCase):
     def test_prepare_new_reference_item(self):
         """This tests both full name string generation and archive qualifier generation"""
         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        wppage.__get_wikipedia_article_from_title__(title="Democracy")
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+        wppage.__get_wikipedia_article_from_title__()
         reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
@@ -68,8 +68,8 @@ class TestWikibaseCrudCreate(TestCase):
 
     def test_prepare_new_reference_item_with_very_long_title(self):
         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        wppage.__get_wikipedia_article_from_title__(title="Test")
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+        wppage.__get_wikipedia_article_from_title__()
         reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
@@ -103,8 +103,8 @@ class TestWikibaseCrudCreate(TestCase):
 
     def test_prepare_new_wikipedia_article_item_invalid_qid(self):
         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        wppage.__get_wikipedia_article_from_title__(title="Democracy")
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+        wppage.__get_wikipedia_article_from_title__()
         reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
@@ -135,9 +135,8 @@ class TestWikibaseCrudCreate(TestCase):
         # logger.info(f"url: {wppage.wikicitations_url}")
 
     def test_prepare_new_wikipedia_article_item_valid_qid(self):
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Democracy"
-        wppage.__get_wikipedia_article_from_title__(title=title)
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+        wppage.__get_wikipedia_article_from_title__()
         reference = EnglishWikipediaReference(
             **{
                 "last": "Tangian",
@@ -207,9 +206,8 @@ class TestWikibaseCrudCreate(TestCase):
 
     def test_prepare_and_upload_website_item(self):
         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Democracy"
-        wppage.__get_wikipedia_article_from_title__(title=title)
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+        wppage.__get_wikipedia_article_from_title__()
         wppage.__generate_hash__()
         # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
         reference = EnglishWikipediaReference(
@@ -268,9 +266,8 @@ class TestWikibaseCrudCreate(TestCase):
     def test_uploading_a_page_reference_and_website_item_twice(self):
         # wcd = WikibaseCrudDelete(wikibase=IASandboxWikibase())
         # wcd.delete_imported_items()
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase())
-        title = "Democracy"
-        wppage.__get_wikipedia_article_from_title__(title=title)
+        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+        wppage.__get_wikipedia_article_from_title__()
         wppage.__generate_hash__()
         # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
         reference = EnglishWikipediaReference(
