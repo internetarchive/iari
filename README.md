@@ -27,11 +27,12 @@ maintained by them as of this writing.
 
 # Why store the data about references in a graph database?
 The advantages of having access to this data in a graph are many.
+* Globally unique and persistent identifiers for as many references in Wikipedia as possible. (see F1 in the [FAIR data principles](https://www.wikidata.org/wiki/Q29032644))
 * Overview and visualization of references across Wikipedia articles and language editions becomes possible.
 * Overview of most cited websites in the world (see also [bestref.net](https://bestref.net/) 
 which is based on data extraction from the dump files)
 * Insight into how many references have URLs, authors and other valuable information.
-* Using SPARQL it becomes easy to e.g. pinpoint pages with less trustworthy sources
+* Using SPARQL it becomes trivial for anyone to e.g. pinpoint pages with less trustworthy sources
 * Using the data over time can help follow and understand changes in patterns of referencing.
 * and more...
 
