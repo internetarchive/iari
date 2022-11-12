@@ -137,26 +137,28 @@ class WcdImportBot(WcdBaseModel):
             "--category",
             help="Import range of pages from a specific category title recursively",
         )
-        parser.add_argument(
-            "-d",
-            "--delete-page",
-            help=(
-                "Delete a single page from WikiCitations and the cache by title "
-                "(Defaults to English Wikipedia for now). "
-                "Note: This does not delete the reference items associated "
-                "with the page."
-            ),
-        )
+        # DEPRECATED since 2.1.0-alpha2
+        # parser.add_argument(
+        #     "-d",
+        #     "--delete-page",
+        #     help=(
+        #         "Delete a single page from WikiCitations and the cache by title "
+        #         "(Defaults to English Wikipedia for now). "
+        #         "Note: This does not delete the reference items associated "
+        #         "with the page."
+        #     ),
+        # )
         parser.add_argument(
             "-r",
             "--max-range",
             help="Import max range of pages",
         ),
-        parser.add_argument(
-            "--flush-cache",
-            action="store_true",
-            help="Remove all items from the cache",
-        ),
+        # DEPRECATED since 2.1.0-alpha2
+        # parser.add_argument(
+        #     "--flush-cache",
+        #     action="store_true",
+        #     help="Remove all items from the cache",
+        # ),
         parser.add_argument(
             "-i",
             "--import-title",
@@ -177,11 +179,12 @@ class WcdImportBot(WcdBaseModel):
             action="store_true",
             help="Get all imported items from SPARQL and rebuild the cache",
         ),
-        parser.add_argument(
-            "--rinse",
-            action="store_true",
-            help="Rinse all page and reference items and delete the cache",
-        )
+        # DEPRECATED since 2.1.0-alpha2
+        # parser.add_argument(
+        #     "--rinse",
+        #     action="store_true",
+        #     help="Rinse all page and reference items and delete the cache",
+        # )
         parser.add_argument(
             "-s",
             "--statistics",
@@ -224,9 +227,10 @@ class WcdImportBot(WcdBaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     @validate_arguments
-    def delete_one_page(self, title: str):
+    def delete_one_page(self#, title: str
+    ):
         """Deletes one page from the Wikibase and from the cache"""
-        console.print("This has been disabled because we no longer delete items.")
+        raise DeprecationWarning("This has been deprecated since 2.1.0-alpha2.")
         # logger.debug("delete_one_page: running")
         # with console.status(f"Deleting {title}"):
         #     from src.models.wikimedia.wikipedia.article import (
@@ -390,7 +394,7 @@ class WcdImportBot(WcdBaseModel):
     @staticmethod
     def rinse_all_items_and_cache():
         """Delete all page and reference items and clear the SSDB cache"""
-        console.print("This has been disabled because we no longer delete items.")
+        raise DeprecationWarning("This has been deprecated since 2.1.0-alpha2.")
         # wc = WikibaseCrudDelete(wikibase=self.wikibase)
         # wc.delete_imported_items()
         # self.__flush_cache__()

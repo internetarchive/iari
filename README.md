@@ -126,63 +126,24 @@ If you want to delete items from the Wikibase, ask an administrator of the Wikib
 
 # Features
 Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
+
 ## Import one or more pages
-The bot can import any Wikipedia page (in English Wikipedia)
+The bot can import any Wikipedia article (in English Wikipedia)
 
-`$ python wcdimportbot.py --import "title of page"` 
+`$ python wcdimportbot.py --import "title of article"` 
 
-## Delete a page
-The bot can delete any page item (Defaults to English Wikipedia)
+## Import range
+The bot can import ranges of Wikipedia articles (in English Wikipedia) in the order A-Z
 
-`$ python wcdimportbot.py --delete-page "title of page"` 
+`$ python wcdimportbot.py --max-range 10` 
 
-## Rinse all items from the Wikibase
-To delete all the imported items e.g. after changes in the data model run
+## Import range based on category
+The bot can import ranges of Wikipedia articles (in English Wikipedia)
 
-`$ python wcdimportbot.py --rinse`
+`$ python wcdimportbot.py --category "title of category"` 
 
 # Help
-```
-usage: wcdimportbot.py [-h] [-c CATEGORY] [-d DELETE_PAGE] [-r NUMERICAL_RANGE] [-i IMPORT_TITLE] [-l LOOKUP_MD5HASH]
-                       [--rinse]
-
-    WCD Import Bot imports references and pages from Wikipedia
-
-    Example adding one page:
-    '$ ./wcdimportbot.py --import-title "Easter Island"'
-
-    Example deleting one page:
-    '$ ./wcdimportbot.py --delete-page "Easter Island"'
-
-    Example looking up a md5hash:
-    '$ ./wcdimportbot.py --lookup-md5hash e98adc5b05cb993cd0c884a28098096c'
-
-    Example importing 5 pages (any page on the Wiki):
-    '$ ./wcdimportbot.py --numerical-range 5'
-
-    Example importing 5 pages from a specific category_title:
-    '$ ./wcdimportbot.py --numerical-range 5 --category "World War II"'
-
-    Example rinsing the Wikibase and the cache:
-    '$ ./wcdimportbot.py --rinse'
-
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -c CATEGORY, --category CATEGORY
-                        Import range of pages from a specific category_title
-  -d DELETE_PAGE, --delete-page DELETE_PAGE
-                        Delete a single page from WikiCitations and the cache by title (Defaults to English Wikipedia
-                        for now). Note: This does not delete the reference items associated with the page.
-  -r NUMERICAL_RANGE, --numerical-range NUMERICAL_RANGE
-                        Import range of pages
-  -i IMPORT_TITLE, --import-title IMPORT_TITLE
-                        Title to import from a Wikipedia (Defaults to English Wikipedia for now)
-  -l LOOKUP_MD5HASH, --lookup-md5hash LOOKUP_MD5HASH
-                        Lookup md5hash in the cache (if enabled) and WikiCitations via SPARQL (used mainly for
-                        debugging)
-  --rinse               Rinse all page and reference items and delete the cache
-```
+Run `$ python wcdimportbot.py --help` to see a list of all supported commands
 
 ## License
 This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022
