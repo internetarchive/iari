@@ -20,8 +20,9 @@ class TestWikipediaArticle(TestCase):
             wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
+            title="Easter Island"
         )
-        page.__get_wikipedia_article_from_title__(title="Easter Island")
+        page.__get_wikipedia_article_from_title__()
         page.__extract_and_parse_references__()
         logger.info(f"{len(page.references)} references found")
         for ref in page.references:
@@ -187,9 +188,10 @@ class TestWikipediaArticle(TestCase):
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
 
-    def test_get_title_from_wikidata(self):
-        from src.models.wikimedia.wikipedia.article import WikipediaArticle
-
-        wp = WikipediaArticle(wdqid="Q1", wikibase=IASandboxWikibase())
-        wp.__get_title_from_wikidata__()
-        assert wp.title == "Universe"
+    # DISABLED because it fails. we disabled the method since 2.1.0-alpha2
+    # def test_get_title_from_wikidata(self):
+    #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
+    #
+    #     wp = WikipediaArticle(wdqid="Q1", wikibase=IASandboxWikibase())
+    #     wp.__get_title_from_wikidata__()
+    #     assert wp.title == "Universe"

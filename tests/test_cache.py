@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class TestCache(TestCase):
     def test_connect(self):
         database = Cache()
-        database.connect(host="archive-wcd.aws.scatter.red")
+        database.connect()
 
     def test_check_website_and_get_wikibase_qid(self):
         cache = Cache()
