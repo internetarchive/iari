@@ -540,7 +540,8 @@ class WikipediaArticle(WcdItem):
         # logger.debug("__get_title_from_wikidata__: Running")
         # from wikibaseintegrator import wbi_helpers  # type: ignore
         #
-        # # https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q180736&props=sitelinks/urls&languages=az&languagefallback=&sitefilter=enwiki&formatversion=2
+        # # https://www.wikidata.org/w/api.php?action=wbgetentities
+        # &ids=Q180736&props=sitelinks/urls&languages=az&languagefallback=&sitefilter=enwiki&formatversion=2
         # # TODO avoid hardcoding enwiki here
         # data = {
         #     "action": "wbgetentities",
