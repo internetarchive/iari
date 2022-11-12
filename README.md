@@ -1,16 +1,16 @@
 # WikiCitations Import Bot
 This bot is capable of fetching and storing 
-reference information from Wikipedia pages as structured data 
-in a [Wikibase](https://wikiba.se/) instance. 
+reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700) 
+in a [Wikibase.cloud](https://wikibase.cloud/) instance. 
 
-This bot has been developed by James Hare (version 1.0.0) 
-and Dennis Priskorn (version 2) as part of the 
-Turn All References Blue project which is led by 
+It has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) (version 1.0.0) 
+and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2) as part of the 
+[Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by 
 Mark Graham, head of The 
-Wayback Machine department of the Internet Archive.
+[Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the [Internet Archive](https://www.wikidata.org/wiki/Q461).
 
 A Wikibase with millions of references and edges between 
-them and the Wikipedia page(s) they are used on is useful
+them and the Wikipedia article(s) they are used on is useful
  for both Wikimedians and researchers who wish to understand
  which websites are linked to which pages and used as references.
 
@@ -27,10 +27,12 @@ maintained by them as of this writing.
 
 # Why store the data about references in a graph database?
 The advantages of having access to this data in a graph are many.
-* Overview and visualization of references across (whole categories) of Wikipedia pages becomes possible.
-* Overview of most cited websites in the world
+* Globally unique and persistent identifiers for as many references in Wikipedia as possible. (see F1 in the [FAIR data principles](https://www.wikidata.org/wiki/Q29032644))
+* Overview and visualization of references across Wikipedia articles and language editions becomes possible.
+* Overview of most cited websites in the world (see also [bestref.net](https://bestref.net/) 
+which is based on data extraction from the dump files)
 * Insight into how many references have URLs, authors and other valuable information.
-* Using SPARQL it becomes easy to e.g. pinpoint pages with less trustworthy sources
+* Using SPARQL it becomes trivial for anyone to e.g. pinpoint pages with less trustworthy sources
 * Using the data over time can help follow and understand changes in patterns of referencing.
 * and more...
 
