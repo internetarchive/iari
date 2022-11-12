@@ -18,19 +18,19 @@ class WikibaseCrudRead(WikibaseCrud):
     @property
     def number_of_pages(self):
         return self.__get_statistic__(
-            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_PAGE
+            wikibase_property_id=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_PAGE
         )
 
     @property
     def number_of_references(self):
         return self.__get_statistic__(
-            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_REFERENCE
+            wikibase_property_id=self.wikibase.INSTANCE_OF, value=self.wikibase.WIKIPEDIA_REFERENCE
         )
 
     @property
     def number_of_website_items(self):
         return self.__get_statistic__(
-            property=self.wikibase.INSTANCE_OF, value=self.wikibase.WEBSITE_ITEM
+            wikibase_property_id=self.wikibase.INSTANCE_OF, value=self.wikibase.WEBSITE_ITEM
         )
 
     @validate_arguments
@@ -120,15 +120,15 @@ class WikibaseCrudRead(WikibaseCrud):
         )
 
     @validate_arguments
-    def __get_statistic__(self, property: str, value: str, prefix: bool = True):
-        if prefix and (len(property) < 3 or len(value) < 3):
+    def __get_statistic__(self, wikibase_property_id: str, value: str, prefix: bool = True):
+        if prefix and (len(wikibase_property_id) < 3 or len(value) < 3):
             raise ValueError("Either property or value was too short.")
         if prefix:
             query = f"""
             prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
             prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
                 SELECT (COUNT(?item) as ?count) WHERE {{
-                  ?item wcdt:{property} wcd:{value}.
+                  ?item wcdt:{wikibase_property_id} wcd:{value}.
                 }}
             """
         else:
@@ -136,7 +136,7 @@ class WikibaseCrudRead(WikibaseCrud):
             prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
             prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
                 SELECT (COUNT(?item) as ?count) WHERE {{
-                  ?item wcdt:{property} {value}.
+                  ?item wcdt:{wikibase_property_id} {value}.
                 }}
             """
         return self.__extract_count_from_first_binding__(
@@ -163,8 +163,8 @@ class WikibaseCrudRead(WikibaseCrud):
         )
 
     @validate_arguments
-    def get_external_identifier_statistic(self, property: str):
-        return self.__get_statistic__(property=property, value="[]", prefix=False)
+    def get_external_identifier_statistic(self, wikibase_property_id: str):
+        return self.__get_statistic__(wikibase_property_id=wikibase_property_id, value="[]", prefix=False)
 
     @validate_arguments
     def get_item(self, item_id: str) -> Optional[ItemEntity]:

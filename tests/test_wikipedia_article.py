@@ -20,7 +20,7 @@ class TestWikipediaArticle(TestCase):
             wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.WIKIPEDIA,
-            title="Easter Island"
+            title="Easter Island",
         )
         page.__get_wikipedia_article_from_title__()
         page.__extract_and_parse_references__()

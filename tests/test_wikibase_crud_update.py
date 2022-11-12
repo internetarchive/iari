@@ -105,8 +105,7 @@ class TestWikibaseCrudUpdate(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = wikibase
         reference.finish_parsing_and_generate_hash()
-        wppage = WikipediaArticle(wikibase=wikibase,         title="Test"
-)
+        wppage = WikipediaArticle(wikibase=wikibase, title="Test")
         wppage.__get_wikipedia_article_from_title__()
         wppage.__generate_hash__()
         wc = WikibaseCrud(wikibase=wikibase)
@@ -150,8 +149,7 @@ class TestWikibaseCrudUpdate(TestCase):
         URL/ISBN/DOI can be updated on the reference"""
         wikibase = IASandboxWikibase()
         # instantiate a page to test on
-        wppage = WikipediaArticle(wikibase=wikibase,         title = "Test"
-)
+        wppage = WikipediaArticle(wikibase=wikibase, title="Test")
         wppage.__get_wikipedia_article_from_title__()
         wppage.__generate_hash__()
         title_ref = "test title"

@@ -31,7 +31,9 @@ class Message(WcdBaseModel):
                     bot.page_title = self.title
                     bot.get_and_extract_page_by_title()
                 if self.article_wikidata_qid:
-                    raise DeprecationWarning("deprecated because of failed test since 2.1.0-alpha2")
+                    raise DeprecationWarning(
+                        "deprecated because of failed test since 2.1.0-alpha2"
+                    )
                     # bot.wikidata_qid = self.article_wikidata_qid
                     # bot.get_and_extract_page_by_wdqid()
         else:
