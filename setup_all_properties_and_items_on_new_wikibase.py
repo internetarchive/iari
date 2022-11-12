@@ -262,17 +262,17 @@ class SetupNewWikibase(BaseModel):
                 )
                 try:
                     logger.info(f"Trying to create {label}")
-                    property = draft_property.write()
+                    wikibase_property_object = draft_property.write()
                     output_text.append(
-                        f'{entry} = "{property.id}" # datatype: {datatype} description: {description}'
+                        f'{entry} = "{wikibase_property_object.id}" # datatype: {datatype} description: {description}'
                     )
                 except MWApiError as e:
                     logger.debug(e)
                     existing_property = e.get_conflicting_entity_ids[0]
-                    property = wbi.property.get(entity_id=existing_property)
-                    logger.debug(f"property id: {property.id}")
+                    wikibase_property_object = wbi.property.get(entity_id=existing_property)
+                    logger.debug(f"property id: {wikibase_property_object.id}")
                     output_text.append(
-                        f'{entry} = "{property.id}" # datatype: {datatype} description: {property.descriptions.get(language="en")}'
+                        f'{entry} = "{wikibase_property_object.id}" # datatype: {datatype} description: {wikibase_property_object.descriptions.get(language="en")}'
                     )
                     # logger.warning(f"Got error: {e} from the Wikibase")
                 count += 1

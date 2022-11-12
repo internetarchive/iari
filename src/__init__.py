@@ -62,7 +62,7 @@ class WcdImportBot(WcdBaseModel):
         for attribute in attributes:
             if attribute in {**wcd_externalid_properties, **wcd_string_properties}:
                 value = wcr.get_external_identifier_statistic(
-                    property=getattr(self.wikibase, attribute)
+                    wikibase_property_id=getattr(self.wikibase, attribute)
                 )
                 console.print(f"Number of {attribute}: {value}")
 

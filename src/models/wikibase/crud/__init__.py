@@ -137,7 +137,7 @@ class WikibaseCrud(WcdBaseModel):
             )
         authors = self.__prepare_person_claims__(
             use_list=page_reference.authors_list,
-            property=self.wikibase.FULL_NAME_STRING,
+            wikibase_property_id=self.wikibase.FULL_NAME_STRING,
         )
         if (
             config.assume_persons_without_role_are_authors
@@ -146,23 +146,23 @@ class WikibaseCrud(WcdBaseModel):
             logger.info("Assuming persons without role are authors")
         no_role_authors = self.__prepare_person_claims__(
             use_list=page_reference.persons_without_role,
-            property=self.wikibase.FULL_NAME_STRING,
+            wikibase_property_id=self.wikibase.FULL_NAME_STRING,
         )
         editors = self.__prepare_person_claims__(
             use_list=page_reference.interviewers_list,
-            property=self.wikibase.EDITOR_NAME_STRING,
+            wikibase_property_id=self.wikibase.EDITOR_NAME_STRING,
         )
         hosts = self.__prepare_person_claims__(
             use_list=page_reference.hosts_list,
-            property=self.wikibase.HOST_STRING,
+            wikibase_property_id=self.wikibase.HOST_STRING,
         )
         interviewers = self.__prepare_person_claims__(
             use_list=page_reference.interviewers_list,
-            property=self.wikibase.INTERVIEWER_STRING,
+            wikibase_property_id=self.wikibase.INTERVIEWER_STRING,
         )
         translators = self.__prepare_person_claims__(
             use_list=page_reference.interviewers_list,
-            property=self.wikibase.INTERVIEWER_STRING,
+            wikibase_property_id=self.wikibase.INTERVIEWER_STRING,
         )
         return authors + no_role_authors + editors + hosts + interviewers + translators
 
@@ -326,13 +326,13 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_person_claims__(
         self,
         use_list: Optional[List[Person]],
-        property: str,
+        wikibase_property_id: str,
     ) -> List:
         """Prepare claims using the specified property and list of person objects"""
         persons = []
         use_list = use_list or []
         if use_list:
-            logger.debug(f"Preparing {property}")
+            logger.debug(f"Preparing {wikibase_property_id}")
             for person_object in use_list:
                 # We use this pythonic way of checking if the string is empty inspired by:
                 # https://www.delftstack.com/howto/python/how-to-check-a-string-is-empty-in-a-pythonic-way/
@@ -343,13 +343,13 @@ class WikibaseCrud(WcdBaseModel):
                     )
                     if qualifiers:
                         person = datatypes.String(
-                            prop_nr=property,
+                            prop_nr=wikibase_property_id,
                             value=person_object.full_name,
                             qualifiers=qualifiers,
                         )
                     else:
                         person = datatypes.String(
-                            prop_nr=property,
+                            prop_nr=wikibase_property_id,
                             value=person_object.full_name,
                         )
                     persons.append(person)
