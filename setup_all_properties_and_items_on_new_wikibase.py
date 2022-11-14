@@ -269,10 +269,13 @@ class SetupNewWikibase(BaseModel):
                 except MWApiError as e:
                     logger.debug(e)
                     existing_property = e.get_conflicting_entity_ids[0]
-                    wikibase_property_object = wbi.property.get(entity_id=existing_property)
+                    wikibase_property_object = wbi.property.get(
+                        entity_id=existing_property
+                    )
                     logger.debug(f"property id: {wikibase_property_object.id}")
                     output_text.append(
-                        f'{entry} = "{wikibase_property_object.id}" # datatype: {datatype} description: {wikibase_property_object.descriptions.get(language="en")}'
+                        f'{entry} = "{wikibase_property_object.id}" # datatype: {datatype} '
+                        f'description: {wikibase_property_object.descriptions.get(language="en")}'
                     )
                     # logger.warning(f"Got error: {e} from the Wikibase")
                 count += 1

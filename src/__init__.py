@@ -227,8 +227,7 @@ class WcdImportBot(WcdBaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     @validate_arguments
-    def delete_one_page(self#, title: str
-    ):
+    def delete_one_page(self):  # , title: str
         """Deletes one page from the Wikibase and from the cache"""
         raise DeprecationWarning("This has been deprecated since 2.1.0-alpha2.")
         # logger.debug("delete_one_page: running")
