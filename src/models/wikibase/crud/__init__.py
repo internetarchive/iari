@@ -28,7 +28,9 @@ from wikibaseintegrator.wbi_helpers import delete_page  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
+from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
+from src.models.hash_ import Hash_
 from src.models.person import Person
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase import Wikibase
@@ -1123,6 +1125,16 @@ class WikibaseCrud(WcdBaseModel):
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
         return_ = wcc.upload_new_item(item=item)
         if isinstance(return_, WikibaseReturn):
+            if return_.uploaded_now:
+                hash_ = Hash_(
+                    wikibase=self.wikibase,
+                    language_code=self.language_code,
+                    title=page_reference.title,
+                    wikimedia_site=page_reference.wikimedia_site,
+                )
+                cache = Cache()
+                cache.connect()
+                cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
             return return_
         else:
             raise ValueError(f"we did not get a WikibaseReturn back")
@@ -1169,4 +1181,5 @@ class WikibaseCrud(WcdBaseModel):
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
         return_: WikibaseReturn = wcc.upload_new_item(item=item)
+        
         return return_
