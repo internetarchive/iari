@@ -182,11 +182,11 @@ class Cache(WcdBaseModel):
         else:
             raise ValueError("self.ssdb was None")
 
-    def set_title_or_wdqid_last_updated(self, key: str) -> Any:
-        """This sets the update timestamp of an entity"""
+    def set_title_or_wdqid_last_updated(self, key: str) -> float:
+        """This sets the update timestamp of an entity and returns it"""
         if self.ssdb:
-            return self.ssdb.set_value(
-                key=key, value=str(datetime.timestamp(datetime.now()))
-            )
+            timestamp = datetime.timestamp(datetime.now())
+            self.ssdb.set_value(key=key, value=str(timestamp))
+            return timestamp
         else:
             raise ValueError("self.ssdb was None")

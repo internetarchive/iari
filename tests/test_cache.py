@@ -66,3 +66,15 @@ class TestCache(TestCase):
         cache = Cache()
         cache.connect()
         cache.get_cache_information()
+
+    def test_set_title_or_wdqid_last_updated(self):
+        cache = Cache()
+        cache.connect()
+        timestamp = cache.set_title_or_wdqid_last_updated(key="1234")
+        assert isinstance(timestamp, float)
+
+    def test_lookup_title_or_wdqid_last_updated(self):
+        cache = Cache()
+        cache.connect()
+        timestamp = cache.lookup_title_or_wdqid_last_updated(key="1234")
+        assert isinstance(timestamp, float)
