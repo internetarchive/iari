@@ -147,12 +147,14 @@ class Cache(WcdBaseModel):
             raise ValueError("self.ssdb was None")
 
     def flush_database(self):
-        if self.ssdb:
-            result = self.ssdb.flush_database()
-            logger.debug(f"result from SSDB: {result}")
-            console.print("Done flushing the SSDB database")
-        else:
-            raise ValueError("self.ssdb was None")
+        """Deprecated method"""
+        raise DeprecationWarning("This has been deprecated since 2.1.0-alpha3.")
+        # if self.ssdb:
+        #     result = self.ssdb.flush_database()
+        #     logger.debug(f"result from SSDB: {result}")
+        #     console.print("Done flushing the SSDB database")
+        # else:
+        #     raise ValueError("self.ssdb was None")
 
     def get_cache_information(self):
         if self.ssdb:
