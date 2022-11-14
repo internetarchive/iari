@@ -1134,7 +1134,9 @@ class WikibaseCrud(WcdBaseModel):
                 )
                 cache = Cache()
                 cache.connect()
-                cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
+                cache.set_title_or_wdqid_last_updated(
+                    key=hash_.__entity_updated_hash_key__()
+                )
             return return_
         else:
             raise ValueError(f"we did not get a WikibaseReturn back")
@@ -1193,5 +1195,7 @@ class WikibaseCrud(WcdBaseModel):
             )
             cache = Cache()
             cache.connect()
-            cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
+            cache.set_title_or_wdqid_last_updated(
+                key=hash_.__entity_updated_hash_key__()
+            )
         return return_
