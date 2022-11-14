@@ -13,10 +13,12 @@ class Hash_(WcdBaseModel):
     title: str = ""
     article_wikidata_qid: str = ""
 
-    def __entity_updated_hash__(
+    def __entity_updated_hash_key__(
         self,
     ) -> str:
-        """We encode the information we need to make it
+        """Key we use to lookup the timestamp in SSDB
+
+        We encode the information we need to make it
         unique and quick to lookup of the timestamp"""
         if self.title:
             title_or_wdqid = self.title
