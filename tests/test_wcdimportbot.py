@@ -27,9 +27,10 @@ class TestWcdImportBot(TestCase):
         bot = WcdImportBot(wikibase=IASandboxWikibase())
         bot.__rebuild_cache__()
 
-    def test_flush_cache(self):
-        bot = WcdImportBot(wikibase=IASandboxWikibase())
-        bot.__flush_cache__()
+    # DEPRECATED since 2.1.0-alpha3
+    # def test_flush_cache(self):
+    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot.__flush_cache__()
 
     # def test_import_one_page(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())

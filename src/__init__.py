@@ -67,8 +67,8 @@ class WcdImportBot(WcdBaseModel):
                 console.print(f"Number of {attribute}: {value}")
 
     def __rebuild_cache__(self):
-        """Flush and rebuild the cache"""
-        self.__flush_cache__()
+        """Rebuild the cache"""
+        # We don't flush first since 2.1.0-alpha3
         if self.cache:
             wcrsandbox = WikibaseCrudRead(wikibase=IASandboxWikibase())
             data = wcrsandbox.__get_all_items_and_hashes__()
