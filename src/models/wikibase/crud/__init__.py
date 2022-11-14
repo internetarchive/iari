@@ -1181,5 +1181,17 @@ class WikibaseCrud(WcdBaseModel):
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
         return_: WikibaseReturn = wcc.upload_new_item(item=item)
-        
+        if return_.uploaded_now:
+            if not wikipedia_article.return_:
+                raise MissingInformationError("wikipedia_article.return_ was None")
+            hash_ = Hash_(
+                wikibase=self.wikibase,
+                language_code=self.language_code,
+                article_wikidata_qid=wikipedia_article.return_.item_qid,
+                title=wikipedia_article.title,
+                wikimedia_site=wikipedia_article.wikimedia_site,
+            )
+            cache = Cache()
+            cache.connect()
+            cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
         return return_
