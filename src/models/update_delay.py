@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 
 import config
+from src import MissingInformationError
 from src.models.cache import Cache
 from src.models.hash_ import Hash_
 from src.wcd_base_model import WcdBaseModel
@@ -18,6 +19,8 @@ class UpdateDelay(WcdBaseModel):
     @property
     def time_to_update(self) -> bool:
         self.cache.connect()
+        if not self.object_:
+            raise MissingInformationError("self.object_ was None")
         from src.models.message import Message
 
         if isinstance(self.object_, Message):
