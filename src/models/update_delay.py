@@ -2,9 +2,10 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 
 import config
-from src import MissingInformationError
 from src.models.cache import Cache
+from src.models.exceptions import MissingInformationError
 from src.models.hash_ import Hash_
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
 
 
@@ -36,8 +37,12 @@ class UpdateDelay(WcdBaseModel):
                 WikipediaReference,
             )
 
-            if not isinstance(self.object_, WikipediaReference):
-                raise ValueError("did not get Message or WikipediaReference")
+            if not isinstance(self.object_, WikipediaReference) or not isinstance(
+                self.object_, WikipediaArticle
+            ):
+                raise ValueError(
+                    "did not get Message or WikipediaReference or WikipediaArticle"
+                )
             # Got reference
             hash_ = Hash_(
                 wikibase=self.object_.wikibase,
