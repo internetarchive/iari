@@ -9,7 +9,7 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 import config
 from src.helpers.console import console
 from src.models.cache import Cache
-from src.models.exceptions import WikibaseError, MissingInformationError
+from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
