@@ -9,7 +9,7 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 import config
 from src.helpers.console import console
 from src.models.cache import Cache
-from src.models.exceptions import WikibaseError
+from src.models.exceptions import WikibaseError, MissingInformationError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
@@ -22,6 +22,7 @@ from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.recent_changes_api.event_stream import EventStream
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
 
@@ -44,6 +45,7 @@ class WcdImportBot(WcdBaseModel):
     work_queue: Optional[WorkQueue]
     wikidata_qid: str = ""
     testing: bool = False
+    wikipedia_article: Optional[WikipediaArticle]
 
     def __flush_cache__(self):
         # TODO deprecate flushing the cache, since we will loose the last
@@ -278,14 +280,14 @@ class WcdImportBot(WcdBaseModel):
         made in Wikipedia"""
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        page = WikipediaArticle(
+        self.wikipedia_article = WikipediaArticle(
             wikibase=self.wikibase,
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
             title=self.page_title,
         )
-        page.__get_wikipedia_article_from_title__()
-        page.extract_and_parse_and_upload_missing_items_to_wikibase()
+        self.wikipedia_article.__get_wikipedia_article_from_title__()
+        self.wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
     def get_and_extract_pages_by_range(
