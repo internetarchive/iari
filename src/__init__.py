@@ -278,6 +278,8 @@ class WcdImportBot(WcdBaseModel):
         present in the Wikibase then compare it and all its
         references to make sure we the data is reflecting changes
         made in Wikipedia"""
+        if not self.page_title:
+            raise MissingInformationError("self.page_title was None")
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         self.wikipedia_article = WikipediaArticle(
