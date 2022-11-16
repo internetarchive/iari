@@ -1280,3 +1280,19 @@ class WikipediaReference(WcdItem):
             self.__clean_wiki_markup_from_strings__()
             # We generate the hash last because the parsing needs to be done first
             self.__generate_hashes__()
+
+    def insert_last_update_timestamp(self):
+        from src.models.cache import Cache
+        from src.models.hash_ import Hash_
+
+        hash_ = Hash_(
+            wikibase=self.wikibase,
+            language_code=self.language_code,
+            title=self.title,
+            wikimedia_site=self.wikimedia_site,
+        )
+        cache = Cache()
+        cache.connect()
+        cache.set_title_or_wdqid_last_updated(
+            key=hash_.__entity_updated_hash_key__()
+        )

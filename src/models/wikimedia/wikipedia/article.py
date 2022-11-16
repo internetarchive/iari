@@ -472,8 +472,9 @@ class WikipediaArticle(WcdItem):
                             "reference.return_ was None and is needed "
                             "to judge whether to compare or not"
                         )
+                    # We only store last update information for references with a hash/item
+                    reference.insert_last_update_timestamp()
             updated_references.append(reference)
-            # TODO insert timestamp into ssdb
             count += 1
         self.references = updated_references
 
@@ -500,7 +501,8 @@ class WikipediaArticle(WcdItem):
                 self.__upload_page_and_references__()
             else:
                 self.__compare_data_and_update__()
-            # TODO insert timestamp into ssdb
+            # We update the timestamp no matter what action we took above
+            self.__insert_last_update_timestamp__()
         else:
             if self.is_redirect:
                 console.print("This page is a redirect to another page. Not importing.")
@@ -589,3 +591,20 @@ class WikipediaArticle(WcdItem):
         #             raise MissingInformationError(f"no sitelinks from Wikidata, got {entities}")
         # else:
         #     raise MissingInformationError("no entities from Wikidata")
+
+    def __insert_last_update_timestamp__(self):
+        from src.models.cache import Cache
+        from src.models.hash_ import Hash_
+
+        hash_ = Hash_(
+            wikibase=self.wikibase,
+            language_code=self.language_code,
+            article_wikidata_qid=self.return_.item_qid,
+            title=self.title,
+            wikimedia_site=self.wikimedia_site,
+        )
+        cache = Cache()
+        cache.connect()
+        cache.set_title_or_wdqid_last_updated(
+            key=hash_.__entity_updated_hash_key__()
+        )
