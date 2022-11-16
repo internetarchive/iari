@@ -12,7 +12,7 @@ from wikibaseintegrator.models import (  # type: ignore
 from wikibaseintegrator.wbi_exceptions import ModificationFailed  # type: ignore
 
 import config
-from src import console
+from src.helpers.console import console
 from src.models.exceptions import MissingInformationError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.crud import WikibaseCrud
@@ -31,7 +31,7 @@ class WikibaseCrudCreate(WikibaseCrud):
             console.print(item.get_json())
         try:
             new_item = item.write(summary="New item imported from Wikipedia")
-            print(f"Added new item {self.entity_url(new_item.id)}")
+            console.print(f"Added new item {self.entity_url(new_item.id)}")
             if config.press_enter_to_continue:
                 input("press enter to continue")
             logger.debug(f"returning new wcdqid: {new_item.id}")

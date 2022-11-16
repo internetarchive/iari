@@ -27,14 +27,20 @@ class TestWcdImportBot(TestCase):
         bot = WcdImportBot(wikibase=IASandboxWikibase())
         bot.__rebuild_cache__()
 
-    def test_flush_cache(self):
-        bot = WcdImportBot(wikibase=IASandboxWikibase())
-        bot.__flush_cache__()
-
-    # def test_import_one_page(self):
+    # DEPRECATED since 2.1.0-alpha3
+    # def test_flush_cache(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())
-    #     bot.get_and_extract_page_by_title(title="Test")
-    #     bot.
+    #     bot.__flush_cache__()
+
+    def test_import_one_page_and_make_sure_we_updated_ssdb(self):
+        bot = WcdImportBot(wikibase=IASandboxWikibase(), page_title="Test")
+        bot.get_and_extract_page_by_title()
+        assert bot.wikipedia_article is not None
+        from src.models.update_delay import UpdateDelay
+
+        ud = UpdateDelay(object_=bot.wikipedia_article)
+        assert ud.time_to_update is False
+        assert ud.time_of_last_update is not None
 
     # def test__gather_statistics__(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())

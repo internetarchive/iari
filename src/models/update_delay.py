@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 import config
 from src.models.cache import Cache
+from src.models.exceptions import MissingInformationError
 from src.models.hash_ import Hash_
 from src.wcd_base_model import WcdBaseModel
 
@@ -18,6 +19,8 @@ class UpdateDelay(WcdBaseModel):
     @property
     def time_to_update(self) -> bool:
         self.cache.connect()
+        if not self.object_:
+            raise MissingInformationError("self.object_ was None")
         from src.models.message import Message
 
         if isinstance(self.object_, Message):
@@ -32,18 +35,22 @@ class UpdateDelay(WcdBaseModel):
             from src.models.wikimedia.wikipedia.reference.generic import (
                 WikipediaReference,
             )
+            from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-            if not isinstance(self.object_, WikipediaReference):
-                raise ValueError("did not get Message or WikipediaReference")
-            # Got reference
-            hash_ = Hash_(
-                wikibase=self.object_.wikibase,
-                language_code=self.object_.language_code,
-                title=self.object_.title,
-                wikimedia_site=self.object_.wikimedia_site,
-            )
+            if not isinstance(self.object_, WikipediaReference) and not isinstance(
+                self.object_, WikipediaArticle
+            ):
+                raise ValueError(
+                    "did not get Message or WikipediaReference or WikipediaArticle"
+                )
+        hash_ = Hash_(
+            wikibase=self.object_.wikibase,
+            language_code=self.object_.language_code,
+            title=self.object_.title,
+            wikimedia_site=self.object_.wikimedia_site,
+        )
         timestamp_string = self.cache.lookup_title_or_wdqid_last_updated(
-            key=hash_.__entity_updated_hash__()
+            key=hash_.__entity_updated_hash_key__()
         )
         self.time_of_last_update = datetime.fromtimestamp(timestamp_string)
         return self.__delay_time_has_passed__()
