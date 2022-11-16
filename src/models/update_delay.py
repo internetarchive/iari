@@ -5,7 +5,6 @@ import config
 from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
 from src.models.hash_ import Hash_
-from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
 
 
@@ -36,20 +35,20 @@ class UpdateDelay(WcdBaseModel):
             from src.models.wikimedia.wikipedia.reference.generic import (
                 WikipediaReference,
             )
+            from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-            if not isinstance(self.object_, WikipediaReference) or not isinstance(
+            if not isinstance(self.object_, WikipediaReference) and not isinstance(
                 self.object_, WikipediaArticle
             ):
                 raise ValueError(
                     "did not get Message or WikipediaReference or WikipediaArticle"
                 )
-            # Got reference
-            hash_ = Hash_(
-                wikibase=self.object_.wikibase,
-                language_code=self.object_.language_code,
-                title=self.object_.title,
-                wikimedia_site=self.object_.wikimedia_site,
-            )
+        hash_ = Hash_(
+            wikibase=self.object_.wikibase,
+            language_code=self.object_.language_code,
+            title=self.object_.title,
+            wikimedia_site=self.object_.wikimedia_site,
+        )
         timestamp_string = self.cache.lookup_title_or_wdqid_last_updated(
             key=hash_.__entity_updated_hash_key__()
         )
