@@ -5,7 +5,6 @@ from wikibaseintegrator.wbi_exceptions import MissingEntityException  # type: ig
 
 import config
 from src import WcdImportBot
-from src.models.update_delay import UpdateDelay
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 
 logging.basicConfig(level=config.loglevel)
@@ -36,9 +35,12 @@ class TestWcdImportBot(TestCase):
     def test_import_one_page_and_make_sure_we_updated_ssdb(self):
         bot = WcdImportBot(wikibase=IASandboxWikibase(), page_title="Test")
         bot.get_and_extract_page_by_title()
+        assert bot.wikipedia_article is not None
+        from src.models.update_delay import UpdateDelay
+
         ud = UpdateDelay(object_=bot.wikipedia_article)
         assert ud.time_to_update is False
-        print(ud.time_of_last_update)
+        assert ud.time_of_last_update is not None
 
     # def test__gather_statistics__(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())
