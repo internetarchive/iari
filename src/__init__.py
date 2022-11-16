@@ -46,11 +46,12 @@ class WcdImportBot(WcdBaseModel):
     testing: bool = False
 
     def __flush_cache__(self):
-        # TODO deprecate flushing the cache, since we will loose the last
+        # We deprecate flushing the cache, since we will loose the last
         #  update information if doing so and we cannot currently populate
         #  it with a query because the timestamp is not uploaded to wikibase
-        self.__setup_cache__()
-        self.cache.flush_database()
+        raise DeprecationWarning("This has been deprecated since 2.1.0-alpha3.")
+        # self.__setup_cache__()
+        # self.cache.flush_database()
 
     def __gather_and_print_statistics__(self):
         console.print(self.wikibase.title)
@@ -335,18 +336,20 @@ class WcdImportBot(WcdBaseModel):
             for page in site.allpages(namespace=0):
                 if count >= self.event_max_count:
                     break
-                # page: Page = page
+                from pywikibot import Page
+
+                page: Page = page # type: ignore
                 if not page.isRedirectPage():
                     count += 1
                     # console.print(count)
-                    logger.info(f"{page.pageid} {page.page_title()}")
+                    logger.info(f"{page.pageid} {page.title()}")
                     # raise DebugExit()
                     wikipedia_article = WikipediaArticle(
                         language_code=self.language_code,
                         latest_revision_date=page.editTime(),
                         latest_revision_id=page.latest_revision_id,
                         page_id=page.pageid,
-                        title=str(page.page_title()),
+                        title=str(page.title()),
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
                         wikibase=self.wikibase,
@@ -403,12 +406,13 @@ class WcdImportBot(WcdBaseModel):
         args = self.__setup_argparse_and_return_args__()
         if args.wikicitations:
             self.wikibase = WikiCitationsWikibase()
-        if args.rinse:
-            self.rinse_all_items_and_cache()
+        # DEPRECATED since 2.1.0-alpha2
+        # if args.rinse:
+        #     self.rinse_all_items_and_cache()
         elif args.rebuild_cache:
             self.__rebuild_cache__()
-        elif args.flush_cache:
-            self.__flush_cache__()
+        # elif args.flush_cache:
+        #     self.__flush_cache__()
         elif args.import_title:
             logger.info(f"importing title {args.import_title}")
             self.page_title = args.import_title

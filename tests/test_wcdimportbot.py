@@ -32,10 +32,10 @@ class TestWcdImportBot(TestCase):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())
     #     bot.__flush_cache__()
 
+    # DISABLED because other tests cover this method
     # def test_import_one_page(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())
     #     bot.get_and_extract_page_by_title(title="Test")
-    #     bot.
 
     # def test__gather_statistics__(self):
     #     bot = WcdImportBot(wikibase=IASandboxWikibase())
@@ -55,17 +55,11 @@ class TestWcdImportBot(TestCase):
     #     if pages is None or len(pages) != 10:
     #         self.fail()
 
-    # def test_get_pages_by_range_200(self):
-    #     bot = WcdImportBot(
-    #         max_count=200,
-    #         wikibase_url="test",
-    #         mediawiki_api_url="test",
-    #         mediawiki_index_url="test",
-    #         sparql_endpoint_url="test",
-    #     )
-    #     pages = bot.get_pages_by_range()
-    #     if pages is None or len(pages) != 200:
-    #         self.fail()
+    def test_get_pages_by_range(self):
+        bot = WcdImportBot(
+            wikibase=IASandboxWikibase(),
+        )
+        bot.get_and_extract_pages_by_range(max_count=2)
 
     # def test_extract_references_from_20_pages(self):
     #     bot = WcdImportBot(
