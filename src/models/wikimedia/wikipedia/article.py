@@ -472,6 +472,9 @@ class WikipediaArticle(WcdItem):
                             "reference.return_ was None and is needed "
                             "to judge whether to compare or not"
                         )
+                    # else:
+                    #     console.print(reference.return_.dict())
+                    # exit()
                     # We only store last update information for references with a hash/item
                     reference.insert_last_update_timestamp()
             updated_references.append(reference)
@@ -509,6 +512,7 @@ class WikipediaArticle(WcdItem):
             if self.is_redirect:
                 console.print("This page is a redirect to another page. Not importing.")
 
+    # TODO remove this old code
     # def __get_title_from_event__(self):
     #     self.title = self.wikimedia_event.page_title
     #     if self.title is None or self.title == "":
