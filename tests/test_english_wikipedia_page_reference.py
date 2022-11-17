@@ -308,7 +308,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
 
     def test_clean_wiki_markup_from_strings_complicated_markup(self):
         data = dict(
-            publisher="[[test|test]]",
+            publisher="[[test|test2]]",
             template_name="cite book",
         )
         reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
