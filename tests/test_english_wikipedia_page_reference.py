@@ -9,7 +9,6 @@ from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.english.english_reference import (
     EnglishWikipediaReference,
 )
-from src.models.wikimedia.wikipedia.reference.english.google_books import GoogleBooks
 from src.models.wikimedia.wikipedia.reference.english.schema import (
     EnglishWikipediaReferenceSchema,
 )
@@ -165,7 +164,24 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        assert reference.url is None
+        assert reference.url == ""
+
+    def test_extract_first_level_domain_google_books_template(self):
+        data = {
+            "url": "{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+            "title": "Turntable Interview: !!!",
+            "last": "Locker",
+            "first": "Melissa",
+            "date": "May 9, 2013",
+            "website": "Stereogum",
+            "access_date": "May 24, 2021",
+            "template_name": "cite web",
+            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+        }
+        reference = EnglishWikipediaReferenceSchema().load(data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.url == ""
 
     def test_find_number(self):
         ref = EnglishWikipediaReference(
@@ -218,25 +234,26 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         assert reference.detected_archive_of_url is None
         assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
 
-    def test_google_books(self):
-        data = {
-            "url": "{{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}",
-            "title": "Turntable Interview: !!!",
-            "last": "Locker",
-            "first": "Melissa",
-            "date": "May 9, 2013",
-            "website": "Stereogum",
-            "access_date": "May 24, 2021",
-            "template_name": "cite web",
-        }
-        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
-            data
-        )
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
-        # console.print(type(reference.google_books))
-        assert reference.first_level_domain_of_url == "google.com"
-        self.assertIsInstance(reference.google_books, GoogleBooks)
+    # DEPRECATED since 2.1.0-alpha3
+    # def test_google_books(self):
+    #     data = {
+    #         "url": "{{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}",
+    #         "title": "Turntable Interview: !!!",
+    #         "last": "Locker",
+    #         "first": "Melissa",
+    #         "date": "May 9, 2013",
+    #         "website": "Stereogum",
+    #         "access_date": "May 24, 2021",
+    #         "template_name": "cite web",
+    #     }
+    #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+    #         data
+    #     )
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash()
+    #     # console.print(type(reference.google_books))
+    #     assert reference.first_level_domain_of_url == "google.com"
+    #     self.assertIsInstance(reference.google_books, GoogleBooks)
 
     def test_detect_internet_archive_id(self):
         data = dict(
@@ -251,18 +268,19 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         # print(reference.internet_archive_id)
         assert reference.internet_archive_id == "catalogueofshipw0000wils"
 
-    def test_detect_google_books_id(self):
-        data = dict(
-            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
-            template_name="cite book",
-        )
-        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
-            data
-        )
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
-        # print(reference.internet_archive_id)
-        assert reference.google_books_id == "on0TaPqFXbcC"
+    # DEPRECATED since 2.1.0-alpha3
+    # def test_detect_google_books_id(self):
+    #     data = dict(
+    #         url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+    #         template_name="cite book",
+    #     )
+    #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+    #         data
+    #     )
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash()
+    #     # print(reference.internet_archive_id)
+    #     assert reference.google_books_id == "on0TaPqFXbcC"
 
     def test_clean_wiki_markup_from_strings(self):
         data = dict(
@@ -387,3 +405,16 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             reference.wikibase_url
             == f"https://ia-sandbox.wikibase.cloud/wiki/Item:test"
         )
+
+    # DEPRECATED since 2.1.0-alpha3
+    # def test_google_books_template_in_chapter_url(self):
+    #     """Test for https://github.com/internetarchive/wcdimportbot/issues/148"""
+    #     data = dict(
+    #         oclc="test",
+    #         chapter_url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+    #         template_name="cite book",
+    #     )
+    #     reference = EnglishWikipediaReference(**data)
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash()
+    #     assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"

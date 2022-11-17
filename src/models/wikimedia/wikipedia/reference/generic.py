@@ -3,7 +3,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from typing import Any, List, Optional
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 
 from pydantic import validate_arguments, validator
 from tld import get_fld
@@ -11,7 +11,6 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src import WikimediaSite
-from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import (
     AmbiguousDateError,
     MissingInformationError,
@@ -21,10 +20,6 @@ from src.models.person import Person
 from src.models.return_.cache_return import CacheReturn
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
-from src.models.wikimedia.wikipedia.reference.english.google_books import (
-    GoogleBooks,
-    GoogleBooksSchema,
-)
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
@@ -61,8 +56,8 @@ class WikipediaReference(WcdItem):
     first_level_domain_of_url: Optional[str]
     first_level_domain_of_url_hash: Optional[str]
     website_item: Optional[WcdItem]
-    google_books: Optional[GoogleBooks]
-    google_books_id: Optional[str]
+    # google_books: Optional[GoogleBooks]
+    # google_books_id: Optional[str]
     hosts_list: Optional[List[Person]]
     interviewers_list: Optional[List[Person]]
     isbn_10: Optional[str]
@@ -520,23 +515,24 @@ class WikipediaReference(WcdItem):
                 # log file very quickly and not yield anything useful
                 pass
 
-    def __detect_google_books_id__(self):
-        """We detect GOOGLE_BOOKS_ID to populate the property later
-        Example: https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431
-        NOTE: we don't parse the page number for now"""
-        if (
-            self.first_level_domain_of_url
-            and "google." in self.first_level_domain_of_url
-        ):
-            if self.url and "/books.google." in self.url:
-                query = str(urlparse(self.url).query)
-                parsed_query = parse_qs(query)
-                if parsed_query and "id" in parsed_query.keys():
-                    self.google_books_id = parsed_query["id"][0]
-                else:
-                    raise ValueError(
-                        f"could not extract query from {self.url} or no id found in the url"
-                    )
+    # DEPRECATED since 2.1.0-alpha3
+    # def __detect_google_books_id__(self):
+    #     """We detect GOOGLE_BOOKS_ID to populate the property later
+    #     Example: https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431
+    #     NOTE: we don't parse the page number for now"""
+    #     if (
+    #         self.first_level_domain_of_url
+    #         and "google." in self.first_level_domain_of_url
+    #     ):
+    #         if self.url and "/books.google." in self.url:
+    #             query = str(urlparse(self.url).query)
+    #             parsed_query = parse_qs(query)
+    #             if parsed_query and "id" in parsed_query.keys():
+    #                 self.google_books_id = parsed_query["id"][0]
+    #             else:
+    #                 raise ValueError(
+    #                     f"could not extract query from {self.url} or no id found in the url"
+    #                 )
 
     def __detect_internet_archive_id__(self):
         """We detect INTERNET_ARCHIVE_ID to populate the property later
@@ -968,21 +964,22 @@ class WikipediaReference(WcdItem):
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
-    def __parse_google_books_template__(self):
-        """Parse the Google Books template that sometimes appear in self.url
-        and save the result in self.google_books and generate the URL
-        and store it in self.url"""
-        logger.debug("__parse_google_books__: Running")
-        template_tuples = extract_templates_and_params(self.url, True)
-        if template_tuples:
-            logger.info("Found Google books template")
-            for _template_name, content in template_tuples:
-                google_books: GoogleBooks = GoogleBooksSchema().load(content)
-                google_books.wikibase = self.wikibase
-                google_books.finish_parsing()
-                self.url = google_books.url
-                self.google_books_id = google_books.id
-                self.google_books = google_books
+    # DEPRECATED since 2.1.0-alpha3
+    # def __parse_google_books_template__(self):
+    #     """Parse the Google Books template that sometimes appear in self.url
+    #     and save the result in self.google_books and generate the URL
+    #     and store it in self.url"""
+    #     logger.debug("__parse_google_books__: Running")
+    #     template_tuples = extract_templates_and_params(self.url, True)
+    #     if template_tuples:
+    #         logger.info("Found Google books template")
+    #         for _template_name, content in template_tuples:
+    #             google_books: GoogleBooks = GoogleBooksSchema().load(content)
+    #             google_books.wikibase = self.wikibase
+    #             google_books.finish_parsing()
+    #             self.url = google_books.url
+    #             self.google_books_id = google_books.id
+    #             self.google_books = google_books
 
     def __parse_isbn__(self) -> None:
         if self.isbn is not None:
@@ -1113,9 +1110,10 @@ class WikipediaReference(WcdItem):
         parse the URLs to avoid complaints from Wikibase"""
         logger.debug("__parse_urls__: Running")
         if self.url:
-            # If we find a GoogleBooks template we
-            # overwrite self.url with the generated URL
-            self.__parse_google_books_template__()
+            # DEPRECATED since 2.1.0-alpha3
+            # # If we find a GoogleBooks template we
+            # # overwrite self.url with the generated URL
+            # self.__parse_google_books_template__()
             # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
             parsed_url = urlparse(self.url)
             if parsed_url.scheme:
@@ -1124,13 +1122,25 @@ class WikipediaReference(WcdItem):
                 logger.warning(
                     f"Skipped the URL '{self.url}' because of missing scheme"
                 )
-                self.url = None
+                self.url = ""
         if self.archive_url:
             self.archive_url = urlparse(self.archive_url).geturl()
         if self.lay_url:
             self.lay_url = urlparse(self.lay_url).geturl()
         if self.chapter_url:
-            self.chapter_url = urlparse(self.chapter_url).geturl()
+            # DEPRECATED since 2.1.0-alpha3
+            # # If we find a GoogleBooks template we
+            # # overwrite self.url with the generated URL
+            # self.__parse_google_books_template__()
+            # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+            parsed_url = urlparse(self.chapter_url)
+            if parsed_url.scheme:
+                self.chapter_url = parsed_url.geturl()
+            else:
+                logger.warning(
+                    f"Skipped the URL '{self.chapter_url}' because of missing scheme"
+                )
+                self.chapter_url = ""
         if self.conference_url:
             self.conference_url = urlparse(self.conference_url).geturl()
         if self.transcripturl:
@@ -1272,7 +1282,7 @@ class WikipediaReference(WcdItem):
             self.__extract_first_level_domain__()
             self.__detect_archive_urls__()
             self.__detect_internet_archive_id__()
-            self.__detect_google_books_id__()
+            # self.__detect_google_books_id__()
             self.__parse_persons__()
             self.__merge_date_into_publication_date__()
             self.__merge_lang_into_language__()
