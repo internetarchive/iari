@@ -111,9 +111,6 @@ class WcdImportBot(WcdBaseModel):
     Example adding one page:
     '$ ./wcdimportbot.py --import-title "Easter Island"'
 
-    Example deleting one page:
-    '$ ./wcdimportbot.py --delete-page "Easter Island"'
-
     Example looking up a md5hash:
     '$ ./wcdimportbot.py --lookup-md5hash e98adc5b05cb993cd0c884a28098096c'
 
@@ -126,13 +123,7 @@ class WcdImportBot(WcdBaseModel):
     Example importing all pages from a specific category title (recursively):
     '$ ./wcdimportbot.py --category "World War II"'
 
-    Example rinsing the Wikibase and the cache:
-    '$ ./wcdimportbot.py --rinse'
-
-    Example flush the cache:
-    '$ ./wcdimportbot.py --flush-cache'
-
-    Example flush and rebuild the cache:
+    Example rebuild the caches of all supported Wikibase instances:
     '$ ./wcdimportbot.py --rebuild-cache'""",
         )
         parser.add_argument(
@@ -422,9 +413,10 @@ class WcdImportBot(WcdBaseModel):
             logger.info(f"importing title {args.import_title}")
             self.page_title = args.import_title
             self.get_and_extract_page_by_title()
-        elif args.delete_page:
-            logger.info("deleting page")
-            self.delete_one_page(title=args.delete_page)
+        # DEPRECATED since 2.1.0-alpha2
+        # elif args.delete_page:
+        #     logger.info("deleting page")
+        #     self.delete_one_page(title=args.delete_page)
         elif args.max_range or args.category:
             logger.info("Importing range of pages")
             self.get_and_extract_pages_by_range(
