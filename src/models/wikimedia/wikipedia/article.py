@@ -487,8 +487,10 @@ class WikipediaArticle(WcdItem):
         the references.
 
         Then we upload the references and websites if missing
-        and lastly we either upload the page or if missing
-        compare and upload any missing claims."""
+        and then we either upload the page or if missing
+        compare and upload any missing claims.
+
+        Lastly we store the timestamp in the cache"""
         logger.debug("extract_and_upload_to_wikibase: Running")
         self.__fetch_page_data__()
         if not self.is_redirect and self.found_in_wikipedia:
