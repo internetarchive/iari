@@ -34,7 +34,7 @@ class GoogleBooks(WcdBaseModel):
     id: Optional[TwelveCharString]
     keywords: Optional[str]
     md5hash: Optional[str]
-    page: Optional[int]
+    page: Optional[str]
     plainurl: Optional[Union[YesNo, YesNoShort]]
     text: Optional[str]
     title: Optional[str]
