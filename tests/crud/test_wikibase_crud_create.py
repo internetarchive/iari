@@ -498,6 +498,8 @@ class TestWikibaseCrudCreate(TestCase):
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+        assert wppage.references[0].has_hash is True
+        assert wppage.references[0].return_ is not None
         wbi = WikibaseIntegrator()
         item = wbi.item.get(wppage.references[0].return_.item_qid)
         instance_of_value = get_item_value(
