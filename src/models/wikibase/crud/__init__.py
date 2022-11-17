@@ -526,13 +526,14 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_external_identifier_claims__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
-        if page_reference.google_books_id:
-            google_books_id = datatypes.ExternalID(
-                prop_nr=self.wikibase.GOOGLE_BOOKS_ID,
-                value=page_reference.google_books_id,
-            )
-        else:
-            google_books_id = None
+        # DEPRECATED since 2.1.0-alpha3
+        # if page_reference.google_books_id:
+        #     google_books_id = datatypes.ExternalID(
+        #         prop_nr=self.wikibase.GOOGLE_BOOKS_ID,
+        #         value=page_reference.google_books_id,
+        #     )
+        # else:
+        google_books_id = None
         if page_reference.internet_archive_id:
             internet_archive_id = datatypes.ExternalID(
                 prop_nr=self.wikibase.INTERNET_ARCHIVE_ID,
