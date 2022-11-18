@@ -391,25 +391,26 @@ class TestWikibaseCrudCreate(TestCase):
             == reference.internet_archive_id
         )
 
-    def test_google_books_id_statement(self):
-        data = dict(
-            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
-            template_name="cite book",
-        )
-        reference = EnglishWikipediaReference(**data)
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
-        wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
-        wppage.references.append(reference)
-        wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
-        wbi = WikibaseIntegrator()
-        item = wbi.item.get(wppage.references[0].return_.item_qid)
-        assert (
-            item.claims.get(property=wppage.wikibase.GOOGLE_BOOKS_ID)[
-                0
-            ].mainsnak.datavalue["value"]
-            == reference.google_books_id
-        )
+    # DEPRECATED since 2.1.0-alpha3
+    # def test_google_books_id_statement(self):
+    #     data = dict(
+    #         url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+    #         template_name="cite book",
+    #     )
+    #     reference = EnglishWikipediaReference(**data)
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash()
+    #     wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+    #     wppage.references.append(reference)
+    #     wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
+    #     wbi = WikibaseIntegrator()
+    #     item = wbi.item.get(wppage.references[0].return_.item_qid)
+    #     assert (
+    #         item.claims.get(property=wppage.wikibase.GOOGLE_BOOKS_ID)[
+    #             0
+    #         ].mainsnak.datavalue["value"]
+    #         == reference.google_books_id
+    #     )
 
     def test_periodical_string_statement(self):
         data = dict(
