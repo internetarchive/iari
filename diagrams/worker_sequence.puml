@@ -15,9 +15,6 @@ wcdimportbot_worker -> rabbitmq : listen for messages
 loop
 rabbitmq -> wcdimportbot_worker : push message to worker
 wcdimportbot_worker -> wcdimportbot_worker : parse message
-alt got wikidata qid
-    wcdimportbot_worker -> wikidata : get enwiki title from QID
-end
 wcdimportbot_worker -> wikipediaapi : fetch data (based on title)
     wcdimportbot_worker -> wcdimportbot_worker : check if redirect
     alt not redirect
