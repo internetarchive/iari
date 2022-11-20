@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
@@ -7,6 +8,7 @@ from src.models.exceptions import MissingInformationError
 from src.models.hash_ import Hash_
 from src.wcd_base_model import WcdBaseModel
 
+logger = logging.getLogger(__name__)
 
 class UpdateDelay(WcdBaseModel):
     """This class accepts a message or reference and
@@ -57,9 +59,12 @@ class UpdateDelay(WcdBaseModel):
 
     def __delay_time_has_passed__(self) -> bool:
         """We return true if the delay has passed and False otherwise"""
+        logger.debug("__delay_time_has_passed__: running")
         if self.time_of_last_update:
-            return self.time_of_last_update < (
+            result = self.time_of_last_update < (
                 datetime.now() - timedelta(hours=config.article_update_delay_in_hours)
             )
+            logger.info(f"Delay time has passed: {result}")
+            return result
         else:
             raise ValueError("self.time_of_last_update was None")
