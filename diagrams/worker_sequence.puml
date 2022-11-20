@@ -15,17 +15,20 @@ wcdimportbot_worker -> rabbitmq : listen for messages
 loop
 rabbitmq -> wcdimportbot_worker : push message to worker
 wcdimportbot_worker -> wcdimportbot_worker : parse message
-wcdimportbot_worker -> wikipediaapi : fetch data (based on title)
-    wcdimportbot_worker -> wcdimportbot_worker : check if redirect
-    alt not redirect
-        wcdimportbot_worker -> cache : Check if the article has recently been updated
-        alt not recently updated
-            wcdimportbot_worker -> wcdimportbot_worker : parse templates into structured data
-            wcdimportbot_worker -> wikicitations : upload structured data
-            alt successful upload
-                wcdimportbot_worker -> cache : add hash
-                wcdimportbot_worker -> cache : add time of update
-                wcdimportbot_worker -> rabbitmq : send acknowledge of completed job
+wcdimportbot_worker -> cache : lookup last update information
+alt delay time has passed
+    wcdimportbot_worker -> wikipediaapi : fetch data (based on title)
+        wcdimportbot_worker -> wcdimportbot_worker : check if redirect
+        alt not redirect
+            wcdimportbot_worker -> cache : Check if the article has recently been updated
+            alt not recently updated
+                wcdimportbot_worker -> wcdimportbot_worker : parse templates into structured data
+                wcdimportbot_worker -> wikicitations : upload structured data
+                alt successful upload
+                    wcdimportbot_worker -> cache : add hash
+                    wcdimportbot_worker -> cache : add time of update
+                    wcdimportbot_worker -> rabbitmq : send acknowledge of completed job
+                end
             end
         end
     end
