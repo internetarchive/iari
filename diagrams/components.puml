@@ -36,6 +36,9 @@ cloud "Wikimedia"{
   [Issues userscript] --> GET_FROM_WDQID
   [Go to WikiCitations item userscript] --> GET_FROM_WDQID
   [Enterprise API] -left- page_updates
+  [MediaWiki REST v1 API] -- page
+   WW1 -> page : fetch data
+   WW2 -> page : fetch data
 }
 
 database "Wikibase.cloud" {
