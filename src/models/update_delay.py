@@ -10,6 +10,7 @@ from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
+
 class UpdateDelay(WcdBaseModel):
     """This class accepts a message or reference and
     helps determine if the update delay has passed or not"""
@@ -34,10 +35,10 @@ class UpdateDelay(WcdBaseModel):
                 wikimedia_site=self.object_.wikimedia_site,
             )
         else:
+            from src.models.wikimedia.wikipedia.article import WikipediaArticle
             from src.models.wikimedia.wikipedia.reference.generic import (
                 WikipediaReference,
             )
-            from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
             if not isinstance(self.object_, WikipediaReference) and not isinstance(
                 self.object_, WikipediaArticle
