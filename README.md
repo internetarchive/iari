@@ -147,5 +147,21 @@ The bot can import ranges of Wikipedia articles (in English Wikipedia)
 # Help
 Run `$ python wcdimportbot.py --help` to see a list of all supported commands
 
+# Diagrams
+
+## Components
+![image](diagrams/components.png)
+
+## Roadmap
+![image](diagrams/roadmap.png)
+
+## Ingestor sequence
+![image](diagrams/ingestor_sequence.png)
+
+## Worker sequence
+![image](diagrams/worker_sequence.png)
+
+
 ## License
 This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022
+The diagram PNG files are CC0.

@@ -334,7 +334,7 @@ class WcdImportBot(WcdBaseModel):
                     break
                 from pywikibot import Page
 
-                page: Page = page # type: ignore
+                page: Page = page  # type: ignore
                 if not page.isRedirectPage():
                     count += 1
                     # console.print(count)

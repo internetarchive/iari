@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
@@ -6,6 +7,8 @@ from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
 from src.models.hash_ import Hash_
 from src.wcd_base_model import WcdBaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class UpdateDelay(WcdBaseModel):
@@ -32,10 +35,10 @@ class UpdateDelay(WcdBaseModel):
                 wikimedia_site=self.object_.wikimedia_site,
             )
         else:
+            from src.models.wikimedia.wikipedia.article import WikipediaArticle
             from src.models.wikimedia.wikipedia.reference.generic import (
                 WikipediaReference,
             )
-            from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
             if not isinstance(self.object_, WikipediaReference) and not isinstance(
                 self.object_, WikipediaArticle
@@ -57,9 +60,12 @@ class UpdateDelay(WcdBaseModel):
 
     def __delay_time_has_passed__(self) -> bool:
         """We return true if the delay has passed and False otherwise"""
+        logger.debug("__delay_time_has_passed__: running")
         if self.time_of_last_update:
-            return self.time_of_last_update < (
+            result = self.time_of_last_update < (
                 datetime.now() - timedelta(hours=config.article_update_delay_in_hours)
             )
+            logger.info(f"Delay time has passed: {result}")
+            return result
         else:
             raise ValueError("self.time_of_last_update was None")
