@@ -11,8 +11,8 @@ sandbox_user = "So9q@test"
 sandbox_pwd = os.environ["ia_sandbox"]
 
 # Login to rabbitmq bitnami container
-rabbitmq_username = ""
-rabbitmq_password = ""
+rabbitmq_username = "user"
+rabbitmq_password = "bitnami"
 
 # Settings:
 cache_host: str = "127.0.0.1"
