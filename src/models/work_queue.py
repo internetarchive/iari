@@ -4,7 +4,6 @@ import functools
 import json
 import logging
 import threading
-import time
 from typing import Optional
 
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
@@ -26,7 +25,9 @@ class WorkQueue(WcdBaseModel):
     """This models the RabbitMQ article queue
     We publish to this queue when ingesting page updates
     and when receiving a title via the wikicitaitons-api
-    add-job endpoint"""
+    add-job endpoint
+
+    This class is partly based on https://github.com/pika/pika/blob/1.0.1/examples/basic_consumer_threaded.py"""
 
     connection: Optional[BlockingConnection]
     channel: Optional[BlockingChannel]
@@ -108,9 +109,11 @@ class WorkQueue(WcdBaseModel):
     def listen_to_queue(self):
         """This function is run by the wcdimportbot worker
         There can be multiple workers running at the same
-        time listening to the work queue"""
-        # TODO add threading like in https://github.com/pika/pika/blob/1.0.1/examples/basic_consumer_threaded.py
+        time listening to the work queue
 
+        We use threading to avoid the worker quitting
+        because it canot keep the connection to
+        rabbitmq open during the work and errors out"""
         self.__connect__()
         self.__setup_channel__()
         self.__create_queue__()
@@ -134,10 +137,6 @@ class WorkQueue(WcdBaseModel):
 
             self.connection.close()
 
-            # self.channel.basic_consume(
-            #     queue=self.queue_name, auto_ack=True, on_message_callback=callback
-            # )
-
     @staticmethod
     def __ack_message__(ch, delivery_tag):
         """Note that `ch` must be the same pika channel instance via which
@@ -159,8 +158,6 @@ class WorkQueue(WcdBaseModel):
             delivery_tag,
             body,
         )
-        # Sleeping to simulate 10 seconds of work
-        time.sleep(10)
         # Parse into OOP and do the work
         decoded_body = body.decode("utf-8")
         json_data_string = json.loads(decoded_body)
