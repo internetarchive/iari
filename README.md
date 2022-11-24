@@ -1,5 +1,5 @@
-# WikiCitations Import Bot
-This bot is capable of fetching and storing 
+# [WikiCitations ETL-framework](https://www.wikidata.org/wiki/Q115252313) ([graph](https://w.wiki/5$yU))
+This framework is capable of fetching, extracting, transforming and storing 
 reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700) 
 in a [Wikibase.cloud](https://wikibase.cloud/) instance. 
 
