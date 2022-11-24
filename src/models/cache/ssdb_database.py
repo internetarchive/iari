@@ -37,7 +37,7 @@ class SsdbDatabase(WcdBaseModel):
             )
         except ConnectionRefusedError as e:
             raise ConnectionRefusedError(
-                f"Could not connect to the AWS SSDB cache, got {e}"
+                f"Could not connect to the SSDB cache, got {e}"
             )
 
     @validate_arguments
