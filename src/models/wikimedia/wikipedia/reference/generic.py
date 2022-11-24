@@ -1117,10 +1117,12 @@ class WikipediaReference(WcdItem):
             # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
             parsed_url = urlparse(self.url)
             if parsed_url.scheme:
-                self.url = parsed_url.geturl()
+                url = parsed_url.geturl()
+                logger.info(f"Found scheme in {url}")
+                self.url = url
             else:
                 logger.warning(
-                    f"Skipped the URL '{self.url}' because of missing scheme"
+                    f"Skipped the URL '{self.url}' because of missing URL scheme"
                 )
                 self.url = ""
         if self.archive_url:
