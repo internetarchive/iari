@@ -64,21 +64,21 @@ services:
 #      - "./:/app"
 #    command: "poetry run hypercorn app/app/main:app --bind 0.0.0.0:8000 --reload"
 
-  # FIXME both the worker and the ingestor fail to connect to rabbitmq
-  worker:
-    build: .
-    depends_on:
-      - rabbitmq
-      - redis
-    # working_dir: "/app"
-    volumes:
-      - "./:/app"
-    # command: "sleep 30 ; timeout 20 bash -c '</dev/tcp/127.0.0.1/5672'  && echo 'connection success' || echo 'connection failed'"
-    command: "poetry run python app/wcdimportbot.py --worker"
-    logging:
-        options:
-            max-size: "50M"
-            max-file: "2"
+#  # FIXME both the worker and the ingestor fail to connect to rabbitmq
+#  worker:
+#    build: .
+#    depends_on:
+#      - rabbitmq
+#      - redis
+#    # working_dir: "/app"
+#    volumes:
+#      - "./:/app"
+#    # command: "sleep 30 ; timeout 20 bash -c '</dev/tcp/127.0.0.1/5672'  && echo 'connection success' || echo 'connection failed'"
+#    command: "poetry run python app/wcdimportbot.py --worker"
+#    logging:
+#        options:
+#            max-size: "50M"
+#            max-file: "2"
 
 #  ingestor:
 #    build: .
