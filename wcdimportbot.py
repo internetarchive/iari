@@ -9,7 +9,13 @@ except ModuleNotFoundError:
     )
 from src import WcdImportBot
 
-logging.basicConfig(level=config.loglevel)
+# Found here https://github.com/pika/pika/blob/1.0.1/examples/basic_consumer_threaded.py
+LOG_FORMAT = (
+    "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
+    "-35s %(lineno) -5d: %(message)s"
+)
+
+logging.basicConfig(level=config.loglevel, format=LOG_FORMAT)
 # This hides exceptions about modification failed from wikibaseintegrator
 logging.getLogger("wikibaseintegrator").setLevel(level=logging.CRITICAL)
 wcdimportbot = WcdImportBot()
