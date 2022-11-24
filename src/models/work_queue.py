@@ -13,18 +13,13 @@ from pika.exceptions import AMQPConnectionError
 from pydantic import validate_arguments
 
 import config
+from src.helpers.console import console
 from src.models.exceptions import NoChannelError
 from src.models.message import Message
 from src.models.wikibase import Wikibase
 from src.wcd_base_model import WcdBaseModel
 
-LOG_FORMAT = (
-    "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
-    "-35s %(lineno) -5d: %(message)s"
-)
 logger = logging.getLogger(__name__)
-
-logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
 
 
 class WorkQueue(WcdBaseModel):
@@ -166,17 +161,17 @@ class WorkQueue(WcdBaseModel):
         )
         # Sleeping to simulate 10 seconds of work
         time.sleep(10)
-        # # Parse into OOP and do the work
-        # decoded_body = body.decode("utf-8")
-        # json_data_string = json.loads(decoded_body)
-        # json_data_dict = json.loads(json_data_string)
-        # if config.loglevel == logging.DEBUG:
-        #     console.print(json_data_dict)
-        # message = Message(**json_data_dict)
-        # print(f" [x] Received {message.title} job for {message.wikibase.title}")
-        # if config.loglevel == logging.DEBUG:
-        #     console.print(message.dict())
-        # message.process_data()
+        # Parse into OOP and do the work
+        decoded_body = body.decode("utf-8")
+        json_data_string = json.loads(decoded_body)
+        json_data_dict = json.loads(json_data_string)
+        if config.loglevel == logging.DEBUG:
+            console.print(json_data_dict)
+        message = Message(**json_data_dict)
+        print(f" [x] Received {message.title} job for {message.wikibase.title}")
+        if config.loglevel == logging.DEBUG:
+            console.print(message.dict())
+        message.process_data()
 
         cb = functools.partial(self.__ack_message__, ch, delivery_tag)
         conn.add_callback_threadsafe(cb)
