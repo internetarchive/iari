@@ -31,27 +31,27 @@ services:
             max-size: "50M"
             max-file: "2"
 
-#  celery-flower:
-#    image: gregsi/latest-celery-flower-docker:latest
-#    environment:
-#      - AMQP_USERNAME=user
-#      - AMQP_PASSWORD=bitnami
-#      - AMQP_ADMIN_USERNAME=user
-#      - AMQP_ADMIN_PASSWORD=bitnami
-#      - AMQP_HOST=rabbitmq
-#      - AMQP_PORT=5672
-#      - AMQP_ADMIN_HOST=rabbitmq
-#      - AMQP_ADMIN_PORT=15672
-#      - FLOWER_BASIC_AUTH=user:test
-#    ports:
-#      - "5555:5555"
-#    depends_on:
-#      - rabbitmq
-#      - redis
-#    logging:
-#        options:
-#            max-size: "50M"
-#            max-file: "2"
+  celery-flower:
+    image: gregsi/latest-celery-flower-docker:latest
+    environment:
+      - AMQP_USERNAME=user
+      - AMQP_PASSWORD=bitnami
+      - AMQP_ADMIN_USERNAME=user
+      - AMQP_ADMIN_PASSWORD=bitnami
+      - AMQP_HOST=rabbitmq
+      - AMQP_PORT=5672
+      - AMQP_ADMIN_HOST=rabbitmq
+      - AMQP_ADMIN_PORT=15672
+      - FLOWER_BASIC_AUTH=user:test
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
+      - redis
+    logging:
+        options:
+            max-size: "50M"
+            max-file: "2"
 
 #  fastapi:
 #    build: .
