@@ -61,10 +61,12 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         # console.print(reference)
 
-    def test_url_template2(self):
-        """We don't support URLs """
+    def test_url_template_missing_scheme(self):
+        """We don't support URLs without scheme or template"""
         data = {"1": "chkchkchk.net", "template_name": "url"}
         reference = EnglishWikipediaReferenceSchema().load(data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
         # console.print(reference)
         assert reference.url == ""
 
@@ -478,3 +480,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
                 )
                 == "https://books.google.com/books?id=MdPDAQAAQBAJ"
         )
+
+    def test___parse_first_parameter__(self):
+        pass
