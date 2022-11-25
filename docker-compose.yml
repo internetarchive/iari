@@ -42,7 +42,7 @@ services:
       - AMQP_PORT=5672
       - AMQP_ADMIN_HOST=rabbitmq
       - AMQP_ADMIN_PORT=15672
-      - FLOWER_BASIC_AUTH=user:test
+      # - FLOWER_BASIC_AUTH=user:test
     ports:
       - "5555:5555"
     depends_on:
