@@ -188,7 +188,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         "website": "Stereogum",
     #         "access_date": "May 24, 2021",
     #         "template_name": "cite web",
-    #         "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+    #         "archive_url":
+    #         "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
     #     }
     #     reference = EnglishWikipediaReferenceSchema().load(data)
     #     reference.wikibase = IASandboxWikibase()
