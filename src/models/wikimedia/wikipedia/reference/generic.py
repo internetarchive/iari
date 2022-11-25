@@ -11,6 +11,7 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src import WikimediaSite
+from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import (
     AmbiguousDateError,
     MissingInformationError,
@@ -20,6 +21,10 @@ from src.models.person import Person
 from src.models.return_.cache_return import CacheReturn
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
+from src.models.wikimedia.wikipedia.reference.english.google_books import (
+    GoogleBooks,
+    GoogleBooksSchema,
+)
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
@@ -953,14 +958,15 @@ class WikipediaReference(WcdItem):
                         f"WD QID"
                     )
         elif self.template_name == "url":
-            # crudely detect if url in first_parameter
+            # crudely detect if url with scheme in first_parameter
             if self.first_parameter:
                 if "://" in self.first_parameter:
                     self.url = self.first_parameter
                 else:
-                    logger.debug(
+                    logger.warning(
                         f"'{self.first_parameter}' was not recognized as a URL"
                     )
+                    self.url = ""
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
@@ -1105,48 +1111,39 @@ class WikipediaReference(WcdItem):
         persons.extend(self.__get_numbered_persons__(attributes=attributes))
         return persons
 
+    def __parse_url__(self, url: str = "") -> str:
+        # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+        parsed_url = urlparse(url)
+        if parsed_url.scheme:
+            url = parsed_url.geturl()
+            logger.info(f"Found scheme in {url}")
+            return url
+        else:
+            if self.__has_template_data__(string=url):
+                logger.info(f"Found template data in url: {url}")
+                return self.__get_url_from_template__(url=url)
+            else:
+                logger.warning(
+                    f"Skipped the URL '{self.url}' because of missing URL scheme"
+                )
+                return ""
+
     def __parse_urls__(self) -> None:
         """This function looks for Google Books references and
         parse the URLs to avoid complaints from Wikibase"""
         logger.debug("__parse_urls__: Running")
         if self.url:
-            # DEPRECATED since 2.1.0-alpha3
-            # # If we find a GoogleBooks template we
-            # # overwrite self.url with the generated URL
-            # self.__parse_google_books_template__()
-            # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
-            parsed_url = urlparse(self.url)
-            if parsed_url.scheme:
-                url = parsed_url.geturl()
-                logger.info(f"Found scheme in {url}")
-                self.url = url
-            else:
-                logger.warning(
-                    f"Skipped the URL '{self.url}' because of missing URL scheme"
-                )
-                self.url = ""
+            self.url = self.__parse_url__(url=self.url)
         if self.archive_url:
-            self.archive_url = urlparse(self.archive_url).geturl()
+            self.archive_url = self.__parse_url__(url=self.archive_url)
         if self.lay_url:
-            self.lay_url = urlparse(self.lay_url).geturl()
+            self.lay_url = self.__parse_url__(url=self.lay_url)
         if self.chapter_url:
-            # DEPRECATED since 2.1.0-alpha3
-            # # If we find a GoogleBooks template we
-            # # overwrite self.url with the generated URL
-            # self.__parse_google_books_template__()
-            # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
-            parsed_url = urlparse(self.chapter_url)
-            if parsed_url.scheme:
-                self.chapter_url = parsed_url.geturl()
-            else:
-                logger.warning(
-                    f"Skipped the URL '{self.chapter_url}' because of missing scheme"
-                )
-                self.chapter_url = ""
+            self.chapter_url = self.__parse_url__(url=self.chapter_url)
         if self.conference_url:
-            self.conference_url = urlparse(self.conference_url).geturl()
+            self.conference_url = self.__parse_url__(url=self.conference_url)
         if self.transcripturl:
-            self.transcripturl = urlparse(self.transcripturl).geturl()
+            self.transcripturl = self.__parse_url__(url=self.transcripturl)
 
     @validator(
         "access_date",
@@ -1306,3 +1303,35 @@ class WikipediaReference(WcdItem):
         cache = Cache()
         cache.connect()
         cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
+
+    def __has_template_data__(self, string: str) -> bool:
+        """This is a very simple test for two opening curly brackets"""
+        if "{{" in string:
+            return True
+        else:
+            return False
+
+    def __get_url_from_template__(self, url: str) -> str:
+        if "google books" in url.lower():
+            logger.info("Found Google books template")
+            return self.__get_url_from_google_books_template__(url=url)
+        else:
+            logger.warning(f"Parsing the template data in {url} is not supported yet")
+            return ""
+
+    def __get_url_from_google_books_template__(self, url: str) -> str:
+        """Parse the Google Books template that sometimes appear in a url
+        and return the generated url"""
+        logger.debug("__get_url_from_google_books_template__: Running")
+        template_tuples = extract_templates_and_params(url, True)
+        if template_tuples:
+            for _template_name, content in template_tuples:
+                google_books: GoogleBooks = GoogleBooksSchema().load(content)
+                google_books.finish_parsing()
+                # We only care about the first
+                return str(google_books.url)
+            logger.warning(f"Parsing the google books template data in {url} failed")
+            return ""
+        else:
+            logger.warning(f"Parsing the google books template data in {url} failed")
+            return ""

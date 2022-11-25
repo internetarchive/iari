@@ -31,7 +31,11 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         }
 
         reference = EnglishWikipediaReferenceSchema().load(data)
-        console.print(reference)
+        # console.print(reference)
+        assert (
+            reference.url
+            == "https://www.stereogum.com/1345401/turntable-interview/interviews/"
+        )
 
     def test_url_template_with_archive_url(self):
         data = {
@@ -48,15 +52,23 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
 
         reference = EnglishWikipediaReferenceSchema().load(data)
         assert (
+            reference.url
+            == "https://www.stereogum.com/1345401/turntable-interview/interviews/"
+        )
+        assert (
             reference.archive_url
             == "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
         )
         # console.print(reference)
 
-    def test_url_template2(self):
+    def test_url_template_missing_scheme(self):
+        """We don't support URLs without scheme or template"""
         data = {"1": "chkchkchk.net", "template_name": "url"}
         reference = EnglishWikipediaReferenceSchema().load(data)
-        console.print(reference)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        # console.print(reference)
+        assert reference.url == ""
 
     def test_parse_persons_from_cite_web(self):
         data = {
@@ -75,7 +87,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash()
-        console.print(reference)
+        # console.print(reference)
         person = reference.persons_without_role[0]
         assert person.given == "Melissa"
         assert person.surname == "Locker"
@@ -166,22 +178,23 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash()
         assert reference.url == ""
 
-    def test_extract_first_level_domain_google_books_template(self):
-        data = {
-            "url": "{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
-            "title": "Turntable Interview: !!!",
-            "last": "Locker",
-            "first": "Melissa",
-            "date": "May 9, 2013",
-            "website": "Stereogum",
-            "access_date": "May 24, 2021",
-            "template_name": "cite web",
-            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
-        }
-        reference = EnglishWikipediaReferenceSchema().load(data)
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
-        assert reference.url == ""
+    # def test_extract_first_level_domain_google_books_template(self):
+    #     data = {
+    #         "url": "{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+    #         "title": "Turntable Interview: !!!",
+    #         "last": "Locker",
+    #         "first": "Melissa",
+    #         "date": "May 9, 2013",
+    #         "website": "Stereogum",
+    #         "access_date": "May 24, 2021",
+    #         "template_name": "cite web",
+    #         "archive_url":
+    #         "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+    #     }
+    #     reference = EnglishWikipediaReferenceSchema().load(data)
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash()
+    #     assert reference.url == ""
 
     def test_find_number(self):
         ref = EnglishWikipediaReference(
@@ -418,3 +431,58 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference.wikibase = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash()
     #     assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+
+    def test_google_books_template_handling(self):
+        data = dict(
+            oclc="test",
+            url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+            chapter_url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+            lay_url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+            transcripturl="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash()
+        assert reference.url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+        assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+        assert reference.lay_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+        assert (
+            reference.transcripturl == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+        )
+
+    def test_parse_url(self):
+        reference = EnglishWikipediaReference(template_name="")
+        assert (
+            reference.__parse_url__(
+                url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}"
+            )
+            == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+        )
+        assert (
+            reference.__parse_url__(
+                url="[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+            )
+            == ""
+        )
+
+    def test__get_url_from_template__(self):
+        reference = EnglishWikipediaReference(template_name="")
+        assert (
+            reference.__get_url_from_template__(
+                url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}"
+            )
+            == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+        )
+
+    def test__get_url_from_google_books_template__(self):
+        reference = EnglishWikipediaReference(template_name="")
+        assert (
+            reference.__get_url_from_google_books_template__(
+                url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}"
+            )
+            == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+        )
+
+    def test___parse_first_parameter__(self):
+        pass
