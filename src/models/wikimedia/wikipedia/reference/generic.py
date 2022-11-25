@@ -958,14 +958,15 @@ class WikipediaReference(WcdItem):
                         f"WD QID"
                     )
         elif self.template_name == "url":
-            # crudely detect if url in first_parameter
+            # crudely detect if url with scheme in first_parameter
             if self.first_parameter:
                 if "://" in self.first_parameter:
                     self.url = self.first_parameter
                 else:
-                    logger.debug(
+                    logger.warning(
                         f"'{self.first_parameter}' was not recognized as a URL"
                     )
+                    self.url = ""
         elif self.template_name == "isbn":
             self.isbn = self.first_parameter
 
