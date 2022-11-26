@@ -559,3 +559,27 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.has_hash is True
         assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
+
+    def test_has_hash_empty(self):
+        data = dict(
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.md5hash = ""
+        assert reference.has_hash is False
+
+    def test_has_hash_not_empty(self):
+        data = dict(
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.md5hash = "123"
+        assert reference.has_hash is True
+
+    def test_has_hash_is_none(self):
+        data = dict(
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.md5hash = None
+        assert reference.has_hash is False
