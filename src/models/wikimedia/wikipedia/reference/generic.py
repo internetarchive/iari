@@ -712,7 +712,7 @@ class WikipediaReference(WcdItem):
             ).hexdigest()
             logger.debug(self.md5hash)
         else:
-            self.md5hash = None
+            self.md5hash = ""
             logger.warning(
                 f"hashing not possible for this instance of {self.template_name} "
                 f"because no identifier or url or first parameter was found "
