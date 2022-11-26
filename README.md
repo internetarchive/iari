@@ -85,6 +85,12 @@ supported_templates = [
     "cite web",
 ]
 ```
+# Terminology
+We use the following terminology:
+* citation: this is what is called a reference in Wikipedia and could be uniquely 
+identified by one of the supported identifiers (ie DOI, ISBN, PMID, OCLC, URL)
+* string citation: this is a reference that could not be uniquely identified.
+
 # Running the bot in AWS
 Because of security limitations of SSDB it is recommended 
 to only run the bot on the same server as the SSDB instance.
