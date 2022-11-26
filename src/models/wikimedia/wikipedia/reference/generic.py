@@ -1304,7 +1304,8 @@ class WikipediaReference(WcdItem):
         cache.connect()
         cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
 
-    def __has_template_data__(self, string: str) -> bool:
+    @staticmethod
+    def __has_template_data__(string: str) -> bool:
         """This is a very simple test for two opening curly brackets"""
         if "{{" in string:
             return True
@@ -1319,7 +1320,8 @@ class WikipediaReference(WcdItem):
             logger.warning(f"Parsing the template data in {url} is not supported yet")
             return ""
 
-    def __get_url_from_google_books_template__(self, url: str) -> str:
+    @staticmethod
+    def __get_url_from_google_books_template__(url: str) -> str:
         """Parse the Google Books template that sometimes appear in a url
         and return the generated url"""
         logger.debug("__get_url_from_google_books_template__: Running")
