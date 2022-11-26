@@ -599,14 +599,14 @@ class WikipediaReference(WcdItem):
         str2hash = ""
         # TODO decide if we really trust doi to be unique.
         #  See https://www.wikidata.org/wiki/Property_talk:P356
-        # In WD there are as of 2022-07-11 25k violations here.
-        # Most are due to bad data at PubMed
-        # see https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations/P356#Unique_value
-        # and https://twitter.com/DennisPriskorn/status/1546475347851591680
         if self.wikidata_qid:
             # This is the external id we trust the most.
             str2hash = self.wikidata_qid
         elif self.doi:
+            # In WD there are as of 2022-07-11 25k violations here.
+            # Most are due to bad data at PubMed
+            # see https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations/P356#Unique_value
+            # and https://twitter.com/DennisPriskorn/status/1546475347851591680
             str2hash = self.doi
         elif self.pmid:
             str2hash = self.pmid
