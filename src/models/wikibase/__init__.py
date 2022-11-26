@@ -16,7 +16,7 @@ class Wikibase(WcdBaseModel):
 
     botpassword: str
     item_prefixed_wikibase = True
-    query_service_url: str # we expect a slash in the end
+    query_service_url: str  # we expect a slash in the end
     title: str
     user_name: str
     wikibase_cloud_wikibase: bool = True
@@ -107,11 +107,16 @@ class Wikibase(WcdBaseModel):
         return self.wikibase_url + "w/index.php"
 
     @property
-    def rdf_entity_prefix(self) -> str:
-        return self.rdf_prefix + "entity/"
+    def rdf_entity_prefix_url(self) -> str:
+        return self.rdf_prefix_url + "entity/"
 
     @property
-    def rdf_prefix(self) -> str:
+    def rdf_prefix_prop_direct_url(self) -> str:
+        """This is the truthy property url"""
+        return self.rdf_prefix_url + "prop/direct/"
+
+    @property
+    def rdf_prefix_url(self) -> str:
         """We only support wikibase.cloud Wikibase installations for now"""
         return self.wikibase_url
 
@@ -128,9 +133,7 @@ class Wikibase(WcdBaseModel):
     @validate_arguments
     def entity_history_url(self, item_id: str):
         if self.item_prefixed_wikibase:
-            return (
-                f"{self.wikibase_url}w/index.php?title=Item:{item_id}&action=history"
-            )
+            return f"{self.wikibase_url}w/index.php?title=Item:{item_id}&action=history"
         else:
             return f"{self.wikibase_url}w/index.php?title={item_id}&action=history"
 
@@ -174,4 +177,4 @@ class Wikibase(WcdBaseModel):
         self, data: Dict, sparql_variable: str = "item"
     ) -> str:
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
-        return str(data[sparql_variable]["value"].replace(self.rdf_entity_prefix, ""))
+        return str(data[sparql_variable]["value"].replace(self.rdf_entity_prefix_url, ""))

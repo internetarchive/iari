@@ -27,14 +27,37 @@ class TestWikibase(TestCase):
 
     def test_wcd_urls(self):
         wcw = WikiCitationsWikibase()
-        assert wcw.sparql_endpoint_url == "https://wikicitations.wikibase.cloud/query/sparql"
+        assert (
+            wcw.sparql_endpoint_url
+            == "https://wikicitations.wikibase.cloud/query/sparql"
+        )
         assert wcw.wikibase_url == "https://wikicitations.wikibase.cloud/"
-        assert wcw.entity_url(item_id="Q1") == "https://wikicitations.wikibase.cloud/wiki/Item:Q1"
-        assert wcw.entity_history_url(item_id="Q1") == "https://wikicitations.wikibase.cloud/w/index.php?title=Item:Q1&action=history"
+        assert (
+            wcw.entity_url(item_id="Q1")
+            == "https://wikicitations.wikibase.cloud/wiki/Item:Q1"
+        )
+        assert (
+            wcw.entity_history_url(item_id="Q1")
+            == "https://wikicitations.wikibase.cloud/w/index.php?title=Item:Q1&action=history"
+        )
+        assert wcw.rdf_prefix_url == "https://wikicitations.wikibase.cloud/"
+        assert wcw.rdf_entity_prefix_url == "https://wikicitations.wikibase.cloud/entity/"
+        assert wcw.rdf_prefix_prop_direct_url == "https://wikicitations.wikibase.cloud/prop/direct/"
 
     def test_sandbox_urls(self):
         wcw = IASandboxWikibase()
-        assert wcw.sparql_endpoint_url == "https://ia-sandbox.wikibase.cloud/query/sparql"
+        assert (
+            wcw.sparql_endpoint_url == "https://ia-sandbox.wikibase.cloud/query/sparql"
+        )
         assert wcw.wikibase_url == "https://ia-sandbox.wikibase.cloud/"
-        assert wcw.entity_url(item_id="Q1") == "https://ia-sandbox.wikibase.cloud/wiki/Item:Q1"
-        assert wcw.entity_history_url(item_id="Q1") == "https://ia-sandbox.wikibase.cloud/w/index.php?title=Item:Q1&action=history"
+        assert (
+            wcw.entity_url(item_id="Q1")
+            == "https://ia-sandbox.wikibase.cloud/wiki/Item:Q1"
+        )
+        assert (
+            wcw.entity_history_url(item_id="Q1")
+            == "https://ia-sandbox.wikibase.cloud/w/index.php?title=Item:Q1&action=history"
+        )
+        assert wcw.rdf_prefix_url == "https://ia-sandbox.wikibase.cloud/"
+        assert wcw.rdf_entity_prefix_url == "https://ia-sandbox.wikibase.cloud/entity/"
+        assert wcw.rdf_prefix_prop_direct_url == "https://ia-sandbox.wikibase.cloud/prop/direct/"
