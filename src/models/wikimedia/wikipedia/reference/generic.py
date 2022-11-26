@@ -596,7 +596,7 @@ class WikipediaReference(WcdItem):
     def __generate_reference_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
-        str2hash = None
+        str2hash = ""
         # TODO decide if we really trust doi to be unique.
         #  See https://www.wikidata.org/wiki/Property_talk:P356
         # In WD there are as of 2022-07-11 25k violations here.
@@ -606,7 +606,7 @@ class WikipediaReference(WcdItem):
         if self.wikidata_qid:
             # This is the external id we trust the most.
             str2hash = self.wikidata_qid
-        if self.doi:
+        elif self.doi:
             str2hash = self.doi
         elif self.pmid:
             str2hash = self.pmid
@@ -706,7 +706,7 @@ class WikipediaReference(WcdItem):
         # else:
         #     # Do we want a generic fallback?
         #     pass
-        if str2hash is not None:
+        if str2hash:
             self.md5hash = hashlib.md5(
                 f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
             ).hexdigest()
