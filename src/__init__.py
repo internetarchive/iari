@@ -72,21 +72,22 @@ class WcdImportBot(WcdBaseModel):
     def __rebuild_cache__(self):
         """Rebuild the cache"""
         # We don't flush first since 2.1.0-alpha3
+        self.__setup_cache__()
         if self.cache:
             wcrsandbox = WikibaseCrudRead(wikibase=IASandboxWikibase())
             data = wcrsandbox.__get_all_items_and_hashes__()
-            logger.info("Rebuilding the cache")
+            logger.info("Rebuilding the sandbox cache")
             count_sandbox = 1
             for entry in data:
                 self.__log_to_file__(message=str(entry), file_name="cache-content.log")
                 hash_value = entry[1]
                 wcdqid = entry[0]
-                # logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
+                logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
                 self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
                 count_sandbox += 1
             wcrswc = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
             data = wcrswc.__get_all_items_and_hashes__()
-            logger.info("Rebuilding the cache")
+            logger.info("Rebuilding the wikicitations cache")
             count_wikicitations = 1
             for entry in data:
                 self.__log_to_file__(message=str(entry), file_name="cache-content.log")
@@ -99,6 +100,8 @@ class WcdImportBot(WcdBaseModel):
                 f"Inserted a total of {count_sandbox+count_wikicitations} "
                 f"entries into the cache"
             )
+        else:
+            raise RuntimeError("self.cache could not be set up.")
 
     @staticmethod
     def __setup_argparse_and_return_args__():

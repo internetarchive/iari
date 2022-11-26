@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from src import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 
 
@@ -23,3 +24,17 @@ class TestWikibase(TestCase):
         """We instantiate WikiCitationsWikibase here but the methods are inherited from Wikibase"""
         wcw = WikiCitationsWikibase()
         assert wcw.is_valid_qid(qid="q123a") is False
+
+    def test_wcd_urls(self):
+        wcw = WikiCitationsWikibase()
+        assert wcw.sparql_endpoint_url == "https://wikicitations.wikibase.cloud/query/sparql"
+        assert wcw.wikibase_url == "https://wikicitations.wikibase.cloud/"
+        assert wcw.entity_url(item_id="Q1") == "https://wikicitations.wikibase.cloud/wiki/Item:Q1"
+        assert wcw.entity_history_url(item_id="Q1") == "https://wikicitations.wikibase.cloud/w/index.php?title=Item:Q1&action=history"
+
+    def test_sandbox_urls(self):
+        wcw = IASandboxWikibase()
+        assert wcw.sparql_endpoint_url == "https://ia-sandbox.wikibase.cloud/query/sparql"
+        assert wcw.wikibase_url == "https://ia-sandbox.wikibase.cloud/"
+        assert wcw.entity_url(item_id="Q1") == "https://ia-sandbox.wikibase.cloud/wiki/Item:Q1"
+        assert wcw.entity_history_url(item_id="Q1") == "https://ia-sandbox.wikibase.cloud/w/index.php?title=Item:Q1&action=history"
