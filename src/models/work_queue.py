@@ -112,7 +112,7 @@ class WorkQueue(WcdBaseModel):
         time listening to the work queue
 
         We use threading to avoid the worker quitting
-        because it canot keep the connection to
+        because it cannot keep the connection to
         rabbitmq open during the work and errors out"""
         self.__connect__()
         self.__setup_channel__()
