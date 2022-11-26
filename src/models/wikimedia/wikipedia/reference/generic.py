@@ -427,7 +427,10 @@ class WikipediaReference(WcdItem):
 
     @property
     def has_hash(self) -> bool:
-        return bool(self.md5hash is not None)
+        if self.md5hash is None:
+            return False
+        else:
+            return bool(self.md5hash != "")
 
     # @property
     # def isodate(self) -> str:
@@ -596,17 +599,17 @@ class WikipediaReference(WcdItem):
     def __generate_reference_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
-        str2hash = None
+        str2hash = ""
         # TODO decide if we really trust doi to be unique.
         #  See https://www.wikidata.org/wiki/Property_talk:P356
-        # In WD there are as of 2022-07-11 25k violations here.
-        # Most are due to bad data at PubMed
-        # see https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations/P356#Unique_value
-        # and https://twitter.com/DennisPriskorn/status/1546475347851591680
         if self.wikidata_qid:
             # This is the external id we trust the most.
             str2hash = self.wikidata_qid
-        if self.doi:
+        elif self.doi:
+            # In WD there are as of 2022-07-11 25k violations here.
+            # Most are due to bad data at PubMed
+            # see https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations/P356#Unique_value
+            # and https://twitter.com/DennisPriskorn/status/1546475347851591680
             str2hash = self.doi
         elif self.pmid:
             str2hash = self.pmid
@@ -706,13 +709,13 @@ class WikipediaReference(WcdItem):
         # else:
         #     # Do we want a generic fallback?
         #     pass
-        if str2hash is not None:
+        if str2hash:
             self.md5hash = hashlib.md5(
                 f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
             ).hexdigest()
             logger.debug(self.md5hash)
         else:
-            self.md5hash = None
+            self.md5hash = ""
             logger.warning(
                 f"hashing not possible for this instance of {self.template_name} "
                 f"because no identifier or url or first parameter was found "
@@ -1267,13 +1270,13 @@ class WikipediaReference(WcdItem):
         self.__insert_reference_in_cache__(wcdqid=return_.item_qid)
         self.return_ = return_
 
-    def finish_parsing_and_generate_hash(self) -> None:
+    def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
         from src.models.update_delay import UpdateDelay
 
         update_delay = UpdateDelay(object_=self)
-        if update_delay.time_to_update:
+        if update_delay.time_to_update or testing is True:
             self.__parse_first_parameter__()
             self.__parse_urls__()
             self.__parse_isbn__()
@@ -1304,7 +1307,8 @@ class WikipediaReference(WcdItem):
         cache.connect()
         cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
 
-    def __has_template_data__(self, string: str) -> bool:
+    @staticmethod
+    def __has_template_data__(string: str) -> bool:
         """This is a very simple test for two opening curly brackets"""
         if "{{" in string:
             return True
@@ -1319,7 +1323,8 @@ class WikipediaReference(WcdItem):
             logger.warning(f"Parsing the template data in {url} is not supported yet")
             return ""
 
-    def __get_url_from_google_books_template__(self, url: str) -> str:
+    @staticmethod
+    def __get_url_from_google_books_template__(url: str) -> str:
         """Parse the Google Books template that sometimes appear in a url
         and return the generated url"""
         logger.debug("__get_url_from_google_books_template__: Running")

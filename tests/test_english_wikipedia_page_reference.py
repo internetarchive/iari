@@ -66,7 +66,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         data = {"1": "chkchkchk.net", "template_name": "url"}
         reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         # console.print(reference)
         assert reference.url == ""
 
@@ -86,7 +86,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         # console.print(reference)
         person = reference.persons_without_role[0]
         assert person.given == "Melissa"
@@ -110,7 +110,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         console.print(reference)
         person = reference.persons_without_role[0]
         assert person.given == "Svend-Erik"
@@ -134,7 +134,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         console.print(reference)
         person = reference.persons_without_role[0]
         assert person.given == "Andranik"
@@ -154,7 +154,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         }
         reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.first_level_domain_of_url == "stereogum.com"
         assert (
             reference.url
@@ -175,7 +175,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         }
         reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.url == ""
 
     # def test_extract_first_level_domain_google_books_template(self):
@@ -193,7 +193,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     }
     #     reference = EnglishWikipediaReferenceSchema().load(data)
     #     reference.wikibase = IASandboxWikibase()
-    #     reference.finish_parsing_and_generate_hash()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.url == ""
 
     def test_find_number(self):
@@ -228,7 +228,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.publisher == "Kungliga Motorbåt Klubben"
         assert reference.location == "Stockholm"
 
@@ -241,7 +241,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             archive_url="https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
             template_name="test",
         )
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         # logger.debug(reference.detected_archive_of_url)
         # logger.debug(reference.detected_archive_of_archive_url)
         assert reference.detected_archive_of_url is None
@@ -263,7 +263,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         data
     #     )
     #     reference.wikibase = IASandboxWikibase()
-    #     reference.finish_parsing_and_generate_hash()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # console.print(type(reference.google_books))
     #     assert reference.first_level_domain_of_url == "google.com"
     #     self.assertIsInstance(reference.google_books, GoogleBooks)
@@ -277,7 +277,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         # print(reference.internet_archive_id)
         assert reference.internet_archive_id == "catalogueofshipw0000wils"
 
@@ -291,7 +291,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         data
     #     )
     #     reference.wikibase = IASandboxWikibase()
-    #     reference.finish_parsing_and_generate_hash()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # print(reference.internet_archive_id)
     #     assert reference.google_books_id == "on0TaPqFXbcC"
 
@@ -304,7 +304,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         # print(reference.internet_archive_id)
         assert reference.publisher == "test"
         data = dict(
@@ -315,7 +315,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         # print(reference.internet_archive_id)
         assert reference.publisher is None
 
@@ -328,7 +328,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.publisher == "test"
 
     def test_handle_place(self):
@@ -340,7 +340,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.location == "Copenhagen"
 
     def test_handle_lang(self):
@@ -352,7 +352,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             data
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.language == "English"
 
     def test_periodical(self):
@@ -362,7 +362,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.periodical == "test"
 
     def test_oclc(self):
@@ -373,7 +373,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.oclc == "test"
 
     def test_has_first_level_domain_url_hash_and_has_hash(self):
@@ -386,7 +386,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         assert reference.has_first_level_domain_url_hash is False
         assert reference.has_hash is False
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.has_first_level_domain_url_hash is True
         assert reference.has_hash is True
 
@@ -429,7 +429,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     )
     #     reference = EnglishWikipediaReference(**data)
     #     reference.wikibase = IASandboxWikibase()
-    #     reference.finish_parsing_and_generate_hash()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
 
     def test_google_books_template_handling(self):
@@ -443,7 +443,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
         assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
         assert reference.lay_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
@@ -485,4 +485,101 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
 
     def test___parse_first_parameter__(self):
+        # TODO write this test
         pass
+
+    def test_generate_reference_hash_based_on_wikidata_qid(self):
+        data = dict(
+            wikidata_qid="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash(testing=True)
+        assert reference.has_hash is True
+        assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
+
+    def test_generate_reference_hash_based_on_doi(self):
+        data = dict(
+            doi="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash(testing=True)
+        assert reference.has_hash is True
+        assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
+
+    def test_generate_reference_hash_based_on_pmid(self):
+        data = dict(
+            pmid="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash(testing=True)
+        assert reference.has_hash is True
+        assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
+
+    def test_generate_reference_hash_based_on_isbn(self):
+        data = dict(
+            isbn="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash(testing=True)
+        assert reference.has_hash is True
+        assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
+
+    def test_generate_reference_hash_based_on_oclc(self):
+        data = dict(
+            oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash(testing=True)
+        assert reference.has_hash is True
+        assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
+
+    def test_generate_reference_hash_based_on_url(self):
+        data = dict(
+            # oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash(testing=True)
+        assert reference.has_hash is True
+        assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
+
+    def test_has_hash_empty(self):
+        data = dict(
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.md5hash = ""
+        assert reference.has_hash is False
+
+    def test_has_hash_not_empty(self):
+        data = dict(
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.md5hash = "123"
+        assert reference.has_hash is True
+
+    def test_has_hash_is_none(self):
+        data = dict(
+            template_name="cite book",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.md5hash = None
+        assert reference.has_hash is False

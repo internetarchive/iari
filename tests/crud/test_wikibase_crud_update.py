@@ -32,10 +32,10 @@ class TestWikibaseCrudUpdate(TestCase):
     #     )
     #     old_reference = EnglishWikipediaReference(**old_data)
     #     old_reference.wikibase = IASandboxWikibase()
-    #     old_reference.finish_parsing_and_generate_hash()
+    #     old_reference.finish_parsing_and_generate_hash(testing=True)
     #     new_reference = EnglishWikipediaReference(**new_data)
     #     new_reference.wikibase = IASandboxWikibase()
-    #     new_reference.finish_parsing_and_generate_hash()
+    #     new_reference.finish_parsing_and_generate_hash(testing=True)
     #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
     #     title = "Test"
     #     wppage.__get_wikipedia_article_from_title__(title=title)
@@ -64,10 +64,10 @@ class TestWikibaseCrudUpdate(TestCase):
     #     )
     #     old_reference = EnglishWikipediaReference(**old_data)
     #     old_reference.wikibase = wikibase
-    #     old_reference.finish_parsing_and_generate_hash()
+    #     old_reference.finish_parsing_and_generate_hash(testing=True)
     #     new_reference = EnglishWikipediaReference(**new_data)
     #     new_reference.wikibase = wikibase
-    #     new_reference.finish_parsing_and_generate_hash()
+    #     new_reference.finish_parsing_and_generate_hash(testing=True)
     #     new_reference.return_ = WikibaseReturn(uploaded_now=False, item_qid="")
     #     wppage = WikipediaArticle(wikibase=wikibase)
     #     title = "Test"
@@ -104,7 +104,7 @@ class TestWikibaseCrudUpdate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = wikibase
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage = WikipediaArticle(wikibase=wikibase, title="Test")
         wppage.__get_wikipedia_article_from_title__()
         wppage.__generate_hash__()
@@ -167,7 +167,7 @@ class TestWikibaseCrudUpdate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = wikibase
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
         # Update existing
         reference.__setup_wikibase_crud_update__(wikipedia_article=wppage)
@@ -207,7 +207,7 @@ class TestWikibaseCrudUpdate(TestCase):
         )
         reference = EnglishWikipediaReference(**new_data)
         reference.wikibase = wikibase
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         # here we get he return_ set
         reference.upload_reference_and_insert_in_the_cache_if_enabled()
         reference.__setup_wikibase_crud_update__(wikipedia_article=wppage)
