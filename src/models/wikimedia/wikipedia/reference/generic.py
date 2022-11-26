@@ -427,7 +427,10 @@ class WikipediaReference(WcdItem):
 
     @property
     def has_hash(self) -> bool:
-        return bool(self.md5hash is not None)
+        if self.md5hash is None:
+            return False
+        else:
+            return bool(self.md5hash != "")
 
     # @property
     # def isodate(self) -> str:
