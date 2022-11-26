@@ -96,14 +96,14 @@ class TestWikipediaArticle(TestCase):
 
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         string_data1 = dict(
             title="Test book with no identifier",
             template_name="cite book",
         )
         string_reference = EnglishWikipediaReference(**string_data1)
         string_reference.wikibase = IASandboxWikibase()
-        string_reference.finish_parsing_and_generate_hash()
+        string_reference.finish_parsing_and_generate_hash(testing=True)
         wp = WikipediaArticle(title="Test", wikibase=IASandboxWikibase())
         wp.references.extend([reference, string_reference])
         wp.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -157,7 +157,7 @@ class TestWikipediaArticle(TestCase):
 
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wp = WikipediaArticle(title="Test", wikibase=IASandboxWikibase())
         wp.references.append(reference)
         wp.extract_and_parse_and_upload_missing_items_to_wikibase()

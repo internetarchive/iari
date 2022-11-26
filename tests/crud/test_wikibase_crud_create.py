@@ -47,7 +47,7 @@ class TestWikibaseCrudCreate(TestCase):
             }
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         logger.debug(
             f"reference.detected_archive_of_archive_url: {reference.detected_archive_of_archive_url}"
         )
@@ -94,7 +94,7 @@ class TestWikibaseCrudCreate(TestCase):
             }
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         item = wc.__prepare_new_reference_item__(
             page_reference=reference, wikipedia_article=wppage
         )
@@ -121,7 +121,7 @@ class TestWikibaseCrudCreate(TestCase):
             }
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         reference.return_ = WikibaseReturn(item_qid="test", uploaded_now=False)
         wppage.references = []
         wppage.references.append(reference)
@@ -153,7 +153,7 @@ class TestWikibaseCrudCreate(TestCase):
             }
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         reference.return_ = WikibaseReturn(item_qid="Q1", uploaded_now=False)
         wppage.references = []
         wppage.references.append(reference)
@@ -191,7 +191,7 @@ class TestWikibaseCrudCreate(TestCase):
     #             "template_name": "cite book",
     #         }
     #     )
-    #     reference.finish_parsing_and_generate_hash()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
     #     test_qid = "Q4"
     #     reference.wikicitations_qid = test_qid
     #     wppage.references = []
@@ -220,7 +220,7 @@ class TestWikibaseCrudCreate(TestCase):
             }
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         return_: Return = wc.prepare_and_upload_website_item(
             page_reference=reference, wikipedia_article=wppage
         )
@@ -247,7 +247,7 @@ class TestWikibaseCrudCreate(TestCase):
     #         }
     #     )
     #     reference.wikibase = IASandboxWikibase()
-    #     reference.finish_parsing_and_generate_hash()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
     #     wppage.references = []
     #     wppage.references.append(reference)
     #     wppage.__upload_references_and_websites_if_missing__()
@@ -280,7 +280,7 @@ class TestWikibaseCrudCreate(TestCase):
             }
         )
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage.references = []
         wppage.references.append(reference)
         wppage.references.append(reference)
@@ -310,7 +310,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -378,7 +378,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -399,7 +399,7 @@ class TestWikibaseCrudCreate(TestCase):
     #     )
     #     reference = EnglishWikipediaReference(**data)
     #     reference.wikibase = IASandboxWikibase()
-    #     reference.finish_parsing_and_generate_hash()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
     #     wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
     #     wppage.references.append(reference)
     #     wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -420,7 +420,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -444,7 +444,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -464,7 +464,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -495,7 +495,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash()
+        reference.finish_parsing_and_generate_hash(testing=True)
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
         wppage.references.append(reference)
         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
