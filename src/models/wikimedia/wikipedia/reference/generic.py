@@ -1267,13 +1267,13 @@ class WikipediaReference(WcdItem):
         self.__insert_reference_in_cache__(wcdqid=return_.item_qid)
         self.return_ = return_
 
-    def finish_parsing_and_generate_hash(self) -> None:
+    def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
         from src.models.update_delay import UpdateDelay
 
         update_delay = UpdateDelay(object_=self)
-        if update_delay.time_to_update:
+        if update_delay.time_to_update or testing is True:
             self.__parse_first_parameter__()
             self.__parse_urls__()
             self.__parse_isbn__()
