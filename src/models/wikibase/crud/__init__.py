@@ -1098,6 +1098,7 @@ class WikibaseCrud(WcdBaseModel):
 
     @staticmethod
     def __wait_for_wcdqs_to_sync__():
+        """This is used by the rebuild cache functionality"""
         logger.info(
             f"Sleeping {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
         )

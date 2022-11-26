@@ -112,7 +112,9 @@ class WikibaseCrudRead(WikibaseCrud):
     @validate_arguments
     def __get_items_via_sparql__(self, query: str) -> Any:
         """This is the lowest level function
-        that executes the query with WBI after setting it up"""
+        that executes the query with WBI after setting it up
+
+        This is used by the rebuild cache functionality"""
         self.__setup_wikibase_integrator_configuration__()
         self.__wait_for_wcdqs_to_sync__()
         logger.debug(
