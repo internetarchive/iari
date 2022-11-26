@@ -34,8 +34,8 @@ class LookupWikicitationsQid(BaseModel):
                 wikibase_property = self.wikibase.WIKIDATA_QID
                 # We uppercase the QID because the SPARQL string matching is probably case-sensitive
                 query = f"""
-                prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-                prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+                prefix wcd: <{self.wikibase.rdf_prefix_url}/entity/>
+                prefix wcdt: <{self.wikibase.rdf_prefix_url}/prop/direct/>
                     SELECT ?item WHERE {{
                       ?item wcdt:{wikibase_property} "{wdqid.upper()}".
                     }}

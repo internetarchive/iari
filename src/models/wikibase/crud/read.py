@@ -69,8 +69,8 @@ class WikibaseCrudRead(WikibaseCrud):
         return self.__extract_item_ids__(
             sparql_result=self.__get_items_via_sparql__(
                 f"""
-                    prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-                    prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+                    prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
+                    prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
                     SELECT ?item WHERE {{
                       ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{item_type}
                     }}
@@ -84,8 +84,8 @@ class WikibaseCrudRead(WikibaseCrud):
         return self.__extract_item_ids_and_hashes__(
             sparql_result=self.__get_items_via_sparql__(
                 f"""
-                    prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-                    prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+                    prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
+                    prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
                     SELECT ?item ?hash WHERE {{
                       VALUES ?values {{
                         wcd:{self.wikibase.WIKIPEDIA_PAGE}
@@ -132,16 +132,16 @@ class WikibaseCrudRead(WikibaseCrud):
             raise ValueError("Either property or value was too short.")
         if prefix:
             query = f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
+            prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
                 SELECT (COUNT(?item) as ?count) WHERE {{
                   ?item wcdt:{wikibase_property_id} wcd:{value}.
                 }}
             """
         else:
             query = f"""
-            prefix wcd: <{self.wikibase.rdf_prefix}/entity/>
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
+            prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
                 SELECT (COUNT(?item) as ?count) WHERE {{
                   ?item wcdt:{wikibase_property_id} {value}.
                 }}
@@ -158,7 +158,7 @@ class WikibaseCrudRead(WikibaseCrud):
         if not self.wikibase.HASH:
             raise MissingInformationError("self.wikibase.HASH was empty string")
         query = f"""
-            prefix wcdt: <{self.wikibase.rdf_prefix}/prop/direct/>
+            prefix wcdt: <{self.wikibase.rdf_prefix_url}/prop/direct/>
             SELECT ?item WHERE {{
               ?item wcdt:{self.wikibase.HASH} "{md5hash}".
             }}

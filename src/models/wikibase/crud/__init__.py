@@ -106,7 +106,7 @@ class WikibaseCrud(WcdBaseModel):
         # TODO rename to include "from_sparql_variable"
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
         return str(
-            data[sparql_variable]["value"].replace(self.wikibase.rdf_entity_prefix, "")
+            data[sparql_variable]["value"].replace(self.wikibase.rdf_entity_prefix_url, "")
         )
 
     def __setup_wikibase_integrator_configuration__(
