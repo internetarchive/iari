@@ -1295,9 +1295,9 @@ class WikipediaReference(WcdItem):
 
     def insert_last_update_timestamp(self):
         from src.models.cache import Cache
-        from src.models.hash_ import Hash_
+        from src.models.hashing import Hashing
 
-        hash_ = Hash_(
+        hash_ = Hashing(
             wikibase=self.wikibase,
             language_code=self.language_code,
             title=self.title,
@@ -1305,7 +1305,7 @@ class WikipediaReference(WcdItem):
         )
         cache = Cache()
         cache.connect()
-        cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
+        cache.set_title_or_wdqid_last_updated(key=hash_.__generate_entity_updated_hash_key__())
 
     @staticmethod
     def __has_template_data__(string: str) -> bool:

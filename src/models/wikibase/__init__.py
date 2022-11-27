@@ -177,4 +177,6 @@ class Wikibase(WcdBaseModel):
         self, data: Dict, sparql_variable: str = "item"
     ) -> str:
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
-        return str(data[sparql_variable]["value"].replace(self.rdf_entity_prefix_url, ""))
+        return str(
+            data[sparql_variable]["value"].replace(self.rdf_entity_prefix_url, "")
+        )

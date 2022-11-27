@@ -5,7 +5,7 @@ from typing import Any, Optional
 import config
 from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
-from src.models.hash_ import Hash_
+from src.models.hashing import Hashing
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
@@ -24,10 +24,11 @@ class UpdateDelay(WcdBaseModel):
         self.cache.connect()
         if not self.object_:
             raise MissingInformationError("self.object_ was None")
+        # TODO refactor into own method and make it testable
         from src.models.message import Message
 
         if isinstance(self.object_, Message):
-            hash_ = Hash_(
+            hashing = Hashing(
                 wikibase=self.object_.wikibase,
                 language_code=self.object_.language_code,
                 article_wikidata_qid=self.object_.article_wikidata_qid,
@@ -46,14 +47,14 @@ class UpdateDelay(WcdBaseModel):
                 raise ValueError(
                     "did not get Message or WikipediaReference or WikipediaArticle"
                 )
-        hash_ = Hash_(
-            wikibase=self.object_.wikibase,
-            language_code=self.object_.language_code,
-            title=self.object_.title,
-            wikimedia_site=self.object_.wikimedia_site,
-        )
+            hashing = Hashing(
+                wikibase=self.object_.wikibase,
+                language_code=self.object_.language_code,
+                title=self.object_.title,
+                wikimedia_site=self.object_.wikimedia_site,
+            )
         timestamp_string = self.cache.lookup_title_or_wdqid_last_updated(
-            key=hash_.__entity_updated_hash_key__()
+            key=hashing.__generate_entity_updated_hash_key__()
         )
         self.time_of_last_update = datetime.fromtimestamp(timestamp_string)
         return self.__delay_time_has_passed__()

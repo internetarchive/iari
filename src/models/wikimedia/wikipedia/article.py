@@ -464,6 +464,7 @@ class WikipediaArticle(WcdItem):
                     )
             # Here we check for an existing reference item
             if reference.has_hash:
+                # logger.debug(f"has_hash was True for md5hash: {reference.md5hash}")
                 with console.status(f"Creating the reference item if missing"):
                     # Here we get the reference with WikibaseReturn back
                     reference.check_and_upload_reference_item_to_wikibase_if_missing()
@@ -600,9 +601,9 @@ class WikipediaArticle(WcdItem):
 
     def __insert_last_update_timestamp__(self):
         from src.models.cache import Cache
-        from src.models.hash_ import Hash_
+        from src.models.hashing import Hashing
 
-        hash_ = Hash_(
+        hash_ = Hashing(
             wikibase=self.wikibase,
             language_code=self.language_code,
             article_wikidata_qid=self.return_.item_qid,
@@ -611,4 +612,4 @@ class WikipediaArticle(WcdItem):
         )
         cache = Cache()
         cache.connect()
-        cache.set_title_or_wdqid_last_updated(key=hash_.__entity_updated_hash_key__())
+        cache.set_title_or_wdqid_last_updated(key=hash_.__generate_entity_updated_hash_key__())

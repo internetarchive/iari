@@ -41,8 +41,13 @@ class TestWikibase(TestCase):
             == "https://wikicitations.wikibase.cloud/w/index.php?title=Item:Q1&action=history"
         )
         assert wcw.rdf_prefix_url == "https://wikicitations.wikibase.cloud/"
-        assert wcw.rdf_entity_prefix_url == "https://wikicitations.wikibase.cloud/entity/"
-        assert wcw.rdf_prefix_prop_direct_url == "https://wikicitations.wikibase.cloud/prop/direct/"
+        assert (
+            wcw.rdf_entity_prefix_url == "https://wikicitations.wikibase.cloud/entity/"
+        )
+        assert (
+            wcw.rdf_prefix_prop_direct_url
+            == "https://wikicitations.wikibase.cloud/prop/direct/"
+        )
 
     def test_sandbox_urls(self):
         wcw = IASandboxWikibase()
@@ -60,4 +65,7 @@ class TestWikibase(TestCase):
         )
         assert wcw.rdf_prefix_url == "https://ia-sandbox.wikibase.cloud/"
         assert wcw.rdf_entity_prefix_url == "https://ia-sandbox.wikibase.cloud/entity/"
-        assert wcw.rdf_prefix_prop_direct_url == "https://ia-sandbox.wikibase.cloud/prop/direct/"
+        assert (
+            wcw.rdf_prefix_prop_direct_url
+            == "https://ia-sandbox.wikibase.cloud/prop/direct/"
+        )
