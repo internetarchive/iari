@@ -63,7 +63,7 @@ Sometimes they are mixed plain text reference and a naked isbn template in the e
 
 ## User script investigation
 
-Base template for our user scripts: https://en.wikipedia.org/wiki/User:Plastikspork/admindash.js
+Base template for our user scripts: https://en.wikipedia.org/wiki/User:Dipankan001/New_pages.js
 
 Criteria used for selection:
 * clear and simple
