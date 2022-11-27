@@ -24,10 +24,11 @@ class UpdateDelay(WcdBaseModel):
         self.cache.connect()
         if not self.object_:
             raise MissingInformationError("self.object_ was None")
+        # TODO split into own method and make it testable
         from src.models.message import Message
 
         if isinstance(self.object_, Message):
-            hash_ = Hashing(
+            hashing = Hashing(
                 wikibase=self.object_.wikibase,
                 language_code=self.object_.language_code,
                 article_wikidata_qid=self.object_.article_wikidata_qid,
@@ -46,14 +47,14 @@ class UpdateDelay(WcdBaseModel):
                 raise ValueError(
                     "did not get Message or WikipediaReference or WikipediaArticle"
                 )
-        hash_ = Hashing(
-            wikibase=self.object_.wikibase,
-            language_code=self.object_.language_code,
-            title=self.object_.title,
-            wikimedia_site=self.object_.wikimedia_site,
-        )
+            hashing = Hashing(
+                wikibase=self.object_.wikibase,
+                language_code=self.object_.language_code,
+                title=self.object_.title,
+                wikimedia_site=self.object_.wikimedia_site,
+            )
         timestamp_string = self.cache.lookup_title_or_wdqid_last_updated(
-            key=hash_.__entity_updated_hash_key__()
+            key=hashing.__entity_updated_hash_key__()
         )
         self.time_of_last_update = datetime.fromtimestamp(timestamp_string)
         return self.__delay_time_has_passed__()
