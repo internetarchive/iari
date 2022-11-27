@@ -34,6 +34,10 @@ and simple graphical user interface when editing any article. You deal with the 
 and ProveIt deals with the wikitext.
 https://en.wikipedia.org/wiki/Wikipedia:ProveIt
 
+## [Citation expander](https://en.wikipedia.org/wiki/Wikipedia:Citation_expander)
+Gadget in english wikipedia that enables expansion of citation templates.
+TODO try it out.
+
 # References in Wikipedia investigation
 
 There are about 200 million in total according to extractions from dumps done by scientists.
