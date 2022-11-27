@@ -13,7 +13,7 @@ class Hashing(WcdBaseModel):
     title: str = ""
     article_wikidata_qid: str = ""
 
-    def __entity_updated_hash_key__(
+    def __generate_entity_updated_hash_key__(
         self,
     ) -> str:
         """Key we use to lookup the timestamp in SSDB

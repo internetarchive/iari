@@ -54,7 +54,7 @@ class UpdateDelay(WcdBaseModel):
                 wikimedia_site=self.object_.wikimedia_site,
             )
         timestamp_string = self.cache.lookup_title_or_wdqid_last_updated(
-            key=hashing.__entity_updated_hash_key__()
+            key=hashing.__generate_entity_updated_hash_key__()
         )
         self.time_of_last_update = datetime.fromtimestamp(timestamp_string)
         return self.__delay_time_has_passed__()
