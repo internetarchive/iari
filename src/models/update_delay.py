@@ -24,7 +24,7 @@ class UpdateDelay(WcdBaseModel):
         self.cache.connect()
         if not self.object_:
             raise MissingInformationError("self.object_ was None")
-        # TODO split into own method and make it testable
+        # TODO refactor into own method and make it testable
         from src.models.message import Message
 
         if isinstance(self.object_, Message):
