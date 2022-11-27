@@ -63,5 +63,8 @@ Sometimes they are mixed plain text reference and a naked isbn template in the e
 
 ## User script investigation
 
-Todo
+Base template for our user scripts: https://en.wikipedia.org/wiki/User:Plastikspork/admindash.js
 
+Criteria used for selection:
+* clear and simple
+* minimal without bloat
