@@ -464,6 +464,7 @@ class WikipediaArticle(WcdItem):
                     )
             # Here we check for an existing reference item
             if reference.has_hash:
+                # logger.debug(f"has_hash was True for md5hash: {reference.md5hash}")
                 with console.status(f"Creating the reference item if missing"):
                     # Here we get the reference with WikibaseReturn back
                     reference.check_and_upload_reference_item_to_wikibase_if_missing()
