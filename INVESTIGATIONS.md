@@ -1,16 +1,18 @@
-# Citation generation helpers services and scripts
+# Investigations
+
+## Citation generation helpers services and scripts
 
 These scripts and services play a central role in
 generating valid CS1 templates to be inserted on (English) Wikipedia
 
 Some of them were supported by grants.
 
-## [Citoid](https://www.wikidata.org/wiki/Q21679984)
+### [Citoid](https://www.wikidata.org/wiki/Q21679984)
 
 Mediawiki extension. This is already the default in the visual editor.
 https://en.wikipedia.org/wiki/User:BrandonXLF/Citoid
 
-## [Web2cit](https://www.wikidata.org/wiki/Q115473545) (launched in september 2022)
+### [Web2cit](https://www.wikidata.org/wiki/Q115473545) (launched in september 2022)
 
 This is not the default but way more accurate and customizeable than citoid it seems.
 It was made by Diego de la hara who seems competent at writing JavaScript and got a grant
@@ -24,7 +26,7 @@ https://commons.wikimedia.org/wiki/File:How_to_use_Web2Cit.webm
 https://commons.wikimedia.org/wiki/File:How_Web2Cit_works.webm
 https://commons.wikimedia.org/wiki/Category:Web2Cit
 
-## Proveit
+### Proveit
 
 ProveIt (/ˈpruːvɪt/) is a gadget that makes it easy to find, edit, add, and cite
 references when editing Wikipedia articles. Referencing is a key task at Wikipedia,
@@ -34,11 +36,11 @@ and simple graphical user interface when editing any article. You deal with the 
 and ProveIt deals with the wikitext.
 https://en.wikipedia.org/wiki/Wikipedia:ProveIt
 
-# References in Wikipedia investigation
+## State of references in Wikipedia investigation
 
 There are about 200 million in total according to extractions from dumps done by scientists.
 
-## Many references are plain text ie. no template is used
+### Many references are plain text ie. no template is used
 
 These are completely ignore by wcdimportbot because we only support references
 entered in one of the currently 30 templates we support.
@@ -53,7 +55,7 @@ for a graphical overview.
 Suggestion: We should really improve the framework to detect and store these references as well.
 Sometimes they are mixed plain text reference and a naked isbn template in the end.
 
-# User script investigation
+## User script investigation
 
 Todo
 
