@@ -5,7 +5,7 @@ from typing import Any, Optional
 import config
 from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError
-from src.models.hash_ import Hash_
+from src.models.hashing import Hashing
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class UpdateDelay(WcdBaseModel):
         from src.models.message import Message
 
         if isinstance(self.object_, Message):
-            hash_ = Hash_(
+            hash_ = Hashing(
                 wikibase=self.object_.wikibase,
                 language_code=self.object_.language_code,
                 article_wikidata_qid=self.object_.article_wikidata_qid,
@@ -46,7 +46,7 @@ class UpdateDelay(WcdBaseModel):
                 raise ValueError(
                     "did not get Message or WikipediaReference or WikipediaArticle"
                 )
-        hash_ = Hash_(
+        hash_ = Hashing(
             wikibase=self.object_.wikibase,
             language_code=self.object_.language_code,
             title=self.object_.title,

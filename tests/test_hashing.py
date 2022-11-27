@@ -1,9 +1,9 @@
-from src.models.hash_ import Hash_
+from src.models.hashing import Hashing
 
 
-class TestHash_:
+class TestHashing:
     def test___entity_updated_hash__(self):
-        h = Hash_()
+        h = Hashing()
         h.article_wikidata_qid = "Q1"
         # print(m.__entity_updated_hash__())
         assert "6571bcc708dbebba0616aaabd3d0e98a" == h.__entity_updated_hash_key__()

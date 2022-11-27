@@ -6,7 +6,7 @@ from src.models.wikimedia.enums import WikimediaSite
 from src.wcd_base_model import WcdBaseModel
 
 
-class Hash_(WcdBaseModel):
+class Hashing(WcdBaseModel):
     wikibase: Wikibase = IASandboxWikibase()
     language_code: str = "en"
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA

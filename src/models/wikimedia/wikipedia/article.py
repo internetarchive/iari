@@ -601,9 +601,9 @@ class WikipediaArticle(WcdItem):
 
     def __insert_last_update_timestamp__(self):
         from src.models.cache import Cache
-        from src.models.hash_ import Hash_
+        from src.models.hashing import Hashing
 
-        hash_ = Hash_(
+        hash_ = Hashing(
             wikibase=self.wikibase,
             language_code=self.language_code,
             article_wikidata_qid=self.return_.item_qid,
