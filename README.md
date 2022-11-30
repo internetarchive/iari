@@ -9,14 +9,17 @@ and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2.0.0+ 
 Mark Graham, head of The 
 [Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the [Internet Archive](https://www.wikidata.org/wiki/Q461).
 
+The 200 million references are together with the article text in the Wikipedias 
+one of the most valuable collections of knowledge ever made by humans, see [size comparison](https://en.wikipedia.org/wiki/Wikipedia:Size_comparisons).
+
 A Wikibase with millions of references and edges between 
 them and the Wikipedia article(s) they are used on is useful
- for both Wikimedians and researchers who wish to understand
+ for both Wikimedians, digital librarians and researchers who wish to understand
  which websites are linked to which pages and used as references.
 
-This is part of a wider initiative help raise the quality of sources in 
+This is part of a wider initiative help raise the quality of references in 
 Wikipedia to enable everyone in the world to make
- decisions based on trustworthy information that is sourced by 
+ decisions based on trustworthy knowledge that is derived from 
 trustworthy sources.
 
 # What is Wikibase?
