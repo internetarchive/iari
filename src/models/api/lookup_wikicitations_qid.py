@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class LookupWikicitationsQid(BaseModel):
+    """lookup the wcdqid based on the wdqid"""
+
     wikibase = WikiCitationsWikibase()
-    # lookup the wcdqid based on the wdqid
 
     @staticmethod
     def __setup_wikibase_integrator_configuration__() -> None:
@@ -27,15 +28,16 @@ class LookupWikicitationsQid(BaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = wikibase.sparql_endpoint_url
 
     def lookup_via_query_service(self, wdqid="") -> Union[Return, str]:
-        """This looks up the WDQID via the query service. It is slower than using cirrussearch"""
+        """This looks up the WDQID via the query service. It is way
+        slower than using cirrussearch, but cirrussearch is currently
+        not installed on the wikibases we support"""
         if wdqid:
             if self.wikibase.is_valid_qid(qid=wdqid):
                 self.__setup_wikibase_integrator_configuration__()
                 wikibase_property = self.wikibase.WIKIDATA_QID
                 # We uppercase the QID because the SPARQL string matching is probably case-sensitive
                 query = f"""
-                prefix wcd: <{self.wikibase.rdf_prefix_url}/entity/>
-                prefix wcdt: <{self.wikibase.rdf_prefix_url}/prop/direct/>
+                {self.wikibase.prefix_lines}
                     SELECT ?item WHERE {{
                       ?item wcdt:{wikibase_property} "{wdqid.upper()}".
                     }}
