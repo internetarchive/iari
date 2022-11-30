@@ -1,14 +1,14 @@
 import logging
-from typing import Union
+from typing import Union, Optional
 
 from pydantic import BaseModel
 from wikibaseintegrator import wbi_config  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
+from src.models.wikibase import Wikibase
 from src.helpers.console import console
 from src.models.api.enums import Return
-from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 
 logger = logging.getLogger(__name__)
 
@@ -16,24 +16,32 @@ logger = logging.getLogger(__name__)
 class LookupWikicitationsQid(BaseModel):
     """lookup the wcdqid based on the wdqid"""
 
-    wikibase = WikiCitationsWikibase()
+    wikibase: Optional[Wikibase]
 
-    @staticmethod
-    def __setup_wikibase_integrator_configuration__() -> None:
-        wikibase = WikiCitationsWikibase()
+    def __setup_wikibase_integrator_configuration__(self) -> None:
+        if config.use_sandbox_wikibase_backend_for_wikicitations_api:
+            from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+
+            self.wikibase = IASandboxWikibase()
+        else:
+            from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
+
+            self.wikibase = WikiCitationsWikibase()
         wbi_config.config["USER_AGENT"] = config.user_agent
-        wbi_config.config["WIKIBASE_URL"] = wikibase.wikibase_url
-        wbi_config.config["MEDIAWIKI_API_URL"] = wikibase.mediawiki_api_url
-        wbi_config.config["MEDIAWIKI_INDEX_URL"] = wikibase.mediawiki_index_url
-        wbi_config.config["SPARQL_ENDPOINT_URL"] = wikibase.sparql_endpoint_url
+        wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
+        wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
+        wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
+        wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
 
     def lookup_via_query_service(self, wdqid="") -> Union[Return, str]:
         """This looks up the WDQID via the query service. It is way
         slower than using cirrussearch, but cirrussearch is currently
         not installed on the wikibases we support"""
         if wdqid:
+            self.__setup_wikibase_integrator_configuration__()
+            if not self.wikibase:
+                raise ValueError("self.wikibase was None")
             if self.wikibase.is_valid_qid(qid=wdqid):
-                self.__setup_wikibase_integrator_configuration__()
                 wikibase_property = self.wikibase.WIKIDATA_QID
                 # We uppercase the QID because the SPARQL string matching is probably case-sensitive
                 query = f"""
