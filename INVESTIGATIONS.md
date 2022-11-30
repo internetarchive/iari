@@ -55,8 +55,8 @@ We currently do not try to analyze all references <ref>...</ref> which lack temp
 but we could start doing that since we download all the wikitext anyway (and throw away
 everything data in of of the supported templates).
 
-See https://commons.wikimedia.org/wiki/File:Wikipedia%27s_references_and_citation_templates_shift.png
-for a graphical overview.
+Here you see a graphical overview of the number of references 
+![image](https://commons.wikimedia.org/wiki/File:Wikipedia%27s_references_and_citation_templates_shift.png)
 
 Suggestion: We should really improve the framework to detect and store these references as well.
 Sometimes they are mixed plain text reference and a naked isbn template in the end.
