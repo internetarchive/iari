@@ -1238,26 +1238,23 @@ class WikipediaReference(WcdItem):
 
     @validate_arguments
     def get_wcdqid_from_cache(self) -> None:
-        if self.cache is None:
-            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         if self.cache is not None:
             self.return_: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
                 reference=self
             )
-            logger.debug(f"result from the cache:{self.return_.item_qid}")
-        else:
-            raise ValueError("self.cache was None")
+            if self.return_:
+                logger.debug(f"result from the cache:{self.return_.item_qid}")
 
     @validate_arguments
     def __insert_reference_in_cache__(self, wcdqid: str):
         """Insert reference in the cache"""
         logger.debug("__insert_in_cache__: Running")
-        if self.cache is None:
-            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         if self.cache is not None:
             self.cache.add_reference(reference=self, wcdqid=wcdqid)
-        else:
-            raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
 
     @validate_arguments
