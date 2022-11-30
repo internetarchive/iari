@@ -29,7 +29,9 @@ class LookupWikicitationsQid(BaseModel):
         wbi_config.config["SPARQL_ENDPOINT_URL"] = wikibase.sparql_endpoint_url
 
     def lookup_via_query_service(self, wdqid="") -> Union[Return, str]:
-        """This looks up the WDQID via the query service. It is slower than using cirrussearch"""
+        """This looks up the WDQID via the query service. It is way
+        slower than using cirrussearch, but cirrussearch is currently
+        not installed on the wikibases we support"""
         if wdqid:
             if self.wikibase.is_valid_qid(qid=wdqid):
                 self.__setup_wikibase_integrator_configuration__()
