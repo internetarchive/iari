@@ -30,7 +30,8 @@ maintained by them as of this writing.
 
 # Why store the data about references in a graph database?
 The advantages of having access to this data in a graph are many.
-* Globally unique and persistent identifiers for as many references in Wikipedia as possible. (see F1 in the [FAIR data principles](https://www.wikidata.org/wiki/Q29032644))
+* [Globally unique and persistent identifiers](https://www.wikidata.org/wiki/Q115493815)(aka. GUPRI) for as many references in Wikipedia as possible.
+* Helping Wikipedians to improve the references so they can be uniquely identified and can be [_turned blue_](https://www.wikidata.org/wiki/Q115136754) ([video](https://commons.wikimedia.org/wiki/File:Let%E2%80%99s_Turn_all_the_References_Blue.webm))
 * Overview and visualization of references across Wikipedia articles and language editions becomes possible.
 * Overview of most cited websites in the world (see also [bestref.net](https://bestref.net/) 
 which is based on data extraction from the dump files)
