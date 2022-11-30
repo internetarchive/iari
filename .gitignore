@@ -1,3 +1,9 @@
 config.py
 libs
 sources
+/throttle.ctrl
+/url_exceptions.log
+/schema_errors.log
+/pywikibot.lwp
+/isbn_exceptions.log
+/cache-content.log
