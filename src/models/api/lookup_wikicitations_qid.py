@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class LookupWikicitationsQid(BaseModel):
+    """lookup the wcdqid based on the wdqid"""
+
     wikibase = WikiCitationsWikibase()
     # lookup the wcdqid based on the wdqid
 
