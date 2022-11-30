@@ -180,3 +180,15 @@ class Wikibase(WcdBaseModel):
         return str(
             data[sparql_variable]["value"].replace(self.rdf_entity_prefix_url, "")
         )
+
+    @property
+    def wcd_prefix_line(self):
+        return f"prefix wcd: <{self.rdf_entity_prefix_url}>"
+
+    @property
+    def wcdt_prefix_line(self):
+        return f"prefix wcdt: <{self.rdf_prefix_prop_direct_url}>"
+
+    @property
+    def prefix_lines(self):
+        return f"{self.wcd_prefix_line}\n{self.wcdt_prefix_line}"
