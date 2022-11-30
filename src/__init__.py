@@ -11,7 +11,6 @@ from src.helpers.console import console
 from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.wikibase import Wikibase
-from src.models.wikibase.crud.delete import WikibaseCrudDelete
 from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.dictionaries import (
     wcd_externalid_properties,
