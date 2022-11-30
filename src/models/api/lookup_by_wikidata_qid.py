@@ -29,7 +29,8 @@ class LookupByWikidataQid(Resource):
             if isinstance(result, str):
                 return redirect(wikibase.entity_url(item_id=result))
             elif result == Return.NO_MATCH:
-                return result.value, 404
+                # https://www.geeksforgeeks.org/string-formatting-in-python/
+                return result.value.format(wikibase=wikibase.__repr_name__(), qid=qid), 404
             else:
                 return result.value, 400
         else:
