@@ -1,10 +1,10 @@
-# [WikiCitations ETL-framework](https://www.wikidata.org/wiki/Q115252313) ([graph](https://w.wiki/5$yU))
-This framework is capable of fetching, extracting, transforming and storing 
+# [wcdimportbot](https://www.wikidata.org/wiki/Q115252313) ([graph](https://w.wiki/5$yU))
+This ETL-framework is capable of fetching, extracting, transforming and storing 
 reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700) 
-in a [Wikibase.cloud](https://wikibase.cloud/) instance. 
+in a [Wikibase.cloud](https://wikibase.cloud/) instance. We call the resulting database Wikipedia Citations Database (WCD).
 
-It has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) (version 1.0.0) 
-and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2) as part of the 
+The framework has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) (version 1.0.0 a proof of concept import tool based on WikidataIntegrator)
+and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2.0.0+ a scalable ETL-framework with an API and capability of reading EventStreams) as part of the 
 [Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by 
 Mark Graham, head of The 
 [Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the [Internet Archive](https://www.wikidata.org/wiki/Q461).
@@ -100,67 +100,14 @@ We use the following terminology:
 identified by one of the supported identifiers (ie DOI, ISBN, PMID, OCLC, URL)
 * string citation: this is a reference that could not be uniquely identified.
 
-# Running the bot in AWS
-Because of security limitations of SSDB it is recommended 
-to only run the bot on the same server as the SSDB instance.
-
-Log into the AWS server via putty or a virtual terminal in Linux/Mac OSX. 
-You will need to generate a public SSH key and have 
-an account set up before being able to log in. 
-
-Start GNU screen (if you want to have a persisting session)
-`$ screen -D -RR`
-
-Now you are ready to install and setup the bot.
-The bot requires to be run on Python 3.8 or later.
-
-# Installation
-Clone the git repo:
-
-`$ git clone https://github.com/internetarchive/wcdimportbot.git`
-`$ cd wcdimportbot`
-
-# Setup
-Create a [virtual environment](https://docs.python.org/3/library/venv.html):
-`$ python3 -m venv .venv`
-
-Activate the virtual environment:
-`$ source .venv/bin/activate`
-- When you have finished using wcdimportbot, you can deactivate this virtual environment by typing `deactivate`
-
-Install the dependencies:
-`$ pip install -r requirements.txt`
-
-[Generate a botpassword](https://wikicitations.wiki.opencura.com/w/index.php?title=Special:UserLogin&returnto=Special%3ABotPasswords&returntoquery=&force=BotPasswords)
-
-Copy config.py.sample -> config.py 
-`$ cp config.py.sample config.py`
-and 
-enter your botpassword credentials. E.g. user: "test" and password: "q62noap7251t8o3nwgqov0c0h8gvqt20"
-`$ nano config.py`
-
-If you want to delete items from the Wikibase, ask an administrator of the Wikibase to become admin.
-
 # Features
-Currently the bot can be used to import pages one by one and to rinse the imported items from the Wikibase.
-
-## Import one or more pages
-The bot can import any Wikipedia article (in English Wikipedia)
-
-`$ python wcdimportbot.py --import "title of article"` 
-
-## Import range
-The bot can import ranges of Wikipedia articles (in English Wikipedia) in the order A-Z
-
-`$ python wcdimportbot.py --max-range 10` 
-
-## Import range based on category
-The bot can import ranges of Wikipedia articles (in English Wikipedia)
-
-`$ python wcdimportbot.py --category "title of category"` 
-
-# Help
-Run `$ python wcdimportbot.py --help` to see a list of all supported commands
+Currently the framework has the following features:
+* support for English Wikipedia only
+* import articles one by one
+* import a range of articles
+* import a range of articles from a category
+* ingest article updates from [EventStreams](https://www.wikidata.org/wiki/Q115402046)
+* scale horizontally up to the Wikibase API gets choked (a total max of ~6 edits a second)
 
 # Diagrams
 
@@ -170,13 +117,15 @@ Run `$ python wcdimportbot.py --help` to see a list of all supported commands
 ## Roadmap
 ![image](diagrams/roadmap.png)
 
-## Ingestor sequence
+## Ingester sequence
 ![image](diagrams/ingestor_sequence.png)
 
 ## Worker sequence
 ![image](diagrams/worker_sequence.png)
 
-
-## License
+# License
 This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022
 The diagram PNG files are CC0.
+
+# Further reading and installation/setup
+See the [development notes](DEVELOPMENT_NOTES.md)
