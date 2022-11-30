@@ -2,6 +2,7 @@
 // Author: So9q
 // Date: 2022
 // Inspired by https://en.wikipedia.org/wiki/User:Dipankan001/New_pages.js
+// Note: This user script was created as part of wcdimportbot, see https://www.wikidata.org/wiki/Q115252313
 
 function addPortletLink(){
           mw.util.addPortletLink(
