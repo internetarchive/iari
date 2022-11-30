@@ -2,9 +2,9 @@
 // Author: So9q
 // Date: 2022
 // Inspired by https://en.wikipedia.org/wiki/User:Dipankan001/New_pages.js
-// TODO: add check for namespace == 0 (article)
+// Note: This user script was created as part of wcdimportbot, see https://www.wikidata.org/wiki/Q115252313
 
-function addNewpages(){
+function addPortletLink(){
           mw.util.addPortletLink(
           "p-tb",
           "http://18.217.22.248/v1/add-job?lang=en&site=wikipedia&title=" + mw.config.get( 'wgPageName' ) ,
@@ -14,7 +14,9 @@ function addNewpages(){
           );
 }
 
-$(addNewpages);
+if(mw.config.values.wgNamespaceNumber === 0) {
+    $(addPortletLink);
+}
 
 
 // [[Category:Wikipedia scripts]]
