@@ -1305,7 +1305,9 @@ class WikipediaReference(WcdItem):
         )
         cache = Cache()
         cache.connect()
-        cache.set_title_or_wdqid_last_updated(key=hash_.__generate_entity_updated_hash_key__())
+        cache.set_title_or_wdqid_last_updated(
+            key=hash_.__generate_entity_updated_hash_key__()
+        )
 
     @staticmethod
     def __has_template_data__(string: str) -> bool:
