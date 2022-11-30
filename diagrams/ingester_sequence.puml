@@ -3,18 +3,18 @@
 
 autonumber
 actor user
-control wcdimportbot_ingestor
+control wcdimportbot_ingester
 entity "Wikimedia Enterprise API - page updates" as enterprise_api
 entity RabbitMQ as rabbitmq
 
-user -> wcdimportbot_ingestor :start
+user -> wcdimportbot_ingester :start
 wcdimportbot_ingestor -> enterprise_api : listen for messages
 loop got message
-    wcdimportbot_ingestor -> wcdimportbot_ingestor : parse message
+    wcdimportbot_ingester -> wcdimportbot_ingester : parse message
     alt got enwiki article
-        wcdimportbot_ingestor -> wcdimportbot_ingestor : check if redirect
+        wcdimportbot_ingester -> wcdimportbot_ingester : check if redirect
         alt not redirect
-            wcdimportbot_ingestor -> rabbitmq : publish message
+            wcdimportbot_ingester -> rabbitmq : publish message
         end
     end
 end

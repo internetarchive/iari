@@ -121,8 +121,11 @@ Currently the framework has the following features:
 ## Roadmap
 ![image](diagrams/roadmap.png)
 
+## Article import sequence
+![image](diagrams/sequence_import_title.png)
+
 ## Ingester sequence
-![image](diagrams/ingestor_sequence.png)
+![image](diagrams/ingester_sequence.png)
 
 ## Worker sequence
 ![image](diagrams/worker_sequence.png)
