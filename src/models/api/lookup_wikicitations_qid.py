@@ -17,7 +17,6 @@ class LookupWikicitationsQid(BaseModel):
     """lookup the wcdqid based on the wdqid"""
 
     wikibase = WikiCitationsWikibase()
-    # lookup the wcdqid based on the wdqid
 
     @staticmethod
     def __setup_wikibase_integrator_configuration__() -> None:
@@ -38,8 +37,7 @@ class LookupWikicitationsQid(BaseModel):
                 wikibase_property = self.wikibase.WIKIDATA_QID
                 # We uppercase the QID because the SPARQL string matching is probably case-sensitive
                 query = f"""
-                prefix wcd: <{self.wikibase.rdf_prefix_url}/entity/>
-                prefix wcdt: <{self.wikibase.rdf_prefix_url}/prop/direct/>
+                {self.wikibase.prefix_lines}
                     SELECT ?item WHERE {{
                       ?item wcdt:{wikibase_property} "{wdqid.upper()}".
                     }}
