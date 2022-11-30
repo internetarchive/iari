@@ -36,6 +36,15 @@ which is based on data extraction from the dump files)
 * Using the data over time can help follow and understand changes in patterns of referencing.
 * and more...
 
+# Use cases
+1. to support various queries of various citation types to learn various things about cited material.  E.g. number of citations per source or publication.
+2. to be able to query to learn about how well citations are linked... to help us understand the gaps, scale and scope of the Goal of Turn All References Blue.
+
+# Estimated size
+200+ million reference items(add source to research extracting references from Wikipedias). 100+ million website items(guesstimate). [60 million wikipedia article](https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia#Comparisons_with_other_Wikipedias) items. 
+
+In total we estimate we will have 15 triples per item which equals 15 bn triples in total. For comparison, [Wikidata today has 14.4 bn triples](https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
+
 # Supported templates
 There are a lot of templates in use in the different Wikipedias. For now 
 the bot only supports templates and parameters from English Wikipedia 
