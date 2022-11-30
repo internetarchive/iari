@@ -583,3 +583,16 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.md5hash = None
         assert reference.has_hash is False
+
+    def test_cite_dictionary(self):
+        """this tests https://en.wikipedia.org/wiki/Template:Cite_dictionary which is an alias for cite encyclopedia"""
+        data = dict(
+            # oclc="test",
+            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+            template_name="cite dictionary",
+        )
+        reference = EnglishWikipediaReference(**data)
+        reference.wikibase = IASandboxWikibase()
+        reference.finish_parsing_and_generate_hash(testing=True)
+        assert reference.has_hash is True
+        assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
