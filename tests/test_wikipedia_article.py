@@ -97,15 +97,18 @@ class TestWikipediaArticle(TestCase):
         reference = EnglishWikipediaReference(**data)
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash(testing=True)
+        reference.__setup_cache__()
         string_data1 = dict(
             title="Test book with no identifier",
             template_name="cite book",
         )
         string_reference = EnglishWikipediaReference(**string_data1)
         string_reference.wikibase = IASandboxWikibase()
+        string_reference.__setup_cache__()
         string_reference.finish_parsing_and_generate_hash(testing=True)
         wp = WikipediaArticle(title="Test", wikibase=IASandboxWikibase())
         wp.references.extend([reference, string_reference])
+        wp.__setup_cache__()
         wp.extract_and_parse_and_upload_missing_items_to_wikibase()
         wbi = WikibaseIntegrator()
         item = wbi.item.get(wp.return_.item_qid)
@@ -124,6 +127,7 @@ class TestWikipediaArticle(TestCase):
         )
         reference2 = EnglishWikipediaReference(**string_data1)
         reference2.wikibase = IASandboxWikibase()
+        reference2.__setup_cache__()
         reference2.finish_parsing_and_generate_hash()
         string_data2 = dict(
             title="Test another book with no identifier",
@@ -132,9 +136,11 @@ class TestWikipediaArticle(TestCase):
         string_reference2 = EnglishWikipediaReference(**string_data2)
         string_reference2.wikibase = IASandboxWikibase()
         string_reference2.finish_parsing_and_generate_hash()
+        string_reference2.__setup_cache__()
         wp2.references.extend(
             [reference, reference2, string_reference, string_reference2]
         )
+        wp2.__setup_cache__()
         wp2.extract_and_parse_and_upload_missing_items_to_wikibase()
         item = wbi.item.get(wp2.return_.item_qid)
         citations = item.claims.get(property=IASandboxWikibase().CITATIONS)
