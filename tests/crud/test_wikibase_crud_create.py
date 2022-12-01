@@ -269,6 +269,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
         wppage.__get_wikipedia_article_from_title__()
         wppage.__generate_hash__()
+        wppage.__setup_cache__()
         # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
         reference = EnglishWikipediaReference(
             **{
@@ -284,7 +285,7 @@ class TestWikibaseCrudCreate(TestCase):
         wppage.references = []
         wppage.references.append(reference)
         wppage.references.append(reference)
-        wppage.__upload_references_and_websites_if_missing__()
+        wppage.__upload_references_and_websites_if_missing__(testing=True)
         # We have no assertions in this test.
         # It is successful if no exceptions other than
         # NonUniqueLabelDescriptionPairError are raised.

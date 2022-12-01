@@ -451,9 +451,13 @@ class WikipediaArticle(WcdItem):
             )
             self.__compare_data_and_update__()
 
-    def __upload_references_and_websites_if_missing__(self):
+    def __upload_references_and_websites_if_missing__(self, testing: bool = False):
         """Go through each reference and upload if missing to Wikibase"""
         logger.debug("__upload_references_and_websites_if_missing__: Running")
+        if testing and not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache could not be setup")
         updated_references = []
         count = 1
         total = len(self.references)
