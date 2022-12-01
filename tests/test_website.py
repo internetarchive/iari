@@ -13,7 +13,8 @@ class TestWebsite(TestCase):
             template_name="test", url="http://test.com", wikibase=wikibase
         )
         r.finish_parsing_and_generate_hash()
-        w = Website(reference=r)
+        r.__setup_cache__()
+        w = Website(reference=r, cache=r.cache)
         w.__insert_website_in_cache__(wcdqid="test")
 
     def test___upload_website_to_wikibase__(self):
@@ -23,7 +24,7 @@ class TestWebsite(TestCase):
         )
         r.finish_parsing_and_generate_hash()
         w = Website(
-            reference=r,
+            reference=r
         )
         return_ = w.__upload_website_to_wikibase__(
             wikipedia_article=WikipediaArticle(wikibase=wikibase)
@@ -39,9 +40,11 @@ class TestWebsite(TestCase):
             # first_level_domain_of_url="test.test"
         )
         r.finish_parsing_and_generate_hash()
+        r.__setup_cache__()
         w = Website(
             reference=r,
             wikibase=wikibase,
+            cache=r.cache
         )
         w.check_and_upload_website_item_to_wikibase_if_missing(
             wikipedia_article=WikipediaArticle()
@@ -56,8 +59,9 @@ class TestWebsite(TestCase):
             # first_level_domain_of_url="test.test"
         )
         r.finish_parsing_and_generate_hash()
+        r.__setup_cache__()
         w = Website(
-            reference=r,
+            reference=r, cache=r.cache
         )
         w.get_website_wcdqid_from_cache()
 
@@ -70,8 +74,10 @@ class TestWebsite(TestCase):
             # first_level_domain_of_url="test.test"
         )
         r.finish_parsing_and_generate_hash()
+        r.__setup_cache__()
         w = Website(
             reference=r,
+            cache=r.cache
         )
         w.__upload_website_and_insert_in_the_cache__(
             wikipedia_article=WikipediaArticle(wikibase=wikibase)
