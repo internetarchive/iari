@@ -55,12 +55,14 @@ class Website(WcdItem):
 
     @validate_arguments
     def check_and_upload_website_item_to_wikibase_if_missing(
-        self, wikipedia_article: WcdItem
+        self, wikipedia_article: WcdItem, testing: bool = False
     ):
         """This method checks if a website item is present
         using the first_level_domain_of_url_hash and the cache if
         enabled and uploads a new item if not"""
         logger.debug("check_and_upload_website_item_to_wikibase_if_missing: Running")
+        if testing and not self.cache:
+            self.__setup_cache__()
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):
