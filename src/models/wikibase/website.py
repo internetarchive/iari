@@ -18,8 +18,10 @@ class Website(WcdItem):
     reference: WikipediaReference
 
     @validate_arguments
-    def __insert_website_in_cache__(self, wcdqid: str):
+    def __insert_website_in_cache__(self, wcdqid: str, testing: bool = False):
         logger.debug("__insert_website_in_cache__: Running")
+        if testing and not self.cache:
+            self.__setup_cache__()
         if not self.cache:
             raise ValueError("self.cache was None")
         else:
@@ -92,8 +94,10 @@ class Website(WcdItem):
 
     @validate_arguments
     def __upload_website_and_insert_in_the_cache__(
-        self, wikipedia_article: WcdItem
+        self, wikipedia_article: WcdItem, testing: bool = False
     ) -> None:
+        if testing and not self.cache:
+            self.__setup_cache__()
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):

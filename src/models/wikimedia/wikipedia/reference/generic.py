@@ -1270,6 +1270,8 @@ class WikipediaReference(WcdItem):
     def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
+        if testing and not self.cache:
+            self.__setup_cache__()
         from src.models.update_delay import UpdateDelay
 
         update_delay = UpdateDelay(object_=self)
