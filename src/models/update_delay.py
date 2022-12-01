@@ -100,7 +100,8 @@ class UpdateDelay(WcdBaseModel):
         )
         return float(timestamp_string)
 
-    def __convert_to_datetime__(self, timestamp: float = 0.0) -> datetime:
+    @staticmethod
+    def __convert_to_datetime__(timestamp: float = 0.0) -> datetime:
         if not timestamp:
             raise MissingInformationError("timestamp was 0.0")
         else:
