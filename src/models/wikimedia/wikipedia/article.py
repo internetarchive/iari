@@ -31,7 +31,13 @@ logger = logging.getLogger(__name__)
 
 
 class WikipediaArticle(WcdItem):
-    """Models a WMF Wikipedia article"""
+    """Models a WMF Wikipedia article
+
+    Implementation details:
+    Cache setup occurs only in this class and
+    not in the classes below (ie Website and WikipediaReference)
+    because of
+    https://github.com/internetarchive/wcdimportbot/issues/261"""
 
     latest_revision_date: Optional[datetime]
     latest_revision_id: Optional[int]
