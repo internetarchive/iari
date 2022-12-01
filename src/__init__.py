@@ -285,7 +285,8 @@ class WcdImportBot(WcdBaseModel):
             cache=self.cache,
         )
         self.wikipedia_article.__get_wikipedia_article_from_title__()
-        self.wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
+        if self.wikipedia_article.found_in_wikipedia:
+            self.wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
     def get_and_extract_pages_by_range(
