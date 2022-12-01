@@ -4,6 +4,7 @@ from src.models.wikimedia.wikipedia.reference.schema import WikipediaReferenceSc
 
 
 class EnglishWikipediaReferenceSchema(WikipediaReferenceSchema):
+    # noinspection PyUnusedLocal
     @post_load
     # **kwargs is needed here despite what the validator claims
     def return_object(self, data, **kwargs):  # type: ignore

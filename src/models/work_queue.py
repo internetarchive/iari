@@ -4,7 +4,7 @@ import functools
 import json
 import logging
 import threading
-from typing import Optional
+from typing import Optional, List, Any
 
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel
@@ -106,7 +106,7 @@ class WorkQueue(WcdBaseModel):
         else:
             raise NoChannelError()
 
-    def listen_to_queue(self):
+    def listen_to_queue(self, testing: bool = False):
         """This function is run by the wcdimportbot worker
         There can be multiple workers running at the same
         time listening to the work queue
@@ -114,13 +114,17 @@ class WorkQueue(WcdBaseModel):
         We use threading to avoid the worker quitting
         because it cannot keep the connection to
         rabbitmq open during the work and errors out"""
+        if testing and not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         self.__connect__()
         self.__setup_channel__()
         self.__create_queue__()
 
-        if not self.testing:
+        if not self.testing and self.channel and self.connection:
             print(" [*] Waiting for messages. To exit press CTRL+C")
-            threads = []
+            threads: List[Any] = []
             on_message_callback = functools.partial(
                 self.__on_message__, args=(self.connection, threads)
             )
@@ -136,6 +140,11 @@ class WorkQueue(WcdBaseModel):
                 thread.join()
 
             self.connection.close()
+        else:
+            if not self.channel:
+                raise ValueError("self.channel was None")
+            if not self.connection:
+                raise ValueError("self.connection was None")
 
     @staticmethod
     def __ack_message__(ch, delivery_tag):
@@ -165,6 +174,7 @@ class WorkQueue(WcdBaseModel):
         if config.loglevel == logging.DEBUG:
             console.print(json_data_dict)
         message = Message(**json_data_dict)
+        message.cache = self.cache
         print(f" [x] Received {message.title} job for {message.wikibase.title}")
         if config.loglevel == logging.DEBUG:
             console.print(message.dict())
