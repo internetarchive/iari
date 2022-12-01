@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from src.models.return_ import Return
 from src.models.wikibase import Wikibase
@@ -25,6 +25,7 @@ class WcdItem(WcdBaseModel):
 
     def __setup_cache__(self):
         from src.models.cache import Cache
+
         if not self.cache:
             self.cache = Cache()
             self.cache.connect()
