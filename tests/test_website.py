@@ -13,7 +13,6 @@ class TestWebsite(TestCase):
             template_name="test", url="http://test.com", wikibase=wikibase
         )
         r.finish_parsing_and_generate_hash(testing=True)
-        r.__setup_cache__()
         w = Website(reference=r)
         w.__insert_website_in_cache__(wcdqid="test", testing=True)
 

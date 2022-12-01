@@ -1274,8 +1274,8 @@ class WikipediaReference(WcdItem):
             self.__setup_cache__()
         from src.models.update_delay import UpdateDelay
 
-        update_delay = UpdateDelay(object_=self)
-        if update_delay.time_to_update or testing is True:
+        update_delay = UpdateDelay(object_=self, cache=self.cache)
+        if update_delay.time_to_update(testing=testing) or testing is True:
             self.__parse_first_parameter__()
             self.__parse_urls__()
             self.__parse_isbn__()
