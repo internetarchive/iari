@@ -84,7 +84,9 @@ class Website(WcdItem):
         return self.reference
 
     @validate_arguments
-    def get_website_wcdqid_from_cache(self) -> None:
+    def get_website_wcdqid_from_cache(self, testing: bool = False) -> None:
+        if testing and not self.cache:
+            self.__setup_cache__()
         if not self.cache:
             raise ValueError("self.cache was None")
         if self.cache:
