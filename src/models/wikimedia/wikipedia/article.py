@@ -350,6 +350,10 @@ class WikipediaArticle(WcdItem):
 
     def __parse_templates__(self):
         """We parse all the references into WikipediaArticleReferences"""
+        if not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("could not setup the cache")
         if self.wikitext is None:
             raise ValueError("self.wikitext was None")
         # We use the pywikibot template extracting function
@@ -503,6 +507,10 @@ class WikipediaArticle(WcdItem):
 
         Lastly we store the timestamp in the cache"""
         logger.debug("extract_and_upload_to_wikibase: Running")
+        if not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("could not setup the cache :/")
         self.__fetch_page_data__()
         if not self.is_redirect and self.found_in_wikipedia:
             self.__fetch_wikidata_qid__()
