@@ -25,7 +25,7 @@ class TestWebsite(TestCase):
         r.finish_parsing_and_generate_hash(testing=True)
         w = Website(reference=r)
         return_ = w.__upload_website_to_wikibase__(
-            wikipedia_article=WikipediaArticle(wikibase=wikibase), testing=True
+            wikipedia_article=WikipediaArticle(wikibase=wikibase)
         )
         assert return_.item_qid == "Q263"
 
@@ -43,8 +43,10 @@ class TestWebsite(TestCase):
             reference=r,
             wikibase=wikibase,
         )
+        wa = WikipediaArticle()
+        wa.wikibase = wikibase
         w.check_and_upload_website_item_to_wikibase_if_missing(
-            wikipedia_article=WikipediaArticle(), testing=True
+            wikipedia_article=wa, testing=True
         )
 
     def test_get_website_wcdqid_from_cache(self):
