@@ -62,9 +62,10 @@ class TestWcdImportBot(TestCase):
 
     def test_get_pages_by_range(self):
         bot = WcdImportBot(
-            wikibase=IASandboxWikibase(),
+            wikibase=IASandboxWikibase()
         )
-        bot.get_and_extract_pages_by_range(max_count=2)
+        bot.__setup_cache__()
+        bot.get_and_extract_pages_by_range(max_count=1)
 
     # def test_extract_references_from_20_pages(self):
     #     bot = WcdImportBot(
