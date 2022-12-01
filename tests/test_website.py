@@ -12,22 +12,20 @@ class TestWebsite(TestCase):
         r = WikipediaReference(
             template_name="test", url="http://test.com", wikibase=wikibase
         )
-        r.finish_parsing_and_generate_hash()
+        r.finish_parsing_and_generate_hash(testing=True)
         r.__setup_cache__()
-        w = Website(reference=r, cache=r.cache)
-        w.__insert_website_in_cache__(wcdqid="test")
+        w = Website(reference=r)
+        w.__insert_website_in_cache__(wcdqid="test", testing=True)
 
     def test___upload_website_to_wikibase__(self):
         wikibase = IASandboxWikibase()
         r = WikipediaReference(
             template_name="test", url="http://test.com", wikibase=wikibase
         )
-        r.finish_parsing_and_generate_hash()
-        w = Website(
-            reference=r
-        )
+        r.finish_parsing_and_generate_hash(testing=True)
+        w = Website(reference=r)
         return_ = w.__upload_website_to_wikibase__(
-            wikipedia_article=WikipediaArticle(wikibase=wikibase)
+            wikipedia_article=WikipediaArticle(wikibase=wikibase), testing=True
         )
         assert return_.item_qid == "Q263"
 
@@ -39,15 +37,14 @@ class TestWebsite(TestCase):
             wikibase=wikibase
             # first_level_domain_of_url="test.test"
         )
-        r.finish_parsing_and_generate_hash()
+        r.finish_parsing_and_generate_hash(testing=True)
         r.__setup_cache__()
         w = Website(
             reference=r,
             wikibase=wikibase,
-            cache=r.cache
         )
         w.check_and_upload_website_item_to_wikibase_if_missing(
-            wikipedia_article=WikipediaArticle()
+            wikipedia_article=WikipediaArticle(), testing=True
         )
 
     def test_get_website_wcdqid_from_cache(self):
@@ -58,12 +55,11 @@ class TestWebsite(TestCase):
             wikibase=wikibase
             # first_level_domain_of_url="test.test"
         )
-        r.finish_parsing_and_generate_hash()
-        r.__setup_cache__()
+        r.finish_parsing_and_generate_hash(testing=True)
         w = Website(
-            reference=r, cache=r.cache
+            reference=r,
         )
-        w.get_website_wcdqid_from_cache()
+        w.get_website_wcdqid_from_cache(testing=True)
 
     def test_upload_website_and_insert_in_the_cache(self):
         wikibase = IASandboxWikibase()
@@ -73,12 +69,10 @@ class TestWebsite(TestCase):
             wikibase=wikibase
             # first_level_domain_of_url="test.test"
         )
-        r.finish_parsing_and_generate_hash()
-        r.__setup_cache__()
+        r.finish_parsing_and_generate_hash(testing=True)
         w = Website(
             reference=r,
-            cache=r.cache
         )
         w.__upload_website_and_insert_in_the_cache__(
-            wikipedia_article=WikipediaArticle(wikibase=wikibase)
+            wikipedia_article=WikipediaArticle(wikibase=wikibase), testing=True
         )

@@ -20,9 +20,7 @@ class TestLookupWikicitationsQid(TestCase):
         result = lookup.lookup_via_query_service(wdqid="Q14452000000000")
         assert result == Return.NO_MATCH
 
-
     def test_lookup_via_cirrussearch(self):
         lookup = LookupWikicitationsQid()
         with self.assertRaises(Exception):
             lookup.lookup_via_cirrussearch(wdqid="Q14452")
-

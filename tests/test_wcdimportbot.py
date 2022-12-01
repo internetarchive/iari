@@ -61,9 +61,7 @@ class TestWcdImportBot(TestCase):
     #         self.fail()
 
     def test_get_pages_by_range(self):
-        bot = WcdImportBot(
-            wikibase=IASandboxWikibase()
-        )
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
         bot.__setup_cache__()
         bot.get_and_extract_pages_by_range(max_count=1)
 
