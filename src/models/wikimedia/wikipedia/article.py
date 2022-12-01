@@ -235,6 +235,7 @@ class WikipediaArticle(WcdItem):
                         for page in pages:
                             page_data = pages[page]
                             # console.print(page_data)
+                            # TODO add check here for pageprops to avoid https://github.com/internetarchive/wcdimportbot/issues/340
                             self.wikidata_qid = page_data["pageprops"]["wikibase_item"]
                             # We only care about the first page
                             break
