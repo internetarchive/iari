@@ -1238,26 +1238,23 @@ class WikipediaReference(WcdItem):
 
     @validate_arguments
     def get_wcdqid_from_cache(self) -> None:
-        if self.cache is None:
-            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         if self.cache is not None:
             self.return_: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
                 reference=self
             )
-            logger.debug(f"result from the cache:{self.return_.item_qid}")
-        else:
-            raise ValueError("self.cache was None")
+            if self.return_:
+                logger.debug(f"result from the cache:{self.return_.item_qid}")
 
     @validate_arguments
     def __insert_reference_in_cache__(self, wcdqid: str):
         """Insert reference in the cache"""
         logger.debug("__insert_in_cache__: Running")
-        if self.cache is None:
-            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         if self.cache is not None:
             self.cache.add_reference(reference=self, wcdqid=wcdqid)
-        else:
-            raise ValueError("self.cache was None")
         logger.info("Reference inserted into the hash database")
 
     @validate_arguments
@@ -1273,10 +1270,12 @@ class WikipediaReference(WcdItem):
     def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
+        if testing and not self.cache:
+            self.__setup_cache__()
         from src.models.update_delay import UpdateDelay
 
-        update_delay = UpdateDelay(object_=self)
-        if update_delay.time_to_update or testing is True:
+        update_delay = UpdateDelay(object_=self, cache=self.cache)
+        if update_delay.time_to_update(testing=testing) or testing is True:
             self.__parse_first_parameter__()
             self.__parse_urls__()
             self.__parse_isbn__()

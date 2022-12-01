@@ -18,14 +18,14 @@ class Website(WcdItem):
     reference: WikipediaReference
 
     @validate_arguments
-    def __insert_website_in_cache__(self, wcdqid: str):
+    def __insert_website_in_cache__(self, wcdqid: str, testing: bool = False):
         logger.debug("__insert_website_in_cache__: Running")
-        if self.cache is None:
+        if testing and not self.cache:
             self.__setup_cache__()
-        if self.cache is not None:
-            self.cache.add_website(reference=self.reference, wcdqid=wcdqid)
-        else:
+        if not self.cache:
             raise ValueError("self.cache was None")
+        else:
+            self.cache.add_website(reference=self.reference, wcdqid=wcdqid)
         logger.info("Reference inserted into the hash database")
 
     @validate_arguments
@@ -55,12 +55,14 @@ class Website(WcdItem):
 
     @validate_arguments
     def check_and_upload_website_item_to_wikibase_if_missing(
-        self, wikipedia_article: WcdItem
+        self, wikipedia_article: WcdItem, testing: bool = False
     ):
         """This method checks if a website item is present
         using the first_level_domain_of_url_hash and the cache if
         enabled and uploads a new item if not"""
         logger.debug("check_and_upload_website_item_to_wikibase_if_missing: Running")
+        if testing and not self.cache:
+            self.__setup_cache__()
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):
@@ -82,21 +84,24 @@ class Website(WcdItem):
         return self.reference
 
     @validate_arguments
-    def get_website_wcdqid_from_cache(self) -> None:
-        if not self.cache:
+    def get_website_wcdqid_from_cache(self, testing: bool = False) -> None:
+        if testing and not self.cache:
             self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         if self.cache:
             self.return_ = self.cache.check_website_and_get_wikibase_qid(
                 reference=self.reference
             )
-            logger.debug(f"result from the cache:{self.return_.item_qid}")
-        else:
-            raise ValueError("self.cache was None")
+            if self.return_:
+                logger.debug(f"result from the cache:{self.return_.item_qid}")
 
     @validate_arguments
     def __upload_website_and_insert_in_the_cache__(
-        self, wikipedia_article: WcdItem
+        self, wikipedia_article: WcdItem, testing: bool = False
     ) -> None:
+        if testing and not self.cache:
+            self.__setup_cache__()
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         if not isinstance(wikipedia_article, WikipediaArticle):

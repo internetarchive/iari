@@ -25,8 +25,8 @@ class Message(WcdBaseModel):
             from src import WcdImportBot
 
             bot = WcdImportBot(wikibase=IASandboxWikibase())
-            update_delay = UpdateDelay(object_=self)
-            if update_delay.time_to_update:
+            update_delay = UpdateDelay(object_=self, cache=self.cache)
+            if update_delay.time_to_update():
                 if self.title:
                     bot.page_title = self.title
                     bot.get_and_extract_page_by_title()

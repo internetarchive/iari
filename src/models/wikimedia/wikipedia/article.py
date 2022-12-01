@@ -31,7 +31,13 @@ logger = logging.getLogger(__name__)
 
 
 class WikipediaArticle(WcdItem):
-    """Models a WMF Wikipedia article"""
+    """Models a WMF Wikipedia article
+
+    Implementation details:
+    Cache setup occurs only in this class and
+    not in the classes below (ie Website and WikipediaReference)
+    because of
+    https://github.com/internetarchive/wcdimportbot/issues/261"""
 
     latest_revision_date: Optional[datetime]
     latest_revision_id: Optional[int]
@@ -229,6 +235,7 @@ class WikipediaArticle(WcdItem):
                         for page in pages:
                             page_data = pages[page]
                             # console.print(page_data)
+                            # TODO add check here for pageprops to avoid https://github.com/internetarchive/wcdimportbot/issues/340
                             self.wikidata_qid = page_data["pageprops"]["wikibase_item"]
                             # We only care about the first page
                             break
@@ -326,14 +333,12 @@ class WikipediaArticle(WcdItem):
     def __page_has_already_been_uploaded__(self) -> bool:
         """This checks whether the page has already been uploaded by checking the cache"""
         console.print(f"Checking if the page '{self.title}' has already been uploaded")
-        if self.cache is None:
-            self.__setup_cache__()
-        if self.cache is not None:
+        if not self.cache:
+            raise ValueError("self.cache was None")
+        else:
             cache_return = self.cache.check_page_and_get_wikibase_qid(
                 wikipedia_article=self
             )
-        else:
-            raise ValueError("self.cache was None")
         if not cache_return.item_qid:
             logger.debug("Page not found in the cache")
             return False
@@ -346,6 +351,10 @@ class WikipediaArticle(WcdItem):
 
     def __parse_templates__(self):
         """We parse all the references into WikipediaArticleReferences"""
+        if not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("could not setup the cache")
         if self.wikitext is None:
             raise ValueError("self.wikitext was None")
         # We use the pywikibot template extracting function
@@ -389,6 +398,8 @@ class WikipediaArticle(WcdItem):
                 # else:
                 if reference:
                     reference.wikibase = self.wikibase
+                    # This is because of https://github.com/internetarchive/wcdimportbot/issues/261
+                    reference.cache = self.cache
                     reference.finish_parsing_and_generate_hash()
                     # Handle duplicates:
                     if reference.md5hash in [
@@ -441,9 +452,13 @@ class WikipediaArticle(WcdItem):
             )
             self.__compare_data_and_update__()
 
-    def __upload_references_and_websites_if_missing__(self):
+    def __upload_references_and_websites_if_missing__(self, testing: bool = False):
         """Go through each reference and upload if missing to Wikibase"""
         logger.debug("__upload_references_and_websites_if_missing__: Running")
+        if testing and not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache could not be setup")
         updated_references = []
         count = 1
         total = len(self.references)
@@ -456,8 +471,9 @@ class WikipediaArticle(WcdItem):
                     f"with link to {reference.first_level_domain_of_url}"
                 ):
                     # Here we get the reference with the first_level_domain_of_url WCDQID back
+                    # We add the cache because of https://github.com/internetarchive/wcdimportbot/issues/261
                     reference.website_item = Website(
-                        reference=reference, wikibase=self.wikibase
+                        reference=reference, wikibase=self.wikibase, cache=self.cache
                     )
                     reference.website_item.check_and_upload_website_item_to_wikibase_if_missing(
                         wikipedia_article=self
@@ -496,6 +512,10 @@ class WikipediaArticle(WcdItem):
 
         Lastly we store the timestamp in the cache"""
         logger.debug("extract_and_upload_to_wikibase: Running")
+        if not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("could not setup the cache :/")
         self.__fetch_page_data__()
         if not self.is_redirect and self.found_in_wikipedia:
             self.__fetch_wikidata_qid__()

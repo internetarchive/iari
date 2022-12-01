@@ -39,7 +39,7 @@ class TestWcdImportBot(TestCase):
         from src.models.update_delay import UpdateDelay
 
         ud = UpdateDelay(object_=bot.wikipedia_article)
-        assert ud.time_to_update is False
+        assert ud.time_to_update(testing=True) is False
         assert ud.time_of_last_update is not None
 
     # def test__gather_statistics__(self):
@@ -61,10 +61,9 @@ class TestWcdImportBot(TestCase):
     #         self.fail()
 
     def test_get_pages_by_range(self):
-        bot = WcdImportBot(
-            wikibase=IASandboxWikibase(),
-        )
-        bot.get_and_extract_pages_by_range(max_count=2)
+        bot = WcdImportBot(wikibase=IASandboxWikibase())
+        bot.__setup_cache__()
+        bot.get_and_extract_pages_by_range(max_count=1)
 
     # def test_extract_references_from_20_pages(self):
     #     bot = WcdImportBot(
@@ -91,3 +90,10 @@ class TestWcdImportBot(TestCase):
         """We test that we can connect to rabbitmq and listen"""
         bot = WcdImportBot(wikibase=IASandboxWikibase(), testing=True)
         bot.__receive_workloads__()
+
+    def test_get_and_extract_page_by_title_invalid_page_title(self):
+        bot = WcdImportBot(
+            wikibase=IASandboxWikibase(), testing=True, page_title="asdfdsiowe"
+        )
+        bot.get_and_extract_page_by_title()
+        assert bot.wikipedia_article.found_in_wikipedia is False

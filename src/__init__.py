@@ -272,6 +272,7 @@ class WcdImportBot(WcdBaseModel):
         present in the Wikibase then compare it and all its
         references to make sure we the data is reflecting changes
         made in Wikipedia"""
+        self.__setup_cache__()
         if not self.page_title:
             raise MissingInformationError("self.page_title was None")
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -281,9 +282,11 @@ class WcdImportBot(WcdBaseModel):
             language_code=self.language_code,
             wikimedia_site=self.wikimedia_site,
             title=self.page_title,
+            cache=self.cache,
         )
         self.wikipedia_article.__get_wikipedia_article_from_title__()
-        self.wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
+        if self.wikipedia_article.found_in_wikipedia:
+            self.wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
     def get_and_extract_pages_by_range(
@@ -293,6 +296,7 @@ class WcdImportBot(WcdBaseModel):
         This method gets all pages in the main namespace up to max_count
         It uses pywikibot
         """
+        self.__setup_cache__()
         from pywikibot import Category, Site  # type: ignore
 
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -328,6 +332,7 @@ class WcdImportBot(WcdBaseModel):
                         title=str(page.title()),
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
+                        cache=self.cache,
                     )
                     wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
         else:
@@ -351,6 +356,7 @@ class WcdImportBot(WcdBaseModel):
                         wikimedia_site=self.wikimedia_site,
                         wikitext=page.text,
                         wikibase=self.wikibase,
+                        cache=self.cache,
                     )
                     wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
 
@@ -401,6 +407,7 @@ class WcdImportBot(WcdBaseModel):
     def run(self):
         """This method handles running the bot
         based on the given command line arguments."""
+        self.__setup_cache__()
         args = self.__setup_argparse_and_return_args__()
         if args.wikicitations:
             self.wikibase = WikiCitationsWikibase()

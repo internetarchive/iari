@@ -124,14 +124,14 @@ class TestWikipediaArticle(TestCase):
         )
         reference2 = EnglishWikipediaReference(**string_data1)
         reference2.wikibase = IASandboxWikibase()
-        reference2.finish_parsing_and_generate_hash()
+        reference2.finish_parsing_and_generate_hash(testing=True)
         string_data2 = dict(
             title="Test another book with no identifier",
             template_name="cite book",
         )
         string_reference2 = EnglishWikipediaReference(**string_data2)
         string_reference2.wikibase = IASandboxWikibase()
-        string_reference2.finish_parsing_and_generate_hash()
+        string_reference2.finish_parsing_and_generate_hash(testing=True)
         wp2.references.extend(
             [reference, reference2, string_reference, string_reference2]
         )
@@ -165,9 +165,9 @@ class TestWikipediaArticle(TestCase):
         item = wbi.item.get(wp.return_.item_qid)
         citations = item.claims.get(property=IASandboxWikibase().CITATIONS)
         assert len(citations) == 1
-        wp = WikipediaArticle(title="Test", wikibase=IASandboxWikibase())
-        wp.extract_and_parse_and_upload_missing_items_to_wikibase()
-        item = wbi.item.get(wp.return_.item_qid)
+        wp2 = WikipediaArticle(title="Test", wikibase=IASandboxWikibase())
+        wp2.extract_and_parse_and_upload_missing_items_to_wikibase()
+        item = wbi.item.get(wp2.return_.item_qid)
         with self.assertRaises(KeyError):
             item.claims.get(property=IASandboxWikibase().CITATIONS)
 

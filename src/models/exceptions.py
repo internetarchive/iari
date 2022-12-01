@@ -18,6 +18,10 @@ class NotLoggedInError(BaseException):
     pass
 
 
+class NotSupportedError(BaseException):
+    pass
+
+
 class TimeParseException(BaseException):
     pass
 

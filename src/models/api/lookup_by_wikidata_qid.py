@@ -5,9 +5,9 @@ from flask import redirect
 from flask_restful import Resource  # type: ignore
 
 import config
-from src.models.wikibase import Wikibase
 from src.models.api.enums import Return
 from src.models.api.lookup_wikicitations_qid import LookupWikicitationsQid
+from src.models.wikibase import Wikibase
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,9 @@ class LookupByWikidataQid(Resource):
 
                 wikibase = IASandboxWikibase()
             else:
-                from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
+                from src.models.wikibase.wikicitations_wikibase import (
+                    WikiCitationsWikibase,
+                )
 
                 wikibase = WikiCitationsWikibase()
             logger.info(f"Got QID, looking up now in {wikibase.__repr_name__()}")
@@ -35,7 +37,10 @@ class LookupByWikidataQid(Resource):
                     return redirect(wikibase.entity_url(item_id=result))
             elif result == Return.NO_MATCH:
                 # https://www.geeksforgeeks.org/string-formatting-in-python/
-                return result.value.format(wikibase=wikibase.__repr_name__(), qid=qid), 404
+                return (
+                    result.value.format(wikibase=wikibase.__repr_name__(), qid=qid),
+                    404,
+                )
             else:
                 return result.value, 400
         else:

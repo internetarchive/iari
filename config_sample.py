@@ -38,7 +38,7 @@ use_sandbox_wikibase_backend_for_wikicitations_api = True
 supported_templates = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
     "cite q",
-    "citeq", # alias
+    "citeq",  # alias
     "isbn",
     "url",
     # CS1 templates:
@@ -49,7 +49,7 @@ supported_templates = [
     "cite book",
     "cite cite seerx",
     "cite conference",
-    "cite dictionary", # alias for cite encyclopedia
+    "cite dictionary",  # alias for cite encyclopedia
     "cite encyclopedia",
     "cite episode",
     "cite interview",
