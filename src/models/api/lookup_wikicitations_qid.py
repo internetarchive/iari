@@ -1,14 +1,15 @@
 import logging
-from typing import Union, Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
 from wikibaseintegrator import wbi_config  # type: ignore
 from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
-from src.models.wikibase import Wikibase
 from src.helpers.console import console
 from src.models.api.enums import Return
+from src.models.exceptions import NotSupportedError
+from src.models.wikibase import Wikibase
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +68,7 @@ class LookupWikicitationsQid(BaseModel):
     def lookup_via_cirrussearch(self, wdqid=""):
         """This does not work because the WikibaseCirrusSearch
         extension is not enabled yet on our Wikibases in Wikibase.cloud"""
-        raise Exception(
+        raise NotSupportedError(
             "This does not work because the WikibaseCirrusSearch "
             "extension is not enabled yet on our Wikibases in Wikibase.cloud"
         )
