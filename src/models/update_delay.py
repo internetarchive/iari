@@ -20,6 +20,10 @@ class UpdateDelay(WcdBaseModel):
     time_of_last_update: Optional[datetime]
 
     def time_to_update(self, testing: bool = False) -> bool:
+        if testing and not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         self.time_of_last_update = self.__convert_to_datetime__(
             timestamp=self.__get_timestamp_from_cache__(testing=testing)
         )
@@ -102,7 +106,10 @@ class UpdateDelay(WcdBaseModel):
 
     @staticmethod
     def __convert_to_datetime__(timestamp: float = 0.0) -> datetime:
+        logger.debug("__convert_to_datetime__: Running")
         if not timestamp:
-            raise MissingInformationError("timestamp was 0.0")
+            logger.info("No update timestamp found in the cache")
+            # Ẃe return the epoch timestamp 1970-01-01
+            return datetime.fromtimestamp(timestamp)
         else:
             return datetime.fromtimestamp(timestamp)

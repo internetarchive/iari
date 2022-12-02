@@ -15,8 +15,8 @@ class TestUpdateDelay:
         ud.cache.set_title_or_wdqid_last_updated(
             key=ud.__get_entity_updated_hash_key__(), timestamp=123.123
         )
+        # Then we test if it is time to update
         result = ud.time_to_update(testing=True)
-        # print(result)
         assert result is True
 
     def test___delay_time_has_passed__(self):
@@ -27,13 +27,21 @@ class TestUpdateDelay:
 
     def test__get_timestamp_from_cache__message(self):
         ud = UpdateDelay(object_=Message(title="Test"))
-        # First we ensure that the timestamp is present
+        # First we ensure that the timestamp is present in the cache
         ud.__setup_cache__()
         ud.cache.set_title_or_wdqid_last_updated(
             key=ud.__get_entity_updated_hash_key__(), timestamp=123.123
         )
         # Then we check that we can correctly get it
         assert ud.__get_timestamp_from_cache__(testing=True) == 123.123
+
+    def test__get_timestamp_from_cache__message_no_timestamp(self):
+        ud = UpdateDelay(object_=Message(title="Theft"))
+        # First we ensure that the timestamp is not present in the cache
+        ud.__setup_cache__()
+        ud.cache.delete_key(key=ud.__get_entity_updated_hash_key__())
+        # Then we check that we get the empty result
+        assert ud.__get_timestamp_from_cache__(testing=True) == 0.0
 
     def test_configuration_variables(self):
         """We test if we have sane settings"""

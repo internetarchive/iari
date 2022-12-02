@@ -20,7 +20,11 @@ class Message(WcdBaseModel):
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     time_of_last_update: Optional[datetime]
 
-    def process_data(self):
+    def process_data(self, testing: bool = False):
+        if testing and not self.cache:
+            self.__setup_cache__()
+        if not self.cache:
+            raise ValueError("self.cache was None")
         if self.title or self.article_wikidata_qid:
             from src import WcdImportBot
 

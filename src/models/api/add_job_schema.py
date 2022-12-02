@@ -9,6 +9,7 @@ class AddJobSchema(Schema):
     testing = fields.Bool(required=False)
     title = fields.Str(required=True)
 
+    # noinspection PyUnusedLocal
     @post_load
     # **kwargs is needed here despite what the validator claims
     def return_object(self, data, **kwargs):  # type: ignore

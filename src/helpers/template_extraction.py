@@ -72,6 +72,7 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
        *mwparserfromhell* is strictly recommended.
     """
 
+    # noinspection PyShadowingNames
     def explicit(param):
         try:
             attr = param.showkey
