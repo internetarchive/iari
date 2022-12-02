@@ -4,7 +4,7 @@ import functools
 import json
 import logging
 import threading
-from typing import Optional, List, Any
+from typing import Any, List, Optional
 
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 from pika.adapters.blocking_connection import BlockingChannel

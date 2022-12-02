@@ -39,12 +39,9 @@ class TestUpdateDelay:
         ud = UpdateDelay(object_=Message(title="Theft"))
         # First we ensure that the timestamp is not present in the cache
         ud.__setup_cache__()
-        ud.cache.delete_key(
-            key=ud.__get_entity_updated_hash_key__()
-        )
+        ud.cache.delete_key(key=ud.__get_entity_updated_hash_key__())
         # Then we check that we get the empty result
         assert ud.__get_timestamp_from_cache__(testing=True) == 0.0
-
 
     def test_configuration_variables(self):
         """We test if we have sane settings"""
