@@ -160,6 +160,8 @@ class WorkQueue(WcdBaseModel):
             pass
 
     def __do_work__(self, conn, ch, delivery_tag, body):
+        if not self.cache:
+            raise ValueError("self.cache was None")
         thread_id = threading.get_ident()
         logger.info(
             "Thread id: %s Delivery tag: %s Message body: %s",
