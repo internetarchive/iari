@@ -452,7 +452,9 @@ class WcdImportBot(WcdBaseModel):
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 
     def __receive_workloads__(self):
-        self.work_queue = WorkQueue(wikibase=self.wikibase, testing=self.testing)
+        if self.testing:
+            self.__setup_cache__()
+        self.work_queue = WorkQueue(wikibase=self.wikibase, testing=self.testing, cache=self.cache)
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):
