@@ -36,7 +36,7 @@ class WcdImportBot(WcdBaseModel):
 
     cache: Optional[Cache]
     language_code: str = "en"
-    event_max_count: int = 0  # 0 means disabled
+    event_max_count: int = 0  # 0 means disabled, ie. no maximum ie. run forever
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
     wikibase: Wikibase = IASandboxWikibase()
