@@ -454,7 +454,9 @@ class WcdImportBot(WcdBaseModel):
     def __receive_workloads__(self):
         if self.testing:
             self.__setup_cache__()
-        self.work_queue = WorkQueue(wikibase=self.wikibase, testing=self.testing, cache=self.cache)
+        self.work_queue = WorkQueue(
+            wikibase=self.wikibase, testing=self.testing, cache=self.cache
+        )
         self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):
