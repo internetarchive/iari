@@ -19,7 +19,7 @@ It was made by Diego de la hara who seems competent at writing JavaScript and go
 for creating Web2Cit in 2022
 It currently has
 [only 11 active users on English Wikipedia](https://en.wikipedia.org/wiki/Wikipedia:User_scripts/Most_imported_scripts)
-which is suprisingly few.
+which is surprisingly few.
 https://en.wikipedia.org/wiki/User:Diegodlh/Web2Cit/script
 https://meta.wikimedia.org/wiki/Web2Cit
 https://commons.wikimedia.org/wiki/File:How_to_use_Web2Cit.webm
