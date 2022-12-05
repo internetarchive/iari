@@ -469,7 +469,7 @@ class WikipediaArticle(WcdItem):
         count = 1
         total = len(self.references)
         for reference in self.references:
-            console.print(f"Working on reference {count}/{total}")
+            console.print(f"Working on reference {count}/{total} from article {self.title}")
             # Here we check for an existing website item
             if reference.has_first_level_domain_url_hash:
                 with console.status(
