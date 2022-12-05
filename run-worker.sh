@@ -1,1 +1,1 @@
-python3 run-worker.py
+python3 wcdimportbot.py --worker
