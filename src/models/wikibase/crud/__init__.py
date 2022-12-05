@@ -201,7 +201,6 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_new_reference_item__(
         self,
         page_reference,  # type: WikipediaReference
-        wikipedia_article,  # type: Optional[WikipediaArticle]
     ) -> ItemEntity:
         """This method converts a page_reference into a new reference wikibase item"""
         item = self.__login_and_prepare_new_item__()
@@ -1112,9 +1111,8 @@ class WikibaseCrud(WcdBaseModel):
     ) -> WikibaseReturn:
         """This method prepares and then tries to upload the reference to WikiCitations
         and returns a WikibaseReturn."""
-        self.__prepare_reference_claim__(wikipedia_article=wikipedia_article)
         item = self.__prepare_new_reference_item__(
-            page_reference=page_reference, wikipedia_article=wikipedia_article
+            page_reference=page_reference
         )
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
