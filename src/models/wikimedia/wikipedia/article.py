@@ -16,8 +16,7 @@ from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import (
     MissingInformationError,
     WikibaseError,
-    WikipediaApiFetchError,
-)
+    WikipediaApiFetchError, )
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
@@ -164,7 +163,7 @@ class WikipediaArticle(WcdItem):
         self.__compare_and_update_page__()
 
     def __extract_and_parse_references__(self):
-        logger.info("Extracting references now")
+        logger.info("Extracting templates and parsing the references now")
         # if self.wikimedia_event is not None:
         #     # raise ValueError("wikimedia_event was None")
         #     self.__get_title_from_event__()
@@ -174,8 +173,15 @@ class WikipediaArticle(WcdItem):
         #         raise ValueError("self.pywikibot_site was None")
         #     self.__get_wikipedia_article_from_title__()
         # else:
-        self.__parse_templates__()
-        self.__print_hash_statistics__()
+        self.__extract_templates_from_the_wikitext__()
+        self.__count_number_of_supported_templates_found__()
+        if self.number_of_reference_templates > 500:
+            console.print(
+                "Cannot import this article because it has more than 500 references. "
+                "See https://github.com/internetarchive/wcdimportbot/issues/358 for details")
+        else:
+            self.__parse_templates__()
+            self.__print_hash_statistics__()
 
     def __fetch_page_data__(self) -> None:
         """This fetches metadata and the latest revision id
@@ -355,15 +361,10 @@ class WikipediaArticle(WcdItem):
             self.__setup_cache__()
         if not self.cache:
             raise ValueError("could not setup the cache")
-        if self.wikitext is None:
-            raise ValueError("self.wikitext was None")
-        # We use the pywikibot template extracting function
-        template_tuples = extract_templates_and_params(self.wikitext, True)
-        number_of_templates = len(template_tuples)
-        logger.info(
-            f"Parsing {number_of_templates} references from {self.title}, see {self.url}"
+        console.print(
+            f"Parsing {self.number_of_templates} supported reference templates from {self.title}, see {self.url}"
         )
-        for template_name, content in template_tuples:
+        for template_name, content in self.template_tuples:
             # logger.debug(f"working on {template_name}")
             if template_name.lower() in config.supported_templates:
                 parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
@@ -522,13 +523,14 @@ class WikipediaArticle(WcdItem):
             self.__generate_hash__()
             self.__setup_wikibase_crud_create__()
             self.__extract_and_parse_references__()
-            self.__upload_references_and_websites_if_missing__()
-            if not self.__page_has_already_been_uploaded__():
-                self.__upload_page_and_references__()
-            else:
-                self.__compare_data_and_update__()
-            # We update the timestamp no matter what action we took above
-            self.__insert_last_update_timestamp__()
+            if self.number_of_reference_templates <= 500:
+                self.__upload_references_and_websites_if_missing__()
+                if not self.__page_has_already_been_uploaded__():
+                    self.__upload_page_and_references__()
+                else:
+                    self.__compare_data_and_update__()
+                # We update the timestamp no matter what action we took above
+                self.__insert_last_update_timestamp__()
         else:
             if self.is_redirect:
                 console.print("This page is a redirect to another page. Not importing.")
@@ -635,3 +637,18 @@ class WikipediaArticle(WcdItem):
         cache.set_title_or_wdqid_last_updated(
             key=hash_.__generate_entity_updated_hash_key__()
         )
+
+    def __extract_templates_from_the_wikitext__(self):
+        if self.wikitext is None:
+            raise ValueError("self.wikitext was None")
+        # We use the pywikibot template extracting function
+        self.template_tuples = extract_templates_and_params(self.wikitext, True)
+        self.number_of_templates = len(self.template_tuples)
+
+    def __count_number_of_supported_templates_found__(self):
+        self.number_of_reference_templates = 0
+        for template_name, content in self.template_tuples:
+            # logger.debug(f"working on {template_name}")
+            if template_name.lower() in config.supported_templates:
+                self.number_of_reference_templates += 1
+        # raise DebugExit(f"found {self.number_of_reference_templates} reference templates")
