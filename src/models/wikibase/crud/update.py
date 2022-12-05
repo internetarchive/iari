@@ -233,7 +233,7 @@ class WikibaseCrudUpdate(WikibaseCrud):
                 f"See {self.wikibase.entity_url(item_id=self.entity.return_.item_qid)}"
             )
             self.new_item = wcr.__prepare_new_reference_item__(
-                page_reference=self.entity, wikipedia_article=self.wikipedia_article
+                page_reference=self.entity
             )
         else:
             if isinstance(self.entity, WikipediaArticle) and self.entity.title:

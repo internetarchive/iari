@@ -110,7 +110,7 @@ class TestWikibaseCrudUpdate(TestCase):
         wppage.__generate_hash__()
         wc = WikibaseCrud(wikibase=wikibase)
         item = wc.__prepare_new_reference_item__(
-            page_reference=reference, wikipedia_article=wppage
+            page_reference=reference
         )
         item.claims.remove(property=wikibase.HASH)
         # We get a keyerror because WBI knows the item is only in memory and not from
