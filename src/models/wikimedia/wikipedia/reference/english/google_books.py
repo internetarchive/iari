@@ -1,13 +1,16 @@
 """Template data example: {{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}"""
+import logging
 from enum import Enum
 from typing import Optional, Union
 
 from marshmallow import Schema, post_load
 from marshmallow.fields import String
-from pydantic import ConstrainedStr
+from pydantic import ConstrainedStr, ValidationError
 
 from src.models.wikibase import Wikibase
 from src.wcd_base_model import WcdBaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class YesNo(Enum):
@@ -74,5 +77,11 @@ class GoogleBooksSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     # **kwargs is needed here despite what the validator claims
-    def return_object(self, data, **kwargs):  # type: ignore
-        return GoogleBooks(**data)
+    def return_object(self, data, **kwargs) -> Optional[GoogleBooks]:
+        result = None
+        try:
+            result = GoogleBooks(**data)
+        except ValidationError as e:
+            # TODO log to logfile instead
+            logger.warning(f"Encountered error during parsing: {e} for the data {data}")
+        return result
