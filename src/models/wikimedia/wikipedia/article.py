@@ -365,7 +365,9 @@ class WikipediaArticle(WcdItem):
         if not self.cache:
             raise ValueError("could not setup the cache")
         console.print(
-            f"Parsing {self.number_of_templates} supported reference templates from {self.title}, see {self.url}"
+            f"Parsing {self.number_of_reference_templates} reference "
+            f"templates out of {self.number_of_templates} templates in "
+            f"total from {self.title}, see {self.url}"
         )
         for template_name, content in self.template_tuples:
             # logger.debug(f"working on {template_name}")
