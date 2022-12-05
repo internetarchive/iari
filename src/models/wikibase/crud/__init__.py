@@ -295,7 +295,7 @@ class WikibaseCrud(WcdBaseModel):
         item.labels.set("en", shortened_title)
         item.descriptions.set(
             "en",
-            f"page from {wikipedia_article.language_code}:{wikipedia_article.wikimedia_site.name.title()}",
+            f"article from {wikipedia_article.language_code}:{wikipedia_article.wikimedia_site.name.title()}",
         )
         # Prepare claims
         # First prepare the page_reference needed in other claims
