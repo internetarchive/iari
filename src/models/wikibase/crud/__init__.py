@@ -218,17 +218,11 @@ class WikibaseCrud(WcdBaseModel):
                 shortened_title = "Title missing"
             label = f"{shortened_title} | {page_reference.md5hash[:7]}"
             item.labels.set("en", label)
-            if wikipedia_article:
-                from src.models.wikimedia.wikipedia.article import WikipediaArticle
-
-                if not isinstance(wikipedia_article, WikipediaArticle):
-                    raise TypeError("not a WikipediaArticle")
-                item.descriptions.set(
-                    "en",
-                    f"reference from {wikipedia_article.wikimedia_site.name.title()}",
-                )
-            else:
-                item.descriptions.set("en", f"reference uploaded for testing")
+            item.descriptions.set(
+                "en",
+                # We hardcode Wikipedia here for now.
+                f"reference from Wikipedia",
+            )
             persons = self.__prepare_all_person_claims__(page_reference=page_reference)
             if persons:
                 item.add_claims(persons)
