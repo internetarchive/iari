@@ -2,7 +2,7 @@ import hashlib
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import quote
 
 import requests
@@ -50,6 +50,9 @@ class WikipediaArticle(WcdItem):
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
+    template_tuples: List[Tuple] = []
+    number_of_reference_templates: int = 0
+    number_of_templates: int = 0
 
     class Config:
         arbitrary_types_allowed = True
