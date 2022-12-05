@@ -28,3 +28,15 @@ class TestGoogleBooks(TestCase):
             gb.finish_parsing()
             console.print(gb.dict())
             assert gb.url == "https://books.google.com/books?id=CDJpAAAAMAAJ"
+
+    def test_id_with_too_many_chars(self):
+        data = "{{google books |plainurl=y |id=CDJpAAAAMAAJTEST |page=313d}}"
+        template_tuples = extract_templates_and_params(data, True)
+        for _template_name, content in template_tuples:
+            GoogleBooksSchema().load(content)
+
+    def test_id_with_too_few_chars(self):
+        data = "{{google books |plainurl=y |id=CDJpAAAAMAA |page=313d}}"
+        template_tuples = extract_templates_and_params(data, True)
+        for _template_name, content in template_tuples:
+            GoogleBooksSchema().load(content)

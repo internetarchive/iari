@@ -1332,10 +1332,12 @@ class WikipediaReference(WcdItem):
         template_tuples = extract_templates_and_params(url, True)
         if template_tuples:
             for _template_name, content in template_tuples:
-                google_books: GoogleBooks = GoogleBooksSchema().load(content)
-                google_books.finish_parsing()
-                # We only care about the first
-                return str(google_books.url)
+                # We only care about the first one found
+                google_books: Optional[GoogleBooks] = GoogleBooksSchema().load(content)
+                if google_books:
+                    google_books.finish_parsing()
+                    # We only care about the first
+                    return str(google_books.url)
             logger.warning(f"Parsing the google books template data in {url} failed")
             return ""
         else:
