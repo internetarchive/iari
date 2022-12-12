@@ -244,8 +244,17 @@ class WikipediaArticle(WcdItem):
                         for page in pages:
                             page_data = pages[page]
                             # console.print(page_data)
-                            # TODO add check here for pageprops to avoid https://github.com/internetarchive/wcdimportbot/issues/340
-                            self.wikidata_qid = page_data["pageprops"]["wikibase_item"]
+                            if page_data["pageprops"]:
+                                if page_data["pageprops"]["wikibase_item"]:
+                                    self.wikidata_qid = page_data["pageprops"]["wikibase_item"]
+                                else:
+                                    raise MissingInformationError(
+                                        f"Did not get any wikibase_item from MediaWiki, see {url}"
+                                    )
+                            else:
+                                raise MissingInformationError(
+                                    f"Did not get any pageprops from MediaWiki, see {url}"
+                                )
                             # We only care about the first page
                             break
                     else:
