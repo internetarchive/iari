@@ -109,9 +109,7 @@ class TestWikibaseCrudUpdate(TestCase):
         wppage.__get_wikipedia_article_from_title__()
         wppage.__generate_hash__()
         wc = WikibaseCrud(wikibase=wikibase)
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference
-        )
+        item = wc.__prepare_new_reference_item__(page_reference=reference)
         item.claims.remove(property=wikibase.HASH)
         # We get a keyerror because WBI knows the item is only in memory and not from
         # a Wikibase and can thus be removed directly

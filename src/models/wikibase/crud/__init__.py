@@ -75,7 +75,9 @@ class WikibaseCrud(WcdBaseModel):
         if sparql_result:
             yielded = 0
             for binding in sparql_result["results"]["bindings"]:
-                if item_id := self.__extract_wcdqs_json_entity_id__(data=binding):
+                if item_id := self.__extract_wcdqs_json_entity_id_from_sparql_variable__(
+                    data=binding
+                ):
                     yielded += 1
                     yield item_id
             if number_of_bindings := len(sparql_result["results"]["bindings"]):
@@ -90,8 +92,10 @@ class WikibaseCrud(WcdBaseModel):
         if sparql_result:
             yielded = 0
             for binding in sparql_result["results"]["bindings"]:
-                if item_id := self.__extract_wcdqs_json_entity_id__(data=binding):
-                    if hash_value := self.__extract_wcdqs_json_entity_id__(
+                if item_id := self.__extract_wcdqs_json_entity_id_from_sparql_variable__(
+                    data=binding
+                ):
+                    if hash_value := self.__extract_wcdqs_json_entity_id_from_sparql_variable__(
                         data=binding, sparql_variable="hash"
                     ):
                         yielded += 1
@@ -100,10 +104,9 @@ class WikibaseCrud(WcdBaseModel):
                 logger.info(f"Yielded {yielded} bindings out of {number_of_bindings}")
 
     @validate_arguments
-    def __extract_wcdqs_json_entity_id__(
+    def __extract_wcdqs_json_entity_id_from_sparql_variable__(
         self, data: Dict, sparql_variable: str = "item"
     ) -> str:
-        # TODO rename to include "from_sparql_variable"
         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
         return str(
             data[sparql_variable]["value"].replace(
@@ -1111,9 +1114,7 @@ class WikibaseCrud(WcdBaseModel):
     ) -> WikibaseReturn:
         """This method prepares and then tries to upload the reference to WikiCitations
         and returns a WikibaseReturn."""
-        item = self.__prepare_new_reference_item__(
-            page_reference=page_reference
-        )
+        item = self.__prepare_new_reference_item__(page_reference=page_reference)
         from src.models.wikibase.crud.create import WikibaseCrudCreate
 
         wcc = WikibaseCrudCreate(wikibase=self.wikibase)

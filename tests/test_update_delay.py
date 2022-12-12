@@ -21,7 +21,7 @@ class TestUpdateDelay:
 
     def test___delay_time_has_passed__(self):
         ud = UpdateDelay(object_=Message())
-        assert config.article_update_delay_in_hours < 48
+        assert config.article_update_delay_in_minutes < 48 * 60
         ud.time_of_last_update = datetime.now() - timedelta(days=2)
         assert ud.__delay_time_has_passed__() is True
 
@@ -45,5 +45,6 @@ class TestUpdateDelay:
 
     def test_configuration_variables(self):
         """We test if we have sane settings"""
-        assert config.article_update_delay_in_hours >= 1
-        assert config.reference_update_delay_in_hours >= 24
+        assert config.article_update_delay_in_minutes >= 1
+        # We don't want to update references more often than 24h
+        assert config.reference_update_delay_in_minutes >= 24 * 60

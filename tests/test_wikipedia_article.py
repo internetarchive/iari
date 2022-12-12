@@ -4,7 +4,7 @@ from unittest import TestCase
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
-from src import console
+from src import console, MissingInformationError
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
 
@@ -181,10 +181,21 @@ class TestWikipediaArticle(TestCase):
         wp.__fetch_page_data__()
         assert wp.is_redirect is False
 
-    def test_fetch_wikidata_qid(self):
+    def test_fetch_wikidata_qid_enwiki(self):
+        """Test fetching from enwiki"""
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         wp = WikipediaArticle(title="Easter island", wikibase=IASandboxWikibase())
+        wp.__fetch_wikidata_qid__()
+        assert wp.wikidata_qid == "Q14452"
+
+    def test_fetch_wikidata_qid_dawiki(self):
+        """Test fetching from dawiki"""
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        wp = WikipediaArticle(
+            title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+        )
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
 
@@ -195,3 +206,43 @@ class TestWikipediaArticle(TestCase):
     #     wp = WikipediaArticle(wdqid="Q1", wikibase=IASandboxWikibase())
     #     wp.__get_title_from_wikidata__()
     #     assert wp.title == "Universe"
+
+    def test___count_number_of_supported_templates_found_no_templates(self):
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        wp = WikipediaArticle(
+            title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+        )
+        with self.assertRaises(MissingInformationError):
+            wp.__count_number_of_supported_templates_found__()
+
+
+    def test___count_number_of_supported_templates_found_with_template(self):
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        wp = WikipediaArticle(
+            title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+        )
+        wp.wikitext = "{{citeq|1}}"
+        wp.__extract_templates_from_the_wikitext__()
+        assert len(wp.template_tuples) == 1
+
+    def test___extract_templates_from_the_wikitext_valid(self):
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        wp = WikipediaArticle(
+            title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+        )
+        wp.wikitext = "{{citeq|1}}"
+        wp.__extract_templates_from_the_wikitext__()
+        assert len(wp.template_tuples) == 1
+
+    def test___extract_templates_from_the_wikitext_no_templates(self):
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        wp = WikipediaArticle(
+            title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+        )
+        wp.wikitext = "{citeq|1}}testtestxxxx{}"
+        wp.__extract_templates_from_the_wikitext__()
+        assert len(wp.template_tuples) == 0
