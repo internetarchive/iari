@@ -72,6 +72,7 @@ class WikipediaReference(WcdItem):
     numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
     persons_without_role: Optional[List[Person]]
+    raw_template: str = ""
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
@@ -1272,6 +1273,8 @@ class WikipediaReference(WcdItem):
         # We parse the first parameter before isbn
         if testing and not self.cache:
             self.__setup_cache__()
+        if not self.raw_template:
+            raise MissingInformationError("self.raw_template was empty string")
         from src.models.update_delay import UpdateDelay
 
         update_delay = UpdateDelay(object_=self, cache=self.cache)
