@@ -181,10 +181,19 @@ class TestWikipediaArticle(TestCase):
         wp.__fetch_page_data__()
         assert wp.is_redirect is False
 
-    def test_fetch_wikidata_qid(self):
+    def test_fetch_wikidata_qid_enwiki(self):
+        """Test fetching from enwiki"""
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         wp = WikipediaArticle(title="Easter island", wikibase=IASandboxWikibase())
+        wp.__fetch_wikidata_qid__()
+        assert wp.wikidata_qid == "Q14452"
+
+    def test_fetch_wikidata_qid_dawiki(self):
+        """Test fetching from dawiki"""
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        wp = WikipediaArticle(title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da")
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
 

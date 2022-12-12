@@ -228,8 +228,7 @@ class WikipediaArticle(WcdItem):
 
     def __fetch_wikidata_qid__(self):
         """Fetch the Wikidata QID so we can efficiently look up pages via JS"""
-        # TODO avoid hardcoding enwiki here
-        url = f"https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&titles={quote(self.title)}&format=json"
+        url = f"https://{self.language_code}.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&titles={quote(self.title)}&format=json"
         headers = {"User-Agent": config.user_agent}
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
@@ -587,7 +586,7 @@ class WikipediaArticle(WcdItem):
         #
         # # https://www.wikidata.org/w/api.php?action=wbgetentities
         # &ids=Q180736&props=sitelinks/urls&languages=az&languagefallback=&sitefilter=enwiki&formatversion=2
-        # # TODO avoid hardcoding enwiki here
+        # #  avoid hardcoding enwiki here
         # data = {
         #     "action": "wbgetentities",
         #     "props": "sitelinks/urls",
