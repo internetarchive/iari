@@ -46,13 +46,13 @@ class UpdateDelay(WcdBaseModel):
                 logger.info("Using delay time for article")
                 result = self.time_of_last_update < (
                     datetime.now()
-                    - timedelta(hours=config.article_update_delay_in_hours)
+                    - timedelta(minutes=config.article_update_delay_in_minutes)
                 )
             elif isinstance(self.object_, WikipediaReference):
                 logger.info("Using delay time for reference")
                 result = self.time_of_last_update < (
                     datetime.now()
-                    - timedelta(hours=config.reference_update_delay_in_hours)
+                    - timedelta(minutes=config.reference_update_delay_in_minutes)
                 )
             else:
                 raise ValueError("could not recognize self.object_")

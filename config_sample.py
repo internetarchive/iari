@@ -27,8 +27,8 @@ user_agent = "wcdimportbot 2.0.0-alpha3"
 sparql_sync_waiting_time_in_seconds = 5
 check_if_page_has_been_uploaded_via_sparql = True
 print_debug_json = False
-article_update_delay_in_hours = 24
-reference_update_delay_in_hours = 24
+article_update_delay_in_minutes = 24 * 60  # 24 hours
+reference_update_delay_in_minutes = 96 * 60  # 96 hours
 title_allow_list = [
     "Easter island",
 ]
