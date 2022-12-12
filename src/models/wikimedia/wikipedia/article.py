@@ -16,7 +16,8 @@ from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import (
     MissingInformationError,
     WikibaseError,
-    WikipediaApiFetchError, )
+    WikipediaApiFetchError,
+)
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
@@ -181,7 +182,8 @@ class WikipediaArticle(WcdItem):
         if self.number_of_reference_templates > 500:
             console.print(
                 "Cannot import this article because it has more than 500 references. "
-                "See https://github.com/internetarchive/wcdimportbot/issues/358 for details")
+                "See https://github.com/internetarchive/wcdimportbot/issues/358 for details"
+            )
         else:
             self.__parse_templates__()
             self.__print_hash_statistics__()
@@ -245,7 +247,9 @@ class WikipediaArticle(WcdItem):
                             # console.print(page_data)
                             if page_data["pageprops"]:
                                 if page_data["pageprops"]["wikibase_item"]:
-                                    self.wikidata_qid = page_data["pageprops"]["wikibase_item"]
+                                    self.wikidata_qid = page_data["pageprops"][
+                                        "wikibase_item"
+                                    ]
                                 else:
                                     raise MissingInformationError(
                                         f"Did not get any wikibase_item from MediaWiki, see {url}"
@@ -477,7 +481,9 @@ class WikipediaArticle(WcdItem):
         count = 1
         total = len(self.references)
         for reference in self.references:
-            console.print(f"Working on reference {count}/{total} from article {self.title}")
+            console.print(
+                f"Working on reference {count}/{total} from article {self.title}"
+            )
             # Here we check for an existing website item
             if reference.has_first_level_domain_url_hash:
                 with console.status(
@@ -659,9 +665,12 @@ class WikipediaArticle(WcdItem):
         self.number_of_templates = len(self.template_tuples)
 
     def __count_number_of_supported_templates_found__(self):
+        if not self.template_tuples:
+            raise MissingInformationError("self.template_tuples was None")
         self.number_of_reference_templates = 0
-        for template_name, content in self.template_tuples:
+        for template_tuple in self.template_tuples:
             # logger.debug(f"working on {template_name}")
-            if template_name.lower() in config.supported_templates:
+            # 0 is the name, 1 is the content which we ignore
+            if template_tuple[0].lower() in config.supported_templates:
                 self.number_of_reference_templates += 1
         # raise DebugExit(f"found {self.number_of_reference_templates} reference templates")

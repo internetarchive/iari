@@ -53,9 +53,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         assert reference.detected_archive_of_archive_url is not None
         assert len(reference.persons_without_role) > 0
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference
-        )
+        item = wc.__prepare_new_reference_item__(page_reference=reference)
         console.print(item.get_json())
         assert item.claims.get(property=wc.wikibase.FULL_NAME_STRING) is not None
         assert item.claims.get(property=wc.wikibase.ARCHIVE_URL) is not None
@@ -95,9 +93,7 @@ class TestWikibaseCrudCreate(TestCase):
         )
         reference.wikibase = IASandboxWikibase()
         reference.finish_parsing_and_generate_hash(testing=True)
-        item = wc.__prepare_new_reference_item__(
-            page_reference=reference
-        )
+        item = wc.__prepare_new_reference_item__(page_reference=reference)
         # console.print(item.get_json())
         assert len(item.labels.get(language="en")) == 250
 
