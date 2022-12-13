@@ -4,7 +4,7 @@ from unittest import TestCase
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
-from src import console, MissingInformationError
+from src import MissingInformationError, console
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
 
@@ -478,6 +478,6 @@ Easter Island is one of the most remote inhabited islands in the world.<ref>{{ci
             == "{{cite web |url=http://www.citypopulation.de/Pitcairn.html |title=Pitcairn Islands |author=Thomas Brinkhoff |date=1 February 2013 |website=Citypopulation.de |publisher=Thomas Brinkhoff |access-date=8 November 2013 |url-status=live |archive-url=https://web.archive.org/web/20131015182546/http://www.citypopulation.de/Pitcairn.html |archive-date=15 October 2013}}"
         )
         assert wp.references[7].template_name == "cite web"
-        assert wp.references[7].publisher =="Thomas Brinkhoff"
+        assert wp.references[7].publisher == "Thomas Brinkhoff"
         assert wp.references[7].title == "Pitcairn Islands"
         assert wp.references[7].url == "http://www.citypopulation.de/Pitcairn.html"
