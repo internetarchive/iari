@@ -1227,7 +1227,7 @@ class WikipediaReference(WcdItem):
             self.__setup_wikibase_crud_create__()
         if self.wikibase_crud_create:
             return_ = self.wikibase_crud_create.prepare_and_upload_reference_item(
-                page_reference=self, wikipedia_article=wikipedia_article
+                page_reference=self
             )
             if isinstance(return_, WikibaseReturn):
                 return return_
@@ -1273,7 +1273,7 @@ class WikipediaReference(WcdItem):
         # We parse the first parameter before isbn
         if testing and not self.cache:
             self.__setup_cache__()
-        if not self.raw_template:
+        if not self.raw_template and not testing:
             raise MissingInformationError("self.raw_template was empty string")
         from src.models.update_delay import UpdateDelay
 
@@ -1332,9 +1332,9 @@ class WikipediaReference(WcdItem):
         """Parse the Google Books template that sometimes appear in a url
         and return the generated url"""
         logger.debug("__get_url_from_google_books_template__: Running")
-        template_tuples = extract_templates_and_params(url, True)
-        if template_tuples:
-            for _template_name, content in template_tuples:
+        template_triples = extract_templates_and_params(url, True)
+        if template_triples:
+            for _template_name, content, _raw_template in template_triples:
                 # We only care about the first one found
                 google_books: Optional[GoogleBooks] = GoogleBooksSchema().load(content)
                 if google_books:
