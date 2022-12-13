@@ -62,6 +62,7 @@ class Wikibase(WcdBaseModel):
     PUBLICATION_DATE: str  # date
     PUBLISHED_IN: str  # ?
     PUBLISHER_STRING: str  # string
+    RAW_TEMPLATE: str  # string
     RETRIEVED_DATE: str  # date
     SERIES_ORDINAL: str  # aka author position # quantity
     SOURCE_WIKIPEDIA: str  # item

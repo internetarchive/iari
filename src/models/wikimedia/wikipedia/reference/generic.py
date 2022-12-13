@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import re
+import textwrap
 from datetime import datetime, timezone
 from typing import Any, List, Optional
 from urllib.parse import urlparse
@@ -457,6 +458,14 @@ class WikipediaReference(WcdItem):
         if not self.return_:
             raise MissingInformationError("self.return_ was None")
         return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
+
+    @property
+    def shortened_raw_template(self):
+        """Return a shortened string with max 400 chars which is the default Wikibase limit"""
+        # TODO consider making a generic property and use it here and for shortening of the title
+        if not self.raw_template:
+            raise MissingInformationError("self.raw_template was empty")
+        return textwrap.shorten(str(self.raw_template), width=400, placeholder="...")
 
     @validate_arguments
     def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
@@ -1058,7 +1067,7 @@ class WikipediaReference(WcdItem):
     def __parse_persons__(self) -> None:
         """Parse all person related data into Person objects"""
         # find all the attributes but exclude the properties as they lead to weird errors
-        properties = ["has_hash", "isodate", "template_url", "wikibase_url"]
+        properties = ["has_hash", "isodate", "shortened_raw_template", "template_url", "wikibase_url"]
         attributes = [
             a
             for a in dir(self)
@@ -1217,9 +1226,7 @@ class WikipediaReference(WcdItem):
         return date
 
     @validate_arguments
-    def __upload_reference_to_wikibase__(
-        self
-    ) -> WikibaseReturn:
+    def __upload_reference_to_wikibase__(self) -> WikibaseReturn:
         """This method tries to upload the reference to Wikibase
         and returns a WikibaseReturn."""
         logger.debug("__upload_reference_to_wikicitations__: Running")

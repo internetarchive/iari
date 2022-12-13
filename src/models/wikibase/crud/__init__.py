@@ -480,6 +480,13 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_claims_always_present__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
+        if page_reference.raw_template:
+            raw_template = datatypes.String(
+                prop_nr=self.wikibase.RAW_TEMPLATE,
+                value=page_reference.shortened_raw_template,
+            )
+        else:
+            raise MissingInformationError("page_reference.raw_template was None")
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
             value=self.wikibase.WIKIPEDIA_REFERENCE,
@@ -493,7 +500,7 @@ class WikibaseCrud(WcdBaseModel):
                 value=page_reference.template_name,
             )
         else:
-            raise ValueError("no template name found")
+            raise MissingInformationError("no template name found")
         retrieved_date = datatypes.Time(
             prop_nr=self.wikibase.RETRIEVED_DATE,
             time=datetime.utcnow()  # Fetched today
@@ -516,6 +523,7 @@ class WikibaseCrud(WcdBaseModel):
         return [
             hash_claim,
             instance_of,
+            raw_template,
             retrieved_date,
             source_wikipedia,
             template_string,
@@ -999,9 +1007,11 @@ class WikibaseCrud(WcdBaseModel):
         )
         if string_translators:
             claims.extend(string_translators)
+        # TODO add FULL_NAME_STRING here for the first author
         archive_date = None
         archive_url = None
         publication_date = None
+        raw_template = None
         title = None
         website_string = None
         if page_reference.access_date:
@@ -1052,6 +1062,13 @@ class WikibaseCrud(WcdBaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
+        if page_reference.raw_template:
+            raw_template = datatypes.String(
+                prop_nr=self.wikibase.RAW_TEMPLATE,
+                value=page_reference.shortened_raw_template,
+            )
+        else:
+            raise MissingInformationError("page_reference.raw_template was None")
         if page_reference.title:
             title = datatypes.String(
                 prop_nr=self.wikibase.TITLE,
@@ -1074,6 +1091,7 @@ class WikibaseCrud(WcdBaseModel):
             archive_date,
             archive_url,
             publication_date,
+            raw_template,
             title,
             url,
             website_string,
