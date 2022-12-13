@@ -35,7 +35,9 @@ class IASandboxWikibase(Wikibase):
     EDITOR_NAME_STRING = "P20"  # datatype: WikibaseDatatype.STRING description:
     FAMILY_NAME = "P21"  # datatype: WikibaseDatatype.STRING description:
     FIRST_LEVEL_DOMAIN_STRING = "P22"  # datatype: WikibaseDatatype.STRING description:
-    FULL_NAME_STRING = "P23"  # datatype: WikibaseDatatype.STRING description:
+    FULL_NAME_STRING = (
+        "P23"  # datatype: WikibaseDatatype.STRING description: author name string
+    )
     GIVEN_NAME = "P24"  # datatype: WikibaseDatatype.STRING description:
     HASH = "P25"  # datatype: WikibaseDatatype.STRING description:
     HOST_STRING = "P26"  # datatype: WikibaseDatatype.STRING description:
@@ -48,6 +50,7 @@ class IASandboxWikibase(Wikibase):
     PAGE_REVISION_ID = "P33"  # datatype: WikibaseDatatype.STRING description:
     PERIODICAL_STRING = "P34"  # datatype: WikibaseDatatype.STRING description:
     PUBLISHER_STRING = "P35"  # datatype: WikibaseDatatype.STRING description:
+    RAW_TEMPLATE = "P89"  # datatype: WikibaseDatatype.STRING description:
     STRING_CITATIONS = "P36"  # datatype: WikibaseDatatype.STRING description:
     TEMPLATE_NAME = "P37"  # datatype: WikibaseDatatype.STRING description:
     TITLE = "P38"  # datatype: WikibaseDatatype.STRING description:
