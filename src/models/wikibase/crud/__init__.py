@@ -1110,7 +1110,6 @@ class WikibaseCrud(WcdBaseModel):
     def prepare_and_upload_reference_item(
         self,
         page_reference,  # type: WikipediaReference
-        wikipedia_article: Optional[WikipediaArticle] = None,
     ) -> WikibaseReturn:
         """This method prepares and then tries to upload the reference to WikiCitations
         and returns a WikibaseReturn."""

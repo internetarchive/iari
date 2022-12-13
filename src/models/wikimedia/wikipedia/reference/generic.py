@@ -1218,7 +1218,7 @@ class WikipediaReference(WcdItem):
 
     @validate_arguments
     def __upload_reference_to_wikibase__(
-        self, wikipedia_article=None
+        self
     ) -> WikibaseReturn:
         """This method tries to upload the reference to Wikibase
         and returns a WikibaseReturn."""
