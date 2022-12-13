@@ -216,7 +216,6 @@ class TestWikipediaArticle(TestCase):
         with self.assertRaises(MissingInformationError):
             wp.__count_number_of_supported_templates_found__()
 
-
     def test___count_number_of_supported_templates_found_with_template(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
@@ -236,7 +235,6 @@ class TestWikipediaArticle(TestCase):
         wp.wikitext = "{{citeq|1}}"
         wp.__extract_templates_from_the_wikitext__()
         assert len(wp.template_triples) == 1
-
 
     def test___extract_templates_from_the_wikitext_no_templates(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -264,9 +262,7 @@ class TestWikipediaArticle(TestCase):
     def test___extract_and_parse_references_easter_island_excerpt(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(
-            title="Easter Island", wikibase=IASandboxWikibase()
-        )
+        wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
         wp.wikitext = """{{short description|Chilean island in the Pacific}}
 {{for|the Kris Kristofferson album|Easter Island (album)}}
 {{Redirect|Rapa Nui}}
@@ -442,6 +438,46 @@ Easter Island is one of the most remote inhabited islands in the world.<ref>{{ci
         wp.__extract_and_parse_references__()
         assert len(wp.template_triples) == 26
         assert len(wp.references) == 8
-        # TODO test all 8 :)
-        assert wp.references[0].raw_template == "{{cite web | url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php | title= Censo de Población y Vivienda 2002 | work= [[National Statistics Institute (Chile)|National Statistics Institute]] | access-date= 1 May 2010 | url-status=live | archive-url= https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}"
+        assert (
+            wp.references[0].raw_template
+            == "{{cite web | url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php | title= Censo de Población y Vivienda 2002 | work= [[National Statistics Institute (Chile)|National Statistics Institute]] | access-date= 1 May 2010 | url-status=live | archive-url= https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}"
+        )
         assert wp.references[0].template_name == "cite web"
+        assert (
+            wp.references[1].raw_template
+            == "{{cite web |language= es |url= https://resultados.censo2017.cl/Home/Download |title= Censo 2017 |work= [[National Statistics Institute (Chile)|National Statistics Institute]] |access-date= 11 May 2018 |archive-url= https://web.archive.org/web/20180511145942/https://resultados.censo2017.cl/Home/Download |archive-date= 11 May 2018 |url-status=dead }}"
+        )
+        assert wp.references[1].template_name == "cite web"
+        assert (
+            wp.references[2].raw_template
+            == "{{cite web |last1=Dangerfield |first1=Whitney |title=The Mystery of Easter Island |url=https://www.smithsonianmag.com/travel/the-mystery-of-easter-island-151285298/ |website=[[Smithsonian (magazine)|Smithsonian Magazine]] |access-date=December 10, 2020 |date=March 31, 2007}}"
+        )
+        assert wp.references[2].template_name == "cite web"
+        assert (
+            wp.references[3].raw_template
+            == "{{cite journal |author=Peiser, B. |url=http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf |archive-url=https://web.archive.org/web/20100610062402/http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf |url-status=dead |archive-date=2010-06-10 |title=From Genocide to Ecocide: The Rape of Rapa Nui |doi=10.1260/0958305054672385 |journal=Energy & Environment |volume=16 |issue=3&4 |pages=513–539 |year=2005 |citeseerx=10.1.1.611.1103 |s2cid=155079232 }}"
+        )
+        assert wp.references[3].template_name == "cite journal"
+        assert (
+            wp.references[4].raw_template
+            == "{{citation |url=http://www.leychile.cl/Navegar?idNorma=1026285 |title=List of Chilean Provinces |publisher=Congreso Nacional |access-date=20 February 2013 |url-status=live |archive-url=https://web.archive.org/web/20120910034328/http://www.leychile.cl/Navegar?idNorma=1026285 |archive-date=10 September 2012}}"
+        )
+        assert wp.references[4].template_name == "citation"
+        assert (
+            wp.references[5].raw_template
+            == "{{cite web|url=https://redatam-ine.ine.cl/redbin/RpWebEngine.exe/Portal?BASE=CENSO_2017&lang=esp|title=Instituto Nacional de Estadísticas – REDATAM Procesamiento y diseminación|website=Redatam-ine.ine.cl|access-date=11 January 2019|archive-url=https://web.archive.org/web/20190527171611/https://redatam-ine.ine.cl/redbin/RpWebEngine.exe/Portal?BASE=CENSO_2017&lang=esp|archive-date=27 May 2019|url-status=live}}"
+        )
+        assert wp.references[5].template_name == "cite web"
+        assert (
+            wp.references[6].raw_template
+            == "{{citation|title=Welcome to Rapa Nui – Isla de Pascua – Easter Island|url=http://www.portalrapanui.cl/rapanui/informaciones.htm|work=Portal RapaNui, the island's official website|url-status=live|archive-url=https://web.archive.org/web/20120114041943/http://www.portalrapanui.cl/rapanui/informaciones.htm|archive-date=14 January 2012}}"
+        )
+        assert wp.references[6].template_name == "citation"
+        assert (
+            wp.references[7].raw_template
+            == "{{cite web |url=http://www.citypopulation.de/Pitcairn.html |title=Pitcairn Islands |author=Thomas Brinkhoff |date=1 February 2013 |website=Citypopulation.de |publisher=Thomas Brinkhoff |access-date=8 November 2013 |url-status=live |archive-url=https://web.archive.org/web/20131015182546/http://www.citypopulation.de/Pitcairn.html |archive-date=15 October 2013}}"
+        )
+        assert wp.references[7].template_name == "cite web"
+        assert wp.references[7].publisher =="Thomas Brinkhoff"
+        assert wp.references[7].title == "Pitcairn Islands"
+        assert wp.references[7].url == "http://www.citypopulation.de/Pitcairn.html"
