@@ -51,7 +51,7 @@ class WikipediaArticle(WcdItem):
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
-    template_tuples: List[Tuple] = []
+    template_triples: List[Tuple] = []
     number_of_reference_templates: int = 0
     number_of_templates: int = 0
 
@@ -381,7 +381,7 @@ class WikipediaArticle(WcdItem):
             f"templates out of {self.number_of_templates} templates in "
             f"total from {self.title}, see {self.url}"
         )
-        for template_name, content in self.template_tuples:
+        for template_name, content, raw_template in self.template_triples:
             # logger.debug(f"working on {template_name}")
             if template_name.lower() in config.supported_templates:
                 parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
@@ -418,6 +418,8 @@ class WikipediaArticle(WcdItem):
                     reference.wikibase = self.wikibase
                     # This is because of https://github.com/internetarchive/wcdimportbot/issues/261
                     reference.cache = self.cache
+                    # We want the raw template
+                    reference.raw_template = raw_template
                     reference.finish_parsing_and_generate_hash()
                     # Handle duplicates:
                     if reference.md5hash in [
@@ -660,17 +662,17 @@ class WikipediaArticle(WcdItem):
     def __extract_templates_from_the_wikitext__(self):
         if self.wikitext is None:
             raise ValueError("self.wikitext was None")
-        # We use the pywikibot template extracting function
-        self.template_tuples = extract_templates_and_params(self.wikitext, True)
-        self.number_of_templates = len(self.template_tuples)
+        # We use an improved and simplified version of pywikibots template extracting function
+        self.template_triples = extract_templates_and_params(self.wikitext, True)
+        self.number_of_templates = len(self.template_triples)
 
     def __count_number_of_supported_templates_found__(self):
-        if not self.template_tuples:
+        if not self.template_triples:
             raise MissingInformationError("self.template_tuples was None")
         self.number_of_reference_templates = 0
-        for template_tuple in self.template_tuples:
+        for template_triple in self.template_triples:
             # logger.debug(f"working on {template_name}")
-            # 0 is the name, 1 is the content which we ignore
-            if template_tuple[0].lower() in config.supported_templates:
+            # 0 is the name, 1 is the params which we ignore 2 is the raw template
+            # Check if the template name is supported
+            if template_triple[0].lower() in config.supported_templates:
                 self.number_of_reference_templates += 1
-        # raise DebugExit(f"found {self.number_of_reference_templates} reference templates")

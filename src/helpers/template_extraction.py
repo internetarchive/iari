@@ -37,7 +37,7 @@ def remove_comments(text: str):
         return text
 
 
-def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
+def extract_templates_and_params(text: str, strip: bool = False) -> List[Tuple]:
     """Return a list of references found in text.
 
     Return value is a list of tuples. There is one tuple for each use of a
@@ -87,7 +87,7 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
     # if remove_disabled_parts:
     #     text = removeDisabledParts(text)
 
-    result = []
+    result: List[Tuple] = []
     parsed = mwparserfromhell.parse(text)
 
     templates = parsed.ifilter_templates(
@@ -96,6 +96,7 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
     arguments = "params"
 
     for template in templates:
+        logger.debug(f"Working on template: {template}")
         params = OrderedDict()
         for param in getattr(template, arguments):
             value = str(param.value)  # mwpfh needs upcast to str
@@ -113,5 +114,6 @@ def extract_templates_and_params(text: str, strip: bool = False) -> ETPType:
             # logger.debug(f"value after: {value}")
             params[key] = value
 
-        result.append((template.name.strip(), params))
+        # Dennis added the raw template so it became a triple
+        result.append((template.name.strip(), params, template))
     return result
