@@ -23,6 +23,8 @@ class Hashing(WcdBaseModel):
 
         We encode the information we need to make it
         unique and quick to lookup of the timestamp"""
+        if not self.title and not self.article_wikidata_qid:
+            raise MissingInformationError("self.title and self.article_wikidata_qid was empty")
         if self.title:
             title_or_wdqid = self.title
         else:
