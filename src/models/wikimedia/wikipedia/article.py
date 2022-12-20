@@ -1,18 +1,15 @@
 import hashlib
-import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional
 from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
-from marshmallow.exceptions import ValidationError
 from pydantic import validate_arguments
 
 import config
 from src import console
-from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import (
     MissingInformationError,
     WikibaseError,
@@ -22,9 +19,7 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.reference.english.schema import (
-    EnglishWikipediaReferenceSchema,
-)
+from src.models.wikimedia.wikipedia.reference.extractor import WikipediaReferenceExtractor
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
 logger = logging.getLogger(__name__)
@@ -51,9 +46,7 @@ class WikipediaArticle(WcdItem):
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
-    template_triples: List[Tuple] = []
-    number_of_reference_templates: int = 0
-    number_of_templates: int = 0
+    extractor: Optional[WikipediaReferenceExtractor] = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -62,28 +55,6 @@ class WikipediaArticle(WcdItem):
     def absolute_url(self):
         return f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/index.php?curid={self.page_id}"
 
-    @property
-    def number_of_hashed_references(self):
-        return len(
-            [
-                reference
-                for reference in self.references
-                if reference.md5hash is not None
-            ]
-        )
-
-    @property
-    def number_of_references(self):
-        return len(self.references)
-
-    @property
-    def percent_of_references_with_a_hash(self):
-        if self.number_of_references == 0:
-            return 0
-        else:
-            return int(
-                self.number_of_hashed_references * 100 / self.number_of_references
-            )
 
     @property
     def is_redirect(self) -> bool:
@@ -177,9 +148,9 @@ class WikipediaArticle(WcdItem):
         #         raise ValueError("self.pywikibot_site was None")
         #     self.__get_wikipedia_article_from_title__()
         # else:
-        self.__extract_templates_from_the_wikitext__()
-        self.__count_number_of_supported_templates_found__()
-        if self.number_of_reference_templates > 500:
+        self.extractor.wikitext = self.wikitext
+        self.extractor.extract_all_references()
+        if self.extractor and self.extractor.number_of_references > 500:
             console.print(
                 "Cannot import this article because it has more than 500 references. "
                 "See https://github.com/internetarchive/wcdimportbot/issues/358 for details"
@@ -274,66 +245,10 @@ class WikipediaArticle(WcdItem):
                 )
             logger.info(f"Found Wikidata QID: {self.wikidata_qid}")
 
-    @staticmethod
-    def __fix_class_key__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
-        """convert "class" key to "_class" to avoid collision with reserved python expression"""
-        newdict = {}
-        for key in dictionary:
-            if key == "class":
-                new_key = "news_class"
-                newdict[new_key] = dictionary[key]
-            else:
-                newdict[key] = dictionary[key]
-        return newdict
-
-    @staticmethod
-    def __fix_aliases__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
-        """Replace alias keys"""
-        replacements = dict(
-            accessdate="access_date",
-            archiveurl="archive_url",
-            archivedate="archive_date",
-            ISBN="isbn",
-            authorlink1="author_link1",
-            authorlink2="author_link2",
-            authorlink3="author_link3",
-            authorlink4="author_link4",
-            authorlink5="author_link5",
-            authorlink="author_link",
-        )
-        newdict = {}
-        for key in dictionary:
-            replacement_made = False
-            for replacement in replacements:
-                if replacement == key:
-                    new_key = replacements[key]
-                    logger.debug(f"Replacing key {key} with {new_key}")
-                    newdict[new_key] = dictionary[key]
-                    replacement_made = True
-            if not replacement_made:
-                newdict[key] = dictionary[key]
-        return newdict
-
-    @staticmethod
-    def __fix_dash__(dictionary: Dict[str, Any]) -> Dict[str, Any]:
-        newdict = {}
-        for key in dictionary:
-            if "-" in key:
-                new_key = key.replace("-", "_")
-                newdict[new_key] = dictionary[key]
-            else:
-                newdict[key] = dictionary[key]
-        return newdict
-
-    @validate_arguments
-    def __fix_keys__(self, dictionary: Dict[str, Any]) -> Dict[str, Any]:
-        dictionary = self.__fix_class_key__(dictionary=dictionary)
-        dictionary = self.__fix_aliases__(dictionary=dictionary)
-        return self.__fix_dash__(dictionary=dictionary)
-
     def __generate_hash__(self):
         """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
+        # TODO move this to Hashing
         logger.debug(
             f"Generating hash based on: "
             f"{self.wikibase.title}{self.language_code}{self.page_id}"
@@ -372,78 +287,80 @@ class WikipediaArticle(WcdItem):
 
     def __parse_templates__(self):
         """We parse all the references into WikipediaArticleReferences"""
-        if not self.cache:
-            self.__setup_cache__()
-        if not self.cache:
-            raise ValueError("could not setup the cache")
-        console.print(
-            f"Parsing {self.number_of_reference_templates} reference "
-            f"templates out of {self.number_of_templates} templates in "
-            f"total from {self.title}, see {self.url}"
-        )
-        for template_name, content, raw_template in self.template_triples:
-            # logger.debug(f"working on {template_name}")
-            if template_name.lower() in config.supported_templates:
-                parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
-                parsed_template["template_name"] = template_name.lower()
-                if config.loglevel == logging.DEBUG:
-                    logger.debug("parsed_template:")
-                    console.print(parsed_template)
-                    # press_enter_to_continue()
-                schema = EnglishWikipediaReferenceSchema()
-                try:
-                    reference: Optional[WikipediaReference] = schema.load(
-                        parsed_template
-                    )
-                except ValidationError as error:
-                    logger.debug(f"Validation error: {error}")
-                    schema_log_file = "schema_errors.log"
-                    self.__log_to_file__(message=str(error), file_name=schema_log_file)
-                    logger.error(
-                        f"This reference was skipped because an unknown "
-                        f"field was found. See the file '{schema_log_file}' for details"
-                    )
-                    reference = None
-                # DISABLED partial loading because it does not work :/
-                # if not reference:
-                #     logger.info("Trying now to deserialize the reference partially")
-                #     # Load partially (ie. ignore the unknown field)
-                #     reference: WikipediaReference = schema.load(
-                #         parsed_template, partial=True
-                #     )
-                # if not reference:
-                #     raise ValueError("This reference could not be deserialized. :/")
-                # else:
-                if reference:
-                    reference.wikibase = self.wikibase
-                    # This is because of https://github.com/internetarchive/wcdimportbot/issues/261
-                    reference.cache = self.cache
-                    # We want the raw template
-                    reference.raw_template = raw_template
-                    reference.finish_parsing_and_generate_hash()
-                    # Handle duplicates:
-                    if reference.md5hash in [
-                        reference.md5hash
-                        for reference in self.references
-                        if reference.md5hash is not None
-                    ]:
-                        logging.debug(
-                            "Skipping reference already present "
-                            "in the list to avoid duplicates"
-                        )
-                    # if config.loglevel == logging.DEBUG:
-                    #     console.print(reference.dict())
-                    else:
-                        self.references.append(reference)
-            else:
-                if config.debug_unsupported_templates:
-                    logger.debug(f"Template '{template_name.lower()}' not supported")
+        # FIXME rewrite to use Extractor
+        # if not self.cache:
+        #     self.__setup_cache__()
+        # if not self.cache:
+        #     raise ValueError("could not setup the cache")
+        # console.print(
+        #     f"Parsing {self.number_of_reference_templates} reference "
+        #     f"templates out of {self.number_of_templates} templates in "
+        #     f"total from {self.title}, see {self.url}"
+        # )
+        # for template_name, content, raw_template in self.template_triples:
+        #     # logger.debug(f"working on {template_name}")
+        #     if template_name.lower() in config.supported_templates:
+        #         parsed_template = self.__fix_keys__(json.loads(json.dumps(content)))
+        #         parsed_template["template_name"] = template_name.lower()
+        #         if config.loglevel == logging.DEBUG:
+        #             logger.debug("parsed_template:")
+        #             console.print(parsed_template)
+        #             # press_enter_to_continue()
+        #         schema = EnglishWikipediaReferenceSchema()
+        #         try:
+        #             reference: Optional[WikipediaReference] = schema.load(
+        #                 parsed_template
+        #             )
+        #         except ValidationError as error:
+        #             logger.debug(f"Validation error: {error}")
+        #             schema_log_file = "schema_errors.log"
+        #             self.__log_to_file__(message=str(error), file_name=schema_log_file)
+        #             logger.error(
+        #                 f"This reference was skipped because an unknown "
+        #                 f"field was found. See the file '{schema_log_file}' for details"
+        #             )
+        #             reference = None
+        #         # DISABLED partial loading because it does not work :/
+        #         # if not reference:
+        #         #     logger.info("Trying now to deserialize the reference partially")
+        #         #     # Load partially (ie. ignore the unknown field)
+        #         #     reference: WikipediaReference = schema.load(
+        #         #         parsed_template, partial=True
+        #         #     )
+        #         # if not reference:
+        #         #     raise ValueError("This reference could not be deserialized. :/")
+        #         # else:
+        #         if reference:
+        #             reference.wikibase = self.wikibase
+        #             # This is because of https://github.com/internetarchive/wcdimportbot/issues/261
+        #             reference.cache = self.cache
+        #             # We want the raw template
+        #             reference.raw_template = raw_template
+        #             reference.finish_parsing_and_generate_hash()
+        #             # Handle duplicates:
+        #             if reference.md5hash in [
+        #                 reference.md5hash
+        #                 for reference in self.references
+        #                 if reference.md5hash is not None
+        #             ]:
+        #                 logging.debug(
+        #                     "Skipping reference already present "
+        #                     "in the list to avoid duplicates"
+        #                 )
+        #             # if config.loglevel == logging.DEBUG:
+        #             #     console.print(reference.dict())
+        #             else:
+        #                 self.references.append(reference)
+        #     else:
+        #         if config.debug_unsupported_templates:
+        #             logger.debug(f"Template '{template_name.lower()}' not supported")
 
     def __print_hash_statistics__(self):
-        logger.info(
-            f"Hashed {self.percent_of_references_with_a_hash} percent of "
-            f"{len(self.references)} references on page {self.title}"
-        )
+        if self.extractor:
+            logger.info(
+                f"Hashed {self.extractor.percent_of_references_with_a_hash} percent of "
+                f"{len(self.references)} references on page {self.title}"
+            )
 
     def __upload_page_and_references__(self):
         # TODO rename this method to "__upload_new_article_item__"
@@ -544,7 +461,7 @@ class WikipediaArticle(WcdItem):
             self.__generate_hash__()
             self.__setup_wikibase_crud_create__()
             self.__extract_and_parse_references__()
-            if self.number_of_reference_templates <= 500:
+            if self.extractor and self.extractor.number_of_references <= 500:
                 self.__upload_references_and_websites_if_missing__()
                 if not self.__page_has_already_been_uploaded__():
                     self.__upload_page_and_references__()
@@ -658,21 +575,3 @@ class WikipediaArticle(WcdItem):
         cache.set_title_or_wdqid_last_updated(
             key=hash_.__generate_entity_updated_hash_key__()
         )
-
-    def __extract_templates_from_the_wikitext__(self):
-        if self.wikitext is None:
-            raise ValueError("self.wikitext was None")
-        # We use an improved and simplified version of pywikibots template extracting function
-        self.template_triples = extract_templates_and_params(self.wikitext, True)
-        self.number_of_templates = len(self.template_triples)
-
-    def __count_number_of_supported_templates_found__(self):
-        if not self.template_triples:
-            raise MissingInformationError("self.template_tuples was None")
-        self.number_of_reference_templates = 0
-        for template_triple in self.template_triples:
-            # logger.debug(f"working on {template_name}")
-            # 0 is the name, 1 is the params which we ignore 2 is the raw template
-            # Check if the template name is supported
-            if template_triple[0].lower() in config.supported_templates:
-                self.number_of_reference_templates += 1

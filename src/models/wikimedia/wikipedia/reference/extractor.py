@@ -36,6 +36,25 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def number_of_references(self) -> int:
         return len(self.references)
 
+    @property
+    def number_of_hashed_references(self):
+        return len(
+            [
+                reference
+                for reference in self.references
+                if reference.md5hash is not None
+            ]
+        )
+
+    @property
+    def percent_of_references_with_a_hash(self):
+        if self.number_of_references == 0:
+            return 0
+        else:
+            return int(
+                self.number_of_hashed_references * 100 / self.number_of_references
+            )
+
     def __extract_all_raw_references__(self):
         """This extracts everything inside <ref></ref> tags"""
         # Thanks to https://github.com/JJMC89,
