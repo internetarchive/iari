@@ -148,7 +148,7 @@ class WikipediaArticle(WcdItem):
         #         raise ValueError("self.pywikibot_site was None")
         #     self.__get_wikipedia_article_from_title__()
         # else:
-        self.extractor.wikitext = self.wikitext
+        self.extractor = WikipediaReferenceExtractor(wikitext=self.wikitext, wikibase=self.wikibase)
         self.extractor.extract_all_references()
         if self.extractor and self.extractor.number_of_references > 500:
             console.print(
