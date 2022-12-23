@@ -1,12 +1,13 @@
 from unittest import TestCase
 
-from mwparserfromhell import parse # type: ignore
+from mwparserfromhell import parse  # type: ignore
 
 from src.models.exceptions import MultipleTemplateError
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
 wikibase = IASandboxWikibase()
+
 
 class TestWikipediaRawReference(TestCase):
     def test__extract_raw_templates__(self):
@@ -67,7 +68,11 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, testing=True, wikibase=wikibase)
-            reference = raw_reference_object.extract_determine_type_and_get_finished_wikipedia_reference_object()
+            raw_reference_object = WikipediaRawReference(
+                tag=ref, testing=True, wikibase=wikibase
+            )
+            reference = (
+                raw_reference_object.extract_determine_type_and_get_finished_wikipedia_reference_object()
+            )
             assert reference.template_name == "citeq"
             assert reference.wikidata_qid == "Q1"

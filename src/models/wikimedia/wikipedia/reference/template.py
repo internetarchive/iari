@@ -10,13 +10,13 @@ from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
+
 class WikipediaTemplate(WcdBaseModel):
     parameters: OrderedDict = OrderedDict()
     raw_template: Template
 
     class Config:
         arbitrary_types_allowed = True
-
 
     @property
     def name(self):

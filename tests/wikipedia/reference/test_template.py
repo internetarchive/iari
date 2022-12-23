@@ -1,4 +1,4 @@
-from mwparserfromhell import parse # type: ignore
+from mwparserfromhell import parse  # type: ignore
 
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
 
@@ -35,7 +35,10 @@ class TestTemplate:
         for template in templates:
             wt = WikipediaTemplate(raw_template=template)
             wt.extract_and_prepare_parameters()
-            assert wt.parameters["1"] == "https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7"
+            assert (
+                wt.parameters["1"]
+                == "https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7"
+            )
 
         # assert (
         #     wrr.templates[0].raw_template
