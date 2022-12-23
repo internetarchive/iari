@@ -480,13 +480,13 @@ class WikibaseCrud(WcdBaseModel):
     def __prepare_single_value_reference_claims_always_present__(
         self, page_reference  # type: WikipediaReference
     ) -> List[Claim]:
-        if page_reference.raw_template:
-            raw_template = datatypes.String(
-                prop_nr=self.wikibase.RAW_TEMPLATE,
-                value=page_reference.shortened_raw_template,
-            )
-        else:
-            raise MissingInformationError("page_reference.raw_template was None")
+        # if page_reference.raw_template:
+        #     raw_template = datatypes.String(
+        #         prop_nr=self.wikibase.RAW_TEMPLATE,
+        #         value=page_reference.shortened_raw_template,
+        #     )
+        # else:
+        #     raise MissingInformationError("page_reference.raw_template was None")
         instance_of = datatypes.Item(
             prop_nr=self.wikibase.INSTANCE_OF,
             value=self.wikibase.WIKIPEDIA_REFERENCE,
@@ -1062,13 +1062,13 @@ class WikibaseCrud(WcdBaseModel):
                     .strftime("+%Y-%m-%dT%H:%M:%SZ")
                 ),
             )
-        if page_reference.raw_template:
-            raw_template = datatypes.String(
-                prop_nr=self.wikibase.RAW_TEMPLATE,
-                value=page_reference.shortened_raw_template,
-            )
-        else:
-            raise MissingInformationError("page_reference.raw_template was None")
+        # if page_reference.raw_template:
+        #     raw_template = datatypes.String(
+        #         prop_nr=self.wikibase.RAW_TEMPLATE,
+        #         value=page_reference.shortened_raw_template,
+        #     )
+        # else:
+        #     raise MissingInformationError("page_reference.raw_template was None")
         if page_reference.title:
             title = datatypes.String(
                 prop_nr=self.wikibase.TITLE,
