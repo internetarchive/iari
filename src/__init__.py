@@ -8,7 +8,6 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
 from src.helpers.console import console
-from src.models.cache import Cache
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.wikibase import Wikibase
 from src.models.wikibase.crud.read import WikibaseCrudRead
@@ -20,7 +19,6 @@ from src.models.wikibase.enums import Result
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.recent_changes_api.event_stream import EventStream
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.models.work_queue import WorkQueue
 from src.wcd_base_model import WcdBaseModel
@@ -34,7 +32,6 @@ class WcdImportBot(WcdBaseModel):
 
     The language code is the one used by Wikimedia Foundation"""
 
-    cache: Optional[Cache]
     language_code: str = "en"
     event_max_count: int = 0  # 0 means disabled, ie. no maximum ie. run forever
     page_title: Optional[str]
@@ -47,8 +44,8 @@ class WcdImportBot(WcdBaseModel):
     wikipedia_article: Optional[WikipediaArticle]
 
     def __flush_cache__(self):
-        # We deprecate flushing the cache, since we will loose the last
-        #  update information if doing so and we cannot currently populate
+        # We deprecate flushing the cache, since we will lose the last
+        #  update information if doing so, and we cannot currently populate
         #  it with a query because the timestamp is not uploaded to wikibase
         raise DeprecationWarning("This has been deprecated since 2.1.0-alpha3.")
         # self.__setup_cache__()
@@ -147,7 +144,7 @@ class WcdImportBot(WcdBaseModel):
         parser.add_argument(
             "-r",
             "--max-range",
-            help="Import max range of pages",
+            help="Import max range of pages via http",
         ),
         # DEPRECATED since 2.1.0-alpha2
         # parser.add_argument(
@@ -159,7 +156,7 @@ class WcdImportBot(WcdBaseModel):
             "-i",
             "--import-title",
             help=(
-                "Title to import from a Wikipedia (Defaults to English Wikipedia for now)"
+                "Title to import from a Wikipedia (Defaults to English Wikipedia for now) via http"
             ),
         )
         parser.add_argument(
@@ -170,11 +167,6 @@ class WcdImportBot(WcdBaseModel):
                 "and WikiCitations via SPARQL (used mainly for debugging)"
             ),
         )
-        parser.add_argument(
-            "--rebuild-cache",
-            action="store_true",
-            help="Get all imported items from SPARQL and rebuild the cache",
-        ),
         # DEPRECATED since 2.1.0-alpha2
         # parser.add_argument(
         #     "--rinse",
@@ -194,24 +186,7 @@ class WcdImportBot(WcdBaseModel):
             # TODO revert to defaulting to Wikicitaitons again
             help="Work against Wikicitations. The bot defaults to IASandboxWikibase.",
         )
-        parser.add_argument(
-            "--worker",
-            action="store_true",
-            help="Start as worker and consume messages from the work queue.",
-        )
-        parser.add_argument(
-            "--ingestor",
-            action="store_true",
-            help="Start as ingestor and consume messages from the Wikimedia "
-            "Enterprise Page Updates API and publish to the article queue.",
-        )
         return parser.parse_args()
-
-    def __setup_cache__(self) -> None:
-        """Setup the cache"""
-        if not self.cache:
-            self.cache = Cache()
-            self.cache.connect()
 
     def __setup_wikibase_integrator_configuration__(
         self,
@@ -289,7 +264,7 @@ class WcdImportBot(WcdBaseModel):
             self.wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
 
     @validate_arguments
-    def get_and_extract_pages_by_range(
+    def get_and_extract_pages_by_range_via_http(
         self, max_count: int = None, category_title: str = None
     ) -> None:
         """
@@ -360,32 +335,6 @@ class WcdImportBot(WcdBaseModel):
                     )
                     wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
 
-    @validate_arguments
-    def lookup_md5hash(self, md5hash: str):
-        """Lookup a md5hash and show the result to the user"""
-        console.print(f"Lookup of md5hash {md5hash}")
-        wc = WikibaseCrudRead(wikibase=self.wikibase)
-        cache = Cache()
-        cache.connect()
-        if cache.ssdb:
-            cache_result = cache.lookup(key=md5hash)
-            if cache_result:
-                console.print(
-                    f"CACHE: Found: {cache_result}, see {wc.entity_url(qid=str(cache_result))}",
-                    style="green",
-                )
-            else:
-                console.print("CACHE: Not found", style="red")
-        else:
-            raise Exception("no ssdb in the cache instance")
-        sparql_result = wc.__get_wcdqids_from_hash__(md5hash=md5hash)
-        if sparql_result:
-            console.print(
-                f"SPARQL: Found: {sparql_result}, see {wc.entity_url(qid=sparql_result[0])}",
-                style="green",
-            )
-        else:
-            console.print("SPARQL: Not found", style="red")
 
     # def print_statistics(self):
     #     self.__calculate_statistics__()
@@ -428,36 +377,17 @@ class WcdImportBot(WcdBaseModel):
         #     self.delete_one_page(title=args.delete_page)
         elif args.max_range or args.category:
             logger.info("Importing range of pages")
-            self.get_and_extract_pages_by_range(
+            self.get_and_extract_pages_by_range_via_http(
                 max_count=args.max_range, category_title=args.category
             )
-        elif args.lookup_md5hash:
-            # We strip here to avoid errors caused by spaces
-            self.lookup_md5hash(md5hash=args.lookup_md5hash.strip())
         elif args.statistics:
             bot = WcdImportBot(wikibase=IASandboxWikibase())
             bot.__gather_and_print_statistics__()
             # DISABLED because it returns 503 now.
             bot = WcdImportBot(wikibase=WikiCitationsWikibase())
             bot.__gather_and_print_statistics__()
-        elif args.worker:
-            console.print("Worker started")
-            work_queue = WorkQueue(wikibase=self.wikibase)
-            work_queue.listen_to_queue()
-        elif args.ingestor:
-            console.print("Ingestor started")
-            event_stream = EventStream(wikibase=self.wikibase)
-            event_stream.start_consuming()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
-
-    def __receive_workloads__(self):
-        if self.testing:
-            self.__setup_cache__()
-        self.work_queue = WorkQueue(
-            wikibase=self.wikibase, testing=self.testing, cache=self.cache
-        )
-        self.work_queue.listen_to_queue()
 
     def get_and_extract_page_by_wdqid(self):
         raise DeprecationWarning("deprecated because of failed test since 2.1.0-alpha2")
