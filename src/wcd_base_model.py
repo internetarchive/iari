@@ -23,10 +23,3 @@ class WcdBaseModel(BaseModel):
         with open(file_name, "a") as f:
             logger.debug(f"Writing entry to {file_name}")
             f.write(f"{message}\n")
-
-    def __setup_cache__(self):
-        from src.models.cache import Cache
-
-        if not self.cache:
-            self.cache = Cache()
-            self.cache.connect()

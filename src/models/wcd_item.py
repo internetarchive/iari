@@ -7,7 +7,6 @@ from src.wcd_base_model import WcdBaseModel
 if TYPE_CHECKING:
     from src.models.wikibase.crud.create import WikibaseCrudCreate
     from src.models.wikibase.crud.read import WikibaseCrudRead
-    from src.models.wikibase.crud.update import WikibaseCrudUpdate
 
 
 class WcdItem(WcdBaseModel):
@@ -37,17 +36,3 @@ class WcdItem(WcdBaseModel):
                 language_code=self.language_code,
                 wikibase=self.wikibase,
             )
-
-    def __setup_wikibase_crud_update__(self, wikipedia_article: "WcdItem"):
-        from src.models.wikibase.crud.update import WikibaseCrudUpdate
-
-        if not self.wikibase_crud_update:
-            self.wikibase_crud_update = WikibaseCrudUpdate(
-                language_code=self.language_code,
-                wikibase=self.wikibase,
-            )
-        from src.models.wikimedia.wikipedia.article import WikipediaArticle
-
-        if not isinstance(wikipedia_article, WikipediaArticle):
-            raise TypeError("not a WikipediaArticle")
-        self.wikibase_crud_update.wikipedia_article = wikipedia_article

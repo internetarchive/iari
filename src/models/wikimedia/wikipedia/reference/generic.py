@@ -17,7 +17,6 @@ from src.models.exceptions import (
     MoreThanOneNumberError,
 )
 from src.models.person import Person
-from src.models.return_.cache_return import CacheReturn
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.enums import (
@@ -1273,46 +1272,23 @@ class WikipediaReference(WcdItem):
     def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
-        if testing and not self.cache:
-            self.__setup_cache__()
         if not self.raw_reference and not testing:
             raise MissingInformationError("self.raw_reference was empty string")
-        from src.models.update_delay import UpdateDelay
-
-        update_delay = UpdateDelay(object_=self, cache=self.cache, testing=testing)
-        # UpdateDelay needs either a title or a wikidata_qid to
-        if update_delay.time_to_update() or testing is True:
-            self.__parse_first_parameter__()
-            self.__parse_urls__()
-            self.__parse_isbn__()
-            # First Level Domain detection is needed for the detection methods
-            self.__extract_first_level_domain__()
-            self.__detect_archive_urls__()
-            self.__detect_internet_archive_id__()
-            # self.__detect_google_books_id__()
-            self.__parse_persons__()
-            self.__merge_date_into_publication_date__()
-            self.__merge_lang_into_language__()
-            self.__merge_place_into_location__()
-            self.__clean_wiki_markup_from_strings__()
-            # We generate the hash last because the parsing needs to be done first
-            self.__generate_hashes__()
-
-    def insert_last_update_timestamp(self):
-        from src.models.cache import Cache
-        from src.models.hashing import Hashing
-
-        hash_ = Hashing(
-            wikibase=self.wikibase,
-            language_code=self.language_code,
-            title=self.title,
-            wikimedia_site=self.wikimedia_site,
-        )
-        cache = Cache()
-        cache.connect()
-        cache.set_title_or_wdqid_last_updated(
-            key=hash_.__generate_entity_updated_hash_key__()
-        )
+        self.__parse_first_parameter__()
+        self.__parse_urls__()
+        self.__parse_isbn__()
+        # First Level Domain detection is needed for the detection methods
+        self.__extract_first_level_domain__()
+        self.__detect_archive_urls__()
+        self.__detect_internet_archive_id__()
+        # self.__detect_google_books_id__()
+        self.__parse_persons__()
+        self.__merge_date_into_publication_date__()
+        self.__merge_lang_into_language__()
+        self.__merge_place_into_location__()
+        self.__clean_wiki_markup_from_strings__()
+        # We generate the hash last because the parsing needs to be done first
+        self.__generate_hashes__()
 
     @staticmethod
     def __has_template_data__(string: str) -> bool:
