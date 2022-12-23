@@ -13,8 +13,6 @@ class MissingInformationError(BaseException):
 class MoreThanOneNumberError(BaseException):
     pass
 
-class MultipleTemplateError(BaseException):
-    pass
 
 class MultipleTemplateError(BaseException):
     pass

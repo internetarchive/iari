@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import config
 from src import console
-from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
@@ -598,22 +597,3 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.has_hash is True
         assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
-
-    def test_raw_template_url(self):
-        data = (
-            "{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
-            "https://babel.hathitrust.org/cgi/pt?id=mdp.39015027915100&view=1up&seq=11 -->}}"
-        )
-        template_triples = extract_templates_and_params(data, True)
-        for name, content, raw in template_triples:
-            assert (
-                raw
-                == data
-            )
-            content["template_name"] = name
-            reference = EnglishWikipediaReference(**content)
-            reference.raw_template = raw
-            reference.wikibase = IASandboxWikibase()
-            reference.finish_parsing_and_generate_hash(testing=True)
-            # we test that it is still correct
-            assert reference.raw_template == raw
