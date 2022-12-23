@@ -4,7 +4,9 @@ reference information from Wikipedia articles as [structured data](https://www.w
 in a [Wikibase.cloud](https://wikibase.cloud/) instance. We call the resulting database Wikipedia Citations Database (WCD).
 
 The framework has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) (version 1.0.0 a proof of concept import tool based on WikidataIntegrator)
-and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2.0.0+ a scalable ETL-framework with an API and capability of reading EventStreams) as part of the 
+and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2.0.0+ a scalable ETL-framework with an API 
+and capability of reading EventStreams and version 3.0.0+ with graph generation from Wikipedia dumps and an 
+article_statistic API) as part of the 
 [Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by 
 Mark Graham, head of The 
 [Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the [Internet Archive](https://www.wikidata.org/wiki/Q461).
@@ -63,41 +65,8 @@ Currently the focus is on supporting the most widely used reference
 templates in English Wikipedia.
 
 ### List of currently supported templates
-```
-supported_templates = [
-    "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
-    "cite q",
-    "citeq",
-    "isbn",
-    "url",
-    # CS1 templates:
-    "cite arxiv",
-    "cite av media notes",
-    "cite av media",
-    "cite biorxiv",
-    "cite book",
-    "cite cite seerx",
-    "cite conference",
-    "cite encyclopedia",
-    "cite episode",
-    "cite interview",
-    "cite journal",
-    "cite magazine",
-    "cite mailing list" "cite map",
-    "cite news",
-    "cite newsgroup",
-    "cite podcast",
-    "cite press release",
-    "cite report",
-    "cite serial",
-    "cite sign",
-    "cite speech",
-    "cite ssrn",
-    "cite techreport",
-    "cite thesis",
-    "cite web",
-]
-```
+See [config_sample.py](config_sample.py) for a list of templates.
+
 # Terminology
 We use the following terminology:
 * citation: this is what is called a reference in Wikipedia and could be uniquely 
@@ -107,11 +76,10 @@ identified by one of the supported identifiers (ie DOI, ISBN, PMID, OCLC, URL)
 # Features
 Currently the framework has the following features:
 * support for English Wikipedia only
-* import articles one by one
-* import a range of articles
-* import a range of articles from a category
-* ingest article updates from [EventStreams](https://www.wikidata.org/wiki/Q115402046)
-* scale horizontally up to the Wikibase API gets choked (a total max of ~6 edits a second)
+* generation of a Wikibase graph based on a Wikipedia dump and upload it to Wikibase 
+* API endpoint which helps jump from an article to the item in the Wikibase
+* API endpoint which analyze a given article and returns statistics about it (number of references, 
+number of citation templates of different types, number of references outside <ref>s, etc.)
 
 # Diagrams
 
