@@ -561,20 +561,3 @@ class WikipediaArticle(WcdItem):
         #             raise MissingInformationError(f"no sitelinks from Wikidata, got {entities}")
         # else:
         #     raise MissingInformationError("no entities from Wikidata")
-
-    def __insert_last_update_timestamp__(self):
-        from src.models.cache import Cache
-        from src.models.hashing import Hashing
-
-        hash_ = Hashing(
-            wikibase=self.wikibase,
-            language_code=self.language_code,
-            article_wikidata_qid=self.return_.item_qid,
-            title=self.title,
-            wikimedia_site=self.wikimedia_site,
-        )
-        cache = Cache()
-        cache.connect()
-        cache.set_title_or_wdqid_last_updated(
-            key=hash_.__generate_entity_updated_hash_key__()
-        )

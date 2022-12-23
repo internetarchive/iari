@@ -26,8 +26,8 @@ class TestHashing(TestCase):
 
     def test_generate_raw_reference_hash(self):
         h = Hashing(raw_template="test")
-        hash = h.generate_raw_reference_hash()
-        assert hash == "098f6bcd4621d373cade4e832627b4f6"
+        hash_ = h.generate_raw_reference_hash()
+        assert hash_ == "098f6bcd4621d373cade4e832627b4f6"
         h.raw_template = ""
         with self.assertRaises(MissingInformationError):
             h.generate_raw_reference_hash()
