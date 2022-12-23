@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 # class WikidataProperty(Enum):
 #     MAIN_SUBJECT = "P921"
 #     DETERMINATION_METHOD = "P459"
@@ -45,3 +46,11 @@ class WikimediaEditType(Enum):
     LOG = "log"
     CATEGORIZE = "categorize"
     UNKNOWN = "142"
+
+
+# class ReferenceType(Enum):
+#     CLEAN_SUPPORTED_CITATION_REFERENCE = auto() # cite q, cs1, citation
+#     PLAIN_TEXT_REFERENCE_WITH_CS1_TEMPLATE = auto()
+#     PLAIN_TEXT_REFERENCE_WITH_BARE_URL_TEMPLATE = auto()
+#     PLAIN_TEXT_REFERENCE_WITH_ISBN_TEMPLATE = auto()
+#     PLAIN_TEXT_REFERENCE_WITH_A_SUPPORTED_IDENTIFIER = auto() # URL is a supported identifier
