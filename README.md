@@ -131,12 +131,6 @@ number of citation templates of different types, number of references outside <r
 ## Article import sequence
 ![image](diagrams/sequence_import_title.png)
 
-## Ingester sequence
-![image](diagrams/ingester_sequence.png)
-
-## Worker sequence
-![image](diagrams/worker_sequence.png)
-
 # License
 This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022
 The diagram PNG files are CC0.
