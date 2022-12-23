@@ -8,7 +8,8 @@ from src.wcd_base_model import WcdBaseModel
 
 
 class Hashing(WcdBaseModel):
-    """Here we handle all the neccesary hashing"""
+    """Here we handle all the necessary hashing"""
+
     wikibase: Wikibase = IASandboxWikibase()
     language_code: str = "en"
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
@@ -26,13 +27,12 @@ class Hashing(WcdBaseModel):
         unique and quick to lookup of the timestamp"""
         if not self.title and not self.article_wikidata_qid:
             if not self.testing:
-                raise MissingInformationError("self.title and self.article_wikidata_qid was empty")
+                raise MissingInformationError(
+                    "self.title and self.article_wikidata_qid was empty"
+                )
             else:
                 # generate a nonsense hash to avoid test failure
-                return hashlib.md5(
-                    f"testing-"
-                    f"updated".encode()
-                ).hexdigest()
+                return hashlib.md5(f"testing-" f"updated".encode()).hexdigest()
         if self.title:
             title_or_wdqid = self.title
         else:
@@ -50,6 +50,4 @@ class Hashing(WcdBaseModel):
         if not self.raw_template:
             raise MissingInformationError("self.raw_template was empty")
         # We lower case the whole thing first because we don't care about casing
-        return hashlib.md5(
-            f"{self.raw_template.lower()}".encode()
-        ).hexdigest()
+        return hashlib.md5(f"{self.raw_template.lower()}".encode()).hexdigest()

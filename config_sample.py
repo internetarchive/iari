@@ -39,7 +39,7 @@ use_sandbox_wikibase_backend_for_wikicitations_api = True
 # Supported templates
 citation_template = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
-    ]
+]
 citeq_templates = [
     "cite q",
     "citeq",  # alias
@@ -81,7 +81,13 @@ url_template = [
     "url",
 ]
 supported_citation_templates: List[str] = []
-for list_ in [citation_template, citeq_templates, cs1_templates, isbn_template, url_template]:
+for list_ in [
+    citation_template,
+    citeq_templates,
+    cs1_templates,
+    isbn_template,
+    url_template,
+]:
     supported_citation_templates.extend(list_)
 bare_url_regex = (
     # There are about 10 different ones but we don't care
