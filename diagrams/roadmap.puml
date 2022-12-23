@@ -2,10 +2,12 @@
 'https://plantuml.com/activity-diagram-beta
 
 start
+:Write a new API get_statistics that analyzes an article and returns statistics;
 :Write a userscript that gives the user an overview and detailed report about all quantifiable information based on
 the article wikitext and inform the user about ways to improve the references;
-:Write a new class WikipediaArticleDumpReader that can read articles from a compressed Wikipedia dump
-:Write an AI/GROBID based reference reader that can convert plain text and mixed references to CS1 templates
+:Write a new class WikipediaArticleDumpReader that can read articles from a compressed Wikipedia dump;
+:Generate a test graph based on a dump to a file and then upload it to Wikibase using WBI;
+:Write an AI/GROBID based reference reader that can convert plain text and mixed references to CS1 templates;
 :Invite the community to provide feedback on the framework;
 :Define a process to let the community help guide what to improve iteratively;
 stop
