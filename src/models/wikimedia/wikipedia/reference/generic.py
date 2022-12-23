@@ -1054,7 +1054,13 @@ class WikipediaReference(WcdItem):
     def __parse_persons__(self) -> None:
         """Parse all person related data into Person objects"""
         # find all the attributes but exclude the properties as they lead to weird errors
-        properties = ["has_hash", "isodate", "shortened_raw_template", "template_url", "wikibase_url"]
+        properties = [
+            "has_hash",
+            "isodate",
+            "shortened_raw_template",
+            "template_url",
+            "wikibase_url",
+        ]
         attributes = [
             a
             for a in dir(self)

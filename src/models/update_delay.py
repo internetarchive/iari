@@ -75,7 +75,7 @@ class UpdateDelay(WcdBaseModel):
                 article_wikidata_qid=self.object_.article_wikidata_qid,
                 title=self.object_.title,
                 wikimedia_site=self.object_.wikimedia_site,
-                testing=self.testing
+                testing=self.testing,
             )
         else:
             from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -94,7 +94,7 @@ class UpdateDelay(WcdBaseModel):
                 language_code=self.object_.language_code,
                 title=self.object_.title,
                 wikimedia_site=self.object_.wikimedia_site,
-                testing=self.testing
+                testing=self.testing,
             )
         return hashing.__generate_entity_updated_hash_key__()
 

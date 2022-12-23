@@ -2,13 +2,13 @@
 Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import Tag  # type: ignore
 
 import config
-from src.models.exceptions import MultipleTemplateError, MissingInformationError
+from src.models.exceptions import MissingInformationError, MultipleTemplateError
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
 from src.wcd_base_model import WcdBaseModel
@@ -21,11 +21,12 @@ logger = logging.getLogger(__name__)
 
 # TODO this does not scale at all if we want multi-wiki support :/
 class WikipediaRawReference(WcdBaseModel):
-    """This class handles determining the type of refence and parse the templates from the raw reference
+    """This class handles determining the type of reference and parse the templates from the raw reference
 
     This contains code from pywikibot 7.2.0 textlib.py to avoid forking the whole thing
     """
-    tag: Tag # raw reference Tag from mwparserfromhell
+
+    tag: Tag  # raw reference Tag from mwparserfromhell
     templates: List[WikipediaTemplate] = []
     plain_text_in_reference: bool = False
     citation_template_found: bool = True
@@ -72,7 +73,9 @@ class WikipediaRawReference(WcdBaseModel):
         self.__extract_templates_and_parameters_from_raw_reference__()
         self.__determine_reference_type__()
 
-    def extract_determine_type_and_get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
+    def extract_determine_type_and_get_finished_wikipedia_reference_object(
+        self,
+    ) -> "WikipediaReference":
         """Get the WikipediaReference object"""
         self.__extract_and_determine_reference_type__()
         return self.make_wikipedia_reference_object()
@@ -126,14 +129,18 @@ class WikipediaRawReference(WcdBaseModel):
                     self.bare_url_template_found = False
             else:
                 # TODO log to file and fail gracely instead
-                raise MultipleTemplateError(f"We found multiple templates in "
-                                            f"{self.tag} which is currently not supported")
+                raise MultipleTemplateError(
+                    f"We found multiple templates in "
+                    f"{self.tag} which is currently not supported"
+                )
 
     def __detect_clean_template__(self) -> bool:
         """A clean template reference has no text outside the {{ and }}"""
         if not self.templates[0].raw_template:
             raise MissingInformationError("self.templates[0].raw_template was None")
-        if str(self.templates[0].raw_template).startswith("{{") and self.templates[0].raw_template.endswith("}}"):
+        if str(self.templates[0].raw_template).startswith("{{") and self.templates[
+            0
+        ].raw_template.endswith("}}"):
             return True
         else:
             return False

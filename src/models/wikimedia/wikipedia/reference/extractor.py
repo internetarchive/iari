@@ -7,14 +7,15 @@ import mwparserfromhell  # type: ignore
 
 import config
 from src.models.wikibase import Wikibase
-from src.wcd_base_model import WcdBaseModel
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
+from src.wcd_base_model import WcdBaseModel
 
 Triple_list = List[Tuple[str, OrderedDictType[str, str], str]]
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
+
 
 class WikipediaReferenceExtractor(WcdBaseModel):
     """This class handles all extraction of references from wikicode
@@ -26,7 +27,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     """
 
     wikitext: str
-    __raw_references: List[WikipediaRawReference] = [] # private
+    __raw_references: List[WikipediaRawReference] = []  # private
     references: List[WikipediaReference] = []
     number_of_references_with_one_supported_template: int = 0
     wikibase: Wikibase
@@ -62,11 +63,18 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         wikicode = mwparserfromhell.parse(self.wikitext)
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
-            self.__raw_references.append(WikipediaRawReference(tag=ref, wikibase=self.wikibase, testing=self.testing))
+            self.__raw_references.append(
+                WikipediaRawReference(
+                    tag=ref, wikibase=self.wikibase, testing=self.testing
+                )
+            )
 
     def extract_all_references(self):
         self.__extract_all_raw_references__()
-        self.references = [raw_reference.extract_determine_type_and_get_finished_wikipedia_reference_object() for raw_reference in self.__raw_references]
+        self.references = [
+            raw_reference.extract_determine_type_and_get_finished_wikipedia_reference_object()
+            for raw_reference in self.__raw_references
+        ]
 
     # def prepare_all_statistic(self):
     #     # TODO figure out how to best store this data in the wikibase

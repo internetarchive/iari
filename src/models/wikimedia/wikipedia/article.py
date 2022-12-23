@@ -19,7 +19,9 @@ from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikibase.website import Website
 from src.models.wikimedia.enums import WikimediaSite
-from src.models.wikimedia.wikipedia.reference.extractor import WikipediaReferenceExtractor
+from src.models.wikimedia.wikipedia.reference.extractor import (
+    WikipediaReferenceExtractor,
+)
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
 logger = logging.getLogger(__name__)
@@ -54,7 +56,6 @@ class WikipediaArticle(WcdItem):
     @property
     def absolute_url(self):
         return f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/index.php?curid={self.page_id}"
-
 
     @property
     def is_redirect(self) -> bool:
@@ -148,7 +149,9 @@ class WikipediaArticle(WcdItem):
         #         raise ValueError("self.pywikibot_site was None")
         #     self.__get_wikipedia_article_from_title__()
         # else:
-        self.extractor = WikipediaReferenceExtractor(wikitext=self.wikitext, wikibase=self.wikibase)
+        self.extractor = WikipediaReferenceExtractor(
+            wikitext=self.wikitext, wikibase=self.wikibase
+        )
         self.extractor.extract_all_references()
         if self.extractor and self.extractor.number_of_references > 500:
             console.print(
