@@ -31,7 +31,7 @@ maintained by them as of this writing.
 # Why store the data about references in a graph database?
 The advantages of having access to this data in a graph are many.
 * [Globally unique and persistent identifiers](https://www.wikidata.org/wiki/Q115493815)(aka. GUPRI) for as many references in Wikipedia as possible.
-* Helping Wikipedians to improve the references so they can be uniquely identified and can be [_turned blue_](https://www.wikidata.org/wiki/Q115136754) ([video](https://commons.wikimedia.org/wiki/File:Let%E2%80%99s_Turn_all_the_References_Blue.webm))
+* Helping Wikipedians to improve the references, so they can be uniquely identified and can be [_turned blue_](https://www.wikidata.org/wiki/Q115136754) ([video](https://commons.wikimedia.org/wiki/File:Let%E2%80%99s_Turn_all_the_References_Blue.webm))
 * Overview and visualization of references across Wikipedia articles and language editions becomes possible.
 * Overview of most cited websites in the world (see also [bestref.net](https://bestref.net/) 
 which is based on data extraction from the dump files)
@@ -47,7 +47,7 @@ which is based on data extraction from the dump files)
 # Estimated size
 200+ million reference items (add source to research extracting references from Wikipedias). 100+ million website items (guesstimate). [60 million wikipedia article](https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia#Comparisons_with_other_Wikipedias) items. In total ~260 million items. For comparison [Wikidata as of this writing have 100 million items](https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
 
-In total we estimate we will have 15 triples per item which equals 15 bn triples in total. For comparison, [Wikidata as of this writing have 14.4 bn triples](https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
+In total, we estimate we will have 15 triples per item which equals 15 bn triples in total. For comparison, [Wikidata as of this writing have 14.4 bn triples](https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
 
 # Supported templates
 There are a lot of templates in use in the different Wikipedias. For now 
@@ -59,7 +59,7 @@ enwp specific templates and parameters.
 English Wikipedia has hundreds of special reference templates in use 
 and a handful of widely used generic templates.
 
-Currently the focus is on supporting the most widely used reference 
+Currently, the focus is on supporting the most widely used reference 
 templates in English Wikipedia.
 
 ### List of currently supported templates
@@ -102,10 +102,10 @@ supported_templates = [
 We use the following terminology to distinguish different types of references.
 ## Templates
 1) **Citation template** - see https://en.wikipedia.org/wiki/Template:Citation
-1) **Citation Style 1 template** aka cs1 template - class of templates which multiple Wikipedias use. Implemented in lua. See https://en.wikipedia.org/wiki/Help:Citation_Style_1
-1) **General reference with a supported template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template we support.
-1) **Unbulleted list citebundle template** - template with multiple templates inside, see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
-1) **bare url template** - template added in English Wikipedia (by a bot presumably) when a bare url is found. See https://en.wikipedia.org/wiki/Template:Cleanup_bare_URLs
+2) **Citation Style 1 template** aka cs1 template - class of templates which multiple Wikipedias use. Implemented in lua. See https://en.wikipedia.org/wiki/Help:Citation_Style_1
+3) **General reference with a supported template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template we support.
+4) **Unbulleted list citebundle template** - template with multiple templates inside, see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
+5) **bare url template** - template added in English Wikipedia (by a bot presumably) when a bare url is found. See https://en.wikipedia.org/wiki/Template:Cleanup_bare_URLs
  
 ## Reference types detected by the ArticleAnalyzer
 We support detecting the following types. A reference cannot have multiple types.
@@ -115,25 +115,25 @@ E.g.
 
 ### Parse support
 1) **mixed reference with an ISBN template** - reference with plain text and a {{isbn}} template
-1) **mixed reference with a URL template** - reference with plain text and a URL (these are very rare)
-1) **ISBN template reference** - reference with only a {{isbn}} template
-1) **URL template reference** - reference with only a {{url}} template
-1) **Plain text reference with a cs1 template** - reference as above but where part of the information is structured and part of it is not (theoretical so far, we presume it exists) (defined as: begins with {{ and ends with }})
-1) **multiple template reference with google books template** - (defined as: contains multiple templates according to mwparserfromhell) E.g. {{cite book|url={{google books|123456}}}} <- this particular subtype we want to support
-1) **multiple template reference with url and bare url x template** - E.g. `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
+2) **mixed reference with a URL template** - reference with plain text and a URL (these are very rare)
+3) **ISBN template reference** - reference with only a {{isbn}} template
+4) **URL template reference** - reference with only a {{url}} template
+5) **Plain text reference with a cs1 template** - reference as above but where part of the information is structured and part of it is not (theoretical so far, we presume it exists) (defined as: begins with {{ and ends with }})
+6) **multiple template reference with Google books template** - (defined as: contains multiple templates according to mwparserfromhell) E.g. {{cite book|url={{google books|123456}}}} <- this particular subtype we want to support
+7) **multiple template reference with url and bare url x template** - E.g. `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
 
 ### No parse support
 These are unsupported because of complexity
 1) **reference with a Bare URL template** - as above, but with one of the {{bare url x}} templates 
-1) **Plain text reference with a URL outside a template** - as above, but with no other identifier than the URL
-1) **Short citation reference** - special type of plain text reference defined above. See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
+2) **Plain text reference with a URL outside a template** - as above, but with no other identifier than the URL
+3) **Short citation reference** - special type of plain text reference defined above. See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
 ![image](https://user-images.githubusercontent.com/68460690/208091737-abc20b6e-8102-4acd-b0fa-409aa72d9ae8.png)
-1) **Plain text reference without a URL or identifier** - e.g. reference to a book only by author and title. e.g. "Muller Report, p12"
-1) **General reference** - reference outside of <ref>. E.g. part of further reading- or bibliography section.
+4) **Plain text reference without a URL or identifier** - e.g. reference to a book only by author and title. e.g. "Muller Report, p12"
+5) **General reference** - reference outside of <ref>. E.g. part of further reading- or bibliography section.
 ![image](https://user-images.githubusercontent.com/68460690/208092363-ba4b5346-cad7-495e-8aff-1aa4f2f0161e.png)
-1) **General reference with a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template
-1) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
-1) **Plain text reference**: references inside <ref> tags, but without ANY template. 
+6) **General reference with a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template
+7) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
+8) **Plain text reference**: references inside <ref> tags, but without ANY template. 
 
 These are unsupported because they are very few (<200 transclusions in enwiki)
 * **Bundled reference** - multiple references in one <ref> see https://en.wikipedia.org/w/index.php?title=Wikipedia:CITEBUNDLE
@@ -141,10 +141,10 @@ These are unsupported because they are very few (<200 transclusions in enwiki)
 
 ## Types used in the graph
 1) **wikipedia citation** - anything inside <ref> tags in a Wikipedia article that _can_ be uniquely identified via a URL, PMID, ISBN, DOI or similar identifier. We have a property for this in the graph and these citations get their own item with an id.
-1) **wikipedia string citation** -  anything inside <ref> tags in a Wikipedia article that _cannot_ be uniquely identified via a URL, PMID, ISBN, DOI or similar identifier. These should be improved by Wikipedia editors so they can be uniquely identified. Eg. lookup ISBN for a {{cite book}} or add a DOI, URL or other identifier to a {{cite journal}}
+2) **wikipedia string citation** -  anything inside <ref> tags in a Wikipedia article that _cannot_ be uniquely identified via a URL, PMID, ISBN, DOI or similar identifier. These should be improved by Wikipedia editors, so they can be uniquely identified. E.g. lookup ISBN for a {{cite book}} or add a DOI, URL or other identifier to a {{cite journal}}
  
 # Features
-Currently the framework has the following features:
+Currently, the framework has the following features:
 * support for English Wikipedia only
 * import articles one by one
 * import a range of articles
