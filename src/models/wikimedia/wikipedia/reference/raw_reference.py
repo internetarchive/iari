@@ -20,12 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 # TODO this does not scale at all if we want multi-wiki support :/
+# TODO convert to abstract class and make an 2 implementations WikipediaRawCitationReference and WikipediaRawGeneralReference
 class WikipediaRawReference(WcdBaseModel):
     """This class handles determining the type of reference and parse the templates from the raw reference
 
     This contains code from pywikibot 7.2.0 textlib.py to avoid forking the whole thing
     """
 
+    # TODO make tag optional
     tag: Tag  # raw reference Tag from mwparserfromhell
     templates: List[WikipediaTemplate] = []
     plain_text_in_reference: bool = False
@@ -37,6 +39,9 @@ class WikipediaRawReference(WcdBaseModel):
     bare_url_template_found: bool = False
     testing: bool = False
     wikibase: Wikibase
+    # TODO add new optional attribute wikicode: Optional[Wikicode]
+    #  which contains the parsed output of the general reference line
+    # TODO add new method is_from_ref that returns True if tag is not None
 
     class Config:
         arbitrary_types_allowed = True
@@ -52,6 +57,7 @@ class WikipediaRawReference(WcdBaseModel):
 
     def __extract_raw_templates__(self):
         """Extract the templates from the Tag"""
+        # TODO rewrite to handle self.wikicode also
         if not self.tag:
             raise MissingInformationError("self.tag was None")
         if isinstance(self.tag, str):

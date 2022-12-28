@@ -392,6 +392,7 @@ class WikipediaArticle(WcdItem):
             )
             self.__compare_data_and_update__()
 
+    # TODO comment out before 3.0.0-alpha0
     def __upload_references_and_websites_if_missing__(self, testing: bool = False):
         """Go through each reference and upload if missing to Wikibase"""
         logger.debug("__upload_references_and_websites_if_missing__: Running")
@@ -440,6 +441,7 @@ class WikipediaArticle(WcdItem):
             count += 1
         self.references = updated_references
 
+    # TODO comment out before 3.0.0-alpha0
     def extract_and_parse_and_upload_missing_items_to_wikibase(self) -> None:
         """Extract the references and upload first
         the references and then the page to Wikibase

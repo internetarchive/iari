@@ -33,6 +33,11 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     wikibase: Wikibase
     testing: bool = False
 
+    # TODO rewrite to distinguish between citation aka refreferences and general references outside a </ref>.
+    # TODO add number_of_citation_references method
+    # TODO add number_of_general_references method
+    # TODO add number_of_references_with_a_template using list comprehension and if wrr.templates
+    # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
     @property
     def number_of_references(self) -> int:
         return len(self.references)
