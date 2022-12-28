@@ -1152,6 +1152,7 @@ class WikipediaReference(WcdItem):
         if self.transcripturl:
             self.transcripturl = self.__parse_url__(url=self.transcripturl)
 
+    # noinspection PyMethodParameters
     @validator(
         "access_date",
         "archive_date",
