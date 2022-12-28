@@ -86,5 +86,7 @@ class WikiCitationsWikibase(Wikibase):
     GHOSTARCHIVE_ORG = "Q7981"  # label: Ghostarchive.org description: web archive
     WEBCITATION_ORG = "Q7982"  # label: Webcitation.org description: web archive
 
+    RAW_TEMPLATE = ""  # not setup yet
+
     # This has to come last to work.
     wcdqid_language_edition_of_wikipedia_to_work_on = ENGLISH_WIKIPEDIA

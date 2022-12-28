@@ -11,7 +11,6 @@ from tld.exceptions import TldBadUrl
 
 import config
 from src import WikimediaSite
-from src.helpers.template_extraction import extract_templates_and_params
 from src.models.exceptions import (
     AmbiguousDateError,
     MissingInformationError,
@@ -21,13 +20,10 @@ from src.models.person import Person
 from src.models.return_.cache_return import CacheReturn
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
-from src.models.wikimedia.wikipedia.reference.english.google_books import (
-    GoogleBooks,
-    GoogleBooksSchema,
-)
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
+from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
 logger = logging.getLogger(__name__)
 
@@ -72,10 +68,10 @@ class WikipediaReference(WcdItem):
     numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
     persons_without_role: Optional[List[Person]]
-    raw_template: str = ""
     template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    raw_reference: Optional[WikipediaRawReference] = None
 
     # These are all the parameters in the supported references
     #######################
@@ -1058,7 +1054,13 @@ class WikipediaReference(WcdItem):
     def __parse_persons__(self) -> None:
         """Parse all person related data into Person objects"""
         # find all the attributes but exclude the properties as they lead to weird errors
-        properties = ["has_hash", "isodate", "template_url", "wikibase_url"]
+        properties = [
+            "has_hash",
+            "isodate",
+            "shortened_raw_template",
+            "template_url",
+            "wikibase_url",
+        ]
         attributes = [
             a
             for a in dir(self)
@@ -1123,14 +1125,15 @@ class WikipediaReference(WcdItem):
             logger.info(f"Found scheme in {url}")
             return url
         else:
-            if self.__has_template_data__(string=url):
-                logger.info(f"Found template data in url: {url}")
-                return self.__get_url_from_template__(url=url)
-            else:
-                logger.warning(
-                    f"Skipped the URL '{self.url}' because of missing URL scheme"
-                )
-                return ""
+            # TODO REGRESSION We don't support nested templates for now during the rewrite
+            # if self.__has_template_data__(string=url):
+            #     logger.info(f"Found template data in url: {url}")
+            #     return self.__get_url_from_template__(url=url)
+            # else:
+            logger.warning(
+                f"Skipped the URL '{self.url}' because of missing URL scheme"
+            )
+            return ""
 
     def __parse_urls__(self) -> None:
         """This function looks for Google Books references and
@@ -1149,6 +1152,7 @@ class WikipediaReference(WcdItem):
         if self.transcripturl:
             self.transcripturl = self.__parse_url__(url=self.transcripturl)
 
+    # noinspection PyMethodParameters
     @validator(
         "access_date",
         "archive_date",
@@ -1217,9 +1221,7 @@ class WikipediaReference(WcdItem):
         return date
 
     @validate_arguments
-    def __upload_reference_to_wikibase__(
-        self
-    ) -> WikibaseReturn:
+    def __upload_reference_to_wikibase__(self) -> WikibaseReturn:
         """This method tries to upload the reference to Wikibase
         and returns a WikibaseReturn."""
         logger.debug("__upload_reference_to_wikicitations__: Running")
@@ -1273,12 +1275,13 @@ class WikipediaReference(WcdItem):
         # We parse the first parameter before isbn
         if testing and not self.cache:
             self.__setup_cache__()
-        if not self.raw_template and not testing:
-            raise MissingInformationError("self.raw_template was empty string")
+        if not self.raw_reference and not testing:
+            raise MissingInformationError("self.raw_reference was empty string")
         from src.models.update_delay import UpdateDelay
 
-        update_delay = UpdateDelay(object_=self, cache=self.cache)
-        if update_delay.time_to_update(testing=testing) or testing is True:
+        update_delay = UpdateDelay(object_=self, cache=self.cache, testing=testing)
+        # UpdateDelay needs either a title or a wikidata_qid to
+        if update_delay.time_to_update() or testing is True:
             self.__parse_first_parameter__()
             self.__parse_urls__()
             self.__parse_isbn__()
@@ -1319,30 +1322,32 @@ class WikipediaReference(WcdItem):
         else:
             return False
 
-    def __get_url_from_template__(self, url: str) -> str:
-        if "google books" in url.lower():
-            logger.info("Found Google books template")
-            return self.__get_url_from_google_books_template__(url=url)
-        else:
-            logger.warning(f"Parsing the template data in {url} is not supported yet")
-            return ""
+    # TODO update to use new models
+    # def __get_url_from_template__(self, url: str) -> str:
+    #     if "google books" in url.lower():
+    #         logger.info("Found Google books template")
+    #         return self.__get_url_from_google_books_template__(url=url)
+    #     else:
+    #         logger.warning(f"Parsing the template data in {url} is not supported yet")
+    #         return ""
 
-    @staticmethod
-    def __get_url_from_google_books_template__(url: str) -> str:
-        """Parse the Google Books template that sometimes appear in a url
-        and return the generated url"""
-        logger.debug("__get_url_from_google_books_template__: Running")
-        template_triples = extract_templates_and_params(url, True)
-        if template_triples:
-            for _template_name, content, _raw_template in template_triples:
-                # We only care about the first one found
-                google_books: Optional[GoogleBooks] = GoogleBooksSchema().load(content)
-                if google_books:
-                    google_books.finish_parsing()
-                    # We only care about the first
-                    return str(google_books.url)
-            logger.warning(f"Parsing the google books template data in {url} failed")
-            return ""
-        else:
-            logger.warning(f"Parsing the google books template data in {url} failed")
-            return ""
+    # TODO update to use new models
+    # @staticmethod
+    # def __get_url_from_google_books_template__(url: str) -> str:
+    #     """Parse the Google Books template that sometimes appear in a url
+    #     and return the generated url"""
+    #     logger.debug("__get_url_from_google_books_template__: Running")
+    #     template_triples = extract_templates_and_params(url, True)
+    #     if template_triples:
+    #         for _template_name, content, _raw_template in template_triples:
+    #             # We only care about the first one found
+    #             google_books: Optional[GoogleBooks] = GoogleBooksSchema().load(content)
+    #             if google_books:
+    #                 google_books.finish_parsing()
+    #                 # We only care about the first
+    #                 return str(google_books.url)
+    #         logger.warning(f"Parsing the google books template data in {url} failed")
+    #         return ""
+    #     else:
+    #         logger.warning(f"Parsing the google books template data in {url} failed")
+    #         return ""

@@ -16,7 +16,7 @@ class TestUpdateDelay:
             key=ud.__get_entity_updated_hash_key__(), timestamp=123.123
         )
         # Then we test if it is time to update
-        result = ud.time_to_update(testing=True)
+        result = ud.time_to_update()
         assert result is True
 
     def test___delay_time_has_passed__(self):

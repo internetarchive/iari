@@ -18,14 +18,16 @@ class UpdateDelay(WcdBaseModel):
     cache: Optional[Cache] = None
     object_: Any
     time_of_last_update: Optional[datetime]
+    testing: bool = False
 
-    def time_to_update(self, testing: bool = False) -> bool:
-        if testing and not self.cache:
+    def time_to_update(self) -> bool:
+        # We check here if the cache was propagated correctly
+        if self.testing and not self.cache:
             self.__setup_cache__()
         if not self.cache:
             raise ValueError("self.cache was None")
         self.time_of_last_update = self.__convert_to_datetime__(
-            timestamp=self.__get_timestamp_from_cache__(testing=testing)
+            timestamp=self.__get_timestamp_from_cache__()
         )
         return self.__delay_time_has_passed__()
 
@@ -62,6 +64,8 @@ class UpdateDelay(WcdBaseModel):
             raise ValueError("self.time_of_last_update was None")
 
     def __get_entity_updated_hash_key__(self) -> str:
+        if not self.object_.wikibase:
+            raise MissingInformationError("self.object_.wikibase was None")
         from src.models.message import Message
 
         if isinstance(self.object_, Message):
@@ -71,6 +75,7 @@ class UpdateDelay(WcdBaseModel):
                 article_wikidata_qid=self.object_.article_wikidata_qid,
                 title=self.object_.title,
                 wikimedia_site=self.object_.wikimedia_site,
+                testing=self.testing,
             )
         else:
             from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -89,6 +94,7 @@ class UpdateDelay(WcdBaseModel):
                 language_code=self.object_.language_code,
                 title=self.object_.title,
                 wikimedia_site=self.object_.wikimedia_site,
+                testing=self.testing,
             )
         return hashing.__generate_entity_updated_hash_key__()
 

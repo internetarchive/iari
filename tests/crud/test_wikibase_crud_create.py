@@ -529,3 +529,38 @@ class TestWikibaseCrudCreate(TestCase):
 
     # TODO test page id for articles
     # TODO test published in for references
+
+    # def test_raw_template_property(self):
+    #     data = (
+    #         "{{cite web | url= http://www.ine.cl/canales/chile_estadisticoTEST/"
+    #         "censos_poblacion_vivienda/censo_pobl_vivi.php | "
+    #         "title= Censo de Población y Vivienda 2002 TEST | "
+    #         "work= [[National Statistics Institute (Chile)|National Statistics Institute]] | "
+    #         "access-date= 1 May 2010 | url-status=live | "
+    #         "archive-url= https://web.archive.org/web/20100715195638/http://www.ine.cl/"
+    #         "canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php | "
+    #         "archive-date= 15 July 2010}}"
+    #     )
+    #     template_triples = extract_templates_and_params(data, True)
+    #     for name, content, raw in template_triples:
+    #         assert raw == data
+    #         # workaround that should not be needed
+    #         content["template_name"] = name
+    #         reference = EnglishWikipediaReference(**content)
+    #         reference.raw_template = raw
+    #         reference.wikibase = IASandboxWikibase()
+    #         reference.finish_parsing_and_generate_hash(testing=True)
+    #         # we test that it is still correct
+    #         assert reference.raw_template == raw
+    #         reference.upload_reference_and_insert_in_the_cache_if_enabled()
+    #         wcdqid = reference.return_.item_qid
+    #         wbi = WikibaseIntegrator()
+    #         item = wbi.item.get(wcdqid)
+    #         assert (
+    #             item.claims.get(property=reference.wikibase.RAW_TEMPLATE)[
+    #                 0
+    #             ].mainsnak.datavalue["value"]
+    #             == reference.shortened_raw_template
+    #         )
+
+    # TODO test also the raw template string citation where it is in the qualifier

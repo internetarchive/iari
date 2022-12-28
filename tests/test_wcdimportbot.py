@@ -39,7 +39,7 @@ class TestWcdImportBot(TestCase):
         from src.models.update_delay import UpdateDelay
 
         ud = UpdateDelay(object_=bot.wikipedia_article)
-        assert ud.time_to_update(testing=True) is False
+        assert ud.time_to_update() is False
         assert ud.time_of_last_update is not None
 
     # def test__gather_statistics__(self):

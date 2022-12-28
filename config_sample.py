@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import List
 
 # Login credentials to WikiCitations
 user = ""
@@ -35,12 +36,15 @@ title_allow_list = [
 max_events_during_testing = 10
 use_sandbox_wikibase_backend_for_wikicitations_api = True
 
-supported_templates = [
+# Supported templates
+citation_template = [
     "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
+]
+citeq_templates = [
     "cite q",
     "citeq",  # alias
-    "isbn",
-    "url",
+]
+cs1_templates = [
     # CS1 templates:
     "cite arxiv",
     "cite av media notes",
@@ -55,7 +59,8 @@ supported_templates = [
     "cite interview",
     "cite journal",
     "cite magazine",
-    "cite mailing list" "cite map",
+    "cite mailing list",
+    "cite map",
     "cite news",
     "cite newsgroup",
     "cite podcast",
@@ -69,6 +74,26 @@ supported_templates = [
     "cite thesis",
     "cite web",
 ]
+isbn_template = [
+    "isbn",
+]
+url_template = [
+    "url",
+]
+supported_citation_templates: List[str] = []
+for list_ in [
+    citation_template,
+    citeq_templates,
+    cs1_templates,
+    isbn_template,
+    url_template,
+]:
+    supported_citation_templates.extend(list_)
+bare_url_regex = (
+    # There are about 10 different ones but we don't care
+    # for now which one is in use
+    "bare url"
+)
 
 wikibase_url = "https://wikicitations.wiki.opencura.com"
 mediawiki_api_url = wikibase_url + "/w/api.php"

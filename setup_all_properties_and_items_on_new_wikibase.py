@@ -25,7 +25,7 @@ from wikibaseintegrator.wbi_exceptions import (  # type: ignore
 )
 
 import config
-from src import Wikibase, WikiCitationsWikibase, console
+from src import IASandboxWikibase, Wikibase, console
 from src.models.wikibase.crud import WikibaseCrud
 from src.models.wikibase.dictionaries import wcd_archive_items, wcd_items
 from src.models.wikibase.properties import Properties
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class SetupNewWikibase(BaseModel):
-    wikibase: Wikibase = WikiCitationsWikibase()
+    wikibase: Wikibase = IASandboxWikibase()
 
     # def __delete_old_properties__(self):
     #     wc = WikibaseCrud(wikibase=self.wikibase)
@@ -213,10 +213,11 @@ class SetupNewWikibase(BaseModel):
         if args.delete is True:
             console.print("We don't support this currently.")
             # self.__delete_old_properties__()
-        console.print(
-            f"Now copy the above output into the {snw.wikibase.__repr_name__()} "
-            f"class."
-        )
+        if (args.items or args.properties) is True:
+            console.print(
+                f"Now copy the above output into the {snw.wikibase.__repr_name__()} "
+                f"class."
+            )
 
     def setup_items(self):
         if not self.wikibase.INSTANCE_OF:
