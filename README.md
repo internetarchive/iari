@@ -99,11 +99,50 @@ supported_templates = [
 ]
 ```
 # Terminology
-We use the following terminology:
-* citation: this is what is called a reference in Wikipedia and could be uniquely 
-identified by one of the supported identifiers (ie DOI, ISBN, PMID, OCLC, URL)
-* string citation: this is a reference that could not be uniquely identified.
+We use the following terminology to distinguish different types of references.
+## Templates
+1) **Citation template** - see https://en.wikipedia.org/wiki/Template:Citation
+1) **Citation Style 1 template** aka cs1 template - class of templates which multiple Wikipedias use. Implemented in lua. See https://en.wikipedia.org/wiki/Help:Citation_Style_1
+1) **General reference with a supported template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template we support.
+1) **Unbulleted list citebundle template** - template with multiple templates inside, see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
+1) **bare url template** - template added in English Wikipedia (by a bot presumably) when a bare url is found. See https://en.wikipedia.org/wiki/Template:Cleanup_bare_URLs
+ 
+## Reference types detected by the ArticleAnalyzer
+We support detecting the following types. A reference cannot have multiple types.
 
+E.g.
+`<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
+
+### Parse support
+1) **mixed reference with an ISBN template** - reference with plain text and a {{isbn}} template
+1) **mixed reference with a URL template** - reference with plain text and a URL (these are very rare)
+1) **ISBN template reference** - reference with only a {{isbn}} template
+1) **URL template reference** - reference with only a {{url}} template
+1) **Plain text reference with a cs1 template** - reference as above but where part of the information is structured and part of it is not (theoretical so far, we presume it exists) (defined as: begins with {{ and ends with }})
+1) **multiple template reference with google books template** - (defined as: contains multiple templates according to mwparserfromhell) E.g. {{cite book|url={{google books|123456}}}} <- this particular subtype we want to support
+1) **multiple template reference with url and bare url x template** - E.g. `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
+
+### No parse support
+These are unsupported because of complexity
+1) **reference with a Bare URL template** - as above, but with one of the {{bare url x}} templates 
+1) **Plain text reference with a URL outside a template** - as above, but with no other identifier than the URL
+1) **Short citation reference** - special type of plain text reference defined above. See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
+![image](https://user-images.githubusercontent.com/68460690/208091737-abc20b6e-8102-4acd-b0fa-409aa72d9ae8.png)
+1) **Plain text reference without a URL or identifier** - e.g. reference to a book only by author and title. e.g. "Muller Report, p12"
+1) **General reference** - reference outside of <ref>. E.g. part of further reading- or bibliography section.
+![image](https://user-images.githubusercontent.com/68460690/208092363-ba4b5346-cad7-495e-8aff-1aa4f2f0161e.png)
+1) **General reference with a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template
+1) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
+1) **Plain text reference**: references inside <ref> tags, but without ANY template. 
+
+These are unsupported because they are very few (<200 transclusions in enwiki)
+* **Bundled reference** - multiple references in one <ref> see https://en.wikipedia.org/w/index.php?title=Wikipedia:CITEBUNDLE
+* **Unbulleted list citebundle reference** - type of nested reference with multiple templates inside, see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
+
+## Types used in the graph
+1) **wikipedia citation** - anything inside <ref> tags in a Wikipedia article that _can_ be uniquely identified via a URL, PMID, ISBN, DOI or similar identifier. We have a property for this in the graph and these citations get their own item with an id.
+1) **wikipedia string citation** -  anything inside <ref> tags in a Wikipedia article that _cannot_ be uniquely identified via a URL, PMID, ISBN, DOI or similar identifier. These should be improved by Wikipedia editors so they can be uniquely identified. Eg. lookup ISBN for a {{cite book}} or add a DOI, URL or other identifier to a {{cite journal}}
+ 
 # Features
 Currently the framework has the following features:
 * support for English Wikipedia only
