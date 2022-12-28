@@ -12,12 +12,10 @@ import config
 from src import console
 from src.models.exceptions import (
     MissingInformationError,
-    WikibaseError,
     WikipediaApiFetchError,
 )
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
-from src.models.wikibase.website import Website
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
@@ -88,55 +86,55 @@ class WikipediaArticle(WcdItem):
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
 
-    def __compare_and_update_all_references__(self) -> None:
-        """Compare and update all the references.
-        We assume all references have already been uploaded to Wikibase"""
-        logger.debug("__compare_and_update_all_references__: Running")
-        if not self.references:
-            console.print("No references found. Skipping comparison of references")
-            # raise MissingInformationError("self.references was empty or None")
-        else:
-            self.__setup_wikibase_crud_update__(wikipedia_article=self)
-            if self.wikibase_crud_update:
-                count = 0
-                total = len(self.references)
-                for reference in self.references:
-                    """We go through each reference that has a hash
-                    and compare it to the existing one in Wikibase"""
-                    if reference.has_hash:
-                        if not reference.return_:
-                            logger.debug(f"reference: {reference}")
-                            raise MissingInformationError(
-                                "reference.return_ was None and is needed "
-                                f"to judge whether to compare or not"
-                            )
-                        count += 1
-                        console.print(
-                            f"Comparing reference {count}/{total} on page '{self.title}'"
-                        )
-                        self.wikibase_crud_update.compare_and_update_claims(
-                            entity=reference
-                        )
-            else:
-                raise WikibaseError()
-
-    def __compare_and_update_page__(self):
-        logger.debug("__compare_and_update_page__: Running")
-        console.print(f"Comparing the page '{self.title}'")
-        if not self.return_:
-            raise MissingInformationError(
-                "self.return_ was None and is needed "
-                "to judge whether to compare or not"
-            )
-        self.__setup_wikibase_crud_update__(wikipedia_article=self)
-        self.wikibase_crud_update.compare_and_update_claims(entity=self)
-
-    def __compare_data_and_update__(self):
-        """We compare and update all references and the page data"""
-        logger.debug("__compare_data_and_update__: Running")
-        if config.compare_references:
-            self.__compare_and_update_all_references__()
-        self.__compare_and_update_page__()
+    # def __compare_and_update_all_references__(self) -> None:
+    #     """Compare and update all the references.
+    #     We assume all references have already been uploaded to Wikibase"""
+    #     logger.debug("__compare_and_update_all_references__: Running")
+    #     if not self.references:
+    #         console.print("No references found. Skipping comparison of references")
+    #         # raise MissingInformationError("self.references was empty or None")
+    #     else:
+    #         self.__setup_wikibase_crud_update__(wikipedia_article=self)
+    #         if self.wikibase_crud_update:
+    #             count = 0
+    #             total = len(self.references)
+    #             for reference in self.references:
+    #                 """We go through each reference that has a hash
+    #                 and compare it to the existing one in Wikibase"""
+    #                 if reference.has_hash:
+    #                     if not reference.return_:
+    #                         logger.debug(f"reference: {reference}")
+    #                         raise MissingInformationError(
+    #                             "reference.return_ was None and is needed "
+    #                             f"to judge whether to compare or not"
+    #                         )
+    #                     count += 1
+    #                     console.print(
+    #                         f"Comparing reference {count}/{total} on page '{self.title}'"
+    #                     )
+    #                     self.wikibase_crud_update.compare_and_update_claims(
+    #                         entity=reference
+    #                     )
+    #         else:
+    #             raise WikibaseError()
+    #
+    # def __compare_and_update_page__(self):
+    #     logger.debug("__compare_and_update_page__: Running")
+    #     console.print(f"Comparing the page '{self.title}'")
+    #     if not self.return_:
+    #         raise MissingInformationError(
+    #             "self.return_ was None and is needed "
+    #             "to judge whether to compare or not"
+    #         )
+    #     self.__setup_wikibase_crud_update__(wikipedia_article=self)
+    #     self.wikibase_crud_update.compare_and_update_claims(entity=self)
+    #
+    # def __compare_data_and_update__(self):
+    #     """We compare and update all references and the page data"""
+    #     logger.debug("__compare_data_and_update__: Running")
+    #     if config.compare_references:
+    #         self.__compare_and_update_all_references__()
+    #     self.__compare_and_update_page__()
 
     def __extract_and_parse_references__(self):
         logger.info("Extracting templates and parsing the references now")
@@ -365,118 +363,118 @@ class WikipediaArticle(WcdItem):
                 f"{len(self.references)} references on page {self.title}"
             )
 
-    def __upload_page_and_references__(self):
-        # TODO rename this method to "__upload_new_article_item__"
-        console.print(f"Importing page '{self.title}'")
-        self.__setup_wikibase_crud_create__()
-        self.return_ = (
-            self.wikibase_crud_create.prepare_and_upload_wikipedia_article_item(
-                wikipedia_article=self,
-            )
-        )
-        if self.return_ is None:
-            raise ValueError("wcdqid was None")
-        self.cache.add_page(wikipedia_article=self, wcdqid=self.return_.item_qid)
-        if self.return_.uploaded_now:
-            console.print(
-                f"Finished uploading {self.title} to Wikibase, "
-                f"see {self.url} and {self.wikibase_url}"
-            )
-        else:
-            # TODO comment out the below code and fail with an exception instead
-            # This branch is hit e.g. when the cache has not been synced with the wikibase
-            console.print(
-                f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
-                f"see {self.url} and {self.wikibase_url}. \nPlease run the bot with --rebuild-cache "
-                f"to speed up the process."
-            )
-            self.__compare_data_and_update__()
+    # def __upload_page_and_references__(self):
+    #     # TODO rename this method to "__upload_new_article_item__"
+    #     console.print(f"Importing page '{self.title}'")
+    #     self.__setup_wikibase_crud_create__()
+    #     self.return_ = (
+    #         self.wikibase_crud_create.prepare_and_upload_wikipedia_article_item(
+    #             wikipedia_article=self,
+    #         )
+    #     )
+    #     if self.return_ is None:
+    #         raise ValueError("wcdqid was None")
+    #     self.cache.add_page(wikipedia_article=self, wcdqid=self.return_.item_qid)
+    #     if self.return_.uploaded_now:
+    #         console.print(
+    #             f"Finished uploading {self.title} to Wikibase, "
+    #             f"see {self.url} and {self.wikibase_url}"
+    #         )
+    #     else:
+    #         # TODO comment out the below code and fail with an exception instead
+    #         # This branch is hit e.g. when the cache has not been synced with the wikibase
+    #         console.print(
+    #             f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
+    #             f"see {self.url} and {self.wikibase_url}. \nPlease run the bot with --rebuild-cache "
+    #             f"to speed up the process."
+    #         )
+    #         self.__compare_data_and_update__()
 
     # TODO comment out before 3.0.0-alpha0
-    def __upload_references_and_websites_if_missing__(self, testing: bool = False):
-        """Go through each reference and upload if missing to Wikibase"""
-        logger.debug("__upload_references_and_websites_if_missing__: Running")
-        if testing and not self.cache:
-            self.__setup_cache__()
-        if not self.cache:
-            raise ValueError("self.cache could not be setup")
-        updated_references = []
-        count = 1
-        total = len(self.references)
-        for reference in self.references:
-            console.print(
-                f"Working on reference {count}/{total} from article {self.title}"
-            )
-            # Here we check for an existing website item
-            if reference.has_first_level_domain_url_hash:
-                with console.status(
-                    f"Linking to or uploading new website item for reference "
-                    f"with link to {reference.first_level_domain_of_url}"
-                ):
-                    # Here we get the reference with the first_level_domain_of_url WCDQID back
-                    # We add the cache because of https://github.com/internetarchive/wcdimportbot/issues/261
-                    reference.website_item = Website(
-                        reference=reference, wikibase=self.wikibase, cache=self.cache
-                    )
-                    reference.website_item.check_and_upload_website_item_to_wikibase_if_missing(
-                        wikipedia_article=self
-                    )
-            # Here we check for an existing reference item
-            if reference.has_hash:
-                # logger.debug(f"has_hash was True for md5hash: {reference.md5hash}")
-                with console.status(f"Creating the reference item if missing"):
-                    # Here we get the reference with WikibaseReturn back
-                    reference.check_and_upload_reference_item_to_wikibase_if_missing()
-                    if not reference.return_:
-                        raise MissingInformationError(
-                            "reference.return_ was None and is needed "
-                            "to judge whether to compare or not"
-                        )
-                    # else:
-                    #     console.print(reference.return_.dict())
-                    # exit()
-                    # We only store last update information for references with a hash/item
-                    reference.insert_last_update_timestamp()
-            updated_references.append(reference)
-            count += 1
-        self.references = updated_references
-
-    # TODO comment out before 3.0.0-alpha0
-    def extract_and_parse_and_upload_missing_items_to_wikibase(self) -> None:
-        """Extract the references and upload first
-        the references and then the page to Wikibase
-
-        First we fetch the page data and generate the hash,
-        then we setup the Wikibase and extract and parse
-        the references.
-
-        Then we upload the references and websites if missing
-        and then we either upload the page or if missing
-        compare and upload any missing claims.
-
-        Lastly we store the timestamp in the cache"""
-        logger.debug("extract_and_upload_to_wikibase: Running")
-        if not self.cache:
-            self.__setup_cache__()
-        if not self.cache:
-            raise ValueError("could not setup the cache :/")
-        self.__fetch_page_data__()
-        if not self.is_redirect and self.found_in_wikipedia:
-            self.__fetch_wikidata_qid__()
-            self.__generate_hash__()
-            self.__setup_wikibase_crud_create__()
-            self.__extract_and_parse_references__()
-            if self.extractor and self.extractor.number_of_references <= 500:
-                self.__upload_references_and_websites_if_missing__()
-                if not self.__page_has_already_been_uploaded__():
-                    self.__upload_page_and_references__()
-                else:
-                    self.__compare_data_and_update__()
-                # We update the timestamp no matter what action we took above
-                self.__insert_last_update_timestamp__()
-        else:
-            if self.is_redirect:
-                console.print("This page is a redirect to another page. Not importing.")
+    # def __upload_references_and_websites_if_missing__(self, testing: bool = False):
+    #     """Go through each reference and upload if missing to Wikibase"""
+    #     logger.debug("__upload_references_and_websites_if_missing__: Running")
+    #     # if testing and not self.cache:
+    #     #     self.__setup_cache__()
+    #     # if not self.cache:
+    #     #     raise ValueError("self.cache could not be setup")
+    #     updated_references = []
+    #     count = 1
+    #     total = len(self.references)
+    #     for reference in self.references:
+    #         console.print(
+    #             f"Working on reference {count}/{total} from article {self.title}"
+    #         )
+    #         # Here we check for an existing website item
+    #         if reference.has_first_level_domain_url_hash:
+    #             with console.status(
+    #                 f"Linking to or uploading new website item for reference "
+    #                 f"with link to {reference.first_level_domain_of_url}"
+    #             ):
+    #                 # Here we get the reference with the first_level_domain_of_url WCDQID back
+    #                 # We add the cache because of https://github.com/internetarchive/wcdimportbot/issues/261
+    #                 reference.website_item = Website(
+    #                     reference=reference, wikibase=self.wikibase, cache=self.cache
+    #                 )
+    #                 reference.website_item.check_and_upload_website_item_to_wikibase_if_missing(
+    #                     wikipedia_article=self
+    #                 )
+    #         # Here we check for an existing reference item
+    #         if reference.has_hash:
+    #             # logger.debug(f"has_hash was True for md5hash: {reference.md5hash}")
+    #             with console.status(f"Creating the reference item if missing"):
+    #                 # Here we get the reference with WikibaseReturn back
+    #                 reference.check_and_upload_reference_item_to_wikibase_if_missing()
+    #                 if not reference.return_:
+    #                     raise MissingInformationError(
+    #                         "reference.return_ was None and is needed "
+    #                         "to judge whether to compare or not"
+    #                     )
+    #                 # else:
+    #                 #     console.print(reference.return_.dict())
+    #                 # exit()
+    #                 # We only store last update information for references with a hash/item
+    #                 reference.insert_last_update_timestamp()
+    #         updated_references.append(reference)
+    #         count += 1
+    #     self.references = updated_references
+    #
+    # # TODO comment out before 3.0.0-alpha0
+    # def extract_and_parse_and_upload_missing_items_to_wikibase(self) -> None:
+    #     """Extract the references and upload first
+    #     the references and then the page to Wikibase
+    #
+    #     First we fetch the page data and generate the hash,
+    #     then we setup the Wikibase and extract and parse
+    #     the references.
+    #
+    #     Then we upload the references and websites if missing
+    #     and then we either upload the page or if missing
+    #     compare and upload any missing claims.
+    #
+    #     Lastly we store the timestamp in the cache"""
+    #     logger.debug("extract_and_upload_to_wikibase: Running")
+    #     if not self.cache:
+    #         self.__setup_cache__()
+    #     if not self.cache:
+    #         raise ValueError("could not setup the cache :/")
+    #     self.__fetch_page_data__()
+    #     if not self.is_redirect and self.found_in_wikipedia:
+    #         self.__fetch_wikidata_qid__()
+    #         self.__generate_hash__()
+    #         self.__setup_wikibase_crud_create__()
+    #         self.__extract_and_parse_references__()
+    #         if self.extractor and self.extractor.number_of_references <= 500:
+    #             self.__upload_references_and_websites_if_missing__()
+    #             if not self.__page_has_already_been_uploaded__():
+    #                 self.__upload_page_and_references__()
+    #             else:
+    #                 self.__compare_data_and_update__()
+    #             # We update the timestamp no matter what action we took above
+    #             self.__insert_last_update_timestamp__()
+    #     else:
+    #         if self.is_redirect:
+    #             console.print("This page is a redirect to another page. Not importing.")
 
     # TODO remove this old code
     # def __get_title_from_event__(self):
