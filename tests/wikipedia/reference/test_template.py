@@ -26,6 +26,15 @@ class TestTemplate:
             wt.extract_and_prepare_parameters()
             assert wt.parameters["foo"] == "bar"
 
+    def test_extract_and_prepare_parameters_citeq(self):
+        data = "{{citeq|Q1}}"
+        templates = parse(data).ifilter_templates()
+        for template in templates:
+            wt = WikipediaTemplate(raw_template=template)
+            wt.extract_and_prepare_parameters()
+            assert wt.parameters["1"] == "Q1"
+            assert wt.parameters["first_parameter"] == "Q1"
+
     def test_raw_template_url(self):
         data = (
             "{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="

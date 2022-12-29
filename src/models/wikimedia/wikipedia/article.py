@@ -163,7 +163,6 @@ class WikipediaArticle(WcdItem):
     def __fetch_page_data__(self) -> None:
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
-        # TODO refactor this into new class?
         logger.debug("__fetch_page_data__: Running")
         if not self.title:
             raise MissingInformationError("self.title was empty string")

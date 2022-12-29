@@ -2,7 +2,7 @@
 Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import Tag  # type: ignore
@@ -31,7 +31,7 @@ class WikipediaRawReference(WcdBaseModel):
     tag: Tag  # raw reference Tag from mwparserfromhell
     templates: List[WikipediaTemplate] = []
     plain_text_in_reference: bool = False
-    citation_template_found: bool = True
+    citation_template_found: bool = False
     cs1_template_found: bool = False
     citeq_template_found: bool = False
     isbn_template_found: bool = False
@@ -39,6 +39,7 @@ class WikipediaRawReference(WcdBaseModel):
     bare_url_template_found: bool = False
     testing: bool = False
     wikibase: Wikibase
+    extraction_done: bool = False
     # TODO add new optional attribute wikicode: Optional[Wikicode]
     #  which contains the parsed output of the general reference line
     # TODO add new method is_from_ref that returns True if tag is not None
@@ -52,11 +53,13 @@ class WikipediaRawReference(WcdBaseModel):
 
     def __extract_templates_and_parameters_from_raw_reference__(self):
         """Helper method"""
+        logger.debug("__extract_templates_and_parameters_from_raw_reference__: running")
         self.__extract_raw_templates__()
         self.__extract_and_clean_template_parameters__()
 
     def __extract_raw_templates__(self):
         """Extract the templates from the Tag"""
+        logger.debug("__extract_raw_templates__: running")
         # TODO rewrite to handle self.wikicode also
         if not self.tag:
             raise MissingInformationError("self.tag was None")
@@ -71,26 +74,27 @@ class WikipediaRawReference(WcdBaseModel):
 
     def __extract_and_clean_template_parameters__(self):
         """We only extract and clean if exactly one template is found"""
+        logger.debug("__extract_and_clean_template_parameters__: running")
         if self.number_of_templates == 1:
             [template.extract_and_prepare_parameters() for template in self.templates]
 
-    def __extract_and_determine_reference_type__(self):
+    def extract_and_determine_reference_type(self):
         """Helper method"""
         self.__extract_templates_and_parameters_from_raw_reference__()
         self.__determine_reference_type__()
+        self.extraction_done = True
 
-    def extract_determine_type_and_get_finished_wikipedia_reference_object(
-        self,
-    ) -> "WikipediaReference":
-        """Get the WikipediaReference object"""
-        self.__extract_and_determine_reference_type__()
-        return self.make_wikipedia_reference_object()
-
-    def make_wikipedia_reference_object(self) -> "WikipediaReference":
+    def get_finished_wikipedia_reference_object(self) -> Optional["WikipediaReference"]:
         """Make a WikipediaReference based on the extracted information"""
+        logger.debug("get_finished_wikipedia_reference_object: running")
+        if not self.extraction_done:
+            self.extract_and_determine_reference_type()
         from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
-        reference = WikipediaReference(**self.templates[0].parameters)
+        if self.number_of_templates:
+            reference = WikipediaReference(**self.templates[0].parameters)
+        else:
+            reference = WikipediaReference()
         # propagate attributes
         reference.raw_reference = self
         reference.cache = self.cache
@@ -103,8 +107,9 @@ class WikipediaRawReference(WcdBaseModel):
 
         Design limit: we only support one template for now"""
         if self.number_of_templates:
+            logger.info(f"Found {self.number_of_templates} template(s) in {self.tag}")
             if self.number_of_templates == 1:
-                if self.__detect_clean_template__():
+                if self.__detect_any_plain_text__():
                     # We have a clean template reference like {{citeq|Q1}}
                     self.plain_text_in_reference = False
                 else:
@@ -136,11 +141,11 @@ class WikipediaRawReference(WcdBaseModel):
             else:
                 # TODO log to file and fail gracely instead
                 raise MultipleTemplateError(
-                    f"We found multiple templates in "
-                    f"{self.tag} which is currently not supported"
+                    f"We found {self.number_of_templates} templates in "
+                    f"{self.tag} -> templates: {self.templates} which is currently not supported"
                 )
 
-    def __detect_clean_template__(self) -> bool:
+    def __detect_any_plain_text__(self) -> bool:
         """A clean template reference has no text outside the {{ and }}"""
         if not self.templates[0].raw_template:
             raise MissingInformationError("self.templates[0].raw_template was None")

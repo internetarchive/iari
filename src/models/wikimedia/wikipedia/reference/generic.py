@@ -1115,40 +1115,41 @@ class WikipediaReference(WcdItem):
         persons.extend(self.__get_numbered_persons__(attributes=attributes))
         return persons
 
-    def __parse_url__(self, url: str = "") -> str:
-        # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
-        parsed_url = urlparse(url)
-        if parsed_url.scheme:
-            url = parsed_url.geturl()
-            logger.info(f"Found scheme in {url}")
-            return url
-        else:
-            # TODO REGRESSION We don't support nested templates for now during the rewrite
-            # if self.__has_template_data__(string=url):
-            #     logger.info(f"Found template data in url: {url}")
-            #     return self.__get_url_from_template__(url=url)
-            # else:
-            logger.warning(
-                f"Skipped the URL '{self.url}' because of missing URL scheme"
-            )
-            return ""
-
-    def __parse_urls__(self) -> None:
-        """This function looks for Google Books references and
-        parse the URLs to avoid complaints from Wikibase"""
-        logger.debug("__parse_urls__: Running")
-        if self.url:
-            self.url = self.__parse_url__(url=self.url)
-        if self.archive_url:
-            self.archive_url = self.__parse_url__(url=self.archive_url)
-        if self.lay_url:
-            self.lay_url = self.__parse_url__(url=self.lay_url)
-        if self.chapter_url:
-            self.chapter_url = self.__parse_url__(url=self.chapter_url)
-        if self.conference_url:
-            self.conference_url = self.__parse_url__(url=self.conference_url)
-        if self.transcripturl:
-            self.transcripturl = self.__parse_url__(url=self.transcripturl)
+    # TODO move this to Template
+    # def __parse_url__(self, url: str = "") -> str:
+    #     # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+    #     parsed_url = urlparse(url)
+    #     if parsed_url.scheme:
+    #         url = parsed_url.geturl()
+    #         logger.info(f"Found scheme in {url}")
+    #         return url
+    #     else:
+    #         # TODO REGRESSION We don't support nested templates for now during the rewrite
+    #         # if self.__has_template_data__(string=url):
+    #         #     logger.info(f"Found template data in url: {url}")
+    #         #     return self.__get_url_from_template__(url=url)
+    #         # else:
+    #         logger.warning(
+    #             f"Skipped the URL '{self.url}' because of missing URL scheme"
+    #         )
+    #         return ""
+    #
+    # def __parse_urls__(self) -> None:
+    #     """This function looks for Google Books references and
+    #     parse the URLs to avoid complaints from Wikibase"""
+    #     logger.debug("__parse_urls__: Running")
+    #     if self.url:
+    #         self.url = self.__parse_url__(url=self.url)
+    #     if self.archive_url:
+    #         self.archive_url = self.__parse_url__(url=self.archive_url)
+    #     if self.lay_url:
+    #         self.lay_url = self.__parse_url__(url=self.lay_url)
+    #     if self.chapter_url:
+    #         self.chapter_url = self.__parse_url__(url=self.chapter_url)
+    #     if self.conference_url:
+    #         self.conference_url = self.__parse_url__(url=self.conference_url)
+    #     if self.transcripturl:
+    #         self.transcripturl = self.__parse_url__(url=self.transcripturl)
 
     # noinspection PyMethodParameters
     @validator(
@@ -1272,9 +1273,10 @@ class WikipediaReference(WcdItem):
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
         if not self.raw_reference and not testing:
-            raise MissingInformationError("self.raw_reference was empty string")
+            raise MissingInformationError("self.raw_reference was None")
         self.__parse_first_parameter__()
-        self.__parse_urls__()
+        # TODO remove this when parsing of urls is done in Template
+        # self.__parse_urls__()
         self.__parse_isbn__()
         # First Level Domain detection is needed for the detection methods
         self.__extract_first_level_domain__()

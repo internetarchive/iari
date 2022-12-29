@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class TestWikipediaArticle(TestCase):
     def test_fix_dash(self):
+        # TODO improve this test and document it, it does not make sense
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
@@ -22,6 +23,7 @@ class TestWikipediaArticle(TestCase):
             wikimedia_site=WikimediaSite.WIKIPEDIA,
             title="Easter Island",
         )
+        # This uses internet which is not optimal
         page.__get_wikipedia_article_from_title__()
         page.__extract_and_parse_references__()
         logger.info(f"{len(page.references)} references found")

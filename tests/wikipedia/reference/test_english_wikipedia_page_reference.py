@@ -1,6 +1,8 @@
 import logging
 from unittest import TestCase
 
+from mwparserfromhell import parse
+
 import config
 from src import console
 from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
@@ -12,10 +14,12 @@ from src.models.wikimedia.wikipedia.reference.english.english_reference import (
 from src.models.wikimedia.wikipedia.reference.english.schema import (
     EnglishWikipediaReferenceSchema,
 )
+from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
+wikibase = IASandboxWikibase()
 
 class TestEnglishWikipediaReferenceSchema(TestCase):
     def test_url_template1(self):
@@ -161,22 +165,23 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             == "https://www.stereogum.com/1345401/turntable-interview/interviews/"
         )
 
-    def test_extract_first_level_domain_bad_url(self):
-        data = {
-            "url": "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]",
-            "title": "Turntable Interview: !!!",
-            "last": "Locker",
-            "first": "Melissa",
-            "date": "May 9, 2013",
-            "website": "Stereogum",
-            "access_date": "May 24, 2021",
-            "template_name": "cite web",
-            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
-        }
-        reference = EnglishWikipediaReferenceSchema().load(data)
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash(testing=True)
-        assert reference.url == ""
+    # TODO move this to TestTemplate once parsing of urls has been implemented there
+    # def test_extract_first_level_domain_bad_url(self):
+    #     data = {
+    #         "url": "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]",
+    #         "title": "Turntable Interview: !!!",
+    #         "last": "Locker",
+    #         "first": "Melissa",
+    #         "date": "May 9, 2013",
+    #         "website": "Stereogum",
+    #         "access_date": "May 24, 2021",
+    #         "template_name": "cite web",
+    #         "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+    #     }
+    #     reference = EnglishWikipediaReferenceSchema().load(data)
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
+    #     assert reference.url == ""
 
     # def test_extract_first_level_domain_google_books_template(self):
     #     data = {
@@ -432,39 +437,40 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
 
-    def test_google_books_template_handling(self):
-        data = dict(
-            oclc="test",
-            url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
-            chapter_url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
-            lay_url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
-            transcripturl="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
-            template_name="cite book",
-        )
-        reference = EnglishWikipediaReference(**data)
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash(testing=True)
-        assert reference.url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
-        assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
-        assert reference.lay_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
-        assert (
-            reference.transcripturl == "https://books.google.com/books?id=MdPDAQAAQBAJ"
-        )
+    # TODO enable this when we support nested templates
+    # def test_google_books_template_handling(self):
+    #     data = dict(
+    #         oclc="test",
+    #         url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+    #         chapter_url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+    #         lay_url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+    #         transcripturl="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}",
+    #         template_name="cite book",
+    #     )
+    #     reference = EnglishWikipediaReference(**data)
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
+    #     assert reference.url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+    #     assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+    #     assert reference.lay_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+    #     assert (
+    #         reference.transcripturl == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+    #     )
 
-    def test_parse_url(self):
-        reference = EnglishWikipediaReference(template_name="")
-        assert (
-            reference.__parse_url__(
-                url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}"
-            )
-            == "https://books.google.com/books?id=MdPDAQAAQBAJ"
-        )
-        assert (
-            reference.__parse_url__(
-                url="[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
-            )
-            == ""
-        )
+    # def test_parse_url(self):
+    #     reference = EnglishWikipediaReference(template_name="")
+    #     assert (
+    #         reference.__parse_url__(
+    #             url="{{Google books|plainurl=yes|id=MdPDAQAAQBAJ|page=25}}"
+    #         )
+    #         == "https://books.google.com/books?id=MdPDAQAAQBAJ"
+    #     )
+    #     assert (
+    #         reference.__parse_url__(
+    #             url="[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+    #         )
+    #         == ""
+    #     )
 
     # TODO update to changes in model
     # def test__get_url_from_template__(self):
@@ -597,3 +603,26 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.has_hash is True
         assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
+
+    def test_cite_q(self):
+        """this tests https://en.wikipedia.org/wiki/Template:Cite_q"""
+        raw_template = "{{citeq|Q1}}"
+        raw_reference = f"<ref>{raw_template}</ref>"
+        wikicode = parse(raw_reference)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(
+                tag=ref, testing=True, wikibase=wikibase
+            )
+            # This also runs finish_parsing_and_generate_hash()
+            reference = (
+                raw_reference_object.get_finished_wikipedia_reference_object()
+            )
+            assert reference.raw_reference.number_of_templates == 1
+            assert reference.raw_reference.templates[0].raw_template == raw_template
+            #assert reference.has_hash is True
+            #assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
+            assert reference.template_name == "citeq"
+            assert reference.first_parameter == "Q1"
+            assert reference.wikidata_qid == "Q1"
+

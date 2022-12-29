@@ -61,8 +61,10 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                 self.number_of_hashed_references * 100 / self.number_of_references
             )
 
+    # TODO rename to citation_references
     def __extract_all_raw_references__(self):
         """This extracts everything inside <ref></ref> tags"""
+        logger.debug("__extract_all_raw_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
         wikicode = mwparserfromhell.parse(self.wikitext)
@@ -75,11 +77,12 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             )
 
     def extract_all_references(self):
+        """Extract all references from self.wikitext"""
+        logger.debug("extract_all_references: running")
         self.__extract_all_raw_references__()
-        self.references = [
-            raw_reference.extract_determine_type_and_get_finished_wikipedia_reference_object()
-            for raw_reference in self.__raw_references
-        ]
+        self.__parse_all_raw_references__()
+        self.__convert_raw_references_to_reference_objects__()
+        # We guard for None here
 
     # def prepare_all_statistic(self):
     #     # TODO figure out how to best store this data in the wikibase
@@ -98,3 +101,14 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     #         self.number_of_references_with_a_url_template =
     #         self.number_of_references_with_a_bare_url_template =
     #         self.number_of_references_with_a_bare_url_pdf_template =
+    def __convert_raw_references_to_reference_objects__(self):
+        self.references = [
+            raw_reference.get_finished_wikipedia_reference_object()
+            for raw_reference in self.__raw_references
+        ]
+
+    def __parse_all_raw_references__(self):
+        for wrr in self.__raw_references:
+            wrr.extract_and_determine_reference_type()
+
+
