@@ -4,6 +4,7 @@ from mwparserfromhell import parse  # type: ignore
 
 from src.models.exceptions import MultipleTemplateError
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from src.models.wikimedia.wikipedia.reference.extractor import WikipediaReferenceExtractor
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
 wikibase = IASandboxWikibase()
@@ -19,6 +20,16 @@ class TestWikipediaRawReference(TestCase):
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
             raw_reference_object.__extract_raw_templates__()
             assert raw_reference_object.templates[0].raw_template == raw_template
+        raw_template2 = "{{citeq|Q2}}"
+        raw_reference2 = f"<ref>{raw_template2}</ref>"
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=raw_reference + raw_reference2, wikibase=wikibase
+        )
+        print(wre.wikitext)
+        wre.extract_all_references()
+        assert wre.number_of_references == 2
+        assert wre.references[0].raw_reference.number_of_templates == 1
+        assert wre.references[1].raw_reference.number_of_templates == 1
 
     def test___determine_reference_type_one_template(self):
         raw_template = "{{citeq|Q1}}"
