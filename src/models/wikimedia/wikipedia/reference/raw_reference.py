@@ -27,7 +27,7 @@ class WikipediaRawReference(WcdBaseModel):
     This contains code from pywikibot 7.2.0 textlib.py to avoid forking the whole thing
     """
 
-    # TODO make tag optional
+    # TODO rewrite to accept Tag or Wikicode
     tag: Tag  # raw reference Tag from mwparserfromhell
     templates: List[WikipediaTemplate] = []
     plain_text_in_reference: bool = False
@@ -48,16 +48,25 @@ class WikipediaRawReference(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def first_template_name(self) -> str:
+        """Helper method. We use this information in the graph to know which
+        template the information in the reference came from"""
+        if self.templates:
+            return self.templates[0].name
+        else:
+            return ""
+
+    @property
     def number_of_templates(self) -> int:
         return len(self.templates)
 
-    def __extract_templates_and_parameters_from_raw_reference__(self):
+    def __extract_templates_and_parameters_from_raw_reference__(self) -> None:
         """Helper method"""
         logger.debug("__extract_templates_and_parameters_from_raw_reference__: running")
         self.__extract_raw_templates__()
         self.__extract_and_clean_template_parameters__()
 
-    def __extract_raw_templates__(self):
+    def __extract_raw_templates__(self) -> None:
         """Extract the templates from the Tag"""
         logger.debug("__extract_raw_templates__: running")
         # TODO rewrite to handle self.wikicode also
@@ -65,6 +74,8 @@ class WikipediaRawReference(WcdBaseModel):
             raise MissingInformationError("self.tag was None")
         if isinstance(self.tag, str):
             raise MissingInformationError("self.tag was str")
+        # Try fixing bug with templates
+        self.templates = []
         # .contents is needed here to get a Wikicode object
         raw_templates = self.tag.contents.ifilter_templates(
             matches=lambda x: not x.name.lstrip().startswith("#"), recursive=True
@@ -72,19 +83,19 @@ class WikipediaRawReference(WcdBaseModel):
         for raw_template in raw_templates:
             self.templates.append(WikipediaTemplate(raw_template=raw_template))
 
-    def __extract_and_clean_template_parameters__(self):
+    def __extract_and_clean_template_parameters__(self) -> None:
         """We only extract and clean if exactly one template is found"""
         logger.debug("__extract_and_clean_template_parameters__: running")
         if self.number_of_templates == 1:
             [template.extract_and_prepare_parameters() for template in self.templates]
 
-    def extract_and_determine_reference_type(self):
+    def extract_and_determine_reference_type(self) -> None:
         """Helper method"""
         self.__extract_templates_and_parameters_from_raw_reference__()
         self.__determine_reference_type__()
         self.extraction_done = True
 
-    def get_finished_wikipedia_reference_object(self) -> Optional["WikipediaReference"]:
+    def get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
         """Make a WikipediaReference based on the extracted information"""
         logger.debug("get_finished_wikipedia_reference_object: running")
         if not self.extraction_done:

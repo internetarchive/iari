@@ -102,11 +102,35 @@ class TestWikipediaRawReference(TestCase):
             raw_reference_object = WikipediaRawReference(
                 tag=ref, testing=True, wikibase=wikibase
             )
+            raw_reference_object.extract_and_determine_reference_type()
+            assert raw_reference_object.number_of_templates == 1
+            assert raw_reference_object.templates[0].name == "citeq"
+            assert raw_reference_object.first_template_name == "citeq"
             reference = (
                 raw_reference_object.get_finished_wikipedia_reference_object()
             )
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].raw_template == raw_template
-            assert reference.template_name == "citeq"
+            assert reference.first_template_name == "citeq"
             assert reference.first_parameter == "Q1"
             assert reference.wikidata_qid == "Q1"
+
+    def test_first_template_name(self):
+        raw_template = "{{citeq|Q1}}"
+        raw_reference = f"<ref>{raw_template}</ref>"
+        wikicode = parse(raw_reference)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(
+                tag=ref, testing=True, wikibase=wikibase
+            )
+            raw_reference_object.extract_and_determine_reference_type()
+            assert raw_reference_object.number_of_templates == 1
+            assert raw_reference_object.templates[0].name == "citeq"
+            assert raw_reference_object.first_template_name == "citeq"
+            reference = (
+                raw_reference_object.get_finished_wikipedia_reference_object()
+            )
+            assert raw_reference_object.number_of_templates == 1
+            assert raw_reference_object.templates[0].raw_template == raw_template
+            assert reference.first_template_name == "citeq"

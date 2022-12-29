@@ -17,6 +17,11 @@ class TestTemplate:
         for template in templates:
             wt = WikipediaTemplate(raw_template=template)
             assert wt.name == "test"
+        data = "{{citeq|Q1}}"
+        templates = parse(data).ifilter_templates()
+        for template in templates:
+            wt = WikipediaTemplate(raw_template=template)
+            assert wt.name == "citeq"
 
     def test_extract_and_prepare_parameters(self):
         data = "{{test|foo=bar}}"

@@ -494,10 +494,10 @@ class WikibaseCrud(WcdBaseModel):
         hash_claim = datatypes.String(
             prop_nr=self.wikibase.HASH, value=page_reference.md5hash
         )
-        if page_reference.template_name:
+        if page_reference.first_template_name:
             template_string = datatypes.String(
                 prop_nr=self.wikibase.TEMPLATE_NAME,
-                value=page_reference.template_name,
+                value=page_reference.first_template_name,
             )
         else:
             raise MissingInformationError("no template name found")
@@ -984,7 +984,7 @@ class WikibaseCrud(WcdBaseModel):
             claim_qualifiers.add(qualifier)
         string_citation = datatypes.String(
             prop_nr=self.wikibase.STRING_CITATIONS,
-            value=page_reference.template_name,
+            value=page_reference.first_template_name,
             qualifiers=claim_qualifiers,
             references=self.reference_claim,
         )

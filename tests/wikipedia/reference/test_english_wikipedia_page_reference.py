@@ -396,6 +396,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         assert reference.has_hash is True
 
     def test_template_url(self):
+        # FIXME rewrite to use WRR
         data = dict(
             oclc="test",
             url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
@@ -491,9 +492,29 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         == "https://books.google.com/books?id=MdPDAQAAQBAJ"
     #     )
 
-    def test___parse_first_parameter__(self):
-        # TODO write this test
-        pass
+    def test_parse_first_parameter_citeq(self):
+        raw_template = "{{citeq|Q1}}"
+        raw_reference = f"<ref>{raw_template}</ref>"
+        wikicode = parse(raw_reference)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            reference = raw_reference_object.get_finished_wikipedia_reference_object()
+            reference.finish_parsing_and_generate_hash()
+            assert reference.first_parameter == "Q1"
+            assert reference.wikidata_qid == "Q1"
+
+    def test_parse_first_parameter_cite_q(self):
+        raw_template1 = "{{cite q|Q1}}"
+        raw_reference1 = f"<ref>{raw_template1}</ref>"
+        wikicode = parse(raw_reference1)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            reference = raw_reference_object.get_finished_wikipedia_reference_object()
+            reference.finish_parsing_and_generate_hash()
+            assert reference.first_parameter == "Q1"
+            assert reference.wikidata_qid == "Q1"
 
     def test_generate_reference_hash_based_on_wikidata_qid(self):
         data = dict(
@@ -620,9 +641,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             )
             assert reference.raw_reference.number_of_templates == 1
             assert reference.raw_reference.templates[0].raw_template == raw_template
-            #assert reference.has_hash is True
-            #assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
-            assert reference.template_name == "citeq"
+            assert reference.first_template_name == "citeq"
             assert reference.first_parameter == "Q1"
             assert reference.wikidata_qid == "Q1"
+            # assert reference.has_hash is True
+            # assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
 

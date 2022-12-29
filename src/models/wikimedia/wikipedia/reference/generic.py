@@ -66,7 +66,6 @@ class WikipediaReference(WcdItem):
     numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
     persons_without_role: Optional[List[Person]]
-    template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     raw_reference: Optional[WikipediaRawReference] = None
@@ -441,8 +440,17 @@ class WikipediaReference(WcdItem):
     #         )
 
     @property
+    def first_template_name(self) -> str:
+        """Helper method. We use this information in the graph to know which
+        template the information in the reference came from"""
+        if self.raw_reference and self.raw_reference.number_of_templates:
+            return self.raw_reference.templates[0].name
+        else:
+            return ""
+
+    @property
     def template_url(self) -> str:
-        return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
+        return f"https://en.wikipedia.org/wiki/Template:{self.first_template_name}"
 
     @property
     def wikibase_url(self) -> str:
@@ -712,7 +720,7 @@ class WikipediaReference(WcdItem):
         else:
             self.md5hash = ""
             logger.warning(
-                f"hashing not possible for this instance of {self.template_name} "
+                f"hashing not possible for this instance of {self.first_template_name} "
                 f"because no identifier or url or first parameter was found "
                 f"or they were turned of in config.py."
             )
@@ -944,30 +952,41 @@ class WikipediaReference(WcdItem):
     def __parse_first_parameter__(self) -> None:
         """We parse the first parameter which has different meaning
         depending on the template in question"""
-        if self.template_name in ("cite q", "citeq"):
-            # We assume that the first parameter is the Wikidata QID
-            if self.first_parameter:
-                if self.first_parameter[:1] in ("q", "Q"):
-                    self.wikidata_qid = self.first_parameter
-                else:
-                    logger.warning(
-                        f"First parameter '{self.first_parameter}' "
-                        f"of {self.template_name} was not a valid "
-                        f"WD QID"
-                    )
-        elif self.template_name == "url":
-            # crudely detect if url with scheme in first_parameter
-            if self.first_parameter:
-                if "://" in self.first_parameter:
-                    self.url = self.first_parameter
-                else:
-                    logger.warning(
-                        f"'{self.first_parameter}' was not recognized as a URL"
-                    )
-                    self.url = ""
-        elif self.template_name == "isbn":
-            self.isbn = self.first_parameter
-
+        if self.first_template_name and self.first_parameter:
+            if self.first_template_name in ("cite q", "citeq"):
+                # We assume that the first parameter is the Wikidata QID
+                if self.first_parameter:
+                    if self.first_parameter[:1] in ("q", "Q"):
+                        self.wikidata_qid = self.first_parameter
+                    else:
+                        logger.warning(
+                            f"First parameter '{self.first_parameter}' "
+                            f"of {self.first_template_name} was not a valid "
+                            f"WD QID"
+                        )
+            elif self.first_template_name == "url":
+                # crudely detect if url with scheme in first_parameter
+                if self.first_parameter:
+                    if "://" in self.first_parameter:
+                        self.url = self.first_parameter
+                    else:
+                        logger.warning(
+                            f"'{self.first_parameter}' was not recognized as a URL"
+                        )
+                        self.url = ""
+            elif self.first_template_name == "isbn":
+                self.isbn = self.first_parameter
+            else:
+                logger.warning(f"The template name {self.first_template_name} is currently not supported")
+        else:
+            # TODO rewrite to use generic attribute after the WRR rewrite
+            if self.raw_reference:
+                if self.first_parameter and not self.first_template_name:
+                    logger.warning(f"No first template name found for the WRR with tag {self.raw_reference.tag}")
+                if not self.first_parameter and self.first_template_name:
+                    logger.warning(f"No first parameter found for the WRR with tag {self.raw_reference.tag}")
+            else:
+                logger.error("No raw reference for this reference")
     # DEPRECATED since 2.1.0-alpha3
     # def __parse_google_books_template__(self):
     #     """Parse the Google Books template that sometimes appear in self.url

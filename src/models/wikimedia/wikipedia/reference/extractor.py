@@ -27,7 +27,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     """
 
     wikitext: str
-    __raw_references: List[WikipediaRawReference] = []  # private
+    raw_references: List[WikipediaRawReference] = []  # private
     references: List[WikipediaReference] = []
     number_of_references_with_one_supported_template: int = 0
     wikibase: Wikibase
@@ -38,6 +38,10 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     # TODO add number_of_general_references method
     # TODO add number_of_references_with_a_template using list comprehension and if wrr.templates
     # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
+    @property
+    def number_of_raw_references(self) -> int:
+        return len(self.raw_references)
+
     @property
     def number_of_references(self) -> int:
         return len(self.references)
@@ -70,7 +74,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         wikicode = mwparserfromhell.parse(self.wikitext)
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
-            self.__raw_references.append(
+            self.raw_references.append(
                 WikipediaRawReference(
                     tag=ref, wikibase=self.wikibase, testing=self.testing
                 )
@@ -104,11 +108,11 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def __convert_raw_references_to_reference_objects__(self):
         self.references = [
             raw_reference.get_finished_wikipedia_reference_object()
-            for raw_reference in self.__raw_references
+            for raw_reference in self.raw_references
         ]
 
     def __parse_all_raw_references__(self):
-        for wrr in self.__raw_references:
+        for wrr in self.raw_references:
             wrr.extract_and_determine_reference_type()
 
 
