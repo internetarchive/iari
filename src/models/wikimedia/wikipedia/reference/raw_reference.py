@@ -42,6 +42,7 @@ class WikipediaRawReference(WcdBaseModel):
     testing: bool = False
     wikibase: Wikibase
     extraction_done: bool = False
+    is_named_reference: bool = False
     # TODO add new optional attribute wikicode: Optional[Wikicode]
     #  which contains the parsed output of the general reference line
     # TODO add new method is_from_ref that returns True if tag is not None
@@ -76,14 +77,22 @@ class WikipediaRawReference(WcdBaseModel):
             raise MissingInformationError("self.tag was None")
         if isinstance(self.tag, str):
             raise MissingInformationError("self.tag was str")
-        # Try fixing bug with templates
-        self.templates = []
-        # .contents is needed here to get a Wikicode object
-        raw_templates = self.tag.contents.ifilter_templates(
-            matches=lambda x: not x.name.lstrip().startswith("#"), recursive=True
-        )
-        for raw_template in raw_templates:
-            self.templates.append(WikipediaTemplate(raw_template=raw_template))
+        # Skip named references like "<ref name="INE"/>"
+        if "</ref>" not in self.tag:
+            logger.info("Skipping named reference with no content")
+            self.is_named_reference = True
+        else:
+            logger.debug(f"Extracting templates from: {self.tag}")
+            # .contents is needed here to get a Wikicode object
+            raw_templates = self.tag.contents.ifilter_templates(
+                matches=lambda x: not x.name.lstrip().startswith("#"), recursive=True
+            )
+            count = 0
+            for raw_template in raw_templates:
+                count += 1
+                self.templates.append(WikipediaTemplate(raw_template=raw_template))
+            if count == 0:
+                logger.debug(f"Found no templates in {self.tag}")
 
     def __extract_and_clean_template_parameters__(self) -> None:
         """We only extract and clean if exactly one template is found"""

@@ -57,3 +57,17 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.number_of_references == 1
         assert wre2.references[0].first_template_name == "citeq"
         assert wre2.references[0].first_parameter == "Q1"
+
+    def test_extract_all_references_named_reference(self):
+        raw_template = "{{citeq|Q1}}"
+        named_reference = '<ref name="INE"/>'
+        raw_reference = f"<ref>{raw_template}</ref>{named_reference}"
+        wre2 = WikipediaReferenceExtractor(
+            testing=True, wikitext=raw_reference, wikibase=wikibase
+        )
+        wre2.extract_all_references()
+        assert wre2.number_of_references == 2
+        assert wre2.number_of_content_references == 1
+        assert wre2.number_of_named_references == 1
+        assert wre2.references[0].first_template_name == "citeq"
+        assert wre2.references[0].first_parameter == "Q1"

@@ -38,6 +38,26 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     # TODO add number_of_general_references method
     # TODO add number_of_references_with_a_template using list comprehension and if wrr.templates
     # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
+
+    @property
+    def named_references(self):
+        """Special type of reference with no content
+        Example: <ref name="INE"/>"""
+        return [reference for reference in self.references if reference.raw_reference.is_named_reference]
+
+    @property
+    def number_of_named_references(self):
+        return len(self.named_references)
+
+    @property
+    def content_references(self):
+        """This is references with actual content beyond a name"""
+        return [reference for reference in self.references if not reference.raw_reference.is_named_reference]
+
+    @property
+    def number_of_content_references(self):
+        return len(self.content_references)
+
     @property
     def number_of_raw_references(self) -> int:
         return len(self.raw_references)

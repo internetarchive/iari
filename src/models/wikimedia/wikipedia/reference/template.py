@@ -59,7 +59,7 @@ class WikipediaTemplate(WcdBaseModel):
             attr = not param.positional
         return attr
 
-    def __extract_and_clean_template_parameters__(self, strip: bool = False):
+    def __extract_and_clean_template_parameters__(self, strip: bool = True):
         """Return a list of references found in text.
 
         Return value is a list of tuples. There is one tuple for each use of a

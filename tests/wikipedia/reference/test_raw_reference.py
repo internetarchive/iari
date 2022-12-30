@@ -17,8 +17,10 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
+            print(ref)
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
             raw_reference_object.__extract_raw_templates__()
+            assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].raw_template == raw_template
         raw_template2 = "{{citeq|Q2}}"
         raw_reference2 = f"<ref>{raw_template2}</ref>"
@@ -92,7 +94,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.__extract_templates_and_parameters_from_raw_reference__()
+            raw_reference_object.extract_and_determine_reference_type()
             assert raw_reference_object.number_of_templates == 1
 
     def test_number_of_templates_two(self):
@@ -146,3 +148,14 @@ class TestWikipediaRawReference(TestCase):
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].raw_template == raw_template
             assert reference.first_template_name == "citeq"
+
+    def test_named_reference(self):
+        ref = '<ref name="INE"/>'
+        wikicode = parse(ref)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(
+                tag=ref, testing=True, wikibase=wikibase
+            )
+            raw_reference_object.extract_and_determine_reference_type()
+            assert raw_reference_object.is_named_reference is True

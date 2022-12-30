@@ -38,7 +38,6 @@ class WikipediaArticle(WcdItem):
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: Optional[int]
-    references: List[WikipediaReference] = []
     # wikimedia_event: Optional[
     #     Any  # We can't type this with WikimediaEvent because of pydantic
     # ]
@@ -136,7 +135,7 @@ class WikipediaArticle(WcdItem):
     #         self.__compare_and_update_all_references__()
     #     self.__compare_and_update_page__()
 
-    def __extract_and_parse_references__(self):
+    def extract_and_parse_references(self):
         logger.info("Extracting templates and parsing the references now")
         # if self.wikimedia_event is not None:
         #     # raise ValueError("wikimedia_event was None")
@@ -359,7 +358,7 @@ class WikipediaArticle(WcdItem):
         if self.extractor:
             logger.info(
                 f"Hashed {self.extractor.percent_of_references_with_a_hash} percent of "
-                f"{len(self.references)} references on page {self.title}"
+                f"{len(self.extractor.references)} references on page {self.title}"
             )
 
     # def __upload_page_and_references__(self):
