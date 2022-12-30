@@ -40,6 +40,30 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
 
     @property
+    def number_of_cs1_references(self):
+        return len([reference for reference in self.references if reference.raw_reference.cs1_template_found])
+
+    @property
+    def number_of_citation_references(self):
+        return len([reference for reference in self.references if reference.raw_reference.citation_template_found])
+
+    @property
+    def number_of_bare_url_references(self):
+        return len([reference for reference in self.references if reference.raw_reference.bare_url_template_found])
+
+    @property
+    def number_of_citeq_references(self):
+        return len([reference for reference in self.references if reference.raw_reference.citeq_template_found])
+
+    @property
+    def number_of_isbn_template_references(self):
+        return len([reference for reference in self.references if reference.raw_reference.isbn_template_found])
+
+    @property
+    def number_of_multiple_template_references(self):
+        return len([reference for reference in self.references if reference.raw_reference.multiple_templates_found])
+
+    @property
     def named_references(self):
         """Special type of reference with no content
         Example: <ref name="INE"/>"""
@@ -67,22 +91,22 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(self.references)
 
     @property
-    def number_of_hashed_references(self):
+    def number_of_hashed_content_references(self):
         return len(
             [
                 reference
-                for reference in self.references
+                for reference in self.content_references
                 if reference.md5hash is not None
             ]
         )
 
     @property
-    def percent_of_references_with_a_hash(self):
-        if self.number_of_references == 0:
+    def percent_of_content_references_with_a_hash(self):
+        if self.number_of_content_references == 0:
             return 0
         else:
             return int(
-                self.number_of_hashed_references * 100 / self.number_of_references
+                self.number_of_hashed_content_references * 100 / self.number_of_content_references
             )
 
     # TODO rename to citation_references

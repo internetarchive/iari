@@ -38,14 +38,12 @@ class WikipediaArticle(WcdItem):
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: Optional[int]
-    # wikimedia_event: Optional[
-    #     Any  # We can't type this with WikimediaEvent because of pydantic
-    # ]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
     extractor: Optional[WikipediaReferenceExtractor] = None
+    # TODO add language_code to avoid enwiki hardcoding
 
     class Config:
         arbitrary_types_allowed = True
@@ -146,6 +144,10 @@ class WikipediaArticle(WcdItem):
         #         raise ValueError("self.pywikibot_site was None")
         #     self.__get_wikipedia_article_from_title__()
         # else:
+        if not self.wikitext:
+            self.__fetch_page_data__()
+        if not self.wikitext:
+            raise MissingInformationError("self.wikitext was empty")
         self.extractor = WikipediaReferenceExtractor(
             wikitext=self.wikitext, wikibase=self.wikibase
         )
@@ -357,7 +359,7 @@ class WikipediaArticle(WcdItem):
     def __print_hash_statistics__(self):
         if self.extractor:
             logger.info(
-                f"Hashed {self.extractor.percent_of_references_with_a_hash} percent of "
+                f"Hashed {self.extractor.percent_of_content_references_with_a_hash} percent of "
                 f"{len(self.extractor.references)} references on page {self.title}"
             )
 

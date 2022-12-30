@@ -4,6 +4,7 @@ from src import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
+from wikipedia.test_content import easter_island_excerpt
 
 wikibase = IASandboxWikibase()
 
@@ -71,3 +72,13 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.number_of_named_references == 1
         assert wre2.references[0].first_template_name == "citeq"
         assert wre2.references[0].first_parameter == "Q1"
+
+    def test_number_of_hashed_content_references(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_excerpt, wikibase=wikibase
+        )
+        wre.extract_all_references()
+        assert wre.number_of_references == 3
+        assert wre.number_of_content_references == 2
+        assert wre.number_of_named_references == 1
+        assert wre.number_of_hashed_content_references == 2
