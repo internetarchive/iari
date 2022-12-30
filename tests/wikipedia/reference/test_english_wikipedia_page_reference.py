@@ -67,12 +67,22 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
 
     def test_url_template_missing_scheme(self):
         """We don't support URLs without scheme or template"""
-        data = {"1": "chkchkchk.net", "template_name": "url"}
-        reference = EnglishWikipediaReferenceSchema().load(data)
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash(testing=True)
-        # console.print(reference)
-        assert reference.url == ""
+        raw_template = "{{url|chkchkchk.net}}"
+        raw_reference = f"<ref>{raw_template}</ref>"
+        wikicode = parse(raw_reference)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(
+                tag=ref, testing=True, wikibase=wikibase
+            )
+            raw_reference_object.extract_and_determine_reference_type()
+            assert raw_reference_object.number_of_templates == 1
+            assert raw_reference_object.templates[0].name == "url"
+            assert raw_reference_object.first_template_name == "url"
+            reference = (
+                raw_reference_object.get_finished_wikipedia_reference_object()
+            )
+            assert reference.url == ""
 
     def test_parse_persons_from_cite_web(self):
         data = {
@@ -396,17 +406,25 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         assert reference.has_hash is True
 
     def test_template_url(self):
-        # FIXME rewrite to use WRR
-        data = dict(
-            oclc="test",
-            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
-            template_name="cite book",
-        )
-        reference = EnglishWikipediaReference(**data)
-        assert (
-            reference.template_url
-            == f"https://en.wikipedia.org/wiki/Template:cite book"
-        )
+        raw_template = "{{citeq|Q1}}"
+        raw_reference = f"<ref>{raw_template}</ref>"
+        wikicode = parse(raw_reference)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(
+                tag=ref, testing=True, wikibase=wikibase
+            )
+            raw_reference_object.extract_and_determine_reference_type()
+            assert raw_reference_object.number_of_templates == 1
+            assert raw_reference_object.templates[0].name == "citeq"
+            assert raw_reference_object.first_template_name == "citeq"
+            reference = (
+                raw_reference_object.get_finished_wikipedia_reference_object()
+            )
+            assert (
+                reference.template_url
+                == f"https://en.wikipedia.org/wiki/Template:citeq"
+            )
 
     def test_wikibase_url(self):
         data = dict(
