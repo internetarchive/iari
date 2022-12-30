@@ -2,13 +2,13 @@
 Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import Tag  # type: ignore
 
 import config
-from src.models.exceptions import MissingInformationError, MultipleTemplateError
+from src.models.exceptions import MissingInformationError
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
 from src.wcd_base_model import WcdBaseModel
@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 # TODO this does not scale at all if we want multi-wiki support :/
-# TODO convert to abstract class and make an 2 implementations WikipediaRawCitationReference and WikipediaRawGeneralReference
+# TODO convert to abstract class and make an 2 implementations
+#  WikipediaRawCitationReference and WikipediaRawGeneralReference
 class WikipediaRawReference(WcdBaseModel):
     """This class handles determining the type of reference and parse the templates from the raw reference
 
@@ -37,6 +38,7 @@ class WikipediaRawReference(WcdBaseModel):
     isbn_template_found: bool = False
     url_template_found: bool = False
     bare_url_template_found: bool = False
+    multiple_templates_found: bool = False
     testing: bool = False
     wikibase: Wikibase
     extraction_done: bool = False
@@ -150,11 +152,12 @@ class WikipediaRawReference(WcdBaseModel):
                 else:
                     self.bare_url_template_found = False
             else:
-                # TODO log to file and fail gracely instead
-                raise MultipleTemplateError(
-                    f"We found {self.number_of_templates} templates in "
+                self.multiple_templates_found = True
+                message = (f"We found {self.number_of_templates} templates in "
                     f"{self.tag} -> templates: {self.templates} which is currently not supported"
                 )
+                logger.error(message)
+                self.__log_to_file__(message=message, file_name="multiple_template_error.log")
 
     def __detect_any_plain_text__(self) -> bool:
         """A clean template reference has no text outside the {{ and }}"""
