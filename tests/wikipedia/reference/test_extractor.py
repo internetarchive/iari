@@ -4,7 +4,7 @@ from src import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
-from wikipedia.test_content import easter_island_excerpt
+from test_data.test_content import easter_island_excerpt
 
 wikibase = IASandboxWikibase()
 

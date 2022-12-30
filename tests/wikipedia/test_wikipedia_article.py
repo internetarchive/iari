@@ -7,7 +7,7 @@ import config
 from src.helpers.console import console
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
-from wikipedia.test_content import easter_island_excerpt
+from test_data.test_content import easter_island_excerpt
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)

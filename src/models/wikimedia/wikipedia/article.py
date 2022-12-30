@@ -135,31 +135,33 @@ class WikipediaArticle(WcdItem):
 
     def extract_and_parse_references(self):
         logger.info("Extracting templates and parsing the references now")
-        # if self.wikimedia_event is not None:
-        #     # raise ValueError("wikimedia_event was None")
-        #     self.__get_title_from_event__()
-        #     self.__get_wikipedia_page_from_event__()
-        # elif self.title is not None:
-        #     if self.pywikibot_site is None:
-        #         raise ValueError("self.pywikibot_site was None")
-        #     self.__get_wikipedia_article_from_title__()
-        # else:
+        # We only fetch data from Wikipedia if we don't already have wikitext to work on
         if not self.wikitext:
             self.__fetch_page_data__()
-        if not self.wikitext:
-            raise MissingInformationError("self.wikitext was empty")
-        self.extractor = WikipediaReferenceExtractor(
-            wikitext=self.wikitext, wikibase=self.wikibase
-        )
-        self.extractor.extract_all_references()
-        if self.extractor and self.extractor.number_of_references > 500:
-            console.print(
-                "Cannot import this article because it has more than 500 references. "
-                "See https://github.com/internetarchive/wcdimportbot/issues/358 for details"
+        if self.is_redirect:
+            logger.debug("Skipped extraction and parsing because the article is a redirect")
+        elif not self.found_in_wikipedia:
+            logger.debug("Skipped extraction and parsing because the article was not found")
+        elif not self.is_redirect and self.found_in_wikipedia:
+            if not self.wikitext:
+                raise MissingInformationError("self.wikitext was empty")
+            # We got what we need now to make the extraction and parsing
+            print(self.wikitext)
+            self.extractor = WikipediaReferenceExtractor(
+                wikitext=self.wikitext, wikibase=self.wikibase
             )
-        else:
+            self.extractor.extract_all_references()
+            # Disabled because we only analyze currently
+            # if self.extractor and self.extractor.number_of_references > 500:
+            #     console.print(
+            #         "Cannot import this article because it has more than 500 references. "
+            #         "See https://github.com/internetarchive/wcdimportbot/issues/358 for details"
+            #     )
+            # else:
             self.__parse_templates__()
             self.__print_hash_statistics__()
+        else:
+            logger.error("This branch should never be hit.")
 
     def __fetch_page_data__(self) -> None:
         """This fetches metadata and the latest revision id
@@ -287,8 +289,7 @@ class WikipediaArticle(WcdItem):
             return True
 
     def __parse_templates__(self):
-        """We parse all the references into WikipediaArticleReferences"""
-        # FIXME rewrite to use Extractor
+        """Disabled method because of rewrite"""
         # if not self.cache:
         #     self.__setup_cache__()
         # if not self.cache:

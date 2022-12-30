@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 # class WikidataProperty(Enum):
@@ -54,3 +54,7 @@ class WikimediaEditType(Enum):
 #     PLAIN_TEXT_REFERENCE_WITH_BARE_URL_TEMPLATE = auto()
 #     PLAIN_TEXT_REFERENCE_WITH_ISBN_TEMPLATE = auto()
 #     PLAIN_TEXT_REFERENCE_WITH_A_SUPPORTED_IDENTIFIER = auto() # URL is a supported identifier
+
+class AnalyzerReturn(Enum):
+    IS_REDIRECT = "No statistic available because this is a redirect."
+    NOT_FOUND = "Article title not found."
