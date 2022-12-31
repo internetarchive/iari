@@ -1,5 +1,4 @@
 """This is the entry point for gunicorn"""
-from src.models.api import app
+from src.models.api import create_app
 
-if __name__ == "__main__":
-    app.run()
+app = create_app()

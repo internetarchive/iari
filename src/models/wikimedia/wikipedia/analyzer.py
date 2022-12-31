@@ -1,13 +1,12 @@
-import json
 import logging
 
 from src import IASandboxWikibase, Wikibase
 from src.helpers.console import console
-from src.models.exceptions import MissingInformationError
-from src.wcd_base_model import WcdBaseModel
-from src.models.wikimedia.wikipedia.article import  WikipediaArticle
-from src.models.wikimedia.enums import WikimediaSite, AnalyzerReturn
 from src.models.api.article_statistics import ArticleStatistics
+from src.models.exceptions import MissingInformationError
+from src.models.wikimedia.enums import WikimediaSite, AnalyzerReturn
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             excludes = {"cache"}
             dictionary = self.article_statistics.dict(exclude=excludes)
             console.print(dictionary)
-            return json.dumps(dictionary)
+            return dictionary
         else:
             if self.article.is_redirect:
                 return AnalyzerReturn.IS_REDIRECT
