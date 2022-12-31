@@ -27,8 +27,8 @@ class TestWikipediaArticle(TestCase):
         # This uses internet which is not optimal
         page.__get_wikipedia_article_from_title__()
         page.extract_and_parse_references()
-        logger.info(f"{len(page.references)} references found")
-        for ref in page.references:
+        logger.info(f"{len(page.extractor.references)} references found")
+        for ref in page.extractor.references:
             if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
                 # console.print(ref.template_name)
                 if (

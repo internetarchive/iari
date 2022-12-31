@@ -1,7 +1,7 @@
 import hashlib
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from urllib.parse import quote
 
 import requests
@@ -20,7 +20,6 @@ from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
-from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ import config
 from src.helpers.console import console
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.wikibase import Wikibase
-from src.models.wikibase.crud.read import WikibaseCrudRead
+# from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.dictionaries import (
     wcd_externalid_properties,
     wcd_string_properties,
@@ -49,19 +49,19 @@ class WcdImportBot(WcdBaseModel):
         # self.__setup_cache__()
         # self.cache.flush_database()
 
-    def __gather_and_print_statistics__(self):
-        console.print(self.wikibase.title)
-        wcr = WikibaseCrudRead(wikibase=self.wikibase)
-        console.print(f"Number of pages: {wcr.number_of_pages}")
-        console.print(f"Number of references: {wcr.number_of_references}")
-        console.print(f"Number of websites: {wcr.number_of_website_items}")
-        attributes = [a for a in dir(self.wikibase)]
-        for attribute in attributes:
-            if attribute in {**wcd_externalid_properties, **wcd_string_properties}:
-                value = wcr.get_external_identifier_statistic(
-                    wikibase_property_id=getattr(self.wikibase, attribute)
-                )
-                console.print(f"Number of {attribute}: {value}")
+    # def __gather_and_print_statistics__(self):
+    #     console.print(self.wikibase.title)
+    #     wcr = WikibaseCrudRead(wikibase=self.wikibase)
+    #     console.print(f"Number of pages: {wcr.number_of_pages}")
+    #     console.print(f"Number of references: {wcr.number_of_references}")
+    #     console.print(f"Number of websites: {wcr.number_of_website_items}")
+    #     attributes = [a for a in dir(self.wikibase)]
+    #     for attribute in attributes:
+    #         if attribute in {**wcd_externalid_properties, **wcd_string_properties}:
+    #             value = wcr.get_external_identifier_statistic(
+    #                 wikibase_property_id=getattr(self.wikibase, attribute)
+    #             )
+    #             console.print(f"Number of {attribute}: {value}")
 
     # def __rebuild_cache__(self):
     #     """Rebuild the cache"""
@@ -378,12 +378,12 @@ class WcdImportBot(WcdBaseModel):
         #     self.get_and_extract_pages_by_range_via_http(
         #         max_count=args.max_range, category_title=args.category
         #     )
-        elif args.statistics:
-            bot = WcdImportBot(wikibase=IASandboxWikibase())
-            bot.__gather_and_print_statistics__()
-            # DISABLED because it returns 503 now.
-            bot = WcdImportBot(wikibase=WikiCitationsWikibase())
-            bot.__gather_and_print_statistics__()
+        # elif args.statistics:
+        #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+        #     bot.__gather_and_print_statistics__()
+        #     # DISABLED because it returns 503 now.
+        #     bot = WcdImportBot(wikibase=WikiCitationsWikibase())
+        #     bot.__gather_and_print_statistics__()
         else:
             console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
 

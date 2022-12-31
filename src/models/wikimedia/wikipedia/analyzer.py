@@ -7,7 +7,7 @@ from src.models.exceptions import MissingInformationError
 from src.wcd_base_model import WcdBaseModel
 from src.models.wikimedia.wikipedia.article import  WikipediaArticle
 from src.models.wikimedia.enums import WikimediaSite, AnalyzerReturn
-from src.models.wikimedia.wikipedia.article_statistics import ArticleStatistics
+from src.models.api.article_statistics import ArticleStatistics
 
 logger = logging.getLogger(__name__)
 

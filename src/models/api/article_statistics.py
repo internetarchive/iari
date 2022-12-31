@@ -2,6 +2,8 @@ from src.wcd_base_model import WcdBaseModel
 
 
 class ArticleStatistics(WcdBaseModel):
+    """The purpose of this class is to model the statistics
+    the user wants from the get_statistics endpoint"""
     number_of_cs1_references: int = 0
     number_of_citation_references: int = 0
     number_of_bare_url_references: int = 0

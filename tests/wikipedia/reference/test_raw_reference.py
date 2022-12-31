@@ -2,7 +2,6 @@ from unittest import TestCase
 
 from mwparserfromhell import parse  # type: ignore
 
-from src.models.exceptions import MultipleTemplateError
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.extractor import WikipediaReferenceExtractor
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
