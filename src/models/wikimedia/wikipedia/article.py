@@ -10,10 +10,7 @@ from pydantic import validate_arguments
 
 import config
 from src import console
-from src.models.exceptions import (
-    MissingInformationError,
-    WikipediaApiFetchError,
-)
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaSite
@@ -138,9 +135,13 @@ class WikipediaArticle(WcdItem):
         if not self.wikitext:
             self.__fetch_page_data__()
         if self.is_redirect:
-            logger.debug("Skipped extraction and parsing because the article is a redirect")
+            logger.debug(
+                "Skipped extraction and parsing because the article is a redirect"
+            )
         elif not self.found_in_wikipedia:
-            logger.debug("Skipped extraction and parsing because the article was not found")
+            logger.debug(
+                "Skipped extraction and parsing because the article was not found"
+            )
         elif not self.is_redirect and self.found_in_wikipedia:
             if not self.wikitext:
                 raise MissingInformationError("self.wikitext was empty")

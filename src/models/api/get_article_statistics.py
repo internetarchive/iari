@@ -8,7 +8,7 @@ from src.helpers.console import console
 from src.models.api.get_statistics_schema import GetStatisticsSchema
 from src.models.api.job import Job
 from src.models.wikimedia.enums import AnalyzerReturn
-from test_data.test_content import test_full_article, easter_island_excerpt
+from test_data.test_content import easter_island_excerpt, test_full_article
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,11 @@ class GetArticleStatistics(Resource):
 
     def get(self):
         self.__validate_and_get_job__()
-        if self.job.lang.lower() == "en" and self.job.title and self.job.site.lower() == "wikipedia":
+        if (
+            self.job.lang.lower() == "en"
+            and self.job.title
+            and self.job.site.lower() == "wikipedia"
+        ):
             from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 
             wikipedia_analyzer = None
@@ -27,28 +31,34 @@ class GetArticleStatistics(Resource):
             if self.job.testing and self.job.title in supported_test_titles:
                 if self.job.title == "Test":
                     logger.info(f"(testing) Analyzing {self.job.title} from test_data")
-                    wikipedia_analyzer = WikipediaAnalyzer(title=self.job.title,
-                                                           lang=self.job.lang,
-                                                           wikimedia_site=self.job.site,
-                                                           testing=self.job.testing,
-                                                           wikitext=test_full_article)
+                    wikipedia_analyzer = WikipediaAnalyzer(
+                        title=self.job.title,
+                        lang=self.job.lang,
+                        wikimedia_site=self.job.site,
+                        testing=self.job.testing,
+                        wikitext=test_full_article,
+                    )
                 elif self.job.title == "Easter Island":
                     logger.info(f"(testing) Analyzing {self.job.title} from test_data")
-                    wikipedia_analyzer = WikipediaAnalyzer(title=self.job.title,
-                                                           lang=self.job.lang,
-                                                           wikimedia_site=self.job.site,
-                                                           testing=self.job.testing,
-                                                           wikitext=easter_island_excerpt)
+                    wikipedia_analyzer = WikipediaAnalyzer(
+                        title=self.job.title,
+                        lang=self.job.lang,
+                        wikimedia_site=self.job.site,
+                        testing=self.job.testing,
+                        wikitext=easter_island_excerpt,
+                    )
                 else:
                     logger.warning(f"Ignoring unsupported test title {self.job.title}")
             if not wikipedia_analyzer:
                 logger.info(f"Analyzing {self.job.title}...")
                 # TODO use a work queue here like ReFill so
                 #  we can easily scale the workload from thousands of users
-                wikipedia_analyzer = WikipediaAnalyzer(title=self.job.title,
-                                                       lang=self.job.lang,
-                                                       wikimedia_site=self.job.site,
-                                                       testing=self.job.testing)
+                wikipedia_analyzer = WikipediaAnalyzer(
+                    title=self.job.title,
+                    lang=self.job.lang,
+                    wikimedia_site=self.job.site,
+                    testing=self.job.testing,
+                )
             statistics = wikipedia_analyzer.get_statistics()
             if isinstance(statistics, dict):
                 # we got a json response

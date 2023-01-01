@@ -4,6 +4,7 @@ from unittest import TestCase
 from wikibaseintegrator.wbi_exceptions import MissingEntityException  # type: ignore
 
 import config
+
 # from src import WcdImportBot
 # from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 

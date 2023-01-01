@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 wikibase = IASandboxWikibase()
 
+
 class TestEnglishWikipediaReferenceSchema(TestCase):
     def test_url_template1(self):
         data = {
@@ -79,9 +80,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "url"
             assert raw_reference_object.first_template_name == "url"
-            reference = (
-                raw_reference_object.get_finished_wikipedia_reference_object()
-            )
+            reference = raw_reference_object.get_finished_wikipedia_reference_object()
             assert reference.url == ""
 
     def test_parse_persons_from_cite_web(self):
@@ -418,9 +417,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "citeq"
             assert raw_reference_object.first_template_name == "citeq"
-            reference = (
-                raw_reference_object.get_finished_wikipedia_reference_object()
-            )
+            reference = raw_reference_object.get_finished_wikipedia_reference_object()
             assert (
                 reference.template_url
                 == f"https://en.wikipedia.org/wiki/Template:citeq"
@@ -654,9 +651,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
                 tag=ref, testing=True, wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
-            reference = (
-                raw_reference_object.get_finished_wikipedia_reference_object()
-            )
+            reference = raw_reference_object.get_finished_wikipedia_reference_object()
             assert reference.raw_reference.number_of_templates == 1
             assert reference.raw_reference.templates[0].raw_template == raw_template
             assert reference.first_template_name == "citeq"
@@ -664,4 +659,3 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             assert reference.wikidata_qid == "Q1"
             # assert reference.has_hash is True
             # assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
-

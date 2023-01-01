@@ -41,33 +41,73 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     @property
     def number_of_cs1_references(self):
-        return len([reference for reference in self.references if reference.raw_reference.cs1_template_found])
+        return len(
+            [
+                reference
+                for reference in self.references
+                if reference.raw_reference.cs1_template_found
+            ]
+        )
 
     @property
     def number_of_citation_references(self):
-        return len([reference for reference in self.references if reference.raw_reference.citation_template_found])
+        return len(
+            [
+                reference
+                for reference in self.references
+                if reference.raw_reference.citation_template_found
+            ]
+        )
 
     @property
     def number_of_bare_url_references(self):
-        return len([reference for reference in self.references if reference.raw_reference.bare_url_template_found])
+        return len(
+            [
+                reference
+                for reference in self.references
+                if reference.raw_reference.bare_url_template_found
+            ]
+        )
 
     @property
     def number_of_citeq_references(self):
-        return len([reference for reference in self.references if reference.raw_reference.citeq_template_found])
+        return len(
+            [
+                reference
+                for reference in self.references
+                if reference.raw_reference.citeq_template_found
+            ]
+        )
 
     @property
     def number_of_isbn_template_references(self):
-        return len([reference for reference in self.references if reference.raw_reference.isbn_template_found])
+        return len(
+            [
+                reference
+                for reference in self.references
+                if reference.raw_reference.isbn_template_found
+            ]
+        )
 
     @property
     def number_of_multiple_template_references(self):
-        return len([reference for reference in self.references if reference.raw_reference.multiple_templates_found])
+        return len(
+            [
+                reference
+                for reference in self.references
+                if reference.raw_reference.multiple_templates_found
+            ]
+        )
 
     @property
     def named_references(self):
         """Special type of reference with no content
         Example: <ref name="INE"/>"""
-        return [reference for reference in self.references if reference.raw_reference.is_named_reference]
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.is_named_reference
+        ]
 
     @property
     def number_of_named_references(self):
@@ -76,7 +116,11 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def content_references(self):
         """This is references with actual content beyond a name"""
-        return [reference for reference in self.references if not reference.raw_reference.is_named_reference]
+        return [
+            reference
+            for reference in self.references
+            if not reference.raw_reference.is_named_reference
+        ]
 
     @property
     def number_of_content_references(self):
@@ -106,7 +150,9 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             return 0
         else:
             return int(
-                self.number_of_hashed_content_references * 100 / self.number_of_content_references
+                self.number_of_hashed_content_references
+                * 100
+                / self.number_of_content_references
             )
 
     # TODO rename to citation_references
@@ -158,5 +204,3 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def __parse_all_raw_references__(self):
         for wrr in self.raw_references:
             wrr.extract_and_determine_reference_type()
-
-

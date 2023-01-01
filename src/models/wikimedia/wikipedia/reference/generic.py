@@ -977,16 +977,23 @@ class WikipediaReference(WcdItem):
             elif self.first_template_name == "isbn":
                 self.isbn = self.first_parameter
             else:
-                logger.warning(f"The template name {self.first_template_name} is currently not supported")
+                logger.warning(
+                    f"The template name {self.first_template_name} is currently not supported"
+                )
         else:
             # TODO rewrite to use generic attribute after the WRR rewrite
             if self.raw_reference:
                 if self.first_parameter and not self.first_template_name:
-                    logger.warning(f"No first template name found for the WRR with tag {self.raw_reference.tag}")
+                    logger.warning(
+                        f"No first template name found for the WRR with tag {self.raw_reference.tag}"
+                    )
                 if not self.first_parameter and self.first_template_name:
-                    logger.warning(f"No first parameter found for the WRR with tag {self.raw_reference.tag}")
+                    logger.warning(
+                        f"No first parameter found for the WRR with tag {self.raw_reference.tag}"
+                    )
             else:
                 logger.error("No raw reference for this reference")
+
     # DEPRECATED since 2.1.0-alpha3
     # def __parse_google_books_template__(self):
     #     """Parse the Google Books template that sometimes appear in self.url

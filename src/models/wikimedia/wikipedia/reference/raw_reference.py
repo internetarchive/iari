@@ -162,11 +162,14 @@ class WikipediaRawReference(WcdBaseModel):
                     self.bare_url_template_found = False
             else:
                 self.multiple_templates_found = True
-                message = (f"We found {self.number_of_templates} templates in "
+                message = (
+                    f"We found {self.number_of_templates} templates in "
                     f"{self.tag} -> templates: {self.templates} which is currently not supported"
                 )
                 logger.error(message)
-                self.__log_to_file__(message=message, file_name="multiple_template_error.log")
+                self.__log_to_file__(
+                    message=message, file_name="multiple_template_error.log"
+                )
 
     def __detect_any_plain_text__(self) -> bool:
         """A clean template reference has no text outside the {{ and }}"""

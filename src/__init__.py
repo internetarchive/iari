@@ -10,6 +10,7 @@ import config
 from src.helpers.console import console
 from src.models.exceptions import MissingInformationError, WikibaseError
 from src.models.wikibase import Wikibase
+
 # from src.models.wikibase.crud.read import WikibaseCrudRead
 from src.models.wikibase.dictionaries import (
     wcd_externalid_properties,
@@ -332,7 +333,6 @@ class WcdImportBot(WcdBaseModel):
     #                     cache=self.cache,
     #                 )
     #                 wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
-
 
     # def print_statistics(self):
     #     self.__calculate_statistics__()

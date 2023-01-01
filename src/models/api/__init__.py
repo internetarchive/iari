@@ -14,6 +14,7 @@ from flask_restful import Api  # type: ignore
 
 import config
 from src.models.api.get_article_statistics import GetArticleStatistics
+
 # from src.models.api.add_job_to_queue import AddJobToQueue
 from src.models.api.lookup_by_wikidata_qid import LookupByWikidataQid
 

@@ -4,7 +4,6 @@ from src.models.return_ import Return
 from src.models.wikibase import Wikibase
 from src.wcd_base_model import WcdBaseModel
 
-
 # if TYPE_CHECKING:
 #     from src.models.wikibase.crud.create import WikibaseCrudCreate
 #     from src.models.wikibase.crud.read import WikibaseCrudRead

@@ -11,9 +11,7 @@ wikibase = IASandboxWikibase()
 
 class TestWikipediaReferenceExtractor(TestCase):
     def test_number_of_references_zero(self):
-        wre0 = WikipediaReferenceExtractor(
-            testing=True, wikitext="", wikibase=wikibase
-        )
+        wre0 = WikipediaReferenceExtractor(testing=True, wikitext="", wikibase=wikibase)
         wre0.extract_all_references()
         assert wre0.number_of_raw_references == 0
         assert wre0.number_of_references == 0
@@ -26,7 +24,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True, wikitext=raw_reference + raw_reference2, wikibase=wikibase
         )
-        #print(wre.wikitext)
+        # print(wre.wikitext)
         wre.extract_all_references()
         assert wre.number_of_raw_references == 2
         assert wre.number_of_references == 2
@@ -43,7 +41,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             wikitext=raw_reference + raw_reference2 + raw_reference3,
             wikibase=wikibase,
         )
-        #print(wre1.wikitext)
+        # print(wre1.wikitext)
         wre1.extract_all_references()
         assert wre1.number_of_raw_references == 3
         assert wre1.number_of_references == 3

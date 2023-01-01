@@ -9,13 +9,18 @@ from test_data.test_content import easter_island_excerpt, test_full_article
 class TestWikipediaAnalyzer(TestCase):
     def test_get_statistics_valid_article_easter_island(self):
         # Test using excerpt so we don't rely on information from Wikipedia that might change
-        wa = WikipediaAnalyzer(title="Easter Island", wikitext=easter_island_excerpt, testing=True)
+        wa = WikipediaAnalyzer(
+            title="Easter Island", wikitext=easter_island_excerpt, testing=True
+        )
         assert wa.get_statistics() == (
-            ArticleStatistics(number_of_content_references=2,
-                                                        number_of_cs1_references=2,
-                                                        number_of_hashed_content_references=2,
-                                                        number_of_named_references=1,
-                                                        percent_of_content_references_with_a_hash=100).dict(exclude={"cache"}))
+            ArticleStatistics(
+                number_of_content_references=2,
+                number_of_cs1_references=2,
+                number_of_hashed_content_references=2,
+                number_of_named_references=1,
+                percent_of_content_references_with_a_hash=100,
+            ).dict(exclude={"cache"})
+        )
 
     def test_get_statistics_valid_article_test(self):
         wa = WikipediaAnalyzer(title="Test", wikitext=test_full_article)
