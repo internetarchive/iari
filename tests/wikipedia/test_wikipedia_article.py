@@ -179,11 +179,11 @@ class TestWikipediaArticle(TestCase):
         wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
         wp.wikitext = easter_island_excerpt
         wp.extract_and_parse_references()
-        assert len(wp.extractor.references) == 3
-        # print(wp.extractor.references)
-        # print(wp.extractor.references[0].raw_reference.templates)
-        assert wp.extractor.references[0].raw_reference.number_of_templates == 1
-        assert wp.extractor.references[0].raw_reference.templates[0].raw_template == (
+        assert wp.extractor.number_of_references == 3
+        assert wp.extractor.number_of_named_references == 1
+        assert wp.extractor.number_of_content_references == 2
+        assert wp.extractor.content_references[0].raw_reference.number_of_templates == 1
+        assert wp.extractor.content_references[0].raw_reference.templates[0].raw_template == (
             "{{cite web | url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_viviend"
             "a/censo_pobl_vivi.php | title= Censo de Población y Vivienda 2002 | work= [[National Statistics Institute "
             "(Chile)|National Statistics Institute]] | access-date= 1 May 2010 | url-stat"
@@ -191,22 +191,22 @@ class TestWikipediaArticle(TestCase):
             "l= https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistic"
             "o/censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}"
         )
-        assert wp.extractor.references[0].first_template_name == "cite web"
+        assert wp.extractor.content_references[0].first_template_name == "cite web"
         # print(wp.extractor.references[1].raw_reference.templates)
-        assert wp.extractor.references[1].raw_reference.templates[0].raw_template == (
+        assert wp.extractor.content_references[1].raw_reference.templates[0].raw_template == (
             "{{cite web |language= es |url= https://resultados.censo2017.cl/Home/Download |title= Censo 2017 |wo"
             "rk= [[National Statistics Institute (Chile)|National Statistics Institute]] |access-d"
             "ate= 11 May 2018 |archive-url= https://web.archive.org/web/20180511145942/https://resultados.censo2"
             "017.cl/Home/Download |archive-date= 11 May 2018 |url-status=dead }}"
         )
-        assert wp.extractor.references[1].first_template_name == "cite web"
-        print(wp.extractor.references[2].raw_reference)
-        assert wp.extractor.references[2].raw_reference.templates[0].raw_template == (
-            "{{cite web |last1=Dangerfield |first1=Whitney |title=The Mystery of Easter Island |url=https://www.sm"
-            "ithsonianmag.com/travel/the-mystery-of-easter-island-151285298/ |website=[[Smiths"
-            "onian (magazine)|Smithsonian Magazine]] |access-date=December 10, 2020 |date=March 31, 2007}}"
-        )
-        assert wp.extractor.references[2].first_template_name == "cite web"
+        assert wp.extractor.content_references[1].first_template_name == "cite web"
+        # print(wp.extractor.references[2].raw_reference)
+        # assert wp.extractor.references[2].raw_reference.templates[0].raw_template == (
+        #     "{{cite web |last1=Dangerfield |first1=Whitney |title=The Mystery of Easter Island |url=https://www.sm"
+        #     "ithsonianmag.com/travel/the-mystery-of-easter-island-151285298/ |website=[[Smiths"
+        #     "onian (magazine)|Smithsonian Magazine]] |access-date=December 10, 2020 |date=March 31, 2007}}"
+        # )
+        # assert wp.extractor.references[2].first_template_name == "cite web"
         # assert wp.extractor.references[3].raw_reference.templates[0].raw_template == (
         #     "{{cite journal |author=Peiser, B. |url=http://www.uri.edu/artsci/ecn/starkey/ECN398%20-"
         #     "Ecology,%20Economy,%20Society/RAPANUI.pdf |archive-url=https://web.archive.org/web/2010061"
