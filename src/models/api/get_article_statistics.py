@@ -8,7 +8,6 @@ from src.helpers.console import console
 from src.models.api.get_statistics_schema import GetStatisticsSchema
 from src.models.api.job import Job
 from src.models.wikimedia.enums import AnalyzerReturn
-from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import test_full_article, easter_island_excerpt
 
 logger = logging.getLogger(__name__)
@@ -21,6 +20,8 @@ class GetArticleStatistics(Resource):
     def get(self):
         self.__validate_and_get_job__()
         if self.job.lang.lower() == "en" and self.job.title and self.job.site.lower() == "wikipedia":
+            from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
+
             wikipedia_analyzer = None
             supported_test_titles = ["Test", "Easter Island"]
             if self.job.testing and self.job.title in supported_test_titles:
