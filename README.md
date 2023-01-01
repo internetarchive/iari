@@ -116,7 +116,8 @@ See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
 4) ([TODO](https://github.com/internetarchive/wcdimportbot/issues/471)) **General reference with a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template
 5) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
 
-These two are similar but appear in different contexts. Both require a trained machine learning model to recognize what they are refering to.
+These two are similar but appear in different contexts. Both require a trained machine learning model to recognize 
+what they are referring to.
 1) **General reference without a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section. 
 2**Plain text reference without a template**: references inside <ref> tags, but without ANY template. 
 
