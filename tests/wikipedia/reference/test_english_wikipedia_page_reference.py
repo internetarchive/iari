@@ -1,7 +1,7 @@
 import logging
 from unittest import TestCase
 
-from mwparserfromhell import parse
+from mwparserfromhell import parse  # type: ignore
 
 import config
 from src import console

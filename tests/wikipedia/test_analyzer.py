@@ -3,7 +3,10 @@ from unittest import TestCase
 from src.models.api.article_statistics import ArticleStatistics
 from src.models.wikimedia.enums import AnalyzerReturn
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
-from test_data.test_content import easter_island_excerpt, test_full_article  # type: ignore
+from test_data.test_content import (  # type: ignore
+    easter_island_excerpt,
+    test_full_article,
+)
 
 
 class TestWikipediaAnalyzer(TestCase):
