@@ -181,6 +181,7 @@ class WikipediaArticle(WcdItem):
             url = f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/rest.php/v1/page/{title}"
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
+            # console.print(response.json())
             if response.status_code == 200:
                 data = response.json()
                 # TODO read up on the documentation to find out if this is reliable
