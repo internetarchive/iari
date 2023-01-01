@@ -1,3 +1,4 @@
+# flake8: noqa
 easter_island_excerpt = """{{short description|Chilean island in the Pacific}}
 {{for|the Kris Kristofferson album|Easter Island (album)}}
 {{Redirect|Rapa Nui}}

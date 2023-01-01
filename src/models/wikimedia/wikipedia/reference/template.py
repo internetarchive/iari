@@ -99,7 +99,7 @@ class WikipediaTemplate(WcdBaseModel):
 
         # Dennis removed the loop here during OOP-ification
         logger.debug(f"Working on template: {self.raw_template}")
-        for parameter in getattr(self.raw_template, "params"):
+        for parameter in self.raw_template.params:
             value = str(parameter.value)  # mwpfh needs upcast to str
             if strip:
                 key = parameter.name.strip()
