@@ -1,9 +1,10 @@
 import unittest
 import json
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import Api
 
+from src.models.api.article_statistics import ArticleStatistics
 from src.models.api.get_article_statistics import GetArticleStatistics
 
 
@@ -110,31 +111,17 @@ class GetStatisticsSchema(Schema):
         response = self.app.get('/get_article_statistics?lang=en&site=wikipedia&title=Test&testing=True')
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, {'number_of_bare_url_references': 0,
- 'number_of_citation_references': 0,
- 'number_of_citeq_references': 0,
- 'number_of_content_references': 0,
- 'number_of_cs1_references': 0,
- 'number_of_hashed_content_references': 0,
- 'number_of_isbn_template_references': 0,
- 'number_of_multiple_template_references': 0,
- 'number_of_named_references': 0,
- 'percent_of_content_references_with_a_hash': 0})  # expected output
+        self.assertEqual(ArticleStatistics(**data).dict(), ArticleStatistics().dict())
 
     def test_valid_request_easter_island(self):
         response = self.app.get('/get_article_statistics?lang=en&site=wikipedia&title=Easter Island&testing=True')
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, {'number_of_bare_url_references': 0,
-                                 'number_of_citation_references': 0,
-                                 'number_of_citeq_references': 0,
-                                 'number_of_content_references': 2,
-                                 'number_of_cs1_references': 2,
-                                 'number_of_hashed_content_references': 2,
-                                 'number_of_isbn_template_references': 0,
-                                 'number_of_multiple_template_references': 0,
-                                 'number_of_named_references': 1,
-                                 'percent_of_content_references_with_a_hash': 100})  # expected output
+        self.assertEqual(ArticleStatistics(**data).dict(), ArticleStatistics(number_of_content_references=2,
+                                                        number_of_cs1_references=2,
+                                                        number_of_hashed_content_references=2,
+                                                        number_of_named_references=1,
+                                                        percent_of_content_references_with_a_hash=100).dict())
 
     def test_invalid_language(self):
         response = self.app.get('/get_article_statistics?lang=fr&site=wikipedia&title=Test')
