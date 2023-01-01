@@ -444,7 +444,7 @@ class WikipediaReference(WcdItem):
         """Helper method. We use this information in the graph to know which
         template the information in the reference came from"""
         if self.raw_reference and self.raw_reference.number_of_templates:
-            return self.raw_reference.templates[0].name
+            return str(self.raw_reference.templates[0].name)
         else:
             return ""
 

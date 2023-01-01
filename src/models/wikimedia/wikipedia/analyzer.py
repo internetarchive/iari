@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from src import IASandboxWikibase, Wikibase
 from src.helpers.console import console
@@ -15,8 +16,8 @@ class WikipediaAnalyzer(WcdBaseModel):
     title: str = ""
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     language_code: str = "en"
-    article: WikipediaArticle = None
-    article_statistics: ArticleStatistics = None
+    article: Optional[WikipediaArticle] = None
+    article_statistics: Optional[ArticleStatistics] = None
     wikibase: Wikibase = IASandboxWikibase()
     wikitext: str = ""
     testing: bool = False

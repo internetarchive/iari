@@ -55,7 +55,7 @@ class WikipediaRawReference(WcdBaseModel):
         """Helper method. We use this information in the graph to know which
         template the information in the reference came from"""
         if self.templates:
-            return self.templates[0].name
+            return str(self.templates[0].name)
         else:
             return ""
 

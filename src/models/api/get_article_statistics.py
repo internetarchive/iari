@@ -8,7 +8,10 @@ from src.helpers.console import console
 from src.models.api.get_statistics_schema import GetStatisticsSchema
 from src.models.api.job import Job
 from src.models.wikimedia.enums import AnalyzerReturn
-from test_data.test_content import easter_island_excerpt, test_full_article
+from test_data.test_content import (  # type: ignore
+    easter_island_excerpt,
+    test_full_article,
+)
 
 logger = logging.getLogger(__name__)
 
