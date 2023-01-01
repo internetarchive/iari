@@ -183,7 +183,9 @@ class TestWikipediaArticle(TestCase):
         assert wp.extractor.number_of_named_references == 1
         assert wp.extractor.number_of_content_references == 2
         assert wp.extractor.content_references[0].raw_reference.number_of_templates == 1
-        assert wp.extractor.content_references[0].raw_reference.templates[0].raw_template == (
+        assert wp.extractor.content_references[0].raw_reference.templates[
+            0
+        ].raw_template == (
             "{{cite web | url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_viviend"
             "a/censo_pobl_vivi.php | title= Censo de Población y Vivienda 2002 | work= [[National Statistics Institute "
             "(Chile)|National Statistics Institute]] | access-date= 1 May 2010 | url-stat"
@@ -193,7 +195,9 @@ class TestWikipediaArticle(TestCase):
         )
         assert wp.extractor.content_references[0].first_template_name == "cite web"
         # print(wp.extractor.references[1].raw_reference.templates)
-        assert wp.extractor.content_references[1].raw_reference.templates[0].raw_template == (
+        assert wp.extractor.content_references[1].raw_reference.templates[
+            0
+        ].raw_template == (
             "{{cite web |language= es |url= https://resultados.censo2017.cl/Home/Download |title= Censo 2017 |wo"
             "rk= [[National Statistics Institute (Chile)|National Statistics Institute]] |access-d"
             "ate= 11 May 2018 |archive-url= https://web.archive.org/web/20180511145942/https://resultados.censo2"
