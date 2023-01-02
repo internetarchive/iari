@@ -3,7 +3,7 @@ from marshmallow import Schema, fields, post_load
 from src.models.api.job import Job
 
 
-class AddJobSchema(Schema):
+class GetStatisticsSchema(Schema):
     lang = fields.Str(required=True)
     site = fields.Str(required=True)
     testing = fields.Bool(required=False)

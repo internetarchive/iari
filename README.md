@@ -4,7 +4,9 @@ reference information from Wikipedia articles as [structured data](https://www.w
 in a [Wikibase.cloud](https://wikibase.cloud/) instance. We call the resulting database Wikipedia Citations Database (WCD).
 
 The framework has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) (version 1.0.0 a proof of concept import tool based on WikidataIntegrator)
-and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2.0.0+ a scalable ETL-framework with an API and capability of reading EventStreams) as part of the 
+and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) (version 2.0.0+ a scalable ETL-framework with an API 
+and capability of reading EventStreams and version 3.0.0+ with graph generation from Wikipedia dumps and an 
+article_statistic API) as part of the 
 [Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by 
 Mark Graham, head of The 
 [Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the [Internet Archive](https://www.wikidata.org/wiki/Q461).
@@ -63,41 +65,8 @@ Currently, the focus is on supporting the most widely used reference
 templates in English Wikipedia.
 
 ### List of currently supported templates
-```
-supported_templates = [
-    "citation",  # see https://en.wikipedia.org/wiki/Template:Citation
-    "cite q",
-    "citeq",
-    "isbn",
-    "url",
-    # CS1 templates:
-    "cite arxiv",
-    "cite av media notes",
-    "cite av media",
-    "cite biorxiv",
-    "cite book",
-    "cite cite seerx",
-    "cite conference",
-    "cite encyclopedia",
-    "cite episode",
-    "cite interview",
-    "cite journal",
-    "cite magazine",
-    "cite mailing list" "cite map",
-    "cite news",
-    "cite newsgroup",
-    "cite podcast",
-    "cite press release",
-    "cite report",
-    "cite serial",
-    "cite sign",
-    "cite speech",
-    "cite ssrn",
-    "cite techreport",
-    "cite thesis",
-    "cite web",
-]
-```
+See [config_sample.py](config_sample.py) for a list of templates.
+
 # Terminology
 We use the following terminology to distinguish different types of references.
 ## Templates
@@ -108,12 +77,26 @@ We use the following terminology to distinguish different types of references.
 5) **bare url template** - template added in English Wikipedia (by a bot presumably) when a bare url is found. See https://en.wikipedia.org/wiki/Template:Cleanup_bare_URLs
  
 ## Reference types detected by the ArticleAnalyzer
-We support detecting the following types. A reference cannot have multiple types.
+We support detecting the following types. A reference cannot have multiple types. 
+We distinguish between two main types of references:
+1)  **named reference** - type of reference with only a name and no content e.g. '<ref name="INE"/>' (Unsupported 
+beyond counting because we have not decided if they contain any value)
+2) **content reference** - reference with any type of content 
+   1) **general reference** - subtype of content reference which is outside a <ref></ref> and usually found in 
+   sections called "Further reading" or "Bibliography"
+   (unsupported but we want to support it, see https://github.com/internetarchive/wcdimportbot/labels/general%20reference)
+    ![image](https://user-images.githubusercontent.com/68460690/208092363-ba4b5346-cad7-495e-8aff-1aa4f2f0161e.png)
+   2) **citation reference** - subtype of content reference which is inside a <ref> (supported partially, see below)
 
-E.g.
+Example of a supported reference:
 `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
+This is a content reference -> a citation reference -> a mixed reference with a URL template. 
 
-### Parse support
+Example of an unsupported reference:
+`<ref>Muller Report, p12</ref>`
+This is a content reference -> citation reference -> Short citation reference. 
+
+### Citation reference subtypes with parse support 
 1) **mixed reference with an ISBN template** - reference with plain text and a {{isbn}} template
 2) **mixed reference with a URL template** - reference with plain text and a URL (these are very rare)
 3) **ISBN template reference** - reference with only a {{isbn}} template
@@ -122,22 +105,26 @@ E.g.
 6) **multiple template reference with Google books template** - (defined as: contains multiple templates according to mwparserfromhell) E.g. {{cite book|url={{google books|123456}}}} <- this particular subtype we want to support
 7) **multiple template reference with url and bare url x template** - E.g. `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
 
-### No parse support
+### Citation reference subtypes without parse support
 These are unsupported because of complexity
 1) **reference with a Bare URL template** - as above, but with one of the {{bare url x}} templates 
 2) **Plain text reference with a URL outside a template** - as above, but with no other identifier than the URL
-3) **Short citation reference** - special type of plain text reference defined above. See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
+3) **Short citation reference** aka plain text reference without a URL or identifier - 
+special type of plain text reference. e.g. reference to a book only by author and title. e.g. "Muller Report, p12". 
+See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
 ![image](https://user-images.githubusercontent.com/68460690/208091737-abc20b6e-8102-4acd-b0fa-409aa72d9ae8.png)
-4) **Plain text reference without a URL or identifier** - e.g. reference to a book only by author and title. e.g. "Muller Report, p12"
-5) **General reference** - reference outside of <ref>. E.g. part of further reading- or bibliography section.
-![image](https://user-images.githubusercontent.com/68460690/208092363-ba4b5346-cad7-495e-8aff-1aa4f2f0161e.png)
-6) **General reference with a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template
-7) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
-8) **Plain text reference**: references inside <ref> tags, but without ANY template. 
+4) ([TODO](https://github.com/internetarchive/wcdimportbot/issues/471)) **General reference with a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section that uses a template
+5) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
+
+These two are similar but appear in different contexts. Both require a trained machine learning model to recognize 
+what they are referring to.
+1) **General reference without a template** - reference outside of <ref>. E.g. part of further reading- or bibliography section. 
+2**Plain text reference without a template**: references inside <ref> tags, but without ANY template. 
 
 These are unsupported because they are very few (<200 transclusions in enwiki)
 * **Bundled reference** - multiple references in one <ref> see https://en.wikipedia.org/w/index.php?title=Wikipedia:CITEBUNDLE
 * **Unbulleted list citebundle reference** - type of nested reference with multiple templates inside, see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
+
 
 ## Types used in the graph
 1) **wikipedia citation** - anything inside <ref> tags in a Wikipedia article that _can_ be uniquely identified via a URL, PMID, ISBN, DOI or similar identifier. We have a property for this in the graph and these citations get their own item with an id.
@@ -146,11 +133,10 @@ These are unsupported because they are very few (<200 transclusions in enwiki)
 # Features
 Currently, the framework has the following features:
 * support for English Wikipedia only
-* import articles one by one
-* import a range of articles
-* import a range of articles from a category
-* ingest article updates from [EventStreams](https://www.wikidata.org/wiki/Q115402046)
-* scale horizontally up to the Wikibase API gets choked (a total max of ~6 edits a second)
+* generation of a Wikibase graph based on a Wikipedia dump and upload it to Wikibase 
+* API endpoint which helps jump from an article to the item in the Wikibase
+* API endpoint which analyze a given article and returns statistics about it (number of references, 
+number of citation templates of different types, number of references outside <ref>s, etc.)
 
 # Diagrams
 
@@ -162,12 +148,6 @@ Currently, the framework has the following features:
 
 ## Article import sequence
 ![image](diagrams/sequence_import_title.png)
-
-## Ingester sequence
-![image](diagrams/ingester_sequence.png)
-
-## Worker sequence
-![image](diagrams/worker_sequence.png)
 
 # License
 This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022

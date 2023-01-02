@@ -17,8 +17,6 @@ from src.models.exceptions import (
     MoreThanOneNumberError,
 )
 from src.models.person import Person
-from src.models.return_.cache_return import CacheReturn
-from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
@@ -68,7 +66,6 @@ class WikipediaReference(WcdItem):
     numbered_first_lasts: Optional[List]
     orcid: Optional[str]  # Is this present in the wild?
     persons_without_role: Optional[List[Person]]
-    template_name: str  # We use this to keep track of which template the information came from
     translators_list: Optional[List[Person]]
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     raw_reference: Optional[WikipediaRawReference] = None
@@ -443,8 +440,17 @@ class WikipediaReference(WcdItem):
     #         )
 
     @property
+    def first_template_name(self) -> str:
+        """Helper method. We use this information in the graph to know which
+        template the information in the reference came from"""
+        if self.raw_reference and self.raw_reference.number_of_templates:
+            return str(self.raw_reference.templates[0].name)
+        else:
+            return ""
+
+    @property
     def template_url(self) -> str:
-        return f"https://en.wikipedia.org/wiki/Template:{self.template_name}"
+        return f"https://en.wikipedia.org/wiki/Template:{self.first_template_name}"
 
     @property
     def wikibase_url(self) -> str:
@@ -454,22 +460,22 @@ class WikipediaReference(WcdItem):
             raise MissingInformationError("self.return_ was None")
         return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
 
-    @validate_arguments
-    def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
-        """Check and upload reference item to Wikibase if missing and return an
-        updated reference with the attribute return_ set"""
-        logger.debug(
-            "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
-        )
-        self.get_wcdqid_from_cache()
-        if self.return_:
-            if not self.return_.item_qid:
-                logger.info(
-                    f"Could not find reference with {self.md5hash} in the cache"
-                )
-                self.upload_reference_and_insert_in_the_cache_if_enabled()
-        else:
-            raise MissingInformationError("self.return_ was None")
+    # @validate_arguments
+    # def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
+    #     """Check and upload reference item to Wikibase if missing and return an
+    #     updated reference with the attribute return_ set"""
+    #     logger.debug(
+    #         "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
+    #     )
+    #     self.get_wcdqid_from_cache()
+    #     if self.return_:
+    #         if not self.return_.item_qid:
+    #             logger.info(
+    #                 f"Could not find reference with {self.md5hash} in the cache"
+    #             )
+    #             self.upload_reference_and_insert_in_the_cache_if_enabled()
+    #     else:
+    #         raise MissingInformationError("self.return_ was None")
 
     def __clean_wiki_markup_from_strings__(self):
         """We clean away [[ and ]]
@@ -714,7 +720,7 @@ class WikipediaReference(WcdItem):
         else:
             self.md5hash = ""
             logger.warning(
-                f"hashing not possible for this instance of {self.template_name} "
+                f"hashing not possible for this instance of {self.first_template_name} "
                 f"because no identifier or url or first parameter was found "
                 f"or they were turned of in config.py."
             )
@@ -946,29 +952,47 @@ class WikipediaReference(WcdItem):
     def __parse_first_parameter__(self) -> None:
         """We parse the first parameter which has different meaning
         depending on the template in question"""
-        if self.template_name in ("cite q", "citeq"):
-            # We assume that the first parameter is the Wikidata QID
-            if self.first_parameter:
-                if self.first_parameter[:1] in ("q", "Q"):
-                    self.wikidata_qid = self.first_parameter
-                else:
+        if self.first_template_name and self.first_parameter:
+            if self.first_template_name in ("cite q", "citeq"):
+                # We assume that the first parameter is the Wikidata QID
+                if self.first_parameter:
+                    if self.first_parameter[:1] in ("q", "Q"):
+                        self.wikidata_qid = self.first_parameter
+                    else:
+                        logger.warning(
+                            f"First parameter '{self.first_parameter}' "
+                            f"of {self.first_template_name} was not a valid "
+                            f"WD QID"
+                        )
+            elif self.first_template_name == "url":
+                # crudely detect if url with scheme in first_parameter
+                if self.first_parameter:
+                    if "://" in self.first_parameter:
+                        self.url = self.first_parameter
+                    else:
+                        logger.warning(
+                            f"'{self.first_parameter}' was not recognized as a URL"
+                        )
+                        self.url = ""
+            elif self.first_template_name == "isbn":
+                self.isbn = self.first_parameter
+            else:
+                logger.warning(
+                    f"The template name {self.first_template_name} is currently not supported"
+                )
+        else:
+            # TODO rewrite to use generic attribute after the WRR rewrite
+            if self.raw_reference:
+                if self.first_parameter and not self.first_template_name:
                     logger.warning(
-                        f"First parameter '{self.first_parameter}' "
-                        f"of {self.template_name} was not a valid "
-                        f"WD QID"
+                        f"No first template name found for the WRR with tag {self.raw_reference.tag}"
                     )
-        elif self.template_name == "url":
-            # crudely detect if url with scheme in first_parameter
-            if self.first_parameter:
-                if "://" in self.first_parameter:
-                    self.url = self.first_parameter
-                else:
+                if not self.first_parameter and self.first_template_name:
                     logger.warning(
-                        f"'{self.first_parameter}' was not recognized as a URL"
+                        f"No first parameter found for the WRR with tag {self.raw_reference.tag}"
                     )
-                    self.url = ""
-        elif self.template_name == "isbn":
-            self.isbn = self.first_parameter
+            else:
+                logger.error("No raw reference for this reference")
 
     # DEPRECATED since 2.1.0-alpha3
     # def __parse_google_books_template__(self):
@@ -1117,40 +1141,41 @@ class WikipediaReference(WcdItem):
         persons.extend(self.__get_numbered_persons__(attributes=attributes))
         return persons
 
-    def __parse_url__(self, url: str = "") -> str:
-        # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
-        parsed_url = urlparse(url)
-        if parsed_url.scheme:
-            url = parsed_url.geturl()
-            logger.info(f"Found scheme in {url}")
-            return url
-        else:
-            # TODO REGRESSION We don't support nested templates for now during the rewrite
-            # if self.__has_template_data__(string=url):
-            #     logger.info(f"Found template data in url: {url}")
-            #     return self.__get_url_from_template__(url=url)
-            # else:
-            logger.warning(
-                f"Skipped the URL '{self.url}' because of missing URL scheme"
-            )
-            return ""
-
-    def __parse_urls__(self) -> None:
-        """This function looks for Google Books references and
-        parse the URLs to avoid complaints from Wikibase"""
-        logger.debug("__parse_urls__: Running")
-        if self.url:
-            self.url = self.__parse_url__(url=self.url)
-        if self.archive_url:
-            self.archive_url = self.__parse_url__(url=self.archive_url)
-        if self.lay_url:
-            self.lay_url = self.__parse_url__(url=self.lay_url)
-        if self.chapter_url:
-            self.chapter_url = self.__parse_url__(url=self.chapter_url)
-        if self.conference_url:
-            self.conference_url = self.__parse_url__(url=self.conference_url)
-        if self.transcripturl:
-            self.transcripturl = self.__parse_url__(url=self.transcripturl)
+    # TODO move this to Template
+    # def __parse_url__(self, url: str = "") -> str:
+    #     # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
+    #     parsed_url = urlparse(url)
+    #     if parsed_url.scheme:
+    #         url = parsed_url.geturl()
+    #         logger.info(f"Found scheme in {url}")
+    #         return url
+    #     else:
+    #         # TODO REGRESSION We don't support nested templates for now during the rewrite
+    #         # if self.__has_template_data__(string=url):
+    #         #     logger.info(f"Found template data in url: {url}")
+    #         #     return self.__get_url_from_template__(url=url)
+    #         # else:
+    #         logger.warning(
+    #             f"Skipped the URL '{self.url}' because of missing URL scheme"
+    #         )
+    #         return ""
+    #
+    # def __parse_urls__(self) -> None:
+    #     """This function looks for Google Books references and
+    #     parse the URLs to avoid complaints from Wikibase"""
+    #     logger.debug("__parse_urls__: Running")
+    #     if self.url:
+    #         self.url = self.__parse_url__(url=self.url)
+    #     if self.archive_url:
+    #         self.archive_url = self.__parse_url__(url=self.archive_url)
+    #     if self.lay_url:
+    #         self.lay_url = self.__parse_url__(url=self.lay_url)
+    #     if self.chapter_url:
+    #         self.chapter_url = self.__parse_url__(url=self.chapter_url)
+    #     if self.conference_url:
+    #         self.conference_url = self.__parse_url__(url=self.conference_url)
+    #     if self.transcripturl:
+    #         self.transcripturl = self.__parse_url__(url=self.transcripturl)
 
     # noinspection PyMethodParameters
     @validator(
@@ -1220,99 +1245,77 @@ class WikipediaReference(WcdItem):
             logger.warning(f"date format '{v}' not supported yet")
         return date
 
-    @validate_arguments
-    def __upload_reference_to_wikibase__(self) -> WikibaseReturn:
-        """This method tries to upload the reference to Wikibase
-        and returns a WikibaseReturn."""
-        logger.debug("__upload_reference_to_wikicitations__: Running")
-        if self.wikibase_crud_create is None:
-            self.__setup_wikibase_crud_create__()
-        if self.wikibase_crud_create:
-            return_ = self.wikibase_crud_create.prepare_and_upload_reference_item(
-                page_reference=self
-            )
-            if isinstance(return_, WikibaseReturn):
-                return return_
-            else:
-                raise ValueError(f"we did not get a WikibaseReturn back")
+    # @validate_arguments
+    # def __upload_reference_to_wikibase__(self) -> WikibaseReturn:
+    #     """This method tries to upload the reference to Wikibase
+    #     and returns a WikibaseReturn."""
+    #     logger.debug("__upload_reference_to_wikicitations__: Running")
+    #     if self.wikibase_crud_create is None:
+    #         self.__setup_wikibase_crud_create__()
+    #     if self.wikibase_crud_create:
+    #         return_ = self.wikibase_crud_create.prepare_and_upload_reference_item(
+    #             page_reference=self
+    #         )
+    #         if isinstance(return_, WikibaseReturn):
+    #             return return_
+    #         else:
+    #             raise ValueError(f"we did not get a WikibaseReturn back")
+    #
+    #     else:
+    #         raise ValueError("self.wikibase_crud_create was None")
 
-        else:
-            raise ValueError("self.wikibase_crud_create was None")
-
-    @validate_arguments
-    def get_wcdqid_from_cache(self) -> None:
-        if not self.cache:
-            raise ValueError("self.cache was None")
-        if self.cache is not None:
-            self.return_: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
-                reference=self
-            )
-            if self.return_:
-                logger.debug(f"result from the cache:{self.return_.item_qid}")
-
-    @validate_arguments
-    def __insert_reference_in_cache__(self, wcdqid: str):
-        """Insert reference in the cache"""
-        logger.debug("__insert_in_cache__: Running")
-        if not self.cache:
-            raise ValueError("self.cache was None")
-        if self.cache is not None:
-            self.cache.add_reference(reference=self, wcdqid=wcdqid)
-        logger.info("Reference inserted into the hash database")
-
-    @validate_arguments
-    def upload_reference_and_insert_in_the_cache_if_enabled(self) -> None:
-        """Upload the reference and insert into the cache if enabled. Always add return_"""
-        logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
-        return_ = self.__upload_reference_to_wikibase__()
-        if not return_ or not self.md5hash:
-            raise MissingInformationError("hash or WCDQID was None")
-        self.__insert_reference_in_cache__(wcdqid=return_.item_qid)
-        self.return_ = return_
+    # @validate_arguments
+    # def get_wcdqid_from_cache(self) -> None:
+    #     if not self.cache:
+    #         raise ValueError("self.cache was None")
+    #     if self.cache is not None:
+    #         self.return_: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
+    #             reference=self
+    #         )
+    #         if self.return_:
+    #             logger.debug(f"result from the cache:{self.return_.item_qid}")
+    #
+    # @validate_arguments
+    # def __insert_reference_in_cache__(self, wcdqid: str):
+    #     """Insert reference in the cache"""
+    #     logger.debug("__insert_in_cache__: Running")
+    #     if not self.cache:
+    #         raise ValueError("self.cache was None")
+    #     if self.cache is not None:
+    #         self.cache.add_reference(reference=self, wcdqid=wcdqid)
+    #     logger.info("Reference inserted into the hash database")
+    #
+    # @validate_arguments
+    # def upload_reference_and_insert_in_the_cache_if_enabled(self) -> None:
+    #     """Upload the reference and insert into the cache if enabled. Always add return_"""
+    #     logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
+    #     return_ = self.__upload_reference_to_wikibase__()
+    #     if not return_ or not self.md5hash:
+    #         raise MissingInformationError("hash or WCDQID was None")
+    #     self.__insert_reference_in_cache__(wcdqid=return_.item_qid)
+    #     self.return_ = return_
 
     def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
-        if testing and not self.cache:
-            self.__setup_cache__()
         if not self.raw_reference and not testing:
-            raise MissingInformationError("self.raw_reference was empty string")
-        from src.models.update_delay import UpdateDelay
-
-        update_delay = UpdateDelay(object_=self, cache=self.cache, testing=testing)
-        # UpdateDelay needs either a title or a wikidata_qid to
-        if update_delay.time_to_update() or testing is True:
-            self.__parse_first_parameter__()
-            self.__parse_urls__()
-            self.__parse_isbn__()
-            # First Level Domain detection is needed for the detection methods
-            self.__extract_first_level_domain__()
-            self.__detect_archive_urls__()
-            self.__detect_internet_archive_id__()
-            # self.__detect_google_books_id__()
-            self.__parse_persons__()
-            self.__merge_date_into_publication_date__()
-            self.__merge_lang_into_language__()
-            self.__merge_place_into_location__()
-            self.__clean_wiki_markup_from_strings__()
-            # We generate the hash last because the parsing needs to be done first
-            self.__generate_hashes__()
-
-    def insert_last_update_timestamp(self):
-        from src.models.cache import Cache
-        from src.models.hashing import Hashing
-
-        hash_ = Hashing(
-            wikibase=self.wikibase,
-            language_code=self.language_code,
-            title=self.title,
-            wikimedia_site=self.wikimedia_site,
-        )
-        cache = Cache()
-        cache.connect()
-        cache.set_title_or_wdqid_last_updated(
-            key=hash_.__generate_entity_updated_hash_key__()
-        )
+            raise MissingInformationError("self.raw_reference was None")
+        self.__parse_first_parameter__()
+        # TODO remove this when parsing of urls is done in Template
+        # self.__parse_urls__()
+        self.__parse_isbn__()
+        # First Level Domain detection is needed for the detection methods
+        self.__extract_first_level_domain__()
+        self.__detect_archive_urls__()
+        self.__detect_internet_archive_id__()
+        # self.__detect_google_books_id__()
+        self.__parse_persons__()
+        self.__merge_date_into_publication_date__()
+        self.__merge_lang_into_language__()
+        self.__merge_place_into_location__()
+        self.__clean_wiki_markup_from_strings__()
+        # We generate the hash last because the parsing needs to be done first
+        self.__generate_hashes__()
 
     @staticmethod
     def __has_template_data__(string: str) -> bool:
@@ -1351,3 +1354,5 @@ class WikipediaReference(WcdItem):
     #     else:
     #         logger.warning(f"Parsing the google books template data in {url} failed")
     #         return ""
+    def get_wcdqid_from_cache(self):
+        pass

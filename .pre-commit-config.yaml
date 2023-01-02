@@ -45,12 +45,26 @@ repos:
            "--statistics"]
     types: [ python ]
 
-# Disabled because we don't have a test-wikibase yet to run tests on
-#  - id: pytest
-#    name: pytest
-#    language: system
-#    entry: pytest
+ # https://jaredkhan.com/blog/mypy-pre-commit
+  - id: mypy
+    name: mypy
+    entry: mypy
+    language: python
+    # use your preferred Python version
+    # language_version: python3.7
+    # additional_dependencies: ["mypy==0.790"]
+    types: [python]
+    # use require_serial so that script
+    # is only called once per commit
+    require_serial: true
+    # Print the number of files as a sanity-check
+    verbose: true
+
+  - id: pytest
+    name: pytest
+    language: system
+    entry: pytest
 #    args:
 #      - "--durations=10"
 #      - "--ignore=tests/test_wcdimportbot.py"
-#    types: [ python ]
+    types: [ python ]

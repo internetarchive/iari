@@ -59,7 +59,7 @@ class WikipediaTemplate(WcdBaseModel):
             attr = not param.positional
         return attr
 
-    def __extract_and_clean_template_parameters__(self, strip: bool = False):
+    def __extract_and_clean_template_parameters__(self, strip: bool = True):
         """Return a list of references found in text.
 
         Return value is a list of tuples. There is one tuple for each use of a
@@ -99,7 +99,7 @@ class WikipediaTemplate(WcdBaseModel):
 
         # Dennis removed the loop here during OOP-ification
         logger.debug(f"Working on template: {self.raw_template}")
-        for parameter in getattr(self.raw_template, "params"):
+        for parameter in self.raw_template.params:
             value = str(parameter.value)  # mwpfh needs upcast to str
             if strip:
                 key = parameter.name.strip()
@@ -119,6 +119,7 @@ class WikipediaTemplate(WcdBaseModel):
         self.__extract_and_clean_template_parameters__()
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()
+        self.__rename_one_to_first_parameter__()
 
     def __fix_class_key__(self):
         """convert "class" key to "_class" to avoid collision with reserved python expression"""
@@ -174,3 +175,10 @@ class WikipediaTemplate(WcdBaseModel):
         self.__fix_class_key__()
         self.__fix_aliases__()
         self.__fix_dash__()
+
+    def __rename_one_to_first_parameter__(self):
+        if "1" in self.parameters:
+            logger.debug(f"Found first parameter {self.parameters['1']}")
+            self.parameters["first_parameter"] = self.parameters["1"]
+        else:
+            logger.debug("No first parameter found")
