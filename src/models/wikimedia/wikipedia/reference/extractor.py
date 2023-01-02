@@ -29,7 +29,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     wikitext: str
     raw_references: List[WikipediaRawReference] = []  # private
     references: List[WikipediaReference] = []
-    number_of_references_with_one_supported_template: int = 0
+    # number_of_references_with_one_supported_template: int = 0
     wikibase: Wikibase
     testing: bool = False
 
