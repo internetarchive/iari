@@ -40,6 +40,30 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
 
     @property
+    def content_references_without_templates(self):
+        return [
+            reference
+            for reference in self.content_references
+            if reference.raw_reference.number_of_templates == 0
+        ]
+
+    @property
+    def number_of_content_reference_with_no_templates(self):
+        return len(self.content_references_without_templates)
+
+    @property
+    def content_references_with_at_least_one_template(self):
+        return [
+            reference
+            for reference in self.content_references
+            if reference.raw_reference.number_of_templates >= 1
+        ]
+
+    @property
+    def number_of_content_reference_with_at_least_one_template(self):
+        return len(self.content_references_with_at_least_one_template)
+
+    @property
     def number_of_cs1_references(self):
         return len(
             [
