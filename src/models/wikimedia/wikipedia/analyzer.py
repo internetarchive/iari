@@ -41,6 +41,9 @@ class WikipediaAnalyzer(WcdBaseModel):
                 number_of_content_references=self.article.extractor.number_of_content_references,
                 number_of_hashed_content_references=self.article.extractor.number_of_hashed_content_references,
                 percent_of_content_references_with_a_hash=self.article.extractor.percent_of_content_references_with_a_hash,
+                number_of_references_with_a_supported_template=self.article.extractor.number_of_references_with_a_supported_template,
+                number_of_content_reference_with_no_templates=self.article.extractor.number_of_content_reference_with_no_templates,
+                number_of_content_reference_with_at_least_one_template=self.article.extractor.number_of_content_reference_with_at_least_one_template,
             )
 
     def get_statistics(self):

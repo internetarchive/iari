@@ -15,5 +15,9 @@ class ArticleStatistics(WcdBaseModel):
     number_of_content_references: int = 0
     number_of_hashed_content_references: int = 0
     percent_of_content_references_with_a_hash: int = 0
+    number_of_references_with_a_supported_template: int = 0
+    number_of_content_reference_with_no_templates: int = 0
+    number_of_content_reference_with_at_least_one_template: int = 0
+
     # TODO number_of_images
     # TODO number_of_words
