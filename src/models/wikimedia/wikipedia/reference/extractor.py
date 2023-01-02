@@ -36,8 +36,24 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     # TODO rewrite to distinguish between citation aka refreferences and general references outside a </ref>.
     # TODO add number_of_citation_references method
     # TODO add number_of_general_references method
-    # TODO add number_of_references_with_a_template using list comprehension and if wrr.templates
     # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
+
+    @property
+    def number_of_references_with_a_supported_template(self):
+        return [
+            reference
+            for reference in self.content_references
+            if (
+                reference.raw_reference.number_of_templates > 0
+                and (
+                    reference.raw_reference.cs1_template_found
+                    or reference.raw_reference.isbn_template_found
+                    or reference.raw_reference.citeq_template_found
+                    or reference.raw_reference.citation_template_found
+                    or reference.raw_reference.bare_url_template_found
+                )
+            )
+        ]
 
     @property
     def content_references_without_templates(self):
