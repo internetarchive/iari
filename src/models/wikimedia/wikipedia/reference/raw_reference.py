@@ -51,6 +51,10 @@ class WikipediaRawReference(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def get_wikicode_as_string(self):
+        return str(self.tag)
+
+    @property
     def first_template_name(self) -> str:
         """Helper method. We use this information in the graph to know which
         template the information in the reference came from"""

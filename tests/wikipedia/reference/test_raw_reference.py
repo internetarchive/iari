@@ -157,3 +157,13 @@ class TestWikipediaRawReference(TestCase):
             )
             raw_reference_object.extract_and_determine_reference_type()
             assert raw_reference_object.is_named_reference is True
+
+    def test_get_wikicode_as_string(self):
+        ref = '<ref name="INE"/>'
+        wikicode = parse(ref)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        for ref in refs:
+            raw_reference_object = WikipediaRawReference(
+                tag=ref, testing=True, wikibase=wikibase
+            )
+            assert raw_reference_object.get_wikicode_as_string == ref

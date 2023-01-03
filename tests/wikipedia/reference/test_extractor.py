@@ -80,3 +80,18 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_content_references == 2
         assert wre.number_of_named_references == 1
         assert wre.number_of_hashed_content_references == 2
+        assert wre.percent_of_content_references_with_a_hash == 100
+
+    def test_number_of_references_with_a_supported_template(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_excerpt, wikibase=wikibase
+        )
+        wre.extract_all_references()
+        assert wre.number_of_references_with_a_supported_template == 2
+
+    def test_number_of_cs1_references(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_excerpt, wikibase=wikibase
+        )
+        wre.extract_all_references()
+        assert wre.number_of_cs1_references == 2
