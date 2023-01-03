@@ -1,9 +1,15 @@
-from src.wcd_base_model import WcdBaseModel
+from typing import List
+
+from pydantic import BaseModel
+
+from src.models.api.reference_statistics import ReferenceStatistics
 
 
-class ArticleStatistics(WcdBaseModel):
+class ArticleStatistics(BaseModel):
     """The purpose of this class is to model the statistics
-    the user wants from the get_statistics endpoint"""
+    the user wants from the get_statistics endpoint
+
+    We use BaseModel to avoid the cache attribute"""
 
     number_of_cs1_references: int = 0
     number_of_citation_references: int = 0
@@ -15,5 +21,9 @@ class ArticleStatistics(WcdBaseModel):
     number_of_content_references: int = 0
     number_of_hashed_content_references: int = 0
     percent_of_content_references_with_a_hash: int = 0
+    number_of_references_with_a_supported_template: int = 0
+    number_of_content_reference_with_no_templates: int = 0
+    number_of_content_reference_with_at_least_one_template: int = 0
+    references: List[ReferenceStatistics] = []
     # TODO number_of_images
     # TODO number_of_words

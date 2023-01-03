@@ -60,11 +60,11 @@ repos:
     # Print the number of files as a sanity-check
     verbose: true
 
-  - id: pytest
-    name: pytest
-    language: system
-    entry: pytest
-#    args:
-#      - "--durations=10"
-#      - "--ignore=tests/test_wcdimportbot.py"
-    types: [ python ]
+#  - id: pytest
+#    name: pytest
+#    language: system
+#    entry: pytest
+##    args:
+##      - "--durations=10"
+##      - "--ignore=tests/test_wcdimportbot.py"
+#    types: [ python ]

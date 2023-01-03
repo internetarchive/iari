@@ -29,75 +29,129 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     wikitext: str
     raw_references: List[WikipediaRawReference] = []  # private
     references: List[WikipediaReference] = []
-    number_of_references_with_one_supported_template: int = 0
+    # number_of_references_with_one_supported_template: int = 0
     wikibase: Wikibase
     testing: bool = False
 
     # TODO rewrite to distinguish between citation aka refreferences and general references outside a </ref>.
     # TODO add number_of_citation_references method
     # TODO add number_of_general_references method
-    # TODO add number_of_references_with_a_template using list comprehension and if wrr.templates
     # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
 
     @property
-    def number_of_cs1_references(self):
+    def number_of_references_with_a_supported_template(self) -> int:
         return len(
             [
                 reference
-                for reference in self.references
-                if reference.raw_reference.cs1_template_found
+                for reference in self.content_references
+                if (
+                    reference.raw_reference.number_of_templates > 0
+                    and (
+                        reference.raw_reference.cs1_template_found
+                        or reference.raw_reference.isbn_template_found
+                        or reference.raw_reference.citeq_template_found
+                        or reference.raw_reference.citation_template_found
+                        or reference.raw_reference.bare_url_template_found
+                    )
+                )
             ]
         )
+
+    @property
+    def content_references_without_templates(self):
+        return [
+            reference
+            for reference in self.content_references
+            if reference.raw_reference.number_of_templates == 0
+        ]
+
+    @property
+    def number_of_content_reference_with_no_templates(self):
+        return len(self.content_references_without_templates)
+
+    @property
+    def content_references_with_at_least_one_template(self):
+        return [
+            reference
+            for reference in self.content_references
+            if reference.raw_reference.number_of_templates >= 1
+        ]
+
+    @property
+    def number_of_content_reference_with_at_least_one_template(self):
+        return len(self.content_references_with_at_least_one_template)
+
+    @property
+    def cs1_references(self):
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.cs1_template_found
+        ]
+
+    @property
+    def number_of_cs1_references(self):
+        return len(self.cs1_references)
+
+    @property
+    def citation_references(self):
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.citation_template_found
+        ]
 
     @property
     def number_of_citation_references(self):
-        return len(
-            [
-                reference
-                for reference in self.references
-                if reference.raw_reference.citation_template_found
-            ]
-        )
+        return len(self.citation_references)
+
+    @property
+    def bare_url_references(self):
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.bare_url_template_found
+        ]
 
     @property
     def number_of_bare_url_references(self):
-        return len(
-            [
-                reference
-                for reference in self.references
-                if reference.raw_reference.bare_url_template_found
-            ]
-        )
+        return len(self.bare_url_references)
+
+    @property
+    def citeq_references(self):
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.citeq_template_found
+        ]
 
     @property
     def number_of_citeq_references(self):
-        return len(
-            [
-                reference
-                for reference in self.references
-                if reference.raw_reference.citeq_template_found
-            ]
-        )
+        return len(self.citeq_references)
+
+    @property
+    def isbn_template_references(self):
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.isbn_template_found
+        ]
 
     @property
     def number_of_isbn_template_references(self):
-        return len(
-            [
-                reference
-                for reference in self.references
-                if reference.raw_reference.isbn_template_found
-            ]
-        )
+        return len(self.isbn_template_references)
+
+    @property
+    def multiple_template_references(self):
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.multiple_templates_found
+        ]
 
     @property
     def number_of_multiple_template_references(self):
-        return len(
-            [
-                reference
-                for reference in self.references
-                if reference.raw_reference.multiple_templates_found
-            ]
-        )
+        return len(self.multiple_template_references)
 
     @property
     def named_references(self):
