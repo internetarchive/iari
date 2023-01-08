@@ -212,7 +212,8 @@
 #                 "access-date": "24 February 2021",
 #                 "title": "Democracy",
 #                 "template_name": "cite news",
-#                 "url": "https://www.oxfordreference.com/view/10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
+#                 "url": "https://www.oxfordreference.com/view/10.1093/acref/9780195148909.001.0001/
+#                 acref-9780195148909-e-241",
 #             }
 #         )
 #         reference.wikibase = IASandboxWikibase()
@@ -239,7 +240,8 @@
 #     #             "access-date": "24 February 2021",
 #     #             "title": "Democracy",
 #     #             "template_name": "cite news",
-#     #             "url": "https://www.oxfordreference.com/view/10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
+#     #             "url": "https://www.oxfordreference.com/view/10.1093/
+#     acref/9780195148909.001.0001/acref-9780195148909-e-241",
 #     #         }
 #     #     )
 #     #     reference.wikibase = IASandboxWikibase()
@@ -273,7 +275,8 @@
 #                 "access-date": "24 February 2021",
 #                 "title": "Democracy",
 #                 "template_name": "cite news",
-#                 "url": "https://www.oxfordreference.com/view/10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
+#                 "url": "https://www.oxfordreference.com/view/
+#                 10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
 #             }
 #         )
 #         reference.wikibase = IASandboxWikibase()
@@ -362,7 +365,8 @@
 #             ]
 #             == data["title"]
 #         )
-#         # assert item.claims.get(property=wppage.wikibase.TRANSLATED_TITLE)[0].mainsnak.datavalue["value"] == data["trans_title"]
+#         # assert item.claims.get(property=wppage.wikibase.TRANSLATED_TITLE)[0].
+#         mainsnak.datavalue["value"] == data["trans_title"]
 #         assert (
 #             item.claims.get(property=wppage.wikibase.URL)[0].mainsnak.datavalue["value"]
 #             == data["url"]

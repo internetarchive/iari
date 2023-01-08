@@ -11,7 +11,13 @@ repos:
     name: codespell
     language: system
     entry: codespell
-    types: [python]
+#    args:
+#      - "src/"
+#      - "tests/"
+#      - "*.md"
+#      - "*.py"
+    types_or: [python, markdown]
+    exclude: ^test_data/
 
   - id: bandit
     name: bandit
@@ -58,7 +64,7 @@ repos:
     # is only called once per commit
     require_serial: true
     # Print the number of files as a sanity-check
-    verbose: true
+    # verbose: true
 
 #  - id: pytest
 #    name: pytest

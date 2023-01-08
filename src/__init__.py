@@ -40,7 +40,7 @@ class WcdImportBot(WcdBaseModel):
     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
     wikidata_qid: str = ""
     testing: bool = False
-    wikipedia_article: Optional[WikipediaArticle]
+    wikipedia_article: Optional[WikipediaArticle] = None
 
     def __flush_cache__(self):
         # We deprecate flushing the cache, since we will lose the last

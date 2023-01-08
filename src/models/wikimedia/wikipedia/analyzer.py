@@ -32,19 +32,30 @@ class WikipediaAnalyzer(WcdBaseModel):
             and self.article.found_in_wikipedia
         ):
             self.article_statistics = ArticleStatistics(
-                number_of_cs1_references=self.article.extractor.number_of_cs1_references,
-                number_of_citation_references=self.article.extractor.number_of_citation_references,
                 number_of_bare_url_references=self.article.extractor.number_of_bare_url_references,
+                number_of_citation_references=self.article.extractor.number_of_citation_references,
+                number_of_citation_template_references=self.article.extractor.number_of_citation_template_references,
                 number_of_citeq_references=self.article.extractor.number_of_citeq_references,
+                number_of_content_reference_with_at_least_one_template=(
+                    self.article.extractor.number_of_content_reference_with_at_least_one_template
+                ),
+                number_of_content_reference_with_no_templates=(
+                    self.article.extractor.number_of_content_reference_with_no_templates
+                ),
+                number_of_content_references=self.article.extractor.number_of_content_references,
+                number_of_cs1_references=self.article.extractor.number_of_cs1_references,
+                number_of_general_references=self.article.extractor.number_of_general_references,
+                number_of_hashed_content_references=self.article.extractor.number_of_hashed_content_references,
                 number_of_isbn_template_references=self.article.extractor.number_of_isbn_template_references,
                 number_of_multiple_template_references=self.article.extractor.number_of_multiple_template_references,
                 number_of_named_references=self.article.extractor.number_of_named_references,
-                number_of_content_references=self.article.extractor.number_of_content_references,
-                number_of_hashed_content_references=self.article.extractor.number_of_hashed_content_references,
-                percent_of_content_references_with_a_hash=self.article.extractor.percent_of_content_references_with_a_hash,
-                number_of_references_with_a_supported_template=self.article.extractor.number_of_references_with_a_supported_template,
-                number_of_content_reference_with_no_templates=self.article.extractor.number_of_content_reference_with_no_templates,
-                number_of_content_reference_with_at_least_one_template=self.article.extractor.number_of_content_reference_with_at_least_one_template,
+                number_of_references_with_a_supported_template=(
+                    self.article.extractor.number_of_references_with_a_supported_template
+                ),
+                number_of_url_template_references=self.article.extractor.number_of_url_template_references,
+                percent_of_content_references_with_a_hash=(
+                    self.article.extractor.percent_of_content_references_with_a_hash
+                ),
             )
 
     def get_statistics(self):
@@ -94,6 +105,8 @@ class WikipediaAnalyzer(WcdBaseModel):
                     multiple_templates_found=reference.raw_reference.multiple_templates_found,
                     is_named_reference=reference.raw_reference.is_named_reference,
                     wikitext=reference.raw_reference.get_wikicode_as_string,
+                    is_citation_reference=reference.raw_reference.is_citation_reference,
+                    is_general_reference=reference.raw_reference.is_general_reference,
                 )
                 self.article_statistics.references.append(reference_statistics)
         if not self.article_statistics:

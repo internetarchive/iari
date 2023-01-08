@@ -600,7 +600,8 @@ class WikipediaReference(WcdItem):
         self.__generate_first_level_domain_hash__()
 
     def __generate_reference_hash__(self):
-        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
+        """We generate a md5 hash of the page_reference as a unique
+        identifier for any given page_reference in a Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         str2hash = ""
         # TODO decide if we really trust doi to be unique.
@@ -985,11 +986,11 @@ class WikipediaReference(WcdItem):
             if self.raw_reference:
                 if self.first_parameter and not self.first_template_name:
                     logger.warning(
-                        f"No first template name found for the WRR with tag {self.raw_reference.tag}"
+                        f"No first template name found for the WRR with tag {self.raw_reference.wikicode}"
                     )
                 if not self.first_parameter and self.first_template_name:
                     logger.warning(
-                        f"No first parameter found for the WRR with tag {self.raw_reference.tag}"
+                        f"No first parameter found for the WRR with tag {self.raw_reference.wikicode}"
                     )
             else:
                 logger.error("No raw reference for this reference")

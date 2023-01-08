@@ -52,7 +52,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "website": "Stereogum",
             "access_date": "May 24, 2021",
             "template_name": "cite web",
-            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+            "archive_url": "https://web.archive.org/web/20100715195638/"
+            "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
 
         reference = EnglishWikipediaReferenceSchema().load(data)
@@ -62,7 +63,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         assert (
             reference.archive_url
-            == "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
+            == "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/"
+            "chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
         )
         # console.print(reference)
 
@@ -74,7 +76,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                tag=ref, testing=True, wikibase=wikibase
+                wikicode=ref, testing=True, wikibase=wikibase
             )
             raw_reference_object.extract_and_determine_reference_type()
             assert raw_reference_object.number_of_templates == 1
@@ -163,7 +165,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "website": "Stereogum",
             "access_date": "May 24, 2021",
             "template_name": "cite web",
-            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/"
+            "chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
         }
         reference = EnglishWikipediaReferenceSchema().load(data)
         reference.wikibase = IASandboxWikibase()
@@ -412,7 +415,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                tag=ref, testing=True, wikibase=wikibase
+                wikicode=ref, testing=True, wikibase=wikibase
             )
             raw_reference_object.extract_and_determine_reference_type()
             assert raw_reference_object.number_of_templates == 1
@@ -514,7 +517,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(
+                wikicode=ref, wikibase=wikibase
+            )
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
             reference.finish_parsing_and_generate_hash()
             assert reference.first_parameter == "Q1"
@@ -526,7 +531,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         wikicode = parse(raw_reference1)
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(
+                wikicode=ref, wikibase=wikibase
+            )
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
             reference.finish_parsing_and_generate_hash()
             assert reference.first_parameter == "Q1"
@@ -649,7 +656,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                tag=ref, testing=True, wikibase=wikibase
+                wikicode=ref, testing=True, wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             reference = raw_reference_object.get_finished_wikipedia_reference_object()

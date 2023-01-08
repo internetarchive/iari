@@ -26,7 +26,8 @@
 #     return pageids
 #
 # def get_wcd_item_id(pageid):
-#     prefix = 'prefix wcd: <http://wikipediacitations.wiki.opencura.com/entity/> prefix wdt: <http://www.wikidata.org/prop/direct/>'
+#     prefix = 'prefix wcd: <http://wikipediacitations.wiki.opencura.com/entity/> prefix wdt:
+#     <http://www.wikidata.org/prop/direct/>'
 #     q = f'select ?i where {{ ?i wdt:P1433 wcd:Q2 . ?i wdt:P9675 "{pageid}" . }}'
 #
 #     #lookup_stem = sparql_endpoint_url + '?format=json&query='
@@ -45,7 +46,8 @@
 #
 #     r = sparql_query(q, prefix=prefix, endpoint=sparql_endpoint_url)
 #     if len(r['results']['bindings']) > 0:
-#         return r['results']['bindings'][0]['i']['value'].replace('http://wikipediacitations.wiki.opencura.com/entity/', '')
+#         return r['results']['bindings'][0]['i']['value']
+#         .replace('http://wikipediacitations.wiki.opencura.com/entity/', '')
 #     else:
 #         return None
 #

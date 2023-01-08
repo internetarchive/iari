@@ -61,7 +61,8 @@ class TestTemplateExtraction(TestCase):
     #                         "title",
     #                         (
     #                             "Official Diplomatic Documents Relating to the Outbreak of the European War: "
-    #                             "With Photographic Reproductions of Official Editions of the Documents (Blue, White, Yellow, Etc., Books)"
+    #                             "With Photographic Reproductions of Official Editions of the Documents
+    #                             (Blue, White, Yellow, Etc., Books)"
     #                         ),
     #                     ),
     #                     (

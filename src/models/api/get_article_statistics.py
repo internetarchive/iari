@@ -9,7 +9,9 @@ from src.models.api.get_statistics_schema import GetStatisticsSchema
 from src.models.api.job import Job
 from src.models.wikimedia.enums import AnalyzerReturn
 from test_data.test_content import (  # type: ignore
-    easter_island_excerpt,
+    easter_island_head_excerpt,
+    easter_island_short_tail_excerpt,
+    easter_island_tail_excerpt,
     test_full_article,
 )
 
@@ -48,7 +50,7 @@ class GetArticleStatistics(Resource):
                         lang=self.job.lang,
                         wikimedia_site=self.job.site,
                         testing=self.job.testing,
-                        wikitext=easter_island_excerpt,
+                        wikitext=f"{easter_island_head_excerpt}\n{easter_island_short_tail_excerpt}",
                     )
                 else:
                     logger.warning(f"Ignoring unsupported test title {self.job.title}")
