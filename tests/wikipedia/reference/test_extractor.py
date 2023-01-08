@@ -4,7 +4,11 @@ from src import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
-from test_data.test_content import easter_island_excerpt  # type: ignore
+from test_data.test_content import (  # type: ignore
+    easter_island_head_excerpt,
+    easter_island_tail_excerpt,
+    test_full_article,
+)
 
 wikibase = IASandboxWikibase()
 
@@ -73,7 +77,7 @@ class TestWikipediaReferenceExtractor(TestCase):
 
     def test_number_of_hashed_content_references(self):
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_head_excerpt, wikibase=wikibase
         )
         wre.extract_all_references()
         assert wre.number_of_references == 3
@@ -84,14 +88,71 @@ class TestWikipediaReferenceExtractor(TestCase):
 
     def test_number_of_references_with_a_supported_template(self):
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_head_excerpt, wikibase=wikibase
         )
         wre.extract_all_references()
         assert wre.number_of_references_with_a_supported_template == 2
 
     def test_number_of_cs1_references(self):
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_head_excerpt, wikibase=wikibase
         )
         wre.extract_all_references()
         assert wre.number_of_cs1_references == 2
+
+    def test___extract_all_raw_general_references__(self):
+        """This tests extraction of sections and references"""
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
+        )
+        wre.__extract_all_raw_general_references__()
+        assert wre.number_of_sections_found == 2
+        assert wre.number_of_raw_references == 22
+
+    def test__extract_raw_templates_two(self):
+        raw_template = "{{citeq|Q1}}"
+        raw_reference = f"<ref>{raw_template}</ref>"
+        raw_template2 = "{{citeq|Q2}}"
+        raw_reference2 = f"<ref>{raw_template2}</ref>"
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=raw_reference + raw_reference2, wikibase=wikibase
+        )
+        print(wre.wikitext)
+        wre.extract_all_references()
+        assert wre.number_of_sections_found == 0
+        assert wre.number_of_citation_references == 2
+        assert wre.content_references[0].raw_reference.number_of_templates == 1
+        assert wre.content_references[1].raw_reference.number_of_templates == 1
+
+    def test__extract_sections_test(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=test_full_article, wikibase=wikibase
+        )
+        wre.__extract_sections__()
+        assert wre.number_of_sections_found == 0
+
+    def test__extract_sections_easter_island(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
+        )
+        wre.__extract_sections__()
+        assert wre.number_of_sections_found == 2
+
+    def test_extract_general_references_only(self):
+        """This tests extraction of sections and references"""
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
+        )
+        wre.extract_all_references()
+        assert wre.number_of_sections_found == 2
+        assert wre.number_of_raw_references == 22
+        assert wre.number_of_general_references == 22
+        assert wre.number_of_content_reference_with_at_least_one_template == 22
+        assert wre.number_of_references_with_a_supported_template == 21
+        assert wre.number_of_cs1_references == 21
+        assert wre.number_of_citation_template_references == 0
+        assert wre.number_of_citeq_references == 0
+        assert wre.number_of_url_template_references == 0
+        assert wre.number_of_content_reference_with_no_templates == 0
+        assert wre.number_of_citation_references == 0
+        assert wre.number_of_hashed_content_references == 22

@@ -2,10 +2,11 @@
 Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import Tag  # type: ignore
+from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 import config
 from src.models.exceptions import MissingInformationError
@@ -29,7 +30,7 @@ class WikipediaRawReference(WcdBaseModel):
     """
 
     # TODO rewrite to accept Tag or Wikicode
-    tag: Tag  # raw reference Tag from mwparserfromhell
+    wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
     templates: List[WikipediaTemplate] = []
     plain_text_in_reference: bool = False
     citation_template_found: bool = False
@@ -43,16 +44,23 @@ class WikipediaRawReference(WcdBaseModel):
     wikibase: Wikibase
     extraction_done: bool = False
     is_named_reference: bool = False
+    is_general_reference: bool = False
     # TODO add new optional attribute wikicode: Optional[Wikicode]
     #  which contains the parsed output of the general reference line
-    # TODO add new method is_from_ref that returns True if tag is not None
 
     class Config:
         arbitrary_types_allowed = True
 
     @property
+    def is_citation_reference(self):
+        if self.is_general_reference:
+            return False
+        else:
+            return True
+
+    @property
     def get_wikicode_as_string(self):
-        return str(self.tag)
+        return str(self.wikicode)
 
     @property
     def first_template_name(self) -> str:
@@ -74,29 +82,36 @@ class WikipediaRawReference(WcdBaseModel):
         self.__extract_and_clean_template_parameters__()
 
     def __extract_raw_templates__(self) -> None:
-        """Extract the templates from the Tag"""
+        """Extract the templates from self.wikicode"""
         logger.debug("__extract_raw_templates__: running")
-        # TODO rewrite to handle self.wikicode also
-        if not self.tag:
-            raise MissingInformationError("self.tag was None")
-        if isinstance(self.tag, str):
-            raise MissingInformationError("self.tag was str")
+        if not self.wikicode:
+            raise MissingInformationError("self.wikicode was None")
+        if isinstance(self.wikicode, str):
+            raise MissingInformationError("self.wikicode was str")
         # Skip named references like "<ref name="INE"/>"
-        if "</ref>" not in self.tag:
-            logger.info("Skipping named reference with no content")
+        wikicode_string = str(self.wikicode)
+        if self.is_citation_reference and "</ref>" not in wikicode_string:
+            logger.info(f"Skipping named reference with no content {wikicode_string}")
             self.is_named_reference = True
         else:
-            logger.debug(f"Extracting templates from: {self.tag}")
-            # .contents is needed here to get a Wikicode object
-            raw_templates = self.tag.contents.ifilter_templates(
-                matches=lambda x: not x.name.lstrip().startswith("#"), recursive=True
-            )
+            logger.debug(f"Extracting templates from: {self.wikicode}")
+            if isinstance(self.wikicode, Tag):
+                # contents is needed here to get a Wikicode object
+                raw_templates = self.wikicode.contents.ifilter_templates(
+                    matches=lambda x: not x.name.lstrip().startswith("#"),
+                    recursive=True,
+                )
+            else:
+                raw_templates = self.wikicode.ifilter_templates(
+                    matches=lambda x: not x.name.lstrip().startswith("#"),
+                    recursive=True,
+                )
             count = 0
             for raw_template in raw_templates:
                 count += 1
                 self.templates.append(WikipediaTemplate(raw_template=raw_template))
             if count == 0:
-                logger.debug(f"Found no templates in {self.tag}")
+                logger.debug(f"Found no templates in {self.wikicode}")
 
     def __extract_and_clean_template_parameters__(self) -> None:
         """We only extract and clean if exactly one template is found"""
@@ -133,7 +148,9 @@ class WikipediaRawReference(WcdBaseModel):
 
         Design limit: we only support one template for now"""
         if self.number_of_templates:
-            logger.info(f"Found {self.number_of_templates} template(s) in {self.tag}")
+            logger.info(
+                f"Found {self.number_of_templates} template(s) in {self.wikicode}"
+            )
             if self.number_of_templates == 1:
                 if self.__detect_any_plain_text__():
                     # We have a clean template reference like {{citeq|Q1}}
@@ -168,7 +185,7 @@ class WikipediaRawReference(WcdBaseModel):
                 self.multiple_templates_found = True
                 message = (
                     f"We found {self.number_of_templates} templates in "
-                    f"{self.tag} -> templates: {self.templates} which is currently not supported"
+                    f"{self.wikicode} -> templates: {self.templates} which is currently not supported"
                 )
                 logger.error(message)
                 self.__log_to_file__(

@@ -1,9 +1,11 @@
 import logging
+import re
 from typing import List
 from typing import OrderedDict as OrderedDictType
 from typing import Tuple
 
 import mwparserfromhell  # type: ignore
+from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 import config
 from src.models.wikibase import Wikibase
@@ -27,16 +29,45 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     """
 
     wikitext: str
+    wikicode: Wikicode = None
     raw_references: List[WikipediaRawReference] = []  # private
     references: List[WikipediaReference] = []
-    # number_of_references_with_one_supported_template: int = 0
+    sections: List[Wikicode] = []
     wikibase: Wikibase
     testing: bool = False
 
-    # TODO rewrite to distinguish between citation aka refreferences and general references outside a </ref>.
-    # TODO add number_of_citation_references method
-    # TODO add number_of_general_references method
-    # TODO add number_of_references_with_a_supported_citation_template using list comprehension and if wrr.has_supported_citation_template
+    class Config:
+        arbitrary_types_allowed = True
+
+    @property
+    def number_of_url_template_references(self):
+        return len(self.url_template_references)
+
+    @property
+    def url_template_references(self):
+        return [
+            reference
+            for reference in self.content_references
+            if reference.raw_reference.url_template_found
+        ]
+
+    @property
+    def number_of_sections_found(self):
+        if not self.sections:
+            self.__extract_sections__()
+        return len(self.sections)
+
+    @property
+    def general_references(self):
+        return [
+            reference
+            for reference in self.content_references
+            if reference.raw_reference.is_general_reference
+        ]
+
+    @property
+    def number_of_general_references(self):
+        return len(self.general_references)
 
     @property
     def number_of_references_with_a_supported_template(self) -> int:
@@ -97,13 +128,25 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def citation_references(self):
         return [
             reference
-            for reference in self.references
-            if reference.raw_reference.citation_template_found
+            for reference in self.content_references
+            if reference.raw_reference.is_citation_reference
         ]
 
     @property
     def number_of_citation_references(self):
         return len(self.citation_references)
+
+    @property
+    def citation_template_references(self):
+        return [
+            reference
+            for reference in self.references
+            if reference.raw_reference.citation_template_found
+        ]
+
+    @property
+    def number_of_citation_template_references(self):
+        return len(self.citation_template_references)
 
     @property
     def bare_url_references(self):
@@ -209,28 +252,61 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                 / self.number_of_content_references
             )
 
-    # TODO rename to citation_references
-    def __extract_all_raw_references__(self):
+    def __extract_all_raw_citation_references__(self):
         """This extracts everything inside <ref></ref> tags"""
-        logger.debug("__extract_all_raw_references__: running")
+        logger.debug("__extract_all_raw_citation_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
-        wikicode = mwparserfromhell.parse(self.wikitext)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        self.__parse_wikitext__()
+        # tag = Tag
+        # tag.tag
+        refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        logger.debug(f"Number of refs found: {len(refs)}")
         for ref in refs:
             self.raw_references.append(
                 WikipediaRawReference(
-                    tag=ref, wikibase=self.wikibase, testing=self.testing
+                    wikicode=ref, wikibase=self.wikibase, testing=self.testing
                 )
             )
+
+    def __extract_all_raw_general_references__(self):
+        """This extracts everything inside <ref></ref> tags"""
+        logger.debug("__extract_all_raw_general_references__: running")
+        # Thanks to https://github.com/JJMC89,
+        # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
+        self.__extract_sections__()
+        for section in self.sections:
+            # Get section line by line
+            lines = str(section).split("\n")
+            logger.debug(f"Extracting {len(lines)} lines form section {lines[0]}")
+            for line in lines:
+                logger.info(f"Working on line: {line}")
+                # Guard against empty line
+                if line:
+                    logger.debug("Parsing line")
+                    parsed_line = mwparserfromhell.parse(line)
+                    heading_found = bool("==" in line)
+                    logger.info(f"Heading found in line {bool(heading_found)}")
+                    if not heading_found:
+                        logger.debug("Appending to self.raw_references")
+                        # We don't know what the line contains so we assume it is a reference
+                        self.raw_references.append(
+                            WikipediaRawReference(
+                                wikicode=parsed_line,
+                                wikibase=self.wikibase,
+                                testing=self.testing,
+                                is_general_reference=True,
+                            )
+                        )
 
     def extract_all_references(self):
         """Extract all references from self.wikitext"""
         logger.debug("extract_all_references: running")
-        self.__extract_all_raw_references__()
-        self.__parse_all_raw_references__()
+        self.__parse_wikitext__()
+        self.__extract_all_raw_citation_references__()
+        self.__extract_all_raw_general_references__()
+        self.__parse_templates_and_determine_type_on_raw_references__()
         self.__convert_raw_references_to_reference_objects__()
-        # We guard for None here
 
     # def prepare_all_statistic(self):
     #     # TODO figure out how to best store this data in the wikibase
@@ -250,11 +326,30 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     #         self.number_of_references_with_a_bare_url_template =
     #         self.number_of_references_with_a_bare_url_pdf_template =
     def __convert_raw_references_to_reference_objects__(self):
+        logger.debug("__convert_raw_references_to_reference_objects__: running")
         self.references = [
             raw_reference.get_finished_wikipedia_reference_object()
             for raw_reference in self.raw_references
         ]
 
-    def __parse_all_raw_references__(self):
+    def __parse_templates_and_determine_type_on_raw_references__(self):
+        logger.debug("__parse_all_raw_references__: running")
         for wrr in self.raw_references:
             wrr.extract_and_determine_reference_type()
+
+    def __extract_sections__(self):
+        logger.debug("__extract_sections__: running")
+        if not self.wikicode:
+            self.__parse_wikitext__()
+        self.sections: List[Wikicode] = self.wikicode.get_sections(
+            levels=[2],
+            matches="bibliography|further reading",
+            flags=re.I,
+            include_headings=False,
+        )
+        logger.debug(f"Number of sections found: {len(self.sections)}")
+
+    def __parse_wikitext__(self):
+        logger.debug("__parse_wikitext__: running")
+        if not self.wikicode:
+            self.wikicode = mwparserfromhell.parse(self.wikitext)

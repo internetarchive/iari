@@ -15,3 +15,5 @@ class ReferenceStatistics(BaseModel):
     multiple_templates_found: bool = False
     is_named_reference: bool = False
     wikitext: str = ""
+    is_citation_reference: bool = False
+    is_general_reference: bool = False

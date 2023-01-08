@@ -125,17 +125,20 @@ class TestGetArticleStatistics(unittest.TestCase):
             ArticleStatistics(**data).dict(),
             {
                 "number_of_bare_url_references": 0,
-                "number_of_citation_references": 0,
+                "number_of_citation_references": 2,
+                "number_of_citation_template_references": 0,
                 "number_of_citeq_references": 0,
-                "number_of_content_reference_with_at_least_one_template": 2,
+                "number_of_content_reference_with_at_least_one_template": 4,
                 "number_of_content_reference_with_no_templates": 0,
-                "number_of_content_references": 2,
-                "number_of_cs1_references": 2,
-                "number_of_hashed_content_references": 2,
+                "number_of_content_references": 4,
+                "number_of_cs1_references": 4,
+                "number_of_general_references": 2,
+                "number_of_hashed_content_references": 4,
                 "number_of_isbn_template_references": 0,
                 "number_of_multiple_template_references": 0,
                 "number_of_named_references": 1,
-                "number_of_references_with_a_supported_template": 2,
+                "number_of_references_with_a_supported_template": 4,
+                "number_of_url_template_references": 0,
                 "percent_of_content_references_with_a_hash": 100,
                 "references": [
                     {
@@ -143,19 +146,23 @@ class TestGetArticleStatistics(unittest.TestCase):
                         "citation_template_found": False,
                         "citeq_template_found": False,
                         "cs1_template_found": True,
+                        "is_citation_reference": True,
+                        "is_general_reference": False,
                         "is_named_reference": False,
                         "isbn_template_found": False,
                         "multiple_templates_found": False,
                         "plain_text_in_reference": False,
                         "url_template_found": False,
                         "wikitext": '<ref name="INE">{{cite web | url= '
-                        "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php "
+                        "http://www.ine.cl/canales/chile_estadistico/censos_"
+                        "poblacion_vivienda/censo_pobl_vivi.php "
                         "| title= Censo de Población y Vivienda 2002 | "
                         "work= [[National Statistics Institute "
                         "(Chile)|National Statistics Institute]] | "
                         "access-date= 1 May 2010 | url-status=live | "
                         "archive-url= "
-                        "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php "
+                        "https://web.archive.org/web/20100715195638/http://www.ine.cl/"
+                        "canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php "
                         "| archive-date= 15 July 2010}}</ref>",
                     },
                     {
@@ -163,6 +170,8 @@ class TestGetArticleStatistics(unittest.TestCase):
                         "citation_template_found": False,
                         "citeq_template_found": False,
                         "cs1_template_found": True,
+                        "is_citation_reference": True,
+                        "is_general_reference": False,
                         "is_named_reference": False,
                         "isbn_template_found": False,
                         "multiple_templates_found": False,
@@ -174,7 +183,8 @@ class TestGetArticleStatistics(unittest.TestCase):
                         "Institute (Chile)|National Statistics "
                         "Institute]] |access-date= 11 May 2018 "
                         "|archive-url= "
-                        "https://web.archive.org/web/20180511145942/https://resultados.censo2017.cl/Home/Download "
+                        "https://web.archive.org/web/20180511145942/https://"
+                        "resultados.censo2017.cl/Home/Download "
                         "|archive-date= 11 May 2018 |url-status=dead "
                         "}}</ref>",
                     },
@@ -183,12 +193,55 @@ class TestGetArticleStatistics(unittest.TestCase):
                         "citation_template_found": False,
                         "citeq_template_found": False,
                         "cs1_template_found": False,
+                        "is_citation_reference": True,
+                        "is_general_reference": False,
                         "is_named_reference": True,
                         "isbn_template_found": False,
                         "multiple_templates_found": False,
                         "plain_text_in_reference": False,
                         "url_template_found": False,
                         "wikitext": '<ref name="INE"/>',
+                    },
+                    {
+                        "bare_url_template_found": False,
+                        "citation_template_found": False,
+                        "citeq_template_found": False,
+                        "cs1_template_found": True,
+                        "is_citation_reference": False,
+                        "is_general_reference": True,
+                        "is_named_reference": False,
+                        "isbn_template_found": False,
+                        "multiple_templates_found": False,
+                        "plain_text_in_reference": False,
+                        "url_template_found": False,
+                        "wikitext": "* {{cite book|author-link=Jared "
+                        "Diamond|last=Diamond|first= "
+                        "Jared|year=2005|title=Collapse. How Societies "
+                        "Choose to Fail or Succeed|location=New "
+                        "York|publisher=Viking|isbn=978-0143036555 "
+                        "|title-link=Collapse (book)}}",
+                    },
+                    {
+                        "bare_url_template_found": False,
+                        "citation_template_found": False,
+                        "citeq_template_found": False,
+                        "cs1_template_found": True,
+                        "is_citation_reference": False,
+                        "is_general_reference": True,
+                        "is_named_reference": False,
+                        "isbn_template_found": False,
+                        "multiple_templates_found": False,
+                        "plain_text_in_reference": False,
+                        "url_template_found": False,
+                        "wikitext": "* {{cite journal|last= Fischer|first= Steven "
+                        "Roger|year= 1995|title= Preliminary Evidence for "
+                        "Cosmogonic Texts in Rapanui's Rongorongo "
+                        "Inscriptions|journal= Journal of the Polynesian "
+                        "Society "
+                        "|issue=104|pages=303–21|url=http://www.jps.auckland.ac.nz/document/"
+                        "Volume_104_1995/Volume_104%2C_No._3/Preliminary_evidence_for_cosmogonic_"
+                        "texts_in_Rapanui%26apos%3Bs_Rongorongo_inscriptions%2C_by_"
+                        "Steven_Roger_Fischer%2C_p_303-322/p1}}",
                     },
                 ],
             },

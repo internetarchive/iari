@@ -7,7 +7,10 @@ import config
 from src.helpers.console import console
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
-from test_data.test_content import easter_island_excerpt  # type: ignore
+from test_data.test_content import (  # type: ignore
+    easter_island_head_excerpt,
+    easter_island_tail_excerpt,
+)
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -173,11 +176,11 @@ class TestWikipediaArticle(TestCase):
         )
         assert wp.extractor.references[0].first_template_name == "citeq"
 
-    def test___extract_and_parse_references_easter_island_excerpt(self):
+    def test___extract_and_parse_references_easter_island_head_excerpt(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
-        wp.wikitext = easter_island_excerpt
+        wp.wikitext = easter_island_head_excerpt
         wp.extract_and_parse_references()
         assert wp.extractor.number_of_references == 3
         assert wp.extractor.number_of_named_references == 1
@@ -252,3 +255,14 @@ class TestWikipediaArticle(TestCase):
         # assert wp.extractor.references[7].publisher == "Thomas Brinkhoff"
         # assert wp.extractor.references[7].title == "Pitcairn Islands"
         # assert wp.extractor.references[7].url == "http://www.citypopulation.de/Pitcairn.html"
+
+    def test_easter_island(self):
+        wikitext = f"{easter_island_head_excerpt}\n{easter_island_tail_excerpt}"
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
+        wp.wikitext = wikitext
+        wp.extract_and_parse_references()
+        assert wp.extractor.number_of_citation_references == 2
+        assert wp.extractor.number_of_general_references == 22
+        assert wp.extractor.number_of_content_references == 24
