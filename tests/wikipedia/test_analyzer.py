@@ -25,7 +25,7 @@ class TestWikipediaAnalyzer(TestCase):
             "number_of_content_reference_with_no_templates": 0,
             "number_of_content_references": 2,
             "number_of_cs1_references": 2,
-            "number_of_general_references": 2,
+            "number_of_general_references": 0,
             "number_of_hashed_content_references": 2,
             "number_of_isbn_template_references": 0,
             "number_of_multiple_template_references": 0,

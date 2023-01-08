@@ -36,18 +36,26 @@ class WikipediaAnalyzer(WcdBaseModel):
                 number_of_citation_references=self.article.extractor.number_of_citation_references,
                 number_of_citation_template_references=self.article.extractor.number_of_citation_template_references,
                 number_of_citeq_references=self.article.extractor.number_of_citeq_references,
-                number_of_content_reference_with_at_least_one_template=self.article.extractor.number_of_content_reference_with_at_least_one_template,
-                number_of_content_reference_with_no_templates=self.article.extractor.number_of_content_reference_with_no_templates,
+                number_of_content_reference_with_at_least_one_template=(
+                    self.article.extractor.number_of_content_reference_with_at_least_one_template
+                ),
+                number_of_content_reference_with_no_templates=(
+                    self.article.extractor.number_of_content_reference_with_no_templates
+                ),
                 number_of_content_references=self.article.extractor.number_of_content_references,
                 number_of_cs1_references=self.article.extractor.number_of_cs1_references,
-                number_of_general_references=self.article.extractor.number_of_citation_references,
+                number_of_general_references=self.article.extractor.number_of_general_references,
                 number_of_hashed_content_references=self.article.extractor.number_of_hashed_content_references,
                 number_of_isbn_template_references=self.article.extractor.number_of_isbn_template_references,
                 number_of_multiple_template_references=self.article.extractor.number_of_multiple_template_references,
                 number_of_named_references=self.article.extractor.number_of_named_references,
-                number_of_references_with_a_supported_template=self.article.extractor.number_of_references_with_a_supported_template,
+                number_of_references_with_a_supported_template=(
+                    self.article.extractor.number_of_references_with_a_supported_template
+                ),
                 number_of_url_template_references=self.article.extractor.number_of_url_template_references,
-                percent_of_content_references_with_a_hash=self.article.extractor.percent_of_content_references_with_a_hash,
+                percent_of_content_references_with_a_hash=(
+                    self.article.extractor.percent_of_content_references_with_a_hash
+                ),
             )
 
     def get_statistics(self):
