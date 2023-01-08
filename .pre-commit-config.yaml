@@ -16,7 +16,7 @@ repos:
 #      - "tests/"
 #      - "*.md"
 #      - "*.py"
-    types: [python, markdown]
+    types_or: [python, markdown]
     exclude: ^test_data/
 
   - id: bandit
@@ -64,7 +64,7 @@ repos:
     # is only called once per commit
     require_serial: true
     # Print the number of files as a sanity-check
-    verbose: true
+    # verbose: true
 
 #  - id: pytest
 #    name: pytest
