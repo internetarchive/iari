@@ -14,12 +14,15 @@ class IASandboxWikibase(Wikibase):
 
     # Properties
     DOI = "P1"  # datatype: WikibaseDatatype.EXTERNALID description:
-    GOOGLE_BOOKS_ID = "P2"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books at Google.
-    INTERNET_ARCHIVE_ID = "P3"  # datatype: WikibaseDatatype.EXTERNALID description: Identifier used to link books and other resources at Internet Archive.
+    GOOGLE_BOOKS_ID = "P2"  # datatype: WikibaseDatatype.EXTERNALID description:
+    # Identifier used to link books at Google.
+    INTERNET_ARCHIVE_ID = "P3"  # datatype: WikibaseDatatype.EXTERNALID description:
+    # Identifier used to link books and other resources at Internet Archive.
     ISBN_10 = "P4"  # datatype: WikibaseDatatype.EXTERNALID description:
     ISBN_13 = "P5"  # datatype: WikibaseDatatype.EXTERNALID description:
     MEDIAWIKI_PAGE_ID = "P6"  # datatype: WikibaseDatatype.EXTERNALID description:
-    OCLC_CONTROL_NUMBER = "P7"  # datatype: WikibaseDatatype.EXTERNALID description: Online Computer Library Centers control number in Worldcat
+    OCLC_CONTROL_NUMBER = "P7"  # datatype: WikibaseDatatype.EXTERNALID description:
+    # Online Computer Library Centers control number in Worldcat
     ORCID = "P8"  # datatype: WikibaseDatatype.EXTERNALID description:
     PMID = "P9"  # datatype: WikibaseDatatype.EXTERNALID description:
     WIKIDATA_QID = "P10"  # datatype: WikibaseDatatype.EXTERNALID description:

@@ -253,7 +253,8 @@ class WikipediaArticle(WcdItem):
             logger.info(f"Found Wikidata QID: {self.wikidata_qid}")
 
     def __generate_hash__(self):
-        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a Wikipedia page
+        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a
+        Wikipedia page
         We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
         # TODO move this to Hashing
         logger.debug(
