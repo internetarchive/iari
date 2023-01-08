@@ -11,7 +11,13 @@ repos:
     name: codespell
     language: system
     entry: codespell
-    types: [python]
+#    args:
+#      - "src/"
+#      - "tests/"
+#      - "*.md"
+#      - "*.py"
+    types: [python, markdown]
+    exclude: ^test_data/
 
   - id: bandit
     name: bandit
