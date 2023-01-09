@@ -39,7 +39,7 @@ maintained by them as of this writing.
 
 # Why store the data about references in a graph database?
 The advantages of having access to this data in a graph are many.
-* [Globally unique and persistent identifiers](https://www.wikidata.org/wiki/Q115493815)(aka. GUPRI) 
+* [Globally unique and persistent identifiers](https://www.wikidata.org/wiki/Q115493815) (aka. GUPRI) 
 for as many references in Wikipedia as possible.
 * Helping Wikipedians to improve the references, so they can be uniquely identified and can be 
 [_turned blue_](https://www.wikidata.org/wiki/Q115136754) 
