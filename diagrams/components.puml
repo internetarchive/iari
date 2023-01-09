@@ -1,33 +1,27 @@
 @startuml
 'https://plantuml.com/component-diagram
 
-cloud "AWS" {
-    package "Docker compose" {
-        [flower] as F
-        [rabbitmq] as RM
-        [wikicitations-api] as WA
-        [wcdimportbot worker 1] as WW1
-        [wcdimportbot worker 2] as WW2
-        F -RM : inspection/overview
-        ARTICLE_QUEUE -- RM : manage article jobs
-        ARTICLE_QUEUE -> WW1 : get article job
-        ARTICLE_QUEUE -> WW2 : get article job
-        WA -- GET_WDQID
-        WA -- GET_ARTICLE_STATISTICS
-    }
+cloud AWS {
+    [Wikipedia dump] as WD
+    [Graph generation script] as GGS
+    GGS --> WD
+    [wikicitations-api] as WA
+    WA -- GET_WDQID
+    WA -- GET_STATISTICS
 }
 
 cloud "Wikimedia"{
-  [Issues userscript] --> GET_ARTICLE_STATISTICS
-  [Issues userscript] --> GET_WDQID
-  [Go to WikiCitations item userscript] --> GET_WDQID
+  WA --> page
+  [Get statistics userscript] as US
+  US --> GET_STATISTICS
+  US --> GET_WDQID
+  [Go to Wikipedia Citation Database item userscript] --> GET_WDQID
   [MediaWiki REST v1 API] -- page
-   WW1 -> page : fetch data
-   WW2 -> page : fetch data
 }
 
-database "Wikibase in AWS" {
-    [WikiCitations] as WC
+database "Wikibase in Wikibase.cloud" {
+    GGS --> HTTP_API
+    [Wikipedia Citations Database] as WC
     WC -- CIRRUSSEARCH_ENDPOINT
     WC - HTTP_API
     WC -- SPARQL_API
