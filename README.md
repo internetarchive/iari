@@ -54,9 +54,9 @@ which is based on data extraction from the dump files)
 
 # Use cases
 1. To support various queries of various citation types to learn various things about cited material.  
-2. E.g. number of citations per source or publication.
+E.g. number of citations per source or publication.
 2. To be able to query to learn about how well citations are linked... to help us understand the gaps, 
-3. scale and scope of the Goal of Turn All References Blue.
+scale and scope of the Goal of Turn All References Blue.
 
 # Estimated size
 200+ million reference items (add source to research extracting references from Wikipedias). 
