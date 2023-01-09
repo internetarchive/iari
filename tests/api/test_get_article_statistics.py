@@ -105,18 +105,27 @@ class TestGetArticleStatistics(unittest.TestCase):
         api = Api(app)
 
         api.add_resource(GetArticleStatistics, "/get_article_statistics")
-        self.app = app.test_client()
+        app.testing = True
+        self.test_client = app.test_client()
 
     def test_valid_request_test(self):
-        response = self.app.get(
+        response = self.test_client.get(
             "/get_article_statistics?lang=en&site=wikipedia&title=Test&testing=True"
         )
         data = json.loads(response.data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(ArticleStatistics(**data).dict(), ArticleStatistics().dict())
+        print(response.data)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(ArticleStatistics().dict(), ArticleStatistics(**data).dict())
+
+    def test_valid_request_gnu_linux_naming_controversy(self):
+        response = self.test_client.get(
+            "get-statistics?lang=en&site=wikipedia&title=GNU/Linux_naming_controversy&testing=True"
+        )
+        # data = json.loads(response.data)
+        self.assertEqual(200, response.status_code)
 
     def test_valid_request_easter_island(self):
-        response = self.app.get(
+        response = self.test_client.get(
             "/get_article_statistics?lang=en&site=wikipedia&title=Easter Island&testing=True"
         )
         data = json.loads(response.data)
@@ -248,7 +257,7 @@ class TestGetArticleStatistics(unittest.TestCase):
         )
 
     def test_invalid_language(self):
-        response = self.app.get(
+        response = self.test_client.get(
             "/get_article_statistics?lang=fr&site=wikipedia&title=Test"
         )
         self.assertEqual(response.status_code, 400)
@@ -257,7 +266,9 @@ class TestGetArticleStatistics(unittest.TestCase):
         )  # expected output
 
     def test_missing_title(self):
-        response = self.app.get("/get_article_statistics?lang=en&site=wikipedia")
+        response = self.test_client.get(
+            "/get_article_statistics?lang=en&site=wikipedia"
+        )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data,
@@ -265,7 +276,7 @@ class TestGetArticleStatistics(unittest.TestCase):
         )
 
     def test_invalid_site(self):
-        response = self.app.get(
+        response = self.test_client.get(
             "/get_article_statistics?lang=en&site=example.com&title=Test"
         )
         self.assertEqual(response.status_code, 400)
