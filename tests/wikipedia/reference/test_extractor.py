@@ -117,7 +117,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True, wikitext=raw_reference + raw_reference2, wikibase=wikibase
         )
-        print(wre.wikitext)
+        # print(wre.wikitext)
         wre.extract_all_references()
         assert wre.number_of_sections_found == 0
         assert wre.number_of_citation_references == 2

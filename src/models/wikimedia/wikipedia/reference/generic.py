@@ -67,7 +67,7 @@ class WikipediaReference(WcdItem):
     orcid: Optional[str]  # Is this present in the wild?
     persons_without_role: Optional[List[Person]]
     translators_list: Optional[List[Person]]
-    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     raw_reference: Optional[WikipediaRawReference] = None
 
     # These are all the parameters in the supported references

@@ -2,11 +2,11 @@ import logging
 from typing import Optional
 
 from src import IASandboxWikibase, Wikibase
-from src.helpers.console import console
 from src.models.api.article_statistics import ArticleStatistics
+from src.models.api.job import Job
 from src.models.api.reference_statistics import ReferenceStatistics
 from src.models.exceptions import MissingInformationError
-from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
+from src.models.wikimedia.enums import AnalyzerReturn
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
 
@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class WikipediaAnalyzer(WcdBaseModel):
-    title: str = ""
-    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
-    language_code: str = "en"
+    job: Job
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     wikibase: Wikibase = IASandboxWikibase()
@@ -24,8 +22,6 @@ class WikipediaAnalyzer(WcdBaseModel):
     testing: bool = False
 
     def __gather_article_statistics__(self):
-        if not self.article:
-            self.__analyze__()
         if (
             self.article
             and not self.article.is_redirect
@@ -59,13 +55,15 @@ class WikipediaAnalyzer(WcdBaseModel):
             )
 
     def get_statistics(self):
+        if not self.article:
+            self.__analyze__()
         if not self.article_statistics:
             self.__gather_article_statistics__()
             self.__gather_reference_statistics__()
         if self.article_statistics:
             excludes = {"cache"}
             dictionary = self.article_statistics.dict(exclude=excludes)
-            console.print(dictionary)
+            # console.print(dictionary)
             return dictionary
         else:
             if self.article.is_redirect:
@@ -78,20 +76,15 @@ class WikipediaAnalyzer(WcdBaseModel):
                 )
 
     def __analyze__(self):
-        if self.title:
-            self.article = WikipediaArticle(
-                title=self.title,
-                wikimedia_site=self.wikimedia_site,
-                language_code=self.language_code,
-                wikibase=self.wikibase,
-                wikitext=self.wikitext,
-                testing=self.testing,
-            )
-            self.article.extract_and_parse_references()
-        else:
-            raise MissingInformationError("Got no title")
+        """Helper method"""
+        if self.job:
+            if not self.article:
+                self.__populate_article__()
+            if self.article:
+                self.article.fetch_and_extract_and_parse_references()
 
     def __gather_reference_statistics__(self):
+        logger.debug("__gather_reference_statistics__: running")
         if self.article_statistics and self.article.extractor.number_of_references > 0:
             for reference in self.article.extractor.references:
                 reference_statistics = ReferenceStatistics(
@@ -114,3 +107,18 @@ class WikipediaAnalyzer(WcdBaseModel):
                 "self.article_statistics was None "
                 "so we skip gathering reference statistics"
             )
+
+    def __populate_article__(self):
+        logger.debug("__populate_article__: running")
+        if self.job.title:
+            # Todo consider propagating job further here
+            self.article = WikipediaArticle(
+                title=self.job.title,
+                wikimedia_site=self.job.site,
+                language_code=self.job.lang,
+                wikibase=self.wikibase,
+                wikitext=self.wikitext,
+                testing=self.testing,
+            )
+        else:
+            raise MissingInformationError("Got no title")

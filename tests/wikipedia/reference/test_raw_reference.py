@@ -15,7 +15,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            print(ref)
+            # print(ref)
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
             raw_reference_object.__extract_raw_templates__()
             assert raw_reference_object.number_of_templates == 1

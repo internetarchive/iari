@@ -36,7 +36,7 @@ from enum import Enum
 
 
 class WikimediaSite(Enum):
-    WIKIPEDIA = "wikipedia"
+    wikipedia = "wikipedia"
 
 
 class WikimediaEditType(Enum):
