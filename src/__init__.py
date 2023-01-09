@@ -37,7 +37,7 @@ class WcdImportBot(WcdBaseModel):
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
     wikibase: Wikibase = IASandboxWikibase()
-    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     wikidata_qid: str = ""
     testing: bool = False
     wikipedia_article: Optional[WikipediaArticle] = None

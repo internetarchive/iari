@@ -12,7 +12,7 @@ class Hashing(WcdBaseModel):
 
     wikibase: Wikibase = IASandboxWikibase()
     language_code: str = "en"
-    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     title: str = ""
     article_wikidata_qid: str = ""
     raw_template: str = ""

@@ -1,4 +1,5 @@
 import json
+import logging
 import unittest
 
 from flask import Flask
@@ -6,6 +7,8 @@ from flask_restful import Api  # type: ignore
 
 from src.models.api.article_statistics import ArticleStatistics
 from src.models.api.get_article_statistics import GetArticleStatistics
+
+logger = logging.getLogger(__name__)
 
 
 class TestGetArticleStatistics(unittest.TestCase):
@@ -104,13 +107,13 @@ class TestGetArticleStatistics(unittest.TestCase):
         app = Flask(__name__)
         api = Api(app)
 
-        api.add_resource(GetArticleStatistics, "/get_article_statistics")
+        api.add_resource(GetArticleStatistics, "/get-statistics")
         app.testing = True
         self.test_client = app.test_client()
 
     def test_valid_request_test(self):
         response = self.test_client.get(
-            "/get_article_statistics?lang=en&site=wikipedia&title=Test&testing=True"
+            "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True"
         )
         data = json.loads(response.data)
         print(response.data)
@@ -119,19 +122,19 @@ class TestGetArticleStatistics(unittest.TestCase):
 
     def test_valid_request_gnu_linux_naming_controversy(self):
         response = self.test_client.get(
-            "get-statistics?lang=en&site=wikipedia&title=GNU/Linux_naming_controversy&testing=True"
+            "get-statistics?lang=en&site=wikipedia&title=GNU/Linux_naming_controversy"
         )
+        logger.debug(response.data)
         # data = json.loads(response.data)
         self.assertEqual(200, response.status_code)
 
     def test_valid_request_easter_island(self):
         response = self.test_client.get(
-            "/get_article_statistics?lang=en&site=wikipedia&title=Easter Island&testing=True"
+            "/get-statistics?lang=en&site=wikipedia&title=Easter Island&testing=True"
         )
         data = json.loads(response.data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(200, response.status_code)
         self.assertEqual(
-            ArticleStatistics(**data).dict(),
             {
                 "number_of_bare_url_references": 0,
                 "number_of_citation_references": 2,
@@ -254,11 +257,12 @@ class TestGetArticleStatistics(unittest.TestCase):
                     },
                 ],
             },
+            ArticleStatistics(**data).dict(),
         )
 
     def test_invalid_language(self):
         response = self.test_client.get(
-            "/get_article_statistics?lang=fr&site=wikipedia&title=Test"
+            "/get-statistics?lang=fr&site=wikipedia&title=Test"
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
@@ -266,9 +270,7 @@ class TestGetArticleStatistics(unittest.TestCase):
         )  # expected output
 
     def test_missing_title(self):
-        response = self.test_client.get(
-            "/get_article_statistics?lang=en&site=wikipedia"
-        )
+        response = self.test_client.get("/get-statistics?lang=en&site=wikipedia")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data,
@@ -277,9 +279,25 @@ class TestGetArticleStatistics(unittest.TestCase):
 
     def test_invalid_site(self):
         response = self.test_client.get(
-            "/get_article_statistics?lang=en&site=example.com&title=Test"
+            "/get-statistics?lang=en&site=example.com&title=Test"
         )
-        self.assertEqual(response.status_code, 400)
+        print(response.data)
+        self.assertEqual(400, response.status_code)
         self.assertEqual(
-            response.data, b"\"Only 'wikipedia' site is supported\"\n"
-        )  # expected output
+            b"{\"error\": \"{'site': ['Must be one of: wikipedia.']}\"}\n",
+            response.data,
+        )
+
+    def test_site_capitalized(self):
+        response = self.test_client.get(
+            "/get-statistics?lang=en&site=WIKIPEDIA&title=Test"
+        )
+        # print(response.data)
+        self.assertEqual(400, response.status_code)
+
+    def test_valid_site(self):
+        response = self.test_client.get(
+            "/get-statistics?lang=en&site=wikipedia&title=Test"
+        )
+        # print(response.data)
+        self.assertEqual(200, response.status_code)

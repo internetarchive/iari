@@ -9,9 +9,7 @@ from dateutil.parser import isoparse
 from pydantic import validate_arguments
 
 import config
-from src import console
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-from src.models.return_.wikibase_return import WikibaseReturn
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.reference.extractor import (
@@ -34,7 +32,7 @@ class WikipediaArticle(WcdItem):
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: Optional[int]
-    wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
+    wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
@@ -43,6 +41,12 @@ class WikipediaArticle(WcdItem):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def quoted_title(self):
+        if not self.title:
+            raise MissingInformationError("self.title was empty")
+        return quote(self.title, safe="")
 
     @property
     def absolute_url(self):
@@ -129,7 +133,7 @@ class WikipediaArticle(WcdItem):
     #         self.__compare_and_update_all_references__()
     #     self.__compare_and_update_page__()
 
-    def extract_and_parse_references(self):
+    def fetch_and_extract_and_parse_references(self):
         logger.info("Extracting templates and parsing the references now")
         # We only fetch data from Wikipedia if we don't already have wikitext to work on
         if not self.wikitext:
@@ -146,7 +150,7 @@ class WikipediaArticle(WcdItem):
             if not self.wikitext:
                 raise MissingInformationError("self.wikitext was empty")
             # We got what we need now to make the extraction and parsing
-            print(self.wikitext)
+            # print(self.wikitext)
             self.extractor = WikipediaReferenceExtractor(
                 wikitext=self.wikitext, wikibase=self.wikibase
             )
@@ -158,8 +162,8 @@ class WikipediaArticle(WcdItem):
             #         "See https://github.com/internetarchive/wcdimportbot/issues/358 for details"
             #     )
             # else:
-            self.__parse_templates__()
-            self.__print_hash_statistics__()
+            # self.__parse_templates__()
+            # self.__print_hash_statistics__()
         else:
             logger.error("This branch should never be hit.")
 
@@ -167,18 +171,19 @@ class WikipediaArticle(WcdItem):
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
         logger.debug("__fetch_page_data__: Running")
-        if not self.title:
-            raise MissingInformationError("self.title was empty string")
+        self.__check_if_title_is_empty__()
         if (
             not self.latest_revision_id
             or not self.latest_revision_date
             or not self.wikitext
             or not self.page_id
         ):
-            title = self.title
-            # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base
-            title = title.replace(" ", "_")
-            url = f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/rest.php/v1/page/{title}"
+            # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base or
+            # https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy
+            url = (
+                f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
+                f"w/rest.php/v1/page/{self.quoted_title}"
+            )
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
             # console.print(response.json())
@@ -268,30 +273,30 @@ class WikipediaArticle(WcdItem):
         ).hexdigest()
         logger.debug(self.md5hash)
 
-    @validate_arguments
-    def __get_wikipedia_article_from_title__(self):
-        """Get the page from the Wikimedia site"""
-        logger.info("Fetching the page data")
-        self.__fetch_page_data__()
+    # @validate_arguments
+    # def __get_wikipedia_article_from_title__(self):
+    #     """Get the page from the Wikimedia site"""
+    #     logger.info("Fetching the page data")
+    #     self.__fetch_page_data__()
 
-    def __page_has_already_been_uploaded__(self) -> bool:
-        """This checks whether the page has already been uploaded by checking the cache"""
-        console.print(f"Checking if the page '{self.title}' has already been uploaded")
-        if not self.cache:
-            raise ValueError("self.cache was None")
-        else:
-            cache_return = self.cache.check_page_and_get_wikibase_qid(
-                wikipedia_article=self
-            )
-        if not cache_return.item_qid:
-            logger.debug("Page not found in the cache")
-            return False
-        else:
-            logger.debug("Page found in the cache")
-            self.return_ = WikibaseReturn(
-                item_qid=cache_return.item_qid, uploaded_now=False
-            )
-            return True
+    # def __page_has_already_been_uploaded__(self) -> bool:
+    #     """This checks whether the page has already been uploaded by checking the cache"""
+    #     console.print(f"Checking if the page '{self.title}' has already been uploaded")
+    #     if not self.cache:
+    #         raise ValueError("self.cache was None")
+    #     else:
+    #         cache_return = self.cache.check_page_and_get_wikibase_qid(
+    #             wikipedia_article=self
+    #         )
+    #     if not cache_return.item_qid:
+    #         logger.debug("Page not found in the cache")
+    #         return False
+    #     else:
+    #         logger.debug("Page found in the cache")
+    #         self.return_ = WikibaseReturn(
+    #             item_qid=cache_return.item_qid, uploaded_now=False
+    #         )
+    #         return True
 
     def __parse_templates__(self):
         """Disabled method because of rewrite"""
@@ -362,12 +367,12 @@ class WikipediaArticle(WcdItem):
         #         if config.debug_unsupported_templates:
         #             logger.debug(f"Template '{template_name.lower()}' not supported")
 
-    def __print_hash_statistics__(self):
-        if self.extractor:
-            logger.info(
-                f"Hashed {self.extractor.percent_of_content_references_with_a_hash} percent of "
-                f"{len(self.extractor.references)} references on page {self.title}"
-            )
+    # def __print_hash_statistics__(self):
+    #     if self.extractor:
+    #         logger.info(
+    #             f"Hashed {self.extractor.percent_of_content_references_with_a_hash} percent of "
+    #             f"{len(self.extractor.references)} references on page {self.title}"
+    #         )
 
     # def __upload_page_and_references__(self):
     #     # TODO rename this method to "__upload_new_article_item__"
@@ -567,3 +572,7 @@ class WikipediaArticle(WcdItem):
         #             raise MissingInformationError(f"no sitelinks from Wikidata, got {entities}")
         # else:
         #     raise MissingInformationError("no entities from Wikidata")
+
+    def __check_if_title_is_empty__(self):
+        if not self.title:
+            raise MissingInformationError("self.title was empty string")

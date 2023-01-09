@@ -4,7 +4,7 @@ from unittest import TestCase
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
-from src.helpers.console import console
+from src import MissingInformationError
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.enums import WikimediaSite
 from test_data.test_content import (  # type: ignore
@@ -17,28 +17,28 @@ logger = logging.getLogger(__name__)
 
 
 class TestWikipediaArticle(TestCase):
-    def test_fix_dash(self):
-        # TODO improve this test and document it, it does not make sense
-        from src.models.wikimedia.wikipedia.article import WikipediaArticle
-
-        page = WikipediaArticle(
-            wikibase=IASandboxWikibase(),
-            language_code="en",
-            wikimedia_site=WikimediaSite.WIKIPEDIA,
-            title="Easter Island",
-        )
-        # This uses internet which is not optimal
-        page.__get_wikipedia_article_from_title__()
-        page.extract_and_parse_references()
-        logger.info(f"{len(page.extractor.references)} references found")
-        for ref in page.extractor.references:
-            if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
-                # console.print(ref.template_name)
-                if (
-                    ref.url
-                    == "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
-                ):
-                    console.print(ref.url, ref.archive_url)
+    # def test_fix_dash(self):
+    #     # TODO improve this test and document it, it does not make sense
+    #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
+    #
+    #     page = WikipediaArticle(
+    #         wikibase=IASandboxWikibase(),
+    #         language_code="en",
+    #         wikimedia_site=WikimediaSite.WIKIPEDIA,
+    #         title="Easter Island",
+    #     )
+    #     # This uses internet which is not optimal
+    #     page.__get_wikipedia_article_from_title__()
+    #     page.extract_and_parse_references()
+    #     logger.info(f"{len(page.extractor.references)} references found")
+    #     for ref in page.extractor.references:
+    #         if config.loglevel == logging.INFO or config.loglevel == logging.DEBUG:
+    #             # console.print(ref.template_name)
+    #             if (
+    #                 ref.url
+    #                 == "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php"
+    #             ):
+    #                 console.print(ref.url, ref.archive_url)
 
     def test_fetch_page_data_and_parse_the_wikitext(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -46,7 +46,7 @@ class TestWikipediaArticle(TestCase):
         page = WikipediaArticle(
             wikibase=IASandboxWikibase(),
             language_code="en",
-            wikimedia_site=WikimediaSite.WIKIPEDIA,
+            wikimedia_site=WikimediaSite.wikipedia,
             title="Test",
         )
         page.__fetch_page_data__()
@@ -60,11 +60,23 @@ class TestWikipediaArticle(TestCase):
         page = WikipediaArticle(
             wikibase=IASandboxWikibase(),
             language_code="en",
-            wikimedia_site=WikimediaSite.WIKIPEDIA,
+            wikimedia_site=WikimediaSite.wikipedia,
             title="Test2222",
         )
         page.__fetch_page_data__()
         assert page.found_in_wikipedia is False
+
+    def test_fetch_page_data_slashed_title(self):
+        from src.models.wikimedia.wikipedia.article import WikipediaArticle
+
+        page = WikipediaArticle(
+            wikibase=IASandboxWikibase(),
+            language_code="en",
+            wikimedia_site=WikimediaSite.wikipedia,
+            title="GNU/Linux_naming_controversy",
+        )
+        page.__fetch_page_data__()
+        assert page.found_in_wikipedia is True
 
     # def test_get_wcdqid_from_hash_via_sparql(self):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -168,7 +180,7 @@ class TestWikipediaArticle(TestCase):
             title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
         )
         wp.wikitext = "<ref>{{citeq|1}}</ref>"
-        wp.extract_and_parse_references()
+        wp.fetch_and_extract_and_parse_references()
         assert len(wp.extractor.references) == 1
         assert (
             wp.extractor.references[0].raw_reference.templates[0].raw_template
@@ -181,7 +193,7 @@ class TestWikipediaArticle(TestCase):
 
         wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
         wp.wikitext = easter_island_head_excerpt
-        wp.extract_and_parse_references()
+        wp.fetch_and_extract_and_parse_references()
         assert wp.extractor.number_of_references == 3
         assert wp.extractor.number_of_named_references == 1
         assert wp.extractor.number_of_content_references == 2
@@ -262,7 +274,19 @@ class TestWikipediaArticle(TestCase):
 
         wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
         wp.wikitext = wikitext
-        wp.extract_and_parse_references()
+        wp.fetch_and_extract_and_parse_references()
         assert wp.extractor.number_of_citation_references == 2
         assert wp.extractor.number_of_general_references == 22
         assert wp.extractor.number_of_content_references == 24
+
+    # noinspection PyStatementEffect
+    def test_quoted_title(self):
+        from src import WikipediaArticle
+
+        wp = WikipediaArticle(
+            title="GNU/Linux_naming_controversy", wikibase=IASandboxWikibase()
+        )
+        assert wp.quoted_title == "GNU%2FLinux_naming_controversy"
+        wp = WikipediaArticle(title="", wikibase=IASandboxWikibase())
+        with self.assertRaises(MissingInformationError):
+            wp.quoted_title
