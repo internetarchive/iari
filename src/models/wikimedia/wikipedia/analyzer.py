@@ -2,7 +2,6 @@ import logging
 from typing import Optional
 
 from src import IASandboxWikibase, Wikibase
-from src.helpers.console import console
 from src.models.api.article_statistics import ArticleStatistics
 from src.models.api.job import Job
 from src.models.api.reference_statistics import ReferenceStatistics
