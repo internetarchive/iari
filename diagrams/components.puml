@@ -14,7 +14,6 @@ cloud "Wikimedia"{
   WA --> page
   [Get statistics userscript] as US
   US --> GET_STATISTICS
-  US --> GET_WDQID
   [Go to Wikipedia Citation Database item userscript] --> GET_WDQID
   [MediaWiki REST v1 API] -- page
 }
