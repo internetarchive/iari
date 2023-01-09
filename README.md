@@ -42,7 +42,7 @@ The advantages of having access to this data in a graph are many.
 * [Globally unique and persistent identifiers](https://www.wikidata.org/wiki/Q115493815) (aka. GUPRI) 
 for as many references in Wikipedia as possible.
 * Helping Wikipedians to improve the references, so they can be uniquely identified and can be 
-[_turned blue_](https://www.wikidata.org/wiki/Q115136754) 
+[_turned blue_](https://www.wikidata.org/wiki/Q115136754)
 ([video](https://commons.wikimedia.org/wiki/File:Let%E2%80%99s_Turn_all_the_References_Blue.webm))
 * Overview and visualization of references across Wikipedia articles and language editions becomes possible.
 * Overview of most cited websites in the world (see also [bestref.net](https://bestref.net/) 
@@ -61,16 +61,16 @@ scale and scope of the Goal of Turn All References Blue.
 # Estimated size
 200+ million reference items (add source to research extracting references from Wikipedias). 
 100+ million website items (guesstimate). 
-[60 million wikipedia article]
-(https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia#Comparisons_with_other_Wikipedias) 
+[60 million wikipedia article](
+https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia#Comparisons_with_other_Wikipedias) 
 items. In total ~260 million items. For comparison 
-[Wikidata as of this writing have 100 million items]
-(https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
+[Wikidata as of this writing have 100 million items](
+https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
 
 In total, we estimate we will have 15 triples per item which equals 15 bn triples in total. 
 For comparison, 
-[Wikidata as of this writing have 14.4 bn triples]
-(https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
+[Wikidata as of this writing have 14.4 bn triples](
+https://grafana.wikimedia.org/d/000000489/wikidata-query-service?orgId=1&refresh=1m).
 
 # Supported templates
 There are a lot of templates in use in the different Wikipedias. For now 
@@ -93,13 +93,13 @@ We use the following terminology to distinguish different types of references.
 ## Templates
 1) **Citation template** - see https://en.wikipedia.org/wiki/Template:Citation
 2) **Citation Style 1 template** aka cs1 template - class of templates which multiple Wikipedias use. 
-3) Implemented in lua. See https://en.wikipedia.org/wiki/Help:Citation_Style_1
+Implemented in lua. See https://en.wikipedia.org/wiki/Help:Citation_Style_1
 3) **General reference with a supported template** - reference outside of <ref>. 
-4) E.g. part of further reading- or bibliography section that uses a template we support.
+E.g. part of further reading- or bibliography section that uses a template we support.
 4) **Unbulleted list citebundle template** - template with multiple templates inside, 
-5) see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
+see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
 5) **bare url template** - template added in English Wikipedia (by a bot presumably) 
-6) when a bare url is found. See https://en.wikipedia.org/wiki/Template:Cleanup_bare_URLs
+when a bare url is found. See https://en.wikipedia.org/wiki/Template:Cleanup_bare_URLs
  
 ## Reference types detected by the ArticleAnalyzer
 We support detecting the following types. A reference cannot have multiple types. 
