@@ -187,9 +187,6 @@ number of citation templates of different types, number of references outside <r
 ## Roadmap
 ![image](diagrams/roadmap.png)
 
-## Article import sequence
-![image](diagrams/sequence_import_title.png)
-
 # History
 * version 1.0.0 a proof of concept import tool based on WikidataIntegrator (by James Hare)
 * version 2.0.0+ a scalable ETL-framework with an API and capability of reading EventStreams (by Dennis Priskorn)
