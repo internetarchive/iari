@@ -70,7 +70,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(self.general_references)
 
     @property
-    def number_of_references_with_a_supported_template(self) -> int:
+    def number_of_content_references_with_any_supported_template(self) -> int:
         return len(
             [
                 reference
@@ -83,6 +83,25 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                         or reference.raw_reference.citeq_template_found
                         or reference.raw_reference.citation_template_found
                         or reference.raw_reference.bare_url_template_found
+                    )
+                )
+            ]
+        )
+
+    @property
+    def number_of_content_references_with_a_supported_template_we_prefer(self) -> int:
+        """We prefer templates that is easy to generate a graph from
+        Currently that is CS1 templates, CiteQ template and Citation template"""
+        return len(
+            [
+                reference
+                for reference in self.content_references
+                if (
+                    reference.raw_reference.number_of_templates > 0
+                    and (
+                        reference.raw_reference.cs1_template_found
+                        or reference.raw_reference.citeq_template_found
+                        or reference.raw_reference.citation_template_found
                     )
                 )
             ]
