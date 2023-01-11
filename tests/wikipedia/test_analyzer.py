@@ -21,94 +21,95 @@ class TestWikipediaAnalyzer(TestCase):
         wa.article.fetch_and_extract_and_parse_references()
         assert wa.article.found_in_wikipedia is True
 
-    def test_get_statistics_valid_article_easter_island(self):
-        # Test using excerpt so we don't rely on information from Wikipedia that might change
-        wa = WikipediaAnalyzer(
-            job=Job(title="Easter Island", testing=True),
-            wikitext=easter_island_head_excerpt,
-        )
-        assert wa.get_statistics() == {
-            "number_of_bare_url_references": 0,
-            "number_of_citation_references": 2,
-            "number_of_citation_template_references": 0,
-            "number_of_citeq_references": 0,
-            "number_of_content_reference_with_at_least_one_template": 2,
-            "number_of_content_reference_with_no_templates": 0,
-            "number_of_content_references": 2,
-            "number_of_cs1_references": 2,
-            "number_of_general_references": 0,
-            "number_of_hashed_content_references": 2,
-            "number_of_isbn_template_references": 0,
-            "number_of_multiple_template_references": 0,
-            "number_of_named_references": 1,
-            "number_of_references_with_a_supported_template": 2,
-            "number_of_url_template_references": 0,
-            "percent_of_content_references_with_a_hash": 100,
-            "references": [
-                {
-                    "bare_url_template_found": False,
-                    "citation_template_found": False,
-                    "citeq_template_found": False,
-                    "cs1_template_found": True,
-                    "is_citation_reference": True,
-                    "is_general_reference": False,
-                    "is_named_reference": False,
-                    "isbn_template_found": False,
-                    "multiple_templates_found": False,
-                    "plain_text_in_reference": False,
-                    "url_template_found": False,
-                    "wikitext": '<ref name="INE">{{cite web | url= '
-                    "http://www.ine.cl/canales/chile_estadistico/"
-                    "censos_poblacion_vivienda/censo_pobl_vivi.php "
-                    "| title= Censo de Población y Vivienda 2002 | "
-                    "work= [[National Statistics Institute "
-                    "(Chile)|National Statistics Institute]] | "
-                    "access-date= 1 May 2010 | url-status=live | "
-                    "archive-url= "
-                    "https://web.archive.org/web/20100715195638/"
-                    "http://www.ine.cl/canales/chile_estadistico/"
-                    "censos_poblacion_vivienda/censo_pobl_vivi.php "
-                    "| archive-date= 15 July 2010}}</ref>",
-                },
-                {
-                    "bare_url_template_found": False,
-                    "citation_template_found": False,
-                    "citeq_template_found": False,
-                    "cs1_template_found": True,
-                    "is_citation_reference": True,
-                    "is_general_reference": False,
-                    "is_named_reference": False,
-                    "isbn_template_found": False,
-                    "multiple_templates_found": False,
-                    "plain_text_in_reference": False,
-                    "url_template_found": False,
-                    "wikitext": "<ref>{{cite web |language= es |url= "
-                    "https://resultados.censo2017.cl/Home/Download "
-                    "|title= Censo 2017 |work= [[National Statistics "
-                    "Institute (Chile)|National Statistics "
-                    "Institute]] |access-date= 11 May 2018 "
-                    "|archive-url= "
-                    "https://web.archive.org/web/20180511145942/"
-                    "https://resultados.censo2017.cl/Home/Download "
-                    "|archive-date= 11 May 2018 |url-status=dead "
-                    "}}</ref>",
-                },
-                {
-                    "bare_url_template_found": False,
-                    "citation_template_found": False,
-                    "citeq_template_found": False,
-                    "cs1_template_found": False,
-                    "is_citation_reference": True,
-                    "is_general_reference": False,
-                    "is_named_reference": True,
-                    "isbn_template_found": False,
-                    "multiple_templates_found": False,
-                    "plain_text_in_reference": False,
-                    "url_template_found": False,
-                    "wikitext": '<ref name="INE"/>',
-                },
-            ],
-        }
+    # DISABLED because it completely overlaps with a test in test_get_article_statistics.py
+    # def test_get_statistics_valid_article_easter_island(self):
+    #     # Test using excerpt so we don't rely on information from Wikipedia that might change
+    #     wa = WikipediaAnalyzer(
+    #         job=Job(title="Easter Island", testing=True),
+    #         wikitext=easter_island_head_excerpt,
+    #     )
+    #     assert wa.get_statistics() == {
+    #         "number_of_bare_url_references": 0,
+    #         "number_of_citation_references": 2,
+    #         "number_of_citation_template_references": 0,
+    #         "number_of_citeq_references": 0,
+    #         "number_of_content_reference_with_at_least_one_template": 2,
+    #         "number_of_content_reference_with_no_templates": 0,
+    #         "number_of_content_references": 2,
+    #         "number_of_cs1_references": 2,
+    #         "number_of_general_references": 0,
+    #         "number_of_hashed_content_references": 2,
+    #         "number_of_isbn_template_references": 0,
+    #         "number_of_multiple_template_references": 0,
+    #         "number_of_named_references": 1,
+    #         "number_of_references_with_a_supported_template": 2,
+    #         "number_of_url_template_references": 0,
+    #         "percent_of_content_references_with_a_hash": 100,
+    #         "references": [
+    #             {
+    #                 "bare_url_template_found": False,
+    #                 "citation_template_found": False,
+    #                 "citeq_template_found": False,
+    #                 "cs1_template_found": True,
+    #                 "is_citation_reference": True,
+    #                 "is_general_reference": False,
+    #                 "is_named_reference": False,
+    #                 "isbn_template_found": False,
+    #                 "multiple_templates_found": False,
+    #                 "plain_text_in_reference": False,
+    #                 "url_template_found": False,
+    #                 "wikitext": '<ref name="INE">{{cite web | url= '
+    #                 "http://www.ine.cl/canales/chile_estadistico/"
+    #                 "censos_poblacion_vivienda/censo_pobl_vivi.php "
+    #                 "| title= Censo de Población y Vivienda 2002 | "
+    #                 "work= [[National Statistics Institute "
+    #                 "(Chile)|National Statistics Institute]] | "
+    #                 "access-date= 1 May 2010 | url-status=live | "
+    #                 "archive-url= "
+    #                 "https://web.archive.org/web/20100715195638/"
+    #                 "http://www.ine.cl/canales/chile_estadistico/"
+    #                 "censos_poblacion_vivienda/censo_pobl_vivi.php "
+    #                 "| archive-date= 15 July 2010}}</ref>",
+    #             },
+    #             {
+    #                 "bare_url_template_found": False,
+    #                 "citation_template_found": False,
+    #                 "citeq_template_found": False,
+    #                 "cs1_template_found": True,
+    #                 "is_citation_reference": True,
+    #                 "is_general_reference": False,
+    #                 "is_named_reference": False,
+    #                 "isbn_template_found": False,
+    #                 "multiple_templates_found": False,
+    #                 "plain_text_in_reference": False,
+    #                 "url_template_found": False,
+    #                 "wikitext": "<ref>{{cite web |language= es |url= "
+    #                 "https://resultados.censo2017.cl/Home/Download "
+    #                 "|title= Censo 2017 |work= [[National Statistics "
+    #                 "Institute (Chile)|National Statistics "
+    #                 "Institute]] |access-date= 11 May 2018 "
+    #                 "|archive-url= "
+    #                 "https://web.archive.org/web/20180511145942/"
+    #                 "https://resultados.censo2017.cl/Home/Download "
+    #                 "|archive-date= 11 May 2018 |url-status=dead "
+    #                 "}}</ref>",
+    #             },
+    #             {
+    #                 "bare_url_template_found": False,
+    #                 "citation_template_found": False,
+    #                 "citeq_template_found": False,
+    #                 "cs1_template_found": False,
+    #                 "is_citation_reference": True,
+    #                 "is_general_reference": False,
+    #                 "is_named_reference": True,
+    #                 "isbn_template_found": False,
+    #                 "multiple_templates_found": False,
+    #                 "plain_text_in_reference": False,
+    #                 "url_template_found": False,
+    #                 "wikitext": '<ref name="INE"/>',
+    #             },
+    #         ],
+    #     }
 
     def test_get_statistics_valid_article_test(self):
         wa = WikipediaAnalyzer(job=Job(title="Test"), wikitext=test_full_article)
@@ -153,7 +154,6 @@ class TestWikipediaAnalyzer(TestCase):
             number_of_isbn_template_references=0,
             number_of_multiple_template_references=0,
             number_of_named_references=0,
-            number_of_references_with_a_supported_template=0,
             number_of_url_template_references=0,
             percent_of_content_references_with_a_hash=0,
             references=[

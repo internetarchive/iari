@@ -91,7 +91,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=easter_island_head_excerpt, wikibase=wikibase
         )
         wre.extract_all_references()
-        assert wre.number_of_references_with_a_supported_template == 2
+        assert wre.number_of_content_references_with_any_supported_template == 2
 
     def test_number_of_cs1_references(self):
         wre = WikipediaReferenceExtractor(
@@ -148,7 +148,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_raw_references == 22
         assert wre.number_of_general_references == 22
         assert wre.number_of_content_reference_with_at_least_one_template == 22
-        assert wre.number_of_references_with_a_supported_template == 21
+        assert wre.number_of_content_references_with_any_supported_template == 21
         assert wre.number_of_cs1_references == 21
         assert wre.number_of_citation_template_references == 0
         assert wre.number_of_citeq_references == 0

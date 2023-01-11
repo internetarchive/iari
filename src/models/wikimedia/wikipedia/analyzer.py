@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class WikipediaAnalyzer(WcdBaseModel):
+    """This model contain all the logic for getting the
+    statistics and mapping them to the API output model"""
+
     job: Job
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
@@ -32,22 +35,25 @@ class WikipediaAnalyzer(WcdBaseModel):
                 number_of_citation_references=self.article.extractor.number_of_citation_references,
                 number_of_citation_template_references=self.article.extractor.number_of_citation_template_references,
                 number_of_citeq_references=self.article.extractor.number_of_citeq_references,
+                number_of_content_references=self.article.extractor.number_of_content_references,
+                number_of_content_references_with_a_supported_template_we_prefer=(
+                    self.article.extractor.number_of_content_references_with_a_supported_template_we_prefer
+                ),
+                number_of_content_references_with_any_supported_template=(
+                    self.article.extractor.number_of_content_references_with_any_supported_template
+                ),
                 number_of_content_reference_with_at_least_one_template=(
                     self.article.extractor.number_of_content_reference_with_at_least_one_template
                 ),
                 number_of_content_reference_with_no_templates=(
                     self.article.extractor.number_of_content_reference_with_no_templates
                 ),
-                number_of_content_references=self.article.extractor.number_of_content_references,
                 number_of_cs1_references=self.article.extractor.number_of_cs1_references,
                 number_of_general_references=self.article.extractor.number_of_general_references,
                 number_of_hashed_content_references=self.article.extractor.number_of_hashed_content_references,
                 number_of_isbn_template_references=self.article.extractor.number_of_isbn_template_references,
                 number_of_multiple_template_references=self.article.extractor.number_of_multiple_template_references,
                 number_of_named_references=self.article.extractor.number_of_named_references,
-                number_of_references_with_a_supported_template=(
-                    self.article.extractor.number_of_references_with_a_supported_template
-                ),
                 number_of_url_template_references=self.article.extractor.number_of_url_template_references,
                 percent_of_content_references_with_a_hash=(
                     self.article.extractor.percent_of_content_references_with_a_hash
