@@ -40,7 +40,16 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
-    def number_of_url_template_references(self):
+    def percent_of_content_references_without_a_template(self) -> int:
+        if self.number_of_content_references == 0:
+            return 0
+        return int(
+            (self.number_of_content_reference_without_a_template * 100)
+            / self.number_of_content_references
+        )
+
+    @property
+    def number_of_url_template_references(self) -> int:
         return len(self.url_template_references)
 
     @property
@@ -52,7 +61,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_sections_found(self):
+    def number_of_sections_found(self) -> int:
         if not self.sections:
             self.__extract_sections__()
         return len(self.sections)
@@ -66,7 +75,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_general_references(self):
+    def number_of_general_references(self) -> int:
         return len(self.general_references)
 
     @property
@@ -116,7 +125,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_content_reference_with_no_templates(self):
+    def number_of_content_reference_without_a_template(self) -> int:
         return len(self.content_references_without_templates)
 
     @property
@@ -128,7 +137,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_content_reference_with_at_least_one_template(self):
+    def number_of_content_reference_with_at_least_one_template(self) -> int:
         return len(self.content_references_with_at_least_one_template)
 
     @property
@@ -140,7 +149,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_cs1_references(self):
+    def number_of_cs1_references(self) -> int:
         return len(self.cs1_references)
 
     @property
@@ -152,7 +161,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_citation_references(self):
+    def number_of_citation_references(self) -> int:
         return len(self.citation_references)
 
     @property
@@ -164,7 +173,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_citation_template_references(self):
+    def number_of_citation_template_references(self) -> int:
         return len(self.citation_template_references)
 
     @property
@@ -176,7 +185,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_bare_url_references(self):
+    def number_of_bare_url_references(self) -> int:
         return len(self.bare_url_references)
 
     @property
@@ -188,7 +197,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_citeq_references(self):
+    def number_of_citeq_references(self) -> int:
         return len(self.citeq_references)
 
     @property
@@ -200,7 +209,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_isbn_template_references(self):
+    def number_of_isbn_template_references(self) -> int:
         return len(self.isbn_template_references)
 
     @property
@@ -212,7 +221,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_multiple_template_references(self):
+    def number_of_multiple_template_references(self) -> int:
         return len(self.multiple_template_references)
 
     @property
@@ -226,7 +235,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_empty_named_references(self):
+    def number_of_empty_named_references(self) -> int:
         return len(self.empty_named_references)
 
     @property
@@ -239,7 +248,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_content_references(self):
+    def number_of_content_references(self) -> int:
         return len(self.content_references)
 
     @property
@@ -251,17 +260,13 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(self.references)
 
     @property
-    def number_of_hashed_content_references(self):
+    def number_of_hashed_content_references(self) -> int:
         return len(
-            [
-                reference
-                for reference in self.content_references
-                if reference.md5hash is not None
-            ]
+            [reference for reference in self.content_references if reference.md5hash]
         )
 
     @property
-    def percent_of_content_references_with_a_hash(self):
+    def percent_of_content_references_with_a_hash(self) -> int:
         if self.number_of_content_references == 0:
             return 0
         else:

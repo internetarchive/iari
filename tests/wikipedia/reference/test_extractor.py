@@ -153,6 +153,46 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_citation_template_references == 0
         assert wre.number_of_citeq_references == 0
         assert wre.number_of_url_template_references == 0
-        assert wre.number_of_content_reference_with_no_templates == 0
+        assert wre.number_of_content_reference_without_a_template == 0
         assert wre.number_of_citation_references == 0
-        assert wre.number_of_hashed_content_references == 22
+        assert wre.number_of_hashed_content_references == 18
+
+    def test_percent_of_content_references_without_a_template_0(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
+        )
+        wre.extract_all_references()
+        assert wre.number_of_content_reference_without_a_template == 0
+        assert wre.percent_of_content_references_without_a_template == 0
+
+    def test_percent_of_content_references_without_a_template_100(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>test reference without a template</ref>",
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_content_reference_without_a_template == 1
+        assert wre.percent_of_content_references_without_a_template == 100
+
+    def test_percent_of_content_references_with_a_hash_0(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>{{cite book|first=test|last=tester|title=test}}</ref>",
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_content_references == 1
+        assert wre.number_of_hashed_content_references == 0
+        assert wre.percent_of_content_references_with_a_hash == 0
+
+    def test_percent_of_content_references_with_a_hash_100(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>{{cite book|first=test|last=tester|title=test|isbn=1234}}</ref>",
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_content_references == 1
+        assert wre.number_of_hashed_content_references == 1
+        assert wre.percent_of_content_references_with_a_hash == 100

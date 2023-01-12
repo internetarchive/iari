@@ -146,7 +146,7 @@ class TestWikipediaAnalyzer(TestCase):
             number_of_citation_template_references=0,
             number_of_citeq_references=0,
             number_of_content_reference_with_at_least_one_template=0,
-            number_of_content_reference_with_no_templates=0,
+            number_of_content_reference_without_a_template=0,
             number_of_content_references=0,
             number_of_cs1_references=0,
             number_of_general_references=0,
