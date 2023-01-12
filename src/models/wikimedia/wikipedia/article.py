@@ -81,7 +81,7 @@ class WikipediaArticle(WcdItem):
             return f"{self.wikibase.wikibase_url}wiki/{self.return_.item_qid}"
 
     def __generate_hash__(self):
-        hashing = Hashing(article=self)
+        hashing = Hashing(article=self, testing=True)
         self.md5hash = hashing.generate_article_hash()
 
     def __calculate_hashed_template_distribution__(self):
@@ -109,6 +109,7 @@ class WikipediaArticle(WcdItem):
                 wikitext=self.wikitext, wikibase=self.wikibase
             )
             self.extractor.extract_all_references()
+            self.__generate_hash__()
         else:
             logger.error("This branch should never be hit.")
 
