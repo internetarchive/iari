@@ -253,11 +253,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def number_of_hashed_content_references(self):
         return len(
-            [
-                reference
-                for reference in self.content_references
-                if reference.md5hash is not None
-            ]
+            [reference for reference in self.content_references if reference.md5hash]
         )
 
     @property
