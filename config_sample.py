@@ -18,22 +18,12 @@ rabbitmq_password = "bitnami"
 # Settings:
 cache_host: str = "127.0.0.1"
 cache_port: int = 8888
-compare_references = False
 assume_persons_without_role_are_authors = True
 debug_unsupported_templates = False
 include_url_in_hash_algorithm = True
 loglevel = logging.ERROR
-press_enter_to_continue = False
-user_agent = "wcdimportbot 2.0.0-alpha3"
-sparql_sync_waiting_time_in_seconds = 5
-check_if_page_has_been_uploaded_via_sparql = True
+user_agent = "wcdimportbot"
 print_debug_json = False
-article_update_delay_in_minutes = 24 * 60  # 24 hours
-reference_update_delay_in_minutes = 96 * 60  # 96 hours
-title_allow_list = [
-    "Easter island",
-]
-max_events_during_testing = 10
 use_sandbox_wikibase_backend_for_wikicitations_api = True
 
 # Supported templates
