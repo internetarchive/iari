@@ -1,4 +1,3 @@
-import hashlib
 import logging
 from datetime import datetime
 from typing import Optional
@@ -10,6 +9,7 @@ from pydantic import validate_arguments
 
 import config
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+from src.models.hashing import Hashing
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.reference.extractor import (
@@ -80,60 +80,14 @@ class WikipediaArticle(WcdItem):
         else:
             return f"{self.wikibase.wikibase_url}wiki/{self.return_.item_qid}"
 
+    def __generate_hash__(self):
+        hashing = Hashing(article=self, testing=True)
+        self.md5hash = hashing.generate_article_hash()
+
     def __calculate_hashed_template_distribution__(self):
         raise NotImplementedError("To be written")
 
-    # def __compare_and_update_all_references__(self) -> None:
-    #     """Compare and update all the references.
-    #     We assume all references have already been uploaded to Wikibase"""
-    #     logger.debug("__compare_and_update_all_references__: Running")
-    #     if not self.references:
-    #         console.print("No references found. Skipping comparison of references")
-    #         # raise MissingInformationError("self.references was empty or None")
-    #     else:
-    #         self.__setup_wikibase_crud_update__(wikipedia_article=self)
-    #         if self.wikibase_crud_update:
-    #             count = 0
-    #             total = len(self.references)
-    #             for reference in self.references:
-    #                 """We go through each reference that has a hash
-    #                 and compare it to the existing one in Wikibase"""
-    #                 if reference.has_hash:
-    #                     if not reference.return_:
-    #                         logger.debug(f"reference: {reference}")
-    #                         raise MissingInformationError(
-    #                             "reference.return_ was None and is needed "
-    #                             f"to judge whether to compare or not"
-    #                         )
-    #                     count += 1
-    #                     console.print(
-    #                         f"Comparing reference {count}/{total} on page '{self.title}'"
-    #                     )
-    #                     self.wikibase_crud_update.compare_and_update_claims(
-    #                         entity=reference
-    #                     )
-    #         else:
-    #             raise WikibaseError()
-    #
-    # def __compare_and_update_page__(self):
-    #     logger.debug("__compare_and_update_page__: Running")
-    #     console.print(f"Comparing the page '{self.title}'")
-    #     if not self.return_:
-    #         raise MissingInformationError(
-    #             "self.return_ was None and is needed "
-    #             "to judge whether to compare or not"
-    #         )
-    #     self.__setup_wikibase_crud_update__(wikipedia_article=self)
-    #     self.wikibase_crud_update.compare_and_update_claims(entity=self)
-    #
-    # def __compare_data_and_update__(self):
-    #     """We compare and update all references and the page data"""
-    #     logger.debug("__compare_data_and_update__: Running")
-    #     if config.compare_references:
-    #         self.__compare_and_update_all_references__()
-    #     self.__compare_and_update_page__()
-
-    def fetch_and_extract_and_parse_references(self):
+    def fetch_and_extract_and_parse_and_generate_hash(self):
         logger.info("Extracting templates and parsing the references now")
         # We only fetch data from Wikipedia if we don't already have wikitext to work on
         if not self.wikitext:
@@ -155,15 +109,7 @@ class WikipediaArticle(WcdItem):
                 wikitext=self.wikitext, wikibase=self.wikibase
             )
             self.extractor.extract_all_references()
-            # Disabled because we only analyze currently
-            # if self.extractor and self.extractor.number_of_references > 500:
-            #     console.print(
-            #         "Cannot import this article because it has more than 500 references. "
-            #         "See https://github.com/internetarchive/wcdimportbot/issues/358 for details"
-            #     )
-            # else:
-            # self.__parse_templates__()
-            # self.__print_hash_statistics__()
+            self.__generate_hash__()
         else:
             logger.error("This branch should never be hit.")
 
@@ -256,47 +202,6 @@ class WikipediaArticle(WcdItem):
                     f"Did not get any query from MediaWiki, see {url}"
                 )
             logger.info(f"Found Wikidata QID: {self.wikidata_qid}")
-
-    def __generate_hash__(self):
-        """We generate a md5 hash of the page_reference as a unique identifier for any given page_reference in a
-        Wikipedia page
-        We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
-        # TODO move this to Hashing
-        logger.debug(
-            f"Generating hash based on: "
-            f"{self.wikibase.title}{self.language_code}{self.page_id}"
-        )
-        if not self.page_id:
-            raise MissingInformationError("self.page_id was None")
-        self.md5hash = hashlib.md5(
-            f"{self.wikibase.title}{self.language_code}{self.page_id}".encode()
-        ).hexdigest()
-        logger.debug(self.md5hash)
-
-    # @validate_arguments
-    # def __get_wikipedia_article_from_title__(self):
-    #     """Get the page from the Wikimedia site"""
-    #     logger.info("Fetching the page data")
-    #     self.__fetch_page_data__()
-
-    # def __page_has_already_been_uploaded__(self) -> bool:
-    #     """This checks whether the page has already been uploaded by checking the cache"""
-    #     console.print(f"Checking if the page '{self.title}' has already been uploaded")
-    #     if not self.cache:
-    #         raise ValueError("self.cache was None")
-    #     else:
-    #         cache_return = self.cache.check_page_and_get_wikibase_qid(
-    #             wikipedia_article=self
-    #         )
-    #     if not cache_return.item_qid:
-    #         logger.debug("Page not found in the cache")
-    #         return False
-    #     else:
-    #         logger.debug("Page found in the cache")
-    #         self.return_ = WikibaseReturn(
-    #             item_qid=cache_return.item_qid, uploaded_now=False
-    #         )
-    #         return True
 
     def __parse_templates__(self):
         """Disabled method because of rewrite"""

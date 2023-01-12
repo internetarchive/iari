@@ -18,7 +18,7 @@ class TestWikipediaAnalyzer(TestCase):
         )
         wa.__populate_article__()
         # fixme This uses internet access
-        wa.article.fetch_and_extract_and_parse_references()
+        wa.article.fetch_and_extract_and_parse_and_generate_hash()
         assert wa.article.found_in_wikipedia is True
 
     # DISABLED because it completely overlaps with a test in test_get_article_statistics.py

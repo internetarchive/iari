@@ -394,19 +394,20 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         reference.finish_parsing_and_generate_hash(testing=True)
         assert reference.oclc == "test"
 
-    def test_has_first_level_domain_url_hash_and_has_hash(self):
-        data = dict(
-            oclc="test",
-            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
-            template_name="cite book",
-        )
-        reference = EnglishWikipediaReference(**data)
-        assert reference.has_first_level_domain_url_hash is False
-        assert reference.has_hash is False
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash(testing=True)
-        assert reference.has_first_level_domain_url_hash is True
-        assert reference.has_hash is True
+    # Disabled because we don't generate tld fld hash right now
+    # def test_has_first_level_domain_url_hash_and_has_hash(self):
+    #     data = dict(
+    #         oclc="test",
+    #         url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+    #         template_name="cite book",
+    #     )
+    #     reference = EnglishWikipediaReference(**data)
+    #     assert reference.has_first_level_domain_url_hash is False
+    #     assert reference.has_hash is False
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
+    #     assert reference.has_first_level_domain_url_hash is True
+    #     assert reference.has_hash is True
 
     def test_template_url(self):
         raw_template = "{{citeq|Q1}}"

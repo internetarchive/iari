@@ -1,4 +1,3 @@
-import hashlib
 import logging
 import re
 from datetime import datetime, timezone
@@ -9,13 +8,13 @@ from pydantic import validate_arguments, validator
 from tld import get_fld
 from tld.exceptions import TldBadUrl
 
-import config
 from src import WikimediaSite
 from src.models.exceptions import (
     AmbiguousDateError,
     MissingInformationError,
     MoreThanOneNumberError,
 )
+from src.models.hashing import Hashing
 from src.models.person import Person
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.enums import (
@@ -586,11 +585,13 @@ class WikipediaReference(WcdItem):
 
     def __generate_first_level_domain_hash__(self):
         """This is used as hash for all website items"""
-        if self.first_level_domain_of_url is not None:
-            str2hash = self.first_level_domain_of_url
-            self.first_level_domain_of_url_hash = hashlib.md5(
-                f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
-            ).hexdigest()
+        pass
+        # Disabled because we don't generate any website items right now
+        # if self.first_level_domain_of_url is not None:
+        #     str2hash = self.first_level_domain_of_url
+        #     self.first_level_domain_of_url_hash = hashlib.md5(
+        #         f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
+        #     ).hexdigest()
 
     def __generate_hashes__(self):
         """Generate hashes for both website and reference items"""
@@ -600,131 +601,8 @@ class WikipediaReference(WcdItem):
         self.__generate_first_level_domain_hash__()
 
     def __generate_reference_hash__(self):
-        """We generate a md5 hash of the page_reference as a unique
-        identifier for any given page_reference in a Wikipedia page
-        We choose md5 because it is fast https://www.geeksforgeeks.org/difference-between-md5-and-sha1/"""
-        str2hash = ""
-        # TODO decide if we really trust doi to be unique.
-        #  See https://www.wikidata.org/wiki/Property_talk:P356
-        if self.wikidata_qid:
-            # This is the external id we trust the most.
-            str2hash = self.wikidata_qid
-        elif self.doi:
-            # In WD there are as of 2022-07-11 25k violations here.
-            # Most are due to bad data at PubMed
-            # see https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations/P356#Unique_value
-            # and https://twitter.com/DennisPriskorn/status/1546475347851591680
-            str2hash = self.doi
-        elif self.pmid:
-            str2hash = self.pmid
-        elif self.isbn:
-            # We strip the dashes before hashing
-            str2hash = self.isbn.replace("-", "")
-        # TODO decide if we really trust oclc to be unique
-        # See https://www.wikidata.org/wiki/Property_talk:P243
-        elif self.oclc:
-            str2hash = self.oclc
-        elif self.url:
-            if config.include_url_in_hash_algorithm:
-                str2hash = self.url
-        # elif self.first_parameter:
-        #     if config.include_url_in_hash_algorithm:
-        #         str2hash = self.first_parameter
-
-        # DISABLED template specific hashing for now because it is error
-        # prone and does not make it easy to avoid duplicates
-        # For example a news article might be cited with the publication date in one place but not in another.
-        # If we include the publication date in the hash we will end up with a duplicate in Wikibase.
-        # if self.template_name == "cite av media":
-        #     """{{cite AV media |people= |date= |title= |trans-title= |type=
-        #     |language= |url= |access-date= |archive-url= |archive-date=
-        #     |format= |time= |location= |publisher= |id= |isbn= |oclc= |quote= |ref=}}"""
-        #     # https://en.wikipedia.org/wiki/Template:Cite_AV_media
-        #     if self.doi is None:
-        #         if self.isbn is None:
-        #             str2hash = self.__hash_based_on_title_and_date__()
-        #         else:
-        #             str2hash = self.isbn
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite book":
-        #     if self.isbn is None:
-        #         str2hash = self.__hash_based_on_title_and_publisher_and_date__()
-        #     else:
-        #         str2hash = self.isbn
-        # elif self.template_name == "cite journal":
-        #     if self.doi is None:
-        #         # Fallback first to PMID
-        #         if self.pmid is None:
-        #             str2hash = self.__hash_based_on_title_and_date__()
-        #         else:
-        #             str2hash = self.pmid
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite magazine":
-        #     """{{cite magazine |last= |first= |date= |title= |url=
-        #     |magazine= |location= |publisher= |access-date=}}"""
-        #     if self.doi is None:
-        #         #  clean URL first?
-        #         if (self.title) is not None:
-        #             str2hash = self.title + self.isodate
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite news":
-        #     if self.doi is None:
-        #         #  clean URL first?
-        #         if (self.title) is not None:
-        #             str2hash = self.title + self.isodate
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "cite web":
-        #     if self.doi is None:
-        #         # Many of these references lead to pages without any publication
-        #         # dates unfortunately. e.g. https://www.billboard.com/artist/chk-chk-chk-2/chart-history/tlp/
-        #         #  clean URL first?
-        #         if self.url is not None:
-        #             str2hash = self.url
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # elif self.template_name == "url":
-        #     """Example:{{url|chkchkchk.net}}"""
-        #     if self.doi is None:
-        #         #  clean URL first?
-        #         if self.first_parameter is not None:
-        #             str2hash = self.first_parameter
-        #         else:
-        #             raise ValueError(
-        #                 f"did not get what we need to generate a hash, {self.dict()}"
-        #             )
-        #     else:
-        #         str2hash = self.doi
-        # else:
-        #     # Do we want a generic fallback?
-        #     pass
-        if str2hash:
-            self.md5hash = hashlib.md5(
-                f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
-            ).hexdigest()
-            logger.debug(self.md5hash)
-        else:
-            self.md5hash = ""
-            logger.warning(
-                f"hashing not possible for this instance of {self.first_template_name} "
-                f"because no identifier or url or first parameter was found "
-                f"or they were turned of in config.py."
-            )
+        hashing = Hashing(reference=self)
+        self.md5hash = hashing.generate_reference_hash()
 
     @validate_arguments
     def __get_first_level_domain__(self, url: str) -> Optional[str]:
