@@ -195,7 +195,7 @@ class TestWikipediaArticle(TestCase):
         wp.wikitext = easter_island_head_excerpt
         wp.fetch_and_extract_and_parse_references()
         assert wp.extractor.number_of_references == 3
-        assert wp.extractor.number_of_named_references == 1
+        assert wp.extractor.number_of_empty_named_references == 1
         assert wp.extractor.number_of_content_references == 2
         assert wp.extractor.content_references[0].raw_reference.number_of_templates == 1
         assert wp.extractor.content_references[0].raw_reference.templates[

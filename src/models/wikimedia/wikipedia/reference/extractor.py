@@ -216,7 +216,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(self.multiple_template_references)
 
     @property
-    def named_references(self):
+    def empty_named_references(self):
         """Special type of reference with no content
         Example: <ref name="INE"/>"""
         return [
@@ -226,8 +226,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_named_references(self):
-        return len(self.named_references)
+    def number_of_empty_named_references(self):
+        return len(self.empty_named_references)
 
     @property
     def content_references(self):
