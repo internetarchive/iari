@@ -29,7 +29,6 @@ class WikipediaRawReference(WcdBaseModel):
     This contains code from pywikibot 7.2.0 textlib.py to avoid forking the whole thing
     """
 
-    # TODO rewrite to accept Tag or Wikicode
     wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
     templates: List[WikipediaTemplate] = []
     multiple_templates_found: bool = False
