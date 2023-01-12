@@ -196,3 +196,16 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_content_references == 1
         assert wre.number_of_hashed_content_references == 1
         assert wre.percent_of_content_references_with_a_hash == 100
+
+    def test_isbn_template(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>{{isbn|1234}}</ref>",
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_content_references == 1
+        assert wre.number_of_isbn_template_references == 1
+        assert wre.number_of_hashed_content_references == 1
+        assert wre.percent_of_content_references_with_a_hash == 100
+        assert wre.content_references[0].isbn == "1234"
