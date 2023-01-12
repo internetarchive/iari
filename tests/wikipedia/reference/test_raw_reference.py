@@ -309,7 +309,7 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
         )
         raw_reference_object.extract_and_determine_reference_type()
-        assert raw_reference_object.google_books_url_found is True
+        assert raw_reference_object.google_books_url_or_template_found is True
 
     def test_google_books_url_false(self):
         wikitext = (
@@ -325,4 +325,36 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
         )
         raw_reference_object.extract_and_determine_reference_type()
-        assert raw_reference_object.archive_org_slash_details_in_reference is False
+        assert raw_reference_object.google_books_url_or_template_found is False
+
+    def test_google_books_template_found_true(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+            "|url={{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.google_books_template_found is True
+
+    def test_google_books_template_found_false(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+            "|url=https://www1.geocities.com/}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.google_books_template_found is False
