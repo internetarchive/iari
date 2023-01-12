@@ -32,13 +32,6 @@ class WikipediaRawReference(WcdBaseModel):
     # TODO rewrite to accept Tag or Wikicode
     wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
     templates: List[WikipediaTemplate] = []
-    plain_text_in_reference: bool = False
-    citation_template_found: bool = False
-    cs1_template_found: bool = False
-    citeq_template_found: bool = False
-    isbn_template_found: bool = False
-    url_template_found: bool = False
-    bare_url_template_found: bool = False
     multiple_templates_found: bool = False
     testing: bool = False
     wikibase: Wikibase
@@ -50,6 +43,61 @@ class WikipediaRawReference(WcdBaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def plain_text_in_reference(self) -> bool:
+        # Try removing everything that is inside template markup and see if anything is left
+        if isinstance(self.wikicode, Tag):
+            stripped_wikicode = self.wikicode.contents.strip_code().strip()
+        else:
+            stripped_wikicode = self.wikicode.strip_code().strip()
+        logger.debug(f"Stripped wikicode: '{stripped_wikicode}'")
+        if len(stripped_wikicode) == 0:
+            return False
+        else:
+            return True
+
+    @property
+    def citation_template_found(self) -> bool:
+        for template in self.templates:
+            if template.name in config.citation_template:
+                return True
+        return False
+
+    @property
+    def cs1_template_found(self) -> bool:
+        for template in self.templates:
+            if template.name in config.cs1_templates:
+                return True
+        return False
+
+    @property
+    def citeq_template_found(self) -> bool:
+        for template in self.templates:
+            if template.name in config.citeq_templates:
+                return True
+        return False
+
+    @property
+    def isbn_template_found(self) -> bool:
+        for template in self.templates:
+            if template.name in config.isbn_template:
+                return True
+        return False
+
+    @property
+    def url_template_found(self) -> bool:
+        for template in self.templates:
+            if template.name in config.url_template:
+                return True
+        return False
+
+    @property
+    def bare_url_template_found(self) -> bool:
+        for template in self.templates:
+            if config.bare_url_regex in template.name:
+                return True
+        return False
 
     @property
     def is_citation_reference(self):
@@ -122,7 +170,7 @@ class WikipediaRawReference(WcdBaseModel):
     def extract_and_determine_reference_type(self) -> None:
         """Helper method"""
         self.__extract_templates_and_parameters_from_raw_reference__()
-        self.__determine_reference_type__()
+        self.__determine_if_multiple_templates__()
         self.extraction_done = True
 
     def get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
@@ -143,7 +191,7 @@ class WikipediaRawReference(WcdBaseModel):
         reference.finish_parsing_and_generate_hash(testing=self.testing)
         return reference
 
-    def __determine_reference_type__(self):
+    def __determine_if_multiple_templates__(self):
         """We want to determine which type of reference this is
 
         Design limit: we only support one template for now"""
@@ -151,37 +199,7 @@ class WikipediaRawReference(WcdBaseModel):
             logger.info(
                 f"Found {self.number_of_templates} template(s) in {self.wikicode}"
             )
-            if self.number_of_templates == 1:
-                if self.__detect_any_plain_text__():
-                    # We have a clean template reference like {{citeq|Q1}}
-                    self.plain_text_in_reference = False
-                else:
-                    self.plain_text_in_reference = True
-                if self.__detect_citation_template__():
-                    self.citation_template_found = True
-                else:
-                    self.citation_template_found = False
-                if self.__detect_cs1_template__():
-                    self.cs1_template_found = True
-                else:
-                    self.cs1_template_found = False
-                if self.__detect_citeq_template__():
-                    self.citeq_template_found = True
-                else:
-                    self.citeq_template_found = False
-                if self.__detect_isbn_template__():
-                    self.isbn_template_found = True
-                else:
-                    self.isbn_template_found = False
-                if self.__detect_url_template__():
-                    self.url_template_found = True
-                else:
-                    self.url_template_found = False
-                if self.__detect_bare_url_template__():
-                    self.bare_url_template_found = True
-                else:
-                    self.bare_url_template_found = False
-            else:
+            if self.number_of_templates > 1:
                 self.multiple_templates_found = True
                 message = (
                     f"We found {self.number_of_templates} templates in "
@@ -191,50 +209,3 @@ class WikipediaRawReference(WcdBaseModel):
                 self.__log_to_file__(
                     message=message, file_name="multiple_template_error.log"
                 )
-
-    def __detect_any_plain_text__(self) -> bool:
-        """A clean template reference has no text outside the {{ and }}"""
-        if not self.templates[0].raw_template:
-            raise MissingInformationError("self.templates[0].raw_template was None")
-        if str(self.templates[0].raw_template).startswith("{{") and self.templates[
-            0
-        ].raw_template.endswith("}}"):
-            return True
-        else:
-            return False
-
-    def __detect_citation_template__(self) -> bool:
-        if self.templates[0].name in config.citation_template:
-            return True
-        else:
-            return False
-
-    def __detect_cs1_template__(self) -> bool:
-        if self.templates[0].name in config.cs1_templates:
-            return True
-        else:
-            return False
-
-    def __detect_citeq_template__(self):
-        if self.templates[0].name in config.citeq_templates:
-            return True
-        else:
-            return False
-
-    def __detect_isbn_template__(self):
-        if self.templates[0].name in config.isbn_template:
-            return True
-        else:
-            return False
-
-    def __detect_url_template__(self):
-        if self.templates[0].name in config.url_template:
-            return True
-        else:
-            return False
-
-    def __detect_bare_url_template__(self):
-        if config.bare_url_regex in self.templates[0].name:
-            return True
-        else:
-            return False

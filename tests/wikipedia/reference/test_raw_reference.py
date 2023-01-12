@@ -185,3 +185,48 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object.extract_and_determine_reference_type()
         assert raw_reference_object.is_general_reference is True
         assert raw_reference_object.cs1_template_found is True
+
+    def test__plain_text_detected_before(self):
+        wikitext = (
+            "test{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.plain_text_in_reference is True
+
+    def test__plain_text_detected_after(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}test"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.plain_text_in_reference is True
+
+    def test__plain_text_detected_no(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.plain_text_in_reference is False
