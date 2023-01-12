@@ -153,7 +153,7 @@ class TestWikipediaAnalyzer(TestCase):
             number_of_hashed_content_references=0,
             number_of_isbn_template_references=0,
             number_of_multiple_template_references=0,
-            number_of_named_references=0,
+            number_of_empty_named_references=0,
             number_of_url_template_references=0,
             percent_of_content_references_with_a_hash=0,
             references=[
