@@ -230,3 +230,35 @@ class TestWikipediaRawReference(TestCase):
         )
         raw_reference_object.extract_and_determine_reference_type()
         assert raw_reference_object.plain_text_in_reference is False
+
+    def test_wayback_url_true(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+            "|url=http://web.archive.org/web/19970222174751/https://www1.geocities.com/}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.web_archive_org_in_reference is True
+
+    def test_wayback_url_false(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+            "|url=https://www1.geocities.com/}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.web_archive_org_in_reference is False
