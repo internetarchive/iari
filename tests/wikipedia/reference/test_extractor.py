@@ -71,7 +71,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre2.extract_all_references()
         assert wre2.number_of_references == 2
         assert wre2.number_of_content_references == 1
-        assert wre2.number_of_named_references == 1
+        assert wre2.number_of_empty_named_references == 1
         assert wre2.references[0].first_template_name == "citeq"
         assert wre2.references[0].first_parameter == "Q1"
 
@@ -82,7 +82,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.number_of_references == 3
         assert wre.number_of_content_references == 2
-        assert wre.number_of_named_references == 1
+        assert wre.number_of_empty_named_references == 1
         assert wre.number_of_hashed_content_references == 2
         assert wre.percent_of_content_references_with_a_hash == 100
 

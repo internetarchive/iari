@@ -53,7 +53,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 number_of_hashed_content_references=self.article.extractor.number_of_hashed_content_references,
                 number_of_isbn_template_references=self.article.extractor.number_of_isbn_template_references,
                 number_of_multiple_template_references=self.article.extractor.number_of_multiple_template_references,
-                number_of_named_references=self.article.extractor.number_of_named_references,
+                number_of_empty_named_references=self.article.extractor.number_of_empty_named_references,
                 number_of_url_template_references=self.article.extractor.number_of_url_template_references,
                 percent_of_content_references_with_a_hash=(
                     self.article.extractor.percent_of_content_references_with_a_hash

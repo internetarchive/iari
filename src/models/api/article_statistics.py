@@ -62,7 +62,7 @@ class ArticleStatistics(BaseModel):
     number_of_multiple_template_references: int = 0
 
     # Type of reference which does not have any content and only refer to another <ref> using a name
-    number_of_named_references: int = 0
+    number_of_empty_named_references: int = 0
 
     # Type of template with no metadata https://en.wikipedia.org/wiki/Template:URL
     number_of_url_template_references: int = 0  # transcluded on 363k pages
