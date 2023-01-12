@@ -44,6 +44,23 @@ class WikipediaRawReference(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def google_books_template_found(self):
+        """Google books templates look like this:
+        {{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}"""
+        for template in self.templates:
+            if "google books" == template.name:
+                return True
+        return False
+
+    @property
+    def google_books_url_or_template_found(self):
+        """This detects both google book template and google books url"""
+        return bool(
+            bool("books.google.com" in self.get_wikicode_as_string)
+            or self.google_books_template_found
+        )
+
+    @property
     def web_archive_org_in_reference(self):
         return bool("web.archive.org" in self.get_wikicode_as_string)
 
