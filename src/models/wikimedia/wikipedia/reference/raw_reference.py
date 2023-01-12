@@ -48,6 +48,10 @@ class WikipediaRawReference(WcdBaseModel):
         return bool("web.archive.org" in self.get_wikicode_as_string)
 
     @property
+    def archive_org_slash_details_in_reference(self):
+        return bool("archive.org/details" in self.get_wikicode_as_string)
+
+    @property
     def plain_text_in_reference(self) -> bool:
         # Try removing everything that is inside template markup and see if anything is left
         if isinstance(self.wikicode, Tag):
