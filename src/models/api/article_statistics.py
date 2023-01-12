@@ -30,7 +30,7 @@ class ArticleStatistics(BaseModel):
 
     # Type of reference with no template,
     # these cannot easily be converted to structured information without human intervention
-    number_of_content_reference_with_no_templates: int = 0
+    number_of_content_reference_without_a_template: int = 0
 
     # Reference in- or outside a <ref> tag and with any content.
     number_of_content_references: int = 0
@@ -68,6 +68,7 @@ class ArticleStatistics(BaseModel):
     number_of_url_template_references: int = 0  # transcluded on 363k pages
 
     percent_of_content_references_with_a_hash: int = 0
+    percent_of_content_references_without_a_template: int = 0
     references: List[ReferenceStatistics] = []
     # TODO number_of_images
     # TODO number_of_words

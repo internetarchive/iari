@@ -145,7 +145,7 @@ class TestGetArticleStatistics(TestCase):
                 "number_of_citation_template_references": 0,
                 "number_of_citeq_references": 0,
                 "number_of_content_reference_with_at_least_one_template": 4,
-                "number_of_content_reference_with_no_templates": 0,
+                "number_of_content_reference_without_a_template": 0,
                 "number_of_content_references": 4,
                 "number_of_content_references_with_a_supported_template_we_prefer": 4,
                 "number_of_content_references_with_any_supported_template": 4,
@@ -157,6 +157,7 @@ class TestGetArticleStatistics(TestCase):
                 "number_of_empty_named_references": 1,
                 "number_of_url_template_references": 0,
                 "percent_of_content_references_with_a_hash": 100,
+                "percent_of_content_references_without_a_template": 0,
                 "references": [
                     {
                         "bare_url_template_found": False,
