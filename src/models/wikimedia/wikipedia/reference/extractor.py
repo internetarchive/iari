@@ -332,23 +332,6 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         self.__parse_templates_and_determine_type_on_raw_references__()
         self.__convert_raw_references_to_reference_objects__()
 
-    # def prepare_all_statistic(self):
-    #     # TODO figure out how to best store this data in the wikibase
-    #     self.__count_number_of_supported_templates_found__()
-    #
-    # def __count_number_of_supported_templates_found__(self):
-    #     if self.number_of_references:
-    #         self.number_of_references_with_a_template =
-    #         self.number_of_references_with_one_template =
-    #         self.number_of_references_with_multiple_templates =
-    #         self.number_of_references_with_a_supported_template =
-    #         self.number_of_references_with_one_supported_template =
-    #         self.number_of_references_with_plain_text_only =
-    #         self.number_of_references_with_a_bare_url_template =
-    #         self.number_of_references_with_a_isbn_template =
-    #         self.number_of_references_with_a_url_template =
-    #         self.number_of_references_with_a_bare_url_template =
-    #         self.number_of_references_with_a_bare_url_pdf_template =
     def __convert_raw_references_to_reference_objects__(self):
         logger.debug("__convert_raw_references_to_reference_objects__: running")
         self.references = [
