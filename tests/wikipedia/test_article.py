@@ -180,7 +180,7 @@ class TestWikipediaArticle(TestCase):
             title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
         )
         wp.wikitext = "<ref>{{citeq|1}}</ref>"
-        wp.fetch_and_extract_and_parse_references()
+        wp.fetch_and_extract_and_parse_and_generate_hash()
         assert len(wp.extractor.references) == 1
         assert (
             wp.extractor.references[0].raw_reference.templates[0].raw_template
@@ -193,7 +193,7 @@ class TestWikipediaArticle(TestCase):
 
         wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
         wp.wikitext = easter_island_head_excerpt
-        wp.fetch_and_extract_and_parse_references()
+        wp.fetch_and_extract_and_parse_and_generate_hash()
         assert wp.extractor.number_of_references == 3
         assert wp.extractor.number_of_empty_named_references == 1
         assert wp.extractor.number_of_content_references == 2
@@ -274,7 +274,7 @@ class TestWikipediaArticle(TestCase):
 
         wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
         wp.wikitext = wikitext
-        wp.fetch_and_extract_and_parse_references()
+        wp.fetch_and_extract_and_parse_and_generate_hash()
         assert wp.extractor.number_of_citation_references == 2
         assert wp.extractor.number_of_general_references == 22
         assert wp.extractor.number_of_content_references == 24

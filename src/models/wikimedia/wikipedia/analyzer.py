@@ -90,7 +90,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             if not self.article:
                 self.__populate_article__()
             if self.article:
-                self.article.fetch_and_extract_and_parse_references()
+                self.article.fetch_and_extract_and_parse_and_generate_hash()
 
     def __gather_reference_statistics__(self):
         logger.debug("__gather_reference_statistics__: running")
