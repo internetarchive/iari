@@ -44,6 +44,10 @@ class WikipediaRawReference(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def google_books_url_found(self):
+        return bool("books.google.com" in self.get_wikicode_as_string)
+
+    @property
     def web_archive_org_in_reference(self):
         return bool("web.archive.org" in self.get_wikicode_as_string)
 
