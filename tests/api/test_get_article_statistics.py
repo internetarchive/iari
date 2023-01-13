@@ -140,6 +140,12 @@ class TestGetArticleStatistics(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
+                "first_level_domain_counts": {
+                    "archive.org": 2,
+                    "auckland.ac.nz": 1,
+                    "censo2017.cl": 1,
+                    "ine.cl": 1,
+                },
                 "number_of_bare_url_references": 0,
                 "number_of_citation_references": 2,
                 "number_of_citation_template_references": 0,

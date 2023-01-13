@@ -238,7 +238,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             wikibase=wikibase,
         )
         wre.extract_all_references()
-        assert wre.first_level_domain_counts == [{"count": 2, "fld": "google.com"}]
+        assert wre.first_level_domain_counts == {"google.com": 2}
 
     def test_first_level_domain_counts_excerpt(self):
         wre = WikipediaReferenceExtractor(
