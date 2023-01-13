@@ -2,7 +2,7 @@
 Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Set, Union
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import Tag  # type: ignore
@@ -42,6 +42,17 @@ class WikipediaRawReference(WcdBaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def template_first_level_domains(self) -> Set[str]:
+        """This returns a set"""
+        if not self.templates:
+            return set()
+        template_first_level_domains = set()
+        for template in self.templates:
+            for fld in template.first_level_domains:
+                template_first_level_domains.add(fld)
+        return template_first_level_domains
 
     @property
     def google_books_template_found(self):

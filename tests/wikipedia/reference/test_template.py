@@ -91,3 +91,48 @@ class TestTemplate:
             # print(wt.parameters)
             assert wt.name == "citeq"
             assert wt.parameters["first_parameter"] == "Q1"
+
+    def test_urls(self):
+        """Test on template from the wild"""
+        data = (
+            '<ref name="INE">{{cite web '
+            "| url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php |"
+            " title= Censo de Población y Vivienda 2002 | work= [[National Statistics Institute (Chile)|National "
+            "Statistics Institute]] | access-date= 1 May 2010 | url-status=live "
+            "| archive-url= https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/"
+            "censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}</ref>"
+        )
+        templates = parse(data).ifilter_templates()
+        for template in templates:
+            wt = WikipediaTemplate(raw_template=template)
+            wt.extract_and_prepare_parameters()
+            assert wt.urls == {
+                "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+                "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+            }
+
+    def test_first_level_domains(self):
+        """Test on template from the wild"""
+        data = (
+            '<ref name="INE">{{cite web '
+            "| url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php "
+            "| chapter-url= http://www.test1.com"
+            "| conference-url= http://www.test2.com"
+            "| transcript-url= http://www.test3.com"
+            "|"
+            " title= Censo de Población y Vivienda 2002 | work= [[National Statistics Institute (Chile)|National "
+            "Statistics Institute]] | access-date= 1 May 2010 | url-status=live "
+            "| archive-url= https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/"
+            "censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}</ref>"
+        )
+        templates = parse(data).ifilter_templates()
+        for template in templates:
+            wt = WikipediaTemplate(raw_template=template)
+            wt.extract_and_prepare_parameters()
+            assert wt.first_level_domains == {
+                "test3.com",
+                "archive.org",
+                "test1.com",
+                "test2.com",
+                "ine.cl",
+            }

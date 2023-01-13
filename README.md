@@ -181,6 +181,9 @@ number of citation templates of different types, number of references outside <r
 
 # Diagrams
 
+## API output
+![image](diagrams/api_output.png)
+
 ## Components
 ![image](diagrams/components.png)
 

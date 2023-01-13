@@ -61,6 +61,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 percent_of_content_references_without_a_template=(
                     self.article.extractor.percent_of_content_references_without_a_template
                 ),
+                first_level_domain_counts=self.article.extractor.first_level_domain_counts,
             )
 
     def get_statistics(self):

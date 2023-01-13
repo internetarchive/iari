@@ -2,11 +2,8 @@ import logging
 import re
 from datetime import datetime, timezone
 from typing import Any, List, Optional
-from urllib.parse import urlparse
 
 from pydantic import validate_arguments, validator
-from tld import get_fld
-from tld.exceptions import TldBadUrl
 
 from src import WikimediaSite
 from src.models.exceptions import (
@@ -414,9 +411,9 @@ class WikipediaReference(WcdItem):
     lang: Optional[str]
     periodical: Optional[str]
 
-    @property
-    def has_first_level_domain_url_hash(self) -> bool:
-        return bool(self.first_level_domain_of_url_hash is not None)
+    # @property
+    # def has_first_level_domain_url_hash(self) -> bool:
+    #     return bool(self.first_level_domain_of_url_hash is not None)
 
     @property
     def has_hash(self) -> bool:
@@ -442,22 +439,27 @@ class WikipediaReference(WcdItem):
     def first_template_name(self) -> str:
         """Helper method. We use this information in the graph to know which
         template the information in the reference came from"""
+        # TODO this is brittle because the first template could be a url template
+        #  and the second an isbn template and then this fails to find the latter
+        # references could possibly even have multiple urls and isbns
+        # we should rewrite this to check if isbn_template was found and extract that etc.
         if self.raw_reference and self.raw_reference.number_of_templates:
             return str(self.raw_reference.templates[0].name)
         else:
             return ""
 
-    @property
-    def template_url(self) -> str:
-        return f"https://en.wikipedia.org/wiki/Template:{self.first_template_name}"
+    #
+    # @property
+    # def template_url(self) -> str:
+    #     return f"https://en.wikipedia.org/wiki/Template:{self.first_template_name}"
 
-    @property
-    def wikibase_url(self) -> str:
-        if not self.wikibase:
-            raise MissingInformationError("self.wikibase was None")
-        if not self.return_:
-            raise MissingInformationError("self.return_ was None")
-        return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
+    # @property
+    # def wikibase_url(self) -> str:
+    #     if not self.wikibase:
+    #         raise MissingInformationError("self.wikibase was None")
+    #     if not self.return_:
+    #         raise MissingInformationError("self.return_ was None")
+    #     return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
 
     # @validate_arguments
     # def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
@@ -479,6 +481,7 @@ class WikipediaReference(WcdItem):
     def __clean_wiki_markup_from_strings__(self):
         """We clean away [[ and ]]
         For now we only clean self.publisher"""
+        # TODO use mwparserfromhell strip_code instead
         if self.publisher:
             if "[[" in self.publisher and "|" not in self.publisher:
                 self.publisher = self.publisher.replace("[[", "").replace("]]", "")
@@ -489,41 +492,43 @@ class WikipediaReference(WcdItem):
                     self.publisher.replace("[[", "").replace("]]", "").split("|")[0]
                 )
 
-    def __detect_archive_urls__(self):
-        """Try to detect if self.url contains first level
-        domain from a known web archiver"""
-        logger.debug("__detect_archive_urls__: Running")
-        from src.models.wikibase.enums import KnownArchiveUrl
-
-        # ARCHIVE_URL
-        if self.first_level_domain_of_archive_url:
-            logger.debug("__detect_archive_urls__: Working on self.archive_url")
-            try:
-                logger.debug(
-                    f"Trying to detect archive from {self.first_level_domain_of_archive_url}"
-                )
-                self.detected_archive_of_archive_url = KnownArchiveUrl(
-                    self.first_level_domain_of_archive_url
-                )
-            except ValueError:
-                self.__log_to_file__(
-                    message=f"No archive detected for {self.archive_url}",
-                    file_name="undetected_archive.log",
-                )
-
-        # URL
-        if self.first_level_domain_of_url:
-            try:
-                logger.debug(
-                    f"Trying to detect archive from {self.first_level_domain_of_url}"
-                )
-                self.detected_archive_of_url = KnownArchiveUrl(
-                    self.first_level_domain_of_url
-                )
-            except ValueError:
-                # We don't log this because it would clog the
-                # log file very quickly and not yield anything useful
-                pass
+    # DISABLED - should be moved to Template
+    # def __detect_archive_urls__(self):
+    #     """Try to detect if self.url contains first level
+    #     domain from a known web archiver"""
+    #     pass
+    # logger.debug("__detect_archive_urls__: Running")
+    # from src.models.wikibase.enums import KnownArchiveUrl
+    #
+    # # ARCHIVE_URL
+    # if self.first_level_domain_of_archive_url:
+    #     logger.debug("__detect_archive_urls__: Working on self.archive_url")
+    #     try:
+    #         logger.debug(
+    #             f"Trying to detect archive from {self.first_level_domain_of_archive_url}"
+    #         )
+    #         self.detected_archive_of_archive_url = KnownArchiveUrl(
+    #             self.first_level_domain_of_archive_url
+    #         )
+    #     except ValueError:
+    #         self.__log_to_file__(
+    #             message=f"No archive detected for {self.archive_url}",
+    #             file_name="undetected_archive.log",
+    #         )
+    #
+    # # URL
+    # if self.first_level_domain_of_url:
+    #     try:
+    #         logger.debug(
+    #             f"Trying to detect archive from {self.first_level_domain_of_url}"
+    #         )
+    #         self.detected_archive_of_url = KnownArchiveUrl(
+    #             self.first_level_domain_of_url
+    #         )
+    #     except ValueError:
+    #         # We don't log this because it would clog the
+    #         # log file very quickly and not yield anything useful
+    #         pass
 
     # DEPRECATED since 2.1.0-alpha3
     # def __detect_google_books_id__(self):
@@ -544,30 +549,20 @@ class WikipediaReference(WcdItem):
     #                     f"could not extract query from {self.url} or no id found in the url"
     #                 )
 
-    def __detect_internet_archive_id__(self):
-        """We detect INTERNET_ARCHIVE_ID to populate the property later
-        Example: https://archive.org/details/catalogueofshipw0000wils/"""
-        if (
-            self.first_level_domain_of_url
-            and self.first_level_domain_of_url == "archive.org"
-        ):
-            if self.url and "/details/" in self.url:
-                path = str(urlparse(self.url).path)
-                if path:
-                    self.internet_archive_id = path.split("/")[2]
-                else:
-                    raise ValueError(f"could not extract path from {self.url}")
-
-    def __extract_first_level_domain__(self):
-        logger.info("Extracting first level domain from self.url and self.archive_url")
-        if self.url is not None:
-            self.first_level_domain_of_url = self.__get_first_level_domain__(
-                url=self.url
-            )
-        if self.archive_url is not None:
-            self.first_level_domain_of_archive_url = self.__get_first_level_domain__(
-                url=self.archive_url
-            )
+    # DISABLED should be moved to Template
+    # def __detect_internet_archive_id__(self):
+    #     """We detect INTERNET_ARCHIVE_ID to populate the property later
+    #     Example: https://archive.org/details/catalogueofshipw0000wils/"""
+    #     if (
+    #         self.first_level_domain_of_url
+    #         and self.first_level_domain_of_url == "archive.org"
+    #     ):
+    #         if self.url and "/details/" in self.url:
+    #             path = str(urlparse(self.url).path)
+    #             if path:
+    #                 self.internet_archive_id = path.split("/")[2]
+    #             else:
+    #                 raise ValueError(f"could not extract path from {self.url}")
 
     @staticmethod
     @validate_arguments
@@ -598,32 +593,11 @@ class WikipediaReference(WcdItem):
         if not self.wikibase:
             raise MissingInformationError("self.wikibase was None")
         self.__generate_reference_hash__()
-        self.__generate_first_level_domain_hash__()
+        # self.__generate_first_level_domain_hash__()
 
     def __generate_reference_hash__(self):
         hashing = Hashing(reference=self)
         self.md5hash = hashing.generate_reference_hash()
-
-    @validate_arguments
-    def __get_first_level_domain__(self, url: str) -> Optional[str]:
-        logger.debug("__get_first_level_domain__: Running")
-        try:
-            logger.debug(f"Trying to get FLD from {url}")
-            fld = get_fld(url)
-            if fld:
-                logger.debug(f"Found FLD: {fld}")
-            return fld
-        except TldBadUrl:
-            """The library does not support archive.org URLs"""
-            if "web.archive.org" in url:
-                return "archive.org"
-            else:
-                message = f"Bad url {url} encountered"
-                logger.warning(message)
-                self.__log_to_file__(
-                    message=str(message), file_name="url_exceptions.log"
-                )
-                return None
 
     @validate_arguments
     def __get_numbered_person__(
@@ -828,6 +802,7 @@ class WikipediaReference(WcdItem):
                 file_name="place.log",
             )
 
+    # DISABLED should be moved to raw reference
     def __parse_first_parameter__(self) -> None:
         """We parse the first parameter which has different meaning
         depending on the template in question"""
@@ -1184,9 +1159,9 @@ class WikipediaReference(WcdItem):
         # self.__parse_urls__()
         self.__parse_isbn__()
         # First Level Domain detection is needed for the detection methods
-        self.__extract_first_level_domain__()
-        self.__detect_archive_urls__()
-        self.__detect_internet_archive_id__()
+        # These are disabled because they should be moved to Template instead
+        # self.__detect_archive_urls__()
+        # self.__detect_internet_archive_id__()
         # self.__detect_google_books_id__()
         self.__parse_persons__()
         self.__merge_date_into_publication_date__()
@@ -1196,13 +1171,13 @@ class WikipediaReference(WcdItem):
         # We generate the hash last because the parsing needs to be done first
         self.__generate_hashes__()
 
-    @staticmethod
-    def __has_template_data__(string: str) -> bool:
-        """This is a very simple test for two opening curly brackets"""
-        if "{{" in string:
-            return True
-        else:
-            return False
+    # @staticmethod
+    # def __has_template_data__(string: str) -> bool:
+    #     """This is a very simple test for two opening curly brackets"""
+    #     if "{{" in string:
+    #         return True
+    #     else:
+    #         return False
 
     # TODO update to use new models
     # def __get_url_from_template__(self, url: str) -> str:
@@ -1233,5 +1208,5 @@ class WikipediaReference(WcdItem):
     #     else:
     #         logger.warning(f"Parsing the google books template data in {url} failed")
     #         return ""
-    def get_wcdqid_from_cache(self):
-        pass
+    # def get_wcdqid_from_cache(self):
+    #     pass

@@ -1,8 +1,8 @@
 import logging
 import re
-from typing import List
+from typing import Dict, List
 from typing import OrderedDict as OrderedDictType
-from typing import Tuple
+from typing import Set, Tuple
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
@@ -38,6 +38,27 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def first_level_domain_counts(self) -> Dict[str, int]:
+        """This returns a dict with fld as key and the count as value"""
+        fld_set = set(self.first_level_domains)
+        counts = dict()
+        for fld in fld_set:
+            count = self.first_level_domains.count(fld)
+            counts[fld] = count
+        return counts
+
+    @property
+    def first_level_domains(self) -> List[str]:
+        """This is a list and duplicates are likely and wanted"""
+        if not self.content_references:
+            return []
+        flds = []
+        for reference in self.content_references:
+            for fld in reference.raw_reference.template_first_level_domains:
+                flds.append(fld)
+        return flds
 
     @property
     def percent_of_content_references_without_a_template(self) -> int:

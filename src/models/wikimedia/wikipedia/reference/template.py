@@ -1,9 +1,12 @@
 import logging
 import re
 from collections import OrderedDict
+from typing import Optional, Set
 
 from mwparserfromhell.nodes import Template  # type: ignore
 from pydantic import validate_arguments
+from tld import get_fld
+from tld.exceptions import TldBadUrl
 
 from src.models.exceptions import MissingInformationError
 from src.wcd_base_model import WcdBaseModel
@@ -19,11 +22,69 @@ class WikipediaTemplate(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def first_level_domains(self) -> Set[str]:
+        """This returns a set"""
+        # This is overcomplicated because of mypy
+        results = [self.__get_first_level_domain__(url=url) for url in self.urls]
+        result_set = set()
+        for result in results:
+            if result:
+                result_set.add(result)
+        return result_set
+
+    @property
+    def urls(self) -> Set[str]:
+        """This returns a set"""
+        urls = set()
+        if "url" in self.parameters:
+            url = self.parameters["url"]
+            if url:
+                urls.add(url)
+        if "archive_url" in self.parameters:
+            url = self.parameters["archive_url"]
+            if url:
+                urls.add(url)
+        if "conference_url" in self.parameters:
+            url = self.parameters["conference_url"]
+            if url:
+                urls.add(url)
+        if "transcript_url" in self.parameters:
+            url = self.parameters["transcript_url"]
+            if url:
+                urls.add(url)
+        if "chapter_url" in self.parameters:
+            url = self.parameters["chapter_url"]
+            if url:
+                urls.add(url)
+        return urls
+
+    @property
     def name(self):
-        """Lowercased template name"""
+        """Lowercased and stripped template name"""
         if not self.raw_template.name:
             raise MissingInformationError("self.raw_template.name was empty")
         return self.raw_template.name.strip().lower()
+
+    @validate_arguments
+    def __get_first_level_domain__(self, url: str) -> Optional[str]:
+        logger.debug("__get_first_level_domain__: Running")
+        try:
+            logger.debug(f"Trying to get FLD from {url}")
+            fld = get_fld(url)
+            if fld:
+                logger.debug(f"Found FLD: {fld}")
+            return fld
+        except TldBadUrl:
+            """The library does not support archive.org URLs"""
+            if "web.archive.org" in url:
+                return "archive.org"
+            else:
+                message = f"Bad url {url} encountered"
+                logger.warning(message)
+                self.__log_to_file__(
+                    message=str(message), file_name="url_exceptions.log"
+                )
+                return None
 
     def __add_template_name_to_parameters__(self):
         self.parameters["template_name"] = self.name

@@ -155,27 +155,27 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         assert person.given == "Andranik"
         assert person.surname == "Tangian"
 
-    def test_extract_first_level_domain(self):
-        data = {
-            "url": "https://www.stereogum.com/1345401/turntable-interview/interviews/",
-            "title": "Turntable Interview: !!!",
-            "last": "Locker",
-            "first": "Melissa",
-            "date": "May 9, 2013",
-            "website": "Stereogum",
-            "access_date": "May 24, 2021",
-            "template_name": "cite web",
-            "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/"
-            "chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
-        }
-        reference = EnglishWikipediaReferenceSchema().load(data)
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash(testing=True)
-        assert reference.first_level_domain_of_url == "stereogum.com"
-        assert (
-            reference.url
-            == "https://www.stereogum.com/1345401/turntable-interview/interviews/"
-        )
+    # def test_extract_first_level_domain(self):
+    #     data = {
+    #         "url": "https://www.stereogum.com/1345401/turntable-interview/interviews/",
+    #         "title": "Turntable Interview: !!!",
+    #         "last": "Locker",
+    #         "first": "Melissa",
+    #         "date": "May 9, 2013",
+    #         "website": "Stereogum",
+    #         "access_date": "May 24, 2021",
+    #         "template_name": "cite web",
+    #         "archive_url": "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/"
+    #         "chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+    #     }
+    #     reference = EnglishWikipediaReferenceSchema().load(data)
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
+    #     assert reference.first_level_domain_of_url == "stereogum.com"
+    #     assert (
+    #         reference.url
+    #         == "https://www.stereogum.com/1345401/turntable-interview/interviews/"
+    #     )
 
     # TODO move this to TestTemplate once parsing of urls has been implemented there
     # def test_extract_first_level_domain_bad_url(self):
@@ -250,20 +250,20 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         assert reference.publisher == "Kungliga Motorbåt Klubben"
         assert reference.location == "Stockholm"
 
-    def test_detect_archive_urls(self):
-        # TODO test other archives also
-        from src.models.wikibase.enums import KnownArchiveUrl
-
-        reference = EnglishWikipediaReference(
-            wikibase=IASandboxWikibase(),
-            archive_url="https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
-            template_name="test",
-        )
-        reference.finish_parsing_and_generate_hash(testing=True)
-        # logger.debug(reference.detected_archive_of_url)
-        # logger.debug(reference.detected_archive_of_archive_url)
-        assert reference.detected_archive_of_url is None
-        assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
+    # def test_detect_archive_urls(self):
+    #     # test other archives also
+    #     from src.models.wikibase.enums import KnownArchiveUrl
+    #
+    #     reference = EnglishWikipediaReference(
+    #         wikibase=IASandboxWikibase(),
+    #         archive_url="https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
+    #         template_name="test",
+    #     )
+    #     reference.finish_parsing_and_generate_hash(testing=True)
+    #     # logger.debug(reference.detected_archive_of_url)
+    #     # logger.debug(reference.detected_archive_of_archive_url)
+    #     assert reference.detected_archive_of_url is None
+    #     assert reference.detected_archive_of_archive_url == KnownArchiveUrl.ARCHIVE_ORG
 
     # DEPRECATED since 2.1.0-alpha3
     # def test_google_books(self):
@@ -286,18 +286,18 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     assert reference.first_level_domain_of_url == "google.com"
     #     self.assertIsInstance(reference.google_books, GoogleBooks)
 
-    def test_detect_internet_archive_id(self):
-        data = dict(
-            url="https://archive.org/details/catalogueofshipw0000wils/",
-            template_name="cite book",
-        )
-        reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
-            data
-        )
-        reference.wikibase = IASandboxWikibase()
-        reference.finish_parsing_and_generate_hash(testing=True)
-        # print(reference.internet_archive_id)
-        assert reference.internet_archive_id == "catalogueofshipw0000wils"
+    # def test_detect_internet_archive_id(self):
+    #     data = dict(
+    #         url="https://archive.org/details/catalogueofshipw0000wils/",
+    #         template_name="cite book",
+    #     )
+    #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
+    #         data
+    #     )
+    #     reference.wikibase = IASandboxWikibase()
+    #     reference.finish_parsing_and_generate_hash(testing=True)
+    #     # print(reference.internet_archive_id)
+    #     assert reference.internet_archive_id == "catalogueofshipw0000wils"
 
     # DEPRECATED since 2.1.0-alpha3
     # def test_detect_google_books_id(self):
@@ -409,41 +409,41 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     assert reference.has_first_level_domain_url_hash is True
     #     assert reference.has_hash is True
 
-    def test_template_url(self):
-        raw_template = "{{citeq|Q1}}"
-        raw_reference = f"<ref>{raw_template}</ref>"
-        wikicode = parse(raw_reference)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
-            )
-            raw_reference_object.extract_and_determine_reference_type()
-            assert raw_reference_object.number_of_templates == 1
-            assert raw_reference_object.templates[0].name == "citeq"
-            assert raw_reference_object.first_template_name == "citeq"
-            reference = raw_reference_object.get_finished_wikipedia_reference_object()
-            assert (
-                reference.template_url
-                == f"https://en.wikipedia.org/wiki/Template:citeq"
-            )
+    # def test_template_url(self):
+    #     raw_template = "{{citeq|Q1}}"
+    #     raw_reference = f"<ref>{raw_template}</ref>"
+    #     wikicode = parse(raw_reference)
+    #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+    #     for ref in refs:
+    #         raw_reference_object = WikipediaRawReference(
+    #             wikicode=ref, testing=True, wikibase=wikibase
+    #         )
+    #         raw_reference_object.extract_and_determine_reference_type()
+    #         assert raw_reference_object.number_of_templates == 1
+    #         assert raw_reference_object.templates[0].name == "citeq"
+    #         assert raw_reference_object.first_template_name == "citeq"
+    #         reference = raw_reference_object.get_finished_wikipedia_reference_object()
+    #         assert (
+    #             reference.template_url
+    #             == f"https://en.wikipedia.org/wiki/Template:citeq"
+    #         )
 
-    def test_wikibase_url(self):
-        data = dict(
-            oclc="test",
-            url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
-            template_name="cite book",
-        )
-        reference = EnglishWikipediaReference(**data)
-        reference.wikibase = IASandboxWikibase()
-        with self.assertRaises(MissingInformationError):
-            print(reference.wikibase_url)
-        reference.return_ = WikibaseReturn(item_qid="test", uploaded_now=False)
-        # print(reference.wikibase_url)
-        assert (
-            reference.wikibase_url
-            == f"https://ia-sandbox.wikibase.cloud/wiki/Item:test"
-        )
+    # def test_wikibase_url(self):
+    #     data = dict(
+    #         oclc="test",
+    #         url="https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431",
+    #         template_name="cite book",
+    #     )
+    #     reference = EnglishWikipediaReference(**data)
+    #     reference.wikibase = IASandboxWikibase()
+    #     with self.assertRaises(MissingInformationError):
+    #         print(reference.wikibase_url)
+    #     reference.return_ = WikibaseReturn(item_qid="test", uploaded_now=False)
+    #     # print(reference.wikibase_url)
+    #     assert (
+    #         reference.wikibase_url
+    #         == f"https://ia-sandbox.wikibase.cloud/wiki/Item:test"
+    #     )
 
     # DEPRECATED since 2.1.0-alpha3
     # def test_google_books_template_in_chapter_url(self):
