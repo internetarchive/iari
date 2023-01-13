@@ -5,8 +5,7 @@ from mwparserfromhell import parse  # type: ignore
 
 import config
 from src import console
-from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
-from src.models.return_.wikibase_return import WikibaseReturn
+from src.models.exceptions import MoreThanOneNumberError
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.english.english_reference import (
     EnglishWikipediaReference,
