@@ -1,0 +1,63 @@
+@startuml
+'https://plantuml.com/class-diagram
+abstract API
+abstract template_detection
+abstract reference_type
+abstract aggregate_measures
+API -- template_detection
+API -- aggregate_measures
+API -- reference_type
+
+class "number_of_bare_url_references" as bare_url
+template_detection -- bare_url
+
+class "number_of_citation_references" as cit
+content -- cit
+
+class "number_of_content_references" as content
+reference_type -- content
+
+class "number_of_general_references" as general
+content -- general
+
+class "number_of_empty_named_references" as named
+reference_type -- named
+
+class "number_of_citation_template_references" as ct
+template_detection -- ct
+
+class "number_of_citeq_references" as citeq
+template_detection -- citeq
+
+class "number_of_cs1_references" as cs1
+template_detection -- cs1
+
+class "number_of_isbn_template_references" as isbn
+template_detection -- isbn
+
+class "number_of_url_template_references" as url
+template_detection -- url
+
+class "number_of_content_reference_with_at_least_one_template" as least_one
+aggregate_measures -- least_one
+
+class "number_of_content_reference_without_a_template" as no
+aggregate_measures -- no
+class "number_of_content_references_with_a_supported_template_we_prefer" as prefer
+aggregate_measures -- prefer
+class "number_of_content_references_with_any_supported_template" as any
+aggregate_measures -- any
+
+class "number_of_multiple_template_references" as multiple
+aggregate_measures -- multiple
+
+class "number_of_hashed_content_references" as hash
+aggregate_measures -- hash
+
+class "percent_of_content_references_with_a_hash" as perchash
+aggregate_measures -- perchash
+
+class "percent_of_content_references_without_a_template" as percno
+aggregate_measures -- percno
+
+@enduml
