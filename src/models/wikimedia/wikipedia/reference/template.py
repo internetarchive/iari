@@ -25,11 +25,7 @@ class WikipediaTemplate(WcdBaseModel):
     def first_level_domains(self) -> Set[str]:
         """This returns a set"""
         # This is overcomplicated because of mypy
-        results = [
-            self.__get_first_level_domain__(url=url)
-            for url in self.urls
-            if self.__get_first_level_domain__(url=url)
-        ]
+        results = [self.__get_first_level_domain__(url=url) for url in self.urls]
         result_set = set()
         for result in results:
             if result:
