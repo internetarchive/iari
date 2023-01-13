@@ -299,7 +299,8 @@ class TestWikipediaRawReference(TestCase):
         wikitext = (
             "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
             "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-            "|url=https://books.google.com/}}"
+            "|url=https://books.google.se/books?id=9HRodACJLOoC&printsec="
+            "frontcover&dq=test&hl=sv&sa=X&redir_esc=y#v=onepage&q=test&f=false}}"
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaRawReference(

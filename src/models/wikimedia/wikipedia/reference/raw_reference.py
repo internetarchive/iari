@@ -65,9 +65,11 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def google_books_url_or_template_found(self):
-        """This detects both google book template and google books url"""
+        """This detects both google book template and google books url
+        example: https://books.google.se/books?id=9HRodACJLOoC&printsec=
+        frontcover&dq=test&hl=sv&sa=X&redir_esc=y#v=onepage&q=test&f=false"""
         return bool(
-            bool("books.google.com" in self.get_wikicode_as_string)
+            bool("//books.google." in self.get_wikicode_as_string)
             or self.google_books_template_found
         )
 
