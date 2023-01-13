@@ -358,3 +358,38 @@ class TestWikipediaRawReference(TestCase):
         )
         raw_reference_object.extract_and_determine_reference_type()
         assert raw_reference_object.google_books_template_found is False
+
+    def test_template_first_level_domains_one(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+            "|url=https://www1.geocities.com/}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.template_first_level_domains == {"geocities.com"}
+
+    def test_template_first_level_domains_two(self):
+        wikitext = (
+            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+            "|url=https://www1.geocities.com/|archive-url=http://web.archive.org}}"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            wikibase=wikibase,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_determine_reference_type()
+        assert raw_reference_object.template_first_level_domains == {
+            "geocities.com",
+            "archive.org",
+        }
