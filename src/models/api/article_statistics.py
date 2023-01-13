@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from pydantic import BaseModel, Extra
 
@@ -10,6 +10,8 @@ class ArticleStatistics(BaseModel):
     the user wants from the get_statistics endpoint
 
     We use BaseModel to avoid the cache attribute"""
+
+    first_level_domain_counts: Dict[str, int] = {}
 
     # Bare URL references are used to mark up URLs which wikipedians
     # should improve with metadata to help others to find it in case
