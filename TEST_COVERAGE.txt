@@ -1,6 +1,6 @@
 Name                                                           Stmts   Miss  Cover
 ----------------------------------------------------------------------------------
-config.py                                                         39      0   100%
+config.py                                                         31      0   100%
 src/__init__.py                                                   60     21    65%
 src/helpers/__init__.py                                            0      0   100%
 src/helpers/console.py                                             2      0   100%
@@ -13,6 +13,7 @@ src/models/api/job.py                                             10      1    9
 src/models/api/lookup_by_wikidata_qid.py                          29     17    41%
 src/models/api/lookup_wikicitations_qid.py                        43     27    37%
 src/models/exceptions.py                                          22      0   100%
+src/models/hashing.py                                             67     43    36%
 src/models/person/__init__.py                                     28     10    64%
 src/models/return_/__init__.py                                     4      0   100%
 src/models/wcd_item.py                                            10      0   100%
@@ -25,15 +26,15 @@ src/models/wikibase/wikicitations_wikibase.py                     73      0   10
 src/models/wikimedia/__init__.py                                   0      0   100%
 src/models/wikimedia/enums.py                                     12      0   100%
 src/models/wikimedia/wikipedia/__init__.py                         0      0   100%
-src/models/wikimedia/wikipedia/article.py                        124     76    39%
+src/models/wikimedia/wikipedia/article.py                        122     74    39%
 src/models/wikimedia/wikipedia/reference/__init__.py               0      0   100%
 src/models/wikimedia/wikipedia/reference/english/__init__.py       0      0   100%
 src/models/wikimedia/wikipedia/reference/enums.py                 10      0   100%
-src/models/wikimedia/wikipedia/reference/extractor.py            172     76    56%
-src/models/wikimedia/wikipedia/reference/generic.py              666    290    56%
-src/models/wikimedia/wikipedia/reference/raw_reference.py        151    100    34%
-src/models/wikimedia/wikipedia/reference/template.py              98     70    29%
+src/models/wikimedia/wikipedia/reference/extractor.py            197     93    53%
+src/models/wikimedia/wikipedia/reference/generic.py              574    216    62%
+src/models/wikimedia/wikipedia/reference/raw_reference.py        162    101    38%
+src/models/wikimedia/wikipedia/reference/template.py             149    112    25%
 src/wcd_base_model.py                                             16      7    56%
 test_data/test_content.py                                          4      0   100%
 ----------------------------------------------------------------------------------
-TOTAL                                                           1907    777    59%
+TOTAL                                                           1959    804    59%
