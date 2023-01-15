@@ -1,7 +1,7 @@
 # Release
 * Create new branch and PR
 * Run PyCharm code inspection
-* Run all tests
+* Run all tests and update the coverage
 * Run `$ pre-commit run -all`
 * Bump the version with `$ poetry version 3.0.0-alpha1` or `poetry patch`
 * Run `$ poetry update`
