@@ -108,7 +108,8 @@ class TestTemplate:
             wt.extract_and_prepare_parameters()
             assert wt.urls == {
                 "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
-                "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
+                "https://web.archive.org/web/20100715195638/http://"
+                "www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
             }
 
     def test_first_level_domains(self):

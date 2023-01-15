@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Dict, List
 from typing import OrderedDict as OrderedDictType
-from typing import Set, Tuple
+from typing import Tuple
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
