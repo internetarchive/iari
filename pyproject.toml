@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wcdimportbot"
-version = "3.0.0-alpha0"
+version = "3.0.0-alpha1"
 description = "Import and update architecture for the WikiCitations Database in Wikibase.cloud"
 authors = ["Dennis Priskorn <68460690+dpriskorn@users.noreply.github.com>"]
 license = "GPLv3+"
