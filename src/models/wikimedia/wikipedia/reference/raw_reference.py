@@ -2,6 +2,7 @@
 Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
+import re
 from typing import TYPE_CHECKING, List, Set, Union
 
 import mwparserfromhell  # type: ignore
@@ -12,6 +13,7 @@ import config
 from src.models.exceptions import MissingInformationError
 from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
+from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
 
 if TYPE_CHECKING:
@@ -21,8 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 # TODO this does not scale at all if we want multi-wiki support :/
-# TODO convert to abstract class and make an 2 implementations
-#  WikipediaRawCitationReference and WikipediaRawGeneralReference
 class WikipediaRawReference(WcdBaseModel):
     """This class handles determining the type of reference and parse the templates from the raw reference
 
@@ -44,15 +44,61 @@ class WikipediaRawReference(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
-    def template_first_level_domains(self) -> Set[str]:
-        """This returns a set"""
-        if not self.templates:
-            return set()
-        template_first_level_domains = set()
+    def get_stripped_wikicode(self):
+        if isinstance(self.wikicode, Wikicode):
+            return self.wikicode.strip_code()
+        else:
+            # support Tag
+            return self.wikicode.contents.strip_code()
+
+    @property
+    def __template_urls__(self) -> Set[WikipediaUrl]:
+        urls = set()
         for template in self.templates:
-            for fld in template.first_level_domains:
-                template_first_level_domains.add(fld)
-        return template_first_level_domains
+            if template.urls:
+                # aka merge the sets
+                urls.update(template.urls)
+        return urls
+
+    @property
+    def __find_bare_urls__(self) -> List[tuple]:
+        """Return bare urls from the stripped wikitext"""
+        return re.findall(
+            r"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?",
+            self.get_stripped_wikicode,
+        )
+
+    @property
+    def __bare_urls__(self) -> Set[WikipediaUrl]:
+        """This returns a set"""
+        urls = set()
+        for url in self.__find_bare_urls__:
+            # We get a tuple back so we join it
+            urls.add(WikipediaUrl(url="".join(url)))
+        return urls
+
+    @property
+    def urls(self) -> Set[WikipediaUrl]:
+        """We support both URLs in templates and outside aka bare URLs
+        This returns a union set"""
+        urls: Set[WikipediaUrl] = set()
+        urls.update(self.__template_urls__, self.__bare_urls__)
+        return urls
+
+    @property
+    def check_urls(self):
+        """This checks the status of all the URLs"""
+        return [url.check() for url in self.urls]
+
+    @property
+    def first_level_domains(self) -> Set[str]:
+        """This returns a set"""
+        flds = set()
+        for url in self.urls:
+            url.get_first_level_domain()
+            if url.first_level_domain:
+                flds.add(url.first_level_domain)
+        return flds
 
     @property
     def google_books_template_found(self):
@@ -95,11 +141,20 @@ class WikipediaRawReference(WcdBaseModel):
             return True
 
     @property
+    def cite_book_template_found(self) -> bool:
+        return self.specific_template_found(names="cite book")
+
+    @property
+    def cite_journal_template_found(self) -> bool:
+        return self.specific_template_found(names="cite journal")
+
+    @property
+    def cite_web_template_found(self) -> bool:
+        return self.specific_template_found(names="cite web")
+
+    @property
     def citation_template_found(self) -> bool:
-        for template in self.templates:
-            if template.name in config.citation_template:
-                return True
-        return False
+        return self.specific_template_found(names=config.citation_template)
 
     @property
     def cs1_template_found(self) -> bool:
@@ -117,17 +172,11 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def isbn_template_found(self) -> bool:
-        for template in self.templates:
-            if template.name in config.isbn_template:
-                return True
-        return False
+        return self.specific_template_found(names=config.isbn_template)
 
     @property
     def url_template_found(self) -> bool:
-        for template in self.templates:
-            if template.name in config.url_template:
-                return True
-        return False
+        return self.specific_template_found(names=config.url_template)
 
     @property
     def bare_url_template_found(self) -> bool:
@@ -138,6 +187,8 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def is_citation_reference(self):
+        """This could also be implemented based on the class type of the wikicode attribute.
+        I choose not to because it could perhaps be brittle."""
         if self.is_general_reference:
             return False
         else:
@@ -159,6 +210,21 @@ class WikipediaRawReference(WcdBaseModel):
     @property
     def number_of_templates(self) -> int:
         return len(self.templates)
+
+    def __found_template__(self, name: str = "") -> bool:
+        for template in self.templates:
+            if name == template.name:
+                return True
+        return False
+
+    def specific_template_found(self, names: Union[str, List[str]] = "") -> bool:
+        """Used to search for a specific template"""
+        if isinstance(names, list):
+            for name in names:
+                return self.__found_template__(name=name)
+        else:
+            return self.__found_template__(name=names)
+        return False
 
     def __extract_templates_and_parameters_from_raw_reference__(self) -> None:
         """Helper method"""
@@ -202,7 +268,10 @@ class WikipediaRawReference(WcdBaseModel):
         """We only extract and clean if exactly one template is found"""
         logger.debug("__extract_and_clean_template_parameters__: running")
         if self.number_of_templates == 1:
-            [template.extract_and_prepare_parameters() for template in self.templates]
+            [
+                template.extract_and_prepare_parameter_and_flds()
+                for template in self.templates
+            ]
 
     def extract_and_determine_reference_type(self) -> None:
         """Helper method"""

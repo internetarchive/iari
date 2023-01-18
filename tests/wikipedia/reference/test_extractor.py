@@ -205,10 +205,11 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         wre.extract_all_references()
         assert wre.number_of_content_references == 1
+        assert wre.content_references[0].first_template_name == "isbn"
+        assert wre.content_references[0].isbn == "1234"
         assert wre.number_of_isbn_template_references == 1
         assert wre.number_of_hashed_content_references == 1
         assert wre.percent_of_content_references_with_a_hash == 100
-        assert wre.content_references[0].isbn == "1234"
 
     def test_first_level_domains_one(self):
         example_reference = "<ref>{{cite web|url=http://google.com}}</ref>"
