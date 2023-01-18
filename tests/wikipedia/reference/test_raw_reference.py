@@ -374,7 +374,7 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
         )
         raw_reference_object.extract_and_determine_reference_type()
-        assert raw_reference_object.template_first_level_domains == {"geocities.com"}
+        assert raw_reference_object.first_level_domains == {"geocities.com"}
 
     def test_template_first_level_domains_two(self):
         wikitext = (
@@ -390,7 +390,7 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
         )
         raw_reference_object.extract_and_determine_reference_type()
-        assert raw_reference_object.template_first_level_domains == {
+        assert raw_reference_object.first_level_domains == {
             "geocities.com",
             "archive.org",
         }

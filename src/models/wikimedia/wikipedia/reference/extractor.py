@@ -56,7 +56,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             return []
         flds = []
         for reference in self.content_references:
-            for fld in reference.raw_reference.template_first_level_domains:
+            for fld in reference.raw_reference.first_level_domains:
                 flds.append(fld)
         return flds
 

@@ -1,14 +1,13 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Optional, Set
+from typing import Set
 
 from mwparserfromhell.nodes import Template  # type: ignore
 from pydantic import validate_arguments
-from tld import get_fld
-from tld.exceptions import TldBadUrl
 
 from src.models.exceptions import MissingInformationError
+from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
@@ -17,45 +16,38 @@ logger = logging.getLogger(__name__)
 class WikipediaTemplate(WcdBaseModel):
     parameters: OrderedDict = OrderedDict()
     raw_template: Template
+    extracted: bool = False
 
     class Config:
         arbitrary_types_allowed = True
 
     @property
-    def first_level_domains(self) -> Set[str]:
+    def urls(self) -> Set[WikipediaUrl]:
         """This returns a set"""
-        # This is overcomplicated because of mypy
-        results = [self.__get_first_level_domain__(url=url) for url in self.urls]
-        result_set = set()
-        for result in results:
-            if result:
-                result_set.add(result)
-        return result_set
-
-    @property
-    def urls(self) -> Set[str]:
-        """This returns a set"""
+        if not self.extracted:
+            raise MissingInformationError("template has not been extracted")
         urls = set()
         if "url" in self.parameters:
             url = self.parameters["url"]
             if url:
-                urls.add(url)
+                logger.debug(f"url: {url}")
+                urls.add(WikipediaUrl(url=url))
         if "archive_url" in self.parameters:
             url = self.parameters["archive_url"]
             if url:
-                urls.add(url)
+                urls.add(WikipediaUrl(url=url))
         if "conference_url" in self.parameters:
             url = self.parameters["conference_url"]
             if url:
-                urls.add(url)
+                urls.add(WikipediaUrl(url=url))
         if "transcript_url" in self.parameters:
             url = self.parameters["transcript_url"]
             if url:
-                urls.add(url)
+                urls.add(WikipediaUrl(url=url))
         if "chapter_url" in self.parameters:
             url = self.parameters["chapter_url"]
             if url:
-                urls.add(url)
+                urls.add(WikipediaUrl(url=url))
         return urls
 
     @property
@@ -64,27 +56,6 @@ class WikipediaTemplate(WcdBaseModel):
         if not self.raw_template.name:
             raise MissingInformationError("self.raw_template.name was empty")
         return self.raw_template.name.strip().lower()
-
-    @validate_arguments
-    def __get_first_level_domain__(self, url: str) -> Optional[str]:
-        logger.debug("__get_first_level_domain__: Running")
-        try:
-            logger.debug(f"Trying to get FLD from {url}")
-            fld = get_fld(url)
-            if fld:
-                logger.debug(f"Found FLD: {fld}")
-            return fld
-        except TldBadUrl:
-            """The library does not support archive.org URLs"""
-            if "web.archive.org" in url:
-                return "archive.org"
-            else:
-                message = f"Bad url {url} encountered"
-                logger.warning(message)
-                self.__log_to_file__(
-                    message=str(message), file_name="url_exceptions.log"
-                )
-                return None
 
     def __add_template_name_to_parameters__(self):
         self.parameters["template_name"] = self.name
@@ -176,11 +147,13 @@ class WikipediaTemplate(WcdBaseModel):
             # logger.debug(f"value after: {value}")
             self.parameters[key] = cleaned_value
 
-    def extract_and_prepare_parameters(self):
+    def extract_and_prepare_parameter_and_flds(self):
         self.__extract_and_clean_template_parameters__()
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()
         self.__rename_one_to_first_parameter__()
+        self.extracted = True
+        self.__extract_first_level_domains_from_urls__()
 
     def __fix_class_key__(self):
         """convert "class" key to "_class" to avoid collision with reserved python expression"""
@@ -205,7 +178,7 @@ class WikipediaTemplate(WcdBaseModel):
             authorlink3="author_link3",
             authorlink4="author_link4",
             authorlink5="author_link5",
-            authorlink="author_link",
+            authorurl="author_link",
         )
         newdict = OrderedDict()
         for key in self.parameters:
@@ -243,3 +216,11 @@ class WikipediaTemplate(WcdBaseModel):
             self.parameters["first_parameter"] = self.parameters["1"]
         else:
             logger.debug("No first parameter found")
+
+    def __extract_first_level_domains_from_urls__(self):
+        """Extract from all URLs"""
+        [
+            url.get_first_level_domain()
+            for url in self.urls
+            if url.first_level_domain == ""
+        ]
