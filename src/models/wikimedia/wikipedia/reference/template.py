@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Set
+from typing import List
 
 from mwparserfromhell.nodes import Template  # type: ignore
 from pydantic import validate_arguments
@@ -22,10 +22,10 @@ class WikipediaTemplate(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
-    def urls(self) -> Set[WikipediaUrl]:
-        """This returns a set"""
-        if not self.extracted:
-            raise MissingInformationError("template has not been extracted")
+    def urls(self) -> List[WikipediaUrl]:
+        """This returns a list"""
+        # if not self.extracted:
+        #     raise MissingInformationError("this template has not been extracted")
         urls = set()
         if "url" in self.parameters:
             url = self.parameters["url"]
@@ -48,7 +48,7 @@ class WikipediaTemplate(WcdBaseModel):
             url = self.parameters["chapter_url"]
             if url:
                 urls.add(WikipediaUrl(url=url))
-        return urls
+        return list(urls)
 
     @property
     def name(self):

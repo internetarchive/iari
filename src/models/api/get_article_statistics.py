@@ -5,7 +5,7 @@ from flask import request
 from flask_restful import Resource, abort  # type: ignore
 
 from src.helpers.console import console
-from src.models.api.get_statistics_schema import GetStatisticsSchema
+from src.models.api.get_statistics.get_statistics_schema import GetStatisticsSchema
 from src.models.api.job import Job
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
 from test_data.test_content import (  # type: ignore

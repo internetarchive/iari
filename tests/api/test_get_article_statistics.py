@@ -5,8 +5,8 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src.models.api.article_statistics import ArticleStatistics
 from src.models.api.get_article_statistics import GetArticleStatistics
+from src.models.api.get_statistics.article_statistics import ArticleStatistics
 
 logger = logging.getLogger(__name__)
 

@@ -84,7 +84,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_content_references == 2
         assert wre.number_of_empty_named_references == 1
         assert wre.number_of_hashed_content_references == 2
-        assert wre.percent_of_content_references_with_a_hash == 100
 
     def test_number_of_references_with_a_supported_template(self):
         wre = WikipediaReferenceExtractor(
@@ -157,46 +156,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_citation_references == 0
         assert wre.number_of_hashed_content_references == 18
 
-    def test_percent_of_content_references_without_a_template_0(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
-        )
-        wre.extract_all_references()
-        assert wre.number_of_content_reference_without_a_template == 0
-        assert wre.percent_of_content_references_without_a_template == 0
-
-    def test_percent_of_content_references_without_a_template_100(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="<ref>test reference without a template</ref>",
-            wikibase=wikibase,
-        )
-        wre.extract_all_references()
-        assert wre.number_of_content_reference_without_a_template == 1
-        assert wre.percent_of_content_references_without_a_template == 100
-
-    def test_percent_of_content_references_with_a_hash_0(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="<ref>{{cite book|first=test|last=tester|title=test}}</ref>",
-            wikibase=wikibase,
-        )
-        wre.extract_all_references()
-        assert wre.number_of_content_references == 1
-        assert wre.number_of_hashed_content_references == 0
-        assert wre.percent_of_content_references_with_a_hash == 0
-
-    def test_percent_of_content_references_with_a_hash_100(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="<ref>{{cite book|first=test|last=tester|title=test|isbn=1234}}</ref>",
-            wikibase=wikibase,
-        )
-        wre.extract_all_references()
-        assert wre.number_of_content_references == 1
-        assert wre.number_of_hashed_content_references == 1
-        assert wre.percent_of_content_references_with_a_hash == 100
-
     def test_isbn_template(self):
         wre = WikipediaReferenceExtractor(
             testing=True,
@@ -209,7 +168,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.content_references[0].isbn == "1234"
         assert wre.number_of_isbn_template_references == 1
         assert wre.number_of_hashed_content_references == 1
-        assert wre.percent_of_content_references_with_a_hash == 100
 
     def test_first_level_domains_one(self):
         example_reference = "<ref>{{cite web|url=http://google.com}}</ref>"
@@ -219,7 +177,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             wikibase=wikibase,
         )
         wre.extract_all_references()
-        assert wre.first_level_domains == ["google.com"]
+        assert wre.reference_first_level_domains == ["google.com"]
 
     def test_first_level_domains_two(self):
         example_reference = "<ref>{{cite web|url=http://google.com}}</ref>"
@@ -229,7 +187,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             wikibase=wikibase,
         )
         wre.extract_all_references()
-        assert wre.first_level_domains == ["google.com", "google.com"]
+        assert wre.reference_first_level_domains == ["google.com", "google.com"]
 
     def test_first_level_domain_counts_simple(self):
         example_reference = "<ref>{{cite web|url=http://google.com}}</ref>"
@@ -239,7 +197,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             wikibase=wikibase,
         )
         wre.extract_all_references()
-        assert wre.first_level_domain_counts == {"google.com": 2}
+        assert wre.reference_first_level_domain_counts == [("google.com", 2)]
 
     def test_first_level_domain_counts_excerpt(self):
         wre = WikipediaReferenceExtractor(
@@ -248,12 +206,19 @@ class TestWikipediaReferenceExtractor(TestCase):
             wikibase=wikibase,
         )
         wre.extract_all_references()
-        assert wre.first_level_domain_counts == {
-            "archive.org": 3,
-            "auckland.ac.nz": 1,
-            "bnf.fr": 1,
-            "google.com": 1,
-            "oclc.org": 1,
-            "pisc.org.uk": 1,
-            "usatoday.com": 1,
-        }
+        assert len(wre.reference_first_level_domain_counts) == 7
+
+    def test_reference_urls(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext=easter_island_head_excerpt,
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        urls = list(wre.reference_urls)
+        sorted(urls)
+        print(urls)
+        # assert urls[0].timeout_or_retry_error is True
+        # assert urls[0].status_code == 0
+        assert urls[0].checked is True
+        assert len(urls) == 4

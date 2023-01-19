@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.models.api.article_statistics import ArticleStatistics
+from src.models.api.get_statistics.article_statistics import ArticleStatistics
 from src.models.api.job import Job
 from src.models.api.reference_statistics import ReferenceStatistics
 from src.models.wikimedia.enums import AnalyzerReturn
