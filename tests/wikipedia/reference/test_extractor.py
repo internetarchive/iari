@@ -232,3 +232,21 @@ class TestWikipediaReferenceExtractor(TestCase):
         # assert urls[0].status_code == 0
         assert urls[0].checked is True
         assert len(urls) == 4
+
+    def test_has_references_true(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>{{isbn|1234}}</ref>",
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        assert wre.has_references is True
+
+    def test_has_references_false(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="test",
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        assert wre.has_references is False
