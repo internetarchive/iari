@@ -171,7 +171,12 @@ class WikipediaAnalyzer(WcdBaseModel):
 
     def __gather_reference_statistics__(self):
         logger.debug("__gather_reference_statistics__: running")
-        if self.article_statistics and self.article.extractor.number_of_references > 0:
+        if (
+            self.article_statistics
+            and self.article_statistics.references
+            and self.article.extractor.number_of_references > 0
+        ):
+            self.article_statistics.references.details = []
             for reference in self.article.extractor.references:
                 reference_statistics = ReferenceStatistics(
                     plain_text_in_reference=reference.raw_reference.plain_text_in_reference,
