@@ -54,9 +54,7 @@ class GetArticleStatistics(Resource):
                 logger.info(f"Analyzing {self.job.title}...")
                 # TODO use a work queue here like ReFill so
                 #  we can easily scale the workload from thousands of users
-                wikipedia_analyzer = WikipediaAnalyzer(
-                    job=self.job,
-                )
+                wikipedia_analyzer = WikipediaAnalyzer(job=self.job, check_urls=True)
             statistics = wikipedia_analyzer.get_statistics()
             if isinstance(statistics, dict):
                 # we got a json response
