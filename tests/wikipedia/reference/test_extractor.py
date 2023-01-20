@@ -227,9 +227,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         urls = list(wre.reference_urls)
         sorted(urls)
-        print(urls)
-        # assert urls[0].timeout_or_retry_error is True
-        # assert urls[0].status_code == 0
         assert urls[0].checked is True
         assert len(urls) == 4
 
