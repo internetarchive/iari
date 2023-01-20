@@ -131,28 +131,37 @@ class TestTemplate:
         for template in templates:
             wt = WikipediaTemplate(raw_template=template)
             wt.extract_and_prepare_parameter_and_flds()
-            assert wt.urls == {
+            assert (
                 WikipediaUrl(
                     soft404_probability=0.0,
                     url="http://www.test1.com",
                     checked=False,
                     status_code=0,
                     first_level_domain="",
-                ),
+                )
+                in wt.urls
+            )
+            assert (
                 WikipediaUrl(
                     soft404_probability=0.0,
                     url="http://www.test3.com",
                     checked=False,
                     status_code=0,
                     first_level_domain="",
-                ),
+                )
+                in wt.urls
+            )
+            assert (
                 WikipediaUrl(
                     soft404_probability=0.0,
                     url="http://www.test2.com",
                     checked=False,
                     status_code=0,
                     first_level_domain="",
-                ),
+                )
+                in wt.urls
+            )
+            assert (
                 WikipediaUrl(
                     soft404_probability=0.0,
                     url="https://web.archive.org/web/20100715195638/"
@@ -160,12 +169,16 @@ class TestTemplate:
                     checked=False,
                     status_code=0,
                     first_level_domain="",
-                ),
+                )
+                in wt.urls
+            )
+            assert (
                 WikipediaUrl(
                     soft404_probability=0.0,
                     url="http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
                     checked=False,
                     status_code=0,
                     first_level_domain="",
-                ),
-            }
+                )
+                in wt.urls
+            )

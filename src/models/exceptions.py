@@ -40,3 +40,7 @@ class WikipediaApiFetchError(BaseException):
 
 class NoChannelError(BaseException):
     pass
+
+
+class ResolveError(BaseException):
+    pass

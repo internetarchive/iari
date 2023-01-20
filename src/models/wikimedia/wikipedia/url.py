@@ -1,9 +1,15 @@
 import logging
+from urllib.parse import urlparse
 
 import requests
+from dns.resolver import NXDOMAIN, resolve
 from pydantic import BaseModel
+from requests import ConnectTimeout, ReadTimeout
 from tld import get_fld
 from tld.exceptions import TldBadUrl
+from urllib3.connectionpool import MaxRetryError, SSLError
+
+from src.models.exceptions import ResolveError
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +24,10 @@ class WikipediaUrl(BaseModel):
     checked: bool = False
     status_code: int = 0
     first_level_domain: str = ""
+    timeout_or_retry_error: bool = False
+    no_dns_record: bool = False
+    malformed_url: bool = False
+    ssl_error: bool = False
 
     def __hash__(self):
         return hash(self.url)
@@ -25,16 +35,97 @@ class WikipediaUrl(BaseModel):
     def __eq__(self, other):
         return self.url == other.url
 
+    def __lt__(self, other):
+        return self.url < other.url
+
     @property
     def check_soft404(self):
         raise NotImplementedError()
 
-    def check(self):
-        r = requests.get(self.url)
-        self.status_code = r.status_code
-        logger.debug(self.url + "\tStatus: " + str(r.status_code))
-        # if r.status_code == 200:
-        #     self.check_soft404
+    @property
+    def __netloc__(self) -> str:
+        parsed_url = urlparse(self.url)
+        netloc = parsed_url.netloc
+        if not netloc:
+            self.malformed_url = True
+            # try fixing urls like these: httproe.ru/pdfs/pdf_1914.pdf
+            parsed_url = urlparse("http://" + self.url)
+            netloc = parsed_url.netloc
+            if not netloc:
+                return ""
+        return netloc
+
+    @property
+    def __dns_record_found__(self) -> bool:
+        # if domain name is available
+        netloc = self.__netloc__
+        if netloc:
+            print(f"Trying to resolve {netloc}")
+            try:
+                answers = resolve(netloc)
+                if answers:
+                    return True
+                else:
+                    raise ResolveError("no answers")
+            except NXDOMAIN:
+                self.no_dns_record = True
+                return False
+        else:
+            self.malformed_url = True
+            return False
+
+    def __fix_malformed_urls__(self):
+        self.__fix_malformed_httpwww__()
+        self.__fix_malformed_httpswww__()
+
+    def __fix_malformed_httpwww__(self):
+        if self.url.startswith("httpwww"):
+            self.malformed_url = True
+            self.url = self.url.replace("httpwww", "http://www")
+
+    def __fix_malformed_httpswww__(self):
+        if self.url.startswith("httpswww"):
+            self.malformed_url = True
+            self.url = self.url.replace("httpswww", "https://www")
+
+    def check_with_https_verify(self):
+        try:
+            # https://stackoverflow.com/questions/66710047/
+            # python-requests-library-get-the-status-code-without-downloading-the-target
+            r = requests.head(self.url, timeout=2, verify=True)
+            self.status_code = r.status_code
+            logger.debug(self.url + "\tStatus: " + str(r.status_code))
+            # if r.status_code == 200:
+            #     self.check_soft404
+        # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
+        except (ReadTimeout, ConnectTimeout, MaxRetryError):
+            self.timeout_or_retry_error = True
+        except (SSLError, requests.exceptions.SSLError):
+            self.ssl_error = True
+
+    def check_without_https_verify(self):
+        # https://jcutrer.com/python/requests-ignore-invalid-ssl-certificates
+        try:
+            # https://stackoverflow.com/questions/66710047/
+            # python-requests-library-get-the-status-code-without-downloading-the-target
+            r = requests.head(self.url, timeout=1, verify=False)
+            self.status_code = r.status_code
+            logger.debug(self.url + "\tStatus: " + str(r.status_code))
+            # if r.status_code == 200:
+            #     self.check_soft404
+        # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
+        except (ReadTimeout, ConnectTimeout, MaxRetryError):
+            self.timeout_or_retry_error = True
+
+    def fix_and_check(self):
+        logger.debug("fix_and_check: running")
+        self.__fix_malformed_urls__()
+        print(f"Trying to check: {self.url}")
+        if self.__dns_record_found__:
+            self.check_with_https_verify()
+            if self.ssl_error:
+                self.check_without_https_verify()
+        logger.debug("setting checked to true")
         self.checked = True
 
     def is_google_books_url(self):

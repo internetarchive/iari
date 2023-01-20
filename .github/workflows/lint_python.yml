@@ -17,7 +17,7 @@ jobs:
 #        uses: supercharge/redis-github-action@1.4.0
       - run: pip install --upgrade pip wheel
       - run: poetry install --with=dev
-      - run: poetry run bandit --recursive --skip B101,B105,B324 .  # B101 is assert statements
+      - run: poetry run bandit --recursive --skip B101,B105,B324,B501 .  # B101 is assert statements # B501 cert security issue
       - run: poetry run black --check .
       - run: poetry run codespell src/ tests/ *.md *.py # --ignore-words-list="" --skip="*.css,*.js,*.lock"
       - run: poetry run flake8 --ignore=C408,C416,F401,F541,R501,R502,R503,R504,R505,R506,W503

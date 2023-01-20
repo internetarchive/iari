@@ -5,7 +5,9 @@ from flask import request
 from flask_restful import Resource, abort  # type: ignore
 
 from src.helpers.console import console
-from src.models.api.get_statistics_schema import GetStatisticsSchema
+from src.models.api.get_article_statistics.get_statistics_schema import (
+    GetStatisticsSchema,
+)
 from src.models.api.job import Job
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
 from test_data.test_content import (  # type: ignore
@@ -38,8 +40,7 @@ class GetArticleStatistics(Resource):
                 if self.job.title == "Test":
                     logger.info(f"(testing) Analyzing {self.job.title} from test_data")
                     wikipedia_analyzer = WikipediaAnalyzer(
-                        job=self.job,
-                        wikitext=test_full_article,
+                        job=self.job, wikitext=test_full_article
                     )
                 elif self.job.title == "Easter Island":
                     logger.info(f"(testing) Analyzing {self.job.title} from test_data")
@@ -53,9 +54,7 @@ class GetArticleStatistics(Resource):
                 logger.info(f"Analyzing {self.job.title}...")
                 # TODO use a work queue here like ReFill so
                 #  we can easily scale the workload from thousands of users
-                wikipedia_analyzer = WikipediaAnalyzer(
-                    job=self.job,
-                )
+                wikipedia_analyzer = WikipediaAnalyzer(job=self.job, check_urls=True)
             statistics = wikipedia_analyzer.get_statistics()
             if isinstance(statistics, dict):
                 # we got a json response
