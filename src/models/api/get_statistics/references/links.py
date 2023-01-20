@@ -11,9 +11,9 @@ class Links(BaseModel):
 
     We use BaseModel to avoid the cache attribute"""
 
-    all: int
-    s200: int
-    s404: int
-    s5xx: int
-    other: int
+    all: int = 0
+    s200: int = 0
+    s404: int = 0
+    s5xx: int = 0
+    other: int = 0
     details: List[WikipediaUrl] = []
