@@ -88,6 +88,7 @@ class WikipediaArticle(WcdItem):
         raise NotImplementedError("To be written")
 
     def fetch_and_extract_and_parse_and_generate_hash(self):
+        logger.debug("fetch_and_extract_and_parse_and_generate_hash: running")
         logger.info("Extracting templates and parsing the references now")
         # We only fetch data from Wikipedia if we don't already have wikitext to work on
         if not self.wikitext:
@@ -111,7 +112,7 @@ class WikipediaArticle(WcdItem):
             self.extractor.extract_all_references()
             self.__generate_hash__()
         else:
-            logger.error("This branch should never be hit.")
+            raise Exception("This branch should never be hit.")
 
     def __fetch_page_data__(self) -> None:
         """This fetches metadata and the latest revision id
