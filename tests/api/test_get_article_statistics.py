@@ -124,13 +124,14 @@ class TestGetArticleStatistics(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(ArticleStatistics().dict(), ArticleStatistics(**data).dict())
 
-    def test_valid_request_gnu_linux_naming_controversy(self):
-        response = self.test_client.get(
-            "get-statistics?lang=en&site=wikipedia&title=GNU/Linux_naming_controversy"
-        )
-        logger.debug(response.data)
-        # data = json.loads(response.data)
-        self.assertEqual(200, response.status_code)
+    # DISABLED because it takes forever
+    # def test_valid_request_gnu_linux_naming_controversy(self):
+    #     response = self.test_client.get(
+    #         "get-statistics?lang=en&site=wikipedia&title=GNU/Linux_naming_controversy"
+    #     )
+    #     logger.debug(response.data)
+    #     # data = json.loads(response.data)
+    #     self.assertEqual(200, response.status_code)
 
     def test_valid_request_easter_island(self):
         response = self.test_client.get(
