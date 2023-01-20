@@ -37,7 +37,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     sections: List[Wikicode] = []
     wikibase: Wikibase
     testing: bool = False
-    check_urls: bool = True
+    check_urls: bool = False
 
     class Config:
         arbitrary_types_allowed = True
@@ -215,16 +215,19 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def reference_urls(self) -> List[WikipediaUrl]:
         """Unique URLs"""
-        if not self.content_references[0].raw_reference.urls_checked:
-            raise MissingInformationError("url checking has not been done yet")
-        urls: List[WikipediaUrl] = list()
-        for reference in self.references:
-            if reference.raw_reference:
-                for url in reference.raw_reference.checked_urls:
-                    urls.append(url)
-        # We run them through a set to avoid duplicates and then convert back
-        # to list because objects in sets cannot be updated it seems
-        return list(set(urls))
+        if self.check_urls:
+            if not self.content_references[0].raw_reference.urls_checked:
+                raise MissingInformationError("url checking has not been done yet")
+            urls: List[WikipediaUrl] = list()
+            for reference in self.references:
+                if reference.raw_reference:
+                    for url in reference.raw_reference.checked_urls:
+                        urls.append(url)
+            # We run them through a set to avoid duplicates and then convert back
+            # to list because objects in sets cannot be updated it seems
+            return list(set(urls))
+        else:
+            return list()
 
     @property
     def reference_first_level_domain_counts(self) -> List[Dict[str, int]]:

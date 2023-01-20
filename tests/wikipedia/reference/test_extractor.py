@@ -172,9 +172,7 @@ class TestWikipediaReferenceExtractor(TestCase):
     def test_first_level_domains_one(self):
         example_reference = "<ref>{{cite web|url=http://google.com}}</ref>"
         wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext=example_reference,
-            wikibase=wikibase,
+            testing=True, wikitext=example_reference, wikibase=wikibase, check_urls=True
         )
         wre.extract_all_references()
         assert wre.reference_first_level_domains == ["google.com"]
@@ -185,6 +183,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True,
             wikitext=example_reference + example_reference,
             wikibase=wikibase,
+            check_urls=True,
         )
         wre.extract_all_references()
         assert wre.reference_first_level_domains == ["google.com", "google.com"]
@@ -195,6 +194,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True,
             wikitext=example_reference + example_reference,
             wikibase=wikibase,
+            check_urls=True,
         )
         wre.extract_all_references()
         assert wre.reference_first_level_domain_counts == [{"google.com": 2}]
@@ -223,6 +223,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True,
             wikitext=easter_island_head_excerpt,
             wikibase=wikibase,
+            check_urls=True,
         )
         wre.extract_all_references()
         urls = list(wre.reference_urls)

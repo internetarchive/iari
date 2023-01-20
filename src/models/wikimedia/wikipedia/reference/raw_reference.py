@@ -39,7 +39,7 @@ class WikipediaRawReference(WcdBaseModel):
     is_general_reference: bool = False
     urls_checked: bool = False
     checked_urls: List[WikipediaUrl] = []
-    check_urls: bool = True
+    check_urls: bool = False
     # TODO add new optional attribute wikicode: Optional[Wikicode]
     #  which contains the parsed output of the general reference line
 
@@ -105,14 +105,17 @@ class WikipediaRawReference(WcdBaseModel):
     @property
     def first_level_domains(self) -> Set[str]:
         """This returns a set"""
-        if not self.urls_checked:
-            raise MissingInformationError("urls have not been fixed and checked")
-        flds = set()
-        for url in self.checked_urls:
-            url.get_first_level_domain()
-            if url.first_level_domain:
-                flds.add(url.first_level_domain)
-        return flds
+        if self.check_urls:
+            if not self.urls_checked:
+                raise MissingInformationError("urls have not been fixed and checked")
+            flds = set()
+            for url in self.checked_urls:
+                url.get_first_level_domain()
+                if url.first_level_domain:
+                    flds.add(url.first_level_domain)
+            return flds
+        else:
+            return set()
 
     @property
     def google_books_template_found(self):

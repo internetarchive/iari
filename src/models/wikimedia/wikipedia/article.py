@@ -37,7 +37,7 @@ class WikipediaArticle(WcdItem):
     wdqid: str = ""
     found_in_wikipedia: bool = True
     extractor: Optional[WikipediaReferenceExtractor] = None
-    check_urls: bool = True
+    check_urls: bool = False
     # TODO add language_code to avoid enwiki hardcoding
 
     class Config:

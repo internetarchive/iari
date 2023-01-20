@@ -168,6 +168,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=False,
         )
         assert raw_reference_object.is_citation_reference is False
         assert raw_reference_object.is_general_reference is True
@@ -183,6 +184,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=False,
         )
         raw_reference_object.extract_and_check_urls()
         assert raw_reference_object.is_general_reference is True
@@ -199,6 +201,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=False,
         )
         raw_reference_object.extract_and_check_urls()
         assert raw_reference_object.plain_text_in_reference is True
@@ -214,6 +217,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=False,
         )
         raw_reference_object.extract_and_check_urls()
         assert raw_reference_object.plain_text_in_reference is True
@@ -229,6 +233,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=False,
         )
         raw_reference_object.extract_and_check_urls()
         assert raw_reference_object.plain_text_in_reference is False
@@ -374,6 +379,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=True,
         )
         raw_reference_object.extract_and_check_urls()
         assert raw_reference_object.first_level_domains == {"geocities.com"}
@@ -390,6 +396,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=True,
         )
         raw_reference_object.extract_and_check_urls()
         assert raw_reference_object.first_level_domains == {
@@ -409,6 +416,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=False,
         )
         with self.assertRaises(MissingInformationError):
             raw_reference_object.__check_urls__()
@@ -425,6 +433,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=True,
         )
         raw_reference_object.extract_and_check_urls()
         urls = raw_reference_object.checked_urls
@@ -445,6 +454,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=True,
         )
         raw_reference_object.extract_and_check_urls()
         urls = raw_reference_object.checked_urls
@@ -466,6 +476,7 @@ class TestWikipediaRawReference(TestCase):
             testing=True,
             wikibase=wikibase,
             is_general_reference=True,
+            check_urls=False,
         )
         bare_urls = raw_reference_object.__find_bare_urls__()
         assert len(bare_urls) == 0

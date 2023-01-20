@@ -43,7 +43,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     wikibase: Wikibase = IASandboxWikibase()
     wikitext: str = ""
     testing: bool = False
-    check_urls: bool = True
+    check_urls: bool = False
 
     @property
     def __agg__(self):
