@@ -1,16 +1,16 @@
 from pydantic import BaseModel
 
-from src.models.api.get_statistics.references.content.aggregate.cite_q_references import (
+from src.models.api.get_article_statistics.references.content.aggregate.cite_q_references import (
     CiteQReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1_references import (
+from src.models.api.get_article_statistics.references.content.aggregate.cs1_references import (
     Cs1References,
 )
 
 
 class AggregateContentReferences(BaseModel):
     """The purpose of this class is to model the statistics
-    the user wants from the get_statistics endpoint
+    the user wants from the get_article_statistics endpoint
 
     We use BaseModel to avoid the cache attribute"""
 

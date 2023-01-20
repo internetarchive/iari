@@ -1,25 +1,31 @@
 from unittest import TestCase
 
-from src.models.api.get_statistics.article_statistics import ArticleStatistics
-from src.models.api.get_statistics.references import Links, References, ReferenceTypes
-from src.models.api.get_statistics.references.content import (
+from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
+from src.models.api.get_article_statistics.reference_statistics import (
+    ReferenceStatistics,
+)
+from src.models.api.get_article_statistics.references import (
+    Links,
+    References,
+    ReferenceTypes,
+)
+from src.models.api.get_article_statistics.references.content import (
     AggregateContentReferences,
     CitationReferences,
     ContentReferences,
     GeneralReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate import (
+from src.models.api.get_article_statistics.references.content.aggregate import (
     CiteQReferences,
     Cs1References,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_book_references import (
+from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_book_references import (
     CiteBookReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_web_references import (
+from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_web_references import (
     CiteWebReferences,
 )
 from src.models.api.job import Job
-from src.models.api.reference_statistics import ReferenceStatistics
 from src.models.wikimedia.enums import AnalyzerReturn
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import (  # type: ignore
@@ -71,7 +77,7 @@ class TestWikipediaAnalyzer(TestCase):
         # Verify that it is populated correctly
         assert wa.article_statistics.has_references is True
         print(wa.article_statistics)
-        from src.models.api.get_statistics.references.content.aggregate.cs1.cite_journal_references import (
+        from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_journal_references import (
             CiteJournalReferences,
         )
 

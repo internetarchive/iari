@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class ReferenceStatistics(BaseModel):
     """The purpose of this class is to model the statistics
-    the user wants from the get_statistics endpoint"""
+    the user wants from the get_article_statistics endpoint"""
 
     plain_text_in_reference: bool = False
     citation_template_found: bool = False

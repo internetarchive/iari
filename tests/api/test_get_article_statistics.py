@@ -7,7 +7,7 @@ from flask_restful import Api  # type: ignore
 
 from src import console
 from src.models.api.get_article_statistics import GetArticleStatistics
-from src.models.api.get_statistics.article_statistics import ArticleStatistics
+from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class TestGetArticleStatistics(TestCase):
                                                        lang=self.job.lang,
                                                        wikimedia_site=self.job.site,
                                                        testing=self.job.testing)
-                statistics = wikipedia_analyzer.get_statistics()
+                statistics = wikipedia_analyzer.get_article_statistics()
                 if self.job.testing:
                     # what is the purpose of this?
                     return "ok", 200

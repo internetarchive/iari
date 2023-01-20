@@ -2,12 +2,12 @@ from typing import Optional
 
 from pydantic import BaseModel, Extra
 
-from src.models.api.get_statistics.references import References
+from src.models.api.get_article_statistics.references import References
 
 
 class ArticleStatistics(BaseModel):
     """The purpose of this class is to model the statistics
-    the user wants from the get_statistics endpoint
+    the user wants from the get_article_statistics endpoint
 
     We use BaseModel to avoid the cache attribute"""
 
