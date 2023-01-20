@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List
+from typing import Dict, List
 from typing import OrderedDict as OrderedDictType
 from typing import Tuple
 
@@ -226,7 +226,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return list(set(urls))
 
     @property
-    def reference_first_level_domain_counts(self) -> List[Tuple[str, int]]:
+    def reference_first_level_domain_counts(self) -> List[Dict[str, int]]:
         """This returns a dict with fld as key and the count as value"""
         fld_set = set(self.reference_first_level_domains)
         counts = dict()
@@ -235,7 +235,13 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             counts[fld] = count
         # Sort by count, descending
         sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-        return sorted_counts
+        sorted_counts_dictionaries = []
+        for element in sorted_counts:
+            fld = str(element[0])
+            count = int(element[1])
+            dictionary: Dict[str, int] = {fld: count}
+            sorted_counts_dictionaries.append(dictionary)
+        return sorted_counts_dictionaries
 
     @property
     def reference_first_level_domains(self) -> List[str]:
