@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from pydantic import BaseModel
 
@@ -17,3 +17,4 @@ class References(BaseModel):
     details: List[ReferenceStatistics] = []
     links: Links
     types: ReferenceTypes
+    first_level_domain_counts: List[Dict[str, int]] = []

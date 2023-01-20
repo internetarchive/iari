@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Extra
 
@@ -11,7 +11,6 @@ class ArticleStatistics(BaseModel):
 
     We use BaseModel to avoid the cache attribute"""
 
-    first_level_domain_counts: Dict[str, int] = {}
     has_references: bool = False
     references: Optional[References] = None
 
