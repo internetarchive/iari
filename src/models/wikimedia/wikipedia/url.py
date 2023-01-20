@@ -102,7 +102,13 @@ class WikipediaUrl(BaseModel):
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (ReadTimeout, ConnectTimeout, MaxRetryError, NewConnectionError):
+        except (
+            ReadTimeout,
+            ConnectTimeout,
+            MaxRetryError,
+            NewConnectionError,
+            ConnectionError,
+        ):
             self.timeout_or_retry_error = True
         except (SSLError, requests.exceptions.SSLError):
             self.ssl_error = True
@@ -118,7 +124,13 @@ class WikipediaUrl(BaseModel):
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (ReadTimeout, ConnectTimeout, MaxRetryError, NewConnectionError):
+        except (
+            ReadTimeout,
+            ConnectTimeout,
+            MaxRetryError,
+            NewConnectionError,
+            ConnectionError,
+        ):
             self.timeout_or_retry_error = True
 
     def fix_and_check(self):
