@@ -2,12 +2,13 @@ import logging
 from urllib.parse import urlparse
 
 import requests
-from dns.resolver import NXDOMAIN, resolve
+from dns.resolver import NXDOMAIN, LifetimeTimeout, NoNameservers, resolve
 from pydantic import BaseModel
 from requests import ConnectTimeout, ReadTimeout
 from tld import get_fld
 from tld.exceptions import TldBadUrl
 from urllib3.connectionpool import MaxRetryError, SSLError
+from urllib3.exceptions import NewConnectionError
 
 from src.models.exceptions import ResolveError
 
@@ -70,6 +71,9 @@ class WikipediaUrl(BaseModel):
             except NXDOMAIN:
                 self.no_dns_record = True
                 return False
+            except (LifetimeTimeout, NoNameservers):
+                self.timeout_or_retry_error = True
+                return False
         else:
             self.malformed_url = True
             return False
@@ -98,7 +102,7 @@ class WikipediaUrl(BaseModel):
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (ReadTimeout, ConnectTimeout, MaxRetryError):
+        except (ReadTimeout, ConnectTimeout, MaxRetryError, NewConnectionError):
             self.timeout_or_retry_error = True
         except (SSLError, requests.exceptions.SSLError):
             self.ssl_error = True
@@ -114,7 +118,7 @@ class WikipediaUrl(BaseModel):
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (ReadTimeout, ConnectTimeout, MaxRetryError):
+        except (ReadTimeout, ConnectTimeout, MaxRetryError, NewConnectionError):
             self.timeout_or_retry_error = True
 
     def fix_and_check(self):
