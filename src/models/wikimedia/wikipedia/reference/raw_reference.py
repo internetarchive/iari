@@ -39,6 +39,7 @@ class WikipediaRawReference(WcdBaseModel):
     is_general_reference: bool = False
     urls_checked: bool = False
     checked_urls: List[WikipediaUrl] = []
+    check_urls: bool = True
     # TODO add new optional attribute wikicode: Optional[Wikicode]
     #  which contains the parsed output of the general reference line
 
@@ -311,7 +312,10 @@ class WikipediaRawReference(WcdBaseModel):
         logger.debug("extract_and_check_urls: running")
         self.__extract_templates_and_parameters_from_raw_reference__()
         self.__determine_if_multiple_templates__()
-        self.__check_urls__()
+        if self.check_urls:
+            self.__check_urls__()
+        else:
+            logger.info("Not checking urls for this raw reference")
 
     def get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
         """Make a WikipediaReference based on the extracted information"""

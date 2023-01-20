@@ -43,6 +43,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     wikibase: Wikibase = IASandboxWikibase()
     wikitext: str = ""
     testing: bool = False
+    check_urls: bool = True
 
     @property
     def __agg__(self):
@@ -210,6 +211,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 wikibase=self.wikibase,
                 wikitext=self.wikitext,
                 testing=self.testing,
+                check_urls=self.check_urls,
             )
         else:
             raise MissingInformationError("Got no title")

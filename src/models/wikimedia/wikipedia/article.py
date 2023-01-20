@@ -37,6 +37,7 @@ class WikipediaArticle(WcdItem):
     wdqid: str = ""
     found_in_wikipedia: bool = True
     extractor: Optional[WikipediaReferenceExtractor] = None
+    check_urls: bool = True
     # TODO add language_code to avoid enwiki hardcoding
 
     class Config:
@@ -107,7 +108,9 @@ class WikipediaArticle(WcdItem):
             # We got what we need now to make the extraction and parsing
             # print(self.wikitext)
             self.extractor = WikipediaReferenceExtractor(
-                wikitext=self.wikitext, wikibase=self.wikibase
+                wikitext=self.wikitext,
+                wikibase=self.wikibase,
+                check_urls=self.check_urls,
             )
             self.extractor.extract_all_references()
             self.__generate_hash__()

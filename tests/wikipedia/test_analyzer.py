@@ -30,8 +30,10 @@ from test_data.test_content import (  # type: ignore
 
 class TestWikipediaAnalyzer(TestCase):
     def test_fetch_slash_title_article(self):
+        """This takes forever because of url checking"""
         wa = WikipediaAnalyzer(
-            job=Job(title="GNU/Linux_naming_controversy", testing=True)
+            job=Job(title="GNU/Linux_naming_controversy", testing=True),
+            check_urls=False,
         )
         wa.__populate_article__()
         # fixme This uses internet access
@@ -59,6 +61,8 @@ class TestWikipediaAnalyzer(TestCase):
         assert wa.article_statistics == ArticleStatistics().dict()
 
     def test__get_statistics_easter_island(self):
+        """This test takes forever (11s)"""
+        # FIXME implement mock requests to reduce test time
         wa = WikipediaAnalyzer(
             job=Job(title="Easter Island", testing=True),
             wikitext=easter_island_head_excerpt,

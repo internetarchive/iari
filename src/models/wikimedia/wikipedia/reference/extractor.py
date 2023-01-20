@@ -37,6 +37,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     sections: List[Wikicode] = []
     wikibase: Wikibase
     testing: bool = False
+    check_urls: bool = True
 
     class Config:
         arbitrary_types_allowed = True
@@ -527,7 +528,10 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         for ref in refs:
             self.raw_references.append(
                 WikipediaRawReference(
-                    wikicode=ref, wikibase=self.wikibase, testing=self.testing
+                    wikicode=ref,
+                    wikibase=self.wikibase,
+                    testing=self.testing,
+                    check_urls=self.check_urls,
                 )
             )
 
