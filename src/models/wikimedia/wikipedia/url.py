@@ -1,4 +1,5 @@
 import logging
+from ipaddress import ip_address
 from urllib.parse import urlparse
 
 import requests
@@ -21,7 +22,7 @@ from requests.exceptions import (
     Timeout,
 )
 from tld import get_fld
-from tld.exceptions import TldBadUrl
+from tld.exceptions import TldBadUrl, TldDomainNotFound
 
 from src.models.exceptions import ResolveError
 
@@ -41,6 +42,7 @@ class WikipediaUrl(BaseModel):
     error: bool = False
     no_dns_record: bool = False
     malformed_url: bool = False
+    fld_is_ip: bool = False
 
     def __hash__(self):
         return hash(self.url)
@@ -185,7 +187,7 @@ class WikipediaUrl(BaseModel):
         """Checks for Internet Archive details url"""
         return bool("//archive.org/details" in self.url)
 
-    def get_first_level_domain(self):
+    def extract_first_level_domain_from_url(self) -> None:
         logger.debug("__get_first_level_domain__: Running")
         try:
             logger.debug(f"Trying to get FLD from {self.url}")
@@ -193,14 +195,20 @@ class WikipediaUrl(BaseModel):
             if fld:
                 logger.debug(f"Found FLD: {fld}")
                 self.first_level_domain = fld
-        except TldBadUrl:
+        except (TldBadUrl, TldDomainNotFound):
             """The library does not support Wayback Machine URLs"""
             if self.is_wayback_machine_url():
-                return "archive.org"
+                self.first_level_domain = "archive.org"
             else:
-                message = f"Bad url {self.url} encountered"
-                logger.warning(message)
-                # self.__log_to_file__(
-                #     message=str(message), file_name="url_exceptions.log"
-                # )
-                # return None
+                try:
+                    ip = ip_address(self.__netloc__)
+                    logger.debug(f"found IP: {ip}")
+                    self.first_level_domain = str(ip)
+                    self.fld_is_ip = True
+                except ValueError:
+                    # Not a valid IPv4 or IPv6 address.
+                    message = f"Could not extract fld from {self.url}"
+                    logger.warning(message)
+                    # self.__log_to_file__(
+                    #     message=str(message), file_name="url_exceptions.log"
+                    # )

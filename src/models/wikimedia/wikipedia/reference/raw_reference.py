@@ -110,7 +110,7 @@ class WikipediaRawReference(WcdBaseModel):
                 raise MissingInformationError("urls have not been fixed and checked")
             flds = set()
             for url in self.checked_urls:
-                url.get_first_level_domain()
+                url.extract_first_level_domain_from_url()
                 if url.first_level_domain:
                     flds.add(url.first_level_domain)
             return flds

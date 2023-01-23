@@ -220,7 +220,7 @@ class WikipediaTemplate(WcdBaseModel):
     def __extract_first_level_domains_from_urls__(self):
         """Extract from all URLs"""
         [
-            url.get_first_level_domain()
+            url.extract_first_level_domain_from_url()
             for url in self.urls
             if url.first_level_domain == ""
         ]

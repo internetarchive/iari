@@ -64,9 +64,9 @@ class TestWikipediaUrl(TestCase):
         self.assertFalse(self.wikipediaUrl.is_ia_details_url())
 
     def test_get_first_level_domain(self):
-        self.wikipediaUrl.get_first_level_domain()
+        self.wikipediaUrl.extract_first_level_domain_from_url()
         assert self.wikipediaUrl.first_level_domain == "wikipedia.org"
-        self.wikipediaUrl2.get_first_level_domain()
+        self.wikipediaUrl2.extract_first_level_domain_from_url()
         assert self.wikipediaUrl2.first_level_domain == "google.com"
 
     def test___fix_malformed_httpswww__(self):
@@ -139,3 +139,16 @@ class TestWikipediaUrl(TestCase):
     # def test_check_soft404(self):
     #     assert False
     #
+    def test_fld_ip_adress(self):
+        url = WikipediaUrl(url="127.0.0.1")
+        # url.fix_and_check()
+        url.extract_first_level_domain_from_url()
+        assert url.first_level_domain == "127.0.0.1"
+        assert url.fld_is_ip is True
+
+    def test_fld_ip_adress_with_path(self):
+        url = WikipediaUrl(url="127.0.0.1/test")
+        # url.fix_and_check()
+        url.extract_first_level_domain_from_url()
+        assert url.first_level_domain == "127.0.0.1"
+        assert url.fld_is_ip is True
