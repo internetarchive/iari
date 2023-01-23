@@ -142,7 +142,9 @@ class WikipediaAnalyzer(WcdBaseModel):
         ):
             has_references = self.article.extractor.has_references
             self.article_statistics = ArticleStatistics(
-                has_references=has_references, page_id=self.article.page_id
+                has_references=has_references,
+                page_id=self.article.page_id,
+                title=self.article.title,
             )
             if has_references:
                 self.article_statistics.references = self.__references__
