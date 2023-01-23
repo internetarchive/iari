@@ -18,6 +18,7 @@ class ArticleStatistics(BaseModel):
     site: str = "wikipedia"  # wikimedia site in question
     timestamp: int = 0  # timestamp at beginning of analysis
     timing: int = 0  # time to analyze in seconds
+    title: str = ""
 
     # TODO number_of_images
     # TODO number_of_words
