@@ -27,6 +27,7 @@ from tld.exceptions import TldBadUrl, TldDomainNotFound
 from src.models.exceptions import ResolveError
 
 logger = logging.getLogger(__name__)
+timeout = 2
 
 
 class WikipediaUrl(BaseModel):
@@ -34,15 +35,15 @@ class WikipediaUrl(BaseModel):
     It uses BaseModel to avoid the cache
     attribute so we can output it via the API easily"""
 
-    soft404_probability: float = 0.0
-    url: str
     checked: bool = False
-    status_code: int = 0
-    first_level_domain: str = ""
     error: bool = False
-    no_dns_record: bool = False
-    malformed_url: bool = False
+    first_level_domain: str = ""
     fld_is_ip: bool = False
+    malformed_url: bool = False
+    no_dns_record: bool = False
+    # soft404_probability: float = 0.0
+    status_code: int = 0
+    url: str
 
     def __hash__(self):
         return hash(self.url)
@@ -112,7 +113,7 @@ class WikipediaUrl(BaseModel):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(self.url, timeout=2, verify=True)
+            r = requests.head(self.url, timeout=timeout, verify=True)
             self.status_code = r.status_code
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             # if r.status_code == 200:
@@ -143,7 +144,7 @@ class WikipediaUrl(BaseModel):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(self.url, timeout=1, verify=False)
+            r = requests.head(self.url, timeout=timeout, verify=False)
             self.status_code = r.status_code
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             # if r.status_code == 200:
