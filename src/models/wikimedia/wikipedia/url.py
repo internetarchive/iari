@@ -2,12 +2,26 @@ import logging
 from urllib.parse import urlparse
 
 import requests
-from dns.resolver import NXDOMAIN, resolve
+from dns.resolver import NXDOMAIN, LifetimeTimeout, NoNameservers, resolve
 from pydantic import BaseModel
-from requests import ConnectTimeout, ReadTimeout
+from requests.exceptions import (
+    ConnectionError,
+    ConnectTimeout,
+    HTTPError,
+    InvalidHeader,
+    InvalidProxyURL,
+    InvalidSchema,
+    InvalidURL,
+    MissingSchema,
+    ProxyError,
+    ReadTimeout,
+    RequestException,
+    RetryError,
+    SSLError,
+    Timeout,
+)
 from tld import get_fld
 from tld.exceptions import TldBadUrl
-from urllib3.connectionpool import MaxRetryError, SSLError
 
 from src.models.exceptions import ResolveError
 
@@ -24,10 +38,9 @@ class WikipediaUrl(BaseModel):
     checked: bool = False
     status_code: int = 0
     first_level_domain: str = ""
-    timeout_or_retry_error: bool = False
+    error: bool = False
     no_dns_record: bool = False
     malformed_url: bool = False
-    ssl_error: bool = False
 
     def __hash__(self):
         return hash(self.url)
@@ -39,7 +52,7 @@ class WikipediaUrl(BaseModel):
         return self.url < other.url
 
     @property
-    def check_soft404(self):
+    def __check_soft404__(self):
         raise NotImplementedError()
 
     @property
@@ -57,6 +70,7 @@ class WikipediaUrl(BaseModel):
 
     @property
     def __dns_record_found__(self) -> bool:
+        logger.debug("__dns_record_found__: running")
         # if domain name is available
         netloc = self.__netloc__
         if netloc:
@@ -69,6 +83,9 @@ class WikipediaUrl(BaseModel):
                     raise ResolveError("no answers")
             except NXDOMAIN:
                 self.no_dns_record = True
+                return False
+            except (LifetimeTimeout, NoNameservers):
+                self.error = True
                 return False
         else:
             self.malformed_url = True
@@ -88,7 +105,8 @@ class WikipediaUrl(BaseModel):
             self.malformed_url = True
             self.url = self.url.replace("httpswww", "https://www")
 
-    def check_with_https_verify(self):
+    def __check_with_https_verify__(self):
+        logger.debug("__check_with_https_verify__: running")
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
@@ -98,13 +116,28 @@ class WikipediaUrl(BaseModel):
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (ReadTimeout, ConnectTimeout, MaxRetryError):
-            self.timeout_or_retry_error = True
-        except (SSLError, requests.exceptions.SSLError):
+        except (
+            ReadTimeout,
+            ConnectTimeout,
+            RetryError,
+            InvalidHeader,
+            Timeout,
+            ConnectionError,
+            RequestException,
+            HTTPError,
+            ProxyError,
+        ) as e:
+            logger.debug(f"got exception: {e}")
+            self.error = True
+        except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
+            logger.debug(f"got exception: {e}")
+            self.malformed_url = True
+        except SSLError:
             self.ssl_error = True
 
-    def check_without_https_verify(self):
+    def __check_without_https_verify__(self):
         # https://jcutrer.com/python/requests-ignore-invalid-ssl-certificates
+        logger.debug("__check_without_https_verify__: running")
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
@@ -114,17 +147,31 @@ class WikipediaUrl(BaseModel):
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (ReadTimeout, ConnectTimeout, MaxRetryError):
-            self.timeout_or_retry_error = True
+        except (
+            ReadTimeout,
+            ConnectTimeout,
+            RetryError,
+            InvalidHeader,
+            Timeout,
+            ConnectionError,
+            RequestException,
+            HTTPError,
+            ProxyError,
+        ) as e:
+            logger.debug(f"got exception: {e}")
+            self.error = True
+        except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
+            logger.debug(f"got exception: {e}")
+            self.malformed_url = True
 
     def fix_and_check(self):
         logger.debug("fix_and_check: running")
         self.__fix_malformed_urls__()
         print(f"Trying to check: {self.url}")
         if self.__dns_record_found__:
-            self.check_with_https_verify()
-            if self.ssl_error:
-                self.check_without_https_verify()
+            self.__check_with_https_verify__()
+            if self.error:
+                self.__check_without_https_verify__()
         logger.debug("setting checked to true")
         self.checked = True
 
