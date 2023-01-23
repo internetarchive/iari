@@ -13,6 +13,11 @@ class ArticleStatistics(BaseModel):
 
     has_references: bool = False
     references: Optional[References] = None
+    timing: int = 0  # time to analyze in seconds
+    timestamp: int = 0  # timestamp at beginning of analysis
+    page_id: int = 0  # page id of the Wikipedia in question
+    lang: str = "en"  # language code according to Wikimedia
+    site: str = "wikipedia"  # wikimedia site in question
 
     # TODO number_of_images
     # TODO number_of_words
