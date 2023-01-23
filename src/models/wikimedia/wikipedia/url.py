@@ -2,7 +2,7 @@ import logging
 from urllib.parse import urlparse
 
 import requests
-from dns.resolver import NXDOMAIN, LifetimeTimeout, NoNameservers, resolve
+from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer, NoNameservers, resolve
 from pydantic import BaseModel
 from requests.exceptions import (
     ConnectionError,
@@ -84,7 +84,7 @@ class WikipediaUrl(BaseModel):
             except NXDOMAIN:
                 self.no_dns_record = True
                 return False
-            except (LifetimeTimeout, NoNameservers):
+            except (LifetimeTimeout, NoNameservers, NoAnswer):
                 self.error = True
                 return False
         else:
