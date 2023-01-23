@@ -116,6 +116,12 @@ class TestWikipediaUrl(TestCase):
         url.fix_and_check()
         assert url.error is True
 
+    def test_dns_hoover(self):
+        url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
+        url.fix_and_check()
+        assert url.error is True
+        assert url.checked is True
+
     def test_status_code_404(self):
         url = WikipediaUrl(
             url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
