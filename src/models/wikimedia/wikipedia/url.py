@@ -38,10 +38,9 @@ class WikipediaUrl(BaseModel):
     checked: bool = False
     status_code: int = 0
     first_level_domain: str = ""
-    timeout_or_retry_error: bool = False
+    error: bool = False
     no_dns_record: bool = False
     malformed_url: bool = False
-    ssl_error: bool = False
 
     def __hash__(self):
         return hash(self.url)
@@ -86,7 +85,7 @@ class WikipediaUrl(BaseModel):
                 self.no_dns_record = True
                 return False
             except (LifetimeTimeout, NoNameservers):
-                self.timeout_or_retry_error = True
+                self.error = True
                 return False
         else:
             self.malformed_url = True
@@ -129,7 +128,7 @@ class WikipediaUrl(BaseModel):
             ProxyError,
         ) as e:
             logger.debug(f"got exception: {e}")
-            self.timeout_or_retry_error = True
+            self.error = True
         except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
             logger.debug(f"got exception: {e}")
             self.malformed_url = True
@@ -160,7 +159,7 @@ class WikipediaUrl(BaseModel):
             ProxyError,
         ) as e:
             logger.debug(f"got exception: {e}")
-            self.timeout_or_retry_error = True
+            self.error = True
         except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
             logger.debug(f"got exception: {e}")
             self.malformed_url = True
@@ -171,7 +170,7 @@ class WikipediaUrl(BaseModel):
         print(f"Trying to check: {self.url}")
         if self.__dns_record_found__:
             self.__check_with_https_verify__()
-            if self.ssl_error or self.timeout_or_retry_error:
+            if self.error:
                 self.__check_without_https_verify__()
         logger.debug("setting checked to true")
         self.checked = True
