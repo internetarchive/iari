@@ -1,4 +1,6 @@
 import logging
+import time
+from datetime import datetime
 from typing import Optional
 
 from flask import request
@@ -55,8 +57,15 @@ class GetArticleStatistics(Resource):
                 # TODO use a work queue here like ReFill so
                 #  we can easily scale the workload from thousands of users
                 wikipedia_analyzer = WikipediaAnalyzer(job=self.job, check_urls=True)
+            # https://realpython.com/python-timer/
+            start_time = time.perf_counter()
+            timestamp = datetime.timestamp(datetime.utcnow())
             statistics = wikipedia_analyzer.get_statistics()
+            end_time = time.perf_counter()
             if isinstance(statistics, dict):
+                # Update the dictionary before returning it
+                statistics["timing"] = round(float(end_time - start_time), 3)
+                statistics["timestamp"] = int(timestamp)
                 # we got a json response
                 # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
                 # flask calls jsonify automatically

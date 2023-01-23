@@ -19,6 +19,6 @@ class References(BaseModel):
 
     all: int
     details: List[ReferenceStatistics] = []
+    first_level_domain_counts: List[Dict[str, int]] = []
     links: Links
     types: ReferenceTypes
-    first_level_domain_counts: List[Dict[str, int]] = []
