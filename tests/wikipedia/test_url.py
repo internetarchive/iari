@@ -99,6 +99,16 @@ class TestWikipediaUrl(TestCase):
         url = WikipediaUrl(url="http://www.google.com")
         assert url.__dns_record_found__ is True
 
+    def test_error1(self):
+        url = WikipediaUrl(url="https://voyagermediaawards.nz/judges2019")
+        url.fix_and_check()
+        assert url.timeout_or_retry_error is True
+
+    def test_error2(self):
+        url = WikipediaUrl(url="https://ukrainianweek.com/History/198459")
+        url.fix_and_check()
+        assert url.timeout_or_retry_error is True
+
     def test_ssl_error(self):
         url = WikipediaUrl(
             url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
