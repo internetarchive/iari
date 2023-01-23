@@ -1,4 +1,5 @@
 import logging
+from ipaddress import ip_address
 from urllib.parse import urlparse
 
 import requests
@@ -21,11 +22,12 @@ from requests.exceptions import (
     Timeout,
 )
 from tld import get_fld
-from tld.exceptions import TldBadUrl
+from tld.exceptions import TldBadUrl, TldDomainNotFound
 
 from src.models.exceptions import ResolveError
 
 logger = logging.getLogger(__name__)
+timeout = 2
 
 
 class WikipediaUrl(BaseModel):
@@ -33,14 +35,15 @@ class WikipediaUrl(BaseModel):
     It uses BaseModel to avoid the cache
     attribute so we can output it via the API easily"""
 
-    soft404_probability: float = 0.0
-    url: str
     checked: bool = False
-    status_code: int = 0
-    first_level_domain: str = ""
     error: bool = False
-    no_dns_record: bool = False
+    first_level_domain: str = ""
+    fld_is_ip: bool = False
     malformed_url: bool = False
+    no_dns_record: bool = False
+    # soft404_probability: float = 0.0
+    status_code: int = 0
+    url: str
 
     def __hash__(self):
         return hash(self.url)
@@ -110,7 +113,7 @@ class WikipediaUrl(BaseModel):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(self.url, timeout=2, verify=True)
+            r = requests.head(self.url, timeout=timeout, verify=True)
             self.status_code = r.status_code
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             # if r.status_code == 200:
@@ -141,7 +144,7 @@ class WikipediaUrl(BaseModel):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(self.url, timeout=1, verify=False)
+            r = requests.head(self.url, timeout=timeout, verify=False)
             self.status_code = r.status_code
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             # if r.status_code == 200:
@@ -185,7 +188,7 @@ class WikipediaUrl(BaseModel):
         """Checks for Internet Archive details url"""
         return bool("//archive.org/details" in self.url)
 
-    def get_first_level_domain(self):
+    def extract_first_level_domain_from_url(self) -> None:
         logger.debug("__get_first_level_domain__: Running")
         try:
             logger.debug(f"Trying to get FLD from {self.url}")
@@ -193,14 +196,20 @@ class WikipediaUrl(BaseModel):
             if fld:
                 logger.debug(f"Found FLD: {fld}")
                 self.first_level_domain = fld
-        except TldBadUrl:
+        except (TldBadUrl, TldDomainNotFound):
             """The library does not support Wayback Machine URLs"""
             if self.is_wayback_machine_url():
-                return "archive.org"
+                self.first_level_domain = "archive.org"
             else:
-                message = f"Bad url {self.url} encountered"
-                logger.warning(message)
-                # self.__log_to_file__(
-                #     message=str(message), file_name="url_exceptions.log"
-                # )
-                # return None
+                try:
+                    ip = ip_address(self.__netloc__)
+                    logger.debug(f"found IP: {ip}")
+                    self.first_level_domain = str(ip)
+                    self.fld_is_ip = True
+                except ValueError:
+                    # Not a valid IPv4 or IPv6 address.
+                    message = f"Could not extract fld from {self.url}"
+                    logger.warning(message)
+                    # self.__log_to_file__(
+                    #     message=str(message), file_name="url_exceptions.log"
+                    # )
