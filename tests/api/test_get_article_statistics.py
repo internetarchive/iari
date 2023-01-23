@@ -123,7 +123,10 @@ class TestGetArticleStatistics(TestCase):
         data = json.loads(response.data)
         print(response.data)
         self.assertEqual(200, response.status_code)
-        self.assertEqual(ArticleStatistics().dict(), ArticleStatistics(**data).dict())
+        self.assertEqual(
+            ArticleStatistics(title="Test", page_id=0).dict(),
+            ArticleStatistics(**self.__make_reproducible__(data=data)).dict(),
+        )
 
     # DISABLED because it takes forever
     # def test_valid_request_gnu_linux_naming_controversy(self):
@@ -144,6 +147,8 @@ class TestGetArticleStatistics(TestCase):
         self.assertEqual(
             {
                 "has_references": True,
+                "lang": "en",
+                "page_id": 0,
                 "references": {
                     "all": 5,
                     "details": [
@@ -307,8 +312,12 @@ class TestGetArticleStatistics(TestCase):
                         "named": 1,
                     },
                 },
+                "site": "wikipedia",
+                "timestamp": 0,
+                "timing": 0,
+                "title": "Easter Island",
             },
-            ArticleStatistics(**data).dict(),
+            ArticleStatistics(**self.__make_reproducible__(data=data)).dict(),
         )
 
     def test_invalid_language(self):
@@ -352,3 +361,10 @@ class TestGetArticleStatistics(TestCase):
         )
         # print(response.data)
         self.assertEqual(200, response.status_code)
+
+    def __make_reproducible__(self, data):
+        """Remove all timing information"""
+        # delete non reproducible output
+        data["timing"] = 0
+        data["timestamp"] = 0
+        return data
