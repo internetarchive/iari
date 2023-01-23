@@ -362,7 +362,8 @@ class TestGetArticleStatistics(TestCase):
         # print(response.data)
         self.assertEqual(200, response.status_code)
 
-    def __make_reproducible__(self, data):
+    @staticmethod
+    def __make_reproducible__(data):
         """Remove all timing information"""
         # delete non reproducible output
         data["timing"] = 0
