@@ -143,6 +143,7 @@ class WikipediaArticle(WcdItem):
                 self.latest_revision_id = int(data["latest"]["id"])
                 self.latest_revision_date = isoparse(data["latest"]["timestamp"])
                 self.page_id = int(data["id"])
+                logger.debug(f"Got pageid: {self.page_id}")
                 self.wikitext = data["source"]
             elif response.status_code == 404:
                 self.found_in_wikipedia = False
