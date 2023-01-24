@@ -303,6 +303,7 @@ class TestGetArticleStatistics(TestCase):
                                 "supported_template_we_prefer": 4,
                                 "url_t": 0,
                                 "without_a_template": 0,
+                                "with_deprecated_template": 0,
                             },
                             "citation": {"all": 2},
                             "general": {"all": 2},

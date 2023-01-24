@@ -70,6 +70,7 @@ isbn_template = [
 url_template = [
     "url",
 ]
+deprecated_templates = ["cite pmid", "cite doi"]
 supported_citation_templates: List[str] = []
 for list_ in [
     citation_template,
