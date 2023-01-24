@@ -261,12 +261,10 @@ class TestGetArticleStatistics(TestCase):
                     ],
                     "first_level_domain_counts": [],
                     "links": {
-                        "all": 0,
+                        "agg": None,
+                        "links_found": False,
+                        "malformed_urls": 0,
                         "details": [],
-                        "other": 0,
-                        "s200": 0,
-                        "s404": 0,
-                        "s5xx": 0,
                     },
                     "types": {
                         "content": {

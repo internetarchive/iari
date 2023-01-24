@@ -225,6 +225,11 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len([url for url in self.reference_urls if url.status_code == 200])
 
     @property
+    def number_of_reference_urls_with_malformed_url(self):
+        """This can be True while error is also True"""
+        return len([url for url in self.reference_urls if url.error is True])
+
+    @property
     def number_of_reference_urls_with_error(self):
         return len([url for url in self.reference_urls if url.error is True])
 
