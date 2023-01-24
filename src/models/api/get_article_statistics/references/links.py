@@ -1,7 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
+from src.models.api.get_article_statistics.references.links_aggregates import (
+    LinksAggregates,
+)
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 
@@ -11,9 +14,7 @@ class Links(BaseModel):
 
     We use BaseModel to avoid the cache attribute"""
 
-    all: int = 0
-    s200: int = 0
-    s404: int = 0
-    s5xx: int = 0
-    other: int = 0
+    agg: Optional[LinksAggregates] = None
+    links_found: bool = False
+    malformed_urls: int = 0
     details: List[WikipediaUrl] = []

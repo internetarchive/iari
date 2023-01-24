@@ -30,6 +30,9 @@ from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite
 from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_web_references import (
     CiteWebReferences,
 )
+from src.models.api.get_article_statistics.references.links_aggregates import (
+    LinksAggregates,
+)
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.enums import AnalyzerReturn
@@ -52,73 +55,99 @@ class WikipediaAnalyzer(WcdBaseModel):
     check_urls: bool = False
 
     @property
-    def __agg__(self):
-        return AggregateContentReferences(
-            bare_url_t=self.article.extractor.number_of_bare_url_references,
-            citation_t=self.article.extractor.number_of_citation_template_references,
-            citeq_t=CiteQReferences(
-                all=self.article.extractor.number_of_citeq_references,
-            ),
-            cs1_t=self.__cs1_t__,
-            has_hash=self.article.extractor.number_of_hashed_content_references,
-            has_template=self.article.extractor.number_of_content_reference_with_at_least_one_template,
-            isbn_t=self.article.extractor.number_of_isbn_template_references,
-            multiple_t=self.article.extractor.number_of_multiple_template_references,
-            supported_template_we_prefer=(
-                self.article.extractor.number_of_content_references_with_a_supported_template_we_prefer
-            ),
-            url_t=self.article.extractor.number_of_url_template_references,
-            without_a_template=self.article.extractor.number_of_content_reference_without_a_template,
-        )
+    def __agg__(self) -> Optional[AggregateContentReferences]:
+        if self.article and self.article.extractor:
+            return AggregateContentReferences(
+                bare_url_t=self.article.extractor.number_of_bare_url_references,
+                citation_t=self.article.extractor.number_of_citation_template_references,
+                citeq_t=CiteQReferences(
+                    all=self.article.extractor.number_of_citeq_references,
+                ),
+                cs1_t=self.__cs1_t__,
+                has_hash=self.article.extractor.number_of_hashed_content_references,
+                has_template=self.article.extractor.number_of_content_reference_with_at_least_one_template,
+                isbn_t=self.article.extractor.number_of_isbn_template_references,
+                multiple_t=self.article.extractor.number_of_multiple_template_references,
+                supported_template_we_prefer=(
+                    self.article.extractor.number_of_content_references_with_a_supported_template_we_prefer
+                ),
+                url_t=self.article.extractor.number_of_url_template_references,
+                without_a_template=self.article.extractor.number_of_content_reference_without_a_template,
+            )
+        else:
+            return None
 
     @property
-    def __cs1_t__(self):
-        return Cs1References(
-            all=self.article.extractor.number_of_cs1_references,
-            web=CiteWebReferences(
-                all=self.article.extractor.number_of_cite_web_references,
-                has_google_books_link=(
-                    self.article.extractor.number_of_cite_web_references_with_google_books_link_or_template
+    def __cs1_t__(self) -> Optional[Cs1References]:
+        if self.article and self.article.extractor:
+            return Cs1References(
+                all=self.article.extractor.number_of_cs1_references,
+                web=CiteWebReferences(
+                    all=self.article.extractor.number_of_cite_web_references,
+                    has_google_books_link=(
+                        self.article.extractor.number_of_cite_web_references_with_google_books_link_or_template
+                    ),
+                    has_ia_details_link=self.article.extractor.number_of_cite_web_references_with_ia_details_link,
+                    has_wm_link=self.article.extractor.number_of_cite_web_references_with_wm_link,
+                    no_link=self.article.extractor.number_of_cite_web_references_with_no_link,
                 ),
-                has_ia_details_link=self.article.extractor.number_of_cite_web_references_with_ia_details_link,
-                has_wm_link=self.article.extractor.number_of_cite_web_references_with_wm_link,
-                no_link=self.article.extractor.number_of_cite_web_references_with_no_link,
-            ),
-            journal=(
-                CiteJournalReferences(
-                    all=self.article.extractor.number_of_cite_journal_references,
-                    has_wm_link=(
-                        self.article.extractor.number_of_cite_journal_references_with_wm_link
-                    ),
-                    has_ia_details_link=(
-                        self.article.extractor.number_of_cite_journal_references_with_ia_details_link
-                    ),
-                    no_link=self.article.extractor.number_of_cite_journal_references_with_no_link,
-                    has_doi=self.article.extractor.number_of_cite_journal_references_with_doi,
-                )
-            ),
-            book=CiteBookReferences(
-                all=self.article.extractor.number_of_cite_book_references,
-                has_wm_link=self.article.extractor.number_of_cite_book_references_with_wm_link,
-                has_ia_details_link=self.article.extractor.number_of_cite_book_references_with_ia_details_link,
-                no_link=self.article.extractor.number_of_cite_book_references_with_no_link,
-                has_isbn=self.article.extractor.number_of_cite_book_references_with_isbn,
-            ),
-            others=self.article.extractor.number_of_other_cs1_references,
-        )
+                journal=(
+                    CiteJournalReferences(
+                        all=self.article.extractor.number_of_cite_journal_references,
+                        has_wm_link=(
+                            self.article.extractor.number_of_cite_journal_references_with_wm_link
+                        ),
+                        has_ia_details_link=(
+                            self.article.extractor.number_of_cite_journal_references_with_ia_details_link
+                        ),
+                        no_link=self.article.extractor.number_of_cite_journal_references_with_no_link,
+                        has_doi=self.article.extractor.number_of_cite_journal_references_with_doi,
+                    )
+                ),
+                book=CiteBookReferences(
+                    all=self.article.extractor.number_of_cite_book_references,
+                    has_wm_link=self.article.extractor.number_of_cite_book_references_with_wm_link,
+                    has_ia_details_link=self.article.extractor.number_of_cite_book_references_with_ia_details_link,
+                    no_link=self.article.extractor.number_of_cite_book_references_with_no_link,
+                    has_isbn=self.article.extractor.number_of_cite_book_references_with_isbn,
+                ),
+                others=self.article.extractor.number_of_other_cs1_references,
+            )
+        else:
+            return None
+
+    @property
+    def __links__(self) -> Links:
+        if (
+            self.article
+            and self.article.extractor
+            and self.article.extractor.number_of_reference_urls
+        ):
+            links = Links(
+                agg=LinksAggregates(
+                    all=self.article.extractor.number_of_reference_urls,
+                    s200=self.article.extractor.number_of_reference_urls_with_code_200,
+                    s3xx=self.article.extractor.number_of_reference_urls_with_code_3xx,
+                    s404=self.article.extractor.number_of_reference_urls_with_code_404,
+                    s5xx=self.article.extractor.number_of_reference_urls_with_code_5xx,
+                    error=self.article.extractor.number_of_reference_urls_with_error,
+                    no_dns=self.article.extractor.number_of_reference_urls_with_no_dns,
+                    other_2xx=self.article.extractor.number_of_reference_urls_with_other_2xx,
+                    other_4xx=self.article.extractor.number_of_reference_urls_with_other_4xx,
+                ),
+                links_found=True,
+                malformed_url=self.article.extractor.number_of_reference_urls_with_malformed_url,
+                details=self.article.extractor.reference_urls_dictionaries,
+            )
+        else:
+            links = Links()
+        return links
 
     @property
     def __references__(self):
         return References(
             all=self.article.extractor.number_of_references,
-            links=Links(
-                all=self.article.extractor.number_of_reference_urls,
-                s200=self.article.extractor.number_of_reference_urls_with_code_200,
-                s404=self.article.extractor.number_of_reference_urls_with_code_404,
-                s5xx=self.article.extractor.number_of_reference_urls_with_code_5xx,
-                other=self.article.extractor.number_of_reference_urls_with_other_code,
-                details=self.article.extractor.reference_urls_dictionaries,
-            ),
+            links=self.__links__,
             types=ReferenceTypes(
                 content=ContentReferences(
                     citation=CitationReferences(
