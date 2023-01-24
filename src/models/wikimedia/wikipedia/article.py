@@ -85,9 +85,6 @@ class WikipediaArticle(WcdItem):
         hashing = Hashing(article=self, testing=True)
         self.md5hash = hashing.generate_article_hash()
 
-    def __calculate_hashed_template_distribution__(self):
-        raise NotImplementedError("To be written")
-
     def fetch_and_extract_and_parse_and_generate_hash(self):
         logger.debug("fetch_and_extract_and_parse_and_generate_hash: running")
         logger.info("Extracting templates and parsing the references now")
