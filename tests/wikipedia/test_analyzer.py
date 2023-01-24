@@ -187,6 +187,7 @@ class TestWikipediaAnalyzer(TestCase):
                         supported_template_we_prefer=2,
                         url_t=0,
                         without_a_template=0,
+                        with_deprecated_template=0,
                     ),
                 ),
                 named=1,

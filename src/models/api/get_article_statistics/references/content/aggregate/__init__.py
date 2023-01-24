@@ -60,3 +60,6 @@ class AggregateContentReferences(BaseModel):
     # Type of reference with no template,
     # these cannot easily be converted to structured information without human intervention
     without_a_template: int
+
+    # With at least one deprecated reference template
+    with_deprecated_template: int

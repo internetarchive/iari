@@ -48,12 +48,22 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return bool(self.number_of_references)
 
     @property
+    def number_of_references_with_a_deprecated_template(self) -> int:
+        return len(
+            [
+                reference
+                for reference in self.content_references
+                if reference.raw_reference.deprecated_reference_template_found
+            ]
+        )
+
+    @property
     def number_of_other_cs1_references(self):
         """All other CS1 templates that we don't especially care about"""
         return len(
             [
                 reference
-                for reference in self.references
+                for reference in self.content_references
                 if reference.raw_reference.cs1_template_found
                 and not (
                     reference.raw_reference.cite_web_template_found

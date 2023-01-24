@@ -57,6 +57,10 @@ class WikipediaAnalyzer(WcdBaseModel):
     @property
     def __agg__(self) -> Optional[AggregateContentReferences]:
         if self.article and self.article.extractor:
+            # logger.debug(
+            #     f"self.article.extractor.number_of_references_"
+            #     f"with_a_deprecated_template:{self.article.extractor.number_of_references_with_a_deprecated_template}"
+            # )
             return AggregateContentReferences(
                 bare_url_t=self.article.extractor.number_of_bare_url_references,
                 citation_t=self.article.extractor.number_of_citation_template_references,
@@ -73,6 +77,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 ),
                 url_t=self.article.extractor.number_of_url_template_references,
                 without_a_template=self.article.extractor.number_of_content_reference_without_a_template,
+                with_deprecated_template=self.article.extractor.number_of_references_with_a_deprecated_template,
             )
         else:
             return None

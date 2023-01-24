@@ -174,6 +174,13 @@ class WikipediaRawReference(WcdBaseModel):
         return self.specific_template_found(names=config.citation_template)
 
     @property
+    def deprecated_reference_template_found(self):
+        for template in self.templates:
+            if template.name in config.deprecated_templates:
+                return True
+        return False
+
+    @property
     def cs1_template_found(self) -> bool:
         for template in self.templates:
             if template.name in config.cs1_templates:
