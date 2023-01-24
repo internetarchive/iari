@@ -114,9 +114,13 @@ class WikipediaAnalyzer(WcdBaseModel):
             links=Links(
                 all=self.article.extractor.number_of_reference_urls,
                 s200=self.article.extractor.number_of_reference_urls_with_code_200,
+                s3xx=self.article.extractor.number_of_reference_urls_with_code_3xx,
                 s404=self.article.extractor.number_of_reference_urls_with_code_404,
                 s5xx=self.article.extractor.number_of_reference_urls_with_code_5xx,
-                other=self.article.extractor.number_of_reference_urls_with_other_code,
+                error=self.article.extractor.number_of_reference_urls_with_error,
+                no_dns=self.article.extractor.number_of_reference_urls_with_no_dns,
+                other_2xx=self.article.extractor.number_of_reference_urls_with_other_2xx,
+                other_4xx=self.article.extractor.number_of_reference_urls_with_other_4xx,
                 details=self.article.extractor.reference_urls_dictionaries,
             ),
             types=ReferenceTypes(

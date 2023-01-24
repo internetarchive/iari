@@ -183,13 +183,24 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return [url.dict() for url in self.reference_urls]
 
     @property
-    def number_of_reference_urls_with_other_code(self):
+    def number_of_reference_urls_with_other_2xx(self):
+        """This catches 2xx codes which could be good or not"""
         return len(
             [
                 url
                 for url in self.reference_urls
-                if not str(url.status_code).startswith("5")
-                and url.status_code not in [200, 404]
+                if str(url.status_code).startswith("2") and url.status_code not in [200]
+            ]
+        )
+
+    @property
+    def number_of_reference_urls_with_other_4xx(self):
+        """This catches 2xx codes which could be good or not"""
+        return len(
+            [
+                url
+                for url in self.reference_urls
+                if str(url.status_code).startswith("4") and url.status_code not in [404]
             ]
         )
 
@@ -204,8 +215,22 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len([url for url in self.reference_urls if url.status_code == 404])
 
     @property
+    def number_of_reference_urls_with_code_3xx(self):
+        return len(
+            [url for url in self.reference_urls if str(url.status_code).startswith("3")]
+        )
+
+    @property
     def number_of_reference_urls_with_code_200(self):
         return len([url for url in self.reference_urls if url.status_code == 200])
+
+    @property
+    def number_of_reference_urls_with_error(self):
+        return len([url for url in self.reference_urls if url.error is True])
+
+    @property
+    def number_of_reference_urls_with_no_dns(self):
+        return len([url for url in self.reference_urls if url.no_dns_record is True])
 
     @property
     def number_of_reference_urls(self):
