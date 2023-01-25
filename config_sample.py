@@ -16,6 +16,7 @@ rabbitmq_username = "user"
 rabbitmq_password = "bitnami"
 
 # Settings:
+subdirectory_for_json = "json/"  # create it manually before running the api
 cache_host: str = "127.0.0.1"
 cache_port: int = 8888
 assume_persons_without_role_are_authors = True
