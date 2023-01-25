@@ -13,3 +13,7 @@ class TestJob(TestCase):
     def test_site(self):
         job = Job(title="", site="wikipedia")
         assert job.site == WikimediaSite.wikipedia
+
+    def test_get_page_id(self):
+        job = Job(title="Test", site="wikipedia", lang="en")
+        assert job.get_page_id == 11089416
