@@ -167,8 +167,9 @@ class WikipediaUrl(BaseModel):
             logger.debug(f"got exception: {e}")
             self.malformed_url = True
 
-    def fix_and_check(self):
-        logger.debug("fix_and_check: running")
+    def fix_and_extract_and_check(self):
+        logger.debug("fix_and_extract_and_check: running")
+        self.extract_first_level_domain_from_url()
         self.__fix_malformed_urls__()
         print(f"Trying to check: {self.url}")
         if self.__dns_record_found__:
