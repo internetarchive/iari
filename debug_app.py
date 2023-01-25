@@ -1,4 +1,3 @@
-from src.models.api import create_app
+from src.models.api import app
 
-app = create_app()
 app.run(debug=True)

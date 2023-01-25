@@ -315,3 +315,132 @@ easter_island_short_tail_excerpt = """
 * {{cite book|author-link=Jared Diamond|last=Diamond|first= Jared|year=2005|title=Collapse. How Societies Choose to Fail or Succeed|location=New York|publisher=Viking|isbn=978-0143036555 |title-link=Collapse (book)}}
 * {{cite journal|last= Fischer|first= Steven Roger|year= 1995|title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorongo Inscriptions|journal= Journal of the Polynesian Society |issue=104|pages=303–21|url=http://www.jps.auckland.ac.nz/document/Volume_104_1995/Volume_104%2C_No._3/Preliminary_evidence_for_cosmogonic_texts_in_Rapanui%26apos%3Bs_Rongorongo_inscriptions%2C_by_Steven_Roger_Fischer%2C_p_303-322/p1}}
 """
+electrical_breakdown_full_article = """
+{{short description|Conduction of electricity through an insulator under sufficiently high voltage}}
+[[Image:electrostatic-discharge.jpg|thumbnail|right|180px|Electrical breakdown in an [[electric discharge]] showing the ribbon-like [[Plasma (physics)|plasma]] filaments from a [[Tesla coil]].]]
+
+In [[electronics]], '''electrical breakdown''' or '''dielectric breakdown''' is a process that occurs when an [[Insulator (electricity)|electrically insulating]] material (a [[dielectric]]), subjected to a high enough [[voltage]], suddenly becomes a [[electrical conductor|conductor]] and [[electric current|current]] flows through it.  All insulating materials undergo breakdown when the [[electric field]] caused by an applied voltage exceeds the material's [[dielectric strength]].  The voltage at which a given insulating object becomes conductive is called its ''[[breakdown voltage]]'' and, in addition to its dielectric strength, depends on its size and shape, and the location on the object at which the voltage is applied.  Under sufficient [[electrical potential]], electrical breakdown can occur within [[solid]]s, [[liquid]]s, or [[gas]]es (and theoretically even in a [[vacuum]]). However, the specific breakdown mechanisms are different for each kind of dielectric medium.
+
+Electrical breakdown may be a momentary event (as in an [[electrostatic discharge]]), or may lead to a continuous [[electric arc]] if protective devices fail to interrupt the current in a power circuit.  In this case electrical breakdown can cause catastrophic failure of electrical equipment, and fire hazards.
+
+==Explanation==
+[[Electric current]] is a flow of electrically [[charged particle]]s in a material caused by an [[electric field]], usually created by a [[voltage]] difference across the material.  The mobile charged particles which make up an electric current are called [[charge carrier]]s.  In different substances different particles serve as charge carriers: in metals and some other solids some of the outer [[electron]]s of each atom ([[conduction electron]]s) are able to move about in the material; in [[electrolyte]]s and [[plasma (physics)|plasma]] it is [[ion]]s, electrically charged [[atom]]s or [[molecule]]s, and electrons that are charge carriers.   A material that has a high concentration of charge carriers available for conduction, such as a [[metal]], will conduct a large current with a given electric field, and thus has a low [[electrical resistivity]]; this is called an [[electrical conductor]].<ref name="Ray1">{{cite book
+ | last1  = Ray
+ | first1 = Subir
+ | title  = An Introduction to High Voltage Engineering, 2nd Ed.
+ | publisher = PHI Learning Ltd.
+ | date   = 2013
+ | pages  = 1
+ | url    = https://books.google.com/books?id=raGzKNnToeoC
+ | isbn   = 9788120347403
+ }}</ref>  A material that has few charge carriers, such as glass or ceramic, will conduct very little current with a given electric field and has a high resistivity; this is called an [[electrical insulator]] or [[dielectric]].   All matter is composed of charged particles, but the common property of insulators is that the negative charges, the orbital electrons, are tightly bound to the positive charges, the [[atomic nuclei]], and cannot easily be freed to become mobile. 
+ 
+However, when a large enough electric field is applied to any insulating substance, at a certain field strength the number of charge carriers in the material suddenly increases by many orders of magnitude, so its resistance drops and it becomes a conductor.<ref name="Ray1"/>  This is called ''electrical breakdown''.  The physical mechanism causing breakdown differs in different substances.  In a solid, it usually occurs when the electric field becomes strong enough to pull outer [[valence electron]]s away from their atoms, so they become mobile, and the heat created by their collisions with other atoms releases additional electrons.  In a gas, the electric field accelerates the small number of free electrons naturally present (due to processes like [[photoionization]] and [[radioactive decay]]) to a high enough speed that when they collide with gas molecules they knock additional electrons out of them, called [[ionization]], which go on to ionize more molecules creating more free electrons and ions in a chain reaction called a [[Townsend discharge]].  As these examples indicate, in most materials breakdown occurs by a rapid [[chain reaction]] in which mobile charged particles release additional charged particles.
+
+=== Dielectric strength and breakdown voltage ===
+The electric field strength (in [[volt]]s per metre) at which breakdown occurs is an [[intrinsic property]] of the insulating material called its ''[[dielectric strength]]''.  The electric field is usually caused by a [[voltage]] difference applied across the material.  The applied voltage required to cause breakdown in a given insulating object is called the object's ''[[breakdown voltage]]''.  The electric field created in a given  insulating object by an applied voltage varies depending on the size and shape of the object and the location on the object where the voltage is applied, so in addition to the material's dielectric strength, the breakdown voltage depends on these factors.
+
+In a flat sheet of insulator between two flat metal electrodes, the electric field <math>E</math> is proportional to the voltage difference <math>V</math> divided by the thickness <math>D</math> of the insulator, so in general the breakdown voltage <math>V_\text{b}</math> is proportional to the dielectric strength <math>E_\text{ds}</math> and the length of insulation between two conductors  
+:<math>V_\text{b} = D E_\text{ds}</math>
+However the shape of the conductors can influence the breakdown voltage.
+
+=== Breakdown process ===
+Breakdown is a local process, and in an insulating medium subjected to a high voltage difference begins at whatever point in the insulator the electric field first exceeds the local dielectric strength of the material.  Since the electric field at the surface of a conductor is highest at protruding parts, sharp points and edges, for a conductor immersed in a homogeneous insulator like air or oil, breakdown usually starts at these points.  If the breakdown is caused by a local defect in a solid insulator, such as a crack or bubble in a ceramic insulator, it may remain limited to a small region; this is called ''[[partial discharge]]''.  In a gas adjacent to a sharp pointed conductor, local breakdown processes, [[corona discharge]] or [[brush discharge]], can allow current to leak off the conductor into the gas as ions.  However, usually in a homogeneous solid insulator after one region has broken down and become conductive there is no voltage drop across it, and the full voltage difference is applied to the remaining length of the insulator.  Since the voltage drop is now across a shorter length, this creates a higher electric field in the remaining material, which causes more material to break down.  So the breakdown region rapidly (within microseconds) spreads in the direction of the voltage gradient from one end of the insulator to the other, until a continuous conductive path is created through the material between the two contacts applying the voltage difference, allowing a current to flow between them.
+
+Electrical breakdown can also occur without an applied voltage, due to an electromagnetic wave.  When a sufficiently intense [[electromagnetic wave]] passes through a material medium, the electric field of the wave can be strong enough to cause temporary electrical breakdown.  For example a [[laser]] beam focused to a small spot in air can cause electrical breakdown and [[ionization]] of the air at the focal point.
+
+=== Consequences ===
+In practical [[electric circuit]]s electrical breakdown is usually an unwanted occurrence, a failure of insulating material causing a [[short circuit]], possibly resulting in a catastrophic failure of the equipment.  In power circuits, the sudden drop in resistance causes a high current to flow through the material, beginning an [[electric arc]], and if safety devices do not interrupt the current quickly the sudden extreme [[Joule heating]] may cause the insulating material or other parts of the circuit to melt or vaporize explosively, damaging the equipment and creating a fire hazard.  However, external protective devices in the circuit such as [[circuit breaker]]s and [[current limiting]] can prevent the high current; and the breakdown process itself is not necessarily destructive and may be reversible.  If the current supplied by the external circuit is removed sufficiently quickly, no damage is done to the material, and reducing the applied voltage causes a transition back to the material's insulating state.
+
+[[Lightning]] and sparks due to [[static electricity]] are natural examples of the electrical breakdown of air.   Electrical breakdown is part of the normal operating mode of a number of [[electrical component]]s, such as [[gas discharge lamp]]s like [[fluorescent light]]s,  and [[neon light]]s, [[zener diode]]s, [[avalanche diode]]s, [[IMPATT diode]]s, [[mercury-vapor rectifier]]s, [[thyratron]], [[ignitron]], and [[krytron]] tubes, and  [[spark plug]]s.
+
+== Failure of electrical insulation ==
+Electrical breakdown is often associated with the failure of solid or liquid insulating materials used inside high voltage [[transformer]]s or [[capacitors]] in the [[electricity distribution]] grid, usually resulting in a [[short circuit]] or a blown fuse. Electrical breakdown can also occur across the insulators that suspend overhead [[electric power transmission|power line]]s, within underground power cables, or lines arcing to nearby branches of trees.
+
+Dielectric breakdown is also important in the design of [[integrated circuit]]s and other solid state electronic devices.  Insulating layers in such devices are designed to withstand normal operating voltages, but higher voltage such as from static electricity may destroy these layers, rendering a device useless. The dielectric strength of [[capacitor]]s limits how much energy can be stored and the safe working voltage for the device.<ref>{{cite journal|last1=Belkin|first1=A.|last2=Bezryadin|first2=A.|last3=Hendren|first3=L.|last4=Hubler|first4=A.|title=Recovery of Alumina Nanocapacitors after High Voltage Breakdown|journal=Scientific Reports |volume=7|date=2017|issue=1|page=932|doi=10.1038/s41598-017-01007-9|bibcode=2017NatSR...7..932B|pmc=5430567|pmid=28428625}}</ref>
+
+== Mechanism ==
+Breakdown mechanisms differ in solids, liquids, and gases. Breakdown is influenced by electrode material, sharp curvature of conductor material (resulting in locally intensified electric fields), the size of the gap between the electrodes, and the density of the material in the gap.
+
+===Solids===
+In solid materials (such as in [[power cable]]s) a long-time [[partial discharge]] typically precedes breakdown, degrading the insulators and metals nearest to the voltage gap. Ultimately the partial discharge chars through a channel of carbonized material that conducts current across the gap.
+
+===Liquids===
+Possible mechanisms for breakdown in liquids include bubbles, small impurities, and electrical [[Superheating|super-heating]].  The process of breakdown in liquids is complicated by hydrodynamic effects, since additional pressure is exerted on the fluid by the non-linear electrical field strength in the gap between the electrodes.
+
+In liquefied gases used as [[coolant]]s for [[superconductivity]] &ndash; such as Helium at 4.2&nbsp;[[Kelvin (unit)|K]] or Nitrogen at 77&nbsp;K &ndash; bubbles can induce breakdown.
+
+In oil-cooled and [[transformer oil|oil-insulated]] transformers the field strength for breakdown is about 20&nbsp;kV/mm (as compared to 3&nbsp;kV/mm for dry air). Despite the purified oils used, small particle contaminants are blamed.
+
+===Gases===
+
+Electrical breakdown occurs within a gas when the [[dielectric strength]] of the gas is exceeded. Regions of intense voltage gradients can cause nearby gas to partially ionize and begin conducting. This is done deliberately in low pressure discharges such as in [[fluorescent light]]s. The voltage that leads to electrical breakdown of a gas is approximated by [[Paschen's Law]].
+
+Partial discharge in air causes the "fresh air" smell of [[ozone]] during thunderstorms or around high-voltage equipment. Although air is normally an excellent insulator, when stressed by a sufficiently high voltage (an [[electric field]] of about 3&nbsp;x&nbsp;10<sup>6</sup>&nbsp;[[volt|V]]/m or 3&nbsp;kV/mm<ref>{{cite web|url=http://hypertextbook.com/facts/2000/AliceHong.shtml|last=Hong|first=Alice|work=The Physics Factbook|year=2000|title=Dielectric Strength of Air}}</ref>), air can begin to break down, becoming partially conductive. Across relatively small gaps, breakdown voltage in air is a function of gap length times pressure. If the voltage is sufficiently high, complete electrical breakdown of the air will culminate in an [[Electric spark|electrical spark]] or an [[electric arc]] that bridges the entire gap.
+
+The color of the spark depends upon the gases that make up the gaseous media. While the small sparks generated by [[static electricity]] may barely be audible, larger sparks are often accompanied by a loud snap or bang. [[Lightning]] is an example of an immense spark that can be many miles long.
+
+===Persistent arcs=== 
+If a [[fuse (electrical)|fuse]] or [[circuit breaker]] fails to interrupt the current through a spark in a power circuit, current may continue, forming a very hot [[electric arc]] (about 30&nbsp;000&nbsp;degrees&nbsp;[[Celsius|C]]). The color of an arc depends primarily upon the conducting gasses, some of which may have been solids before being vaporized and mixed into the hot [[Plasma (physics)|plasma]] in the arc. The free ions in and around the arc recombine to create new chemical compounds, such as [[ozone]], [[carbon monoxide]], and [[nitrous oxide]]. Ozone is most easily noticed due to its distinct odour.<ref>{{cite web | title = Lab Note #106 ''Environmental Impact of Arc Suppression'' | publisher = Arc Suppression Technologies | date = April 2011 | url = http://www.arcsuppressiontechnologies.com/arc-suppression-facts/lab-app-notes/ | access-date = March 15, 2012}}</ref>
+
+Although sparks and arcs are usually undesirable, they can be useful in applications such as [[spark plugs]] for gasoline engines, electrical [[welding]] of metals, or for metal melting in an [[electric arc furnace]]. Prior to gas discharge the gas glows with distinct colors that depend on the [[Emission spectrum|energy levels]] of the atoms. Not all mechanisms are fully understood.
+
+[[Image:townsendVI.png|thumbnail|right|Voltage-current relation before breakdown]]
+
+The [[vacuum]] itself is expected to undergo electrical breakdown at or near the [[Schwinger limit]].
+
+=== Voltage-current relation ===
+Before gas breakdown, there is a non-linear relation between voltage and current as shown in the figure. In region&nbsp;1, there are free ions that can be accelerated by the field and induce a current. These will be saturated after a certain voltage and give a constant current, region&nbsp;2. Region&nbsp;3 and 4 are caused by ion avalanche as explained by the [[Townsend discharge]] mechanism.
+
+[[Friedrich Paschen]] established the relation between the breakdown condition to breakdown voltage. He derived [[Paschen's law|a formula]] that defines the breakdown voltage (<math>V_\text{b}</math>) for uniform field gaps as a function of gap length (<math>d</math>) and gap pressure (<math>p</math>).<ref name=":0">{{Cite book|title = An Introduction to High Voltage Engineering|last = Ray|first = Subir|publisher = PHI Learning|year = 2009|isbn = 978-8120324176|pages = 19–21|url = https://books.google.com/books?isbn=812032417X}}</ref>
+
+: <math>V_\text{b} = {Bpd \\over \\ln\\left({Apd \\over \\ln\\left(1 + {1 \\over \\gamma}\right)}\right)}</math>
+
+Paschen also derived a relation between the minimum value of pressure gap for which breakdown occurs with a minimum voltage.<ref name=":0" />
+
+: <math>\begin{align}
+          (pd)_\\min &= {2.718 \\over A} \\ln\\left(1 + \frac{1}{\\gamma}\right) \\
+  V_{\text{b},\\min} &= 2.718 {B \\over A} \\ln\\left(1 + \frac{1}{\\gamma}\right)
+\\end{align}</math>
+
+<math>A</math> and <math>B</math> are constants depending on the gas used.
+
+==Corona breakdown==
+Partial breakdown of the air occurs as a [[corona discharge]] on high voltage conductors at points with the highest electrical stress. Conductors that have sharp points, or balls with small [[radius|radii]], are prone to causing dielectric breakdown, because the field strength around points is higher than that around a flat surface. High-voltage apparatus is designed with rounded curves and [[grading ring]]s to avoid concentrated fields that precipitate breakdown.
+
+===Appearance===
+Corona is sometimes seen as a bluish glow around high voltage wires and heard as a sizzling sound along high voltage power lines. Corona also generates radio frequency noise that can also be heard as ‘static’ or buzzing on radio receivers. Corona can also occur naturally as "[[St. Elmo's Fire]]" at high points such as church spires, treetops, or ship masts during thunderstorms.
+
+===Ozone generation===
+Corona discharge ozone generators have been used for more than 30&nbsp;years in the [[water purification]] process. Ozone is a toxic gas, even more potent than chlorine. In a typical drinking water treatment plant, the ozone gas is dissolved into the filtered water to kill [[bacteria]] and destroy [[virus]]es. Ozone also removes the bad odours and taste from the water.  The main advantage of ozone is that any residual overdose decomposes to gaseous oxygen well before the water reaches the consumer. This is in contrast with [[chlorine]] gas or chlorine salts, which stay in the water longer and can be tasted by the consumer.
+
+===Other uses===
+Although corona discharge is usually undesirable, until recently it was essential in the operation of photocopiers ([[xerography]]) and [[laser printers]]. Many modern copiers and laser printers now charge the photoconductor drum with an electrically conductive roller, reducing undesirable indoor [[ozone]] pollution.
+
+[[Lightning rod]]s use corona discharge to create conductive paths in the air that point towards the rod, deflecting potentially-damaging [[lightning]] away from buildings and other structures.<ref name="UnivPhys">{{cite book | author = Young, Hugh D. |author2=Roger A. Freedman |author3=A. Lewis Ford | title = Sears and Zemansky's University Physics | url = https://archive.org/details/relativity00unse | url-access = registration | orig-year = 1949 | year = 2004 | edition = 11 | publisher = [[Addison Wesley]] | location = [[San Francisco]] | isbn= 0-8053-9179-7 | pages = 886–7 | chapter = Electric Potential}}</ref>
+
+Corona discharges are also used to modify the surface properties of many [[polymers]]. An example is the corona treatment of plastic materials which allows paint or ink to adhere properly.
+
+==Disruptive devices {{anchor|disruptive devices}} ==
+[[File:Square1.jpg|thumb|right| Dielectric breakdown within a solid insulator can permanently change its appearance and properties. As shown in this [[Lichtenberg figure]]]]
+A '''disruptive device''' {{citation needed|date=June 2020}} is designed to electrically overstress a [[dielectric]] beyond its [[dielectric strength]] so as to intentionally cause electrical breakdown of the device. The disruption causes a sudden transition of a portion of the dielectric, from an insulating state to a highly [[Electrical conduction|conductive]] state. This transition is characterized by the formation of an [[electric spark]] or [[Plasma (physics)|plasma]] channel, possibly followed by an [[electric arc]] through part of the dielectric material.
+
+If the dielectric happens to be a solid, permanent physical and chemical changes along the path of the discharge will significantly reduce the material's dielectric strength, and the device can only be used one time. However, if the dielectric material is a liquid or gas, the dielectric can fully recover its insulating properties once current through the plasma channel has been externally interrupted.
+
+Commercial [[spark gap]]s use this property to abruptly switch high voltages in [[pulsed power]] systems, to provide [[Voltage spike|surge]] protection for [[telecommunication]] and [[Power systems|electrical power]] systems, and ignite fuel via [[spark plug]]s in [[internal combustion engine]]s.  [[Spark-gap transmitter]]s were used in early radio telegraph systems.
+
+{{clear}}
+
+==See also==
+
+* [[Comparative Tracking Index]]
+
+== References ==
+{{Reflist}}
+
+{{Commons category|Electrical breakdown}}
+
+{{Authority control}}
+
+[[Category:Electrical breakdown|  ]]
+"""

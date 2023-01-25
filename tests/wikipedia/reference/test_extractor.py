@@ -7,6 +7,7 @@ from src.models.wikimedia.wikipedia.reference.extractor import (
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_tail_excerpt,
+    electrical_breakdown_full_article,
     test_full_article,
 )
 
@@ -221,15 +222,19 @@ class TestWikipediaReferenceExtractor(TestCase):
     def test_reference_urls(self):
         wre = WikipediaReferenceExtractor(
             testing=True,
-            wikitext=easter_island_head_excerpt,
+            wikitext="<ref>{{cite web|url=http://google.com}}</ref>",
             wikibase=wikibase,
             check_urls=True,
         )
         wre.extract_all_references()
-        urls = list(wre.reference_urls)
-        sorted(urls)
-        assert urls[0].checked is True
-        assert len(urls) == 4
+        urls = wre.checked_and_unique_reference_urls
+        assert len(urls) == 1
+        # print(urls)
+        for url in urls:
+            assert url.url == "http://google.com"
+            assert url.status_code == 301
+            assert url.checked is True
+            assert url.first_level_domain == "google.com"
 
     def test_has_references_true(self):
         wre = WikipediaReferenceExtractor(

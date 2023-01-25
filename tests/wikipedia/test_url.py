@@ -35,7 +35,7 @@ class TestWikipediaUrl(TestCase):
     #     return MockResponse(200)
 
     def test_check_200(self):
-        self.wikipediaUrl.fix_and_check()
+        self.wikipediaUrl.fix_and_extract_and_check()
         assert (
             self.wikipediaUrl.status_code == 0 or self.wikipediaUrl.status_code == 200
         )
@@ -43,12 +43,12 @@ class TestWikipediaUrl(TestCase):
 
     def test_check_200_wm(self):
         url = WikipediaUrl(url="http://web.archive.org")
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.status_code == 0 or url.status_code == 200
 
     def test_check_404(self):
         url = WikipediaUrl(url="https://en.wikipedia.org/wiki/45q2345awf")
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.status_code == 0 or url.status_code == 404
         self.assertTrue(url.checked)
 
@@ -102,24 +102,24 @@ class TestWikipediaUrl(TestCase):
 
     def test_error1(self):
         url = WikipediaUrl(url="https://voyagermediaawards.nz/judges2019")
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.error is True
 
     def test_error2(self):
         url = WikipediaUrl(url="https://ukrainianweek.com/History/198459")
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.error is True
 
     def test_error3(self):
         url = WikipediaUrl(
             url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
         )
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.error is True
 
     def test_dns_hoover(self):
         url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.error is True
         assert url.checked is True
 
@@ -127,13 +127,13 @@ class TestWikipediaUrl(TestCase):
         url = WikipediaUrl(
             url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
         )
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.status_code == 0 or url.status_code == 404
         assert url.checked is True
 
     def test_no_dns(self):
         url = WikipediaUrl(url="https://www1.geocities.com/")
-        url.fix_and_check()
+        url.fix_and_extract_and_check()
         assert url.no_dns_record is True
         assert url.checked is True
 
