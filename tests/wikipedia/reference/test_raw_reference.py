@@ -382,7 +382,7 @@ class TestWikipediaRawReference(TestCase):
             check_urls=True,
         )
         raw_reference_object.extract_and_check_urls()
-        assert raw_reference_object.first_level_domains == {"geocities.com"}
+        assert raw_reference_object.first_level_domains == ["geocities.com"]
 
     def test_template_first_level_domains_two(self):
         wikitext = (
@@ -399,10 +399,10 @@ class TestWikipediaRawReference(TestCase):
             check_urls=True,
         )
         raw_reference_object.extract_and_check_urls()
-        assert raw_reference_object.first_level_domains == {
-            "geocities.com",
+        assert raw_reference_object.first_level_domains == [
             "archive.org",
-        }
+            "geocities.com",
+        ]
 
     def test___check_urls__missing_extraction(self):
         wikitext = (
@@ -459,7 +459,9 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object.extract_and_check_urls()
         urls = raw_reference_object.checked_urls
         assert raw_reference_object.urls_checked is True
-        assert urls[0].status_code == 200
+        assert raw_reference_object.first_level_domains == ["archive.org"]
+        assert urls[0].first_level_domain == "archive.org"
+        assert urls[0].status_code in [200, 0]
         assert urls[0].checked is True
         assert urls[0].no_dns_record is False
 

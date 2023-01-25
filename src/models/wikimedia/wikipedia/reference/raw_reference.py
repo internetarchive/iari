@@ -3,7 +3,7 @@ Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
 import re
-from typing import TYPE_CHECKING, List, Set, Union
+from typing import TYPE_CHECKING, List, Union
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import ExternalLink, Tag  # type: ignore
@@ -99,23 +99,22 @@ class WikipediaRawReference(WcdBaseModel):
         urls_list.extend(self.__bare_urls__)
         urls_list.extend(self.__external_wikicoded_links_in_the_reference__)
         # We set it to avoid duplicates
-        # urls = set(urls_list)
-        return urls_list
+        return list(set(urls_list))
 
     @property
-    def first_level_domains(self) -> Set[str]:
+    def first_level_domains(self) -> List[str]:
         """This returns a set"""
         if self.check_urls:
             if not self.urls_checked:
                 raise MissingInformationError("urls have not been fixed and checked")
-            flds = set()
+            flds = list()
             for url in self.checked_urls:
-                url.extract_first_level_domain_from_url()
                 if url.first_level_domain:
-                    flds.add(url.first_level_domain)
+                    flds.append(url.first_level_domain)
+            flds = sorted(flds)
             return flds
         else:
-            return set()
+            return list()
 
     @property
     def google_books_template_found(self):
@@ -256,7 +255,7 @@ class WikipediaRawReference(WcdBaseModel):
         if not self.extraction_done:
             raise MissingInformationError("extraction not done")
         for url in self.__reference_urls__:
-            url.fix_and_check()
+            url.fix_and_extract_and_check()
             self.checked_urls.append(url)
         self.urls_checked = True
 

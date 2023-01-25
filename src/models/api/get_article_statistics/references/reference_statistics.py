@@ -17,3 +17,6 @@ class ReferenceStatistics(BaseModel):
     wikitext: str = ""
     is_citation_reference: bool = False
     is_general_reference: bool = False
+    # urls: List[WikipediaUrl] = []
+    # # These are extracted from the URLs
+    # flds: List[str]

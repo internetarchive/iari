@@ -1,11 +1,8 @@
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from src import IASandboxWikibase, Wikibase
 from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
-from src.models.api.get_article_statistics.reference_statistics import (
-    ReferenceStatistics,
-)
 from src.models.api.get_article_statistics.references import (
     Links,
     References,
@@ -33,9 +30,11 @@ from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite
 from src.models.api.get_article_statistics.references.links_aggregates import (
     LinksAggregates,
 )
+from src.models.api.get_article_statistics.references.reference_statistics import (
+    ReferenceStatistics,
+)
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
-from src.models.wikimedia.enums import AnalyzerReturn
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
 
@@ -53,6 +52,18 @@ class WikipediaAnalyzer(WcdBaseModel):
     wikitext: str = ""
     testing: bool = False
     check_urls: bool = False
+
+    @property
+    def is_redirect(self) -> bool:
+        if not self.article:
+            raise MissingInformationError("self.article was None")
+        return self.article.is_redirect
+
+    @property
+    def found(self) -> bool:
+        if not self.article:
+            raise MissingInformationError("self.article was None")
+        return self.article.found_in_wikipedia
 
     @property
     def __agg__(self) -> Optional[AggregateContentReferences]:
@@ -126,11 +137,11 @@ class WikipediaAnalyzer(WcdBaseModel):
         if (
             self.article
             and self.article.extractor
-            and self.article.extractor.number_of_reference_urls
+            and self.article.extractor.number_of_checked_unique_reference_urls
         ):
             links = Links(
                 agg=LinksAggregates(
-                    all=self.article.extractor.number_of_reference_urls,
+                    all=self.article.extractor.number_of_checked_unique_reference_urls,
                     s200=self.article.extractor.number_of_reference_urls_with_code_200,
                     s3xx=self.article.extractor.number_of_reference_urls_with_code_3xx,
                     s404=self.article.extractor.number_of_reference_urls_with_code_404,
@@ -149,31 +160,38 @@ class WikipediaAnalyzer(WcdBaseModel):
         return links
 
     @property
-    def __references__(self):
-        return References(
-            all=self.article.extractor.number_of_references,
-            links=self.__links__,
-            types=ReferenceTypes(
-                content=ContentReferences(
-                    citation=CitationReferences(
-                        all=self.article.extractor.number_of_citation_references
+    def __references__(self) -> References:
+        if not self.article or not self.article.extractor:
+            raise MissingInformationError(
+                "self.article or self.article.extractor was None"
+            )
+        else:
+            return References(
+                all=self.article.extractor.number_of_references,
+                links=self.__links__,
+                types=ReferenceTypes(
+                    content=ContentReferences(
+                        citation=CitationReferences(
+                            all=self.article.extractor.number_of_citation_references
+                        ),
+                        general=GeneralReferences(
+                            all=self.article.extractor.number_of_general_references,
+                        ),
+                        agg=self.__agg__,
                     ),
-                    general=GeneralReferences(
-                        all=self.article.extractor.number_of_general_references,
-                    ),
-                    agg=self.__agg__,
+                    named=self.article.extractor.number_of_empty_named_references,
                 ),
-                named=self.article.extractor.number_of_empty_named_references,
-            ),
-            first_level_domain_counts=self.article.extractor.reference_first_level_domain_counts,
-        )
+                first_level_domain_counts=self.article.extractor.reference_first_level_domain_counts,
+            )
 
-    def __gather_article_statistics__(self):
+    def __gather_article_statistics__(self) -> None:
         if (
             self.article
             and not self.article.is_redirect
             and self.article.found_in_wikipedia
         ):
+            if not self.article.extractor:
+                raise MissingInformationError("self.article.extractor was None")
             has_references = self.article.extractor.has_references
             self.article_statistics = ArticleStatistics(
                 has_references=has_references,
@@ -183,26 +201,19 @@ class WikipediaAnalyzer(WcdBaseModel):
             if has_references:
                 self.article_statistics.references = self.__references__
 
-    def get_statistics(self):
+    def get_statistics(self) -> Dict[str, Any]:
         if not self.article:
             self.__analyze__()
         if not self.article_statistics:
             self.__gather_article_statistics__()
             self.__gather_reference_statistics__()
+        return self.__get_statistics_dict__()
+
+    def __get_statistics_dict__(self) -> Dict[str, Any]:
         if self.article_statistics:
-            excludes = {"cache"}
-            dictionary = self.article_statistics.dict(exclude=excludes)
-            # console.print(dictionary)
-            return dictionary
+            return self.article_statistics.dict()
         else:
-            if self.article.is_redirect:
-                return AnalyzerReturn.IS_REDIRECT
-            elif not self.article.found_in_wikipedia:
-                return AnalyzerReturn.NOT_FOUND
-            else:
-                logger.error(
-                    "self.article_statistics was None and the article was found and is not a redirect"
-                )
+            return {}
 
     def __analyze__(self):
         """Helper method"""
@@ -234,6 +245,8 @@ class WikipediaAnalyzer(WcdBaseModel):
                     wikitext=reference.raw_reference.get_wikicode_as_string,
                     is_citation_reference=reference.raw_reference.is_citation_reference,
                     is_general_reference=reference.raw_reference.is_general_reference,
+                    # links=reference.raw_reference.checked_urls,
+                    # flds=reference.raw_reference.first_level_domains,
                 )
                 self.article_statistics.references.details.append(reference_statistics)
         if not self.article_statistics:

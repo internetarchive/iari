@@ -1,6 +1,5 @@
 import json
 import logging
-from os import getcwd
 from os.path import exists
 from typing import Any, Dict, Optional
 

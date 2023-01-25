@@ -1,9 +1,6 @@
 from unittest import TestCase
 
 from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
-from src.models.api.get_article_statistics.reference_statistics import (
-    ReferenceStatistics,
-)
 from src.models.api.get_article_statistics.references import (
     Links,
     References,
@@ -25,8 +22,10 @@ from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite
 from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_web_references import (
     CiteWebReferences,
 )
+from src.models.api.get_article_statistics.references.reference_statistics import (
+    ReferenceStatistics,
+)
 from src.models.api.job import Job
-from src.models.wikimedia.enums import AnalyzerReturn
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
@@ -36,7 +35,6 @@ from test_data.test_content import (  # type: ignore
 
 class TestWikipediaAnalyzer(TestCase):
     def test_fetch_slash_title_article(self):
-        """This takes forever because of url checking"""
         wa = WikipediaAnalyzer(
             job=Job(title="GNU/Linux_naming_controversy", testing=True),
             check_urls=False,
@@ -45,6 +43,7 @@ class TestWikipediaAnalyzer(TestCase):
         # fixme This uses internet access
         wa.article.fetch_and_extract_and_parse_and_generate_hash()
         assert wa.article.found_in_wikipedia is True
+        assert wa.found is True
 
     def test_get_statistics_valid_article_test(self):
         wa = WikipediaAnalyzer(job=Job(title="Test"), wikitext=test_full_article)
@@ -54,11 +53,13 @@ class TestWikipediaAnalyzer(TestCase):
 
     def test_get_statistics_redirect(self):
         wa = WikipediaAnalyzer(job=Job(title="WWII"))
-        assert wa.get_statistics() == AnalyzerReturn.IS_REDIRECT
+        assert wa.get_statistics() is None
+        assert wa.is_redirect is True
 
     def test_get_statistics_not_found(self):
         wa = WikipediaAnalyzer(job=Job(title="Test2222"))
-        assert wa.get_statistics() == AnalyzerReturn.NOT_FOUND
+        assert wa.get_statistics() is None
+        assert wa.found is False
 
     def test__gather_reference_statistics_test(self):
         wa = WikipediaAnalyzer(job=Job(title="Test"), wikitext=test_full_article)

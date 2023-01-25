@@ -2,10 +2,10 @@ from typing import Dict, List
 
 from pydantic import BaseModel
 
-from src.models.api.get_article_statistics.reference_statistics import (
+from src.models.api.get_article_statistics.references.links import Links
+from src.models.api.get_article_statistics.references.reference_statistics import (
     ReferenceStatistics,
 )
-from src.models.api.get_article_statistics.references.links import Links
 from src.models.api.get_article_statistics.references.reference_types import (
     ReferenceTypes,
 )
