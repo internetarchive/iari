@@ -190,7 +190,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def reference_urls_dictionaries(self):
         """List of URLs as dictionaries ready for API digestion"""
-        return [url.dict() for url in self.reference_urls]
+        return [url.dict() for url in self.checked_and_unique_reference_urls]
 
     @property
     def number_of_reference_urls_with_other_2xx(self):
@@ -198,7 +198,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(
             [
                 url
-                for url in self.reference_urls
+                for url in self.checked_and_unique_reference_urls
                 if str(url.status_code).startswith("2") and url.status_code not in [200]
             ]
         )
@@ -209,7 +209,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(
             [
                 url
-                for url in self.reference_urls
+                for url in self.checked_and_unique_reference_urls
                 if str(url.status_code).startswith("4") and url.status_code not in [404]
             ]
         )
@@ -217,43 +217,73 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def number_of_reference_urls_with_code_5xx(self):
         return len(
-            [url for url in self.reference_urls if str(url.status_code).startswith("5")]
+            [
+                url
+                for url in self.checked_and_unique_reference_urls
+                if str(url.status_code).startswith("5")
+            ]
         )
 
     @property
     def number_of_reference_urls_with_code_404(self):
-        return len([url for url in self.reference_urls if url.status_code == 404])
+        return len(
+            [
+                url
+                for url in self.checked_and_unique_reference_urls
+                if url.status_code == 404
+            ]
+        )
 
     @property
     def number_of_reference_urls_with_code_3xx(self):
         return len(
-            [url for url in self.reference_urls if str(url.status_code).startswith("3")]
+            [
+                url
+                for url in self.checked_and_unique_reference_urls
+                if str(url.status_code).startswith("3")
+            ]
         )
 
     @property
     def number_of_reference_urls_with_code_200(self):
-        return len([url for url in self.reference_urls if url.status_code == 200])
+        return len(
+            [
+                url
+                for url in self.checked_and_unique_reference_urls
+                if url.status_code == 200
+            ]
+        )
 
     @property
     def number_of_reference_urls_with_malformed_url(self):
         """This can be True while error is also True"""
-        return len([url for url in self.reference_urls if url.error is True])
+        return len(
+            [url for url in self.checked_and_unique_reference_urls if url.error is True]
+        )
 
     @property
     def number_of_reference_urls_with_error(self):
-        return len([url for url in self.reference_urls if url.error is True])
+        return len(
+            [url for url in self.checked_and_unique_reference_urls if url.error is True]
+        )
 
     @property
     def number_of_reference_urls_with_no_dns(self):
-        return len([url for url in self.reference_urls if url.no_dns_record is True])
+        return len(
+            [
+                url
+                for url in self.checked_and_unique_reference_urls
+                if url.no_dns_record is True
+            ]
+        )
 
     @property
-    def number_of_reference_urls(self):
+    def number_of_checked_unique_reference_urls(self):
         """Unique URLs"""
-        return len(self.reference_urls)
+        return len(self.checked_and_unique_reference_urls)
 
     @property
-    def reference_urls(self) -> List[WikipediaUrl]:
+    def checked_and_unique_reference_urls(self) -> List[WikipediaUrl]:
         """Unique URLs"""
         if self.check_urls:
             if not self.content_references[0].raw_reference.urls_checked:
