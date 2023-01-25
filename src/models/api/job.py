@@ -5,7 +5,7 @@ import requests
 from pydantic import BaseModel
 
 import config
-from src import MissingInformationError, console
+from src import MissingInformationError
 from src.models.exceptions import WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaSite
 

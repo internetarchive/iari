@@ -16,4 +16,5 @@ class TestJob(TestCase):
 
     def test_get_page_id(self):
         job = Job(title="Test", site="wikipedia", lang="en")
-        assert job.get_page_id == 11089416
+        job.get_page_id()
+        assert job.page_id == 11089416
