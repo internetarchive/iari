@@ -4,9 +4,9 @@ from typing import Any, Dict, Optional
 from src import IASandboxWikibase, Wikibase
 from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
 from src.models.api.get_article_statistics.references import (
-    Links,
     References,
     ReferenceTypes,
+    Urls,
 )
 from src.models.api.get_article_statistics.references.content import (
     AggregateContentReferences,
@@ -27,11 +27,14 @@ from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite
 from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_web_references import (
     CiteWebReferences,
 )
-from src.models.api.get_article_statistics.references.links_aggregates import (
-    LinksAggregates,
-)
 from src.models.api.get_article_statistics.references.reference_statistics import (
     ReferenceStatistics,
+)
+from src.models.api.get_article_statistics.references.unique_urls_aggregates import (
+    UniqueUrlsAggregates,
+)
+from src.models.api.get_article_statistics.references.urls_aggregates import (
+    UrlsAggregates,
 )
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
@@ -50,8 +53,13 @@ class WikipediaAnalyzer(WcdBaseModel):
     article_statistics: Optional[ArticleStatistics] = None
     wikibase: Wikibase = IASandboxWikibase()
     wikitext: str = ""
-    testing: bool = False
     check_urls: bool = False
+
+    @property
+    def testing(self):
+        if not self.job:
+            raise MissingInformationError("no job")
+        return self.job.testing
 
     @property
     def is_redirect(self) -> bool:
@@ -72,23 +80,30 @@ class WikipediaAnalyzer(WcdBaseModel):
             #     f"self.article.extractor.number_of_references_"
             #     f"with_a_deprecated_template:{self.article.extractor.number_of_references_with_a_deprecated_template}"
             # )
+            ae = self.article.extractor
             return AggregateContentReferences(
-                bare_url_t=self.article.extractor.number_of_bare_url_references,
-                citation_t=self.article.extractor.number_of_citation_template_references,
+                bare_url_t=ae.number_of_bare_url_references,
+                citation_t=ae.number_of_citation_template_references,
                 citeq_t=CiteQReferences(
-                    all=self.article.extractor.number_of_citeq_references,
+                    all=ae.number_of_citeq_references,
                 ),
                 cs1_t=self.__cs1_t__,
-                has_hash=self.article.extractor.number_of_hashed_content_references,
-                has_template=self.article.extractor.number_of_content_reference_with_at_least_one_template,
-                isbn_t=self.article.extractor.number_of_isbn_template_references,
-                multiple_t=self.article.extractor.number_of_multiple_template_references,
+                has_hash=ae.number_of_hashed_content_references,
+                has_template=ae.number_of_content_reference_with_at_least_one_template,
+                isbn_t=ae.number_of_isbn_template_references,
+                multiple_t=ae.number_of_multiple_template_references,
                 supported_template_we_prefer=(
-                    self.article.extractor.number_of_content_references_with_a_supported_template_we_prefer
+                    ae.number_of_content_references_with_a_supported_template_we_prefer
                 ),
-                url_t=self.article.extractor.number_of_url_template_references,
-                without_a_template=self.article.extractor.number_of_content_reference_without_a_template,
-                with_deprecated_template=self.article.extractor.number_of_references_with_a_deprecated_template,
+                url_t=ae.number_of_url_template_references,
+                without_a_template=ae.number_of_content_reference_without_a_template,
+                with_deprecated_template=ae.number_of_references_with_a_deprecated_template,
+                has_archive_details_url=ae.number_of_content_references_with_ia_details_link(),
+                has_google_books_url_or_template=(
+                    ae.number_of_content_references_with_google_books_template_or_url()
+                ),
+                has_web_archive_org_url=ae.number_of_content_references_with_ia_details_link(),
+                url_found=ae.number_of_content_references_with_url_found,
             )
         else:
             return None
@@ -96,68 +111,71 @@ class WikipediaAnalyzer(WcdBaseModel):
     @property
     def __cs1_t__(self) -> Optional[Cs1References]:
         if self.article and self.article.extractor:
+            ae = self.article.extractor
             return Cs1References(
-                all=self.article.extractor.number_of_cs1_references,
+                all=ae.number_of_cs1_references,
                 web=CiteWebReferences(
-                    all=self.article.extractor.number_of_cite_web_references,
-                    has_google_books_link=(
-                        self.article.extractor.number_of_cite_web_references_with_google_books_link_or_template
+                    all=ae.number_of_cite_web_references,
+                    has_google_books_url=(
+                        ae.number_of_cite_web_references_with_google_books_link_or_template
                     ),
-                    has_ia_details_link=self.article.extractor.number_of_cite_web_references_with_ia_details_link,
-                    has_wm_link=self.article.extractor.number_of_cite_web_references_with_wm_link,
-                    no_link=self.article.extractor.number_of_cite_web_references_with_no_link,
+                    has_ia_details_url=ae.number_of_cite_web_references_with_ia_details_link,
+                    has_wm_url=ae.number_of_cite_web_references_with_wm_link,
+                    has_url=ae.number_of_cite_web_references_with_a_url,
                 ),
                 journal=(
                     CiteJournalReferences(
-                        all=self.article.extractor.number_of_cite_journal_references,
-                        has_wm_link=(
-                            self.article.extractor.number_of_cite_journal_references_with_wm_link
-                        ),
-                        has_ia_details_link=(
-                            self.article.extractor.number_of_cite_journal_references_with_ia_details_link
-                        ),
-                        no_link=self.article.extractor.number_of_cite_journal_references_with_no_link,
-                        has_doi=self.article.extractor.number_of_cite_journal_references_with_doi,
+                        all=ae.number_of_cite_journal_references,
+                        has_wm_url=ae.number_of_cite_journal_references_with_wm_link,
+                        # has_ia_details_url=(
+                        #     ae.number_of_cite_journal_references_with_ia_details_link
+                        # ),
+                        has_url=ae.number_of_cite_journal_references_with_a_url,
+                        has_doi=ae.number_of_cite_journal_references_with_doi,
                     )
                 ),
                 book=CiteBookReferences(
-                    all=self.article.extractor.number_of_cite_book_references,
-                    has_wm_link=self.article.extractor.number_of_cite_book_references_with_wm_link,
-                    has_ia_details_link=self.article.extractor.number_of_cite_book_references_with_ia_details_link,
-                    no_link=self.article.extractor.number_of_cite_book_references_with_no_link,
-                    has_isbn=self.article.extractor.number_of_cite_book_references_with_isbn,
+                    all=ae.number_of_cite_book_references,
+                    has_wm_url=ae.number_of_cite_book_references_with_wm_link,
+                    has_ia_details_url=ae.number_of_cite_book_references_with_ia_details_link,
+                    has_url=ae.number_of_cite_book_references_with_a_url,
+                    has_isbn=ae.number_of_cite_book_references_with_isbn,
                 ),
-                others=self.article.extractor.number_of_other_cs1_references,
+                others=ae.number_of_other_cs1_references,
             )
         else:
             return None
 
     @property
-    def __links__(self) -> Links:
+    def __urls__(self) -> Urls:
         if (
             self.article
             and self.article.extractor
-            and self.article.extractor.number_of_checked_unique_reference_urls
+            and self.article.extractor.number_of_urls
         ):
-            links = Links(
-                agg=LinksAggregates(
-                    all=self.article.extractor.number_of_checked_unique_reference_urls,
-                    s200=self.article.extractor.number_of_reference_urls_with_code_200,
-                    s3xx=self.article.extractor.number_of_reference_urls_with_code_3xx,
-                    s404=self.article.extractor.number_of_reference_urls_with_code_404,
-                    s5xx=self.article.extractor.number_of_reference_urls_with_code_5xx,
-                    error=self.article.extractor.number_of_reference_urls_with_error,
-                    no_dns=self.article.extractor.number_of_reference_urls_with_no_dns,
-                    other_2xx=self.article.extractor.number_of_reference_urls_with_other_2xx,
-                    other_4xx=self.article.extractor.number_of_reference_urls_with_other_4xx,
+            ae = self.article.extractor
+            urls = Urls(
+                agg=UrlsAggregates(
+                    all=ae.number_of_urls,
+                    unique=UniqueUrlsAggregates(
+                        all=ae.number_of_checked_unique_reference_urls,
+                        s200=ae.number_of_unique_reference_urls_with_code_200,
+                        s3xx=ae.number_of_unique_reference_urls_with_code_3xx,
+                        s404=ae.number_of_unique_reference_urls_with_code_404,
+                        s5xx=ae.number_of_unique_reference_urls_with_code_5xx,
+                        error=ae.number_of_unique_reference_urls_with_error,
+                        no_dns=ae.number_of_unique_reference_urls_with_no_dns,
+                        other_2xx=ae.number_of_unique_reference_urls_with_other_2xx,
+                        other_4xx=ae.number_of_unique_reference_urls_with_other_4xx,
+                        malformed_urls=ae.number_of_unique_reference_urls_with_malformed_url,
+                    ),
                 ),
-                links_found=True,
-                malformed_url=self.article.extractor.number_of_reference_urls_with_malformed_url,
-                details=self.article.extractor.reference_urls_dictionaries,
+                urls_found=True,
+                # details=ae.reference_urls_dictionaries,
             )
         else:
-            links = Links()
-        return links
+            urls = Urls()
+        return urls
 
     @property
     def __references__(self) -> References:
@@ -166,22 +184,24 @@ class WikipediaAnalyzer(WcdBaseModel):
                 "self.article or self.article.extractor was None"
             )
         else:
+            ae = self.article.extractor
             return References(
-                all=self.article.extractor.number_of_references,
-                links=self.__links__,
+                all=ae.number_of_references,
+                urls=self.__urls__,
                 types=ReferenceTypes(
                     content=ContentReferences(
+                        all=ae.number_of_content_references,
                         citation=CitationReferences(
-                            all=self.article.extractor.number_of_citation_references
+                            all=ae.number_of_citation_references
                         ),
                         general=GeneralReferences(
-                            all=self.article.extractor.number_of_general_references,
+                            all=ae.number_of_general_references,
                         ),
                         agg=self.__agg__,
                     ),
-                    named=self.article.extractor.number_of_empty_named_references,
+                    named=ae.number_of_empty_named_references,
                 ),
-                first_level_domain_counts=self.article.extractor.reference_first_level_domain_counts,
+                first_level_domain_counts=ae.reference_first_level_domain_counts,
             )
 
     def __gather_article_statistics__(self) -> None:
@@ -232,21 +252,35 @@ class WikipediaAnalyzer(WcdBaseModel):
         ):
             self.article_statistics.references.details = []
             for reference in self.article.extractor.references:
+                if not reference.raw_reference:
+                    raise MissingInformationError("raw_reference was None")
+                rr = reference.raw_reference
+                if not rr.check_urls_done:
+                    if not self.testing:
+                        raise MissingInformationError("check_urls_done was False")
+                if not rr.first_level_domains_done:
+                    raise MissingInformationError("first_level_domains_done was False")
                 reference_statistics = ReferenceStatistics(
-                    plain_text_in_reference=reference.raw_reference.plain_text_in_reference,
-                    citation_template_found=reference.raw_reference.citation_template_found,
-                    cs1_template_found=reference.raw_reference.cs1_template_found,
-                    citeq_template_found=reference.raw_reference.citeq_template_found,
-                    isbn_template_found=reference.raw_reference.isbn_template_found,
-                    url_template_found=reference.raw_reference.url_template_found,
-                    bare_url_template_found=reference.raw_reference.bare_url_template_found,
-                    multiple_templates_found=reference.raw_reference.multiple_templates_found,
-                    is_named_reference=reference.raw_reference.is_named_reference,
-                    wikitext=reference.raw_reference.get_wikicode_as_string,
-                    is_citation_reference=reference.raw_reference.is_citation_reference,
-                    is_general_reference=reference.raw_reference.is_general_reference,
-                    # links=reference.raw_reference.checked_urls,
-                    # flds=reference.raw_reference.first_level_domains,
+                    plain_text_in_reference=rr.plain_text_in_reference,
+                    citation_template_found=rr.citation_template_found,
+                    cs1_template_found=rr.cs1_template_found,
+                    citeq_template_found=rr.citeq_template_found,
+                    isbn_template_found=rr.isbn_template_found,
+                    url_template_found=rr.url_template_found,
+                    bare_url_template_found=rr.bare_url_template_found,
+                    multiple_templates_found=rr.multiple_templates_found,
+                    is_named_reference=rr.is_named_reference,
+                    is_citation_reference=rr.is_citation_reference,
+                    is_general_reference=rr.is_general_reference,
+                    has_archive_details_url=rr.archive_org_slash_details_in_reference,
+                    has_google_books_url_or_template=rr.google_books_url_or_template_found,
+                    has_web_archive_org_url=rr.web_archive_org_in_reference,
+                    url_found=rr.url_found,
+                    isbn=reference.isbn,
+                    doi=reference.doi,
+                    wikitext=rr.get_wikicode_as_string,
+                    urls=rr.checked_urls,
+                    flds=rr.first_level_domains,
                 )
                 self.article_statistics.references.details.append(reference_statistics)
         if not self.article_statistics:

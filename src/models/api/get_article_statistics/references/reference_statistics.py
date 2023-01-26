@@ -1,4 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel
+
+from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 
 class ReferenceStatistics(BaseModel):
@@ -17,6 +21,14 @@ class ReferenceStatistics(BaseModel):
     wikitext: str = ""
     is_citation_reference: bool = False
     is_general_reference: bool = False
-    # urls: List[WikipediaUrl] = []
-    # # These are extracted from the URLs
-    # flds: List[str]
+    has_archive_details_url: bool = False
+    has_google_books_url_or_template: bool = False
+    has_web_archive_org_url: bool = False
+    url_found: bool = False
+    doi: str = ""
+    isbn: str = ""
+    urls: List[WikipediaUrl] = []
+    flds: List[str] = []
+
+    class Config:
+        extra = "forbid"

@@ -5,9 +5,23 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src import console
 from src.models.api.get_article_statistics import GetArticleStatistics
 from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
+from src.models.api.get_article_statistics.references.content.aggregate import (
+    CiteQReferences,
+)
+from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_book_references import (
+    CiteBookReferences,
+)
+from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_journal_references import (
+    CiteJournalReferences,
+)
+from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_web_references import (
+    CiteWebReferences,
+)
+from src.models.api.get_article_statistics.references.urls_aggregates import (
+    UrlsAggregates,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -155,182 +169,71 @@ class TestGetArticleStatistics(TestCase):
             "/get-statistics?lang=en&site=wikipedia&title=Easter Island&testing=True"
         )
         data = json.loads(response.data)
-        console.print(ArticleStatistics(**data).dict())
         self.assertEqual(200, response.status_code)
-        self.assertEqual(
-            {
-                "has_references": True,
-                "lang": "en",
-                "page_id": 0,
-                "references": {
-                    "all": 5,
-                    "details": [
-                        {
-                            "bare_url_template_found": False,
-                            "citation_template_found": False,
-                            "citeq_template_found": False,
-                            "cs1_template_found": True,
-                            "is_citation_reference": True,
-                            "is_general_reference": False,
-                            "is_named_reference": False,
-                            "isbn_template_found": False,
-                            "multiple_templates_found": False,
-                            "plain_text_in_reference": False,
-                            "url_template_found": False,
-                            "wikitext": '<ref name="INE">{{cite web | url= '
-                            "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php "
-                            "| title= Censo de Población y "
-                            "Vivienda 2002 | work= [[National "
-                            "Statistics Institute "
-                            "(Chile)|National Statistics "
-                            "Institute]] | access-date= 1 May "
-                            "2010 | url-status=live | "
-                            "archive-url= "
-                            "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales"
-                            "/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php "
-                            "| archive-date= 15 July "
-                            "2010}}</ref>",
-                        },
-                        {
-                            "bare_url_template_found": False,
-                            "citation_template_found": False,
-                            "citeq_template_found": False,
-                            "cs1_template_found": True,
-                            "is_citation_reference": True,
-                            "is_general_reference": False,
-                            "is_named_reference": False,
-                            "isbn_template_found": False,
-                            "multiple_templates_found": False,
-                            "plain_text_in_reference": False,
-                            "url_template_found": False,
-                            "wikitext": "<ref>{{cite web |language= es |url= "
-                            "https://resultados.censo2017.cl/Home/Download "
-                            "|title= Censo 2017 |work= [[National "
-                            "Statistics Institute "
-                            "(Chile)|National Statistics "
-                            "Institute]] |access-date= 11 May "
-                            "2018 |archive-url= "
-                            "https://web.archive.org/web/20180511145942/https://resultados.censo2017.cl/Home/Download "
-                            "|archive-date= 11 May 2018 "
-                            "|url-status=dead }}</ref>",
-                        },
-                        {
-                            "bare_url_template_found": False,
-                            "citation_template_found": False,
-                            "citeq_template_found": False,
-                            "cs1_template_found": False,
-                            "is_citation_reference": True,
-                            "is_general_reference": False,
-                            "is_named_reference": True,
-                            "isbn_template_found": False,
-                            "multiple_templates_found": False,
-                            "plain_text_in_reference": False,
-                            "url_template_found": False,
-                            "wikitext": '<ref name="INE"/>',
-                        },
-                        {
-                            "bare_url_template_found": False,
-                            "citation_template_found": False,
-                            "citeq_template_found": False,
-                            "cs1_template_found": True,
-                            "is_citation_reference": False,
-                            "is_general_reference": True,
-                            "is_named_reference": False,
-                            "isbn_template_found": False,
-                            "multiple_templates_found": False,
-                            "plain_text_in_reference": False,
-                            "url_template_found": False,
-                            "wikitext": "* {{cite book|author-link=Jared "
-                            "Diamond|last=Diamond|first= "
-                            "Jared|year=2005|title=Collapse. How "
-                            "Societies Choose to Fail or "
-                            "Succeed|location=New "
-                            "York|publisher=Viking|isbn=978-0143036555 "
-                            "|title-link=Collapse (book)}}",
-                        },
-                        {
-                            "bare_url_template_found": False,
-                            "citation_template_found": False,
-                            "citeq_template_found": False,
-                            "cs1_template_found": True,
-                            "is_citation_reference": False,
-                            "is_general_reference": True,
-                            "is_named_reference": False,
-                            "isbn_template_found": False,
-                            "multiple_templates_found": False,
-                            "plain_text_in_reference": False,
-                            "url_template_found": False,
-                            "wikitext": "* {{cite journal|last= "
-                            "Fischer|first= Steven Roger|year= "
-                            "1995|title= Preliminary Evidence for "
-                            "Cosmogonic Texts in Rapanui's "
-                            "Rongorongo Inscriptions|journal= "
-                            "Journal of the Polynesian Society "
-                            "|issue=104|pages=303–21|url=http://www.jps.auckland.ac.nz/document/Volume_104_199"
-                            "5/Volume_104%2C_No._3/Preliminary_evidence_for_cosmogonic_texts_in_Ra"
-                            "panui%26apos%3Bs_Rongorongo_inscriptions%2C_by_Steven_Roger_Fischer%2C_"
-                            "p_303-322/p1}}",
-                        },
-                    ],
-                    "first_level_domain_counts": [],
-                    "links": {
-                        "agg": None,
-                        "links_found": False,
-                        "malformed_urls": 0,
-                        "details": [],
-                    },
-                    "types": {
-                        "content": {
-                            "agg": {
-                                "bare_url_t": 0,
-                                "citation_t": 0,
-                                "citeq_t": {"all": 0},
-                                "cs1_t": {
-                                    "all": 4,
-                                    "book": {
-                                        "all": 1,
-                                        "has_ia_details_link": 0,
-                                        "has_isbn": 1,
-                                        "has_wm_link": 0,
-                                        "no_link": 1,
-                                    },
-                                    "journal": {
-                                        "all": 1,
-                                        "has_doi": 0,
-                                        "has_wm_link": 0,
-                                        "no_link": 1,
-                                    },
-                                    "others": 0,
-                                    "web": {
-                                        "all": 2,
-                                        "has_google_books_link": 0,
-                                        "has_ia_details_link": 0,
-                                        "has_wm_link": 2,
-                                        "no_link": 2,
-                                    },
-                                },
-                                "has_hash": 4,
-                                "has_template": 4,
-                                "isbn_t": 0,
-                                "multiple_t": 0,
-                                "supported_template_we_prefer": 4,
-                                "url_t": 0,
-                                "without_a_template": 0,
-                                "with_deprecated_template": 0,
-                            },
-                            "citation": {"all": 2},
-                            "general": {"all": 2},
-                        },
-                        "named": 1,
-                    },
-                },
-                "site": "wikipedia",
-                "timestamp": 0,
-                "timing": 0,
-                "title": "Easter Island",
-            },
-            ArticleStatistics(**self.__make_reproducible__(data=data)).dict(),
+        stat = ArticleStatistics(**self.__make_reproducible__(data=data))
+        assert stat.has_references is True
+        assert stat.title == "Easter Island"
+        assert stat.site == "wikipedia"
+        assert stat.page_id == 0
+        assert stat.timing == 0
+        assert stat.timestamp == 0
+        references = stat.references
+        assert references.all == 5
+        urls = references.urls
+        assert urls.urls_found is True
+        assert isinstance(urls.agg, UrlsAggregates)
+        uagg = urls.agg
+        assert uagg.all == 5
+        uuagg = urls.agg.unique
+        # We dont check urls during this
+        # test for speed reasons so all these are 0
+        assert uuagg.all == 0
+        assert uuagg.error == 0
+        assert uuagg.s5xx == 0
+        assert uuagg.s404 == 0
+        assert uuagg.s200 == 0
+        assert uuagg.s3xx == 0
+        assert uuagg.malformed_urls == 0
+        assert uuagg.no_dns == 0
+        assert uuagg.other_2xx == 0
+        assert uuagg.other_4xx == 0
+        types = references.types
+        assert types.content is not None
+        assert types.named == 1
+        content = types.content
+        assert content.all == 4
+        agg = content.agg
+        assert agg.url_found == 4
+        assert agg.url_t == 0
+        assert agg.bare_url_t == 0
+        assert agg.citation_t == 0
+        assert agg.citeq_t == CiteQReferences(all=0)
+        assert agg.has_archive_details_url == 0
+        assert agg.has_hash == 4
+        assert agg.has_template == 4
+        assert agg.has_web_archive_org_url == 0
+        assert agg.has_google_books_url_or_template == 0
+        cs1 = agg.cs1_t
+        assert cs1.all == 4
+        assert cs1.others == 0
+        assert cs1.web == CiteWebReferences(
+            all=2,
+            has_url=2,
+            has_google_books_url=0,
+            has_ia_details_url=0,
+            has_wm_url=2,
         )
+        assert cs1.journal == CiteJournalReferences(
+            all=1, has_wm_url=0, has_url=1, has_doi=0
+        )
+        assert cs1.book == CiteBookReferences(
+            all=1, has_url=1, has_ia_details_url=0, has_isbn=1, has_wm_url=0
+        )
+        assert agg.isbn_t == 0
+        assert agg.multiple_t == 0
+        assert agg.supported_template_we_prefer == 4
+        assert agg.with_deprecated_template == 0
+        assert agg.without_a_template == 0
 
     def test_invalid_language(self):
         response = self.test_client.get(

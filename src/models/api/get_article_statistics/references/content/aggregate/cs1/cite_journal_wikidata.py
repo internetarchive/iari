@@ -10,3 +10,7 @@ class CiteJournalWikidata(Wikidata):
     We use BaseModel to avoid the cache attribute"""
 
     retracted: bool
+    has_url: int
+
+    class Config:
+        extra = "forbid"

@@ -2,13 +2,13 @@ from typing import Dict, List
 
 from pydantic import BaseModel
 
-from src.models.api.get_article_statistics.references.links import Links
 from src.models.api.get_article_statistics.references.reference_statistics import (
     ReferenceStatistics,
 )
 from src.models.api.get_article_statistics.references.reference_types import (
     ReferenceTypes,
 )
+from src.models.api.get_article_statistics.references.urls import Urls
 
 
 class References(BaseModel):
@@ -20,5 +20,5 @@ class References(BaseModel):
     all: int
     details: List[ReferenceStatistics] = []
     first_level_domain_counts: List[Dict[str, int]] = []
-    links: Links
+    urls: Urls
     types: ReferenceTypes

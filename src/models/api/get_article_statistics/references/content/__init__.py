@@ -17,6 +17,10 @@ class ContentReferences(BaseModel):
 
     We use BaseModel to avoid the cache attribute"""
 
+    all: int
     citation: CitationReferences
     general: GeneralReferences
     agg: AggregateContentReferences
+
+    class Config:
+        extra = "forbid"

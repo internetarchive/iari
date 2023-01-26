@@ -63,3 +63,11 @@ class AggregateContentReferences(BaseModel):
 
     # With at least one deprecated reference template
     with_deprecated_template: int
+
+    has_archive_details_url: int
+    has_google_books_url_or_template: int
+    has_web_archive_org_url: int
+    url_found: int
+
+    class Config:
+        extra = "forbid"

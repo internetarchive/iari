@@ -13,3 +13,6 @@ class ReferenceTypes(BaseModel):
     content: ContentReferences
     # Type of reference which does not have any content and only refer to another <ref> using a name
     named: int
+
+    class Config:
+        extra = "forbid"
