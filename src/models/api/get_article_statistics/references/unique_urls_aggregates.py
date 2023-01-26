@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class LinksAggregates(BaseModel):
+class UniqueUrlsAggregates(BaseModel):
     all: int = 0
     s200: int = 0
     s3xx: int = 0
@@ -11,3 +11,7 @@ class LinksAggregates(BaseModel):
     no_dns: int = 0
     other_2xx: int = 0
     other_4xx: int = 0
+    malformed_urls: int = 0
+
+    class Config:
+        extra = "forbid"

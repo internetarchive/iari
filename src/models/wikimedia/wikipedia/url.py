@@ -38,6 +38,7 @@ class WikipediaUrl(BaseModel):
     checked: bool = False
     error: bool = False
     first_level_domain: str = ""
+    first_level_domain_done: bool = False
     fld_is_ip: bool = False
     malformed_url: bool = False
     no_dns_record: bool = False
@@ -169,8 +170,8 @@ class WikipediaUrl(BaseModel):
 
     def fix_and_extract_and_check(self):
         logger.debug("fix_and_extract_and_check: running")
-        self.extract_first_level_domain_from_url()
         self.__fix_malformed_urls__()
+        self.extract_first_level_domain()
         print(f"Trying to check: {self.url}")
         if self.__dns_record_found__:
             self.__check_with_https_verify__()
@@ -189,7 +190,7 @@ class WikipediaUrl(BaseModel):
         """Checks for Internet Archive details url"""
         return bool("//archive.org/details" in self.url)
 
-    def extract_first_level_domain_from_url(self) -> None:
+    def extract_first_level_domain(self) -> None:
         logger.debug("__get_first_level_domain__: Running")
         try:
             logger.debug(f"Trying to get FLD from {self.url}")
@@ -197,6 +198,7 @@ class WikipediaUrl(BaseModel):
             if fld:
                 logger.debug(f"Found FLD: {fld}")
                 self.first_level_domain = fld
+            self.first_level_domain_done = True
         except (TldBadUrl, TldDomainNotFound):
             """The library does not support Wayback Machine URLs"""
             if self.is_wayback_machine_url():
@@ -214,3 +216,4 @@ class WikipediaUrl(BaseModel):
                     # self.__log_to_file__(
                     #     message=str(message), file_name="url_exceptions.log"
                     # )
+            self.first_level_domain_done = True

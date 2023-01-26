@@ -8,7 +8,10 @@ class CiteJournalReferences(BaseModel):
     We use BaseModel to avoid the cache attribute"""
 
     all: int
-    has_wm_link: int
-    no_link: int
+    has_wm_url: int
+    has_url: int
     has_doi: int
     # wikidata: CiteJournalWikidataStatistics
+
+    class Config:
+        extra = "forbid"

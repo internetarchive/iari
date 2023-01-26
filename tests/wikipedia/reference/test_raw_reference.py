@@ -31,7 +31,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 2
             assert raw_reference_object.multiple_templates_found is True
 
@@ -42,7 +42,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.citeq_template_found is True
         raw_template = "{{cite q|Q1}}"
         raw_reference = f"<ref>{raw_template}</ref>"
@@ -50,7 +50,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.citeq_template_found is True
 
     def test___determine_reference_type_cite_q_extra_params(self):
@@ -61,7 +61,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.citeq_template_found is True
             assert (
                 raw_reference_object.templates[0].parameters["first_parameter"] == "Q1"
@@ -76,7 +76,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 2
             assert raw_reference_object.multiple_templates_found is True
 
@@ -87,7 +87,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
 
     def test_number_of_templates_two(self):
@@ -110,7 +110,7 @@ class TestWikipediaRawReference(TestCase):
             raw_reference_object = WikipediaRawReference(
                 tag=ref, testing=True, wikibase=wikibase
             )
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "citeq"
             assert raw_reference_object.first_template_name == "citeq"
@@ -130,7 +130,7 @@ class TestWikipediaRawReference(TestCase):
             raw_reference_object = WikipediaRawReference(
                 tag=ref, testing=True, wikibase=wikibase
             )
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "citeq"
             assert raw_reference_object.first_template_name == "citeq"
@@ -147,7 +147,7 @@ class TestWikipediaRawReference(TestCase):
             raw_reference_object = WikipediaRawReference(
                 tag=ref, testing=True, wikibase=wikibase
             )
-            raw_reference_object.extract_and_check_urls()
+            raw_reference_object.extract_and_check()
             assert raw_reference_object.is_named_reference is True
 
     def test_get_wikicode_as_string(self):
@@ -186,7 +186,7 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=False,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.is_general_reference is True
         assert raw_reference_object.cs1_template_found is True
 
@@ -203,7 +203,7 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=False,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.plain_text_in_reference is True
 
     def test__plain_text_detected_after(self):
@@ -219,7 +219,7 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=False,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.plain_text_in_reference is True
 
     def test__plain_text_detected_no(self):
@@ -235,7 +235,7 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=False,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.plain_text_in_reference is False
 
     def test_wayback_url_true(self):
@@ -251,7 +251,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.web_archive_org_in_reference is True
 
     def test_wayback_url_false(self):
@@ -267,7 +267,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.web_archive_org_in_reference is False
 
     def test_archive_details_url_true(self):
@@ -283,7 +283,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.archive_org_slash_details_in_reference is True
 
     def test_archive_details_url_false(self):
@@ -299,7 +299,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.archive_org_slash_details_in_reference is False
 
     def test_google_books_url_true(self):
@@ -316,7 +316,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.google_books_url_or_template_found is True
 
     def test_google_books_url_false(self):
@@ -332,7 +332,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.google_books_url_or_template_found is False
 
     def test_google_books_template_found_true(self):
@@ -348,7 +348,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.google_books_template_found is True
 
     def test_google_books_template_found_false(self):
@@ -364,7 +364,7 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         assert raw_reference_object.google_books_template_found is False
 
     def test_template_first_level_domains_one(self):
@@ -381,7 +381,20 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.reference_urls == [
+            WikipediaUrl(
+                checked=True,
+                error=False,
+                first_level_domain="geocities.com",
+                fld_is_ip=False,
+                malformed_url=False,
+                no_dns_record=True,
+                status_code=0,
+                url="https://www1.geocities.com/",
+            )
+        ]
+        assert raw_reference_object.first_level_domains_done is True
         assert raw_reference_object.first_level_domains == ["geocities.com"]
 
     def test_template_first_level_domains_two(self):
@@ -398,8 +411,9 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=True,
         )
-        raw_reference_object.extract_and_check_urls()
-        assert raw_reference_object.first_level_domains == [
+        raw_reference_object.extract_and_check()
+        flds = sorted(raw_reference_object.first_level_domains)
+        assert flds == [
             "archive.org",
             "geocities.com",
         ]
@@ -435,9 +449,9 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         urls = raw_reference_object.checked_urls
-        assert raw_reference_object.urls_checked is True
+        assert raw_reference_object.check_urls_done is True
         assert urls[0].status_code == 0
         assert urls[0].checked is True
         assert urls[0].no_dns_record is True
@@ -456,9 +470,9 @@ class TestWikipediaRawReference(TestCase):
             is_general_reference=True,
             check_urls=True,
         )
-        raw_reference_object.extract_and_check_urls()
+        raw_reference_object.extract_and_check()
         urls = raw_reference_object.checked_urls
-        assert raw_reference_object.urls_checked is True
+        assert raw_reference_object.check_urls_done is True
         assert raw_reference_object.first_level_domains == ["archive.org"]
         assert urls[0].first_level_domain == "archive.org"
         assert urls[0].status_code in [200, 0]
@@ -497,11 +511,9 @@ class TestWikipediaRawReference(TestCase):
             wikibase=wikibase,
             is_general_reference=True,
         )
-        assert (
-            len(raw_reference_object.__external_wikicoded_links_in_the_reference__) == 1
-        )
-        assert raw_reference_object.__external_wikicoded_links_in_the_reference__[
-            0
-        ] == WikipediaUrl(
+        raw_reference_object.__extract_external_wikicoded_links_from_the_reference__()
+        assert raw_reference_object.wikicoded_links_done is True
+        assert len(raw_reference_object.wikicoded_links) == 1
+        assert raw_reference_object.wikicoded_links[0] == WikipediaUrl(
             url="http://www.jewishvirtuallibrary.org/sud-ouest-s-o-4050-vautour"
         )

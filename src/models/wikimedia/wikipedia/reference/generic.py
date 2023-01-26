@@ -269,7 +269,7 @@ class WikipediaReference(WcdItem):
     date: Optional[datetime]
     degree: Optional[str]
     department: Optional[str]
-    doi: Optional[str]
+    doi: str = ""
     doi_access: Optional[str]
     doi_broken_date: Optional[datetime]
     edition: Optional[str]
@@ -280,7 +280,7 @@ class WikipediaReference(WcdItem):
     hdl: Optional[str]
     hdl_access: Optional[str]
     id: Optional[str]  # where does this come from?
-    isbn: Optional[str]
+    isbn: str = ""
     ismn: Optional[str]
     issn: Optional[str]
     issue: Optional[str]
@@ -357,7 +357,7 @@ class WikipediaReference(WcdItem):
     transcripturl: Optional[str]
 
     # Numbered parameters
-    first_parameter: Optional[str]  # 1
+    first_parameter: str = ""  # 1
     second_parameter: Optional[str]  # 2
 
     # Fields found in the wild
@@ -866,12 +866,12 @@ class WikipediaReference(WcdItem):
     #             self.google_books = google_books
 
     def __parse_isbn__(self) -> None:
-        if self.isbn is not None:
+        if self.isbn:
             # Replace spaces with dashes to follow the ISBN standard
             self.isbn = self.isbn.replace(" ", "-")
             stripped_isbn = self.isbn.replace("-", "")
             if stripped_isbn in ["", " "]:
-                self.isbn = None
+                self.isbn = ""
             else:
                 if len(stripped_isbn) == 13:
                     self.isbn_13 = self.isbn

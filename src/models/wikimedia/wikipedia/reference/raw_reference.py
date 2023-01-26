@@ -37,11 +37,19 @@ class WikipediaRawReference(WcdBaseModel):
     extraction_done: bool = False
     is_named_reference: bool = False
     is_general_reference: bool = False
-    urls_checked: bool = False
+    check_urls_done: bool = False
     checked_urls: List[WikipediaUrl] = []
     check_urls: bool = False
-    # TODO add new optional attribute wikicode: Optional[Wikicode]
-    #  which contains the parsed output of the general reference line
+    wikicoded_links: List[WikipediaUrl] = []
+    wikicoded_links_done: bool = False
+    bare_urls: List[WikipediaUrl] = []
+    bare_urls_done: bool = False
+    template_urls: List[WikipediaUrl] = []
+    template_urls_done: bool = False
+    reference_urls: List[WikipediaUrl] = []
+    reference_urls_done: bool = False
+    first_level_domains: List[str] = []
+    first_level_domains_done = True
 
     class Config:
         arbitrary_types_allowed = True
@@ -51,6 +59,29 @@ class WikipediaRawReference(WcdBaseModel):
     #     return bool([url for url in self.urls if url.is_wayback_machine_url()])
 
     @property
+    def common_url_scheme_found(self) -> bool:
+        """Simple, quick and inexpensive search for valid URLs with a common scheme
+        This should catch >95% of all URLs in Wikipedia references"""
+        return bool("http://" or "https://" or "ftp://" in self.get_wikicode_as_string)
+
+    @property
+    def url_found(self) -> bool:
+        # first try inexpensive ones
+        if self.common_url_scheme_found:
+            return True
+        elif not self.bare_urls_done:
+            self.__extract_bare_urls__()
+            return bool(self.bare_urls)
+        elif not self.wikicoded_links_done:
+            self.__extract_external_wikicoded_links_from_the_reference__()
+            return bool(self.wikicoded_links)
+        elif not self.template_urls_done:
+            self.__extract_template_urls__()
+            return bool(self.template_urls)
+        else:
+            return False
+
+    @property
     def get_stripped_wikicode(self):
         if isinstance(self.wikicode, Wikicode):
             return self.wikicode.strip_code()
@@ -58,26 +89,25 @@ class WikipediaRawReference(WcdBaseModel):
             # support Tag
             return self.wikicode.contents.strip_code()
 
-    @property
-    def __template_urls__(self) -> List[WikipediaUrl]:
+    def __extract_template_urls__(self) -> None:
         urls = list()
         for template in self.templates:
             if template.urls:
                 urls.extend(template.urls)
-        # We set it to avoid duplicates
-        return list(urls)
+        self.template_urls = list(urls)
+        self.template_urls_done = True
 
-    @property
-    def __bare_urls__(self) -> List[WikipediaUrl]:
-        """This returns a set"""
+    def __extract_bare_urls__(self) -> None:
+        """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
         urls = list()
         for url in self.__find_bare_urls__():
             # We get a tuple back so we join it
             urls.append(WikipediaUrl(url="".join(url)))
-        return urls
+        self.bare_urls = urls
+        self.bare_urls_done = True
 
-    @property
-    def __external_wikicoded_links_in_the_reference__(self) -> List[WikipediaUrl]:
+    def __extract_external_wikicoded_links_from_the_reference__(self) -> None:
+        """This relies on mwparserfromhell to find links like [google.com Google] in the wikitext"""
         urls = set()
         if isinstance(self.wikicode, Wikicode):
             for url in self.wikicode.ifilter_external_links():
@@ -89,32 +119,43 @@ class WikipediaRawReference(WcdBaseModel):
                 # url: ExternalLink
                 # we throw away the title here
                 urls.add(WikipediaUrl(url=str(url.url)))
-        return list(urls)
+        self.wikicoded_links = list(urls)
+        self.wikicoded_links_done = True
 
-    @property
-    def __reference_urls__(self) -> List[WikipediaUrl]:
+    def __extract_reference_urls__(self) -> None:
         """We support both URLs in templates and outside aka bare URLs"""
         urls_list = list()
-        urls_list.extend(self.__template_urls__)
-        urls_list.extend(self.__bare_urls__)
-        urls_list.extend(self.__external_wikicoded_links_in_the_reference__)
+        if not self.template_urls_done:
+            self.__extract_template_urls__()
+        urls_list.extend(self.template_urls)
+        if not self.bare_urls_done:
+            self.__extract_bare_urls__()
+        urls_list.extend(self.bare_urls)
+        if not self.wikicoded_links_done:
+            self.__extract_external_wikicoded_links_from_the_reference__()
+        urls_list.extend(self.wikicoded_links)
         # We set it to avoid duplicates
-        return list(set(urls_list))
+        self.reference_urls = list(set(urls_list))
+        self.reference_urls_done = True
 
-    @property
-    def first_level_domains(self) -> List[str]:
-        """This returns a set"""
-        if self.check_urls:
-            if not self.urls_checked:
-                raise MissingInformationError("urls have not been fixed and checked")
-            flds = list()
-            for url in self.checked_urls:
+    def __extract_first_level_domains__(self) -> None:
+        """This aggregates all first level domains from the urls found in the raw references"""
+        logger.debug("__extract_first_level_domains__: running")
+        if not self.reference_urls_done:
+            raise MissingInformationError("reference_urls have not been extracted")
+        if self.reference_urls:
+            logger.debug("found at least one url")
+            for url in self.reference_urls:
+                logger.debug("working on url")
+                if not url.first_level_domain_done:
+                    url.extract_first_level_domain()
                 if url.first_level_domain:
-                    flds.append(url.first_level_domain)
-            flds = sorted(flds)
-            return flds
-        else:
-            return list()
+                    logger.debug(f"found fld: {url.first_level_domain}")
+                    self.first_level_domains.append(url.first_level_domain)
+        # We sort them for the sake of easier testing
+        # flds = sorted(flds)
+        logger.debug(f"found flds: {self.first_level_domains}")
+        self.first_level_domains_done = True
 
     @property
     def google_books_template_found(self):
@@ -254,10 +295,12 @@ class WikipediaRawReference(WcdBaseModel):
         logger.debug("__check_urls__: running")
         if not self.extraction_done:
             raise MissingInformationError("extraction not done")
-        for url in self.__reference_urls__:
+        if not self.reference_urls_done:
+            raise MissingInformationError("reference_urls not done")
+        for url in self.reference_urls:
             url.fix_and_extract_and_check()
             self.checked_urls.append(url)
-        self.urls_checked = True
+        self.check_urls_done = True
 
     def specific_template_found(self, names: Union[str, List[str]] = "") -> bool:
         """Used to search for a specific template"""
@@ -316,11 +359,13 @@ class WikipediaRawReference(WcdBaseModel):
                 for template in self.templates
             ]
 
-    def extract_and_check_urls(self) -> None:
+    def extract_and_check(self) -> None:
         """Helper method"""
-        logger.debug("extract_and_check_urls: running")
+        logger.debug("extract_and_check: running")
         self.__extract_templates_and_parameters_from_raw_reference__()
         self.__determine_if_multiple_templates__()
+        self.__extract_reference_urls__()
+        self.__extract_first_level_domains__()
         if self.check_urls:
             self.__check_urls__()
         else:
@@ -330,7 +375,7 @@ class WikipediaRawReference(WcdBaseModel):
         """Make a WikipediaReference based on the extracted information"""
         logger.debug("get_finished_wikipedia_reference_object: running")
         if not self.extraction_done:
-            self.extract_and_check_urls()
+            self.extract_and_check()
         from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
         if self.number_of_templates:

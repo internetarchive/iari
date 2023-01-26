@@ -8,7 +8,10 @@ class CiteWebReferences(BaseModel):
     We use BaseModel to avoid the cache attribute"""
 
     all: int
-    has_google_books_link: int
-    has_ia_details_link: int
-    has_wm_link: int
-    no_link: int
+    has_url: int
+    has_google_books_url: int
+    has_ia_details_url: int
+    has_wm_url: int
+
+    class Config:
+        extra = "forbid"

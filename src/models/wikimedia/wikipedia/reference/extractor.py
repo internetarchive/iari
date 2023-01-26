@@ -43,6 +43,16 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def number_of_content_references_with_url_found(self):
+        return len(
+            [
+                reference
+                for reference in self.content_references
+                if reference.raw_reference.url_found
+            ]
+        )
+
+    @property
     def has_references(self):
         """Helper method"""
         return bool(self.number_of_references)
@@ -92,8 +102,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len([ref for ref in self.cite_book_references if ref.isbn])
 
     @property
-    def number_of_cite_web_references_with_no_link(self):
-        return self.number_of_content_references_with_no_link(
+    def number_of_cite_web_references_with_a_url(self):
+        return self.number_of_content_references_with_a_url(
             list_=self.cite_web_references
         )
 
@@ -110,8 +120,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_cite_journal_references_with_no_link(self):
-        return self.number_of_content_references_with_no_link(
+    def number_of_cite_journal_references_with_a_url(self):
+        return self.number_of_content_references_with_a_url(
             list_=self.cite_journal_references
         )
 
@@ -128,8 +138,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_cite_book_references_with_no_link(self):
-        return self.number_of_content_references_with_no_link(
+    def number_of_cite_book_references_with_a_url(self):
+        return self.number_of_content_references_with_a_url(
             list_=self.cite_book_references
         )
 
@@ -193,7 +203,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return [url.dict() for url in self.checked_and_unique_reference_urls]
 
     @property
-    def number_of_reference_urls_with_other_2xx(self):
+    def number_of_unique_reference_urls_with_other_2xx(self):
         """This catches 2xx codes which could be good or not"""
         return len(
             [
@@ -204,7 +214,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_reference_urls_with_other_4xx(self):
+    def number_of_unique_reference_urls_with_other_4xx(self):
         """This catches 2xx codes which could be good or not"""
         return len(
             [
@@ -215,7 +225,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_reference_urls_with_code_5xx(self):
+    def number_of_unique_reference_urls_with_code_5xx(self):
         return len(
             [
                 url
@@ -225,7 +235,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_reference_urls_with_code_404(self):
+    def number_of_unique_reference_urls_with_code_404(self):
         return len(
             [
                 url
@@ -235,7 +245,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_reference_urls_with_code_3xx(self):
+    def number_of_unique_reference_urls_with_code_3xx(self):
         return len(
             [
                 url
@@ -245,7 +255,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_reference_urls_with_code_200(self):
+    def number_of_unique_reference_urls_with_code_200(self):
         return len(
             [
                 url
@@ -255,20 +265,20 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
 
     @property
-    def number_of_reference_urls_with_malformed_url(self):
+    def number_of_unique_reference_urls_with_malformed_url(self):
         """This can be True while error is also True"""
         return len(
             [url for url in self.checked_and_unique_reference_urls if url.error is True]
         )
 
     @property
-    def number_of_reference_urls_with_error(self):
+    def number_of_unique_reference_urls_with_error(self):
         return len(
             [url for url in self.checked_and_unique_reference_urls if url.error is True]
         )
 
     @property
-    def number_of_reference_urls_with_no_dns(self):
+    def number_of_unique_reference_urls_with_no_dns(self):
         return len(
             [
                 url
@@ -276,6 +286,20 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                 if url.no_dns_record is True
             ]
         )
+
+    @property
+    def number_of_urls(self):
+        """Non-unique URLs"""
+        return len(self.urls)
+
+    @property
+    def urls(self) -> List[WikipediaUrl]:
+        """List of non-unique urls"""
+        urls: List[WikipediaUrl] = list()
+        for rr in self.raw_references:
+            for url in rr.reference_urls:
+                urls.append(url)
+        return urls
 
     @property
     def number_of_checked_unique_reference_urls(self):
@@ -286,7 +310,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def checked_and_unique_reference_urls(self) -> List[WikipediaUrl]:
         """Unique URLs"""
         if self.check_urls:
-            if not self.content_references[0].raw_reference.urls_checked:
+            if not self.content_references[0].raw_reference.check_urls_done:
                 raise MissingInformationError("url checking has not been done yet")
             urls: List[WikipediaUrl] = list()
             for reference in self.references:
@@ -324,6 +348,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             return []
         flds = []
         for reference in self.content_references:
+            if not reference.raw_reference.first_level_domains_done:
+                reference.raw_reference.__extract_first_level_domains__()
             for fld in reference.raw_reference.first_level_domains:
                 flds.append(fld)
         return flds
@@ -545,24 +571,35 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             [reference for reference in self.content_references if reference.md5hash]
         )
 
-    def number_of_content_references_with_no_link(
-        self, list_: List[WikipediaReference]
+    def number_of_content_references_with_google_books_template_or_url(
+        self, list_: List[WikipediaReference] = None
     ) -> int:
-        if not list_:
+        if list_ is None:
             list_ = self.content_references
         result = len(
             [
                 ref
                 for ref in list_
-                if ref.raw_reference and not ref.raw_reference.checked_urls
+                if ref.raw_reference
+                and ref.raw_reference.google_books_url_or_template_found
             ]
         )
         return result
 
-    def number_of_content_references_with_wm_link(
-        self, list_: List[WikipediaReference]
+    def number_of_content_references_with_a_url(
+        self, list_: List[WikipediaReference] = None
     ) -> int:
-        if not list_:
+        if list_ is None:
+            list_ = self.content_references
+        result = len(
+            [ref for ref in list_ if ref.raw_reference and ref.raw_reference.url_found]
+        )
+        return result
+
+    def number_of_content_references_with_wm_link(
+        self, list_: List[WikipediaReference] = None
+    ) -> int:
+        if list_ is None:
             list_ = self.content_references
         result = len(
             [
@@ -574,9 +611,9 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return result
 
     def number_of_content_references_with_ia_details_link(
-        self, list_: List[WikipediaReference]
+        self, list_: List[WikipediaReference] = None
     ) -> int:
-        if not list_:
+        if list_ is None:
             list_ = self.content_references
         result = len(
             [
@@ -657,7 +694,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def __extract_and_check_urls_on_raw_references__(self):
         logger.debug("__extract_and_check_urls_on_raw_references__: running")
         for raw_reference in self.raw_references:
-            raw_reference.extract_and_check_urls()
+            raw_reference.extract_and_check()
 
     def __extract_sections__(self):
         logger.debug("__extract_sections__: running")
