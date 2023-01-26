@@ -256,11 +256,12 @@ class WikipediaAnalyzer(WcdBaseModel):
                 if not reference.raw_reference:
                     raise MissingInformationError("raw_reference was None")
                 rr = reference.raw_reference
-                if not rr.check_urls_done:
-                    if not self.testing:
-                        raise MissingInformationError("check_urls_done was False")
-                if not rr.first_level_domains_done:
-                    raise MissingInformationError("first_level_domains_done was False")
+                # DISABLED because it causes 502 sometimes
+                # if not rr.check_urls_done:
+                #     if not self.testing:
+                #         raise MissingInformationError("check_urls_done was False")
+                # if not rr.first_level_domains_done:
+                #     raise MissingInformationError("first_level_domains_done was False")
                 reference_statistics = ReferenceStatistics(
                     plain_text_in_reference=rr.plain_text_in_reference,
                     citation_template_found=rr.citation_template_found,
