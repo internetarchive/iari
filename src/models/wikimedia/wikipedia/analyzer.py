@@ -237,6 +237,7 @@ class WikipediaAnalyzer(WcdBaseModel):
 
     def __analyze__(self):
         """Helper method"""
+        logger.debug("__analyze__: running")
         if self.job:
             if not self.article:
                 self.__populate_article__()

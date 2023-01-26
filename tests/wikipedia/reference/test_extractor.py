@@ -219,6 +219,18 @@ class TestWikipediaReferenceExtractor(TestCase):
     #         {"pisc.org.uk": 1},
     #     ]
 
+    def test___get_checked_and_unique_reference_urls__(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>{{cite web|url=http://google.com}}</ref>",
+            wikibase=wikibase,
+            check_urls=True,
+        )
+        wre.extract_all_references()
+        assert wre.check_urls_done is True
+        assert wre.number_of_references == 1
+        assert len(wre.checked_and_unique_reference_urls) == 1
+
     def test_reference_urls(self):
         wre = WikipediaReferenceExtractor(
             testing=True,
@@ -227,6 +239,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             check_urls=True,
         )
         wre.extract_all_references()
+        assert wre.check_urls_done is True
         urls = wre.checked_and_unique_reference_urls
         assert len(urls) == 1
         # print(urls)

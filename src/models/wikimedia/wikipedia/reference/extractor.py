@@ -38,6 +38,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     wikibase: Wikibase
     testing: bool = False
     check_urls: bool = False
+    check_urls_done: bool = False
+    checked_and_unique_reference_urls: List[WikipediaUrl] = []
 
     class Config:
         arbitrary_types_allowed = True
@@ -200,11 +202,15 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def reference_urls_dictionaries(self):
         """List of URLs as dictionaries ready for API digestion"""
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return [url.dict() for url in self.checked_and_unique_reference_urls]
 
     @property
     def number_of_unique_reference_urls_with_other_2xx(self):
         """This catches 2xx codes which could be good or not"""
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [
                 url
@@ -216,6 +222,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def number_of_unique_reference_urls_with_other_4xx(self):
         """This catches 2xx codes which could be good or not"""
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [
                 url
@@ -226,6 +234,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     @property
     def number_of_unique_reference_urls_with_code_5xx(self):
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [
                 url
@@ -236,6 +246,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     @property
     def number_of_unique_reference_urls_with_code_404(self):
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [
                 url
@@ -246,6 +258,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     @property
     def number_of_unique_reference_urls_with_code_3xx(self):
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [
                 url
@@ -256,6 +270,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     @property
     def number_of_unique_reference_urls_with_code_200(self):
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [
                 url
@@ -267,18 +283,24 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def number_of_unique_reference_urls_with_malformed_url(self):
         """This can be True while error is also True"""
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [url for url in self.checked_and_unique_reference_urls if url.error is True]
         )
 
     @property
     def number_of_unique_reference_urls_with_error(self):
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [url for url in self.checked_and_unique_reference_urls if url.error is True]
         )
 
     @property
     def number_of_unique_reference_urls_with_no_dns(self):
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(
             [
                 url
@@ -296,22 +318,28 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def urls(self) -> List[WikipediaUrl]:
         """List of non-unique urls"""
         urls: List[WikipediaUrl] = list()
-        for rr in self.raw_references:
-            for url in rr.reference_urls:
-                urls.append(url)
+        for reference in self.references:
+            if reference.raw_reference:
+                for url in reference.raw_reference.reference_urls:
+                    urls.append(url)
         return urls
 
     @property
     def number_of_checked_unique_reference_urls(self):
         """Unique URLs"""
+        if not self.check_urls_done:
+            raise MissingInformationError("self.check_urls_done was False")
         return len(self.checked_and_unique_reference_urls)
 
-    @property
-    def checked_and_unique_reference_urls(self) -> List[WikipediaUrl]:
+    def __get_checked_and_unique_reference_urls_from_references__(self) -> None:
         """Unique URLs"""
         if self.check_urls:
-            if not self.content_references[0].raw_reference.check_urls_done:
+            if not self.check_urls_done:
                 raise MissingInformationError("url checking has not been done yet")
+            if len(self.raw_references) != len(self.references):
+                raise MissingInformationError(
+                    "conversion to references has not been done yet"
+                )
             urls: List[WikipediaUrl] = list()
             for reference in self.references:
                 if reference.raw_reference:
@@ -319,9 +347,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                         urls.append(url)
             # We run them through a set to avoid duplicates and then convert back
             # to list because objects in sets cannot be updated it seems
-            return list(set(urls))
-        else:
-            return list()
+            self.checked_and_unique_reference_urls = list(set(urls))
 
     @property
     def reference_first_level_domain_counts(self) -> List[Dict[str, int]]:
@@ -681,8 +707,9 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         self.__parse_wikitext__()
         self.__extract_all_raw_citation_references__()
         self.__extract_all_raw_general_references__()
-        self.__extract_and_check_urls_on_raw_references__()
+        self.__extract_and_check_urls_on_references__()
         self.__convert_raw_references_to_reference_objects__()
+        self.__get_checked_and_unique_reference_urls_from_references__()
 
     def __convert_raw_references_to_reference_objects__(self):
         logger.debug("__convert_raw_references_to_reference_objects__: running")
@@ -691,10 +718,13 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             for raw_reference in self.raw_references
         ]
 
-    def __extract_and_check_urls_on_raw_references__(self):
+    def __extract_and_check_urls_on_references__(self):
         logger.debug("__extract_and_check_urls_on_raw_references__: running")
-        for raw_reference in self.raw_references:
-            raw_reference.extract_and_check()
+        for reference in self.references:
+            if not reference.raw_reference:
+                raise MissingInformationError("no raw_reference")
+            reference.raw_reference.extract_and_check()
+        self.check_urls_done = True
 
     def __extract_sections__(self):
         logger.debug("__extract_sections__: running")
