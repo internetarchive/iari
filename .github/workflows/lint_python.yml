@@ -28,6 +28,7 @@ jobs:
       - run: cp config_sample.py config.py
         # https://docs.pytest.org/en/latest/how-to/usage.html#specifying-which-tests-to-run
         # Run only one test while we test if the secret work
+      - run: mkdir json
       - run: poetry run pytest .
       - run: shopt -s globstar && poetry run pyupgrade --keep-runtime-typing --py37-plus **/*.py
       - run: poetry run safety check
