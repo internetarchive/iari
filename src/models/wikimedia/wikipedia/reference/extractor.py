@@ -285,9 +285,16 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         """This can be True while error is also True"""
         if not self.check_urls_done:
             raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [url for url in self.checked_and_unique_reference_urls if url.error is True]
-        )
+        return len(self.malformed_urls)
+
+    @property
+    def malformed_urls(self) -> List[str]:
+        """List of malformed_urls"""
+        return [
+            url.url
+            for url in self.checked_and_unique_reference_urls
+            if url.malformed_url is True
+        ]
 
     @property
     def number_of_unique_reference_urls_with_error(self):

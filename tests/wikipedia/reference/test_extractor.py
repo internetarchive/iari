@@ -266,3 +266,24 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         wre.extract_all_references()
         assert wre.has_references is False
+
+    def test_malformed_urls_empty(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="test",
+            wikibase=wikibase,
+        )
+        wre.extract_all_references()
+        assert wre.malformed_urls == []
+
+    def test_malformed_urls_one(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref>",
+            wikibase=wikibase,
+            check_urls=True,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_urls == 1
+        print(wre.urls)
+        assert wre.malformed_urls == []
