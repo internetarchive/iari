@@ -299,4 +299,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.number_of_urls == 2
         # print(wre.urls)
-        assert wre.malformed_urls == ["httpwww.google.com", "google.com"]
+        sorted_urls = sorted(wre.malformed_urls)
+        assert sorted_urls == [
+            "google.com",
+            "httpwww.google.com",
+        ]
