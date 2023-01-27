@@ -444,3 +444,67 @@ Commercial [[spark gap]]s use this property to abruptly switch high voltages in 
 
 [[Category:Electrical breakdown|  ]]
 """
+old_norse_sources = """
+== Sources ==
+=== General sources ===
+{{refbegin}}
+* {{citation | last = Harbert | first = Wayne | title = The Germanic Languages | work = Cambridge Language Surveys | publisher = Cambridge: Cambridge University Press | year = 2007 }}
+* {{citation | last = Haugan | first = Jens | title = Right Dislocated 'Subjects' in Old Norse | work = Working Papers in Scandinavian Syntax | number = 62 | year = 1998 | pages = 37–60}}
+* {{citation | first = Einar | last = Haugen | author-link = Einar Haugen | year = 1950 | title = First Grammatical Treatise. The Earliest Germanic Phonology | journal = Language | volume = 26 | pages = 4–64 | issue = 4 | doi = 10.2307/522272 | jstor = 522272 }}
+* {{citation | url = http://www.menota.org/HB2_index.xml | title = The Menota handbook: Guidelines for the electronic encoding of Medieval Nordic primary sources | editor-first = Odd Einar | editor-last = Haugen | editor-link = Odd Einar Haugen | edition = Version 2.0 | publisher = Bergen: Medieval Nordic Text Archive | orig-year = 2004 | year = 2008 | isbn = 978-82-8088-400-8 | ref = {{harvid|''The Menota handbook''}} }} , "The Menota handbook 2.0"
+* {{citation | last = Lass | first = Roger | title = Old English: A Historical Linguistic Companion | publisher = Cambridge: Cambridge University Press | year = 1993 }}
+* {{citation | editor-last = Adams | editor-first = Charles Kendall | editor-link = Charles Kendall Adams | title = Johnson's Universal Cyclopedia: A New Edition | volume = 7 (Raleigh-Tananarivo) | url = https://archive.org/details/johnsonsuniversa07adam | orig-year = 1876 | year = 1899 | publisher = D. Appleton, A. J. Johnson}}
+* {{citation | editor-first = J. | editor-last = van der Auwera | editor-first2 = E. | editor-last2 = König | year = 1994 | title = The Germanic Languages }}
+* {{citation | first1 = J. | last1 = Moberg | first2 = C. | last2 = Gooskens | first3 = J. | last3 = Nerbonne | first4 = N. | last4 = Vaillette | year = 2007 | chapter = 4. Conditional Entropy Measures Intelligibility among Related Languages | title = Proceedings of the 17th Meeting of Computational Linguistics in the Netherlands | pages = 51–66 | volume = 7 (LOT Occasional series) | hdl = 1874/296747 }}
+* {{citation | editor-first = Oskar | editor-last = Bandle | editor-first2 = Kurt | editor-last2 = Braunmüller | editor-first3 = Ernst Hakon | editor-last3 = Jahr | editor-first4 = Allan | editor-last4 = Karker | editor-first5 = Hans-Peter | editor-last5 = Naumann | editor-first6 = Ulf | editor-last6 = Teleman | editor-first7 = Lennart | editor-last7 = Elmevik | editor-first8 = Gun | editor-last8 = Widmark | title = The Nordic Languages, An International Handbook on the History of the North Germanic Languages | publisher = Walter de Gruyter, Berlin | year = 2002}}
+** {{citation | title = Volume 2 | year = 2005 | ref = {{harvid | Bandle | 2005}} }}
+* {{citation | last = O'Donoghue | first = Heather |title=Old Norse-Icelandic Literature: A Short Introduction |series=Blackwell Introductions to Literature |publisher=Blackwell Publishing Ltd. |date=2004}}
+* {{citation | last1 = Torp | first1 = Arne | author-link = Arne Torp | first2 = Lars S | last2 = Vikør | author-link2 = Lars Vikør | orig-year = 1993 | title = Hovuddrag i norsk språkhistorie | trans-title = The main features of Norwegian language history | language = no | publisher = Gyldendal Norsk Forlag | year = 2014 | isbn = 978-8205464025 | edition = 4th | ref = {{harvid | Torp | Vikør | 1993}} }}
+{{refend}}
+
+=== Dictionaries ===
+{{refbegin|}}
+* {{citation | last1 = Cleasby | first1 = Richard | author-link = Richard Cleasby | last2 = Vigfússon | author-link2 = Guðbrandur Vigfússon | first2 = Guðbrandur | title = An Icelandic-English Dictionary | publisher = Oxford: Clarendon Press | year = 1874 | url = https://archive.org/details/bub_gb_RnEJAAAAQAAJ }}
+** [http://www.germanic-lexicon-project.org/texts/oi_cleasbyvigfusson_about.html e-text] via the Germanic Lexicon Project (''germanic-lexicon-project.org'')
+** [https://old-norse.net e-text] adapted from the Germanic Lexicon Project version to work better with mobile devices and with an improved search (''old-norse.net'')
+* {{citation | first = G. T. | last = Zoëga | title = Íslenzk-Ensk orðabók | year = 1896 | url = https://archive.org/details/enskslenzkorabk00zogoog | publisher = S. Kristjánsson }}
+** {{citation | title = Íslenzk-Ensk orðabók | year = 1922 | url = https://archive.org/details/slenzkenskorab00zouoft | publisher = Reykjavík, Kostnaarmaur: Sigurdur Kristjánsson }}
+* {{citation | first = G. T. | last = Zoëga | title = A Concise Dictionary of Old Icelandic| year = 1910 }}
+** [http://lexicon.ff.cuni.cz/texts/oi_zoega_about.html scanned document] via "Germanic Lexicon Project" (''lexicon.ff.cuni.cz'')
+** [http://norroen.info/dct/zoega/ e-text] via ''norroen.info''
+* {{citation | url = https://onp.ku.dk/onp/onp.php | title = ONP: Dictionary of Old Norse Prose | publisher = University of Copenhagen | language = da, en }}
+* {{citation | first = Jan | last = de Vries | author-link = Jan de Vries (linguist) | orig-year = 1961 | title = Altnordisches Etymologisches Wörterbuch | year = 1977 }}
+* {{citation | editor-first = Sveinbjorn | editor-last = Egilsson | editor-link = Sveinbjörn Egilsson | title = Lexicon poeticum antiquæ linguæ septentrionalis | year = 1854 | url = https://archive.org/details/lexiconpoticuma00copegoog | language = da, la | publisher = Hafniæ, typis J. D. Qvist & comp }}
+* {{citation | editor-first = Sveinbjorn | editor-last = Egilsson | editor-link = Sveinbjörn Egilsson | editor-first2 = Finnur | editor-last2 = Jónsson | editor-link2 = Finnur Jónsson | title = Lexicon poeticum antiquæ linguæ septentrionalis | orig-year = 1913–1916 | year = 1931 | edition = 2nd }}
+** [http://www.septentrionalia.net/etexts/ First and Second editions] via ''www.septentrionalia.net''
+{{refend}}
+
+=== Grammars ===
+{{refbegin}}
+* {{citation | first = George | last = Bayldon | title = An Elementary Grammar of the Old Norse or Icelandic Language | publisher = London: Williams and Norgate | year = 1870 | url = https://archive.org/details/elementarygramma00bayluoft }}
+* {{citation| last1 = Vigfússon| first1 = Gudbrand | author-link = Guðbrandur Vigfússon | first2 = F. York | last2 = Powell| author-link2 = Frederick York Powell | url =https://archive.org/details/icelandicprosere00guuoft | title = An Icelandic Prose Reader: with Notes, Grammar, and Glossary| year = 1879 | publisher = Oxford Clarendon Press }}
+* {{citation | author-link = Adolf Noreen | last = Noreen | first = Adolf | title = Altnordische grammatik I. Altisländische und altnorwegische grammatik (laut- und flexionslehre) | edition = 4th | year = 1923 | url = https://digital-humanities.uni-tuebingen.de/altn-gram/noreen1923.html | publisher = Halle (Saale): Max Niemeyer }} ('''Old West Norse''')
+* {{citation | last = Noreen | first = Adolf | title = Altnordische grammatik II. Altschwedische grammatik mit einschluss des altgutnischen | year = 1904 | url = https://archive.org/details/altschwedischegr00noreuoft/page/n11/mode/2up | publisher = Halle: Max Niemeyer }} ('''Old Swedish''' and '''Old Gutnish''')
+* {{citation | last = Brøndum-Nielsen | first = Johannes | title = Gammeldansk Grammatik i sproghistorisk Fremstilling ''(8 volumes)'' | year = 1928–1974 | publisher = København: J. H. Schultz }} ('''Old Danish''')
+* {{cite book | author-link = Ragnvald Iversen | last = Iversen | first = Ragnvald | year = 1972 | title = Norrøn grammatikk | edition = 7th | publisher = Oslo: Aschehoug }} ('''Old West Norse''')
+* {{citation | author-link = Jan Terje Faarlund | last = Faarlund | first = Jan Terje | title = The Syntax of Old Norse | year = 2004 | publisher = New York: Oxford University Press }} (''Old Norse'' in the narrow sense, i.e. '''Old West Norse''')
+* {{citation | author-link = Odd Einar Haugen | last = Haugen | first = Odd Einar | title = Grunnbok i norrønt språk | year = 2006 | edition = 3rd, revised printing of the 4th | publisher = Gyldendal Akademisk }} ('''Old West Norse''')
+* {{citation | last = Haugen | first = Odd Einar | title = Norröne Grammatik im Überblick | year = 2015 | edition = 2nd | publisher = Universität Bergen | url = https://digital-humanities.uni-tuebingen.de/altn-gram/haugen2015.html }} ('''Old West Norse''')
+{{refend}}
+
+=== Old Norse texts ===
+{{refbegin}}
+* {{citation | ref = {{harvid | Gutasaga}} | url = http://runeberg.org/gutasaga/ | title = Gutasagan | editor-first = Lars | editor-last = Aronsson | editor-link = Lars Aronsson| work = [[Project Runeberg]] | year = 1997 | language = non}}
+** {{citation | url = http://www.germanicmythology.com/works/Gutasagan.html | title = Gutarnas Krönika eller Gutasagan [The History of the Gotlanders] | editor-first = Peter | editor-last = Tunstall | language = non, en }} , facing translation
+{{refend}}
+
+=== Language learning resources ===
+{{refbegin}}
+* {{citation | last = Byock | first = Jesse | author-link =Jesse Byock | title = Viking Language: Learn Old Norse, Runes, and Icelandic Sagas | year = 2013 | publisher = Jules William Press | isbn = 978-1-4802-1644-0 }}
+* {{citation | last1 = Gordon | first1 = Eric V. | author-link = E. V. Gordon | title = An Introduction to Old Norse | year = 1981 | publisher = Clarendon Press | location = Oxford | isbn = 978-0-19-811184-9 | first2 = A. R. | last2 = Taylor | url-access = registration | url = https://archive.org/details/introductiontool00gord }}
+* {{citation | last = Sweet | first = Henry | author-link=Henry Sweet| title = An Icelandic Primer, with Grammar, Notes, and Glossary | year = 1895 | publisher = Univerzita Karlova | url = https://archive.org/details/icelandicprimerw00swee | edition = 2nd }}
+** [http://lexicon.ff.cuni.cz/texts/oi_sweet_about.html alt source] via Germanic Lexicon Project (lexicon.ff.cuni.cz)
+** [http://www.gutenberg.org/ebooks/5424 e-ext] via [[Project Gutenberg]]
+* {{citation | title = Old Norse for Beginners | first1 = Haukur | last1 = Þorgeirsson | first2 = Óskar | last2 = Guðlaugsson | url = https://notendur.hi.is/~haukurth/norse/ | ref = {{harvid | Old Norse for Beginners}} }}
+{{refend}}
+"""

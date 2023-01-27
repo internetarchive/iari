@@ -8,6 +8,7 @@ from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_tail_excerpt,
     electrical_breakdown_full_article,
+    old_norse_sources,
     test_full_article,
 )
 
@@ -304,3 +305,15 @@ class TestWikipediaReferenceExtractor(TestCase):
             "google.com",
             "httpwww.google.com",
         ]
+
+    def test_sections_sources(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext=old_norse_sources,
+            wikibase=wikibase,
+            check_urls=False,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_sections_found == 1
+        assert wre.number_of_references == 52
+        assert wre.number_of_general_references == 52
