@@ -298,10 +298,15 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     @property
     def number_of_unique_reference_urls_with_error(self):
+        """This includes 2 different groups of error types from the request library"""
         if not self.check_urls_done:
             raise MissingInformationError("self.check_urls_done was False")
         return len(
-            [url for url in self.checked_and_unique_reference_urls if url.error is True]
+            [
+                url
+                for url in self.checked_and_unique_reference_urls
+                if url.request_error is True or url.request_url_error
+            ]
         )
 
     @property
@@ -312,7 +317,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             [
                 url
                 for url in self.checked_and_unique_reference_urls
-                if url.no_dns_record is True
+                if url.dns_record_found is False
             ]
         )
 

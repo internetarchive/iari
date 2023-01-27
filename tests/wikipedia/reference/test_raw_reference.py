@@ -454,7 +454,7 @@ class TestWikipediaRawReference(TestCase):
         assert raw_reference_object.check_urls_done is True
         assert urls[0].status_code == 0
         assert urls[0].checked is True
-        assert urls[0].no_dns_record is True
+        assert urls[0].dns_record_found is False
 
     def test___checked_urls_200(self):
         wikitext = (
@@ -477,7 +477,7 @@ class TestWikipediaRawReference(TestCase):
         assert urls[0].first_level_domain == "archive.org"
         assert urls[0].status_code in [200, 0]
         assert urls[0].checked is True
-        assert urls[0].no_dns_record is False
+        assert urls[0].dns_record_found is True
 
     def test___find_bare_urls__(self):
         """Test on a reference from the wild"""
