@@ -25,7 +25,7 @@ from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
 
 from src import console
-from src.models.exceptions import MissingInformationError, ResolveError
+from src.models.exceptions import ResolveError
 
 logger = logging.getLogger(__name__)
 timeout = 2
