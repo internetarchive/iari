@@ -131,7 +131,7 @@ class TestWikipediaUrl(TestCase):
         url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
         url.fix_and_extract_and_check()
         # assert url.error is True
-        console.print(url)
+        # console.print(url)
         assert url.unrecognized_scheme is False
         assert url.request_url_error is False
         assert url.dns_no_answer is True

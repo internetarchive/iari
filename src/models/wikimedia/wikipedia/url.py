@@ -303,7 +303,7 @@ class WikipediaUrl(BaseModel):
     def __parse_and_extract_url__(self):
         """Parse and extract netloc and scheme"""
         parsed_url = urlparse(self.__get_url__)
-        console.print(parsed_url)
+        # console.print(parsed_url)
         self.netloc = parsed_url.netloc
         self.scheme = parsed_url.scheme
         # We ignore the other parts for now
