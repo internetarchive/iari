@@ -18,3 +18,9 @@ class TestJob(TestCase):
         job = Job(title="Test", site="wikipedia", lang="en")
         job.get_page_id()
         assert job.page_id == 11089416
+
+    def test_refresh(self):
+        job = Job(title="Test", site="wikipedia", lang="en")
+        assert job.refresh is False
+        job = Job(title="Test", site="wikipedia", lang="en", refresh=True)
+        assert job.refresh is True

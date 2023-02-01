@@ -39,7 +39,7 @@ class TestFileIo(TestCase):
         assert exists(io1.filename(page_id=1)) is True
 
     def test_read_from_disk(self):
-        stat = ArticleStatistics(page_id=11089416).dict()
+        stat = ArticleStatistics(page_id=11089416, served_from_disk=True).dict()
         io1 = FileIo(job=self.__test_job__, statistics_dictionary=stat)
         io1.write_to_disk()
         # we set to None here to check that we actually get the data

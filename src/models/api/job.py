@@ -20,6 +20,7 @@ class Job(BaseModel):
     title: str
     testing: bool = False
     page_id: int = 0
+    refresh: bool = False
 
     @property
     def quoted_title(self):

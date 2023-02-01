@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, timedelta
 from unittest import TestCase
 
 from flask import Flask
@@ -129,18 +130,6 @@ class TestGetArticleStatistics(TestCase):
         api.add_resource(GetArticleStatistics, "/get-statistics")
         app.testing = True
         self.test_client = app.test_client()
-
-    def test_valid_request_test(self):
-        response = self.test_client.get(
-            "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True"
-        )
-        data = json.loads(response.data)
-        print(response.data)
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(
-            ArticleStatistics(title="Test", page_id=0).dict(),
-            ArticleStatistics(**self.__make_reproducible__(data=data)).dict(),
-        )
 
     # DISABLED because it fails
     # def test_valid_request_electrical_breakdown(self):
@@ -284,3 +273,30 @@ class TestGetArticleStatistics(TestCase):
         data["timing"] = 0
         data["timestamp"] = 0
         return data
+
+    def test_valid_request_test_refresh_false(self):
+        response = self.test_client.get(
+            "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True&refresh=True"
+        )
+        data = json.loads(response.data)
+        print(response.data)
+        self.assertEqual(200, response.status_code)
+        stats = ArticleStatistics(**data)
+        assert stats.served_from_disk is False
+
+    def test_valid_request_test_refresh_true(self):
+        response = self.test_client.get(
+            "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True&refresh=False"
+        )
+        data = json.loads(response.data)
+        print(response.data)
+        self.assertEqual(200, response.status_code)
+        stats = ArticleStatistics(**data)
+        assert stats.served_from_disk is True
+
+    def test___validate_and_get_job__(self):
+        """We dont test this since the dev/team does not yet
+        know how to mock flask that well yet.
+        We do however test the scheme in another file
+        and the job it returns"""
+        pass

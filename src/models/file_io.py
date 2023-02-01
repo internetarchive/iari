@@ -66,6 +66,7 @@ class FileIo(WcdBaseModel):
                 logger.debug("loading json into self.statistics")
                 app.logger.debug("loading json into self.statistics")
                 self.statistics_dictionary = json.load(file)
+                self.statistics_dictionary["served_from_disk"] = True
                 # app.logger.debug(f"loaded: {self.statistics_dictionary}")
         else:
             logger.debug("no json on disk")
