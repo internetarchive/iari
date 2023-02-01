@@ -274,7 +274,7 @@ class TestGetArticleStatistics(TestCase):
         data["timestamp"] = 0
         return data
 
-    def test_valid_request_test_refresh_false(self):
+    def test_valid_request_test_refresh_true(self):
         response = self.test_client.get(
             "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True&refresh=True"
         )
@@ -282,9 +282,10 @@ class TestGetArticleStatistics(TestCase):
         print(response.data)
         self.assertEqual(200, response.status_code)
         stats = ArticleStatistics(**data)
-        assert stats.served_from_disk is False
+        assert stats.served_from_cache is False
+        assert stats.refreshed_now is True
 
-    def test_valid_request_test_refresh_true(self):
+    def test_valid_request_test_refresh_false(self):
         response = self.test_client.get(
             "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True&refresh=False"
         )
@@ -292,7 +293,8 @@ class TestGetArticleStatistics(TestCase):
         print(response.data)
         self.assertEqual(200, response.status_code)
         stats = ArticleStatistics(**data)
-        assert stats.served_from_disk is True
+        assert stats.served_from_cache is True
+        assert stats.refreshed_now is False
 
     def test___validate_and_get_job__(self):
         """We dont test this since the dev/team does not yet

@@ -120,7 +120,8 @@ class GetArticleStatistics(Resource):
                 # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
                 # flask calls jsonify automatically
                 self.__write_to_disk__()
-                self.statistics_dictionary["served_from_disk"] = False
+                self.statistics_dictionary["served_from_cache"] = False
+                self.statistics_dictionary["refreshed_now"] = True
                 # app.logger.debug("returning dictionary")
                 return self.statistics_dictionary, 200
         else:
@@ -231,8 +232,12 @@ class GetArticleStatistics(Resource):
             MissingInformationError("no self.wikipedia_analyzer")
         self.__get_timing_and_statistics__()
         # We set this to be able to test the refresh
-        if not self.job.refresh:
-            self.statistics_dictionary["served_from_disk"] = True
+        if self.job.refresh:
+            self.statistics_dictionary["served_from_cache"] = False
+            self.statistics_dictionary["refreshed_now"] = True
+        else:
+            self.statistics_dictionary["served_from_cache"] = True
+            self.statistics_dictionary["refreshed_now"] = False
         return self.statistics_dictionary, 200
 
     def __return_meaningful_error__(self):
