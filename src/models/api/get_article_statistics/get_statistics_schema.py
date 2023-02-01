@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class GetStatisticsSchema(Schema):
     lang = fields.Str(required=True)
+    refresh = fields.Bool(required=False)
     site = fields.Enum(enum=WikimediaSite, required=True)
     testing = fields.Bool(required=False)
     title = fields.Str(required=True)

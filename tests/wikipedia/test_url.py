@@ -1,7 +1,6 @@
 import logging
 from unittest import TestCase
 
-from src import console
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
