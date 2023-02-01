@@ -743,33 +743,6 @@ class WikipediaReference(WcdItem):
         # We discard all None-values here to placate mypy
         return [i for i in maybe_persons if i]
 
-    # def __hash_based_on_title_and_date__(self):
-    #     logger.debug("__hash_based_on_title_and_date__: running")
-    #     if self.title is not None:
-    #         return self.title + self.isodate
-    #     else:
-    #         raise ValueError(
-    #             f"did not get what we need to generate a hash, {self.dict()}"
-    #         )
-    #
-    # def __hash_based_on_title_and_journal_and_date__(self):
-    #     logger.debug("__hash_based_on_title_and_journal_and_date__: running")
-    #     if (self.title and self.journal) is not None:
-    #         return self.title + self.journal + self.isodate
-    #     else:
-    #         raise ValueError(
-    #             f"did not get what we need to generate a hash, {self.dict()}"
-    #         )
-    #
-    # def __hash_based_on_title_and_publisher_and_date__(self):
-    #     logger.debug("__hash_based_on_title_and_publisher_and_date__: running")
-    #     if (self.title and self.publisher) is not None:
-    #         return self.title + self.publisher + self.isodate
-    #     else:
-    #         raise ValueError(
-    #             f"did not get what we need to generate a hash, {self.dict()}"
-    #         )
-
     def __merge_date_into_publication_date__(self):
         """Handle the possibly ambiguous self.date field"""
         if self.date and self.publication_date:
