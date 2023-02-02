@@ -73,7 +73,7 @@ class WikipediaTemplate(WcdBaseModel):
     def get_doi(self) -> str:
         """Helper method"""
         if not self.extraction_done:
-            raise MissingInformationError("not extracted")
+            self.extract_and_prepare_parameter_and_flds()
         if "doi" in self.parameters.keys():
             return str(self.parameters["doi"])
         else:

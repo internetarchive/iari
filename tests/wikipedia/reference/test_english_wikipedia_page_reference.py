@@ -725,5 +725,5 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
                 wikicode=ref, testing=True, wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
-            with self.assertRaises(MultipleIsbnError):
-                raw_reference_object.get_finished_wikipedia_reference_object()
+            ref = raw_reference_object.get_finished_wikipedia_reference_object()
+            assert ref.encountered_parse_error is True
