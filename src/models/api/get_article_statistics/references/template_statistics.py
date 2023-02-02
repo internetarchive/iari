@@ -15,6 +15,7 @@ class TemplateStatistics(BaseModel):
     is_known_multiref_template: bool
     doi: str
     isbn: str
+    wikitext: str
 
     class Config:
         extra = "forbid"

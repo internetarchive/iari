@@ -25,6 +25,10 @@ class WikipediaTemplate(WcdBaseModel):
         arbitrary_types_allowed = True
 
     @property
+    def wikitext(self) -> str:
+        return str(self.raw_template)
+
+    @property
     def is_known_multiref_template(self) -> bool:
         return bool(self.name in config.known_multiref_templates)
 

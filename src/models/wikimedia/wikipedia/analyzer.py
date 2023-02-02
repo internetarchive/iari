@@ -362,6 +362,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                         is_url_template=template.is_url_template,
                         is_webarchive_template=template.is_webarchive_template,
                         isbn=template.get_isbn,
+                        wikitext=template.wikitext,
                     )
                 )
             app.logger.debug(
