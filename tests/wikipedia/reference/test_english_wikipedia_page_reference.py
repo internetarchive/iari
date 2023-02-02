@@ -4,7 +4,6 @@ from unittest import TestCase
 from mwparserfromhell import parse  # type: ignore
 
 import config
-from src.models.exceptions import MultipleIsbnError
 from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
