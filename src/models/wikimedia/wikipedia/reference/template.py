@@ -1,11 +1,12 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import List
+from typing import Any, List
 
 from mwparserfromhell.nodes import Template  # type: ignore
 from pydantic import validate_arguments
 
+import config
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
@@ -16,10 +17,86 @@ logger = logging.getLogger(__name__)
 class WikipediaTemplate(WcdBaseModel):
     parameters: OrderedDict = OrderedDict()
     raw_template: Template
-    extracted: bool = False
+    extraction_done: bool = False
+    missing_or_empty_first_parameter: bool = False
+    language_code: str = ""
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def is_known_multiref_template(self) -> bool:
+        return bool(self.name in config.known_multiref_templates)
+
+    @property
+    def is_isbn_template(self) -> bool:
+        return bool(self.name in config.isbn_template)
+
+    @property
+    def is_bareurl_template(self) -> bool:
+        return bool(self.name in config.citeq_templates)
+
+    @property
+    def is_citeq_template(self) -> bool:
+        return bool(self.name in config.citeq_templates)
+
+    @property
+    def is_citation_template(self) -> bool:
+        return bool(self.name in config.citation_template)
+
+    @property
+    def is_cs1_template(self) -> bool:
+        return bool(self.name in config.cs1_templates)
+
+    @property
+    def is_url_template(self) -> bool:
+        return bool(self.name in config.url_template)
+
+    @property
+    def is_webarchive_template(self) -> bool:
+        return bool(self.name in config.webarchive_templates)
+
+    @property
+    def __first_parameter__(self) -> str:
+        """Private helper method"""
+        if not self.extraction_done:
+            self.extract_and_prepare_parameter_and_flds()
+        if self.parameters:
+            if "first_parameter" in self.parameters.keys():
+                return str(self.parameters["first_parameter"])
+            else:
+                return ""
+        else:
+            return ""
+
+    @property
+    def get_doi(self) -> str:
+        """Helper method"""
+        if not self.extraction_done:
+            raise MissingInformationError("not extracted")
+        if "doi" in self.parameters.keys():
+            return str(self.parameters["doi"])
+        else:
+            return ""
+
+    @property
+    def get_isbn(self) -> str:
+        """Helper method"""
+        if self.name == "isbn":
+            return self.__first_parameter__
+        elif self.is_cs1_template:
+            if "isbn" in self.parameters.keys():
+                return str(self.parameters["isbn"])
+        # Default to empty
+        return ""
+
+    # DISABLED because currently qid is unfortunately not a valid field on cs1 templates
+    # @property
+    # def get_qid(self) -> str:
+    #     """Helper method"""
+    #     if not self.parameters:
+    #         raise MissingInformationError("no parameters")
+    #     return self.parameters[""]
 
     @property
     def urls(self) -> List[WikipediaUrl]:
@@ -147,12 +224,14 @@ class WikipediaTemplate(WcdBaseModel):
             # logger.debug(f"value after: {value}")
             self.parameters[key] = cleaned_value
 
-    def extract_and_prepare_parameter_and_flds(self):
+    def extract_and_prepare_parameter_and_flds(self) -> Any:
+        logger.debug("extract_and_prepare_parameter_and_flds: running")
         self.__extract_and_clean_template_parameters__()
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()
         self.__rename_one_to_first_parameter__()
-        self.extracted = True
+        self.extraction_done = True
+        self.__detect_missing_first_parameter__()
         self.__extract_first_level_domains_from_urls__()
 
     def __fix_class_key__(self):
@@ -212,7 +291,9 @@ class WikipediaTemplate(WcdBaseModel):
 
     def __rename_one_to_first_parameter__(self):
         if "1" in self.parameters:
-            logger.debug(f"Found first parameter {self.parameters['1']}")
+            logger.debug(f"Found first parameter '{self.parameters['1']}'")
+            if not self.parameters["1"]:
+                logger.debug(f"first parameter was empty")
             self.parameters["first_parameter"] = self.parameters["1"]
         else:
             logger.debug("No first parameter found")
@@ -224,3 +305,18 @@ class WikipediaTemplate(WcdBaseModel):
             for url in self.urls
             if url.first_level_domain == ""
         ]
+
+    def __detect_missing_first_parameter__(self):
+        """Url, webarchive and isbn templates should always have a first parameter"""
+        logger.debug("__detect_missing_first_parameter__: running")
+        if (
+            self.name in config.templates_with_mandatory_first_parameter
+            and not self.__first_parameter__
+        ):
+            self.missing_or_empty_first_parameter = True
+
+    @property
+    def template_url(self) -> str:
+        if not self.language_code:
+            raise MissingInformationError("self.lang was empty")
+        return f"https://en.wikipedia.org/wiki/Template:{self.name}"

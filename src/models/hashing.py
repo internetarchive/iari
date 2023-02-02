@@ -203,7 +203,7 @@ class Hashing(WcdBaseModel):
                 ).hexdigest()
             else:
                 logger.warning(
-                    f"hashing not possible for this instance of {self.reference.first_template_name} "
+                    f"hashing not possible for this reference "
                     f"because no identifier or url or first parameter was found "
                     f"or they were turned of in config.py."
                 )

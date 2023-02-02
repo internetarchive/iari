@@ -97,7 +97,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
-            raw_reference_object.__extract_templates_and_parameters_from_raw_reference__()
+            raw_reference_object.__extract_templates_and_parameters__()
             assert raw_reference_object.number_of_templates == 2
             assert raw_reference_object.multiple_templates_found is True
 
@@ -113,12 +113,10 @@ class TestWikipediaRawReference(TestCase):
             raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "citeq"
-            assert raw_reference_object.first_template_name == "citeq"
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].raw_template == raw_template
-            assert reference.first_template_name == "citeq"
-            assert reference.first_parameter == "Q1"
+            assert reference.raw_reference.templates[0].name == "citeq"
             assert reference.wikidata_qid == "Q1"
 
     def test_first_template_name(self):
@@ -133,11 +131,10 @@ class TestWikipediaRawReference(TestCase):
             raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "citeq"
-            assert raw_reference_object.first_template_name == "citeq"
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].raw_template == raw_template
-            assert reference.first_template_name == "citeq"
+            assert reference.raw_reference.templates[0].name == "citeq"
 
     def test_named_reference(self):
         ref = '<ref name="INE"/>'
@@ -517,3 +514,63 @@ class TestWikipediaRawReference(TestCase):
         assert raw_reference_object.wikicoded_links[0] == WikipediaUrl(
             url="http://www.jewishvirtuallibrary.org/sud-ouest-s-o-4050-vautour"
         )
+
+    def test_multiple_cs1_templates(self):
+        """This is a multitemplate reference of a special kind which we should detect
+        It overcomplicates for us and should really be split into multiple <ref>
+        references by the community if there is a consensus for that.
+
+        The only way to detect it is to count if multiple cs1 templates
+        are found in the same reference"""
+        data = (
+            '<ref name="territory">'
+            "*{{Cite web|last=Benedikter|first=Thomas|date=19 June 2006|"
+            "title=The working autonomies in Europe|"
+            "url=http://www.gfbv.it/3dossier/eu-min/autonomy.html|publisher=[[Society for Threatened Peoples]]|"
+            "quote=Denmark has established very specific territorial autonomies with its two island territories|"
+            "access-date=8 June 2012|archive-date=9 March 2008|"
+            "archive-url=https://web.archive.org/web/20080309063149/http://www.gfbv.it/3dossier/eu-min/autonomy."
+            "html|url-status=dead}}"
+            "*{{Cite web|last=Ackrén|first=Maria|date=November 2017|"
+            "title=Greenland|url=http://www.world-autonomies.info/tas/Greenland/Pages/default.aspx|"
+            "url-status=dead|archive-url=https://web.archive.org/web/20190830110832/http://www.world-"
+            "autonomies.info/tas/Greenland/Pages/default.aspx|archive-date=30 August 2019|"
+            "access-date=30 August 2019|publisher=Autonomy Arrangements in the World|quote=Faroese and "
+            "Greenlandic are seen as official regional languages in the self-governing territories "
+            "belonging to Denmark.}}"
+            "*{{Cite web|date=3 June 2013|title=Greenland|"
+            "url=https://ec.europa.eu/europeaid/countries/greenland_en|access-date=27 August 2019|"
+            "website=International Cooperation and Development|publisher=[[European Commission]]|"
+            "language=en|quote=Greenland [...] is an autonomous territory within the Kingdom of Denmark}}</ref>"
+        )
+        wikicode = parse(data)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode, testing=True, wikibase=wikibase, check_urls=False
+        )
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.number_of_cs1_templates == 3
+        assert raw_reference_object.multiple_cs1_templates_found is True
+
+    def test_number_of_templates_missing_first_parameter_zero(self):
+        data = (
+            "<ref>{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
+            "https://babel.hathitrust.org/cgi/pt?id=mdp.39015027915100&view=1up&seq=11 -->}}</ref>"
+        )
+        wikicode = parse(data)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode, testing=True, wikibase=wikibase, check_urls=False
+        )
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.number_of_templates == 1
+        assert raw_reference_object.number_of_templates_missing_first_parameter == 0
+
+    def test_number_of_templates_missing_first_parameter_one(self):
+        data = "<ref>{{url}}</ref>"
+        wikicode = parse(data)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode, testing=True, wikibase=wikibase, check_urls=False
+        )
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.number_of_templates == 1
+        print(raw_reference_object.templates[0].dict())
+        assert raw_reference_object.number_of_templates_missing_first_parameter == 1

@@ -5,6 +5,7 @@ from typing import Any, List, Optional
 
 from pydantic import validate_arguments, validator
 
+import config
 from src import WikimediaSite
 from src.models.exceptions import (
     AmbiguousDateError,
@@ -65,6 +66,7 @@ class WikipediaReference(WcdItem):
     translators_list: Optional[List[Person]]
     wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     raw_reference: Optional[WikipediaRawReference] = None
+    encountered_parse_error: bool = False
 
     # These are all the parameters in the supported references
     #######################
@@ -358,7 +360,7 @@ class WikipediaReference(WcdItem):
 
     # Numbered parameters
     first_parameter: str = ""  # 1
-    second_parameter: Optional[str]  # 2
+    second_parameter: Optional[str]  # 2 # this is not supported yet
 
     # Fields found in the wild
     df: Optional[str]
@@ -434,24 +436,6 @@ class WikipediaReference(WcdItem):
     #         raise ValueError(
     #             f"missing publication date, in template {self.template_name}, see {self.dict()}"
     #         )
-
-    @property
-    def first_template_name(self) -> str:
-        """Helper method. We use this information in the graph to know which
-        template the information in the reference came from"""
-        # TODO this is brittle because the first template could be a url template
-        #  and the second an isbn template and then this fails to find the latter
-        # references could possibly even have multiple urls and isbns
-        # we should rewrite this to check if isbn_template was found and extract that etc.
-        if self.raw_reference and self.raw_reference.number_of_templates:
-            return str(self.raw_reference.templates[0].name)
-        else:
-            return ""
-
-    #
-    # @property
-    # def template_url(self) -> str:
-    #     return f"https://en.wikipedia.org/wiki/Template:{self.first_template_name}"
 
     # @property
     # def wikibase_url(self) -> str:
@@ -776,50 +760,13 @@ class WikipediaReference(WcdItem):
             )
 
     # DISABLED should be moved to raw reference
-    def __parse_first_parameter__(self) -> None:
-        """We parse the first parameter which has different meaning
-        depending on the template in question"""
-        if self.first_template_name and self.first_parameter:
-            if self.first_template_name in ("cite q", "citeq"):
-                # We assume that the first parameter is the Wikidata QID
-                if self.first_parameter:
-                    if self.first_parameter[:1] in ("q", "Q"):
-                        self.wikidata_qid = self.first_parameter
-                    else:
-                        logger.warning(
-                            f"First parameter '{self.first_parameter}' "
-                            f"of {self.first_template_name} was not a valid "
-                            f"WD QID"
-                        )
-            elif self.first_template_name == "url":
-                # crudely detect if url with scheme in first_parameter
-                if self.first_parameter:
-                    if "://" in self.first_parameter:
-                        self.url = self.first_parameter
-                    else:
-                        logger.warning(
-                            f"'{self.first_parameter}' was not recognized as a URL"
-                        )
-                        self.url = ""
-            elif self.first_template_name == "isbn":
-                self.isbn = self.first_parameter
-            else:
-                logger.warning(
-                    f"The template name {self.first_template_name} is currently not supported"
-                )
-        else:
-            # TODO rewrite to use generic attribute after the WRR rewrite
-            if self.raw_reference:
-                if self.first_parameter and not self.first_template_name:
-                    logger.warning(
-                        f"No first template name found for the WRR with tag {self.raw_reference.wikicode}"
-                    )
-                if not self.first_parameter and self.first_template_name:
-                    logger.warning(
-                        f"No first parameter found for the WRR with tag {self.raw_reference.wikicode}"
-                    )
-            else:
-                logger.error("No raw reference for this reference")
+    def __get_and_validate_identifiers__(self) -> None:
+        """Helper method"""
+        self.__get_identifiers_from_templates__()
+        self.__parse_identifiers__()
+
+    def __parse_identifiers__(self):
+        self.__parse_isbn__()
 
     # DEPRECATED since 2.1.0-alpha3
     # def __parse_google_books_template__(self):
@@ -1127,22 +1074,23 @@ class WikipediaReference(WcdItem):
         # We parse the first parameter before isbn
         if not self.raw_reference and not testing:
             raise MissingInformationError("self.raw_reference was None")
-        self.__parse_first_parameter__()
-        # TODO remove this when parsing of urls is done in Template
-        # self.__parse_urls__()
-        self.__parse_isbn__()
-        # First Level Domain detection is needed for the detection methods
-        # These are disabled because they should be moved to Template instead
-        # self.__detect_archive_urls__()
-        # self.__detect_internet_archive_id__()
-        # self.__detect_google_books_id__()
-        self.__parse_persons__()
-        self.__merge_date_into_publication_date__()
-        self.__merge_lang_into_language__()
-        self.__merge_place_into_location__()
-        self.__clean_wiki_markup_from_strings__()
-        # We generate the hash last because the parsing needs to be done first
-        self.__generate_hashes__()
+        if self.raw_reference:
+            if self.raw_reference.multiple_cs1_templates_found:
+                from src.models.api import app
+
+                app.logger.warning(
+                    "Could not parse this reference because multiple "
+                    "CS1 templates were found and that is currently not supported"
+                )
+                self.encountered_parse_error = True
+            self.__get_and_validate_identifiers__()
+            self.__parse_persons__()
+            self.__merge_date_into_publication_date__()
+            self.__merge_lang_into_language__()
+            self.__merge_place_into_location__()
+            self.__clean_wiki_markup_from_strings__()
+            # We generate the hash last because the parsing needs to be done first
+            self.__generate_hashes__()
 
     # @staticmethod
     # def __has_template_data__(string: str) -> bool:
@@ -1183,3 +1131,95 @@ class WikipediaReference(WcdItem):
     #         return ""
     # def get_wcdqid_from_cache(self):
     #     pass
+
+    def __get_isbn__(self) -> None:
+        """This extracts ISBN if found from isbn templates"""
+        isbn_found = False
+        if not self.raw_reference:
+            raise MissingInformationError("no raw_reference")
+        if self.raw_reference.templates:
+            for template in self.raw_reference.templates:
+                if template.get_isbn:
+                    if isbn_found:
+                        # Currently we only support one isbn for each reference
+                        from src.models.api import app
+
+                        app.logger.warning(
+                            "Parse error: Multiple ISBN numbers were found in this reference "
+                            "and that is currently "
+                            "not supported"
+                        )
+                        self.encountered_parse_error = True
+                        return
+                    self.isbn = template.get_isbn
+                    isbn_found = True
+        return
+
+    def __get_identifiers_from_templates__(self):
+        """Helper method"""
+        # These are based on first_parameter
+        self.__get_isbn__()
+        self.__get_url__()
+        self.__get_qid__()
+
+    def __get_url__(self):
+        """This extracts URL if found in url templates"""
+        url_found = False
+        if not self.raw_reference:
+            raise MissingInformationError("no raw_reference")
+        if self.raw_reference.templates:
+            for template in self.raw_reference.templates:
+                if template.name == "url":
+                    if template.__first_parameter__:
+                        if url_found:
+                            from src.models.api import app
+
+                            app.logger.warning(
+                                "Parse error: Multiple main reference urls "
+                                "were found in this reference "
+                                "and that is currently "
+                                "not supported"
+                            )
+                            self.encountered_parse_error = True
+                            return False
+                        self.url = template.__first_parameter__
+                        url_found = True
+
+    def __get_qid__(self):
+        qid_found = False
+        if not self.raw_reference:
+            raise MissingInformationError("no raw_reference")
+        if self.raw_reference.templates:
+            for template in self.raw_reference.templates:
+                if template.name in config.citeq_templates:
+                    if qid_found:
+                        from src.models.api import app
+
+                        app.logger.warning(
+                            "Parse error: Multiple DOI numbers were found "
+                            "in this reference "
+                            "and that is currently "
+                            "not supported"
+                        )
+                        self.encountered_parse_error = True
+                        return False
+                    self.wikidata_qid = template.__first_parameter__
+                    qid_found = True
+
+    @property
+    def is_valid_qid(self) -> bool:
+        if self.wikidata_qid:
+            # Use WBI to check the QID
+            from wikibaseintegrator.datatypes import Item  # type: ignore
+
+            try:
+                Item(value=self.wikidata_qid)
+                return True
+            # if entity.id == self.wikidata_qid:
+            except ValueError:
+                logger.warning(
+                    f"Wikidata QID '{self.wikidata_qid}' " f"was not a valid " f"WD QID"
+                )
+                return False
+        else:
+            return False

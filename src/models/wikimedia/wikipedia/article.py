@@ -108,6 +108,7 @@ class WikipediaArticle(WcdItem):
                 wikitext=self.wikitext,
                 wikibase=self.wikibase,
                 check_urls=self.check_urls,
+                language_code=self.language_code,
             )
             self.extractor.extract_all_references()
             self.__generate_hash__()

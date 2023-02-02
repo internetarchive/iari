@@ -50,6 +50,7 @@ class WikipediaRawReference(WcdBaseModel):
     reference_urls_done: bool = False
     first_level_domains: List[str] = []
     first_level_domains_done = True
+    language_code: str = ""
 
     class Config:
         arbitrary_types_allowed = True
@@ -222,8 +223,9 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def cs1_template_found(self) -> bool:
+        """This searches for at least one CS1 template"""
         for template in self.templates:
-            if template.name in config.cs1_templates:
+            if template.is_cs1_template:
                 return True
         return False
 
@@ -263,17 +265,22 @@ class WikipediaRawReference(WcdBaseModel):
         return str(self.wikicode)
 
     @property
-    def first_template_name(self) -> str:
-        """Helper method. We use this information in the graph to know which
-        template the information in the reference came from"""
-        if self.templates:
-            return str(self.templates[0].name)
-        else:
-            return ""
-
-    @property
     def number_of_templates(self) -> int:
         return len(self.templates)
+
+    @property
+    def number_of_templates_missing_first_parameter(self) -> int:
+        """This parameter is needed for some templates"""
+        if self.number_of_templates:
+            return len(
+                [
+                    template
+                    for template in self.templates
+                    if template.missing_or_empty_first_parameter
+                ]
+            )
+        else:
+            return 0
 
     def __find_bare_urls__(self, stripped_wikicode: str = "") -> List[tuple]:
         """Return bare urls from the stripped wikitext"""
@@ -303,7 +310,7 @@ class WikipediaRawReference(WcdBaseModel):
         self.check_urls_done = True
 
     def specific_template_found(self, names: Union[str, List[str]] = "") -> bool:
-        """Used to search for a specific template"""
+        """Used to search one instance of a specific template"""
         if isinstance(names, list):
             for name in names:
                 return self.__found_template__(name=name)
@@ -311,7 +318,7 @@ class WikipediaRawReference(WcdBaseModel):
             return self.__found_template__(name=names)
         return False
 
-    def __extract_templates_and_parameters_from_raw_reference__(self) -> None:
+    def __extract_templates_and_parameters__(self) -> None:
         """Helper method"""
         logger.debug("__extract_templates_and_parameters_from_raw_reference__: running")
         self.__extract_raw_templates__()
@@ -346,7 +353,11 @@ class WikipediaRawReference(WcdBaseModel):
             count = 0
             for raw_template in raw_templates:
                 count += 1
-                self.templates.append(WikipediaTemplate(raw_template=raw_template))
+                self.templates.append(
+                    WikipediaTemplate(
+                        raw_template=raw_template, language_code=self.language_code
+                    )
+                )
             if count == 0:
                 logger.debug(f"Found no templates in {self.wikicode}")
 
@@ -358,11 +369,14 @@ class WikipediaRawReference(WcdBaseModel):
                 template.extract_and_prepare_parameter_and_flds()
                 for template in self.templates
             ]
+            for template in self.templates:
+                if not template.extraction_done:
+                    raise ValueError()
 
     def extract_and_check(self) -> None:
         """Helper method"""
         logger.debug("extract_and_check: running")
-        self.__extract_templates_and_parameters_from_raw_reference__()
+        self.__extract_templates_and_parameters__()
         self.__determine_if_multiple_templates__()
         self.__extract_reference_urls__()
         self.__extract_first_level_domains__()
@@ -407,3 +421,82 @@ class WikipediaRawReference(WcdBaseModel):
                 self.__log_to_file__(
                     message=message, file_name="multiple_template_error.log"
                 )
+
+    @property
+    def multiple_cs1_templates_found(self):
+        """Detect a ref with multiple CS1 templates like so:
+                <ref name="territory">*{{Cite web|last=Benedikter|
+        first=Thomas|date=19 June 2006|title=The working autonomies in Europe|url=http://www.gfbv.it/3dossier/eu-min/autonomy.html|publisher=[[
+        Society for Threatened Peoples]]|quote=Denmark has established very specific territorial autonomies with its two island territories|acc
+        ess-date=8 June 2012|archive-date=9 March 2008|archive-url=https://web.archive.org/web/20080309063149/http://www.gfbv.it/3dossier/eu-mi
+        n/autonomy.html|url-status=dead}}
+        *{{Cite web|last=Ackrén|first=Maria|date=November 2017|title=Greenland|url=http://www.world-autonomies.info/tas/Greenland/Pages/default
+        .aspx|url-status=dead|archive-url=https://web.archive.org/web/20190830110832/http://www.world-autonomies.info/tas/Greenland/Pages/defau
+        lt.aspx|archive-date=30 August 2019|access-date=30 August 2019|publisher=Autonomy Arrangements in the World|quote=Faroese and Greenland
+        ic are seen as official regional languages in the self-governing territories belonging to Denmark.}}
+        *{{Cite web|date=3 June 2013|title=Greenland|url=https://ec.europa.eu/europeaid/countries/greenland_en|access-date=27
+        August 2019|website=International Cooperation and Development|publisher=[[European Commission]]|
+        language=en|quote=Greenland [...]
+        is an autonomous territory within the Kingdom of Denmark}}</ref>"""
+        return bool(self.number_of_cs1_templates > 1)
+
+    @property
+    def number_of_cs1_templates(self):
+        return len(
+            [template for template in self.templates if template.is_cs1_template]
+        )
+
+    @property
+    def number_of_bareurl_templates(self):
+        return len(
+            [template for template in self.templates if template.is_bareurl_template]
+        )
+
+    @property
+    def number_of_citation_templates(self):
+        return len(
+            [template for template in self.templates if template.is_citation_template]
+        )
+
+    @property
+    def number_of_citeq_templates(self):
+        return len(
+            [template for template in self.templates if template.is_citeq_template]
+        )
+
+    @property
+    def number_of_isbn_templates(self):
+        return len(
+            [template for template in self.templates if template.is_isbn_template]
+        )
+
+    @property
+    def number_of_webarchive_templates(self):
+        return len(
+            [template for template in self.templates if template.is_webarchive_template]
+        )
+
+    @property
+    def known_multiref_template_found(self):
+        return bool(
+            [
+                template
+                for template in self.templates
+                if template.is_known_multiref_template
+            ]
+        )
+
+    @property
+    def multiple_url_templates_found(self):
+        """Detect a ref with multiple url templates"""
+        return bool(self.number_of_url_templates > 1)
+
+    @property
+    def number_of_url_templates(self):
+        return len(
+            [template for template in self.templates if template.is_url_template]
+        )
+
+    # todo support the common combination of url + webarchive templates
+    # they should btw be converted into a
+    # cite web template IMO

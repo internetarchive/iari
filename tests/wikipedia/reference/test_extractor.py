@@ -60,7 +60,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         wre2.extract_all_references()
         assert wre2.number_of_references == 1
-        assert wre2.references[0].first_template_name == "citeq"
         assert wre2.references[0].first_parameter == "Q1"
 
     def test_extract_all_references_named_reference(self):
@@ -74,8 +73,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.number_of_references == 2
         assert wre2.number_of_content_references == 1
         assert wre2.number_of_empty_named_references == 1
-        assert wre2.references[0].first_template_name == "citeq"
-        assert wre2.references[0].first_parameter == "Q1"
+        assert wre2.references[0].raw_reference.templates[0].name == "citeq"
+        assert wre2.references[0].wikidata_qid == "Q1"
 
     def test_number_of_hashed_content_references(self):
         wre = WikipediaReferenceExtractor(
@@ -166,7 +165,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         wre.extract_all_references()
         assert wre.number_of_content_references == 1
-        assert wre.content_references[0].first_template_name == "isbn"
+        assert wre.content_references[0].raw_reference.templates[0].name == "isbn"
         assert wre.content_references[0].isbn == "1234"
         assert wre.number_of_isbn_template_references == 1
         assert wre.number_of_hashed_content_references == 1
@@ -317,3 +316,14 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_sections_found == 1
         assert wre.number_of_references == 52
         assert wre.number_of_general_references == 52
+
+    def test_combined_url_isbn_template_reference(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext="<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",
+            wikibase=wikibase,
+            check_urls=False,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_isbn_template_references == 1
+        assert wre.number_of_url_template_references == 1

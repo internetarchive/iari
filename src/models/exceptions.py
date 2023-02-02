@@ -44,3 +44,15 @@ class NoChannelError(BaseException):
 
 class ResolveError(BaseException):
     pass
+
+
+class MultipleQidError(BaseException):
+    pass
+
+
+class MultipleIsbnError(BaseException):
+    pass
+
+
+class MultipleDoiError(BaseException):
+    pass

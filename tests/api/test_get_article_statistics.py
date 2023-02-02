@@ -1,6 +1,5 @@
 import json
 import logging
-from datetime import datetime, timedelta
 from unittest import TestCase
 
 from flask import Flask
@@ -154,6 +153,7 @@ class TestGetArticleStatistics(TestCase):
     #     self.assertEqual(200, response.status_code)
 
     def test_valid_request_easter_island(self):
+        """This tests against an excerpt of the whole article (head+tail)"""
         response = self.test_client.get(
             "/get-statistics?lang=en&site=wikipedia&title=Easter Island&testing=True"
         )
