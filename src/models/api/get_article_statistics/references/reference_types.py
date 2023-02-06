@@ -14,5 +14,5 @@ class ReferenceTypes(BaseModel):
     # Type of reference which does not have any content and only refer to another <ref> using a name
     named: int
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

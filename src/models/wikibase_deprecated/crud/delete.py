@@ -10,9 +10,9 @@
 # import config
 # from src import console
 # from src.helpers.cli_input import press_enter_to_continue
-# from src.models.wikibase.crud import WikibaseCrud
-# from src.models.wikibase.crud.read import WikibaseCrudRead
-# from src.models.wikibase.enums import Result, SupportedItemType
+# from src.models.wikibase_deprecated.crud import WikibaseCrud
+# from src.models.wikibase_deprecated.crud.read import WikibaseCrudRead
+# from src.models.wikibase_deprecated.enums import Result, SupportedItemType
 #
 # logger = logging.getLogger(__name__)
 #
@@ -22,9 +22,9 @@
 #     def __delete_items__(self, item_type: SupportedItemType):
 #         """Delete items of by type one by one
 #         Wikibase is currently lacking an API to mass delete"""
-#         read = WikibaseCrudRead(wikibase=self.wikibase)
+#         read = WikibaseCrudRead(wikibase_deprecated=self.wikibase_deprecated)
 #         items = (
-#             read.__get_all_items__(item_type=getattr(self.wikibase, item_type.name))
+#             read.__get_all_items__(item_type=getattr(self.wikibase_deprecated, item_type.name))
 #             or []
 #         )
 #         if items:
@@ -49,16 +49,16 @@
 #         logger.debug("__delete_item__: running")
 #         if config.press_enter_to_continue:
 #             input(f"Do you want to delete {item_id}?")
-#         logger.debug(f"trying to log in to the wikibase as {self.wikibase.user_name}")
+#         logger.debug(f"trying to log in to the wikibase_deprecated as {self.wikibase_deprecated.user_name}")
 #         self.__setup_wikibase_integrator_configuration__()
 #         try:
 #             result = delete_page(
 #                 title=f"Item:{item_id}",
 #                 # deletetalk=True,
 #                 login=wbi_login.Login(
-#                     user=self.wikibase.user_name,
-#                     password=self.wikibase.botpassword,
-#                     mediawiki_api_url=self.wikibase.mediawiki_api_url,
+#                     user=self.wikibase_deprecated.user_name,
+#                     password=self.wikibase_deprecated.botpassword,
+#                     mediawiki_api_url=self.wikibase_deprecated.mediawiki_api_url,
 #                 ),
 #             )
 #             console.print(result)

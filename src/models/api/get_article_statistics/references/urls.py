@@ -18,5 +18,5 @@ class Urls(BaseModel):
     # The details are now found on each reference instead
     # details: List[WikipediaUrl] = []
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

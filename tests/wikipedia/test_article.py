@@ -4,8 +4,7 @@ from unittest import TestCase
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
-from src import MissingInformationError
-from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.enums import WikimediaSite
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
@@ -22,7 +21,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     page = WikipediaArticle(
-    #         wikibase=IASandboxWikibase(),
+    #         wikibase_deprecated=IASandboxWikibase(),
     #         language_code="en",
     #         wikimedia_site=WikimediaSite.WIKIPEDIA,
     #         title="Easter Island",
@@ -44,7 +43,6 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
-            wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.wikipedia,
             title="Test",
@@ -58,7 +56,6 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
-            wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.wikipedia,
             title="Test2222",
@@ -70,7 +67,6 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         page = WikipediaArticle(
-            wikibase=IASandboxWikibase(),
             language_code="en",
             wikimedia_site=WikimediaSite.wikipedia,
             title="GNU/Linux_naming_controversy",
@@ -82,7 +78,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     page = WikipediaArticle(
-    #         wikibase=IASandboxWikibase(),
+    #         wikibase_deprecated=IASandboxWikibase(),
     #         language_code="en",
     #         wikimedia_site=WikimediaSite.WIKIPEDIA,
     #         title="Test",
@@ -101,10 +97,16 @@ class TestWikipediaArticle(TestCase):
     def test_is_redirect(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(title="Easter island", wikibase=IASandboxWikibase())
+        wp = WikipediaArticle(
+            title="Easter island",
+            # wikibase=IASandboxWikibase()
+        )
         wp.__fetch_page_data__()
         assert wp.is_redirect is True
-        wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
+        wp = WikipediaArticle(
+            title="Easter Island",
+            # wikibase=IASandboxWikibase()
+        )
         wp.__fetch_page_data__()
         assert wp.is_redirect is False
 
@@ -112,7 +114,9 @@ class TestWikipediaArticle(TestCase):
         """Test fetching from enwiki"""
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(title="Easter island", wikibase=IASandboxWikibase())
+        wp = WikipediaArticle(
+            title="Easter island",  # wikibase=IASandboxWikibase()
+        )
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
 
@@ -120,9 +124,7 @@ class TestWikipediaArticle(TestCase):
         """Test fetching from dawiki"""
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(
-            title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
-        )
+        wp = WikipediaArticle(title="Påskeøen", language_code="da")
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
 
@@ -130,7 +132,7 @@ class TestWikipediaArticle(TestCase):
     # def test_get_title_from_wikidata(self):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
-    #     wp = WikipediaArticle(wdqid="Q1", wikibase=IASandboxWikibase())
+    #     wp = WikipediaArticle(wdqid="Q1", wikibase_deprecated=IASandboxWikibase())
     #     wp.__get_title_from_wikidata__()
     #     assert wp.title == "Universe"
 
@@ -138,7 +140,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
     #     )
     #     with self.assertRaises(MissingInformationError):
     #         wp.__count_number_of_supported_templates_found__()
@@ -147,7 +149,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
     #     )
     #     wp.wikitext = "{{citeq|1}}"
     #     wp.__extract_templates_from_the_wikitext__()
@@ -157,7 +159,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
     #     )
     #     wp.wikitext = "{{citeq|1}}"
     #     wp.__extract_templates_from_the_wikitext__()
@@ -167,7 +169,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
     #     )
     #     wp.wikitext = "{citeq|1}}testtestxxxx{}"
     #     wp.__extract_templates_from_the_wikitext__()
@@ -176,11 +178,9 @@ class TestWikipediaArticle(TestCase):
     def test___extract_and_parse_references_citeq(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(
-            title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
-        )
+        wp = WikipediaArticle(title="Påskeøen", language_code="da")
         wp.wikitext = "<ref>{{citeq|1}}</ref>"
-        wp.fetch_and_extract_and_parse_and_generate_hash()
+        wp.fetch_and_extract_and_parse()
         assert wp.extractor.number_of_references == 1
         assert (
             wp.extractor.citeq_references[0].raw_reference.templates[0].raw_template
@@ -193,9 +193,9 @@ class TestWikipediaArticle(TestCase):
     def test___extract_and_parse_references_easter_island_head_excerpt(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
+        wp = WikipediaArticle(title="Easter Island")
         wp.wikitext = easter_island_head_excerpt
-        wp.fetch_and_extract_and_parse_and_generate_hash()
+        wp.fetch_and_extract_and_parse()
         assert wp.extractor.number_of_references == 3
         assert wp.extractor.number_of_empty_named_references == 1
         assert wp.extractor.number_of_content_references == 2
@@ -224,9 +224,9 @@ class TestWikipediaArticle(TestCase):
         wikitext = f"{easter_island_head_excerpt}\n{easter_island_tail_excerpt}"
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(title="Easter Island", wikibase=IASandboxWikibase())
+        wp = WikipediaArticle(title="Easter Island")
         wp.wikitext = wikitext
-        wp.fetch_and_extract_and_parse_and_generate_hash()
+        wp.fetch_and_extract_and_parse()
         assert wp.extractor.number_of_citation_references == 2
         assert wp.extractor.number_of_general_references == 22
         assert wp.extractor.number_of_content_references == 24
@@ -236,9 +236,13 @@ class TestWikipediaArticle(TestCase):
         from src import WikipediaArticle
 
         wp = WikipediaArticle(
-            title="GNU/Linux_naming_controversy", wikibase=IASandboxWikibase()
+            title="GNU/Linux_naming_controversy",
+            # wikibase=IASandboxWikibase()
         )
         assert wp.quoted_title == "GNU%2FLinux_naming_controversy"
-        wp = WikipediaArticle(title="", wikibase=IASandboxWikibase())
+        wp = WikipediaArticle(
+            title="",
+            # wikibase=IASandboxWikibase()
+        )
         with self.assertRaises(MissingInformationError):
             wp.quoted_title

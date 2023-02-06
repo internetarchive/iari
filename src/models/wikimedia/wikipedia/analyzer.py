@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import validate_arguments
 
-from src import IASandboxWikibase, Wikibase
 from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
 from src.models.api.get_article_statistics.references import (
     References,
@@ -57,7 +56,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     job: Job
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
-    wikibase: Wikibase = IASandboxWikibase()
+    # wikibase: Wikibase = IASandboxWikibase()
     wikitext: str = ""
     check_urls: bool = False
 
@@ -94,7 +93,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                     all=ae.number_of_citeq_references,
                 ),
                 cs1_t=self.__cs1_t__,
-                has_hash=ae.number_of_hashed_content_references,
+                # has_hash=ae.number_of_hashed_content_references,
                 has_template=ae.number_of_content_reference_with_at_least_one_template,
                 isbn_t=ae.number_of_isbn_template_references,
                 multiple_t=ae.number_of_multiple_template_references,
@@ -248,7 +247,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             if not self.article:
                 self.__populate_article__()
             if self.article:
-                self.article.fetch_and_extract_and_parse_and_generate_hash()
+                self.article.fetch_and_extract_and_parse()
 
     def __gather_reference_statistics__(self):
         logger.debug("__gather_reference_statistics__: running")
@@ -319,7 +318,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 title=self.job.title,
                 wikimedia_site=self.job.site,
                 language_code=self.job.lang,
-                wikibase=self.wikibase,
+                # wikibase=self.wikibase,
                 wikitext=self.wikitext,
                 testing=self.testing,
                 check_urls=self.check_urls,

@@ -11,5 +11,5 @@ class UrlsAggregates(BaseModel):
     all: int = 0
     unique: UniqueUrlsAggregates
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

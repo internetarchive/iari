@@ -48,5 +48,5 @@ class ReferenceStatistics(BaseModel):
     flds: List[str] = []
     templates: List[TemplateStatistics]
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

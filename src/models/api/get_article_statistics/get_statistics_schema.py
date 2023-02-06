@@ -18,7 +18,7 @@ class GetStatisticsSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     # **kwargs is needed here despite what the validator claims
-    def return_object(self, data, **kwargs):  # type: ignore
+    def return_object(self, data, **kwargs):  # type: ignore # dead: disable
         """Return job object"""
         logger.debug("return_object: running")
         job = Job(**data)

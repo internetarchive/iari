@@ -16,7 +16,6 @@ import config
 from src.models.api.get_article_statistics import GetArticleStatistics
 
 # from src.models.api.add_job_to_queue import AddJobToQueue
-from src.models.api.lookup_by_wikidata_qid import LookupByWikidataQid
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -26,7 +25,7 @@ app = Flask(__name__)
 # and bump the version when making breaking changes
 api = Api(app, prefix="/v1")
 
-api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
+# api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
 api.add_resource(GetArticleStatistics, "/get-statistics")
 # return app_
 # api.add_resource(

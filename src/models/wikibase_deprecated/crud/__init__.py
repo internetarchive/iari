@@ -31,7 +31,7 @@
 # from src.models.exceptions import MissingInformationError
 # from src.models.person import Person
 # from src.models.return_.wikibase_return import WikibaseReturn
-# from src.models.wikibase import Wikibase
+# from src.models.wikibase_deprecated import Wikibase
 # from src.wcd_base_model import WcdBaseModel
 #
 # if TYPE_CHECKING:
@@ -57,7 +57,7 @@
 #
 #     language_code: str = "en"
 #     reference_claim: Optional[References]
-#     wikibase: Wikibase
+#     wikibase_deprecated: Wikibase
 #
 #     class Config:
 #         arbitrary_types_allowed = True
@@ -110,7 +110,7 @@
 #         """We default to "item" as sparql value because it is customary in the Wikibase ecosystem"""
 #         return str(
 #             data[sparql_variable]["value"].replace(
-#                 self.wikibase.rdf_entity_prefix_url, ""
+#                 self.wikibase_deprecated.rdf_entity_prefix_url, ""
 #             )
 #         )
 #
@@ -118,31 +118,31 @@
 #         self,
 #     ) -> None:
 #         wbi_config.config["USER_AGENT"] = "wcdimportbot"
-#         wbi_config.config["WIKIBASE_URL"] = self.wikibase.wikibase_url
-#         wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase.mediawiki_api_url
-#         wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase.mediawiki_index_url
-#         wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase.sparql_endpoint_url
+#         wbi_config.config["WIKIBASE_URL"] = self.wikibase_deprecated.wikibase_url
+#         wbi_config.config["MEDIAWIKI_API_URL"] = self.wikibase_deprecated.mediawiki_api_url
+#         wbi_config.config["MEDIAWIKI_INDEX_URL"] = self.wikibase_deprecated.mediawiki_index_url
+#         wbi_config.config["SPARQL_ENDPOINT_URL"] = self.wikibase_deprecated.sparql_endpoint_url
 #
 #     def __prepare_all_person_claims__(
 #         self, page_reference  # type: WikipediaReference
 #     ) -> List[Claim]:
-#         if not self.wikibase.FULL_NAME_STRING:
+#         if not self.wikibase_deprecated.FULL_NAME_STRING:
 #             raise MissingInformationError(
-#                 "self.wikibase.FULL_NAME_STRING was empty string"
+#                 "self.wikibase_deprecated.FULL_NAME_STRING was empty string"
 #             )
-#         if not self.wikibase.EDITOR_NAME_STRING:
+#         if not self.wikibase_deprecated.EDITOR_NAME_STRING:
 #             raise MissingInformationError(
-#                 "self.wikibase.EDITOR_NAME_STRING was empty string"
+#                 "self.wikibase_deprecated.EDITOR_NAME_STRING was empty string"
 #             )
-#         if not self.wikibase.HOST_STRING:
-#             raise MissingInformationError("self.wikibase.HOST_STRING was empty string")
-#         if not self.wikibase.INTERVIEWER_STRING:
+#         if not self.wikibase_deprecated.HOST_STRING:
+#             raise MissingInformationError("self.wikibase_deprecated.HOST_STRING was empty string")
+#         if not self.wikibase_deprecated.INTERVIEWER_STRING:
 #             raise MissingInformationError(
-#                 "self.wikibase.INTERVIEWER_STRING was empty string"
+#                 "self.wikibase_deprecated.INTERVIEWER_STRING was empty string"
 #             )
 #         authors = self.__prepare_person_claims__(
 #             use_list=page_reference.authors_list,
-#             wikibase_property_id=self.wikibase.FULL_NAME_STRING,
+#             wikibase_property_id=self.wikibase_deprecated.FULL_NAME_STRING,
 #         )
 #         if (
 #             config.assume_persons_without_role_are_authors
@@ -151,23 +151,23 @@
 #             logger.info("Assuming persons without role are authors")
 #         no_role_authors = self.__prepare_person_claims__(
 #             use_list=page_reference.persons_without_role,
-#             wikibase_property_id=self.wikibase.FULL_NAME_STRING,
+#             wikibase_property_id=self.wikibase_deprecated.FULL_NAME_STRING,
 #         )
 #         editors = self.__prepare_person_claims__(
 #             use_list=page_reference.interviewers_list,
-#             wikibase_property_id=self.wikibase.EDITOR_NAME_STRING,
+#             wikibase_property_id=self.wikibase_deprecated.EDITOR_NAME_STRING,
 #         )
 #         hosts = self.__prepare_person_claims__(
 #             use_list=page_reference.hosts_list,
-#             wikibase_property_id=self.wikibase.HOST_STRING,
+#             wikibase_property_id=self.wikibase_deprecated.HOST_STRING,
 #         )
 #         interviewers = self.__prepare_person_claims__(
 #             use_list=page_reference.interviewers_list,
-#             wikibase_property_id=self.wikibase.INTERVIEWER_STRING,
+#             wikibase_property_id=self.wikibase_deprecated.INTERVIEWER_STRING,
 #         )
 #         translators = self.__prepare_person_claims__(
 #             use_list=page_reference.interviewers_list,
-#             wikibase_property_id=self.wikibase.INTERVIEWER_STRING,
+#             wikibase_property_id=self.wikibase_deprecated.INTERVIEWER_STRING,
 #         )
 #         return authors + no_role_authors + editors + hosts + interviewers + translators
 #
@@ -184,7 +184,7 @@
 #                 logger.debug("Appending to item-citations")
 #                 claims.append(
 #                     datatypes.Item(
-#                         prop_nr=self.wikibase.CITATIONS,
+#                         prop_nr=self.wikibase_deprecated.CITATIONS,
 #                         value=reference.return_.item_qid,
 #                         references=self.reference_claim,
 #                     )
@@ -193,10 +193,10 @@
 #
 #     def __login_and_prepare_new_item__(self) -> ItemEntity:
 #         self.__setup_wikibase_integrator_configuration__()
-#         logger.debug(f"Trying to log in to the Wikibase as {self.wikibase.user_name}")
+#         logger.debug(f"Trying to log in to the Wikibase as {self.wikibase_deprecated.user_name}")
 #         wbi = WikibaseIntegrator(
 #             login=wbi_login.Login(
-#                 user=self.wikibase.user_name, password=self.wikibase.botpassword
+#                 user=self.wikibase_deprecated.user_name, password=self.wikibase_deprecated.botpassword
 #             ),
 #         )
 #         return wbi.item.new()
@@ -205,7 +205,7 @@
 #         self,
 #         page_reference,  # type: WikipediaReference
 #     ) -> ItemEntity:
-#         """This method converts a page_reference into a new reference wikibase item"""
+#         """This method converts a page_reference into a new reference wikibase_deprecated item"""
 #         item = self.__login_and_prepare_new_item__()
 #         if page_reference.md5hash:
 #             # We append the first 7 chars of the hash to the title
@@ -257,7 +257,7 @@
 #         self.__setup_wikibase_integrator_configuration__()
 #         wbi = WikibaseIntegrator(
 #             login=wbi_login.Login(
-#                 user=self.wikibase.user_name, password=self.wikibase.botpassword
+#                 user=self.wikibase_deprecated.user_name, password=self.wikibase_deprecated.botpassword
 #             ),
 #         )
 #         item = wbi.item.new()
@@ -284,7 +284,7 @@
 #         self.__setup_wikibase_integrator_configuration__()
 #         wbi = WikibaseIntegrator(
 #             login=wbi_login.Login(
-#                 user=self.wikibase.user_name, password=self.wikibase.botpassword
+#                 user=self.wikibase_deprecated.user_name, password=self.wikibase_deprecated.botpassword
 #             ),
 #         )
 #         item = wbi.item.new()
@@ -364,37 +364,37 @@
 #         ):
 #             if person_object.given:
 #                 given_name = datatypes.String(
-#                     prop_nr=self.wikibase.GIVEN_NAME,
+#                     prop_nr=self.wikibase_deprecated.GIVEN_NAME,
 #                     value=person_object.given,
 #                 )
 #                 qualifiers.append(given_name)
 #             if person_object.surname:
 #                 surname = datatypes.String(
-#                     prop_nr=self.wikibase.FAMILY_NAME,
+#                     prop_nr=self.wikibase_deprecated.FAMILY_NAME,
 #                     value=person_object.surname,
 #                 )
 #                 qualifiers.append(surname)
 #             if person_object.number_in_sequence:
 #                 number_in_sequence = datatypes.Quantity(
-#                     prop_nr=self.wikibase.SERIES_ORDINAL,
+#                     prop_nr=self.wikibase_deprecated.SERIES_ORDINAL,
 #                     amount=person_object.number_in_sequence,
 #                 )
 #                 qualifiers.append(number_in_sequence)
 #             if person_object.orcid:
 #                 orcid = datatypes.ExternalID(
-#                     prop_nr=self.wikibase.ORCID,
+#                     prop_nr=self.wikibase_deprecated.ORCID,
 #                     value=person_object.orcid,
 #                 )
 #                 qualifiers.append(orcid)
 #             if person_object.url:
 #                 url = datatypes.URL(
-#                     prop_nr=self.wikibase.URL,
+#                     prop_nr=self.wikibase_deprecated.URL,
 #                     value=person_object.url,
 #                 )
 #                 qualifiers.append(url)
 #             if person_object.mask:
 #                 mask = datatypes.String(
-#                     prop_nr=self.wikibase.NAME_MASK,
+#                     prop_nr=self.wikibase_deprecated.NAME_MASK,
 #                     value=person_object.mask,
 #                 )
 #                 qualifiers.append(mask)
@@ -409,7 +409,7 @@
 #         logger.info("Preparing reference claim")
 #         # Prepare page_reference
 #         retrieved_date = datatypes.Time(
-#             prop_nr=self.wikibase.RETRIEVED_DATE,
+#             prop_nr=self.wikibase_deprecated.RETRIEVED_DATE,
 #             time=datetime.utcnow()  # Fetched today
 #             .replace(tzinfo=timezone.utc)
 #             .replace(
@@ -421,7 +421,7 @@
 #         )
 #         if wikipedia_article:
 #             revision_id = datatypes.String(
-#                 prop_nr=self.wikibase.PAGE_REVISION_ID,
+#                 prop_nr=self.wikibase_deprecated.PAGE_REVISION_ID,
 #                 value=str(wikipedia_article.latest_revision_id),
 #             )
 #             claims = [retrieved_date, revision_id]
@@ -445,7 +445,7 @@
 #             if page_reference.website_item.return_:
 #                 if page_reference.website_item.return_.item_qid:
 #                     website_item = datatypes.Item(
-#                         prop_nr=self.wikibase.WEBSITE,
+#                         prop_nr=self.wikibase_deprecated.WEBSITE,
 #                         value=page_reference.website_item.return_.item_qid,
 #                     )
 #                 else:
@@ -482,27 +482,27 @@
 #     ) -> List[Claim]:
 #         # if page_reference.raw_template:
 #         #     raw_template = datatypes.String(
-#         #         prop_nr=self.wikibase.RAW_TEMPLATE,
+#         #         prop_nr=self.wikibase_deprecated.RAW_TEMPLATE,
 #         #         value=page_reference.shortened_raw_template,
 #         #     )
 #         # else:
 #         #     raise MissingInformationError("page_reference.raw_template was None")
 #         instance_of = datatypes.Item(
-#             prop_nr=self.wikibase.INSTANCE_OF,
-#             value=self.wikibase.WIKIPEDIA_REFERENCE,
+#             prop_nr=self.wikibase_deprecated.INSTANCE_OF,
+#             value=self.wikibase_deprecated.WIKIPEDIA_REFERENCE,
 #         )
 #         hash_claim = datatypes.String(
-#             prop_nr=self.wikibase.HASH, value=page_reference.md5hash
+#             prop_nr=self.wikibase_deprecated.HASH, value=page_reference.md5hash
 #         )
 #         if page_reference.first_template_name:
 #             template_string = datatypes.String(
-#                 prop_nr=self.wikibase.TEMPLATE_NAME,
+#                 prop_nr=self.wikibase_deprecated.TEMPLATE_NAME,
 #                 value=page_reference.first_template_name,
 #             )
 #         else:
 #             raise MissingInformationError("no template name found")
 #         retrieved_date = datatypes.Time(
-#             prop_nr=self.wikibase.RETRIEVED_DATE,
+#             prop_nr=self.wikibase_deprecated.RETRIEVED_DATE,
 #             time=datetime.utcnow()  # Fetched today
 #             .replace(tzinfo=timezone.utc)
 #             .replace(
@@ -512,13 +512,13 @@
 #             )
 #             .strftime("+%Y-%m-%dT%H:%M:%SZ"),
 #         )
-#         if not self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on:
+#         if not self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on:
 #             raise MissingInformationError(
-#                 "self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on was None"
+#                 "self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on was None"
 #             )
 #         source_wikipedia = datatypes.Item(
-#             prop_nr=self.wikibase.SOURCE_WIKIPEDIA,
-#             value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
+#             prop_nr=self.wikibase_deprecated.SOURCE_WIKIPEDIA,
+#             value=self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on,
 #         )
 #         return [
 #             hash_claim,
@@ -535,63 +535,63 @@
 #         # DEPRECATED since 2.1.0-alpha3
 #         # if page_reference.google_books_id:
 #         #     google_books_id = datatypes.ExternalID(
-#         #         prop_nr=self.wikibase.GOOGLE_BOOKS_ID,
+#         #         prop_nr=self.wikibase_deprecated.GOOGLE_BOOKS_ID,
 #         #         value=page_reference.google_books_id,
 #         #     )
 #         # else:
 #         google_books_id = None
 #         if page_reference.internet_archive_id:
 #             internet_archive_id = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.INTERNET_ARCHIVE_ID,
+#                 prop_nr=self.wikibase_deprecated.INTERNET_ARCHIVE_ID,
 #                 value=page_reference.internet_archive_id,
 #             )
 #         else:
 #             internet_archive_id = None
 #         if page_reference.doi:
 #             doi = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.DOI,
+#                 prop_nr=self.wikibase_deprecated.DOI,
 #                 value=page_reference.doi,
 #             )
 #         else:
 #             doi = None
 #         if page_reference.isbn_10:
 #             isbn_10 = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.ISBN_10,
+#                 prop_nr=self.wikibase_deprecated.ISBN_10,
 #                 value=page_reference.isbn_10,
 #             )
 #         else:
 #             isbn_10 = None
 #         if page_reference.isbn_13:
 #             isbn_13 = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.ISBN_13,
+#                 prop_nr=self.wikibase_deprecated.ISBN_13,
 #                 value=page_reference.isbn_13,
 #             )
 #         else:
 #             isbn_13 = None
 #         if page_reference.oclc:
 #             oclc = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.OCLC_CONTROL_NUMBER,
+#                 prop_nr=self.wikibase_deprecated.OCLC_CONTROL_NUMBER,
 #                 value=page_reference.oclc,
 #             )
 #         else:
 #             oclc = None
 #         if page_reference.orcid:
 #             orcid = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.ORCID,
+#                 prop_nr=self.wikibase_deprecated.ORCID,
 #                 value=page_reference.orcid,
 #             )
 #         else:
 #             orcid = None
 #         if page_reference.pmid:
 #             pmid = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.PMID,
+#                 prop_nr=self.wikibase_deprecated.PMID,
 #                 value=page_reference.pmid,
 #             )
 #         else:
 #             pmid = None
 #         if page_reference.wikidata_qid:
 #             wikidata_qid = datatypes.ExternalID(
-#                 prop_nr=self.wikibase.WIKIDATA_QID,
+#                 prop_nr=self.wikibase_deprecated.WIKIDATA_QID,
 #                 value=page_reference.wikidata_qid,
 #             )
 #         else:
@@ -617,27 +617,27 @@
 #     ) -> List[Claim]:
 #         if page_reference.location:
 #             location = datatypes.String(
-#                 prop_nr=self.wikibase.LOCATION_STRING, value=page_reference.location
+#                 prop_nr=self.wikibase_deprecated.LOCATION_STRING, value=page_reference.location
 #             )
 #         else:
 #             location = None
 #         if page_reference.vauthors:
 #             lumped_authors = datatypes.String(
-#                 prop_nr=self.wikibase.LUMPED_AUTHORS,
+#                 prop_nr=self.wikibase_deprecated.LUMPED_AUTHORS,
 #                 value=page_reference.vauthors,
 #             )
 #         else:
 #             lumped_authors = None
 #         if page_reference.periodical:
 #             periodical_string = datatypes.String(
-#                 prop_nr=self.wikibase.PERIODICAL_STRING,
+#                 prop_nr=self.wikibase_deprecated.PERIODICAL_STRING,
 #                 value=page_reference.periodical,
 #             )
 #         else:
 #             periodical_string = None
 #         if page_reference.publisher:
 #             publisher = datatypes.String(
-#                 prop_nr=self.wikibase.PUBLISHER_STRING,
+#                 prop_nr=self.wikibase_deprecated.PUBLISHER_STRING,
 #                 value=page_reference.publisher,
 #             )
 #         else:
@@ -648,14 +648,14 @@
 #                 page_reference.title, width=400, placeholder="..."
 #             )
 #             title = datatypes.String(
-#                 prop_nr=self.wikibase.TITLE,
+#                 prop_nr=self.wikibase_deprecated.TITLE,
 #                 value=shortened_title,
 #             )
 #         else:
 #             title = None
 #         if page_reference.website:
 #             website_string = datatypes.String(
-#                 prop_nr=self.wikibase.WEBSITE_STRING,
+#                 prop_nr=self.wikibase_deprecated.WEBSITE_STRING,
 #                 value=page_reference.website,
 #             )
 #         else:
@@ -680,7 +680,7 @@
 #         if page_reference.access_date:
 #             claims.append(
 #                 datatypes.Time(
-#                     prop_nr=self.wikibase.ACCESS_DATE,
+#                     prop_nr=self.wikibase_deprecated.ACCESS_DATE,
 #                     time=(
 #                         page_reference.access_date.replace(tzinfo=timezone.utc)
 #                         .replace(
@@ -695,7 +695,7 @@
 #         if page_reference.publication_date:
 #             claims.append(
 #                 datatypes.Time(
-#                     prop_nr=self.wikibase.PUBLICATION_DATE,
+#                     prop_nr=self.wikibase_deprecated.PUBLICATION_DATE,
 #                     time=(
 #                         page_reference.publication_date.replace(tzinfo=timezone.utc)
 #                         .replace(
@@ -726,12 +726,12 @@
 #                     logger.debug("Adding qualifier linking to the detected archive")
 #                     claims.append(
 #                         datatypes.URL(
-#                             prop_nr=self.wikibase.ARCHIVE_URL,
+#                             prop_nr=self.wikibase_deprecated.ARCHIVE_URL,
 #                             value=page_reference.archive_url,
 #                             qualifiers=[
 #                                 datatypes.Item(
-#                                     prop_nr=self.wikibase.ARCHIVE,
-#                                     value=self.wikibase.__getattribute__(
+#                                     prop_nr=self.wikibase_deprecated.ARCHIVE,
+#                                     value=self.wikibase_deprecated.__getattribute__(
 #                                         page_reference.detected_archive_of_archive_url.name.upper().replace(
 #                                             ".", "_"
 #                                         )
@@ -748,7 +748,7 @@
 #                     )
 #                     claims.append(
 #                         datatypes.URL(
-#                             prop_nr=self.wikibase.ARCHIVE_URL,
+#                             prop_nr=self.wikibase_deprecated.ARCHIVE_URL,
 #                             value=page_reference.archive_url,
 #                         )
 #                     )
@@ -762,7 +762,7 @@
 #             else:
 #                 claims.append(
 #                     datatypes.URL(
-#                         prop_nr=self.wikibase.URL,
+#                         prop_nr=self.wikibase_deprecated.URL,
 #                         value=page_reference.url,
 #                     )
 #                 )
@@ -776,7 +776,7 @@
 #             else:
 #                 claims.append(
 #                     datatypes.URL(
-#                         prop_nr=self.wikibase.CHAPTER_URL,
+#                         prop_nr=self.wikibase_deprecated.CHAPTER_URL,
 #                         value=page_reference.chapter_url,
 #                     )
 #                 )
@@ -790,7 +790,7 @@
 #             else:
 #                 claims.append(
 #                     datatypes.URL(
-#                         prop_nr=self.wikibase.CONFERENCE_URL,
+#                         prop_nr=self.wikibase_deprecated.CONFERENCE_URL,
 #                         value=page_reference.conference_url,
 #                     )
 #                 )
@@ -804,7 +804,7 @@
 #             else:
 #                 claims.append(
 #                     datatypes.URL(
-#                         prop_nr=self.wikibase.LAY_URL,
+#                         prop_nr=self.wikibase_deprecated.LAY_URL,
 #                         value=page_reference.lay_url,
 #                     )
 #                 )
@@ -818,7 +818,7 @@
 #             else:
 #                 claims.append(
 #                     datatypes.URL(
-#                         prop_nr=self.wikibase.TRANSCRIPT_URL,
+#                         prop_nr=self.wikibase_deprecated.TRANSCRIPT_URL,
 #                         value=page_reference.transcripturl,
 #                     )
 #                 )
@@ -830,25 +830,25 @@
 #         logger.info("Preparing single value claims for the website item")
 #         # Claims always present
 #         instance_of = datatypes.Item(
-#             prop_nr=self.wikibase.INSTANCE_OF,
-#             value=self.wikibase.WEBSITE_ITEM,
+#             prop_nr=self.wikibase_deprecated.INSTANCE_OF,
+#             value=self.wikibase_deprecated.WEBSITE_ITEM,
 #         )
-#         if not self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on:
+#         if not self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on:
 #             raise MissingInformationError(
-#                 "self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on was None"
+#                 "self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on was None"
 #             )
 #         source_wikipedia = datatypes.Item(
-#             prop_nr=self.wikibase.SOURCE_WIKIPEDIA,
-#             value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
+#             prop_nr=self.wikibase_deprecated.SOURCE_WIKIPEDIA,
+#             value=self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on,
 #         )
 #         first_level_domain_string = datatypes.String(
-#             prop_nr=self.wikibase.FIRST_LEVEL_DOMAIN_STRING,
+#             prop_nr=self.wikibase_deprecated.FIRST_LEVEL_DOMAIN_STRING,
 #             value=page_reference.first_level_domain_of_url,
 #         )
 #         if page_reference.first_level_domain_of_url_hash is None:
 #             raise ValueError("page_reference.first_level_domain_of_url_hash was None")
 #         hash_claim = datatypes.String(
-#             prop_nr=self.wikibase.HASH,
+#             prop_nr=self.wikibase_deprecated.HASH,
 #             value=page_reference.first_level_domain_of_url_hash,
 #         )
 #         return [
@@ -867,20 +867,20 @@
 #     ) -> List[Claim]:
 #         # There are no optional claims for Wikipedia Pages
 #         absolute_url = datatypes.URL(
-#             prop_nr=self.wikibase.URL,
+#             prop_nr=self.wikibase_deprecated.URL,
 #             value=wikipedia_article.absolute_url,
 #         )
 #         if wikipedia_article.md5hash is None:
 #             raise ValueError("wikipedia_article.md5hash was None")
 #         hash_claim = datatypes.String(
-#             prop_nr=self.wikibase.HASH, value=wikipedia_article.md5hash
+#             prop_nr=self.wikibase_deprecated.HASH, value=wikipedia_article.md5hash
 #         )
 #         instance_of = datatypes.Item(
-#             prop_nr=self.wikibase.INSTANCE_OF,
-#             value=self.wikibase.WIKIPEDIA_PAGE,
+#             prop_nr=self.wikibase_deprecated.INSTANCE_OF,
+#             value=self.wikibase_deprecated.WIKIPEDIA_PAGE,
 #         )
 #         last_update = datatypes.Time(
-#             prop_nr=self.wikibase.LAST_UPDATE,
+#             prop_nr=self.wikibase_deprecated.LAST_UPDATE,
 #             time=datetime.utcnow()  # Fetched today
 #             .replace(tzinfo=timezone.utc)
 #             .replace(
@@ -893,25 +893,25 @@
 #         if wikipedia_article.page_id is None:
 #             raise ValueError("wikipedia_article.page_id was None")
 #         page_id = datatypes.String(
-#             prop_nr=self.wikibase.MEDIAWIKI_PAGE_ID,
+#             prop_nr=self.wikibase_deprecated.MEDIAWIKI_PAGE_ID,
 #             value=str(wikipedia_article.page_id),
 #         )
-#         if not self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on:
+#         if not self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on:
 #             raise MissingInformationError(
-#                 "self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on was None"
+#                 "self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on was None"
 #             )
 #         published_in = datatypes.Item(
-#             prop_nr=self.wikibase.PUBLISHED_IN,
-#             value=self.wikibase.wcdqid_language_edition_of_wikipedia_to_work_on,
+#             prop_nr=self.wikibase_deprecated.PUBLISHED_IN,
+#             value=self.wikibase_deprecated.wcdqid_language_edition_of_wikipedia_to_work_on,
 #         )
 #         if wikipedia_article.title is None:
 #             raise ValueError("wikipedia_article.item_id was None")
 #         title = datatypes.String(
-#             prop_nr=self.wikibase.TITLE,
+#             prop_nr=self.wikibase_deprecated.TITLE,
 #             value=wikipedia_article.title,
 #         )
 #         wikidata_qid = datatypes.String(
-#             prop_nr=self.wikibase.WIKIDATA_QID,
+#             prop_nr=self.wikibase_deprecated.WIKIDATA_QID,
 #             value=wikipedia_article.wikidata_qid,
 #         )
 #         return [
@@ -930,19 +930,19 @@
 #         for author in page_reference.authors_list or []:
 #             if author.full_name:
 #                 author = datatypes.String(
-#                     prop_nr=self.wikibase.FULL_NAME_STRING,
+#                     prop_nr=self.wikibase_deprecated.FULL_NAME_STRING,
 #                     value=author.full_name,
 #                 )
 #                 authors.append(author)
 #         if page_reference.vauthors:
 #             author = datatypes.String(
-#                 prop_nr=self.wikibase.LUMPED_AUTHORS,
+#                 prop_nr=self.wikibase_deprecated.LUMPED_AUTHORS,
 #                 value=page_reference.vauthors,
 #             )
 #             authors.append(author)
 #         if page_reference.authors:
 #             author = datatypes.String(
-#                 prop_nr=self.wikibase.LUMPED_AUTHORS,
+#                 prop_nr=self.wikibase_deprecated.LUMPED_AUTHORS,
 #                 value=page_reference.authors,
 #             )
 #             authors.append(author)
@@ -953,7 +953,7 @@
 #         for person in page_reference.editors_list or []:
 #             if person.full_name:
 #                 person = datatypes.String(
-#                     prop_nr=self.wikibase.EDITOR_NAME_STRING,
+#                     prop_nr=self.wikibase_deprecated.EDITOR_NAME_STRING,
 #                     value=person.full_name,
 #                 )
 #                 persons.append(person)
@@ -964,7 +964,7 @@
 #         for person in page_reference.translators_list or []:
 #             if person.full_name:
 #                 person = datatypes.String(
-#                     prop_nr=self.wikibase.TRANSLATOR_NAME_STRING,
+#                     prop_nr=self.wikibase_deprecated.TRANSLATOR_NAME_STRING,
 #                     value=person.full_name,
 #                 )
 #                 persons.append(person)
@@ -983,7 +983,7 @@
 #             logger.debug(f"Adding qualifier {qualifier}")
 #             claim_qualifiers.add(qualifier)
 #         string_citation = datatypes.String(
-#             prop_nr=self.wikibase.STRING_CITATIONS,
+#             prop_nr=self.wikibase_deprecated.STRING_CITATIONS,
 #             value=page_reference.first_template_name,
 #             qualifiers=claim_qualifiers,
 #             references=self.reference_claim,
@@ -1016,7 +1016,7 @@
 #         website_string = None
 #         if page_reference.access_date:
 #             access_date = datatypes.Time(
-#                 prop_nr=self.wikibase.ACCESS_DATE,
+#                 prop_nr=self.wikibase_deprecated.ACCESS_DATE,
 #                 time=(
 #                     page_reference.access_date.replace(tzinfo=timezone.utc)
 #                     .replace(
@@ -1031,7 +1031,7 @@
 #             access_date = None
 #         if page_reference.archive_date:
 #             archive_date = datatypes.Time(
-#                 prop_nr=self.wikibase.ARCHIVE_DATE,
+#                 prop_nr=self.wikibase_deprecated.ARCHIVE_DATE,
 #                 time=(
 #                     page_reference.archive_date.replace(tzinfo=timezone.utc)
 #                     .replace(
@@ -1046,12 +1046,12 @@
 #             access_date = None
 #         if page_reference.archive_url:
 #             archive_url = datatypes.URL(
-#                 prop_nr=self.wikibase.ARCHIVE_URL,
+#                 prop_nr=self.wikibase_deprecated.ARCHIVE_URL,
 #                 value=page_reference.archive_url,
 #             )
 #         if page_reference.publication_date:
 #             publication_date = datatypes.Time(
-#                 prop_nr=self.wikibase.PUBLICATION_DATE,
+#                 prop_nr=self.wikibase_deprecated.PUBLICATION_DATE,
 #                 time=(
 #                     page_reference.publication_date.replace(tzinfo=timezone.utc)
 #                     .replace(
@@ -1064,26 +1064,26 @@
 #             )
 #         # if page_reference.raw_template:
 #         #     raw_template = datatypes.String(
-#         #         prop_nr=self.wikibase.RAW_TEMPLATE,
+#         #         prop_nr=self.wikibase_deprecated.RAW_TEMPLATE,
 #         #         value=page_reference.shortened_raw_template,
 #         #     )
 #         # else:
 #         #     raise MissingInformationError("page_reference.raw_template was None")
 #         if page_reference.title:
 #             title = datatypes.String(
-#                 prop_nr=self.wikibase.TITLE,
+#                 prop_nr=self.wikibase_deprecated.TITLE,
 #                 value=page_reference.title,
 #             )
 #         if page_reference.url:
 #             url = datatypes.URL(
-#                 prop_nr=self.wikibase.URL,
+#                 prop_nr=self.wikibase_deprecated.URL,
 #                 value=page_reference.url,
 #             )
 #         else:
 #             url = None
 #         if page_reference.website:
 #             website_string = datatypes.String(
-#                 prop_nr=self.wikibase.WEBSITE_STRING,
+#                 prop_nr=self.wikibase_deprecated.WEBSITE_STRING,
 #                 value=page_reference.website,
 #             )
 #         for claim in (
@@ -1122,7 +1122,7 @@
 #
 #     @validate_arguments
 #     def entity_url(self, qid: str):
-#         return f"{self.wikibase.wikibase_url}wiki/Item:{qid}"
+#         return f"{self.wikibase_deprecated.wikibase_url}wiki/Item:{qid}"
 #
 #     # TODO: refactor these into one generic method
 #     def prepare_and_upload_reference_item(
@@ -1132,9 +1132,9 @@
 #         """This method prepares and then tries to upload the reference to WikiCitations
 #         and returns a WikibaseReturn."""
 #         item = self.__prepare_new_reference_item__(page_reference=page_reference)
-#         from src.models.wikibase.crud.create import WikibaseCrudCreate
+#         from src.models.wikibase_deprecated.crud.create import WikibaseCrudCreate
 #
-#         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
+#         wcc = WikibaseCrudCreate(wikibase_deprecated=self.wikibase_deprecated)
 #         return_ = wcc.upload_new_item(item=item)
 #         if isinstance(return_, WikibaseReturn):
 #             return return_
@@ -1154,9 +1154,9 @@
 #         item = self.__prepare_new_website_item__(
 #             page_reference=page_reference, wikipedia_article=wikipedia_article
 #         )
-#         from src.models.wikibase.crud.create import WikibaseCrudCreate
+#         from src.models.wikibase_deprecated.crud.create import WikibaseCrudCreate
 #
-#         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
+#         wcc = WikibaseCrudCreate(wikibase_deprecated=self.wikibase_deprecated)
 #         return_ = wcc.upload_new_item(item=item)
 #         if isinstance(return_, WikibaseReturn):
 #             return return_
@@ -1179,8 +1179,8 @@
 #         item = self.__prepare_new_wikipedia_article_item__(
 #             wikipedia_article=wikipedia_article
 #         )
-#         from src.models.wikibase.crud.create import WikibaseCrudCreate
+#         from src.models.wikibase_deprecated.crud.create import WikibaseCrudCreate
 #
-#         wcc = WikibaseCrudCreate(wikibase=self.wikibase)
+#         wcc = WikibaseCrudCreate(wikibase_deprecated=self.wikibase_deprecated)
 #         return_: WikibaseReturn = wcc.upload_new_item(item=item)
 #         return return_

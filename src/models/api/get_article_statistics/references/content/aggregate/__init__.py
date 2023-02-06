@@ -22,7 +22,7 @@ class AggregateContentReferences(BaseModel):
     cs1_t: Cs1References
 
     # Has unique hash
-    has_hash: int
+    # has_hash: int
 
     # Bare URL references are used to mark up URLs which wikipedians
     # should improve with metadata to help others to find it in case
@@ -69,5 +69,5 @@ class AggregateContentReferences(BaseModel):
     has_web_archive_org_url: int
     url_found: int
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

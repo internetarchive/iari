@@ -13,5 +13,5 @@ class UniqueUrlsAggregates(BaseModel):
     other_4xx: int = 0
     malformed_urls: int = 0
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

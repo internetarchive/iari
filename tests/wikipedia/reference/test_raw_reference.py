@@ -2,12 +2,11 @@ from unittest import TestCase
 
 from mwparserfromhell import parse  # type: ignore
 
-from src import MissingInformationError
-from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
-wikibase = IASandboxWikibase()
+# wikibase = IASandboxWikibase()
 
 
 class TestWikipediaRawReference(TestCase):
@@ -18,7 +17,7 @@ class TestWikipediaRawReference(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             # print(ref)
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.__extract_raw_templates__()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].raw_template == raw_template
@@ -30,7 +29,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 2
             assert raw_reference_object.multiple_templates_found is True
@@ -41,7 +40,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.citeq_template_found is True
         raw_template = "{{cite q|Q1}}"
@@ -49,7 +48,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.citeq_template_found is True
 
@@ -60,7 +59,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.citeq_template_found is True
             assert (
@@ -75,7 +74,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 2
             assert raw_reference_object.multiple_templates_found is True
@@ -86,7 +85,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
 
@@ -96,7 +95,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(tag=ref, wikibase=wikibase)
+            raw_reference_object = WikipediaRawReference(tag=ref)
             raw_reference_object.__extract_templates_and_parameters__()
             assert raw_reference_object.number_of_templates == 2
             assert raw_reference_object.multiple_templates_found is True
@@ -107,9 +106,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                tag=ref, testing=True, wikibase=wikibase
-            )
+            raw_reference_object = WikipediaRawReference(tag=ref, testing=True)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "citeq"
@@ -125,9 +122,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                tag=ref, testing=True, wikibase=wikibase
-            )
+            raw_reference_object = WikipediaRawReference(tag=ref, testing=True)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.number_of_templates == 1
             assert raw_reference_object.templates[0].name == "citeq"
@@ -141,9 +136,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(ref)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                tag=ref, testing=True, wikibase=wikibase
-            )
+            raw_reference_object = WikipediaRawReference(tag=ref, testing=True)
             raw_reference_object.extract_and_check()
             assert raw_reference_object.is_named_reference is True
 
@@ -152,9 +145,7 @@ class TestWikipediaRawReference(TestCase):
         wikicode = parse(ref)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                tag=ref, testing=True, wikibase=wikibase
-            )
+            raw_reference_object = WikipediaRawReference(tag=ref, testing=True)
             assert raw_reference_object.get_wikicode_as_string == ref
 
     def test_is_citation_reference(self):
@@ -163,7 +154,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=False,
         )
@@ -179,7 +169,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=False,
         )
@@ -196,7 +185,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=False,
         )
@@ -212,7 +200,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=False,
         )
@@ -228,7 +215,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=False,
         )
@@ -245,7 +231,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -261,7 +246,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -277,7 +261,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -293,7 +276,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -310,7 +292,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -326,7 +307,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -342,7 +322,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -358,7 +337,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
@@ -374,7 +352,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=True,
         )
@@ -404,7 +381,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=True,
         )
@@ -425,7 +401,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=False,
         )
@@ -442,7 +417,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=True,
         )
@@ -463,7 +437,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=True,
         )
@@ -487,7 +460,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
             check_urls=False,
         )
@@ -505,7 +477,6 @@ class TestWikipediaRawReference(TestCase):
         raw_reference_object = WikipediaRawReference(
             wikicode=wikicode,
             testing=True,
-            wikibase=wikibase,
             is_general_reference=True,
         )
         raw_reference_object.__extract_external_wikicoded_links_from_the_reference__()
@@ -545,7 +516,7 @@ class TestWikipediaRawReference(TestCase):
         )
         wikicode = parse(data)
         raw_reference_object = WikipediaRawReference(
-            wikicode=wikicode, testing=True, wikibase=wikibase, check_urls=False
+            wikicode=wikicode, testing=True, check_urls=False
         )
         raw_reference_object.extract_and_check()
         assert raw_reference_object.number_of_cs1_templates == 3
@@ -558,7 +529,7 @@ class TestWikipediaRawReference(TestCase):
         )
         wikicode = parse(data)
         raw_reference_object = WikipediaRawReference(
-            wikicode=wikicode, testing=True, wikibase=wikibase, check_urls=False
+            wikicode=wikicode, testing=True, check_urls=False
         )
         raw_reference_object.extract_and_check()
         assert raw_reference_object.number_of_templates == 1
@@ -568,7 +539,7 @@ class TestWikipediaRawReference(TestCase):
         data = "<ref>{{url}}</ref>"
         wikicode = parse(data)
         raw_reference_object = WikipediaRawReference(
-            wikicode=wikicode, testing=True, wikibase=wikibase, check_urls=False
+            wikicode=wikicode, testing=True, check_urls=False
         )
         raw_reference_object.extract_and_check()
         assert raw_reference_object.number_of_templates == 1

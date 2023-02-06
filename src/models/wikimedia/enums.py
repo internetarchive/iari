@@ -39,12 +39,12 @@ class WikimediaSite(Enum):
     wikipedia = "wikipedia"
 
 
-class WikimediaEditType(Enum):
-    NEW = "new"
-    EDIT = "edit"
-    LOG = "log"
-    CATEGORIZE = "categorize"
-    UNKNOWN = "142"
+# class WikimediaEditType(Enum):
+#     NEW = "new"
+#     EDIT = "edit"
+#     LOG = "log"
+#     CATEGORIZE = "categorize"
+#     UNKNOWN = "142"
 
 
 # class ReferenceType(Enum):

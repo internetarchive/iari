@@ -21,8 +21,8 @@ class WikipediaTemplate(WcdBaseModel):
     missing_or_empty_first_parameter: bool = False
     language_code: str = ""
 
-    class Config:
-        arbitrary_types_allowed = True
+    class Config:  # dead: disable
+        arbitrary_types_allowed = True  # dead: disable
 
     @property
     def wikitext(self) -> str:

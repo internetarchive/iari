@@ -37,9 +37,9 @@
 #
 #         if not isinstance(wikipedia_article, WikipediaArticle):
 #             raise TypeError("not a WikipediaArticle")
-#         if not wikipedia_article.wikibase:
-#             raise MissingInformationError("wikipedia_article.wikibase was None")
-#         self.wikibase = wikipedia_article.wikibase
+#         if not wikipedia_article.wikibase_deprecated:
+#             raise MissingInformationError("wikipedia_article.wikibase_deprecated was None")
+#         self.wikibase_deprecated = wikipedia_article.wikibase_deprecated
 #         if self.wikibase_crud_create is None:
 #             self.__setup_wikibase_crud_create__()
 #         if self.wikibase_crud_create is not None:

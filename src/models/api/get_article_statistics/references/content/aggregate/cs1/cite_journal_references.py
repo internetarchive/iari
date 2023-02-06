@@ -13,5 +13,5 @@ class CiteJournalReferences(BaseModel):
     has_doi: int
     # wikidata: CiteJournalWikidataStatistics
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

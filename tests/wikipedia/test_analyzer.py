@@ -33,7 +33,7 @@ class TestWikipediaAnalyzer(TestCase):
         )
         wa.__populate_article__()
         # fixme This uses internet access
-        wa.article.fetch_and_extract_and_parse_and_generate_hash()
+        wa.article.fetch_and_extract_and_parse()
         assert wa.article.found_in_wikipedia is True
         assert wa.found is True
 
@@ -116,7 +116,7 @@ class TestWikipediaAnalyzer(TestCase):
         assert agg.citation_t == 0
         assert agg.citeq_t == CiteQReferences(all=0)
         assert agg.has_archive_details_url == 0
-        assert agg.has_hash == 2
+        # assert agg.has_hash == 2
         assert agg.has_template == 2
         assert agg.has_web_archive_org_url == 0
         assert agg.has_google_books_url_or_template == 0

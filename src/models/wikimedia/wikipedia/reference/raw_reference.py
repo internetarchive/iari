@@ -11,7 +11,6 @@ from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 import config
 from src.models.exceptions import MissingInformationError
-from src.models.wikibase import Wikibase
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
@@ -33,7 +32,7 @@ class WikipediaRawReference(WcdBaseModel):
     templates: List[WikipediaTemplate] = []
     multiple_templates_found: bool = False
     testing: bool = False
-    wikibase: Wikibase
+    # wikibase: Wikibase
     extraction_done: bool = False
     is_named_reference: bool = False
     is_general_reference: bool = False
@@ -52,8 +51,8 @@ class WikipediaRawReference(WcdBaseModel):
     first_level_domains_done = True
     language_code: str = ""
 
-    class Config:
-        arbitrary_types_allowed = True
+    class Config:  # dead: disable
+        arbitrary_types_allowed = True  # dead: disable
 
     # @property
     # def has_wm_link(self) -> bool:
@@ -399,7 +398,7 @@ class WikipediaRawReference(WcdBaseModel):
         # propagate attributes
         reference.raw_reference = self
         reference.cache = self.cache
-        reference.wikibase = self.wikibase
+        # reference.wikibase = self.wikibase
         reference.finish_parsing_and_generate_hash(testing=self.testing)
         return reference
 

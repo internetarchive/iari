@@ -2,8 +2,8 @@
 # from typing import Optional
 #
 # from src.helpers.console import console
-# from src.models.wikibase import Wikibase
-# from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+# from src.models.wikibase_deprecated import Wikibase
+#
 # from src.models.wikimedia.enums import WikimediaSite
 # from src.wcd_base_model import WcdBaseModel
 #
@@ -14,7 +14,7 @@
 #     title: str = ""
 #     # This is a Wikidata QID representing an article to work on
 #     article_wikidata_qid: str = ""
-#     wikibase: Wikibase = IASandboxWikibase()
+#     wikibase_deprecated: Wikibase = IASandboxWikibase()
 #     language_code: str = "en"
 #     wikimedia_site: WikimediaSite = WikimediaSite.WIKIPEDIA
 #     time_of_last_update: Optional[datetime]
@@ -27,7 +27,7 @@
 #         if self.title or self.article_wikidata_qid:
 #             from src import WcdImportBot
 #
-#             bot = WcdImportBot(wikibase=IASandboxWikibase())
+#             bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
 #             update_delay = UpdateDelay(object_=self, cache=self.cache)
 #             if update_delay.time_to_update():
 #                 if self.title:

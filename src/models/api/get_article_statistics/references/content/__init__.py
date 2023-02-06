@@ -22,5 +22,5 @@ class ContentReferences(BaseModel):
     general: GeneralReferences
     agg: AggregateContentReferences
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

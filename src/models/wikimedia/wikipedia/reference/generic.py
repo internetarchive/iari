@@ -12,7 +12,6 @@ from src.models.exceptions import (
     MissingInformationError,
     MoreThanOneNumberError,
 )
-from src.models.hashing import Hashing
 from src.models.person import Person
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.enums import (
@@ -417,12 +416,12 @@ class WikipediaReference(WcdItem):
     # def has_first_level_domain_url_hash(self) -> bool:
     #     return bool(self.first_level_domain_of_url_hash is not None)
 
-    @property
-    def has_hash(self) -> bool:
-        if self.md5hash is None:
-            return False
-        else:
-            return bool(self.md5hash != "")
+    # @property
+    # def has_hash(self) -> bool:
+    #     if self.md5hash is None:
+    #         return False
+    #     else:
+    #         return bool(self.md5hash != "")
 
     # @property
     # def isodate(self) -> str:
@@ -439,11 +438,11 @@ class WikipediaReference(WcdItem):
 
     # @property
     # def wikibase_url(self) -> str:
-    #     if not self.wikibase:
-    #         raise MissingInformationError("self.wikibase was None")
+    #     if not self.wikibase_deprecated:
+    #         raise MissingInformationError("self.wikibase_deprecated was None")
     #     if not self.return_:
     #         raise MissingInformationError("self.return_ was None")
-    #     return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
+    #     return f"{self.wikibase_deprecated.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
 
     # @validate_arguments
     # def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
@@ -482,7 +481,7 @@ class WikipediaReference(WcdItem):
     #     domain from a known web archiver"""
     #     pass
     # logger.debug("__detect_archive_urls__: Running")
-    # from src.models.wikibase.enums import KnownArchiveUrl
+    # from src.models.wikibase_deprecated.enums import KnownArchiveUrl
     #
     # # ARCHIVE_URL
     # if self.first_level_domain_of_archive_url:
@@ -569,19 +568,19 @@ class WikipediaReference(WcdItem):
         # if self.first_level_domain_of_url is not None:
         #     str2hash = self.first_level_domain_of_url
         #     self.first_level_domain_of_url_hash = hashlib.md5(
-        #         f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
+        #         f'{self.wikibase_deprecated.title}{str2hash.replace(" ", "").lower()}'.encode()
         #     ).hexdigest()
 
-    def __generate_hashes__(self):
-        """Generate hashes for both website and reference items"""
-        if not self.wikibase:
-            raise MissingInformationError("self.wikibase was None")
-        self.__generate_reference_hash__()
-        # self.__generate_first_level_domain_hash__()
+    # def __generate_hashes__(self):
+    #     """Generate hashes for both website and reference items"""
+    #     # if not self.wikibase:
+    #     #     raise MissingInformationError("self.wikibase_deprecated was None")
+    #     self.__generate_reference_hash__()
+    #     # self.__generate_first_level_domain_hash__()
 
-    def __generate_reference_hash__(self):
-        hashing = Hashing(reference=self)
-        self.md5hash = hashing.generate_reference_hash()
+    # def __generate_reference_hash__(self):
+    #     hashing = Hashing(reference=self)
+    #     self.md5hash = hashing.generate_reference_hash()
 
     @validate_arguments
     def __get_numbered_person__(
@@ -779,7 +778,7 @@ class WikipediaReference(WcdItem):
     #         logger.info("Found Google books template")
     #         for _template_name, content in template_tuples:
     #             google_books: GoogleBooks = GoogleBooksSchema().load(content)
-    #             google_books.wikibase = self.wikibase
+    #             google_books.wikibase_deprecated = self.wikibase_deprecated
     #             google_books.finish_parsing()
     #             self.url = google_books.url
     #             self.google_books_id = google_books.id
@@ -1090,7 +1089,7 @@ class WikipediaReference(WcdItem):
             self.__merge_place_into_location__()
             self.__clean_wiki_markup_from_strings__()
             # We generate the hash last because the parsing needs to be done first
-            self.__generate_hashes__()
+            # self.__generate_hashes__()
 
     # @staticmethod
     # def __has_template_data__(string: str) -> bool:

@@ -1,31 +1,21 @@
 import logging
-import os
 from typing import List
 
-# Login credentials to WikiCitations
-user = ""
-pwd = ""
-
-# Login credentials to sandbox.wiki
-sandbox_user = "So9q@test"
-# https://medium.datadriveninvestor.com/accessing-github-secrets-in-python-d3e758d8089b
-sandbox_pwd = os.environ["ia_sandbox"]
-
-# Login to rabbitmq bitnami container
-rabbitmq_username = "user"
-rabbitmq_password = "bitnami"
+# # Login credentials to WikiCitations
+# user = ""
+# pwd = ""
 
 # Settings:
 subdirectory_for_json = "json/"  # create it manually before running the api
-cache_host: str = "127.0.0.1"
-cache_port: int = 8888
-assume_persons_without_role_are_authors = True
-debug_unsupported_templates = False
-include_url_in_hash_algorithm = True
+# cache_host: str = "127.0.0.1"
+# cache_port: int = 8888
+# assume_persons_without_role_are_authors = True
+# debug_unsupported_templates = False
+# include_url_in_hash_algorithm = True
 loglevel = logging.ERROR
 user_agent = "wcdimportbot"
-print_debug_json = False
-use_sandbox_wikibase_backend_for_wikicitations_api = True
+# print_debug_json = False
+# use_sandbox_wikibase_backend_for_wikicitations_api = True
 
 # Supported templates
 citation_template = [
@@ -92,8 +82,8 @@ webarchive_templates = [
 ]
 templates_with_mandatory_first_parameter = ["url", "webarchive", "isbn"]
 
-wikibase_url = "https://wikicitations.wiki.opencura.com"
-mediawiki_api_url = wikibase_url + "/w/api.php"
-mediawiki_index_url = wikibase_url + "/w/index.php"
-sparql_endpoint_url = wikibase_url + "/query/sparql"
-wikibase_rdf_entity_prefix = "http://wikicitations.wiki.opencura.com/entity/"
+# wikibase_url = "https://wikicitations.wiki.opencura.com"
+# mediawiki_api_url = wikibase_url + "/w/api.php"
+# mediawiki_index_url = wikibase_url + "/w/index.php"
+# sparql_endpoint_url = wikibase_url + "/query/sparql"
+# wikibase_rdf_entity_prefix = "http://wikicitations.wiki.opencura.com/entity/"

@@ -20,7 +20,7 @@ class TestGoogleBooks(TestCase):
     #         wt = WikipediaTemplate(raw_template=template)
     #         wt.extract_and_prepare_parameters()
     #         gb: GoogleBooks = GoogleBooksSchema().load(content)
-    #         gb.wikibase = IASandboxWikibase()
+    #         gb.wikibase_deprecated = IASandboxWikibase()
     #         gb.finish_parsing()
     #         console.print(gb.dict())
     #         assert gb.url == "https://books.google.com/books?id=CDJpAAAAMAAJ"
@@ -30,7 +30,7 @@ class TestGoogleBooks(TestCase):
     #     template_triples = extract_templates_and_params(data, True)
     #     for _template_name, content, _raw_template in template_triples:
     #         gb: GoogleBooks = GoogleBooksSchema().load(content)
-    #         gb.wikibase = IASandboxWikibase()
+    #         gb.wikibase_deprecated = IASandboxWikibase()
     #         gb.finish_parsing()
     #         console.print(gb.dict())
     #         assert gb.url == "https://books.google.com/books?id=CDJpAAAAMAAJ"

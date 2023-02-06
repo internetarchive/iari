@@ -15,7 +15,7 @@
 # from src.helpers.console import console
 # from src.models.exceptions import NoChannelError
 # from src.models.message import Message
-# from src.models.wikibase import Wikibase
+# from src.models.wikibase_deprecated import Wikibase
 # from src.wcd_base_model import WcdBaseModel
 #
 # logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@
 #     connection: Optional[BlockingConnection]
 #     channel: Optional[BlockingChannel]
 #     queue_name: str = "article_queue"
-#     wikibase: Wikibase
+#     wikibase_deprecated: Wikibase
 #     testing: bool = False
 #
 #     class Config:
@@ -177,7 +177,7 @@
 #             console.print(json_data_dict)
 #         message = Message(**json_data_dict)
 #         message.cache = self.cache
-#         print(f" [x] Received {message.title} job for {message.wikibase.title}")
+#         print(f" [x] Received {message.title} job for {message.wikibase_deprecated.title}")
 #         if config.loglevel == logging.DEBUG:
 #             console.print(message.dict())
 #         message.process_data()

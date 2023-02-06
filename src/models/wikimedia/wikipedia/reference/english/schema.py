@@ -7,7 +7,7 @@ class EnglishWikipediaReferenceSchema(WikipediaReferenceSchema):
     # noinspection PyUnusedLocal
     @post_load
     # **kwargs is needed here despite what the validator claims
-    def return_object(self, data, **kwargs):  # type: ignore
+    def return_object(self, data, **kwargs):  # type: ignore # dead: disable
         from src.models.wikimedia.wikipedia.reference.english.english_reference import (
             EnglishWikipediaReference,
         )

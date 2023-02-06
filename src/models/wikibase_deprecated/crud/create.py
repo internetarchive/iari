@@ -15,7 +15,7 @@
 # from src.helpers.console import console
 # from src.models.exceptions import MissingInformationError
 # from src.models.return_.wikibase_return import WikibaseReturn
-# from src.models.wikibase.crud import WikibaseCrud
+# from src.models.wikibase_deprecated.crud import WikibaseCrud
 #
 # logger = logging.getLogger(__name__)
 #

@@ -22,5 +22,5 @@ class ArticleStatistics(BaseModel):
     timing: int = 0  # time to analyze in seconds
     title: str = ""
 
-    class Config:
-        extra = Extra.forbid
+    class Config:  # dead: disable
+        extra = Extra.forbid  # dead: disable

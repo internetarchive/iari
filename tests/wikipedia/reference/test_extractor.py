@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from src import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
@@ -12,14 +11,13 @@ from test_data.test_content import (  # type: ignore
     test_full_article,
 )
 
-wikibase = IASandboxWikibase()
+# wikibase = IASandboxWikibase()
 
 
 class TestWikipediaReferenceExtractor(TestCase):
     def test_number_of_references_zero(self):
-        wre0 = WikipediaReferenceExtractor(testing=True, wikitext="", wikibase=wikibase)
+        wre0 = WikipediaReferenceExtractor(testing=True, wikitext="")
         wre0.extract_all_references()
-        assert wre0.number_of_raw_references == 0
         assert wre0.number_of_references == 0
 
     def test_number_of_references_two(self):
@@ -28,11 +26,10 @@ class TestWikipediaReferenceExtractor(TestCase):
         raw_template2 = "{{citeq|Q2}}"
         raw_reference2 = f"<ref>{raw_template2}</ref>"
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=raw_reference + raw_reference2, wikibase=wikibase
+            testing=True, wikitext=raw_reference + raw_reference2
         )
         # print(wre.wikitext)
         wre.extract_all_references()
-        assert wre.number_of_raw_references == 2
         assert wre.number_of_references == 2
 
     def test_number_of_references_three(self):
@@ -45,19 +42,16 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre1 = WikipediaReferenceExtractor(
             testing=True,
             wikitext=raw_reference + raw_reference2 + raw_reference3,
-            wikibase=wikibase,
+            #
         )
         # print(wre1.wikitext)
         wre1.extract_all_references()
-        assert wre1.number_of_raw_references == 3
         assert wre1.number_of_references == 3
 
     def test_extract_all_references(self):
         raw_template = "{{citeq|Q1}}"
         raw_reference = f"<ref>{raw_template}</ref>"
-        wre2 = WikipediaReferenceExtractor(
-            testing=True, wikitext=raw_reference, wikibase=wikibase
-        )
+        wre2 = WikipediaReferenceExtractor(testing=True, wikitext=raw_reference)
         wre2.extract_all_references()
         assert wre2.number_of_references == 1
         assert wre2.references[0].first_parameter == "Q1"
@@ -66,9 +60,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         raw_template = "{{citeq|Q1}}"
         named_reference = '<ref name="INE"/>'
         raw_reference = f"<ref>{raw_template}</ref>{named_reference}"
-        wre2 = WikipediaReferenceExtractor(
-            testing=True, wikitext=raw_reference, wikibase=wikibase
-        )
+        wre2 = WikipediaReferenceExtractor(testing=True, wikitext=raw_reference)
         wre2.extract_all_references()
         assert wre2.number_of_references == 2
         assert wre2.number_of_content_references == 1
@@ -76,26 +68,26 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.references[0].raw_reference.templates[0].name == "citeq"
         assert wre2.references[0].wikidata_qid == "Q1"
 
-    def test_number_of_hashed_content_references(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_head_excerpt, wikibase=wikibase
-        )
-        wre.extract_all_references()
-        assert wre.number_of_references == 3
-        assert wre.number_of_content_references == 2
-        assert wre.number_of_empty_named_references == 1
-        assert wre.number_of_hashed_content_references == 2
+    # def test_number_of_hashed_content_references(self):
+    #     wre = WikipediaReferenceExtractor(
+    #         testing=True, wikitext=easter_island_head_excerpt
+    #     )
+    #     wre.extract_all_references()
+    #     assert wre.number_of_references == 3
+    #     assert wre.number_of_content_references == 2
+    #     assert wre.number_of_empty_named_references == 1
+    #     assert wre.number_of_hashed_content_references == 2
 
     def test_number_of_references_with_a_supported_template(self):
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_head_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_head_excerpt
         )
         wre.extract_all_references()
         assert wre.number_of_content_references_with_any_supported_template == 2
 
     def test_number_of_cs1_references(self):
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_head_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_head_excerpt
         )
         wre.extract_all_references()
         assert wre.number_of_cs1_references == 2
@@ -103,11 +95,10 @@ class TestWikipediaReferenceExtractor(TestCase):
     def test___extract_all_raw_general_references__(self):
         """This tests extraction of sections and references"""
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_tail_excerpt
         )
         wre.__extract_all_raw_general_references__()
         assert wre.number_of_sections_found == 2
-        assert wre.number_of_raw_references == 22
 
     def test__extract_raw_templates_two(self):
         raw_template = "{{citeq|Q1}}"
@@ -115,7 +106,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         raw_template2 = "{{citeq|Q2}}"
         raw_reference2 = f"<ref>{raw_template2}</ref>"
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=raw_reference + raw_reference2, wikibase=wikibase
+            testing=True, wikitext=raw_reference + raw_reference2
         )
         # print(wre.wikitext)
         wre.extract_all_references()
@@ -125,15 +116,13 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.content_references[1].raw_reference.number_of_templates == 1
 
     def test__extract_sections_test(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=test_full_article, wikibase=wikibase
-        )
+        wre = WikipediaReferenceExtractor(testing=True, wikitext=test_full_article)
         wre.__extract_sections__()
         assert wre.number_of_sections_found == 0
 
     def test__extract_sections_easter_island(self):
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_tail_excerpt
         )
         wre.__extract_sections__()
         assert wre.number_of_sections_found == 2
@@ -141,11 +130,10 @@ class TestWikipediaReferenceExtractor(TestCase):
     def test_extract_general_references_only(self):
         """This tests extraction of sections and references"""
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_tail_excerpt, wikibase=wikibase
+            testing=True, wikitext=easter_island_tail_excerpt
         )
         wre.extract_all_references()
         assert wre.number_of_sections_found == 2
-        assert wre.number_of_raw_references == 22
         assert wre.number_of_general_references == 22
         assert wre.number_of_content_reference_with_at_least_one_template == 22
         assert wre.number_of_content_references_with_any_supported_template == 21
@@ -155,25 +143,24 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_url_template_references == 0
         assert wre.number_of_content_reference_without_a_template == 0
         assert wre.number_of_citation_references == 0
-        assert wre.number_of_hashed_content_references == 18
+        # assert wre.number_of_hashed_content_references == 18
 
     def test_isbn_template(self):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="<ref>{{isbn|1234}}</ref>",
-            wikibase=wikibase,
         )
         wre.extract_all_references()
         assert wre.number_of_content_references == 1
         assert wre.content_references[0].raw_reference.templates[0].name == "isbn"
         assert wre.content_references[0].isbn == "1234"
         assert wre.number_of_isbn_template_references == 1
-        assert wre.number_of_hashed_content_references == 1
+        # assert wre.number_of_hashed_content_references == 1
 
     def test_first_level_domains_one(self):
         example_reference = "<ref>{{cite web|url=http://google.com}}</ref>"
         wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=example_reference, wikibase=wikibase, check_urls=True
+            testing=True, wikitext=example_reference, check_urls=True
         )
         wre.extract_all_references()
         assert wre.reference_first_level_domains == ["google.com"]
@@ -183,7 +170,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext=example_reference + example_reference,
-            wikibase=wikibase,
             check_urls=True,
         )
         wre.extract_all_references()
@@ -194,7 +180,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext=example_reference + example_reference,
-            wikibase=wikibase,
             check_urls=True,
         )
         wre.extract_all_references()
@@ -205,7 +190,7 @@ class TestWikipediaReferenceExtractor(TestCase):
     #     wre = WikipediaReferenceExtractor(
     #         testing=True,
     #         wikitext=easter_island_tail_excerpt,
-    #         wikibase=wikibase,
+    #         wikibase_deprecated=wikibase_deprecated,
     #     )
     #     wre.extract_all_references()
     #     assert len(wre.reference_first_level_domain_counts) == 7
@@ -223,7 +208,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="<ref>{{cite web|url=http://google.com}}</ref>",
-            wikibase=wikibase,
             check_urls=True,
         )
         wre.extract_all_references()
@@ -235,7 +219,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="<ref>{{cite web|url=http://google.com}}</ref>",
-            wikibase=wikibase,
             check_urls=True,
         )
         wre.extract_all_references()
@@ -253,7 +236,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="<ref>{{isbn|1234}}</ref>",
-            wikibase=wikibase,
         )
         wre.extract_all_references()
         assert wre.has_references is True
@@ -262,7 +244,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="test",
-            wikibase=wikibase,
         )
         wre.extract_all_references()
         assert wre.has_references is False
@@ -271,7 +252,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="test",
-            wikibase=wikibase,
         )
         wre.extract_all_references()
         assert wre.malformed_urls == []
@@ -280,7 +260,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref>",
-            wikibase=wikibase,
             check_urls=True,
         )
         wre.extract_all_references()
@@ -293,7 +272,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref><ref>{{cite web|url=google.com}}</ref>",
-            wikibase=wikibase,
             check_urls=True,
         )
         wre.extract_all_references()
@@ -309,7 +287,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext=old_norse_sources,
-            wikibase=wikibase,
             check_urls=False,
         )
         wre.extract_all_references()
@@ -321,7 +298,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre = WikipediaReferenceExtractor(
             testing=True,
             wikitext="<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",
-            wikibase=wikibase,
             check_urls=False,
         )
         wre.extract_all_references()

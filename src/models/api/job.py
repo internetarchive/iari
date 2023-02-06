@@ -5,8 +5,7 @@ import requests
 from pydantic import BaseModel
 
 import config
-from src import MissingInformationError
-from src.models.exceptions import WikipediaApiFetchError
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaSite
 
 logger = logging.getLogger(__name__)
