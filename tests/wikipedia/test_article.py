@@ -181,12 +181,14 @@ class TestWikipediaArticle(TestCase):
         )
         wp.wikitext = "<ref>{{citeq|1}}</ref>"
         wp.fetch_and_extract_and_parse_and_generate_hash()
-        assert len(wp.extractor.references) == 1
+        assert wp.extractor.number_of_references == 1
         assert (
-            wp.extractor.references[0].raw_reference.templates[0].raw_template
+            wp.extractor.citeq_references[0].raw_reference.templates[0].raw_template
             == "{{citeq|1}}"
         )
-        assert wp.extractor.references[0].first_template_name == "citeq"
+        assert (
+            wp.extractor.citeq_references[0].raw_reference.templates[0].name == "citeq"
+        )
 
     def test___extract_and_parse_references_easter_island_head_excerpt(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -208,7 +210,6 @@ class TestWikipediaArticle(TestCase):
             "l= https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistic"
             "o/censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}"
         )
-        assert wp.extractor.content_references[0].first_template_name == "cite web"
         # print(wp.extractor.references[1].raw_reference.templates)
         assert wp.extractor.content_references[1].raw_reference.templates[
             0
@@ -218,55 +219,6 @@ class TestWikipediaArticle(TestCase):
             "ate= 11 May 2018 |archive-url= https://web.archive.org/web/20180511145942/https://resultados.censo2"
             "017.cl/Home/Download |archive-date= 11 May 2018 |url-status=dead }}"
         )
-        assert wp.extractor.content_references[1].first_template_name == "cite web"
-        # print(wp.extractor.references[2].raw_reference)
-        # assert wp.extractor.references[2].raw_reference.templates[0].raw_template == (
-        #     "{{cite web |last1=Dangerfield |first1=Whitney |title=The Mystery of Easter Island |url=https://www.sm"
-        #     "ithsonianmag.com/travel/the-mystery-of-easter-island-151285298/ |website=[[Smiths"
-        #     "onian (magazine)|Smithsonian Magazine]] |access-date=December 10, 2020 |date=March 31, 2007}}"
-        # )
-        # assert wp.extractor.references[2].first_template_name == "cite web"
-        # assert wp.extractor.references[3].raw_reference.templates[0].raw_template == (
-        #     "{{cite journal |author=Peiser, B. |url=http://www.uri.edu/artsci/ecn/starkey/ECN398%20-"
-        #     "Ecology,%20Economy,%20Society/RAPANUI.pdf |archive-url=https://web.archive.org/web/2010061"
-        #     "0062402/http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANU"
-        #     "I.pdf |url-status=dead |archive-date=2010-06-10 |title=From Genocide to Ecocide: "
-        #     "The Rape of Rapa Nui |doi=10.1260/0958305054672385 |journal=Energy & Environment |"
-        #     "volume=16 |issue=3&4 |pages=513–539 |year=2005 |citeseerx=10.1.1.611.1103 |s2cid=155079232 }}"
-        # )
-        # assert wp.extractor.references[3].first_template_name == "cite journal"
-        # assert wp.extractor.references[4].raw_reference.templates[0].raw_template == (
-        #     "{{citation |url=http://www.leychile.cl/Navegar?idNorma=1026285 |title=List of C"
-        #     "hilean Provinces |publisher=Congreso Nacional |access-date=20 February 2013 "
-        #     "|url-status=live |archive-url=https://web.archive.org/web/20120910034328/http://www"
-        #     ".leychile.cl/Navegar?idNorma=1026285 |archive-date=10 September 2012}}"
-        # )
-        # assert wp.extractor.references[4].first_template_name == "citation"
-        # assert wp.extractor.references[5].raw_reference.templates[0].raw_template == (
-        #     "{{cite web|url=https://redatam-ine.ine.cl/redbin/RpWebEngine.exe/Portal?BASE=CENSO_2"
-        #     "017&lang=esp|title=Instituto Nacional de Estadísticas – REDATAM Procesamiento y disem"
-        #     "inación|website=Redatam-ine.ine.cl|access-date=11 January 2019|archive-url=https://web.archi"
-        #     "ve.org/web/20190527171611/https://redatam-ine.ine.cl/redbin/RpWebEngine.exe/Portal?B"
-        #     "ASE=CENSO_2017&lang=esp|archive-date=27 May 2019|url-status=live}}"
-        # )
-        # assert wp.extractor.references[5].first_template_name == "cite web"
-        # assert wp.extractor.references[6].raw_reference.templates[0].raw_template == (
-        #     "{{citation|title=Welcome to Rapa Nui – Isla de Pascua – Easter Island|url=http://www.portal"
-        #     "rapanui.cl/rapanui/informaciones.htm|work=Portal RapaNui, the island's official website|url-status=li"
-        #     "ve|archive-url=https://web.archive.org/web/20120114041943/http://www.portalrapanui.cl/rapanui/in"
-        #     "formaciones.htm|archive-date=14 January 2012}}"
-        # )
-        # assert wp.extractor.references[6].first_template_name == "citation"
-        # assert wp.extractor.references[7].raw_reference.templates[0].raw_template == (
-        #     "{{cite web |url=http://www.citypopulation.de/Pitcairn.html |title=Pitcairn Islands |author=Thomas B"
-        #     "rinkhoff |date=1 February 2013 |website=Citypopulation.de |publisher=Thomas Brinkhoff |access-d"
-        #     "ate=8 November 2013 |url-status=live |archive-url=https://web.archive.org/web/20131015182546/http://w"
-        #     "ww.citypopulation.de/Pitcairn.html |archive-date=15 October 2013}}"
-        # )
-        # assert wp.extractor.references[7].first_template_name == "cite web"
-        # assert wp.extractor.references[7].publisher == "Thomas Brinkhoff"
-        # assert wp.extractor.references[7].title == "Pitcairn Islands"
-        # assert wp.extractor.references[7].url == "http://www.citypopulation.de/Pitcairn.html"
 
     def test_easter_island(self):
         wikitext = f"{easter_island_head_excerpt}\n{easter_island_tail_excerpt}"

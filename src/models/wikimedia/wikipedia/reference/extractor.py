@@ -40,6 +40,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     check_urls: bool = False
     check_urls_done: bool = False
     checked_and_unique_reference_urls: List[WikipediaUrl] = []
+    language_code: str = ""
 
     class Config:
         arbitrary_types_allowed = True
@@ -680,6 +681,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                     wikibase=self.wikibase,
                     testing=self.testing,
                     check_urls=self.check_urls,
+                    language_code=self.language_code,
                 )
             )
 

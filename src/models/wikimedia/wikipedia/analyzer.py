@@ -1,5 +1,7 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
+
+from pydantic import validate_arguments
 
 from src import IASandboxWikibase, Wikibase
 from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
@@ -30,6 +32,9 @@ from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite
 from src.models.api.get_article_statistics.references.reference_statistics import (
     ReferenceStatistics,
 )
+from src.models.api.get_article_statistics.references.template_statistics import (
+    TemplateStatistics,
+)
 from src.models.api.get_article_statistics.references.unique_urls_aggregates import (
     UniqueUrlsAggregates,
 )
@@ -39,6 +44,7 @@ from src.models.api.get_article_statistics.references.urls_aggregates import (
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
+from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
@@ -283,6 +289,20 @@ class WikipediaAnalyzer(WcdBaseModel):
                     wikitext=rr.get_wikicode_as_string,
                     urls=rr.checked_urls,
                     flds=rr.first_level_domains,
+                    multiple_cs1_templates_found=rr.multiple_cs1_templates_found,
+                    number_of_bareurl_templates=rr.number_of_bareurl_templates,
+                    number_of_citation_templates=rr.number_of_citation_templates,
+                    number_of_citeq_templates=rr.number_of_citeq_templates,
+                    number_of_isbn_templates=rr.number_of_isbn_templates,
+                    number_of_cs1_templates=rr.number_of_cs1_templates,
+                    number_of_templates=rr.number_of_templates,
+                    number_of_templates_missing_first_parameter=rr.number_of_templates_missing_first_parameter,
+                    is_valid_qid=reference.is_valid_qid,
+                    wikidata_qid=reference.wikidata_qid,
+                    number_of_url_templates=rr.number_of_url_templates,
+                    number_of_webarchive_templates=rr.number_of_webarchive_templates,
+                    templates=self.__gather_template_statistics__(reference=reference),
+                    known_multiref_template_found=rr.known_multiref_template_found,
                 )
                 self.article_statistics.references.details.append(reference_statistics)
         if not self.article_statistics:
@@ -306,3 +326,46 @@ class WikipediaAnalyzer(WcdBaseModel):
             )
         else:
             raise MissingInformationError("Got no title")
+
+    @validate_arguments
+    def __gather_template_statistics__(
+        self, reference: WikipediaReference
+    ) -> List[TemplateStatistics]:
+        from src.models.api import app
+
+        app.logger.debug("__gather_template_statistics__: running")
+        if not reference.raw_reference:
+            raise MissingInformationError("raw_reference missing")
+        number_of_templates = reference.raw_reference.number_of_templates
+        if not number_of_templates:
+            app.logger.info(
+                f"no templates found for {reference.raw_reference.wikicode}"
+            )
+            return []
+        else:
+            app.logger.info(
+                f"found {number_of_templates} templates in {reference.raw_reference.wikicode}"
+            )
+            template_statistics_list: List[TemplateStatistics] = []
+            for template in reference.raw_reference.templates:
+                template_statistics_list.append(
+                    TemplateStatistics(
+                        # TODO extract more information that the patrons might want
+                        #  to know from the template, e.g. the different persons
+                        doi=template.get_doi,
+                        is_bareurl_template=template.is_bareurl_template,
+                        is_citation_template=template.is_citation_template,
+                        is_citeq_template=template.is_citeq_template,
+                        is_cs1_template=template.is_cs1_template,
+                        is_isbn_template=template.is_isbn_template,
+                        is_known_multiref_template=template.is_known_multiref_template,
+                        is_url_template=template.is_url_template,
+                        is_webarchive_template=template.is_webarchive_template,
+                        isbn=template.get_isbn,
+                        wikitext=template.wikitext,
+                    )
+                )
+            app.logger.debug(
+                f"returning {len(template_statistics_list)} template_statistics objects"
+            )
+            return template_statistics_list

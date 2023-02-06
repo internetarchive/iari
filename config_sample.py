@@ -86,6 +86,11 @@ bare_url_regex = (
     # for now which one is in use
     "bare url"
 )
+known_multiref_templates = ["unbulleted list citebundle", "multiref", "multiref2"]
+webarchive_templates = [
+    "webarchive",
+]
+templates_with_mandatory_first_parameter = ["url", "webarchive", "isbn"]
 
 wikibase_url = "https://wikicitations.wiki.opencura.com"
 mediawiki_api_url = wikibase_url + "/w/api.php"
