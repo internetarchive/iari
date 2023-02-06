@@ -267,6 +267,21 @@ files = [
 toml = ["tomli"]
 
 [[package]]
+name = "dead"
+version = "1.5.0"
+description = "dead simple python dead code detection"
+category = "dev"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "dead-1.5.0-py2.py3-none-any.whl", hash = "sha256:a40f38d3359cc3c817e3beacff8038c0631a32542f367bed835da9b9113b574f"},
+    {file = "dead-1.5.0.tar.gz", hash = "sha256:e2b3f374b35d9a859a2890902634178984f3f6cedbd3cf2994c6b734ba69f193"},
+]
+
+[package.dependencies]
+identify = "*"
+
+[[package]]
 name = "distlib"
 version = "0.3.6"
 description = "Distribution utilities"
@@ -1750,4 +1765,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<=3.11"
-content-hash = "2d0f4a0c8cf964f371e36de522f61da78f91b5657fcc7712f3a482339a15724b"
+content-hash = "29aab4d055326b1469e1f5a152ed9f8519b7489ee28fc3c75a18d546d24a383e"
