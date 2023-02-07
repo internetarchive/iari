@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple
 
 from flask import request
-from flask_restful import Resource, abort
+from flask_restful import Resource, abort  # type: ignore
 
 from src import WikimediaSite, console
 from src.models.api.get_statistics.get_statistics_schema import GetStatisticsSchema

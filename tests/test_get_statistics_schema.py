@@ -49,11 +49,14 @@ class TestGetStatisticsSchema(TestCase):
         errors = gss.validate(
             dict(title="test", refresh=True, lang="enen", site="wikipedia")
         )
-        assert errors == {'lang': ['Must be one of: en.']}
+        assert errors == {"lang": ["Must be one of: en."]}
 
     def test_validate_invalid_site(self):
         gss = GetStatisticsSchema()
         errors = gss.validate(
             dict(title="test", refresh=True, lang="enen", site="wikipediaaaaaaaaaa")
         )
-        assert errors == {'lang': ['Must be one of: en.'], 'site': ['Must be one of: wikipedia.']}
+        assert errors == {
+            "lang": ["Must be one of: en."],
+            "site": ["Must be one of: wikipedia."],
+        }

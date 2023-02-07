@@ -1,6 +1,18 @@
-from typing import Any, Tuple, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from flask_restful import Resource, abort  # type: ignore
+
+from src.models.api.enums import Subset
+from src.models.api.get_statistics.get_statistics import GetStatistics
+from src.models.api.get_statistics.get_url_statistics.get_urls_schema import (
+    GetUrlsSchema,
+)
+from src.models.api.get_statistics.get_url_statistics.url_statistics import (
+    UrlStatistics,
+)
+from src.models.api.get_statistics.references import Urls
+from src.models.wikimedia.enums import AnalyzerReturn
+from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_short_tail_excerpt,
@@ -9,20 +21,11 @@ from test_data.test_content import (  # type: ignore
     test_full_article,
 )
 
-from src.models.api.enums import Subset
-from src.models.api.get_statistics.get_statistics import GetStatistics
-from src.models.api.get_statistics.get_url_statistics.get_urls_schema import GetUrlsSchema
-from src.models.api.get_statistics.get_url_statistics.url_statistics import (
-    UrlStatistics,
-)
-from src.models.api.get_statistics.references import Urls
-from src.models.wikimedia.enums import AnalyzerReturn
-from src.models.wikimedia.wikipedia.url import WikipediaUrl
-
 
 class GetUrlStatistics(GetStatistics):
     """This models the get-statistics API
     It is instantiated at every request"""
+
     urls: List[WikipediaUrl] = []
     agg: Optional[Urls]
     schema = GetUrlsSchema()
@@ -77,8 +80,9 @@ class GetUrlStatistics(GetStatistics):
             return self.return_a_subset()
 
     def return_a_subset(self) -> Tuple[Any, int]:
-        if self.job.subset:
+        if self.job and self.job.subset:
             from src.models.api import app
+
             app.logger.debug("got subset")
             if self.job.subset == Subset.not_found:
                 app.logger.debug("got not found")
@@ -106,9 +110,9 @@ class GetUrlStatistics(GetStatistics):
     def __extract_urls_from_json__(self):
         """Extract WikipediaUrls from the json depending on what subset the patron asked for"""
         if (
-                self.statistics_dictionary
-                and "references" in self.statistics_dictionary.keys()
-                and self.statistics_dictionary["references"] is not None
+            self.statistics_dictionary
+            and "references" in self.statistics_dictionary.keys()
+            and self.statistics_dictionary["references"] is not None
         ):
             self.agg = self.statistics_dictionary["references"]["urls"]
             references = self.statistics_dictionary["references"]["details"]
@@ -126,4 +130,3 @@ class GetUrlStatistics(GetStatistics):
                                     self.urls.append(url_object)
                         else:
                             self.urls.append(url_object)
-
