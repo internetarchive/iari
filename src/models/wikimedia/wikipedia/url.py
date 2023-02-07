@@ -64,6 +64,7 @@ class WikipediaUrl(BaseModel):
 
     @property
     def __get_url__(self) -> str:
+        """Helper method to get the fixed url and fall back to the original url"""
         if self.fixed_url:
             return self.fixed_url
         else:
@@ -92,7 +93,7 @@ class WikipediaUrl(BaseModel):
             self.__check_and_fix_netloc__()
             self.parsing_done = True
 
-    def __get_dns_record__(self):
+    def __get_dns_record__(self) -> None:
         logger.debug("__get_dns_record__: running")
         # if domain name is available
         if self.netloc:
@@ -201,6 +202,7 @@ class WikipediaUrl(BaseModel):
         self.extract_first_level_domain()
         self.__check_url__()
 
+    # TODO rewrite to expose these in the API also
     def is_google_books_url(self):
         return bool("//books.google." in self.__get_url__)
 

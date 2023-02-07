@@ -6,7 +6,7 @@ from wikibaseintegrator.wbi_exceptions import MissingEntityException  # type: ig
 import config
 
 # from src import WcdImportBot
-# from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+#
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class TestWcdImportBot(TestCase):
     pass
     # def test_delete_one_page(self):
-    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
     #     # bot.rinse_all_items_and_cache()
     #     bot.get_and_extract_page_by_title(title="Test")
     #     console.print(
@@ -26,23 +26,23 @@ class TestWcdImportBot(TestCase):
     #     assert result == Result.SUCCESSFUL
 
     # def test_rebuild_cache(self):
-    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
     #     bot.__rebuild_cache__()
 
     # DEPRECATED since 2.1.0-alpha3
     # def test_flush_cache(self):
-    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
     #     bot.__flush_cache__()
 
     # def test_import_one_page_and_make_sure_we_updated_ssdb(self):
-    #     bot = WcdImportBot(wikibase=IASandboxWikibase(), page_title="Test")
+    #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase(), page_title="Test")
     #     bot.get_and_extract_page_and_upload_by_title()
     #     assert bot.wikipedia_article is not None
 
     # def test__gather_statistics__(self):
-    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
     #     bot.__gather_and_print_statistics__()
-    #     # bot2 = WcdImportBot(wikibase=WikiCitationsWikibase())
+    #     # bot2 = WcdImportBot(wikibase_deprecated=WikiCitationsWikibase())
     #     # bot2.__gather_statistics__()
 
     # def test_get_pages_by_range(self):
@@ -58,7 +58,7 @@ class TestWcdImportBot(TestCase):
     #         self.fail()
 
     # def test_get_pages_by_range(self):
-    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
     #     # bot.__setup_cache__()
     #     bot.get_and_extract_pages_by_range_via_http(max_count=1)
 
@@ -72,7 +72,7 @@ class TestWcdImportBot(TestCase):
 
     # DISABLED because we don't want to rinse all items every time we run all tests
     # def test_rinse_all_items_and_cache(self):
-    #     bot = WcdImportBot(wikibase=IASandboxWikibase())
+    #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
     #     bot.rinse_all_items_and_cache()
     #     console.print(
     #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
@@ -85,7 +85,7 @@ class TestWcdImportBot(TestCase):
 
     # def test_get_and_extract_page_by_title_invalid_page_title(self):
     #     bot = WcdImportBot(
-    #         wikibase=IASandboxWikibase(), testing=True, page_title="asdfdsiowe"
+    #         wikibase_deprecated=IASandboxWikibase(), testing=True, page_title="asdfdsiowe"
     #     )
     #     bot.get_and_extract_page_and_upload_by_title()
     #     assert bot.wikipedia_article.found_in_wikipedia is False

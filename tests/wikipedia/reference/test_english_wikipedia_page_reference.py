@@ -4,13 +4,12 @@ from unittest import TestCase
 from mwparserfromhell import parse  # type: ignore
 
 import config
-from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
-wikibase = IASandboxWikibase()
+# wikibase = IASandboxWikibase()
 
 
 class TestEnglishWikipediaReferenceSchema(TestCase):
@@ -74,7 +73,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # console.print(reference)
     #     person = reference.persons_without_role[0]
@@ -98,7 +97,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     console.print(reference)
     #     person = reference.persons_without_role[0]
@@ -122,7 +121,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     console.print(reference)
     #     person = reference.persons_without_role[0]
@@ -143,7 +142,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         "chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
     #     }
     #     reference = EnglishWikipediaReferenceSchema().load(data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.first_level_domain_of_url == "stereogum.com"
     #     assert (
@@ -166,7 +165,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
     #     }
     #     reference = EnglishWikipediaReferenceSchema().load(data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.url == ""
 
@@ -184,14 +183,14 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         "https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
     #     }
     #     reference = EnglishWikipediaReferenceSchema().load(data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.url == ""
 
     # def test_find_number(self):
     #     ref = EnglishWikipediaReference(
     #         template_name="test",
-    #         wikibase=IASandboxWikibase(),
+    #         wikibase_deprecated=IASandboxWikibase(),
     #     )
     #     with self.assertRaises(MoreThanOneNumberError):
     #         ref.__find_number__(string="123one123")
@@ -219,17 +218,17 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         access_date="2010-11-09",
     #     )
     #     reference = EnglishWikipediaReferenceSchema().load(data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.publisher == "Kungliga Motorbåt Klubben"
     #     assert reference.location == "Stockholm"
 
     # def test_detect_archive_urls(self):
     #     # test other archives also
-    #     from src.models.wikibase.enums import KnownArchiveUrl
+    #     from src.models.wikibase_deprecated.enums import KnownArchiveUrl
     #
     #     reference = EnglishWikipediaReference(
-    #         wikibase=IASandboxWikibase(),
+    #         wikibase_deprecated=IASandboxWikibase(),
     #         archive_url="https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
     #         template_name="test",
     #     )
@@ -254,7 +253,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # console.print(type(reference.google_books))
     #     assert reference.first_level_domain_of_url == "google.com"
@@ -268,7 +267,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # print(reference.internet_archive_id)
     #     assert reference.internet_archive_id == "catalogueofshipw0000wils"
@@ -282,7 +281,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # print(reference.internet_archive_id)
     #     assert reference.google_books_id == "on0TaPqFXbcC"
@@ -295,7 +294,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # print(reference.internet_archive_id)
     #     assert reference.publisher == "test"
@@ -306,7 +305,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     # print(reference.internet_archive_id)
     #     assert reference.publisher is None
@@ -319,7 +318,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.publisher == "test"
 
@@ -331,7 +330,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.location == "Copenhagen"
     #
@@ -343,7 +342,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference: EnglishWikipediaReference = EnglishWikipediaReferenceSchema().load(
     #         data
     #     )
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.language == "English"
     #
@@ -353,7 +352,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         periodical="test",
     #     )
     #     reference = EnglishWikipediaReferenceSchema().load(data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.periodical == "test"
     #
@@ -364,7 +363,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.oclc == "test"
 
@@ -378,7 +377,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     reference = EnglishWikipediaReference(**data)
     #     assert reference.has_first_level_domain_url_hash is False
     #     assert reference.has_hash is False
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_first_level_domain_url_hash is True
     #     assert reference.has_hash is True
@@ -390,7 +389,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
     #     for ref in refs:
     #         raw_reference_object = WikipediaRawReference(
-    #             wikicode=ref, testing=True, wikibase=wikibase
+    #             wikicode=ref, testing=True, wikibase_deprecated=wikibase_deprecated
     #         )
     #         raw_reference_object.extract_and_determine_reference_type()
     #         assert raw_reference_object.number_of_templates == 1
@@ -409,7 +408,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     with self.assertRaises(MissingInformationError):
     #         print(reference.wikibase_url)
     #     reference.return_ = WikibaseReturn(item_qid="test", uploaded_now=False)
@@ -428,7 +427,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
 
@@ -443,7 +442,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
     #     assert reference.chapter_url == "https://books.google.com/books?id=MdPDAQAAQBAJ"
@@ -493,7 +492,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, wikibase=wikibase
+                wikicode=ref,
+                # wikibase=wikibase
             )
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
             reference.finish_parsing_and_generate_hash()
@@ -507,7 +507,8 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, wikibase=wikibase
+                wikicode=ref,
+                # wikibase=wikibase
             )
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
             reference.finish_parsing_and_generate_hash()
@@ -521,7 +522,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
@@ -533,7 +534,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
@@ -545,7 +546,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
@@ -557,7 +558,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
@@ -569,7 +570,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "7f48f6452d26e9b56cc5039dffbe6ecd"
@@ -581,7 +582,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite book",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
@@ -618,7 +619,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         template_name="cite dictionary",
     #     )
     #     reference = EnglishWikipediaReference(**data)
-    #     reference.wikibase = IASandboxWikibase()
+    #     reference.wikibase_deprecated = IASandboxWikibase()
     #     reference.finish_parsing_and_generate_hash(testing=True)
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
@@ -631,7 +632,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
+                wikicode=ref,
+                testing=True,
+                # wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
@@ -649,7 +652,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
+                wikicode=ref,
+                testing=True,
+                # wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
@@ -663,7 +668,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
+                wikicode=ref,
+                testing=True,
+                # wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             raw_reference_object.extract_and_check()
@@ -682,7 +689,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
+                wikicode=ref,
+                testing=True,
+                # wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
@@ -695,7 +704,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
+                wikicode=ref,
+                testing=True,
+                # wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             reference = raw_reference_object.get_finished_wikipedia_reference_object()
@@ -708,7 +719,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
+                wikicode=ref,
+                testing=True,
+                # wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             ref = raw_reference_object.get_finished_wikipedia_reference_object()
@@ -721,7 +734,9 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaRawReference(
-                wikicode=ref, testing=True, wikibase=wikibase
+                wikicode=ref,
+                testing=True,
+                # wikibase=wikibase
             )
             # This also runs finish_parsing_and_generate_hash()
             ref = raw_reference_object.get_finished_wikipedia_reference_object()

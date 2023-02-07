@@ -12,9 +12,9 @@
 # from src.helpers.wbi import get_item_value
 # from src.models.return_ import Return
 # from src.models.return_.wikibase_return import WikibaseReturn
-# from src.models.wikibase.crud import WikibaseCrud
-# from src.models.wikibase.crud.create import WikibaseCrudCreate
-# from src.models.wikibase.ia_sandbox_wikibase import IASandboxWikibase
+# from src.models.wikibase_deprecated.crud import WikibaseCrud
+# from src.models.wikibase_deprecated.crud.create import WikibaseCrudCreate
+#
 # from src.models.wikimedia.wikipedia.article import WikipediaArticle
 # from src.models.wikimedia.wikipedia.reference.english.english_reference import (
 #     EnglishWikipediaReference,
@@ -27,8 +27,8 @@
 # class TestWikibaseCrudCreate(TestCase):
 #     def test_prepare_new_reference_item(self):
 #         """This tests both full name string generation and archive qualifier generation"""
-#         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+#         wc = WikibaseCrud(wikibase_deprecated=IASandboxWikibase())
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Democracy")
 #         wppage.__get_wikipedia_article_from_title__()
 #         reference = EnglishWikipediaReference(
 #             **{
@@ -46,7 +46,7 @@
 #                 "archive_url": "https://web.archive.org/web/20190701062212/http://www.mgtrust.org/ind1.htm",
 #             }
 #         )
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
 #         logger.debug(
 #             f"reference.detected_archive_of_archive_url: {reference.detected_archive_of_archive_url}"
@@ -55,18 +55,18 @@
 #         assert len(reference.persons_without_role) > 0
 #         item = wc.__prepare_new_reference_item__(page_reference=reference)
 #         console.print(item.get_json())
-#         assert item.claims.get(property=wc.wikibase.FULL_NAME_STRING) is not None
-#         assert item.claims.get(property=wc.wikibase.ARCHIVE_URL) is not None
+#         assert item.claims.get(property=wc.wikibase_deprecated.FULL_NAME_STRING) is not None
+#         assert item.claims.get(property=wc.wikibase_deprecated.ARCHIVE_URL) is not None
 #         assert (
-#             item.claims.get(property=wc.wikibase.ARCHIVE_URL)[0].qualifiers.get(
-#                 property=wc.wikibase.ARCHIVE
+#             item.claims.get(property=wc.wikibase_deprecated.ARCHIVE_URL)[0].qualifiers.get(
+#                 property=wc.wikibase_deprecated.ARCHIVE
 #             )
 #             is not None
 #         )
 #
 #     def test_prepare_new_reference_item_with_very_long_title(self):
-#         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wc = WikibaseCrud(wikibase_deprecated=IASandboxWikibase())
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.__get_wikipedia_article_from_title__()
 #         reference = EnglishWikipediaReference(
 #             **{
@@ -91,15 +91,15 @@
 #                 "template_name": "cite book",
 #             }
 #         )
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
 #         item = wc.__prepare_new_reference_item__(page_reference=reference)
 #         # console.print(item.get_json())
 #         assert len(item.labels.get(language="en")) == 250
 #
 #     def test_prepare_new_wikipedia_article_item_invalid_qid(self):
-#         wc = WikibaseCrud(wikibase=IASandboxWikibase())
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+#         wc = WikibaseCrud(wikibase_deprecated=IASandboxWikibase())
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Democracy")
 #         wppage.__get_wikipedia_article_from_title__()
 #         reference = EnglishWikipediaReference(
 #             **{
@@ -116,7 +116,7 @@
 #                 "template_name": "cite book",
 #             }
 #         )
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
 #         reference.return_ = WikibaseReturn(item_qid="test", uploaded_now=False)
 #         wppage.references = []
@@ -131,7 +131,7 @@
 #         # logger.info(f"url: {wppage.wikicitations_url}")
 #
 #     def test_prepare_new_wikipedia_article_item_valid_qid(self):
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Democracy")
 #         wppage.__get_wikipedia_article_from_title__()
 #         reference = EnglishWikipediaReference(
 #             **{
@@ -148,27 +148,27 @@
 #                 "template_name": "cite book",
 #             }
 #         )
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
 #         reference.return_ = WikibaseReturn(item_qid="Q1", uploaded_now=False)
 #         wppage.references = []
 #         wppage.references.append(reference)
 #         wppage.__generate_hash__()
 #         # with self.assertRaises(ValueError):
-#         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
+#         wc = WikibaseCrudCreate(wikibase_deprecated=IASandboxWikibase())
 #         item = wc.__prepare_new_wikipedia_article_item__(
 #             wikipedia_article=wppage,
 #         )
 #         # console.print(item.get_json())
 #         # assert item.labels.get("en") == title
-#         citations: List[Claim] = item.claims.get(wc.wikibase.CITATIONS)
+#         citations: List[Claim] = item.claims.get(wc.wikibase_deprecated.CITATIONS)
 #         # console.print(citations[0].mainsnak.datavalue["value"]["id"])
 #         assert citations[0].mainsnak.datavalue["value"]["id"] == "Q1"
 #         # logger.info(f"url: {wppage.wikicitations_url}")
 #
 #     # @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
 #     # def test_prepare_and_upload_wikipedia_page_item_valid_qid(self):
-#     #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
+#     #     wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase())
 #     #     title = "Democracy"
 #     #     wppage.__get_wikipedia_article_from_title__(title=title)
 #     #     wppage.__generate_hash__()
@@ -192,17 +192,17 @@
 #     #     reference.wikicitations_qid = test_qid
 #     #     wppage.references = []
 #     #     wppage.references.append(reference)
-#     #     wikibase = IASandboxWikibase()
-#     #     wcr = WikibaseCrudRead(wikibase=wikibase)
+#     #     wikibase_deprecated = IASandboxWikibase()
+#     #     wcr = WikibaseCrudRead(wikibase_deprecated=wikibase_deprecated)
 #     #     wcr.prepare_and_upload_wikipedia_page_item(
 #     #         wikipedia_article=wppage,
 #     #     )
-#     #     items = wcr.__get_all_items__(item_type=wikibase.WIKIPEDIA_PAGE)
+#     #     items = wcr.__get_all_items__(item_type=wikibase_deprecated.WIKIPEDIA_PAGE)
 #     #     assert items and len(items) == 1
 #
 #     def test_prepare_and_upload_website_item(self):
-#         wc = WikibaseCrudCreate(wikibase=IASandboxWikibase())
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+#         wc = WikibaseCrudCreate(wikibase_deprecated=IASandboxWikibase())
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Democracy")
 #         wppage.__get_wikipedia_article_from_title__()
 #         wppage.__generate_hash__()
 #         # This reference is the first one on https://en.wikipedia.org/w/index.php?title=Democracy&action=edit
@@ -216,20 +216,20 @@
 #                 acref-9780195148909-e-241",
 #             }
 #         )
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
 #         return_: Return = wc.prepare_and_upload_website_item(
 #             page_reference=reference, wikipedia_article=wppage
 #         )
 #         assert return_.item_qid is not None
-#         # bot = WcdImportBot(wikibase=IASandboxWikibase())
+#         # bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
 #         # bot.rinse_all_items_and_cache()
 #
 #     # @pytest.mark.xfail(bool(getenv("CI")), reason="GitHub Actions do not have logins")
 #     # def test_uploading_a_page_reference_and_website_item(self):
-#     #     # wcd = WikibaseCrudDelete(wikibase=IASandboxWikibase())
+#     #     # wcd = WikibaseCrudDelete(wikibase_deprecated=IASandboxWikibase())
 #     #     # wcd.delete_imported_items()
-#     #     wppage = WikipediaArticle(wikibase=IASandboxWikibase())
+#     #     wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase())
 #     #     title = "Democracy"
 #     #     wppage.__get_wikipedia_article_from_title__(title=title)
 #     #     wppage.__generate_hash__()
@@ -244,7 +244,7 @@
 #     acref/9780195148909.001.0001/acref-9780195148909-e-241",
 #     #         }
 #     #     )
-#     #     reference.wikibase = IASandboxWikibase()
+#     #     reference.wikibase_deprecated = IASandboxWikibase()
 #     #     reference.finish_parsing_and_generate_hash(testing=True)
 #     #     wppage.references = []
 #     #     wppage.references.append(reference)
@@ -253,7 +253,7 @@
 #     #         f"Waiting {config.sparql_sync_waiting_time_in_seconds} seconds for WCDQS to sync"
 #     #     )
 #     #     sleep(config.sparql_sync_waiting_time_in_seconds)
-#     #     wcr = WikibaseCrudRead(wikibase=IASandboxWikibase())
+#     #     wcr = WikibaseCrudRead(wikibase_deprecated=IASandboxWikibase())
 #     #     items = wcr.__get_all_items__(item_type=IASandboxWikibase().WEBSITE_ITEM)
 #     #     assert len(items) == 1
 #     #     ref_items = wcr.__get_all_items__(
@@ -262,9 +262,9 @@
 #     #     assert len(ref_items) == 1
 #
 #     def test_uploading_a_page_reference_and_website_item_twice(self):
-#         # wcd = WikibaseCrudDelete(wikibase=IASandboxWikibase())
+#         # wcd = WikibaseCrudDelete(wikibase_deprecated=IASandboxWikibase())
 #         # wcd.delete_imported_items()
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Democracy")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Democracy")
 #         wppage.__get_wikipedia_article_from_title__()
 #         wppage.__generate_hash__()
 #         # wppage.__setup_cache__()
@@ -279,7 +279,7 @@
 #                 10.1093/acref/9780195148909.001.0001/acref-9780195148909-e-241",
 #             }
 #         )
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
 #         wppage.references = []
 #         wppage.references.append(reference)
@@ -309,66 +309,66 @@
 #             url_status="dead",  # not imported
 #         )
 #         reference = EnglishWikipediaReference(**data)
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.references.append(reference)
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #         wbi = WikibaseIntegrator()
 #         wcdqid = wppage.references[0].return_.item_qid
-#         console.print(wppage.wikibase.entity_url(item_id=wcdqid))
+#         console.print(wppage.wikibase_deprecated.entity_url(item_id=wcdqid))
 #         item = wbi.item.get(wcdqid)
-#         wikibase_access_date = wppage.wikibase.parse_time_from_claim(
-#             item.claims.get(wppage.wikibase.ACCESS_DATE)[0]
+#         wikibase_access_date = wppage.wikibase_deprecated.parse_time_from_claim(
+#             item.claims.get(wppage.wikibase_deprecated.ACCESS_DATE)[0]
 #         )
 #         # https://docs.python.org/3.10/library/datetime.html#datetime.datetime.astimezone
 #         access_date = isoparse(data["access_date"]).replace(tzinfo=timezone.utc)
 #         console.print(access_date)
 #         assert access_date == wikibase_access_date
-#         archive_url: List[Claim] = item.claims.get(property=wppage.wikibase.ARCHIVE_URL)
+#         archive_url: List[Claim] = item.claims.get(property=wppage.wikibase_deprecated.ARCHIVE_URL)
 #         assert archive_url[0].mainsnak.datavalue["value"] == data["archive_url"]
 #         # Check also that a qualifier is present
 #         assert archive_url[0].qualifiers is not None
-#         # assert item.claims.get(property=wppage.wikibase.LANGUAGE)[0].mainsnak.datavalue["value"] == data["language"]
+#         # assert item.claims.get(property=wppage.wikibase_deprecated.LANGUAGE)[0].mainsnak.datavalue["value"] == data["language"]
 #         assert (
-#             item.claims.get(property=wppage.wikibase.LOCATION_STRING)[
+#             item.claims.get(property=wppage.wikibase_deprecated.LOCATION_STRING)[
 #                 0
 #             ].mainsnak.datavalue["value"]
 #             == data["location"]
 #         )
 #         # Not implemented yet
 #         # assert (
-#         #     item.claims.get(property=wppage.wikibase.PAGES)[0].mainsnak.datavalue[
+#         #     item.claims.get(property=wppage.wikibase_deprecated.PAGES)[0].mainsnak.datavalue[
 #         #         "value"
 #         #     ]
 #         #     == data["pages"]
 #         # )
-#         wikibase_publication_date = wppage.wikibase.parse_time_from_claim(
-#             item.claims.get(wppage.wikibase.PUBLICATION_DATE)[0]
+#         wikibase_publication_date = wppage.wikibase_deprecated.parse_time_from_claim(
+#             item.claims.get(wppage.wikibase_deprecated.PUBLICATION_DATE)[0]
 #         )
 #         assert reference.publication_date == wikibase_publication_date
 #         assert (
-#             item.claims.get(property=wppage.wikibase.PUBLISHER_STRING)[
+#             item.claims.get(property=wppage.wikibase_deprecated.PUBLISHER_STRING)[
 #                 0
 #             ].mainsnak.datavalue["value"]
 #             == data["publisher"]
 #         )
 #         assert (
-#             item.claims.get(property=wppage.wikibase.TEMPLATE_NAME)[
+#             item.claims.get(property=wppage.wikibase_deprecated.TEMPLATE_NAME)[
 #                 0
 #             ].mainsnak.datavalue["value"]
 #             == data["template_name"]
 #         )
 #         assert (
-#             item.claims.get(property=wppage.wikibase.TITLE)[0].mainsnak.datavalue[
+#             item.claims.get(property=wppage.wikibase_deprecated.TITLE)[0].mainsnak.datavalue[
 #                 "value"
 #             ]
 #             == data["title"]
 #         )
-#         # assert item.claims.get(property=wppage.wikibase.TRANSLATED_TITLE)[0].
+#         # assert item.claims.get(property=wppage.wikibase_deprecated.TRANSLATED_TITLE)[0].
 #         mainsnak.datavalue["value"] == data["trans_title"]
 #         assert (
-#             item.claims.get(property=wppage.wikibase.URL)[0].mainsnak.datavalue["value"]
+#             item.claims.get(property=wppage.wikibase_deprecated.URL)[0].mainsnak.datavalue["value"]
 #             == data["url"]
 #         )
 #
@@ -378,15 +378,15 @@
 #             template_name="cite book",
 #         )
 #         reference = EnglishWikipediaReference(**data)
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.references.append(reference)
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #         wbi = WikibaseIntegrator()
 #         item = wbi.item.get(wppage.references[0].return_.item_qid)
 #         assert (
-#             item.claims.get(property=wppage.wikibase.INTERNET_ARCHIVE_ID)[
+#             item.claims.get(property=wppage.wikibase_deprecated.INTERNET_ARCHIVE_ID)[
 #                 0
 #             ].mainsnak.datavalue["value"]
 #             == reference.internet_archive_id
@@ -399,15 +399,15 @@
 #     #         template_name="cite book",
 #     #     )
 #     #     reference = EnglishWikipediaReference(**data)
-#     #     reference.wikibase = IASandboxWikibase()
+#     #     reference.wikibase_deprecated = IASandboxWikibase()
 #     #     reference.finish_parsing_and_generate_hash(testing=True)
-#     #     wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#     #     wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #     #     wppage.references.append(reference)
 #     #     wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #     #     wbi = WikibaseIntegrator()
 #     #     item = wbi.item.get(wppage.references[0].return_.item_qid)
 #     #     assert (
-#     #         item.claims.get(property=wppage.wikibase.GOOGLE_BOOKS_ID)[
+#     #         item.claims.get(property=wppage.wikibase_deprecated.GOOGLE_BOOKS_ID)[
 #     #             0
 #     #         ].mainsnak.datavalue["value"]
 #     #         == reference.google_books_id
@@ -420,9 +420,9 @@
 #             template_name="cite book",
 #         )
 #         reference = EnglishWikipediaReference(**data)
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.references.append(reference)
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #
@@ -431,7 +431,7 @@
 #         print(wcdqid)
 #         item = wbi.item.get(wcdqid)
 #         assert (
-#             item.claims.get(property=wppage.wikibase.PERIODICAL_STRING)[
+#             item.claims.get(property=wppage.wikibase_deprecated.PERIODICAL_STRING)[
 #                 0
 #             ].mainsnak.datavalue["value"]
 #             == data["periodical"]
@@ -444,15 +444,15 @@
 #             template_name="cite book",
 #         )
 #         reference = EnglishWikipediaReference(**data)
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.references.append(reference)
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #         wbi = WikibaseIntegrator()
 #         item = wbi.item.get(wppage.references[0].return_.item_qid)
 #         assert (
-#             item.claims.get(property=wppage.wikibase.OCLC_CONTROL_NUMBER)[
+#             item.claims.get(property=wppage.wikibase_deprecated.OCLC_CONTROL_NUMBER)[
 #                 0
 #             ].mainsnak.datavalue["value"]
 #             == data["oclc"]
@@ -464,25 +464,25 @@
 #             template_name="cite book",
 #         )
 #         reference = EnglishWikipediaReference(**data)
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.references.append(reference)
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #         wbi = WikibaseIntegrator()
 #         item = wbi.item.get(wppage.references[0].return_.item_qid)
-#         time_in_wikibase = wppage.wikibase.parse_time_from_claim(
-#             item.claims.get(property=wppage.wikibase.RETRIEVED_DATE)[0]
+#         time_in_wikibase = wppage.wikibase_deprecated.parse_time_from_claim(
+#             item.claims.get(property=wppage.wikibase_deprecated.RETRIEVED_DATE)[0]
 #         )
 #         assert time_in_wikibase.date() == date.today()
 #
 #     def test_wikidata_qid_statement(self):
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #         wbi = WikibaseIntegrator()
 #         item = wbi.item.get(wppage.return_.item_qid)
 #         assert (
-#             item.claims.get(property=wppage.wikibase.WIKIDATA_QID)[
+#             item.claims.get(property=wppage.wikibase_deprecated.WIKIDATA_QID)[
 #                 0
 #             ].mainsnak.datavalue["value"]
 #             == "Q224615"
@@ -495,9 +495,9 @@
 #             template_name="cite book",
 #         )
 #         reference = EnglishWikipediaReference(**data)
-#         reference.wikibase = IASandboxWikibase()
+#         reference.wikibase_deprecated = IASandboxWikibase()
 #         reference.finish_parsing_and_generate_hash(testing=True)
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.references.append(reference)
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #         assert wppage.references[0].has_hash is True
@@ -505,30 +505,30 @@
 #         wbi = WikibaseIntegrator()
 #         item = wbi.item.get(wppage.references[0].return_.item_qid)
 #         instance_of_value = get_item_value(
-#             claim=item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0]
+#             claim=item.claims.get(property=wppage.wikibase_deprecated.INSTANCE_OF)[0]
 #         )
-#         assert instance_of_value == wppage.wikibase.WIKIPEDIA_REFERENCE
+#         assert instance_of_value == wppage.wikibase_deprecated.WIKIPEDIA_REFERENCE
 #         item = wbi.item.get(wppage.return_.item_qid)
 #         assert (
 #             get_item_value(
-#                 claim=item.claims.get(property=wppage.wikibase.INSTANCE_OF)[0]
+#                 claim=item.claims.get(property=wppage.wikibase_deprecated.INSTANCE_OF)[0]
 #             )
-#             == wppage.wikibase.WIKIPEDIA_PAGE
+#             == wppage.wikibase_deprecated.WIKIPEDIA_PAGE
 #         )
 #
 #     def test_published_in_wikipedia_statement_on_article_item(self):
 #         """This appears on website and reference items"""
-#         wppage = WikipediaArticle(wikibase=IASandboxWikibase(), title="Test")
+#         wppage = WikipediaArticle(wikibase_deprecated=IASandboxWikibase(), title="Test")
 #         wppage.extract_and_parse_and_upload_missing_items_to_wikibase()
 #         wbi = WikibaseIntegrator()
 #         wcdqid = wppage.return_.item_qid
 #         console.print(wcdqid)
 #         item = wbi.item.get(wcdqid)
 #         assert (
-#             item.claims.get(property=wppage.wikibase.PUBLISHED_IN)[
+#             item.claims.get(property=wppage.wikibase_deprecated.PUBLISHED_IN)[
 #                 0
 #             ].mainsnak.datavalue["value"]["id"]
-#             == wppage.wikibase.ENGLISH_WIKIPEDIA
+#             == wppage.wikibase_deprecated.ENGLISH_WIKIPEDIA
 #         )
 #
 #     # TODO test page id for articles
@@ -552,7 +552,7 @@
 #     #         content["template_name"] = name
 #     #         reference = EnglishWikipediaReference(**content)
 #     #         reference.raw_template = raw
-#     #         reference.wikibase = IASandboxWikibase()
+#     #         reference.wikibase_deprecated = IASandboxWikibase()
 #     #         reference.finish_parsing_and_generate_hash(testing=True)
 #     #         # we test that it is still correct
 #     #         assert reference.raw_template == raw
@@ -561,7 +561,7 @@
 #     #         wbi = WikibaseIntegrator()
 #     #         item = wbi.item.get(wcdqid)
 #     #         assert (
-#     #             item.claims.get(property=reference.wikibase.RAW_TEMPLATE)[
+#     #             item.claims.get(property=reference.wikibase_deprecated.RAW_TEMPLATE)[
 #     #                 0
 #     #             ].mainsnak.datavalue["value"]
 #     #             == reference.shortened_raw_template

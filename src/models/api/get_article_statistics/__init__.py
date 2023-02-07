@@ -5,13 +5,13 @@ from typing import Any, Dict, Optional, Tuple
 from flask import request
 from flask_restful import Resource, abort  # type: ignore
 
-from src import MissingInformationError
 from src.helpers.console import console
 from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
 from src.models.api.get_article_statistics.get_statistics_schema import (
     GetStatisticsSchema,
 )
 from src.models.api.job import Job
+from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer

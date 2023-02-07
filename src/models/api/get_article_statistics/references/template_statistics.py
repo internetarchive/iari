@@ -17,5 +17,5 @@ class TemplateStatistics(BaseModel):
     isbn: str
     wikitext: str
 
-    class Config:
-        extra = "forbid"
+    class Config:  # dead: disable
+        extra = "forbid"  # dead: disable

@@ -9,7 +9,6 @@ from pydantic import validate_arguments
 
 import config
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-from src.models.hashing import Hashing
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaSite
 from src.models.wikimedia.wikipedia.reference.extractor import (
@@ -31,7 +30,7 @@ class WikipediaArticle(WcdItem):
     latest_revision_date: Optional[datetime]
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
-    page_id: Optional[int]
+    page_id: int = 0
     wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     wikitext: Optional[str]
     wdqid: str = ""
@@ -40,8 +39,8 @@ class WikipediaArticle(WcdItem):
     check_urls: bool = False
     # TODO add language_code to avoid enwiki hardcoding
 
-    class Config:
-        arbitrary_types_allowed = True
+    class Config:  # dead: disable
+        arbitrary_types_allowed = True  # dead: disable
 
     @property
     def quoted_title(self):
@@ -49,9 +48,9 @@ class WikipediaArticle(WcdItem):
             raise MissingInformationError("self.title was empty")
         return quote(self.title, safe="")
 
-    @property
-    def absolute_url(self):
-        return f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/index.php?curid={self.page_id}"
+    # @property
+    # def absolute_url(self):
+    #     return f"https://{self.language_code}.{self.wikimedia_site.value}.org/w/index.php?curid={self.page_id}"
 
     @property
     def is_redirect(self) -> bool:
@@ -74,18 +73,18 @@ class WikipediaArticle(WcdItem):
             f"wiki/{quote(self.underscored_title)}"
         )
 
-    @property
-    def wikibase_url(self):
-        if self.wikibase.item_prefixed_wikibase:
-            return f"{self.wikibase.wikibase_url}wiki/Item:{self.return_.item_qid}"
-        else:
-            return f"{self.wikibase.wikibase_url}wiki/{self.return_.item_qid}"
+    # @property
+    # def wikibase_url(self):
+    #     if self.wikibase.item_prefixed_wikibase:
+    #         return f"{self.wikibase.wikibase_url}wiki/Item:{self.return_.item_qid}"
+    #     else:
+    #         return f"{self.wikibase.wikibase_url}wiki/{self.return_.item_qid}"
 
-    def __generate_hash__(self):
-        hashing = Hashing(article=self, testing=True)
-        self.md5hash = hashing.generate_article_hash()
+    # def __generate_hash__(self):
+    #     hashing = Hashing(article=self, testing=True)
+    #     self.md5hash = hashing.generate_article_hash()
 
-    def fetch_and_extract_and_parse_and_generate_hash(self):
+    def fetch_and_extract_and_parse(self):
         logger.debug("fetch_and_extract_and_parse_and_generate_hash: running")
         logger.info("Extracting templates and parsing the references now")
         # We only fetch data from Wikipedia if we don't already have wikitext to work on
@@ -106,12 +105,12 @@ class WikipediaArticle(WcdItem):
             # print(self.wikitext)
             self.extractor = WikipediaReferenceExtractor(
                 wikitext=self.wikitext,
-                wikibase=self.wikibase,
+                # wikibase=self.wikibase,
                 check_urls=self.check_urls,
                 language_code=self.language_code,
             )
             self.extractor.extract_all_references()
-            self.__generate_hash__()
+            # self.__generate_hash__()
         else:
             raise Exception("This branch should never be hit.")
 
@@ -164,6 +163,7 @@ class WikipediaArticle(WcdItem):
             f"pageprops&ppprop=wikibase_item&redirects=1&titles={quote(self.title)}&format=json"
         )
         headers = {"User-Agent": config.user_agent}
+        logger.debug(url)
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             # console.print(response.text)
@@ -176,20 +176,23 @@ class WikipediaArticle(WcdItem):
                     if len(pages):
                         for page in pages:
                             page_data = pages[page]
-                            # console.print(page_data)
-                            if page_data["pageprops"]:
-                                if page_data["pageprops"]["wikibase_item"]:
-                                    self.wikidata_qid = page_data["pageprops"][
-                                        "wikibase_item"
-                                    ]
+                            print(page_data)
+                            if "pageprops" in page_data.keys():
+                                if page_data["pageprops"]:
+                                    if page_data["pageprops"]["wikibase_item"]:
+                                        self.wikidata_qid = page_data["pageprops"][
+                                            "wikibase_item"
+                                        ]
+                                    else:
+                                        raise MissingInformationError(
+                                            f"Did not get any wikibase_item from MediaWiki, see {url}"
+                                        )
                                 else:
                                     raise MissingInformationError(
-                                        f"Did not get any wikibase_item from MediaWiki, see {url}"
+                                        f"Did not get any pageprops from MediaWiki, see {url}"
                                     )
                             else:
-                                raise MissingInformationError(
-                                    f"Did not get any pageprops from MediaWiki, see {url}"
-                                )
+                                MissingInformationError("no pageprops")
                             # We only care about the first page
                             break
                     else:
@@ -251,7 +254,7 @@ class WikipediaArticle(WcdItem):
         #         #     raise ValueError("This reference could not be deserialized. :/")
         #         # else:
         #         if reference:
-        #             reference.wikibase = self.wikibase
+        #             reference.wikibase_deprecated = self.wikibase_deprecated
         #             # This is because of https://github.com/internetarchive/wcdimportbot/issues/261
         #             reference.cache = self.cache
         #             # We want the raw template
@@ -301,9 +304,9 @@ class WikipediaArticle(WcdItem):
     #         )
     #     else:
     #         # TODO comment out the below code and fail with an exception instead
-    #         # This branch is hit e.g. when the cache has not been synced with the wikibase
+    #         # This branch is hit e.g. when the cache has not been synced with the wikibase_deprecated
     #         console.print(
-    #             f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
+    #             f"{self.title} already exists in {self.wikibase_deprecated.__repr_name__()}, "
     #             f"see {self.url} and {self.wikibase_url}. \nPlease run the bot with --rebuild-cache "
     #             f"to speed up the process."
     #         )
@@ -333,7 +336,7 @@ class WikipediaArticle(WcdItem):
     #                 # Here we get the reference with the first_level_domain_of_url WCDQID back
     #                 # We add the cache because of https://github.com/internetarchive/wcdimportbot/issues/261
     #                 reference.website_item = Website(
-    #                     reference=reference, wikibase=self.wikibase, cache=self.cache
+    #                     reference=reference, wikibase_deprecated=self.wikibase_deprecated, cache=self.cache
     #                 )
     #                 reference.website_item.check_and_upload_website_item_to_wikibase_if_missing(
     #                     wikipedia_article=self

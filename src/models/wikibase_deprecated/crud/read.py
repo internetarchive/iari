@@ -7,7 +7,7 @@
 # from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 #
 # from src.models.exceptions import MissingInformationError
-# from src.models.wikibase.crud import WikibaseCrud
+# from src.models.wikibase_deprecated.crud import WikibaseCrud
 #
 # logger = logging.getLogger(__name__)
 #
@@ -18,32 +18,32 @@
 #     @property
 #     def number_of_pages(self):
 #         return self.__get_statistic__(
-#             wikibase_property_id=self.wikibase.INSTANCE_OF,
-#             value=self.wikibase.WIKIPEDIA_PAGE,
+#             wikibase_property_id=self.wikibase_deprecated.INSTANCE_OF,
+#             value=self.wikibase_deprecated.WIKIPEDIA_PAGE,
 #         )
 #
 #     @property
 #     def number_of_references(self):
 #         return self.__get_statistic__(
-#             wikibase_property_id=self.wikibase.INSTANCE_OF,
-#             value=self.wikibase.WIKIPEDIA_REFERENCE,
+#             wikibase_property_id=self.wikibase_deprecated.INSTANCE_OF,
+#             value=self.wikibase_deprecated.WIKIPEDIA_REFERENCE,
 #         )
 #
 #     @property
 #     def number_of_website_items(self):
 #         return self.__get_statistic__(
-#             wikibase_property_id=self.wikibase.INSTANCE_OF,
-#             value=self.wikibase.WEBSITE_ITEM,
+#             wikibase_property_id=self.wikibase_deprecated.INSTANCE_OF,
+#             value=self.wikibase_deprecated.WEBSITE_ITEM,
 #         )
 #
 #     @validate_arguments
 #     def __execute_query__(self, query: str):
 #         self.__setup_wikibase_integrator_configuration__()
 #         logger.debug(
-#             f"Trying to use this endpoint: {self.wikibase.sparql_endpoint_url}"
+#             f"Trying to use this endpoint: {self.wikibase_deprecated.sparql_endpoint_url}"
 #         )
 #         return execute_sparql_query(
-#             query=query, endpoint=self.wikibase.sparql_endpoint_url
+#             query=query, endpoint=self.wikibase_deprecated.sparql_endpoint_url
 #         )
 #
 #     @staticmethod
@@ -69,10 +69,10 @@
 #         return self.__extract_item_ids__(
 #             sparql_result=self.__get_items_via_sparql__(
 #                 f"""
-#                     prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
-#                     prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
+#                     prefix wcd: <{self.wikibase_deprecated.rdf_entity_prefix_url}>
+#                     prefix wcdt: <{self.wikibase_deprecated.rdf_prefix_prop_direct_url}>
 #                     SELECT ?item WHERE {{
-#                       ?item wcdt:{self.wikibase.INSTANCE_OF} wcd:{item_type}
+#                       ?item wcdt:{self.wikibase_deprecated.INSTANCE_OF} wcd:{item_type}
 #                     }}
 #                     """
 #             )
@@ -84,16 +84,16 @@
 #         return self.__extract_item_ids_and_hashes__(
 #             sparql_result=self.__get_items_via_sparql__(
 #                 f"""
-#                     prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
-#                     prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
+#                     prefix wcd: <{self.wikibase_deprecated.rdf_entity_prefix_url}>
+#                     prefix wcdt: <{self.wikibase_deprecated.rdf_prefix_prop_direct_url}>
 #                     SELECT ?item ?hash WHERE {{
 #                       VALUES ?values {{
-#                         wcd:{self.wikibase.WIKIPEDIA_PAGE}
-#                         wcd:{self.wikibase.WIKIPEDIA_REFERENCE}
-#                         wcd:{self.wikibase.WEBSITE_ITEM}
+#                         wcd:{self.wikibase_deprecated.WIKIPEDIA_PAGE}
+#                         wcd:{self.wikibase_deprecated.WIKIPEDIA_REFERENCE}
+#                         wcd:{self.wikibase_deprecated.WEBSITE_ITEM}
 #                       }}
-#                       ?item wcdt:{self.wikibase.INSTANCE_OF} ?values;
-#                             wcdt:{self.wikibase.HASH} ?hash.
+#                       ?item wcdt:{self.wikibase_deprecated.INSTANCE_OF} ?values;
+#                             wcdt:{self.wikibase_deprecated.HASH} ?hash.
 #                     }}
 #                     """
 #             )
@@ -118,10 +118,10 @@
 #         self.__setup_wikibase_integrator_configuration__()
 #         self.__wait_for_wcdqs_to_sync__()
 #         logger.debug(
-#             f"Trying to use this endpoint: {self.wikibase.sparql_endpoint_url}"
+#             f"Trying to use this endpoint: {self.wikibase_deprecated.sparql_endpoint_url}"
 #         )
 #         return execute_sparql_query(
-#             query=query, endpoint=self.wikibase.sparql_endpoint_url
+#             query=query, endpoint=self.wikibase_deprecated.sparql_endpoint_url
 #         )
 #
 #     @validate_arguments
@@ -132,16 +132,16 @@
 #             raise ValueError("Either property or value was too short.")
 #         if prefix:
 #             query = f"""
-#             prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
-#             prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
+#             prefix wcd: <{self.wikibase_deprecated.rdf_entity_prefix_url}>
+#             prefix wcdt: <{self.wikibase_deprecated.rdf_prefix_prop_direct_url}>
 #                 SELECT (COUNT(?item) as ?count) WHERE {{
 #                   ?item wcdt:{wikibase_property_id} wcd:{value}.
 #                 }}
 #             """
 #         else:
 #             query = f"""
-#             prefix wcd: <{self.wikibase.rdf_entity_prefix_url}>
-#             prefix wcdt: <{self.wikibase.rdf_prefix_prop_direct_url}>
+#             prefix wcd: <{self.wikibase_deprecated.rdf_entity_prefix_url}>
+#             prefix wcdt: <{self.wikibase_deprecated.rdf_prefix_prop_direct_url}>
 #                 SELECT (COUNT(?item) as ?count) WHERE {{
 #                   ?item wcdt:{wikibase_property_id} {value}.
 #                 }}
@@ -155,12 +155,12 @@
 #         """This is a slower SPARQL-powered fallback helper method
 #         used when config.use_cache is False"""
 #         logger.debug("__get_wcdqid_from_hash__: running")
-#         if not self.wikibase.HASH:
-#             raise MissingInformationError("self.wikibase.HASH was empty string")
+#         if not self.wikibase_deprecated.HASH:
+#             raise MissingInformationError("self.wikibase_deprecated.HASH was empty string")
 #         query = f"""
-#             prefix wcdt: <{self.wikibase.rdf_prefix_url}/prop/direct/>
+#             prefix wcdt: <{self.wikibase_deprecated.rdf_prefix_url}/prop/direct/>
 #             SELECT ?item WHERE {{
-#               ?item wcdt:{self.wikibase.HASH} "{md5hash}".
+#               ?item wcdt:{self.wikibase_deprecated.HASH} "{md5hash}".
 #             }}
 #         """
 #         return list(
@@ -181,7 +181,7 @@
 #         self.__setup_wikibase_integrator_configuration__()
 #         wbi = WikibaseIntegrator(
 #             login=wbi_login.Login(
-#                 user=self.wikibase.user_name, password=self.wikibase.botpassword
+#                 user=self.wikibase_deprecated.user_name, password=self.wikibase_deprecated.botpassword
 #             ),
 #         )
 #         return wbi.item.get(item_id)

@@ -1,21 +1,16 @@
 import logging
 import re
 from typing import Dict, List
-from typing import OrderedDict as OrderedDictType
-from typing import Tuple
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 import config
-from src import MissingInformationError
-from src.models.wikibase import Wikibase
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
-
-Triple_list = List[Tuple[str, OrderedDictType[str, str], str]]
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -35,15 +30,15 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     raw_references: List[WikipediaRawReference] = []  # private
     references: List[WikipediaReference] = []
     sections: List[Wikicode] = []
-    wikibase: Wikibase
+    # wikibase: Wikibase
     testing: bool = False
     check_urls: bool = False
     check_urls_done: bool = False
     checked_and_unique_reference_urls: List[WikipediaUrl] = []
     language_code: str = ""
 
-    class Config:
-        arbitrary_types_allowed = True
+    class Config:  # dead: disable
+        arbitrary_types_allowed = True  # dead: disable
 
     @property
     def number_of_content_references_with_url_found(self):
@@ -200,12 +195,12 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             ]
         )
 
-    @property
-    def reference_urls_dictionaries(self):
-        """List of URLs as dictionaries ready for API digestion"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return [url.dict() for url in self.checked_and_unique_reference_urls]
+    # @property
+    # def reference_urls_dictionaries(self):
+    #     """List of URLs as dictionaries ready for API digestion"""
+    #     if not self.check_urls_done:
+    #         raise MissingInformationError("self.check_urls_done was False")
+    #     return [url.dict() for url in self.checked_and_unique_reference_urls]
 
     @property
     def number_of_unique_reference_urls_with_other_2xx(self):
@@ -596,19 +591,19 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def number_of_content_references(self) -> int:
         return len(self.content_references)
 
-    @property
-    def number_of_raw_references(self) -> int:
-        return len(self.raw_references)
+    # @property
+    # def number_of_raw_references(self) -> int:
+    #     return len(self.raw_references)
 
     @property
     def number_of_references(self) -> int:
         return len(self.references)
 
-    @property
-    def number_of_hashed_content_references(self) -> int:
-        return len(
-            [reference for reference in self.content_references if reference.md5hash]
-        )
+    # @property
+    # def number_of_hashed_content_references(self) -> int:
+    #     return len(
+    #         [reference for reference in self.content_references if reference.md5hash]
+    #     )
 
     def number_of_content_references_with_google_books_template_or_url(
         self, list_: List[WikipediaReference] = None
@@ -678,7 +673,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             self.raw_references.append(
                 WikipediaRawReference(
                     wikicode=ref,
-                    wikibase=self.wikibase,
+                    # wikibase=self.wikibase,
                     testing=self.testing,
                     check_urls=self.check_urls,
                     language_code=self.language_code,
@@ -709,7 +704,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                         self.raw_references.append(
                             WikipediaRawReference(
                                 wikicode=parsed_line,
-                                wikibase=self.wikibase,
+                                # wikibase=self.wikibase,
                                 testing=self.testing,
                                 is_general_reference=True,
                             )
