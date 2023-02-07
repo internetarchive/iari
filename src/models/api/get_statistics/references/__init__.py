@@ -2,17 +2,15 @@ from typing import Dict, List
 
 from pydantic import BaseModel
 
-from src.models.api.get_article_statistics.references.reference_statistics import (
+from src.models.api.get_statistics.references.reference_statistics import (
     ReferenceStatistics,
 )
-from src.models.api.get_article_statistics.references.reference_types import (
-    ReferenceTypes,
-)
-from src.models.api.get_article_statistics.references.urls import Urls
+from src.models.api.get_statistics.references.reference_types import ReferenceTypes
+from src.models.api.get_statistics.references.urls import Urls
 
 
 class References(BaseModel):
-    """The purpose of this class is to model the statistics
+    """The purpose of this class is to model the get_statistics
     the user wants from the get_article_statistics endpoint
 
     We use BaseModel to avoid the cache attribute"""

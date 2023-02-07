@@ -5,23 +5,21 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src.models.api.get_article_statistics import GetArticleStatistics
-from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
-from src.models.api.get_article_statistics.references.content.aggregate import (
-    CiteQReferences,
+from src.models.api.get_statistics.get_article_statistics import GetArticleStatistics
+from src.models.api.get_statistics.get_article_statistics.article_statistics import (
+    ArticleStatistics,
 )
-from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_book_references import (
+from src.models.api.get_statistics.references.content.aggregate import CiteQReferences
+from src.models.api.get_statistics.references.content.aggregate.cs1.cite_book_references import (
     CiteBookReferences,
 )
-from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_journal_references import (
+from src.models.api.get_statistics.references.content.aggregate.cs1.cite_journal_references import (
     CiteJournalReferences,
 )
-from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_web_references import (
+from src.models.api.get_statistics.references.content.aggregate.cs1.cite_web_references import (
     CiteWebReferences,
 )
-from src.models.api.get_article_statistics.references.urls_aggregates import (
-    UrlsAggregates,
-)
+from src.models.api.get_statistics.references.urls_aggregates import UrlsAggregates
 
 logger = logging.getLogger(__name__)
 
@@ -62,20 +60,20 @@ class TestGetArticleStatistics(TestCase):
                                                        lang=self.job.lang,
                                                        wikimedia_site=self.job.site,
                                                        testing=self.job.testing)
-                statistics = wikipedia_analyzer.get_article_statistics()
+                get_statistics = wikipedia_analyzer.get_article_statistics()
                 if self.job.testing:
                     # what is the purpose of this?
                     return "ok", 200
                 else:
-                    if isinstance(statistics, dict):
+                    if isinstance(get_statistics, dict):
                         # we got a json response
                         # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
                         # flask calls jsonify automatically
-                        return statistics, 200
-                    elif statistics == AnalyzerReturn.NOT_FOUND:
-                        return statistics.value, 404
-                    elif statistics == AnalyzerReturn.IS_REDIRECT:
-                        return statistics.value, 400
+                        return get_statistics, 200
+                    elif get_statistics == AnalyzerReturn.NOT_FOUND:
+                        return get_statistics.value, 404
+                    elif get_statistics == AnalyzerReturn.IS_REDIRECT:
+                        return get_statistics.value, 400
                     else:
                         raise Exception("this should never be reached.")
 
@@ -230,7 +228,7 @@ class TestGetArticleStatistics(TestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            b"\"Only language code 'en' is supported, currently\"\n", response.data
+            b'{"error": "{\'lang\': [\'Must be one of: en.\']}"}\n', response.data
         )  # expected output
 
     def test_missing_title(self):

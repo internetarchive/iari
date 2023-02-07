@@ -1,10 +1,12 @@
 import logging
+from typing import Optional
 from urllib.parse import quote, unquote
 
 import requests
 from pydantic import BaseModel
 
 import config
+from src.models.api.enums import Lang, Subset
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaSite
 
@@ -14,12 +16,13 @@ logger = logging.getLogger(__name__)
 class Job(BaseModel):
     """A generic job that can be submitted via the API"""
 
-    lang: str = "en"
+    lang: Lang = Lang.en
     site: WikimediaSite = WikimediaSite.wikipedia
     title: str
     testing: bool = False
     page_id: int = 0
     refresh: bool = False
+    subset: Optional[Subset]
 
     @property
     def quoted_title(self):
@@ -36,7 +39,7 @@ class Job(BaseModel):
                 MissingInformationError()
             # https://stackoverflow.com/questions/31683508/wikipedia-mediawiki-api-get-pageid-from-url
             url = (
-                f"https://{self.lang}.{self.site.value}.org/"
+                f"https://{self.lang.value}.{self.site.value}.org/"
                 f"w/api.php?action=query&format=json&titles={self.quoted_title}"
             )
             headers = {"User-Agent": config.user_agent}

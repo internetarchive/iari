@@ -3,17 +3,13 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple
 
 from flask import request
-from flask_restful import Resource, abort  # type: ignore
+from flask_restful import Resource, abort
 
-from src.helpers.console import console
-from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
-from src.models.api.get_article_statistics.get_statistics_schema import (
-    GetStatisticsSchema,
-)
+from src import WikimediaSite, console
+from src.models.api.get_statistics.get_statistics_schema import GetStatisticsSchema
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
-from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
@@ -24,9 +20,8 @@ from test_data.test_content import (  # type: ignore
 )
 
 
-class GetArticleStatistics(Resource):
-    """This models the get-statistics API
-    It is instantiated at every request"""
+class GetStatistics(Resource):
+    """Abstract class modeling a get-statistics endpoint"""
 
     schema = GetStatisticsSchema()
     job: Optional[Job]
@@ -34,22 +29,7 @@ class GetArticleStatistics(Resource):
     statistics_dictionary: Dict[str, Any] = {}
     time_of_analysis: Optional[datetime] = None
     two_days_ago = datetime.utcnow() - timedelta(hours=48)
-
-    def get(self):
-        """This is the main method and the entrypoint for flask
-        Every branch in this method has to return a tuple (Any,response_code)"""
-        from src.models.api import app
-
-        app.logger.debug("get: running")
-        self.__validate_and_get_job__()
-        if (
-            self.job.lang.lower() == "en"
-            and self.job.title
-            and self.job.site == WikimediaSite.wikipedia
-        ):
-            return self.__handle_valid_job__()
-        else:
-            return self.__return_meaningful_error__()
+    serving_from_json: bool = False
 
     def __validate_and_get_job__(self):
         """Helper method"""
@@ -79,7 +59,7 @@ class GetArticleStatistics(Resource):
 
         app.logger.debug("__not_more_than_2_days_old_cache__: running")
         if not self.statistics_dictionary:
-            self.__read_statistics_from_cache__()
+            self.__read_all_statistics_from_cache__()
         if self.statistics_dictionary:
             self.__convert_analysis_timestamp__()
             if not self.time_of_analysis:
@@ -92,40 +72,16 @@ class GetArticleStatistics(Resource):
         # Default to False ie. also return false when no json on disk
         return False
 
-    def __read_statistics_from_cache__(self):
+    def __read_all_statistics_from_cache__(self):
         io = FileIo(job=self.job)
         io.read_from_disk()
         if io.statistics_dictionary:
             self.statistics_dictionary = io.statistics_dictionary
 
     def __analyze_and_write_and_return__(self) -> Tuple[Any, int]:
-        """Analyze, calculate the time, write statistics to disk and return it
-        If we did not get statistics, return a meaningful error to the user"""
-        from src.models.api import app
-
-        app.logger.info("__analyze_and_write_and_return__: running")
-        if not self.wikipedia_analyzer:
-            raise MissingInformationError("self.wikipedia_analyzer was None")
-        self.__get_timing_and_statistics__()
-        if self.wikipedia_analyzer.found:
-            app.logger.debug("found article analyzer")
-            if self.wikipedia_analyzer.is_redirect:
-                app.logger.debug("found redirect")
-                return AnalyzerReturn.IS_REDIRECT.value, 400
-            else:
-                app.logger.debug("adding time information and returning the statistics")
-                self.__update_statistics_with_time_information__()
-                # app.logger.debug(f"dictionary from analyzer: {self.statistics_dictionary}")
-                # we got a json response
-                # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
-                # flask calls jsonify automatically
-                self.__write_to_disk__()
-                self.statistics_dictionary["served_from_cache"] = False
-                self.statistics_dictionary["refreshed_now"] = True
-                # app.logger.debug("returning dictionary")
-                return self.statistics_dictionary, 200
-        else:
-            return AnalyzerReturn.NOT_FOUND.value, 404
+        """Analyze, calculate the time, write get_statistics to disk and return it
+        If we did not get get_statistics, return a meaningful error to the user"""
+        pass
 
     def __prepare_wikipedia_analyzer_if_testing__(self):
         from src.models.api import app
@@ -173,6 +129,8 @@ class GetArticleStatistics(Resource):
             self.statistics_dictionary["timing"] = self.timing
             timestamp = datetime.timestamp(datetime.utcnow())
             self.statistics_dictionary["timestamp"] = int(timestamp)
+            isodate = datetime.isoformat(datetime.utcnow())
+            self.statistics_dictionary["isodate"] = str(isodate)
         else:
             raise ValueError("not a dict")
 
@@ -198,30 +156,8 @@ class GetArticleStatistics(Resource):
         app.logger.debug(f"analysis time {self.time_of_analysis}")
 
     def __handle_valid_job__(self):
-        from src.models.api import app
-
-        app.logger.debug("got valid job")
-        if self.job.testing:
-            return self.__setup_testing__()
-        else:
-            if not self.job.refresh:
-                app.logger.info("trying to read from cache")
-                self.__read_statistics_from_cache__()
-                if (
-                    self.statistics_dictionary
-                    and not self.__more_than_2_days_old_cache__()
-                ):
-                    # We got the statistics from json, return them as is
-                    app.logger.info(
-                        f"Returning existing json from disk with date: {self.time_of_analysis}"
-                    )
-                    return self.statistics_dictionary, 200
-            else:
-                app.logger.info("got refresh from user")
-            # This will run if we did not return an analysis from disk yet
-            self.__print_log_message_about_refresh__()
-            self.__setup_wikipedia_analyzer__()
-            return self.__analyze_and_write_and_return__()
+        """This is the main work horse"""
+        pass
 
     def __setup_testing__(self):
         from src.models.api import app
@@ -257,3 +193,19 @@ class GetArticleStatistics(Resource):
 
             app.logger.info(f"Analyzing {self.job.title}...")
             self.wikipedia_analyzer = WikipediaAnalyzer(job=self.job, check_urls=True)
+
+    def get(self):
+        """This is the main method and the entrypoint for flask
+        Every branch in this method has to return a tuple (Any,response_code)"""
+        from src.models.api import app
+
+        app.logger.debug("get: running")
+        self.__validate_and_get_job__()
+        if (
+            self.job.lang.value == "en"
+            and self.job.title
+            and self.job.site == WikimediaSite.wikipedia
+        ):
+            return self.__handle_valid_job__()
+        else:
+            return self.__return_meaningful_error__()

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from marshmallow import ValidationError
 
-from src.models.api.get_article_statistics import GetStatisticsSchema
+from src.models.api.get_statistics.get_statistics_schema import GetStatisticsSchema
 from src.models.api.job import Job
 
 
@@ -49,13 +49,11 @@ class TestGetStatisticsSchema(TestCase):
         errors = gss.validate(
             dict(title="test", refresh=True, lang="enen", site="wikipedia")
         )
-        # We don't use marshmallow to validate the lang at this point.
-        # We could and probably should use an enum as we do for site.
-        assert errors == dict()
+        assert errors == {'lang': ['Must be one of: en.']}
 
     def test_validate_invalid_site(self):
         gss = GetStatisticsSchema()
         errors = gss.validate(
             dict(title="test", refresh=True, lang="enen", site="wikipediaaaaaaaaaa")
         )
-        assert errors == {"site": ["Must be one of: wikipedia."]}
+        assert errors == {'lang': ['Must be one of: en.'], 'site': ['Must be one of: wikipedia.']}

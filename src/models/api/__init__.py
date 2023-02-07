@@ -13,7 +13,8 @@ from flask import Flask  # type: ignore
 from flask_restful import Api  # type: ignore
 
 import config
-from src.models.api.get_article_statistics import GetArticleStatistics
+from src.models.api.get_statistics.get_article_statistics import GetArticleStatistics
+from src.models.api.get_statistics.get_url_statistics import GetUrlStatistics
 
 # from src.models.api.add_job_to_queue import AddJobToQueue
 
@@ -26,6 +27,7 @@ app = Flask(__name__)
 api = Api(app, prefix="/v1")
 
 # api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
+api.add_resource(GetUrlStatistics, "/get-urls")
 api.add_resource(GetArticleStatistics, "/get-statistics")
 # return app_
 # api.add_resource(

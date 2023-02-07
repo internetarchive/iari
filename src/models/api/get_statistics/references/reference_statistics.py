@@ -2,14 +2,14 @@ from typing import List
 
 from pydantic import BaseModel
 
-from src.models.api.get_article_statistics.references.template_statistics import (
+from src.models.api.get_statistics.references.template_statistics import (
     TemplateStatistics,
 )
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 
 class ReferenceStatistics(BaseModel):
-    """The purpose of this class is to model the statistics
+    """The purpose of this class is to model the get_statistics
     the user wants from the get_article_statistics endpoint"""
 
     plain_text_in_reference: bool
