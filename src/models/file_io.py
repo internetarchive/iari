@@ -64,8 +64,8 @@ class FileIo(WcdBaseModel):
         filename = self.filename(page_id=self.job.page_id)
         if exists(filename):
             with open(file=filename) as file:
-                logger.debug("loading json into self.statistics")
-                app.logger.debug("loading json into self.statistics")
+                logger.debug("loading json into self.get_statistics")
+                app.logger.debug("loading json into self.get_statistics")
                 self.statistics_dictionary = json.load(file)
                 self.statistics_dictionary["served_from_cache"] = True
                 # app.logger.debug(f"loaded: {self.statistics_dictionary}")
@@ -78,7 +78,7 @@ class FileIo(WcdBaseModel):
 
         if not self.job:
             raise MissingInformationError("self.job was None")
-        filename = f"{config.subdirectory_for_json}{self.job.lang}.{self.job.site.value}.org:{page_id}"
+        filename = f"{config.subdirectory_for_json}{self.job.lang.value}.{self.job.site.value}.org:{page_id}"
         logger.debug(f"using filename: {filename}")
         app.logger.debug(f"using filename: {filename}")
         return filename

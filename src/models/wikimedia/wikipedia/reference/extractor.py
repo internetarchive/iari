@@ -340,7 +340,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(self.checked_and_unique_reference_urls)
 
     def __get_checked_and_unique_reference_urls_from_references__(self) -> None:
-        """Unique URLs"""
+        """Get and check unique URLs
+        If check_urls is not enabled we do nothing."""
         if self.check_urls:
             if not self.check_urls_done:
                 raise MissingInformationError("url checking has not been done yet")

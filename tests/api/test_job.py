@@ -1,5 +1,8 @@
 from unittest import TestCase
 
+from pydantic import ValidationError
+
+from src.models.api.enums import Subset
 from src.models.api.job import Job
 from src.models.wikimedia.enums import WikimediaSite
 
@@ -24,3 +27,27 @@ class TestJob(TestCase):
         assert job.refresh is False
         job = Job(title="Test", site="wikipedia", lang="en", refresh=True)
         assert job.refresh is True
+        with self.assertRaises(ValidationError):
+            Job(title="Test", site="wikipedia", lang="en", refresh="123")
+
+    def test_subset(self):
+        job = Job(title="Test", site="wikipedia", lang="en")
+        assert job.subset is None
+        job = Job(
+            title="Test",
+            site="wikipedia",
+            lang="en",
+            refresh=True,
+            subset=Subset.malformed,
+        )
+        assert job.subset == Subset.malformed
+        job = Job(
+            title="Test",
+            site="wikipedia",
+            lang="en",
+            refresh=True,
+            subset=Subset.not_found,
+        )
+        assert job.subset == Subset.not_found
+        with self.assertRaises(ValidationError):
+            Job(title="Test", site="wikipedia", lang="en", refresh=True, subset="123")

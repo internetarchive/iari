@@ -161,9 +161,9 @@ class WcdImportBot(WcdBaseModel):
     #     # )
     #     parser.add_argument(
     #         "-s",
-    #         "--statistics",
+    #         "--get_statistics",
     #         action="store_true",
-    #         help="Show statistics about the supported Wikibase instances",
+    #         help="Show get_statistics about the supported Wikibase instances",
     #     )
     #     parser.add_argument(
     #         "-wc",
@@ -367,7 +367,7 @@ class WcdImportBot(WcdBaseModel):
         #     self.get_and_extract_pages_by_range_via_http(
         #         max_count=args.max_range, category_title=args.category
         #     )
-        # elif args.statistics:
+        # elif args.get_statistics:
         #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
         #     bot.__gather_and_print_statistics__()
         #     # DISABLED because it returns 503 now.

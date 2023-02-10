@@ -37,10 +37,12 @@ class WikipediaArticle(WcdItem):
     found_in_wikipedia: bool = True
     extractor: Optional[WikipediaReferenceExtractor] = None
     check_urls: bool = False
+    testing: bool = False
     # TODO add language_code to avoid enwiki hardcoding
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
+        extra = "forbid"  # dead: disable
 
     @property
     def quoted_title(self):

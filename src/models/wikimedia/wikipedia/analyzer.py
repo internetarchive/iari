@@ -3,43 +3,39 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import validate_arguments
 
-from src.models.api.get_article_statistics.article_statistics import ArticleStatistics
-from src.models.api.get_article_statistics.references import (
-    References,
-    ReferenceTypes,
-    Urls,
+from src.models.api.get_statistics.get_article_statistics.article_statistics import (
+    ArticleStatistics,
 )
-from src.models.api.get_article_statistics.references.content import (
+from src.models.api.get_statistics.references import References, ReferenceTypes, Urls
+from src.models.api.get_statistics.references.content import (
     AggregateContentReferences,
     CitationReferences,
     ContentReferences,
     GeneralReferences,
 )
-from src.models.api.get_article_statistics.references.content.aggregate import (
+from src.models.api.get_statistics.references.content.aggregate import (
     CiteQReferences,
     Cs1References,
 )
-from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_book_references import (
+from src.models.api.get_statistics.references.content.aggregate.cs1.cite_book_references import (
     CiteBookReferences,
 )
-from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_journal_references import (
+from src.models.api.get_statistics.references.content.aggregate.cs1.cite_journal_references import (
     CiteJournalReferences,
 )
-from src.models.api.get_article_statistics.references.content.aggregate.cs1.cite_web_references import (
+from src.models.api.get_statistics.references.content.aggregate.cs1.cite_web_references import (
     CiteWebReferences,
 )
-from src.models.api.get_article_statistics.references.reference_statistics import (
+from src.models.api.get_statistics.references.reference_statistics import (
     ReferenceStatistics,
 )
-from src.models.api.get_article_statistics.references.template_statistics import (
+from src.models.api.get_statistics.references.template_statistics import (
     TemplateStatistics,
 )
-from src.models.api.get_article_statistics.references.unique_urls_aggregates import (
+from src.models.api.get_statistics.references.unique_urls_aggregates import (
     UniqueUrlsAggregates,
 )
-from src.models.api.get_article_statistics.references.urls_aggregates import (
-    UrlsAggregates,
-)
+from src.models.api.get_statistics.references.urls_aggregates import UrlsAggregates
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
@@ -51,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 class WikipediaAnalyzer(WcdBaseModel):
     """This model contain all the logic for getting the
-    statistics and mapping them to the API output model"""
+    get_statistics and mapping them to the API output model"""
 
     job: Job
     article: Optional[WikipediaArticle] = None
@@ -307,7 +303,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         if not self.article_statistics:
             logger.debug(
                 "self.article_statistics was None "
-                "so we skip gathering reference statistics"
+                "so we skip gathering reference get_statistics"
             )
 
     def __populate_article__(self):
@@ -317,10 +313,8 @@ class WikipediaAnalyzer(WcdBaseModel):
             self.article = WikipediaArticle(
                 title=self.job.title,
                 wikimedia_site=self.job.site,
-                language_code=self.job.lang,
-                # wikibase=self.wikibase,
+                language_code=self.job.lang.value,
                 wikitext=self.wikitext,
-                testing=self.testing,
                 check_urls=self.check_urls,
             )
         else:

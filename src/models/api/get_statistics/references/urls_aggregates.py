@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from src.models.api.get_article_statistics.references.unique_urls_aggregates import (
+from src.models.api.get_statistics.references.unique_urls_aggregates import (
     UniqueUrlsAggregates,
 )
 
