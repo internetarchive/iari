@@ -314,9 +314,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 title=self.job.title,
                 wikimedia_site=self.job.site,
                 language_code=self.job.lang.value,
-                # wikibase=self.wikibase,
                 wikitext=self.wikitext,
-                testing=self.testing,
                 check_urls=self.check_urls,
             )
         else:

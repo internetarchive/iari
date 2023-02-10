@@ -21,8 +21,8 @@ class UrlStatistics(BaseModel):
     isodate: str = ""  # isodate (human readable) at beginning of analysis
     timing: int = 0  # time to analyze in seconds
     title: str = ""
-    urls: List[WikipediaUrl] = []
-    agg: Urls
+    url_details: List[WikipediaUrl] = []
+    urls: Urls
 
     class Config:  # dead: disable
         extra = Extra.forbid  # dead: disable

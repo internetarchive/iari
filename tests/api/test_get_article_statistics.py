@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # This is needed to get the full diff when tests fail
 # https://stackoverflow.com/questions/14493670/how-to-set-self-maxdiff-in-nose-to-get-full-diff-output
-TestCase.maxDiff = None
+# TestCase.maxDiff = None
 
 
 class TestGetArticleStatistics(TestCase):
@@ -228,7 +228,7 @@ class TestGetArticleStatistics(TestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            b'{"error": "{\'lang\': [\'Must be one of: en.\']}"}\n', response.data
+            b"{\"error\": \"{'lang': ['Must be one of: en.']}\"}\n", response.data
         )  # expected output
 
     def test_missing_title(self):

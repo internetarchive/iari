@@ -67,3 +67,20 @@ class GetArticleStatistics(GetStatistics):
             self.__print_log_message_about_refresh__()
             self.__setup_wikipedia_analyzer__()
             return self.__analyze_and_write_and_return__()
+
+    def __setup_testing__(self):
+        from src.models.api import app
+
+        app.logger.debug("testing...")
+        self.__prepare_wikipedia_analyzer_if_testing__()
+        if not self.wikipedia_analyzer:
+            MissingInformationError("no self.wikipedia_analyzer")
+        self.__get_timing_and_statistics__()
+        # We set this to be able to test the refresh
+        if self.job.refresh:
+            self.statistics_dictionary["served_from_cache"] = False
+            self.statistics_dictionary["refreshed_now"] = True
+        else:
+            self.statistics_dictionary["served_from_cache"] = True
+            self.statistics_dictionary["refreshed_now"] = False
+        return self.statistics_dictionary, 200

@@ -65,10 +65,10 @@ class GetStatistics(Resource):
             if not self.time_of_analysis:
                 raise MissingInformationError("self.time_of_analysis was None")
             if self.time_of_analysis < self.two_days_ago:
-                app.logger.debug("more than 48h ago")
+                app.logger.debug("more than 48h old data in the cache")
                 return True
             else:
-                app.logger.debug("not more than 48h ago")
+                app.logger.debug("not more than 48h data in the cache")
         # Default to False ie. also return false when no json on disk
         return False
 
@@ -159,23 +159,6 @@ class GetStatistics(Resource):
         """This is the main work horse"""
         pass
 
-    def __setup_testing__(self):
-        from src.models.api import app
-
-        app.logger.debug("testing...")
-        self.__prepare_wikipedia_analyzer_if_testing__()
-        if not self.wikipedia_analyzer:
-            MissingInformationError("no self.wikipedia_analyzer")
-        self.__get_timing_and_statistics__()
-        # We set this to be able to test the refresh
-        if self.job.refresh:
-            self.statistics_dictionary["served_from_cache"] = False
-            self.statistics_dictionary["refreshed_now"] = True
-        else:
-            self.statistics_dictionary["served_from_cache"] = True
-            self.statistics_dictionary["refreshed_now"] = False
-        return self.statistics_dictionary, 200
-
     def __return_meaningful_error__(self):
         from src.models.api import app
 
@@ -209,3 +192,6 @@ class GetStatistics(Resource):
             return self.__handle_valid_job__()
         else:
             return self.__return_meaningful_error__()
+
+    def __setup_testing__(self):
+        raise NotImplementedError()

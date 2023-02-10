@@ -10,7 +10,8 @@ from src.models.api.get_statistics.get_url_statistics.get_urls_schema import (
 from src.models.api.get_statistics.get_url_statistics.url_statistics import (
     UrlStatistics,
 )
-from src.models.api.get_statistics.references import Urls
+from src.models.api.get_statistics.references import ReferenceStatistics, Urls
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.enums import AnalyzerReturn
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from test_data.test_content import (  # type: ignore
@@ -26,11 +27,11 @@ class GetUrlStatistics(GetStatistics):
     """This models the get-statistics API
     It is instantiated at every request"""
 
-    urls: List[WikipediaUrl] = []
-    agg: Optional[Urls]
+    url_details: List[WikipediaUrl] = []
+    urls: Urls = Urls()
     schema = GetUrlsSchema()
 
-    def __update_and_write__(self) -> None:
+    def __update_and_write_to_disk__(self) -> None:
         """Helper method"""
         from src.models.api import app
 
@@ -51,7 +52,7 @@ class GetUrlStatistics(GetStatistics):
 
         app.logger.debug("got valid job")
         if self.job.testing:
-            return self.__setup_testing__()
+            self.__setup_testing__()
         else:
             if not self.job.refresh:
                 app.logger.info("trying to read from cache")
@@ -66,20 +67,29 @@ class GetUrlStatistics(GetStatistics):
                         f"Returning existing json from disk with date: {self.time_of_analysis}"
                     )
                     return self.return_a_subset()
+                else:
+                    # data too old or not found
+                    pass
             else:
                 app.logger.info("got refresh from user")
+            # Refresh
             self.__print_log_message_about_refresh__()
             self.__setup_wikipedia_analyzer__()
             self.__get_timing_and_statistics__()
+            # Check if not found or redirect
             if not self.wikipedia_analyzer.found:
                 return AnalyzerReturn.NOT_FOUND.value, 404
             if self.wikipedia_analyzer.is_redirect:
                 app.logger.debug("found redirect")
                 return AnalyzerReturn.IS_REDIRECT.value, 400
-            self.__update_and_write__()
-            return self.return_a_subset()
+            self.__update_and_write_to_disk__()
+        # Always return here no matter whether testing or not
+        return self.return_a_subset()
 
     def return_a_subset(self) -> Tuple[Any, int]:
+        from src.models.api import app
+
+        app.logger.debug("return_a_subset: running")
         if self.job and self.job.subset:
             from src.models.api import app
 
@@ -92,8 +102,8 @@ class GetUrlStatistics(GetStatistics):
         # We return no matter what but with an empty list and agg=None if no urls were found
         return (
             UrlStatistics(
+                url_details=self.url_details,
                 urls=self.urls,
-                agg=self.agg,
                 served_from_cache=self.serving_from_json,
                 refreshed_now=not self.serving_from_json,
                 isodate=self.statistics_dictionary["isodate"],
@@ -109,24 +119,55 @@ class GetUrlStatistics(GetStatistics):
 
     def __extract_urls_from_json__(self):
         """Extract WikipediaUrls from the json depending on what subset the patron asked for"""
+        from src.models.api import app
+
+        app.logger.debug("__extract_urls_from_json__: running")
         if (
             self.statistics_dictionary
             and "references" in self.statistics_dictionary.keys()
             and self.statistics_dictionary["references"] is not None
         ):
-            self.agg = self.statistics_dictionary["references"]["urls"]
-            references = self.statistics_dictionary["references"]["details"]
+            self.urls = self.statistics_dictionary["references"]["urls"]
+            app.logger.debug(f"found urls {self.urls}")
+            references: List[ReferenceStatistics] = self.statistics_dictionary[
+                "references"
+            ]["details"]
             for reference in references:
+                app.logger.debug(f"Working on {reference}")
                 urls_details = reference["urls"]
                 if urls_details:
+                    app.logger.debug(
+                        f"Found url details {urls_details} with {len(urls_details)} url objects"
+                    )
                     for url in urls_details:
                         url_object = WikipediaUrl(**url)
                         if self.job.subset:
                             if self.job.subset == Subset.not_found:
                                 if url_object.status_code == 404:
-                                    self.urls.append(url_object)
+                                    self.url_details.append(url_object)
                             if self.job.subset == Subset.malformed:
                                 if url_object.malformed_url:
-                                    self.urls.append(url_object)
+                                    self.url_details.append(url_object)
                         else:
-                            self.urls.append(url_object)
+                            self.url_details.append(url_object)
+            app.logger.info(f"found {len(self.url_details)} url objects")
+        else:
+            app.logger.warning("no references in self.statistics_dictionary")
+
+    def __setup_testing__(self) -> None:
+        from src.models.api import app
+
+        app.logger.debug("testing...")
+        self.__prepare_wikipedia_analyzer_if_testing__()
+        if not self.wikipedia_analyzer:
+            MissingInformationError("no self.wikipedia_analyzer")
+        self.__get_timing_and_statistics__()
+        # We set this to be able to test the refresh
+        if not self.job:
+            raise MissingInformationError()
+        if self.job.refresh:
+            self.statistics_dictionary["served_from_cache"] = False
+            self.statistics_dictionary["refreshed_now"] = True
+        else:
+            self.statistics_dictionary["served_from_cache"] = True
+            self.statistics_dictionary["refreshed_now"] = False
