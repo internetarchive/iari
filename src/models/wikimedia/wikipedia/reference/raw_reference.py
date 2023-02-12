@@ -161,10 +161,7 @@ class WikipediaRawReference(WcdBaseModel):
     def google_books_template_found(self):
         """Google books templates look like this:
         {{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}"""
-        for template in self.templates:
-            if "google books" == template.name:
-                return True
-        return False
+        return any("google books" == template.name for template in self.templates)
 
     @property
     def google_books_url_or_template_found(self):
@@ -223,10 +220,7 @@ class WikipediaRawReference(WcdBaseModel):
     @property
     def cs1_template_found(self) -> bool:
         """This searches for at least one CS1 template"""
-        for template in self.templates:
-            if template.is_cs1_template:
-                return True
-        return False
+        return any(template.is_cs1_template for template in self.templates)
 
     @property
     def citeq_template_found(self) -> bool:
@@ -291,10 +285,7 @@ class WikipediaRawReference(WcdBaseModel):
         )
 
     def __found_template__(self, name: str = "") -> bool:
-        for template in self.templates:
-            if name == template.name:
-                return True
-        return False
+        return any(name == template.name for template in self.templates)
 
     def __check_urls__(self):
         """This checks the status of all the URLs"""

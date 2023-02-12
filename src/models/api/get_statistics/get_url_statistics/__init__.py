@@ -142,12 +142,10 @@ class GetUrlStatistics(GetStatistics):
                     for url in urls_details:
                         url_object = WikipediaUrl(**url)
                         if self.job.subset:
-                            if self.job.subset == Subset.not_found:
-                                if url_object.status_code == 404:
-                                    self.url_details.append(url_object)
-                            if self.job.subset == Subset.malformed:
-                                if url_object.malformed_url:
-                                    self.url_details.append(url_object)
+                            if self.job.subset == Subset.not_found and url_object.status_code == 404:
+                                self.url_details.append(url_object)
+                            if self.job.subset == Subset.malformed and url_object.malformed_url:
+                                self.url_details.append(url_object)
                         else:
                             self.url_details.append(url_object)
             app.logger.info(f"found {len(self.url_details)} url objects")

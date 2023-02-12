@@ -728,11 +728,10 @@ class WikipediaReference(WcdItem):
 
     def __merge_date_into_publication_date__(self):
         """Handle the possibly ambiguous self.date field"""
-        if self.date and self.publication_date:
-            if self.date != self.publication_date:
-                raise AmbiguousDateError(
-                    f"got both a date and a publication_date and they differ"
-                )
+        if self.date and self.publication_date and self.date != self.publication_date:
+            raise AmbiguousDateError(
+                f"got both a date and a publication_date and they differ"
+            )
         if self.date and not self.publication_date:
             # Assuming date is the publication date
             self.publication_date = self.date
@@ -1168,21 +1167,20 @@ class WikipediaReference(WcdItem):
             raise MissingInformationError("no raw_reference")
         if self.raw_reference.templates:
             for template in self.raw_reference.templates:
-                if template.name == "url":
-                    if template.__first_parameter__:
-                        if url_found:
-                            from src.models.api import app
+                if template.name == "url" and template.__first_parameter__:
+                    if url_found:
+                        from src.models.api import app
 
-                            app.logger.warning(
-                                "Parse error: Multiple main reference urls "
-                                "were found in this reference "
-                                "and that is currently "
-                                "not supported"
-                            )
-                            self.encountered_parse_error = True
-                            return False
-                        self.url = template.__first_parameter__
-                        url_found = True
+                        app.logger.warning(
+                            "Parse error: Multiple main reference urls "
+                            "were found in this reference "
+                            "and that is currently "
+                            "not supported"
+                        )
+                        self.encountered_parse_error = True
+                        return False
+                    self.url = template.__first_parameter__
+                    url_found = True
 
     def __get_qid__(self):
         qid_found = False
