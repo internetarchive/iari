@@ -1,5 +1,7 @@
 from mwparserfromhell import parse  # type: ignore
 
+from src import console
+from src.models.identifiers.doi import Doi
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -273,3 +275,46 @@ class TestTemplate:
             wt.extract_and_prepare_parameter_and_flds()
             # print(wt.parameters)
             assert wt.get_doi == "10.1260/0958305054672385"
+
+    def test_doi_extraction(self):
+        wikitext = (
+            "<ref>{{cite journal |author=Peiser, B. |"
+            "url=http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI."
+            "pdf |archive-url=https://web.archive.org/web/20100610062402/http://www"
+            ".uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf |url"
+            "-status=dead |archive-date=2010-06-10 |title=From Genocide to Ecocide: The Rape of Rapa "
+            "Nui |doi=10.1260/0958305054672385 |journal=Energy & Environment |volume=16 |issue=3&4 |pages"
+            "=513–539 |year=2005 |citeseerx=10.1.1.611.1103 |s2cid=155079232 }}</ref>"
+        )
+        templates = parse(wikitext).ifilter_templates()
+        for template in templates:
+            wt = WikipediaTemplate(raw_template=template)
+            wt.extract_and_prepare_parameter_and_flds()
+            # print(wt.parameters)
+            assert wt.doi_lookup_done is True
+            console.print(wt.doi)
+            assert wt.doi == Doi(doi="10.1260/0958305054672385")
+
+    def test___extract_and_lookup_doi__(self):
+        wikitext = (
+            "<ref>{{cite journal |author=Peiser, B. |"
+            "url=http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI."
+            "pdf |archive-url=https://web.archive.org/web/20100610062402/http://www"
+            ".uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf |url"
+            "-status=dead |archive-date=2010-06-10 |title=From Genocide to Ecocide: The Rape of Rapa "
+            "Nui |doi=10.1260/0958305054672385 |journal=Energy & Environment |volume=16 |issue=3&4 |pages"
+            "=513–539 |year=2005 |citeseerx=10.1.1.611.1103 |s2cid=155079232 }}</ref>"
+        )
+        templates = parse(wikitext).ifilter_templates()
+        for template in templates:
+            wt = WikipediaTemplate(raw_template=template)
+            wt.__extract_and_clean_template_parameters__()
+            wt.__extract_and_lookup_doi__()
+            console.print(wt.doi)
+            assert wt.doi_lookup_done is True
+            console.print(wt.doi)
+            assert wt.doi.doi == "10.1260/0958305054672385"
+            assert wt.doi.marked_as_retracted_in_openalex is False
+            assert wt.doi.marked_as_retracted_in_wikidata is False
+            assert wt.doi.found_in_wikidata is True
+            assert wt.doi.found_in_openalex is True

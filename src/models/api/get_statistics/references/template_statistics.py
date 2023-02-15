@@ -1,4 +1,8 @@
+from typing import Optional
+
 from pydantic import BaseModel
+
+from src.models.identifiers.doi import Doi
 
 
 class TemplateStatistics(BaseModel):
@@ -16,6 +20,7 @@ class TemplateStatistics(BaseModel):
     doi: str
     isbn: str
     wikitext: str
+    doi_details: Optional[Doi]
 
     class Config:  # dead: disable
         extra = "forbid"  # dead: disable

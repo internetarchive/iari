@@ -341,23 +341,25 @@ class WikipediaAnalyzer(WcdBaseModel):
             )
             template_statistics_list: List[TemplateStatistics] = []
             for template in reference.raw_reference.templates:
-                template_statistics_list.append(
-                    TemplateStatistics(
-                        # TODO extract more information that the patrons might want
-                        #  to know from the template, e.g. the different persons
-                        doi=template.get_doi,
-                        is_bareurl_template=template.is_bareurl_template,
-                        is_citation_template=template.is_citation_template,
-                        is_citeq_template=template.is_citeq_template,
-                        is_cs1_template=template.is_cs1_template,
-                        is_isbn_template=template.is_isbn_template,
-                        is_known_multiref_template=template.is_known_multiref_template,
-                        is_url_template=template.is_url_template,
-                        is_webarchive_template=template.is_webarchive_template,
-                        isbn=template.get_isbn,
-                        wikitext=template.wikitext,
-                    )
+                stat = TemplateStatistics(
+                    # TODO extract more information that the patrons might want
+                    #  to know from the template, e.g. the different persons
+                    doi=template.get_doi,
+                    is_bareurl_template=template.is_bareurl_template,
+                    is_citation_template=template.is_citation_template,
+                    is_citeq_template=template.is_citeq_template,
+                    is_cs1_template=template.is_cs1_template,
+                    is_isbn_template=template.is_isbn_template,
+                    is_known_multiref_template=template.is_known_multiref_template,
+                    is_url_template=template.is_url_template,
+                    is_webarchive_template=template.is_webarchive_template,
+                    isbn=template.get_isbn,
+                    wikitext=template.wikitext,
                 )
+                if template.doi:
+                    app.logger.info("Adding DOI details")
+                    stat.doi_details = template.doi.get_cleaned_doi_object()
+                template_statistics_list.append(stat)
             app.logger.debug(
                 f"returning {len(template_statistics_list)} template_statistics objects"
             )
