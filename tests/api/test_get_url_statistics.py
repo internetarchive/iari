@@ -173,3 +173,27 @@ class TestGetUrlStatistics(TestCase):
         We do however test the scheme in another file
         and the job it returns"""
         pass
+
+    def test_valid_request_sncaso_malformed(self):
+        response = self.test_client.get(
+            "/get-urls?lang=en&site=wikipedia&title=SNCASO&refresh=True&subset=malformed"
+        )
+        data = json.loads(response.data)
+        print(response.data)
+        self.assertEqual(200, response.status_code)
+        stats = UrlStatistics(**data)
+        assert len(stats.url_details) == 0
+        assert stats.served_from_cache is False
+        assert stats.refreshed_now is True
+
+    def test_valid_request_sncaso_not_found(self):
+        response = self.test_client.get(
+            "/get-urls?lang=en&site=wikipedia&title=SNCASO&refresh=True&subset=not_found"
+        )
+        data = json.loads(response.data)
+        print(response.data)
+        self.assertEqual(200, response.status_code)
+        stats = UrlStatistics(**data)
+        assert len(stats.url_details) == 0
+        assert stats.served_from_cache is False
+        assert stats.refreshed_now is True

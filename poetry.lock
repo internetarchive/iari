@@ -999,6 +999,25 @@ pyyaml = ">=5.1"
 virtualenv = ">=20.10.0"
 
 [[package]]
+name = "pyalex"
+version = "0.7"
+description = "One downloader for many scientific data and code repositories!"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pyalex-0.7-py3-none-any.whl", hash = "sha256:1f4082611626f8044cf8ef2d691efcc2a67081750af3bcfe79e34c8a13b8f56e"},
+    {file = "pyalex-0.7.tar.gz", hash = "sha256:91e01c73f8144ca88bf51968a43f3db2c5b6504845d7874be8f80fa55e21add4"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[package.extras]
+lint = ["flake8", "flake8-import-order"]
+test = ["pytest"]
+
+[[package]]
 name = "pycodestyle"
 version = "2.9.1"
 description = "Python style guide checker"
@@ -1765,4 +1784,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<=3.11"
-content-hash = "29aab4d055326b1469e1f5a152ed9f8519b7489ee28fc3c75a18d546d24a383e"
+content-hash = "87605a10f7dd9598269ef3e687a43e55f6699e4d828e40c4ce15def1d233ff0c"
