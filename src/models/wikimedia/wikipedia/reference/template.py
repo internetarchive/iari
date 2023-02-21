@@ -88,9 +88,8 @@ class WikipediaTemplate(WcdBaseModel):
         """Helper method"""
         if self.name == "isbn":
             return self.__first_parameter__
-        elif self.is_cs1_template:
-            if "isbn" in self.parameters.keys():
-                return str(self.parameters["isbn"])
+        elif self.is_cs1_template and "isbn" in self.parameters.keys():
+            return str(self.parameters["isbn"])
         # Default to empty
         return ""
 
