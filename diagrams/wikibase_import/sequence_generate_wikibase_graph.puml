@@ -1,0 +1,75 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor User as user
+control generate_graph
+database "Cache" as Cache
+database Wikibase
+entity "Wikipedia Dump" as WD
+user -> generate_graph: Run
+generate_graph -> WD: Read dump and extract wikitext
+loop "for each artile"
+    alt "not a redirect"
+        generate_graph -> generate_graph: hash the article wikitext
+        generate_graph -> generate_graph: Analyze article
+        loop "for each hashed reference"
+'            alt URL found
+'                generate_graph -> Cache: Lookup existing WCDQID to website item
+'                generate_graph -> generate_graph: Generate website item
+'                alt cache enabled
+'                    generate_graph -> Cache: Insert website item hash and WCDQID
+'                end
+'                generate_graph -> Wikibase: Create new website item
+'                Wikibase -> generate_graph: Response with new WCDQID
+'                generate_graph -> generate_graph: Link to website item from the reference
+'                generate_graph -> user: Print the URL to the new item.
+'            end
+            generate_graph -> Cache: Lookup existing WCDQID
+            Cache -> generate_graph: Response
+            alt reference hash found
+                generate_graph -> generate_graph: Link to existing reference
+            end
+            alt reference hash not found
+                generate_graph -> generate_graph: Generate the reference statements
+                generate_graph -> Wikibase: Create new item for the reference
+                Wikibase -> generate_graph: Response with WCDQID
+                alt cache enabled
+                    generate_graph -> Cache: Insert reference hash and WCDQID
+                end
+                generate_graph -> user: Print the URL to the new item.
+            end
+        end
+        generate_graph -> generate_graph: Generate the statements
+        generate_graph -> Cache: Lookup existing WCDQID
+        Cache -> generate_graph: Response
+        alt "page hash not found -> upload"
+            generate_graph -> Wikibase: Create new item for the page with links to all references
+            Wikibase -> generate_graph: Response with WCDQID
+            alt cache enabled
+                generate_graph -> Cache: Insert reference hash and WCDQID
+            end
+            generate_graph -> user: Print the URL to the new item.
+        end
+        alt "page hash found -> compare"
+            loop "for each reference"
+                generate_graph -> generate_graph: Check if reference was just uploaded
+                alt "not just uploaded"
+                    generate_graph -> Wikibase: Get item data
+                    generate_graph -> generate_graph: Compare all claims
+                    alt "claims missing"
+                        generate_graph -> Wikibase: Update item with new claims
+                    end
+                    generate_graph -> user: Print the result of the comparison.
+                end
+            end
+            generate_graph -> Wikibase: Get page item data
+            generate_graph -> generate_graph: Compare all claims
+            alt "claims missing"
+                generate_graph -> Wikibase: Update item with new claims
+            end
+        end
+        generate_graph -> user: Print the URL to the new page item and the Wikipedia article URL.
+    end
+end
+@enduml

@@ -1,0 +1,64 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class article
+class references
+class reference
+class check-url{
+"url": "",
+"host": "",
+"domain": "",
+"suffix": "",
+"tld": "", # top level domain
+"status": "",
+"checked": isodate
+error: bool
+fixed: str
+}
+class check-doi{
+retracted in openalex: bool
+retracted in open-retractions: bool
+in_wikidata: bool
+wd_fulltext_url: str
+wd_publisher: wdqid
+wd_journal: wdqid
+wd_authors: [author1_qid, ...]
+wd_author_strings: int
+}
+class template
+class titles
+class title_
+class doi
+class url
+class urls
+class dois
+class persons
+class person
+class role
+class author
+class translator
+class editor
+class no_role
+article <-- references
+references <-- reference
+reference <-- titles
+reference <-- template
+reference <-- dois
+reference <-- urls
+template <-- title_
+template <-- doi
+template <-- url
+template <-- archive_url
+template <-- hdl
+template <-- pmid
+template <-- pmcid
+template <-- publisher
+template <-- persons
+persons <-- person
+person <-- role
+role <-- author
+role <-- translator
+role <-- editor
+role <-- no_role
+
+@enduml
