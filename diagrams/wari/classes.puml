@@ -16,6 +16,7 @@ error: bool
 fixed: str
 }
 class check-doi{
+doi: str
 retracted in openalex: bool
 retracted in open-retractions: bool
 in_wikidata: bool
