@@ -29,14 +29,14 @@ general: int
 class article{
 wari_id: str
 reference_statistics: Dict[str, int]
-references: List[dehydrated_reference]
 title: str
 page_id: int
 urls: List[str]
 fld_counts: Dict[str, int] # e.g. {archive.org: 2}
 }
 class references{
-ids: List[str]
+total: int,
+references: List[dehydrated_reference]
 }
 class reference{
 templates: List[Template]
