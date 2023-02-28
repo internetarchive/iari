@@ -20,13 +20,11 @@ journal: wdqid
 authors: List[author1_qid, ...]
 author_strings: int}
 }
-
 class reference_statistics{
 named: int
 citation: int
 content: int
 general: int
-
 }
 class article{
 wari_id: str
@@ -35,7 +33,6 @@ references: List[dehydrated_reference]
 title: str
 page_id: int
 urls: List[str]
-identifiers: Dict[str, List[str]]
 fld_counts: Dict[str, int] # e.g. {archive.org: 2}
 }
 class references{
