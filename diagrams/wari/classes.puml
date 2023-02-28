@@ -1,9 +1,46 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-class article
-class references
-class reference
+class parameters{
+## all ~100 parameters in CS1 templates
+## (all hyphens are converted to underscores)
+doi: str
+isbn: str
+hdl: str
+title: str
+...
+}
+class wikidata_details{
+fulltext_url: str
+publisher: wdqid
+journal: wdqid
+authors: List[author1_qid, ...]
+author_strings: int}
+}
+class article{
+wari_id: str
+reference_statistics: Dict[str, int]
+references: List[dehydrated_reference]
+title: str
+page_id: int
+urls: List[str]
+dois: List[str]
+fld_counts: Dict[str, int] # e.g. {archive.org: 2}
+}
+class references{
+ids: List[str]
+}
+class reference{
+templates: List[Template]
+wikitext: str
+}
+class dehydrated_reference {
+id: str
+titles: List[str]
+identifiers: Dict[str, List[str]]
+urls: List[str]
+}
+dehydrated_reference <-- reference
 class check-url{
 "url": "",
 "host": "",
@@ -17,49 +54,26 @@ fixed: str
 }
 class check-doi{
 doi: str
-retracted in openalex: bool
-retracted in open-retractions: bool
-in_wikidata: bool
-wd_fulltext_url: str
-wd_publisher: wdqid
-wd_journal: wdqid
-wd_authors: [author1_qid, ...]
-wd_author_strings: int
+retracted_in: Dict[str: bool] # e.g. {openalex: true, open-retractions: false}
+wikidata_qid: str
+wikidata_details: Dict[str, Any]
 }
-class template
-class titles
-class title_
-class doi
-class url
-class urls
-class dois
-class persons
-class person
-class role
-class author
-class translator
-class editor
-class no_role
-article <-- references
-references <-- reference
-reference <-- titles
-reference <-- template
-reference <-- dois
-reference <-- urls
-template <-- title_
-template <-- doi
-template <-- url
-template <-- archive_url
-template <-- hdl
-template <-- pmid
-template <-- pmcid
-template <-- publisher
-template <-- persons
-persons <-- person
-person <-- role
-role <-- author
-role <-- translator
-role <-- editor
-role <-- no_role
-
+class template{
+title: str
+parameters: Dict[str, Any]
+persons: List[Person]
+}
+class person{
+role: Enum
+orcid: str
+# todo check these:
+first_name: str
+last_name: str
+}
+enum role{
+author
+translator
+editor
+no_role
+}
 @enduml
