@@ -20,6 +20,14 @@ journal: wdqid
 authors: List[author1_qid, ...]
 author_strings: int}
 }
+
+class reference_statistics{
+named: int
+citation: int
+content: int
+general: int
+
+}
 class article{
 wari_id: str
 reference_statistics: Dict[str, int]
@@ -37,11 +45,23 @@ class reference{
 templates: List[Template]
 wikitext: str
 }
+enum reference_type{
+general # this is from headings we know usually contain reference templates
+footnote # this is <ref></ref> footnotes
+external_link # this is all lines in the external link section
+}
+enum footnote_subtype{
+named # an empty footnote only having a name-based reference
+content # a footnote that contain something
+}
 class dehydrated_reference {
 id: str
 titles: List[str]
 identifiers: Dict[str, List[str]]
 urls: List[str]
+template_names: List[str] e.g. {cite web, !, google books}
+type: reference_type
+subtype: footnote_subtype
 }
 dehydrated_reference <-- reference
 class check-url{
