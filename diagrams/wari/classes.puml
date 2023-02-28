@@ -1,6 +1,9 @@
 @startuml
 'https://plantuml.com/class-diagram
 
+class references_count{
+total: int
+}
 class parameters{
 ## all ~100 parameters in CS1 templates
 ## (all hyphens are converted to underscores)
