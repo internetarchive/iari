@@ -35,7 +35,7 @@ references: List[dehydrated_reference]
 title: str
 page_id: int
 urls: List[str]
-dois: List[str]
+identifiers: Dict[str, List[str]]
 fld_counts: Dict[str, int] # e.g. {archive.org: 2}
 }
 class references{
@@ -77,6 +77,7 @@ fixed: str
 }
 class check-doi{
 doi: str
+"checked": isodate
 retracted_in: Dict[str: bool] # e.g. {openalex: true, open-retractions: false}
 wikidata_qid: str
 wikidata_details: Dict[str, Any]
