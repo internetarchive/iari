@@ -115,7 +115,7 @@
 #     #         #     if config.include_url_in_hash_algorithm:
 #     #         #         str2hash = self.first_parameter
 #     #
-#     #         # DISABLED template specific hashing for now because it is error
+#     #         # DISABLED templates specific hashing for now because it is error
 #     #         # prone and does not make it easy to avoid duplicates
 #     #         # For example a news article might be cited with the publication date in one place but not in another.
 #     #         # If we include the publication date in the hash we will end up with a duplicate in Wikibase.

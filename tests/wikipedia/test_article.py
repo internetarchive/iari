@@ -21,7 +21,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     page = WikipediaArticle(
-    #         wikibase_deprecated=IASandboxWikibase(),
+    #         wikibase=IASandboxWikibase(),
     #         language_code="en",
     #         wikimedia_site=WikimediaSite.WIKIPEDIA,
     #         title="Easter Island",
@@ -78,7 +78,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     page = WikipediaArticle(
-    #         wikibase_deprecated=IASandboxWikibase(),
+    #         wikibase=IASandboxWikibase(),
     #         language_code="en",
     #         wikimedia_site=WikimediaSite.WIKIPEDIA,
     #         title="Test",
@@ -128,11 +128,11 @@ class TestWikipediaArticle(TestCase):
         wp.__fetch_wikidata_qid__()
         assert wp.wikidata_qid == "Q14452"
 
-    # DISABLED because it fails. we disabled the method since 2.1.0-alpha2
+    # DISABLED because it fails. we deprecated the method since 2.1.0-alpha2
     # def test_get_title_from_wikidata(self):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
-    #     wp = WikipediaArticle(wdqid="Q1", wikibase_deprecated=IASandboxWikibase())
+    #     wp = WikipediaArticle(wdqid="Q1", wikibase=IASandboxWikibase())
     #     wp.__get_title_from_wikidata__()
     #     assert wp.title == "Universe"
 
@@ -140,7 +140,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
     #     )
     #     with self.assertRaises(MissingInformationError):
     #         wp.__count_number_of_supported_templates_found__()
@@ -149,7 +149,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
     #     )
     #     wp.wikitext = "{{citeq|1}}"
     #     wp.__extract_templates_from_the_wikitext__()
@@ -159,7 +159,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
     #     )
     #     wp.wikitext = "{{citeq|1}}"
     #     wp.__extract_templates_from_the_wikitext__()
@@ -169,7 +169,7 @@ class TestWikipediaArticle(TestCase):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     wp = WikipediaArticle(
-    #         title="Påskeøen", wikibase_deprecated=IASandboxWikibase(), language_code="da"
+    #         title="Påskeøen", wikibase=IASandboxWikibase(), language_code="da"
     #     )
     #     wp.wikitext = "{citeq|1}}testtestxxxx{}"
     #     wp.__extract_templates_from_the_wikitext__()

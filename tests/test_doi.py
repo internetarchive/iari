@@ -1,7 +1,5 @@
 from unittest import TestCase
 
-from src.models.identifiers.doi import Doi
-
 
 class TestDoi(TestCase):
     retracted_in_oa_but_not_wd = "10.1038/nature04695"

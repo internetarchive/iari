@@ -1,22 +1,5 @@
 from unittest import TestCase
 
-from src.models.api.get_statistics.get_article_statistics.article_statistics import (
-    ArticleStatistics,
-)
-from src.models.api.get_statistics.references.content.aggregate import (
-    CiteQReferences,
-    Cs1References,
-)
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_book_references import (
-    CiteBookReferences,
-)
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_journal_references import (
-    CiteJournalReferences,
-)
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_web_references import (
-    CiteWebReferences,
-)
-from src.models.api.get_statistics.references.urls_aggregates import UrlsAggregates
 from src.models.api.job import Job
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import (  # type: ignore

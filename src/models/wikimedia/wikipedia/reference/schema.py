@@ -90,7 +90,7 @@ class WikipediaReferenceSchema(Schema):
             "orig_year",
             "pmc_embargo_date",
             "publication_date",
-            # from template documentation
+            # from templates documentation
             "first1",
             "first2",
             "first3",

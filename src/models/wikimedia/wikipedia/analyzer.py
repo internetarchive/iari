@@ -3,40 +3,35 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import validate_arguments
 
-from src.models.api.get_statistics.get_article_statistics.article_statistics import (
-    ArticleStatistics,
-)
-from src.models.api.get_statistics.references import References, ReferenceTypes, Urls
-from src.models.api.get_statistics.references.content import (
+from src.models.api import ArticleStatistics
+from src.models.api.job import Job
+from src.models.api.statistics.article import ReferencesOverview
+from src.models.api.statistics.article.content import (
     AggregateContentReferences,
-    CitationReferences,
     ContentReferences,
+    CitationReferences,
     GeneralReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate import (
+from src.models.api.statistics.article.content.aggregate import (
     CiteQReferences,
     Cs1References,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_book_references import (
+from src.models.api.statistics.article.content.aggregate.cs1.cite_book_references import (
     CiteBookReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_journal_references import (
+from src.models.api.statistics.article.content.aggregate.cs1.cite_journal_references import (
     CiteJournalReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_web_references import (
+from src.models.api.statistics.article.content.aggregate.cs1.cite_web_references import (
     CiteWebReferences,
 )
-from src.models.api.get_statistics.references.reference_statistics import (
-    ReferenceStatistics,
-)
-from src.models.api.get_statistics.references.template_statistics import (
-    TemplateStatistics,
-)
-from src.models.api.get_statistics.references.unique_urls_aggregates import (
+from src.models.api.statistics.article.identifiers.unique_urls_aggregates import (
     UniqueUrlsAggregates,
 )
-from src.models.api.get_statistics.references.urls_aggregates import UrlsAggregates
-from src.models.api.job import Job
+from src.models.api.statistics.article.identifiers.urls import Urls
+from src.models.api.statistics.article.identifiers.urls_aggregates import UrlsAggregates
+from src.models.api.statistics.article.reference_types import ReferenceTypes
+from src.models.api.statistics.reference import ReferenceStatistic, TemplateStatistics
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
@@ -47,7 +42,10 @@ logger = logging.getLogger(__name__)
 
 class WikipediaAnalyzer(WcdBaseModel):
     """This model contain all the logic for getting the
-    get_statistics and mapping them to the API output model"""
+    article and reference statistics and mapping them to the API output model
+
+    It does not handle storing on disk.
+    """
 
     job: Job
     article: Optional[WikipediaArticle] = None
@@ -55,6 +53,17 @@ class WikipediaAnalyzer(WcdBaseModel):
     # wikibase: Wikibase = IASandboxWikibase()
     wikitext: str = ""
     check_urls: bool = False
+
+    @property
+    def wari_id(self) -> str:
+        if not self.job:
+            raise MissingInformationError()
+        if not self.article:
+            raise MissingInformationError()
+        return (
+            f"{self.job.lang.value}."
+            f"{self.job.site.value}.org.{self.article.page_id}"
+        )
 
     @property
     def testing(self):
@@ -160,35 +169,25 @@ class WikipediaAnalyzer(WcdBaseModel):
                     all=ae.number_of_urls,
                     unique=UniqueUrlsAggregates(
                         all=ae.number_of_checked_unique_reference_urls,
-                        s200=ae.number_of_unique_reference_urls_with_code_200,
-                        s3xx=ae.number_of_unique_reference_urls_with_code_3xx,
-                        s404=ae.number_of_unique_reference_urls_with_code_404,
-                        s5xx=ae.number_of_unique_reference_urls_with_code_5xx,
-                        error=ae.number_of_unique_reference_urls_with_error,
-                        no_dns=ae.number_of_unique_reference_urls_with_no_dns,
-                        other_2xx=ae.number_of_unique_reference_urls_with_other_2xx,
-                        other_4xx=ae.number_of_unique_reference_urls_with_other_4xx,
-                        malformed_urls=ae.number_of_unique_reference_urls_with_malformed_url,
                     ),
                 ),
+                first_level_domain_counts=ae.reference_first_level_domain_counts,
                 urls_found=True,
-                # details=ae.reference_urls_dictionaries,
             )
         else:
             urls = Urls()
         return urls
 
     @property
-    def __references__(self) -> References:
+    def __references_overview__(self) -> ReferencesOverview:
         if not self.article or not self.article.extractor:
             raise MissingInformationError(
                 "self.article or self.article.extractor was None"
             )
         else:
             ae = self.article.extractor
-            return References(
+            return ReferencesOverview(
                 all=ae.number_of_references,
-                urls=self.__urls__,
                 types=ReferenceTypes(
                     content=ContentReferences(
                         all=ae.number_of_content_references,
@@ -202,7 +201,6 @@ class WikipediaAnalyzer(WcdBaseModel):
                     ),
                     named=ae.number_of_empty_named_references,
                 ),
-                first_level_domain_counts=ae.reference_first_level_domain_counts,
             )
 
     def __gather_article_statistics__(self) -> None:
@@ -215,12 +213,15 @@ class WikipediaAnalyzer(WcdBaseModel):
                 raise MissingInformationError("self.article.extractor was None")
             has_references = self.article.extractor.has_references
             self.article_statistics = ArticleStatistics(
+                # todo update to v2
+                wari_id=self.wari_id,
                 has_references=has_references,
                 page_id=self.article.page_id,
                 title=self.article.title,
+                urls=self.__urls__,
             )
             if has_references:
-                self.article_statistics.references = self.__references__
+                self.article_statistics.references = self.__references_overview__
 
     def get_statistics(self) -> Dict[str, Any]:
         if not self.article:
@@ -257,13 +258,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 if not reference.raw_reference:
                     raise MissingInformationError("raw_reference was None")
                 rr = reference.raw_reference
-                # DISABLED because it causes 502 sometimes
-                # if not rr.check_urls_done:
-                #     if not self.testing:
-                #         raise MissingInformationError("check_urls_done was False")
-                # if not rr.first_level_domains_done:
-                #     raise MissingInformationError("first_level_domains_done was False")
-                reference_statistics = ReferenceStatistics(
+                reference_statistics = ReferenceStatistic(
                     plain_text_in_reference=rr.plain_text_in_reference,
                     citation_template_found=rr.citation_template_found,
                     cs1_template_found=rr.cs1_template_found,
@@ -303,7 +298,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         if not self.article_statistics:
             logger.debug(
                 "self.article_statistics was None "
-                "so we skip gathering reference get_statistics"
+                "so we skip gathering reference statistics"
             )
 
     def __populate_article__(self):
@@ -343,7 +338,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             for template in reference.raw_reference.templates:
                 stat = TemplateStatistics(
                     # TODO extract more information that the patrons might want
-                    #  to know from the template, e.g. the different persons
+                    #  to know from the templates, e.g. the different persons
                     doi=template.get_doi,
                     is_bareurl_template=template.is_bareurl_template,
                     is_citation_template=template.is_citation_template,

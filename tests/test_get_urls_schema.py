@@ -7,7 +7,7 @@ from src.models.api.enums import Subset
 
 class TestGetUrlsSchema(TestCase):
     def test_return_object_valid(self):
-        from src.models.api.get_statistics.get_url_statistics.get_urls_schema import (
+        from src.models.api.statistics import (
             GetUrlsSchema,
         )
         from src.models.api.job import Job
@@ -35,7 +35,7 @@ class TestGetUrlsSchema(TestCase):
         assert job == Job(title="test", refresh=True)
 
     def test_invalid_subset(self):
-        from src.models.api.get_statistics.get_url_statistics.get_urls_schema import (
+        from src.models.api.statistics import (
             GetUrlsSchema,
         )
 

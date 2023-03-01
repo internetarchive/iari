@@ -7,22 +7,8 @@ from flask_restful import Api  # type: ignore
 
 from src import console
 from src.models.api import GetUrlStatistics
-from src.models.api.get_statistics.get_article_statistics import GetArticleStatistics
-from src.models.api.get_statistics.get_article_statistics.article_statistics import (
-    ArticleStatistics,
-)
-from src.models.api.get_statistics.get_url_statistics import UrlStatistics
-from src.models.api.get_statistics.references.content.aggregate import CiteQReferences
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_book_references import (
-    CiteBookReferences,
-)
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_journal_references import (
-    CiteJournalReferences,
-)
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_web_references import (
-    CiteWebReferences,
-)
-from src.models.api.get_statistics.references.urls_aggregates import UrlsAggregates
+from src.models.api.statistics import UrlStatistics
+from src.models.api.statistics import UrlsAggregates
 
 logger = logging.getLogger(__name__)
 

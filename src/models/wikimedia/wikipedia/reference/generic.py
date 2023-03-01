@@ -12,7 +12,7 @@ from src.models.exceptions import (
     MissingInformationError,
     MoreThanOneNumberError,
 )
-from src.models.person import Person
+from src.models.wikimedia.wikipedia.reference.person import Person
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
@@ -433,16 +433,16 @@ class WikipediaReference(WcdItem):
     #         return datetime.strftime(self.year, "%Y-%m-%d")
     #     else:
     #         raise ValueError(
-    #             f"missing publication date, in template {self.template_name}, see {self.dict()}"
+    #             f"missing publication date, in templates {self.template_name}, see {self.dict()}"
     #         )
 
     # @property
     # def wikibase_url(self) -> str:
-    #     if not self.wikibase_deprecated:
-    #         raise MissingInformationError("self.wikibase_deprecated was None")
+    #     if not self.wikibase:
+    #         raise MissingInformationError("self.wikibase was None")
     #     if not self.return_:
     #         raise MissingInformationError("self.return_ was None")
-    #     return f"{self.wikibase_deprecated.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
+    #     return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
 
     # @validate_arguments
     # def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
@@ -481,7 +481,7 @@ class WikipediaReference(WcdItem):
     #     domain from a known web archiver"""
     #     pass
     # logger.debug("__detect_archive_urls__: Running")
-    # from src.models.wikibase_deprecated.enums import KnownArchiveUrl
+    # from src.models.wikibase.enums import KnownArchiveUrl
     #
     # # ARCHIVE_URL
     # if self.first_level_domain_of_archive_url:
@@ -568,13 +568,13 @@ class WikipediaReference(WcdItem):
         # if self.first_level_domain_of_url is not None:
         #     str2hash = self.first_level_domain_of_url
         #     self.first_level_domain_of_url_hash = hashlib.md5(
-        #         f'{self.wikibase_deprecated.title}{str2hash.replace(" ", "").lower()}'.encode()
+        #         f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
         #     ).hexdigest()
 
     # def __generate_hashes__(self):
     #     """Generate hashes for both website and reference items"""
     #     # if not self.wikibase:
-    #     #     raise MissingInformationError("self.wikibase_deprecated was None")
+    #     #     raise MissingInformationError("self.wikibase was None")
     #     self.__generate_reference_hash__()
     #     # self.__generate_first_level_domain_hash__()
 
@@ -769,16 +769,16 @@ class WikipediaReference(WcdItem):
 
     # DEPRECATED since 2.1.0-alpha3
     # def __parse_google_books_template__(self):
-    #     """Parse the Google Books template that sometimes appear in self.url
+    #     """Parse the Google Books templates that sometimes appear in self.url
     #     and save the result in self.google_books and generate the URL
     #     and store it in self.url"""
     #     logger.debug("__parse_google_books__: Running")
     #     template_tuples = extract_templates_and_params(self.url, True)
     #     if template_tuples:
-    #         logger.info("Found Google books template")
+    #         logger.info("Found Google books templates")
     #         for _template_name, content in template_tuples:
     #             google_books: GoogleBooks = GoogleBooksSchema().load(content)
-    #             google_books.wikibase_deprecated = self.wikibase_deprecated
+    #             google_books.wikibase = self.wikibase
     #             google_books.finish_parsing()
     #             self.url = google_books.url
     #             self.google_books_id = google_books.id
@@ -925,7 +925,7 @@ class WikipediaReference(WcdItem):
     #     else:
     #         # TODO REGRESSION We don't support nested templates for now during the rewrite
     #         # if self.__has_template_data__(string=url):
-    #         #     logger.info(f"Found template data in url: {url}")
+    #         #     logger.info(f"Found templates data in url: {url}")
     #         #     return self.__get_url_from_template__(url=url)
     #         # else:
     #         logger.warning(
@@ -1102,16 +1102,16 @@ class WikipediaReference(WcdItem):
     # TODO update to use new models
     # def __get_url_from_template__(self, url: str) -> str:
     #     if "google books" in url.lower():
-    #         logger.info("Found Google books template")
+    #         logger.info("Found Google books templates")
     #         return self.__get_url_from_google_books_template__(url=url)
     #     else:
-    #         logger.warning(f"Parsing the template data in {url} is not supported yet")
+    #         logger.warning(f"Parsing the templates data in {url} is not supported yet")
     #         return ""
 
     # TODO update to use new models
     # @staticmethod
     # def __get_url_from_google_books_template__(url: str) -> str:
-    #     """Parse the Google Books template that sometimes appear in a url
+    #     """Parse the Google Books templates that sometimes appear in a url
     #     and return the generated url"""
     #     logger.debug("__get_url_from_google_books_template__: Running")
     #     template_triples = extract_templates_and_params(url, True)
@@ -1123,10 +1123,10 @@ class WikipediaReference(WcdItem):
     #                 google_books.finish_parsing()
     #                 # We only care about the first
     #                 return str(google_books.url)
-    #         logger.warning(f"Parsing the google books template data in {url} failed")
+    #         logger.warning(f"Parsing the google books templates data in {url} failed")
     #         return ""
     #     else:
-    #         logger.warning(f"Parsing the google books template data in {url} failed")
+    #         logger.warning(f"Parsing the google books templates data in {url} failed")
     #         return ""
     # def get_wcdqid_from_cache(self):
     #     pass

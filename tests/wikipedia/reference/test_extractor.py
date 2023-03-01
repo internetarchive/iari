@@ -190,7 +190,7 @@ class TestWikipediaReferenceExtractor(TestCase):
     #     wre = WikipediaReferenceExtractor(
     #         testing=True,
     #         wikitext=easter_island_tail_excerpt,
-    #         wikibase_deprecated=wikibase_deprecated,
+    #         wikibase=wikibase,
     #     )
     #     wre.extract_all_references()
     #     assert len(wre.reference_first_level_domain_counts) == 7

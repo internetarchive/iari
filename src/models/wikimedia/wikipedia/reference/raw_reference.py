@@ -168,7 +168,7 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def google_books_url_or_template_found(self):
-        """This detects both google book template and google books url
+        """This detects both google book templates and google books url
         example: https://books.google.se/books?id=9HRodACJLOoC&printsec=
         frontcover&dq=test&hl=sv&sa=X&redir_esc=y#v=onepage&q=test&f=false"""
         return bool(
@@ -186,7 +186,7 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def plain_text_in_reference(self) -> bool:
-        # Try removing everything that is inside template markup and see if anything is left
+        # Try removing everything that is inside templates markup and see if anything is left
         if isinstance(self.wikicode, Tag):
             stripped_wikicode = self.wikicode.contents.strip_code().strip()
         else:
@@ -222,7 +222,7 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def cs1_template_found(self) -> bool:
-        """This searches for at least one CS1 template"""
+        """This searches for at least one CS1 templates"""
         for template in self.templates:
             if template.is_cs1_template:
                 return True
@@ -304,12 +304,12 @@ class WikipediaRawReference(WcdBaseModel):
         if not self.reference_urls_done:
             raise MissingInformationError("reference_urls not done")
         for url in self.reference_urls:
-            url.fix_and_extract_and_check()
+            url.extract()
             self.checked_urls.append(url)
         self.check_urls_done = True
 
     def specific_template_found(self, names: Union[str, List[str]] = "") -> bool:
-        """Used to search one instance of a specific template"""
+        """Used to search one instance of a specific templates"""
         if isinstance(names, list):
             for name in names:
                 return self.__found_template__(name=name)
@@ -361,7 +361,7 @@ class WikipediaRawReference(WcdBaseModel):
                 logger.debug(f"Found no templates in {self.wikicode}")
 
     def __extract_and_clean_template_parameters__(self) -> None:
-        """We only extract and clean if exactly one template is found"""
+        """We only extract and clean if exactly one templates is found"""
         logger.debug("__extract_and_clean_template_parameters__: running")
         if self.number_of_templates == 1:
             [
@@ -405,10 +405,10 @@ class WikipediaRawReference(WcdBaseModel):
     def __determine_if_multiple_templates__(self):
         """We want to determine which type of reference this is
 
-        Design limit: we only support one template for now"""
+        Design limit: we only support one templates for now"""
         if self.number_of_templates:
             logger.info(
-                f"Found {self.number_of_templates} template(s) in {self.wikicode}"
+                f"Found {self.number_of_templates} templates(s) in {self.wikicode}"
             )
             if self.number_of_templates > 1:
                 self.multiple_templates_found = True
@@ -498,4 +498,4 @@ class WikipediaRawReference(WcdBaseModel):
 
     # todo support the common combination of url + webarchive templates
     # they should btw be converted into a
-    # cite web template IMO
+    # cite web templates IMO

@@ -5,21 +5,20 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src.models.api.get_statistics.get_article_statistics import GetArticleStatistics
-from src.models.api.get_statistics.get_article_statistics.article_statistics import (
+from src.models.api.statistics import (
     ArticleStatistics,
 )
-from src.models.api.get_statistics.references.content.aggregate import CiteQReferences
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_book_references import (
+from src.models.api.statistics import CiteQReferences
+from src.models.api.statistics import (
     CiteBookReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_journal_references import (
+from src.models.api.statistics import (
     CiteJournalReferences,
 )
-from src.models.api.get_statistics.references.content.aggregate.cs1.cite_web_references import (
+from src.models.api.statistics import (
     CiteWebReferences,
 )
-from src.models.api.get_statistics.references.urls_aggregates import UrlsAggregates
+from src.models.api.statistics import UrlsAggregates
 
 logger = logging.getLogger(__name__)
 
@@ -55,25 +54,25 @@ class TestGetArticleStatistics(TestCase):
             if self.job.lang.lower() == "en" and self.job.title and self.job.site.lower() == "wikipedia":
                 logger.info(f"Analyzing {self.job.title}...")
                 # TODO use a work queue here like ReFill so
-                #  we can easily scale the workload from thousands of users
+                #  we can easily scale the workload from thousands of patrons
                 wikipedia_analyzer = WikipediaAnalyzer(title=self.job.title,
                                                        lang=self.job.lang,
                                                        wikimedia_site=self.job.site,
                                                        testing=self.job.testing)
-                get_statistics = wikipedia_analyzer.get_article_statistics()
+                statistics = wikipedia_analyzer.article()
                 if self.job.testing:
                     # what is the purpose of this?
                     return "ok", 200
                 else:
-                    if isinstance(get_statistics, dict):
+                    if isinstance(statistics, dict):
                         # we got a json response
                         # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
                         # flask calls jsonify automatically
-                        return get_statistics, 200
-                    elif get_statistics == AnalyzerReturn.NOT_FOUND:
-                        return get_statistics.value, 404
-                    elif get_statistics == AnalyzerReturn.IS_REDIRECT:
-                        return get_statistics.value, 400
+                        return statistics, 200
+                    elif statistics == AnalyzerReturn.NOT_FOUND:
+                        return statistics.value, 404
+                    elif statistics == AnalyzerReturn.IS_REDIRECT:
+                        return statistics.value, 400
                     else:
                         raise Exception("this should never be reached.")
 
@@ -124,7 +123,7 @@ class TestGetArticleStatistics(TestCase):
         app = Flask(__name__)
         api = Api(app)
 
-        api.add_resource(GetArticleStatistics, "/get-statistics")
+        api.add_resource(ArticleStatistics, "/get-statistics")
         app.testing = True
         self.test_client = app.test_client()
 

@@ -1,7 +1,7 @@
 # from unittest import TestCase
 #
 # from src.models.api.enums import Return
-# from src.models.api.disabled.lookup_wikicitations_qid import LookupWikicitationsQid
+# from src.models.api.deprecated.lookup_wikicitations_qid import LookupWikicitationsQid
 # from src.models.exceptions import NotSupportedError
 #
 #

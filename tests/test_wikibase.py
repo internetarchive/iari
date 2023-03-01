@@ -1,7 +1,7 @@
 # from unittest import TestCase
 #
 # from src import IASandboxWikibase
-# from src.models.wikibase_deprecated.wikicitations_wikibase import WikiCitationsWikibase
+# from src.models.wikibase.wikicitations_wikibase import WikiCitationsWikibase
 #
 #
 # class TestWikibase(TestCase):
