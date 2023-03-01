@@ -13,30 +13,27 @@ class TestFileIo(TestCase):
 
     def test_filename(self):
         io = FileIo(job=self.__test_job__)
-        assert io.filename() == "json/en.wikipedia.org:0"
+        assert io.filename == "json/en.wikipedia.org:0"
         io1 = FileIo(
             job=self.__test_job__,
             statistics_dictionary=ArticleStatistics(page_id=1).dict(),
         )
-        assert (
-            io1.filename(page_id=io1.statistics_dictionary["page_id"])
-            == "json/en.wikipedia.org:1"
-        )
+        assert io1.filename == "json/en.wikipedia.org:1"
         io2 = FileIo(
             job=self.__test_job__,
             statistics_dictionary=ArticleStatistics(page_id=1).dict(),
         )
         io2.job.get_page_id()
-        assert io2.filename(page_id=io2.job.page_id) == "json/en.wikipedia.org:11089416"
+        assert io2.filename == "json/en.wikipedia.org:11089416"
 
     def test_save_to_disk(self):
         io1 = FileIo(
             job=self.__test_job__,
             statistics_dictionary=ArticleStatistics(page_id=1).dict(),
         )
-        print(io1.statistics_dictionary)
+        print(io1.data)
         io1.write_to_disk()
-        assert exists(io1.filename(page_id=1)) is True
+        assert exists(io1.filename) is True
 
     def test_read_from_disk(self):
         stat = ArticleStatistics(

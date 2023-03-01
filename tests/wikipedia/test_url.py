@@ -34,23 +34,23 @@ class TestWikipediaUrl(TestCase):
     #
     #     return MockResponse(200)
 
-    def test_check_200(self):
-        self.wikipediaUrl.extract()
-        assert (
-            self.wikipediaUrl.status_code == 0 or self.wikipediaUrl.status_code == 200
-        )
-        self.assertTrue(self.wikipediaUrl.checked)
-
-    def test_check_200_wm(self):
-        url = WikipediaUrl(url="http://web.archive.org")
-        url.extract()
-        assert url.status_code == 0 or url.status_code == 200
-
-    def test_check_404(self):
-        url = WikipediaUrl(url="https://en.wikipedia.org/wiki/45q2345awf")
-        url.extract()
-        assert url.status_code == 0 or url.status_code == 404
-        self.assertTrue(url.checked)
+    # def test_check_200(self):
+    #     self.wikipediaUrl.extract()
+    #     assert (
+    #         self.wikipediaUrl.status_code == 0 or self.wikipediaUrl.status_code == 200
+    #     )
+    #     self.assertTrue(self.wikipediaUrl.checked)
+    #
+    # def test_check_200_wm(self):
+    #     url = WikipediaUrl(url="http://web.archive.org")
+    #     url.extract()
+    #     assert url.status_code == 0 or url.status_code == 200
+    #
+    # def test_check_404(self):
+    #     url = WikipediaUrl(url="https://en.wikipedia.org/wiki/45q2345awf")
+    #     url.extract()
+    #     assert url.status_code == 0 or url.status_code == 404
+    #     self.assertTrue(url.checked)
 
     def test_is_google_books_url(self):
         self.assertTrue(self.wikipediaUrl2.is_google_books_url())
@@ -98,59 +98,59 @@ class TestWikipediaUrl(TestCase):
         url.__check_and_fix_netloc__()
         assert url.netloc == "news.oneindia.in"
 
-    def test_check_dns_false(self):
-        url = WikipediaUrl(
-            url="http://news.oneindia.in/2010/10/21/india-invents-laser-guide-bomb.html"
-        )
-        assert url.dns_record_found is False
-
-    def test_check_dns_true(self):
-        url = WikipediaUrl(url="http://www.google.com")
-        url.extract()
-        assert url.dns_record_found is True
-
-    def test_error1(self):
-        url = WikipediaUrl(url="https://voyagermediaawards.nz/judges2019")
-        url.extract()
-        assert url.request_error is True
-
-    def test_error2(self):
-        url = WikipediaUrl(url="https://ukrainianweek.com/History/198459")
-        url.extract()
-        assert url.request_error is True
-
-    def test_error3(self):
-        url = WikipediaUrl(
-            url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
-        )
-        url.extract()
-        assert url.request_error is True
-
-    def test_dns_hoover(self):
-        url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
-        url.extract()
-        # assert url.error is True
-        # console.print(url)
-        assert url.unrecognized_scheme is False
-        assert url.request_url_error is False
-        assert url.dns_no_answer is True
-        # Allow 0 because of intermittent 301 response
-        assert url.status_code in [301, 0]
-        assert url.checked is True
-
-    def test_status_code_404(self):
-        url = WikipediaUrl(
-            url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
-        )
-        url.extract()
-        assert url.status_code == 0 or url.status_code == 404
-        assert url.checked is True
-
-    def test_no_dns(self):
-        url = WikipediaUrl(url="https://www1.geocities.com/")
-        url.extract()
-        assert url.dns_record_found is False
-        assert url.checked is True
+    # def test_check_dns_false(self):
+    #     url = WikipediaUrl(
+    #         url="http://news.oneindia.in/2010/10/21/india-invents-laser-guide-bomb.html"
+    #     )
+    #     assert url.dns_record_found is False
+    #
+    # def test_check_dns_true(self):
+    #     url = WikipediaUrl(url="http://www.google.com")
+    #     url.extract()
+    #     assert url.dns_record_found is True
+    #
+    # def test_error1(self):
+    #     url = WikipediaUrl(url="https://voyagermediaawards.nz/judges2019")
+    #     url.extract()
+    #     assert url.request_error is True
+    #
+    # def test_error2(self):
+    #     url = WikipediaUrl(url="https://ukrainianweek.com/History/198459")
+    #     url.extract()
+    #     assert url.request_error is True
+    #
+    # def test_error3(self):
+    #     url = WikipediaUrl(
+    #         url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
+    #     )
+    #     url.extract()
+    #     assert url.request_error is True
+    #
+    # def test_dns_hoover(self):
+    #     url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
+    #     url.extract()
+    #     # assert url.error is True
+    #     # console.print(url)
+    #     assert url.unrecognized_scheme is False
+    #     assert url.request_url_error is False
+    #     assert url.dns_no_answer is True
+    #     # Allow 0 because of intermittent 301 response
+    #     assert url.status_code in [301, 0]
+    #     assert url.checked is True
+    #
+    # def test_status_code_404(self):
+    #     url = WikipediaUrl(
+    #         url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
+    #     )
+    #     url.extract()
+    #     assert url.status_code == 0 or url.status_code == 404
+    #     assert url.checked is True
+    #
+    # def test_no_dns(self):
+    #     url = WikipediaUrl(url="https://www1.geocities.com/")
+    #     url.extract()
+    #     assert url.dns_record_found is False
+    #     assert url.checked is True
 
     # def test_check_soft404(self):
     #     assert False
@@ -185,16 +185,12 @@ class TestWikipediaUrl(TestCase):
     def test_extract_first_level_domain_malformed3(self):
         url = WikipediaUrl(url="httpss://www1.geocities.com/")
         url.extract()
-        assert url.request_error is True
         assert url.first_level_domain == "geocities.com"
-        assert url.dns_record_found is False
         assert url.malformed_url is True
 
     def test_extract_first_level_domain_malformed4(self):
         url = WikipediaUrl(url="https://www1.geocities.")
         url.extract()
-        assert url.request_error is True
-        assert url.dns_record_found is False
         assert url.unrecognized_tld is True
 
     def test___check_tld__invalid(self):

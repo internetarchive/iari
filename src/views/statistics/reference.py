@@ -1,11 +1,17 @@
 from flask_restful import Resource
 
+from src.models.file_io.reference_file_io import ReferenceFileIo
+
 
 class Reference(Resource):
-    # TODO implement based on md5 id
-    def get(self, id_=""):
-        if not id_:
-            return "No id given", 400
+    @staticmethod
+    def get(reference_id=""):
+        if not reference_id:
+            return "No reference id given", 400
         else:
-            # todo lookup and return based on id
-            raise NotImplementedError()
+            referencefileio = ReferenceFileIo(hash=reference_id)
+            referencefileio.read_from_disk()
+            data = referencefileio.data
+            if not data:
+                return "No json in cache", 404
+            return data, 200

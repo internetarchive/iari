@@ -1,13 +1,14 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Any, List, Optional
+from typing import Any, List
 
 from mwparserfromhell.nodes import Template  # type: ignore
 from pydantic import validate_arguments
 
 import config
 from src.models.exceptions import MissingInformationError
+from src.models.identifiers_checking.doi import Doi
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
 

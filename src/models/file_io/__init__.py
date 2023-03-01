@@ -1,7 +1,7 @@
 import json
 import logging
 from os.path import exists
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import config
 from src import WcdBaseModel

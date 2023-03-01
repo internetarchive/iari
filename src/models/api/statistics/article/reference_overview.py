@@ -1,9 +1,8 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from pydantic import BaseModel
 
 from src.models.api.statistics.article.dehydrated_reference import DehydratedReference
-from src.models.api.statistics.article.identifiers.urls import Urls
 from src.models.api.statistics.article.reference_types import ReferenceTypes
 
 

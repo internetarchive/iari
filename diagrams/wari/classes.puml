@@ -29,6 +29,7 @@ general: int
 class article{
 wari_id: str
 reference_statistics: Dict[str, int]
+references: List[str] #  list of ids
 title: str
 page_id: int
 urls: List[str]

@@ -12,11 +12,11 @@ from src.models.exceptions import (
     MissingInformationError,
     MoreThanOneNumberError,
 )
-from src.models.wikimedia.wikipedia.reference.person import Person
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
+from src.models.wikimedia.wikipedia.reference.person import Person
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
 logger = logging.getLogger(__name__)

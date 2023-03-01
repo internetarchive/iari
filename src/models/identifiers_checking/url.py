@@ -1,23 +1,23 @@
 import logging
 
 import requests
-from dns.resolver import resolve, NXDOMAIN, LifetimeTimeout, NoNameservers, NoAnswer
+from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer, NoNameservers, resolve
 from requests import (
-    ReadTimeout,
-    ConnectTimeout,
-    Timeout,
     ConnectionError,
-    RequestException,
+    ConnectTimeout,
     HTTPError,
+    ReadTimeout,
+    RequestException,
+    Timeout,
 )
 from requests.exceptions import (
-    RetryError,
     InvalidHeader,
-    ProxyError,
-    MissingSchema,
+    InvalidProxyURL,
     InvalidSchema,
     InvalidURL,
-    InvalidProxyURL,
+    MissingSchema,
+    ProxyError,
+    RetryError,
     SSLError,
 )
 
@@ -78,23 +78,6 @@ class Url(WikipediaUrl):
                 self.dns_no_answer = True
         else:
             logger.warning("Could not get DNS because netloc was empty")
-
-    def __fix_malformed_urls__(self):
-        """This fixes common errors found in the urls"""
-        self.__fix_malformed_httpwww__()
-        self.__fix_malformed_httpswww__()
-
-    def __fix_malformed_httpwww__(self):
-        """This fixes a common error found in Wikipedia urls"""
-        if self.__get_url__.startswith("httpwww"):
-            self.malformed_url = True
-            self.fixed_url = self.__get_url__.replace("httpwww", "http://www")
-
-    def __fix_malformed_httpswww__(self):
-        """This fixes a common error found in Wikipedia urls"""
-        if self.__get_url__.startswith("httpswww"):
-            self.malformed_url = True
-            self.fixed_url = self.__get_url__.replace("httpswww", "https://www")
 
     def __check_with_https_verify__(self):
         logger.debug("__check_with_https_verify__: running")

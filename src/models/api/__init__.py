@@ -19,7 +19,6 @@ from src.views.check_url import CheckUrl
 from src.views.statistics.article import Article
 from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
-from src.views.statistics.references_count import ReferencesCount
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -34,9 +33,8 @@ api = Api(app, prefix="/v1")
 api.add_resource(CheckUrl, "/check-url")
 api.add_resource(CheckDoi, "/check-doi")
 api.add_resource(Article, "/statistics/article")
-api.add_resource(Reference, "/statistics/reference/<string:id_>")
+api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
 api.add_resource(References, "/statistics/references")
-api.add_resource(ReferencesCount, "/statistics/references/count")
 # return app_
 # api.add_resource(
 #     AddJobToQueue, "/add-job"

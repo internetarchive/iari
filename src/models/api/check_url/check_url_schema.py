@@ -1,5 +1,5 @@
 from marshmallow import Schema
-from marshmallow.fields import String, Int
+from marshmallow.fields import Int, String
 
 
 class CheckUrlSchema(Schema):
