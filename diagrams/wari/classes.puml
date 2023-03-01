@@ -1,9 +1,9 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-class references_count{
-total: int
-}
+'class references_count{
+'total: int
+'}
 class parameters{
 ## all ~100 parameters in CS1 templates
 ## (all hyphens are converted to underscores)
@@ -22,7 +22,7 @@ author_strings: int}
 }
 class reference_statistics{
 named: int
-citation: int
+footnote: int
 content: int
 general: int
 }
