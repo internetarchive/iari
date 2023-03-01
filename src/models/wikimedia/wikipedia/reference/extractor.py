@@ -203,80 +203,6 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     #     return [url.dict() for url in self.checked_and_unique_reference_urls]
 
     @property
-    def number_of_unique_reference_urls_with_other_2xx(self):
-        """This catches 2xx codes which could be good or not"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("2") and url.status_code not in [200]
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_other_4xx(self):
-        """This catches 2xx codes which could be good or not"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("4") and url.status_code not in [404]
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_code_5xx(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("5")
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_code_404(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.status_code == 404
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_code_3xx(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("3")
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_code_200(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.status_code == 200
-            ]
-        )
-
-    @property
     def number_of_unique_reference_urls_with_malformed_url(self):
         """This can be True while error is also True"""
         if not self.check_urls_done:
@@ -291,31 +217,6 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             for url in self.checked_and_unique_reference_urls
             if url.malformed_url is True
         ]
-
-    @property
-    def number_of_unique_reference_urls_with_error(self):
-        """This includes 2 different groups of error types from the request library"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.request_error is True or url.request_url_error
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_no_dns(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.dns_record_found is False
-            ]
-        )
 
     @property
     def number_of_urls(self):
@@ -359,7 +260,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             self.checked_and_unique_reference_urls = list(set(urls))
 
     @property
-    def reference_first_level_domain_counts(self) -> List[Dict[str, int]]:
+    def reference_first_level_domain_counts(self) -> Dict[str, int]:
         """This returns a dict with fld as key and the count as value"""
         fld_set = set(self.reference_first_level_domains)
         counts = dict()
@@ -368,13 +269,13 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             counts[fld] = count
         # Sort by count, descending
         sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-        sorted_counts_dictionaries = []
+        # Thanks to Sawood for recommending we simplify and return a dictionary
+        sorted_counts_dictionary = {}
         for element in sorted_counts:
             fld = str(element[0])
             count = int(element[1])
-            dictionary: Dict[str, int] = {fld: count}
-            sorted_counts_dictionaries.append(dictionary)
-        return sorted_counts_dictionaries
+            sorted_counts_dictionary[fld] = count
+        return sorted_counts_dictionary
 
     @property
     def reference_first_level_domains(self) -> List[str]:
@@ -441,7 +342,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     @property
     def number_of_content_references_with_a_supported_template_we_prefer(self) -> int:
         """We prefer templates that is easy to generate a graph from
-        Currently that is CS1 templates, CiteQ template and Citation template"""
+        Currently that is CS1 templates, CiteQ templates and Citation templates"""
         return len(
             [
                 reference

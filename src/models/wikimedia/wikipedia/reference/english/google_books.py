@@ -45,12 +45,12 @@
 #         return f"https://books.google.com/books?id={self.id}"
 #
 #     # def __generate_hash__(self):
-#     #     if not self.wikibase_deprecated:
-#     #         raise MissingInformationError("self.wikibase_deprecated was None")
+#     #     if not self.wikibase:
+#     #         raise MissingInformationError("self.wikibase was None")
 #     #     if self.id is not None:
 #     #         str2hash = self.id
 #     #         self.md5hash = hashlib.md5(
-#     #             f'{self.wikibase_deprecated.title}{str2hash.replace(" ", "").lower()}'.encode()
+#     #             f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
 #     #         ).hexdigest()
 #
 #     def finish_parsing(self):

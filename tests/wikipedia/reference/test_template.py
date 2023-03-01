@@ -58,7 +58,7 @@ class TestTemplate:
             )
 
     def test_cite_web_from_easter_island(self):
-        """Test on template from the wild"""
+        """Test on templates from the wild"""
         data = (
             '<ref name="INE">{{cite web '
             "| url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php |"
@@ -96,7 +96,7 @@ class TestTemplate:
             assert wt.parameters["first_parameter"] == "Q1"
 
     # def test_urls(self):
-    #     """Test on template from the wild"""
+    #     """Test on templates from the wild"""
     #     data = (
     #         '<ref name="INE">{{cite web '
     #         "| url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php |"
@@ -106,8 +106,8 @@ class TestTemplate:
     #         "censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}</ref>"
     #     )
     #     templates = parse(data).ifilter_templates()
-    #     for template in templates:
-    #         wt = WikipediaTemplate(raw_template=template)
+    #     for templates in templates:
+    #         wt = WikipediaTemplate(raw_template=templates)
     #         wt.extract_and_prepare_parameters()
     #         assert wt.urls == {
     #             "http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php",
@@ -116,7 +116,7 @@ class TestTemplate:
     #         }
 
     def test_urls(self):
-        """Test on template from the wild"""
+        """Test on templates from the wild"""
         data = (
             '<ref name="INE">{{cite web '
             "| url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_vivienda/censo_pobl_vivi.php "

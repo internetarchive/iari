@@ -1,7 +1,7 @@
 # from unittest import TestCase
 #
 # from src.helpers.console import console
-# from src.models.api.disabled.lookup_by_wikidata_qid import LookupByWikidataQid
+# from src.models.api.deprecated.lookup_by_wikidata_qid import LookupByWikidataQid
 #
 #
 # class TestLookupByWikidataQid(TestCase):

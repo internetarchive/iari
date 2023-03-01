@@ -35,7 +35,7 @@ class TestWikipediaUrl(TestCase):
     #     return MockResponse(200)
 
     def test_check_200(self):
-        self.wikipediaUrl.fix_and_extract_and_check()
+        self.wikipediaUrl.extract()
         assert (
             self.wikipediaUrl.status_code == 0 or self.wikipediaUrl.status_code == 200
         )
@@ -43,12 +43,12 @@ class TestWikipediaUrl(TestCase):
 
     def test_check_200_wm(self):
         url = WikipediaUrl(url="http://web.archive.org")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.status_code == 0 or url.status_code == 200
 
     def test_check_404(self):
         url = WikipediaUrl(url="https://en.wikipedia.org/wiki/45q2345awf")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.status_code == 0 or url.status_code == 404
         self.assertTrue(url.checked)
 
@@ -106,29 +106,29 @@ class TestWikipediaUrl(TestCase):
 
     def test_check_dns_true(self):
         url = WikipediaUrl(url="http://www.google.com")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.dns_record_found is True
 
     def test_error1(self):
         url = WikipediaUrl(url="https://voyagermediaawards.nz/judges2019")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.request_error is True
 
     def test_error2(self):
         url = WikipediaUrl(url="https://ukrainianweek.com/History/198459")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.request_error is True
 
     def test_error3(self):
         url = WikipediaUrl(
             url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
         )
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.request_error is True
 
     def test_dns_hoover(self):
         url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
-        url.fix_and_extract_and_check()
+        url.extract()
         # assert url.error is True
         # console.print(url)
         assert url.unrecognized_scheme is False
@@ -142,13 +142,13 @@ class TestWikipediaUrl(TestCase):
         url = WikipediaUrl(
             url="https://www.orbitalatk.com/defense-systems/armament-systems/cdte/"
         )
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.status_code == 0 or url.status_code == 404
         assert url.checked is True
 
     def test_no_dns(self):
         url = WikipediaUrl(url="https://www1.geocities.com/")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.dns_record_found is False
         assert url.checked is True
 
@@ -158,33 +158,33 @@ class TestWikipediaUrl(TestCase):
     def test_fld_ip_adress(self):
         url = WikipediaUrl(url="127.0.0.1")
         # url.fix_and_check()
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.first_level_domain == "127.0.0.1"
         assert url.fld_is_ip is True
 
     def test_fld_ip_adress_with_path(self):
         url = WikipediaUrl(url="127.0.0.1/test")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.first_level_domain == "127.0.0.1"
         assert url.fld_is_ip is True
 
     def test_extract_first_level_domain_malformed1(self):
         url = WikipediaUrl(url="127.0.0.1/test")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.malformed_url is True
         assert url.scheme_missing is True
         assert url.added_http_scheme_worked is True
 
     def test_extract_first_level_domain_malformed2(self):
         url = WikipediaUrl(url="httproe.ru/pdfs/pdf_1914.pdf")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.malformed_url is True
         assert url.scheme_missing is True
         assert url.added_http_scheme_worked is True
 
     def test_extract_first_level_domain_malformed3(self):
         url = WikipediaUrl(url="httpss://www1.geocities.com/")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.request_error is True
         assert url.first_level_domain == "geocities.com"
         assert url.dns_record_found is False
@@ -192,7 +192,7 @@ class TestWikipediaUrl(TestCase):
 
     def test_extract_first_level_domain_malformed4(self):
         url = WikipediaUrl(url="https://www1.geocities.")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.request_error is True
         assert url.dns_record_found is False
         assert url.unrecognized_tld is True
@@ -213,5 +213,5 @@ class TestWikipediaUrl(TestCase):
 
     def test_check_scheme(self):
         url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
-        url.fix_and_extract_and_check()
+        url.extract()
         assert url.unrecognized_scheme is False

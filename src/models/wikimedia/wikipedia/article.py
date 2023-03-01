@@ -256,10 +256,10 @@ class WikipediaArticle(WcdItem):
         #         #     raise ValueError("This reference could not be deserialized. :/")
         #         # else:
         #         if reference:
-        #             reference.wikibase_deprecated = self.wikibase_deprecated
+        #             reference.wikibase = self.wikibase
         #             # This is because of https://github.com/internetarchive/wcdimportbot/issues/261
         #             reference.cache = self.cache
-        #             # We want the raw template
+        #             # We want the raw templates
         #             reference.raw_template = raw_template
         #             reference.finish_parsing_and_generate_hash()
         #             # Handle duplicates:
@@ -306,9 +306,9 @@ class WikipediaArticle(WcdItem):
     #         )
     #     else:
     #         # TODO comment out the below code and fail with an exception instead
-    #         # This branch is hit e.g. when the cache has not been synced with the wikibase_deprecated
+    #         # This branch is hit e.g. when the cache has not been synced with the wikibase
     #         console.print(
-    #             f"{self.title} already exists in {self.wikibase_deprecated.__repr_name__()}, "
+    #             f"{self.title} already exists in {self.wikibase.__repr_name__()}, "
     #             f"see {self.url} and {self.wikibase_url}. \nPlease run the bot with --rebuild-cache "
     #             f"to speed up the process."
     #         )
@@ -338,7 +338,7 @@ class WikipediaArticle(WcdItem):
     #                 # Here we get the reference with the first_level_domain_of_url WCDQID back
     #                 # We add the cache because of https://github.com/internetarchive/wcdimportbot/issues/261
     #                 reference.website_item = Website(
-    #                     reference=reference, wikibase_deprecated=self.wikibase_deprecated, cache=self.cache
+    #                     reference=reference, wikibase=self.wikibase, cache=self.cache
     #                 )
     #                 reference.website_item.check_and_upload_website_item_to_wikibase_if_missing(
     #                     wikipedia_article=self

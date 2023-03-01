@@ -20,7 +20,7 @@ class WcdImportBot(WcdBaseModel):
     The language code is the one used by Wikimedia Foundation"""
 
     language_code: str = "en"
-    event_max_count: int = 0  # 0 means disabled, ie. no maximum ie. run forever
+    event_max_count: int = 0  # 0 means deprecated, ie. no maximum ie. run forever
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
     # wikibase: Wikibase = IASandboxWikibase()
@@ -32,22 +32,22 @@ class WcdImportBot(WcdBaseModel):
     def __flush_cache__(self):
         # We deprecate flushing the cache, since we will lose the last
         #  update information if doing so, and we cannot currently populate
-        #  it with a query because the timestamp is not uploaded to wikibase_deprecated
+        #  it with a query because the timestamp is not uploaded to wikibase
         raise DeprecationWarning("This has been deprecated since 2.1.0-alpha3.")
         # self.__setup_cache__()
         # self.cache.flush_database()
 
     # def __gather_and_print_statistics__(self):
-    #     console.print(self.wikibase_deprecated.title)
-    #     wcr = WikibaseCrudRead(wikibase_deprecated=self.wikibase_deprecated)
+    #     console.print(self.wikibase.title)
+    #     wcr = WikibaseCrudRead(wikibase=self.wikibase)
     #     console.print(f"Number of pages: {wcr.number_of_pages}")
     #     console.print(f"Number of references: {wcr.number_of_references}")
     #     console.print(f"Number of websites: {wcr.number_of_website_items}")
-    #     attributes = [a for a in dir(self.wikibase_deprecated)]
+    #     attributes = [a for a in dir(self.wikibase)]
     #     for attribute in attributes:
     #         if attribute in {**wcd_externalid_properties, **wcd_string_properties}:
     #             value = wcr.get_external_identifier_statistic(
-    #                 wikibase_property_id=getattr(self.wikibase_deprecated, attribute)
+    #                 wikibase_property_id=getattr(self.wikibase, attribute)
     #             )
     #             console.print(f"Number of {attribute}: {value}")
 
@@ -56,7 +56,7 @@ class WcdImportBot(WcdBaseModel):
     #     # We don't flush first since 2.1.0-alpha3
     #     self.__setup_cache__()
     #     if self.cache:
-    #         wcrsandbox = WikibaseCrudRead(wikibase_deprecated=IASandboxWikibase())
+    #         wcrsandbox = WikibaseCrudRead(wikibase=IASandboxWikibase())
     #         data = wcrsandbox.__get_all_items_and_hashes__()
     #         logger.info("Rebuilding the sandbox cache")
     #         count_sandbox = 1
@@ -67,7 +67,7 @@ class WcdImportBot(WcdBaseModel):
     #             logger.debug(f"Inserting {hash_value}:{wcdqid} into the cache")
     #             self.cache.ssdb.set_value(key=hash_value, value=wcdqid)
     #             count_sandbox += 1
-    #         wcrswc = WikibaseCrudRead(wikibase_deprecated=WikiCitationsWikibase())
+    #         wcrswc = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
     #         data = wcrswc.__get_all_items_and_hashes__()
     #         logger.info("Rebuilding the wikicitations cache")
     #         count_wikicitations = 1
@@ -161,9 +161,9 @@ class WcdImportBot(WcdBaseModel):
     #     # )
     #     parser.add_argument(
     #         "-s",
-    #         "--get_statistics",
+    #         "--statistics",
     #         action="store_true",
-    #         help="Show get_statistics about the supported Wikibase instances",
+    #         help="Show statistics about the supported Wikibase instances",
     #     )
     #     parser.add_argument(
     #         "-wc",
@@ -194,7 +194,7 @@ class WcdImportBot(WcdBaseModel):
     #     #     )
     #     #
     #     #     page = WikipediaArticle(
-    #     #         wikibase_deprecated=self.wikibase_deprecated,
+    #     #         wikibase=self.wikibase,
     #     #         language_code=self.language_code,
     #     #         wikimedia_site=self.wikimedia_site,
     #     #     )
@@ -208,14 +208,14 @@ class WcdImportBot(WcdBaseModel):
     #     #         logger.debug(
     #     #             f"Found {cache_return.item_qid} and trying to delete it now"
     #     #         )
-    #     #         wc = WikibaseCrudDelete(wikibase_deprecated=self.wikibase_deprecated)
+    #     #         wc = WikibaseCrudDelete(wikibase=self.wikibase)
     #     #         result = wc.__delete_item__(item_id=cache_return.item_qid)
     #     #         if result == Result.SUCCESSFUL:
     #     #             if page.md5hash is not None:
     #     #                 cache.delete_key(key=page.md5hash)
     #     #                 logger.info(f"Deleted {title} from the cache")
     #     #                 console.print(
-    #     #                     f"Deleted {title} from {self.wikibase_deprecated.__repr_name__()}"
+    #     #                     f"Deleted {title} from {self.wikibase.__repr_name__()}"
     #     #                 )
     #     #                 return result
     #     #             else:
@@ -239,7 +239,7 @@ class WcdImportBot(WcdBaseModel):
     #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #
     #     self.wikipedia_article = WikipediaArticle(
-    #         wikibase_deprecated=self.wikibase_deprecated,
+    #         wikibase=self.wikibase,
     #         language_code=self.language_code,
     #         wikimedia_site=self.wikimedia_site,
     #         title=self.page_title,
@@ -285,7 +285,7 @@ class WcdImportBot(WcdBaseModel):
     #                 )
     #                 # raise DebugExit()
     #                 wikipedia_article = WikipediaArticle(
-    #                     wikibase_deprecated=self.wikibase_deprecated,
+    #                     wikibase=self.wikibase,
     #                     language_code=self.language_code,
     #                     latest_revision_date=page.editTime(),
     #                     latest_revision_id=page.latest_revision_id,
@@ -316,7 +316,7 @@ class WcdImportBot(WcdBaseModel):
     #                     title=str(page.title()),
     #                     wikimedia_site=self.wikimedia_site,
     #                     wikitext=page.text,
-    #                     wikibase_deprecated=self.wikibase_deprecated,
+    #                     wikibase=self.wikibase,
     #                     cache=self.cache,
     #                 )
     #                 wikipedia_article.extract_and_parse_and_upload_missing_items_to_wikibase()
@@ -334,7 +334,7 @@ class WcdImportBot(WcdBaseModel):
     # def rinse_all_items_and_cache():
     #     """Delete all page and reference items and clear the SSDB cache"""
     #     raise DeprecationWarning("This has been deprecated since 2.1.0-alpha2.")
-    #     # wc = WikibaseCrudDelete(wikibase_deprecated=self.wikibase_deprecated)
+    #     # wc = WikibaseCrudDelete(wikibase=self.wikibase)
     #     # wc.delete_imported_items()
     #     # self.__flush_cache__()
 
@@ -367,11 +367,11 @@ class WcdImportBot(WcdBaseModel):
         #     self.get_and_extract_pages_by_range_via_http(
         #         max_count=args.max_range, category_title=args.category
         #     )
-        # elif args.get_statistics:
-        #     bot = WcdImportBot(wikibase_deprecated=IASandboxWikibase())
+        # elif args.statistics:
+        #     bot = WcdImportBot(wikibase=IASandboxWikibase())
         #     bot.__gather_and_print_statistics__()
         #     # DISABLED because it returns 503 now.
-        #     bot = WcdImportBot(wikibase_deprecated=WikiCitationsWikibase())
+        #     bot = WcdImportBot(wikibase=WikiCitationsWikibase())
         #     bot.__gather_and_print_statistics__()
         # else:
         #     console.print("Got no arguments. Try 'python wcdimportbot.py -h' for help")
@@ -381,7 +381,7 @@ class WcdImportBot(WcdBaseModel):
     #     # from src.models.wikimedia.wikipedia.article import WikipediaArticle
     #     #
     #     # page = WikipediaArticle(
-    #     #     wikibase_deprecated=self.wikibase_deprecated,
+    #     #     wikibase=self.wikibase,
     #     #     language_code=self.language_code,
     #     #     wikimedia_site=self.wikimedia_site,
     #     #     wdqid=self.wikidata_qid,

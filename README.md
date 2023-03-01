@@ -180,15 +180,9 @@ Currently, the framework has the following features:
 number of citation templates of different types, number of references outside <ref>s, etc.)
 
 # Diagrams
-
-## API output
-![image](diagrams/api_output.png)
-
-## Components
-![image](diagrams/components.png)
-
-## Roadmap
-![image](diagrams/roadmap.png)
+## WARI
+### Classes
+![image](diagrams/wari/classes.png)
 
 # History
 * version 1.0.0 a proof of concept import tool based on WikidataIntegrator (by James Hare)
