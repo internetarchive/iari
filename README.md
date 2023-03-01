@@ -181,6 +181,8 @@ number of citation templates of different types, number of references outside <r
 
 # Diagrams
 ## WARI
+### Components
+![image](diagrams/wari/components.png)
 ### Classes
 ![image](diagrams/wari/classes.png)
 
