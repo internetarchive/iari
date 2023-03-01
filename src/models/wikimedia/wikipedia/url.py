@@ -48,6 +48,23 @@ class WikipediaUrl(BaseModel):
     def __lt__(self, other):
         return self.__get_url__ < other.url
 
+    def __fix_malformed_urls__(self):
+        """This fixes common errors found in the urls"""
+        self.__fix_malformed_httpwww__()
+        self.__fix_malformed_httpswww__()
+
+    def __fix_malformed_httpwww__(self):
+        """This fixes a common error found in Wikipedia urls"""
+        if self.__get_url__.startswith("httpwww"):
+            self.malformed_url = True
+            self.fixed_url = self.__get_url__.replace("httpwww", "http://www")
+
+    def __fix_malformed_httpswww__(self):
+        """This fixes a common error found in Wikipedia urls"""
+        if self.__get_url__.startswith("httpswww"):
+            self.malformed_url = True
+            self.fixed_url = self.__get_url__.replace("httpswww", "https://www")
+
     def __parse_extract_and_validate__(self) -> None:
         if not self.parsing_done:
             logger.debug("__parse_and_validate__: running")

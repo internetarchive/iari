@@ -1,5 +1,4 @@
 from typing import Any, Optional
-
 from urllib.parse import urlparse
 
 from src.wcd_base_model import WcdBaseModel

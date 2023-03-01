@@ -1,7 +1,7 @@
 from mwparserfromhell import parse  # type: ignore
 
 from src import console
-from src.models.identifiers.doi import Doi
+from src.models.identifiers_checking.doi import Doi
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 

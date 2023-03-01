@@ -1,13 +1,11 @@
-from plistlib import Dict
-from typing import Any
-
-from flask_restful import Resource
+from typing import Any, Dict
 
 from src.models.api.check_doi.check_doi_schema import CheckDoiSchema
 from src.models.api.job.check_doi_job import CheckDoiJob
+from src.views.statistics import StatisticsView
 
 
-class CheckDoi(Resource):
+class CheckDoi(StatisticsView):
     """
     This models all action based on requests from the frontend/patron
     It is instantiated at every request
@@ -16,7 +14,7 @@ class CheckDoi(Resource):
     See src/models/checking
     """
 
-    check_url_job: CheckDoiJob
+    job: CheckDoiJob
     schema: CheckDoiSchema()
     serving_from_json: bool = False
     headers: Dict[str, Any] = {
@@ -24,4 +22,4 @@ class CheckDoi(Resource):
     }
     data: Dict[str, Any] = {}
     # todo implement
-    pass
+    raise NotImplementedError()

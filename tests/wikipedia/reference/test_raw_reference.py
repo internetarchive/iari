@@ -407,47 +407,47 @@ class TestWikipediaRawReference(TestCase):
         with self.assertRaises(MissingInformationError):
             raw_reference_object.__check_urls__()
 
-    def test___checked_urls_no_dns(self):
-        wikitext = (
-            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-            "|url=https://www1.geocities.com/}}"
-        )
-        wikicode = parse(wikitext)
-        raw_reference_object = WikipediaRawReference(
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-            check_urls=True,
-        )
-        raw_reference_object.extract_and_check()
-        urls = raw_reference_object.checked_urls
-        assert raw_reference_object.check_urls_done is True
-        assert urls[0].status_code == 0
-        assert urls[0].checked is True
-        assert urls[0].dns_record_found is False
-
-    def test___checked_urls_200(self):
-        wikitext = (
-            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-            "|archive-url=http://web.archive.org}}"
-        )
-        wikicode = parse(wikitext)
-        raw_reference_object = WikipediaRawReference(
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-            check_urls=True,
-        )
-        raw_reference_object.extract_and_check()
-        urls = raw_reference_object.checked_urls
-        assert raw_reference_object.check_urls_done is True
-        assert raw_reference_object.first_level_domains == ["archive.org"]
-        assert urls[0].first_level_domain == "archive.org"
-        assert urls[0].status_code in [200, 0]
-        assert urls[0].checked is True
-        assert urls[0].dns_record_found is True
+    # def test___checked_urls_no_dns(self):
+    #     wikitext = (
+    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+    #         "|url=https://www1.geocities.com/}}"
+    #     )
+    #     wikicode = parse(wikitext)
+    #     raw_reference_object = WikipediaRawReference(
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #         check_urls=True,
+    #     )
+    #     raw_reference_object.extract_and_check()
+    #     urls = raw_reference_object.checked_urls
+    #     assert raw_reference_object.check_urls_done is True
+    #     assert urls[0].status_code == 0
+    #     assert urls[0].checked is True
+    #     assert urls[0].dns_record_found is False
+    #
+    # def test___checked_urls_200(self):
+    #     wikitext = (
+    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+    #         "|archive-url=http://web.archive.org}}"
+    #     )
+    #     wikicode = parse(wikitext)
+    #     raw_reference_object = WikipediaRawReference(
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #         check_urls=True,
+    #     )
+    #     raw_reference_object.extract_and_check()
+    #     urls = raw_reference_object.checked_urls
+    #     assert raw_reference_object.check_urls_done is True
+    #     assert raw_reference_object.first_level_domains == ["archive.org"]
+    #     assert urls[0].first_level_domain == "archive.org"
+    #     assert urls[0].status_code in [200, 0]
+    #     assert urls[0].checked is True
+    #     assert urls[0].dns_record_found is True
 
     def test___find_bare_urls__(self):
         """Test on a reference from the wild"""

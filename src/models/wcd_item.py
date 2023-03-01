@@ -1,5 +1,3 @@
-from typing import Optional
-
 from src.wcd_base_model import WcdBaseModel
 
 # if TYPE_CHECKING:

@@ -1,7 +1,12 @@
-from typing import Any, Tuple, Dict
+from typing import Any, Dict, Tuple
 
 from flask import request
 from flask_restful import Resource, abort  # type: ignore
+
+from src import console
+from src.models.api.check_url.check_url_schema import CheckUrlSchema
+from src.models.api.check_url.statistics import CheckUrlStatistics
+from src.models.api.job.check_url_job import CheckUrlJob
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_short_tail_excerpt,
@@ -9,11 +14,6 @@ from test_data.test_content import (  # type: ignore
     electrical_breakdown_full_article,
     test_full_article,
 )
-
-from src import console
-from src.models.api.check_url.check_url_schema import CheckUrlSchema
-from src.models.api.check_url.statistics import CheckUrlStatistics
-from src.models.api.job.check_url_job import CheckUrlJob
 
 
 class CheckUrl(Resource):
@@ -66,7 +66,8 @@ class CheckUrl(Resource):
         # We print the job
         console.print(self.check_url_job.dict())
 
-    def __update_and_write_to_disk__(self) -> None:
+    @staticmethod
+    def __update_and_write_to_disk__() -> None:
         """Helper method"""
         from src.models.api import app
 

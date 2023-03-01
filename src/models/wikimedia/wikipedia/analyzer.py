@@ -8,8 +8,8 @@ from src.models.api.job import Job
 from src.models.api.statistics.article import ReferencesOverview
 from src.models.api.statistics.article.content import (
     AggregateContentReferences,
-    ContentReferences,
     CitationReferences,
+    ContentReferences,
     GeneralReferences,
 )
 from src.models.api.statistics.article.content.aggregate import (

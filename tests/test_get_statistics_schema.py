@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from marshmallow import ValidationError
 
-from src.models.api.statistics import StatisticSchema
 from src.models.api.job import Job
+from src.models.api.statistics.schema import StatisticSchema
 
 
 class TestGetStatisticsSchema(TestCase):

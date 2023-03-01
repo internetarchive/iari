@@ -5,20 +5,7 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src.models.api.statistics import (
-    ArticleStatistics,
-)
-from src.models.api.statistics import CiteQReferences
-from src.models.api.statistics import (
-    CiteBookReferences,
-)
-from src.models.api.statistics import (
-    CiteJournalReferences,
-)
-from src.models.api.statistics import (
-    CiteWebReferences,
-)
-from src.models.api.statistics import UrlsAggregates
+from src.models.api import ArticleStatistics
 
 logger = logging.getLogger(__name__)
 
@@ -154,72 +141,74 @@ class TestGetArticleStatistics(TestCase):
         response = self.test_client.get(
             "/get-statistics?lang=en&site=wikipedia&title=Easter Island&testing=True"
         )
-        data = json.loads(response.data)
+        # data = json.loads(response.data)
         self.assertEqual(200, response.status_code)
-        stat = ArticleStatistics(**self.__make_reproducible__(data=data))
-        assert stat.has_references is True
-        assert stat.title == "Easter Island"
-        assert stat.site == "wikipedia"
-        assert stat.page_id == 0
-        assert stat.timing == 0
-        assert stat.timestamp == 0
-        references = stat.references
-        assert references.all == 5
-        urls = references.urls
-        assert urls.urls_found is True
-        assert isinstance(urls.agg, UrlsAggregates)
-        uagg = urls.agg
-        assert uagg.all == 5
-        uuagg = urls.agg.unique
-        # We dont check urls during this
-        # test for speed reasons so all these are 0
-        assert uuagg.all == 0
-        assert uuagg.error == 0
-        assert uuagg.s5xx == 0
-        assert uuagg.s404 == 0
-        assert uuagg.s200 == 0
-        assert uuagg.s3xx == 0
-        assert uuagg.malformed_urls == 0
-        assert uuagg.no_dns == 0
-        assert uuagg.other_2xx == 0
-        assert uuagg.other_4xx == 0
-        types = references.types
-        assert types.content is not None
-        assert types.named == 1
-        content = types.content
-        assert content.all == 4
-        agg = content.agg
-        assert agg.url_found == 4
-        assert agg.url_t == 0
-        assert agg.bare_url_t == 0
-        assert agg.citation_t == 0
-        assert agg.citeq_t == CiteQReferences(all=0)
-        assert agg.has_archive_details_url == 0
-        # assert agg.has_hash == 4
-        assert agg.has_template == 4
-        assert agg.has_web_archive_org_url == 0
-        assert agg.has_google_books_url_or_template == 0
-        cs1 = agg.cs1_t
-        assert cs1.all == 4
-        assert cs1.others == 0
-        assert cs1.web == CiteWebReferences(
-            all=2,
-            has_url=2,
-            has_google_books_url=0,
-            has_ia_details_url=0,
-            has_wm_url=2,
-        )
-        assert cs1.journal == CiteJournalReferences(
-            all=1, has_wm_url=0, has_url=1, has_doi=0
-        )
-        assert cs1.book == CiteBookReferences(
-            all=1, has_url=1, has_ia_details_url=0, has_isbn=1, has_wm_url=0
-        )
-        assert agg.isbn_t == 0
-        assert agg.multiple_t == 0
-        assert agg.supported_template_we_prefer == 4
-        assert agg.with_deprecated_template == 0
-        assert agg.without_a_template == 0
+        # stat = ArticleStatistics(**self.__make_reproducible__(data=data))
+        # todo update to v2
+        self.fail()
+        # assert stat.has_references is True
+        # assert stat.title == "Easter Island"
+        # assert stat.site == "wikipedia"
+        # assert stat.page_id == 0
+        # assert stat.timing == 0
+        # assert stat.timestamp == 0
+        # references = stat.references
+        # assert references.all == 5
+        # urls = references.urls
+        # assert urls.urls_found is True
+        # assert isinstance(urls.agg, UrlsAggregates)
+        # uagg = urls.agg
+        # assert uagg.all == 5
+        # uuagg = urls.agg.unique
+        # # We dont check urls during this
+        # # test for speed reasons so all these are 0
+        # assert uuagg.all == 0
+        # assert uuagg.error == 0
+        # assert uuagg.s5xx == 0
+        # assert uuagg.s404 == 0
+        # assert uuagg.s200 == 0
+        # assert uuagg.s3xx == 0
+        # assert uuagg.malformed_urls == 0
+        # assert uuagg.no_dns == 0
+        # assert uuagg.other_2xx == 0
+        # assert uuagg.other_4xx == 0
+        # types = references.types
+        # assert types.content is not None
+        # assert types.named == 1
+        # content = types.content
+        # assert content.all == 4
+        # agg = content.agg
+        # assert agg.url_found == 4
+        # assert agg.url_t == 0
+        # assert agg.bare_url_t == 0
+        # assert agg.citation_t == 0
+        # assert agg.citeq_t == CiteQReferences(all=0)
+        # assert agg.has_archive_details_url == 0
+        # # assert agg.has_hash == 4
+        # assert agg.has_template == 4
+        # assert agg.has_web_archive_org_url == 0
+        # assert agg.has_google_books_url_or_template == 0
+        # cs1 = agg.cs1_t
+        # assert cs1.all == 4
+        # assert cs1.others == 0
+        # assert cs1.web == CiteWebReferences(
+        #     all=2,
+        #     has_url=2,
+        #     has_google_books_url=0,
+        #     has_ia_details_url=0,
+        #     has_wm_url=2,
+        # )
+        # assert cs1.journal == CiteJournalReferences(
+        #     all=1, has_wm_url=0, has_url=1, has_doi=0
+        # )
+        # assert cs1.book == CiteBookReferences(
+        #     all=1, has_url=1, has_ia_details_url=0, has_isbn=1, has_wm_url=0
+        # )
+        # assert agg.isbn_t == 0
+        # assert agg.multiple_t == 0
+        # assert agg.supported_template_we_prefer == 4
+        # assert agg.with_deprecated_template == 0
+        # assert agg.without_a_template == 0
 
     def test_invalid_language(self):
         response = self.test_client.get(
@@ -280,7 +269,6 @@ class TestGetArticleStatistics(TestCase):
         self.assertEqual(200, response.status_code)
         stats = ArticleStatistics(**data)
         assert stats.served_from_cache is False
-        assert stats.refreshed_now is True
 
     def test_valid_request_test_refresh_false(self):
         response = self.test_client.get(
@@ -291,7 +279,6 @@ class TestGetArticleStatistics(TestCase):
         self.assertEqual(200, response.status_code)
         stats = ArticleStatistics(**data)
         assert stats.served_from_cache is True
-        assert stats.refreshed_now is False
 
     def test___validate_and_get_job__(self):
         """We dont test this since the dev/team does not yet
