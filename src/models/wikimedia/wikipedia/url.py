@@ -21,7 +21,7 @@ class WikipediaUrl(BaseModel):
     parsing_done: bool = False
     first_level_domain: str = ""
     first_level_domain_done: bool = False
-    fld_is_ip: bool = False  # first level domain is an IP adress
+    fld_is_ip: bool = False  # first level domain is an IP address
     url: str
     fixed_url: str = ""
     scheme: str = ""  # url scheme e.g. http

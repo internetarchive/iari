@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import re
 from datetime import datetime, timezone
@@ -66,6 +67,7 @@ class WikipediaReference(WcdItem):
     wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     raw_reference: Optional[WikipediaRawReference] = None
     encountered_parse_error: bool = False
+    reference_id: str = ""
 
     # These are all the parameters in the supported references
     #######################
@@ -1074,20 +1076,14 @@ class WikipediaReference(WcdItem):
         if not self.raw_reference and not testing:
             raise MissingInformationError("self.raw_reference was None")
         if self.raw_reference:
-            if self.raw_reference.multiple_cs1_templates_found:
-                from src.models.api import app
-
-                app.logger.warning(
-                    "Could not parse this reference because multiple "
-                    "CS1 templates were found and that is currently not supported"
-                )
-                self.encountered_parse_error = True
             self.__get_and_validate_identifiers__()
-            self.__parse_persons__()
-            self.__merge_date_into_publication_date__()
-            self.__merge_lang_into_language__()
-            self.__merge_place_into_location__()
-            self.__clean_wiki_markup_from_strings__()
+            self.__generate_reference_id__()
+            # todo move all this to WikipediaTemplate
+            # self.__parse_persons__()
+            # self.__merge_date_into_publication_date__()
+            # self.__merge_lang_into_language__()
+            # self.__merge_place_into_location__()
+            # self.__clean_wiki_markup_from_strings__()
             # We generate the hash last because the parsing needs to be done first
             # self.__generate_hashes__()
 
@@ -1222,3 +1218,12 @@ class WikipediaReference(WcdItem):
                 return False
         else:
             return False
+
+    def __generate_reference_id__(self) -> None:
+        """This generates an 8-char long id based on the md5 hash of
+        the raw wikitext for this reference"""
+        if not self.raw_reference:
+            raise MissingInformationError()
+        self.reference_id = hashlib.md5(
+            f"{self.raw_reference.wikicode}".encode()
+        ).hexdigest()[:8]

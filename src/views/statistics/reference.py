@@ -1,4 +1,4 @@
-from flask_restful import Resource
+from flask_restful import Resource  # type: ignore
 
 from src.models.file_io.reference_file_io import ReferenceFileIo
 

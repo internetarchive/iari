@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from flask import request
-from flask_restful import Resource, abort
+from flask_restful import Resource, abort  # type: ignore
+from marshmallow import Schema
 
 from src import console
 from src.models.api.job import Job
-from src.models.api.statistics.schema import StatisticSchema
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 
 
@@ -16,11 +16,11 @@ class StatisticsView(Resource):
     We currently have 3 implementations:
     article, references and reference
 
-    They all need to konw the wikimedia site, language and title
+    They all need to know the wikimedia site, language and title
     so we have this abstract class to verify we got what we need.
     """
 
-    schema = StatisticSchema()
+    schema: Optional[Schema] = None
     job: Optional[Job]
     wikipedia_analyzer: Optional[WikipediaAnalyzer] = None
     data: Dict[str, Any] = {}

@@ -1,14 +1,14 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-import pyalex
-from pyalex import Works
+import pyalex  # type: ignore
+from pyalex import Works  # type: ignore
 from pydantic import BaseModel
-from wikibaseintegrator import WikibaseIntegrator
-from wikibaseintegrator.entities import ItemEntity
-from wikibaseintegrator.models import Claim
-from wikibaseintegrator.wbi_config import config
-from wikibaseintegrator.wbi_helpers import fulltext_search
+from wikibaseintegrator import WikibaseIntegrator  # type: ignore
+from wikibaseintegrator.entities import ItemEntity  # type: ignore
+from wikibaseintegrator.models import Claim  # type: ignore
+from wikibaseintegrator.wbi_config import config  # type: ignore
+from wikibaseintegrator.wbi_helpers import fulltext_search  # type: ignore
 
 logger = logging.getLogger(__name__)
 instance_of = "P31"

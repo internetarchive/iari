@@ -234,6 +234,16 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return urls
 
     @property
+    def raw_urls(self) -> List[str]:
+        """List of raw non-unique urls found in the reference"""
+        urls: List[str] = list()
+        for reference in self.references:
+            if reference.raw_reference:
+                for url in reference.raw_reference.reference_urls:
+                    urls.append(url.url)
+        return urls
+
+    @property
     def number_of_checked_unique_reference_urls(self):
         """Unique URLs"""
         if not self.check_urls_done:
@@ -653,3 +663,10 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         logger.debug("__parse_wikitext__: running")
         if not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)
+
+    @property
+    def reference_ids(self) -> List[str]:
+        ids = []
+        for reference in self.references:
+            ids.append(reference.reference_id)
+        return ids

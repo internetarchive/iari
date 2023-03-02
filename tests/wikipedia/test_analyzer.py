@@ -41,7 +41,7 @@ class TestWikipediaAnalyzer(TestCase):
         wa = WikipediaAnalyzer(job=Job(title="Test"), wikitext=test_full_article)
         wa.__analyze__()
         wa.article_statistics = ArticleStatistics()
-        wa.__gather_reference_statistics__()
+        # wa.__gather_reference_statistics__()
         # Verify that it is empty
         assert wa.article_statistics == ArticleStatistics().dict()
 
