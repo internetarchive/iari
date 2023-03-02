@@ -9,7 +9,7 @@ from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.views.statistics import StatisticsView
-from test_data.test_content import (
+from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_short_tail_excerpt,
     electrical_breakdown_full_article,
