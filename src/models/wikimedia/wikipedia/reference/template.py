@@ -95,10 +95,10 @@ class WikipediaTemplate(WcdBaseModel):
         logger.debug("__extract_and_lookup_doi__: running")
         if self.parameters and "doi" in self.parameters:
             doi = self.parameters["doi"]
-            if doi:
-                self.doi_found = True
-                self.doi = Doi(doi=doi)
-                self.doi.lookup_doi()
+            # if doi:
+            #     self.doi_found = True
+                # self.doi = Doi(doi=doi)
+                # self.doi.lookup_doi()
 
     @property
     def get_isbn(self) -> str:

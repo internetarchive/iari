@@ -1,5 +1,5 @@
-from pydantic import BaseModel
+from src.models.api.job import Job
 
 
-class CheckDoiJob(BaseModel):
+class CheckDoiJob(Job):
     doi: str

@@ -4,6 +4,7 @@ from typing import Any, Tuple
 
 from flask_restful import Resource, abort  # type: ignore
 
+from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
@@ -15,11 +16,15 @@ from test_data.test_content import (  # type: ignore
     electrical_breakdown_full_article,
     test_full_article,
 )
+from src.models.api.statistics.article.article_schema import ArticleSchema
 
 
 class Article(StatisticsView):
     """This models the get-statistics API
     It is instantiated at every request"""
+
+    schema = ArticleSchema()
+    job: ArticleJob
 
     def __analyze_and_write_and_return__(self) -> Tuple[Any, int]:
         """Analyze, calculate the time, write statistics to disk and return it
@@ -75,7 +80,7 @@ class Article(StatisticsView):
     def __setup_testing__(self):
         from src.models.api import app
 
-        app.logger.debug("testing...")
+        app.logger.debug("__setup_testing__: running")
         self.__prepare_wikipedia_analyzer_if_testing__()
         if not self.wikipedia_analyzer:
             MissingInformationError("no self.wikipedia_analyzer")
@@ -83,10 +88,8 @@ class Article(StatisticsView):
         # We set this to be able to test the refresh
         if self.job.refresh:
             self.data["served_from_cache"] = False
-            self.data["refreshed_now"] = True
         else:
             self.data["served_from_cache"] = True
-            self.data["refreshed_now"] = False
         return self.data, 200
 
     def __more_than_2_days_old_cache__(self) -> bool:

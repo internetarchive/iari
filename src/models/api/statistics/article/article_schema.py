@@ -5,11 +5,12 @@ from marshmallow import Schema, fields, post_load
 from src import WikimediaSite
 from src.models.api.enums import Lang
 from src.models.api.job import Job
+from src.models.api.job.article_job import ArticleJob
 
 logger = logging.getLogger(__name__)
 
 
-class StatisticSchema(Schema):
+class ArticleSchema(Schema):
     lang = fields.Enum(enum=Lang, required=True)
     refresh = fields.Bool(required=False)
     site = fields.Enum(enum=WikimediaSite, required=True)
@@ -22,7 +23,7 @@ class StatisticSchema(Schema):
     def return_object(self, data, **kwargs) -> Job:  # type: ignore # dead: disable
         """Return job object"""
         logger.debug("return_object: running")
-        job = Job(**data)
+        job = ArticleJob(**data)
         job.urldecode_title()
         # print(job.title)
         return job

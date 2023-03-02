@@ -30,6 +30,7 @@ class WikipediaUrl(BaseModel):
     unrecognized_scheme: bool = False
     unrecognized_tld: bool = False
     added_http_scheme_worked: bool = False
+    malformed_url: bool = False
 
     @property
     def __get_url__(self) -> str:
