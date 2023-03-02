@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from src.models.api.job import Job
 
 
-class CheckUrlJob(BaseModel):
+class CheckUrlJob(Job):
     url: str
     timeout: int = 2  # We default to 2 seconds

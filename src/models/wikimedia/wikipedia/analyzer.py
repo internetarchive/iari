@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from src.models.api import ArticleStatistics
-from src.models.api.job import Job
+from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
@@ -18,7 +18,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     It does not handle storing on disk.
     """
 
-    job: Job
+    job: ArticleJob
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
@@ -65,7 +65,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             ae = self.article.extractor
             self.article_statistics = ArticleStatistics(
                 wari_id=self.wari_id,
-                lang=self.job.lang,
+                lang=self.job.lang.value,
                 reference_statistics=dict(
                     named=ae.number_of_empty_named_references,
                     footnote=ae.number_of_citation_references,
