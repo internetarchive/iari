@@ -5,7 +5,6 @@ from mwparserfromhell import parse  # type: ignore
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
-
 # wikibase = IASandboxWikibase()
 
 

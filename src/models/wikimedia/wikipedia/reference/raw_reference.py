@@ -3,7 +3,7 @@ Copyright Dennis Priskorn where not stated otherwise
 """
 import logging
 import re
-from typing import TYPE_CHECKING, List, Union, Dict, Optional, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import ExternalLink, Tag  # type: ignore
@@ -12,8 +12,8 @@ from mwparserfromhell.wikicode import Wikicode  # type: ignore
 import config
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.enums import (
-    ReferenceType,
     FootnoteSubtype,
+    ReferenceType,
 )
 from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
 from src.models.wikimedia.wikipedia.url import WikipediaUrl

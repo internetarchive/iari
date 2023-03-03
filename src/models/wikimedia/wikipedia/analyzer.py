@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 from src.models.api import ArticleStatistics
 from src.models.api.job.article_job import ArticleJob

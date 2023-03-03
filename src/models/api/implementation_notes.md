@@ -31,5 +31,5 @@ The purpose of this V2 was to
 * simplify
 * make it faster by not doing the checking unless asked to
 * make it possible for frontend developers to get data in a flash and 
-query the checking endpoints asynchroneously
+query the checking endpoints asynchronously
 * offload almost all counting and classification to the frontend developers
