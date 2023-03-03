@@ -2,8 +2,6 @@ from typing import Dict, List
 
 from pydantic import BaseModel, Extra
 
-from src.models.api.statistics.article.reference_overview import ReferencesOverview
-
 
 class ArticleStatistics(BaseModel):
     """The purpose of this class is to model the statistics

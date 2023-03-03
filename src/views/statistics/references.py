@@ -1,4 +1,4 @@
-from src.models.api.statistics.references.references_job import ReferencesJob
+from src.models.api.job.references_job import ReferencesJob
 from src.models.api.statistics.references.references_schema import ReferencesSchema
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo
@@ -30,12 +30,14 @@ class References(StatisticsView):
         # get the references details
         details = []
         for hash_ in hashes:
-            referencefileio = ReferenceFileIo(hash=hash_)
+            referencefileio = ReferenceFileIo(hash_based_id=hash_)
             referencefileio.read_from_disk()
             data = referencefileio.data
             if not data:
                 return "No json in cache", 404
+            # convert to dehydrated reference:
+            del data["templates"]
+            del data["wikitext"]
             details.append(data)
-        # todo convert to dehydrated references
         data = dict(total=total, references=details)
         return data, 200

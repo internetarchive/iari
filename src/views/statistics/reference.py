@@ -9,7 +9,7 @@ class Reference(Resource):
         if not reference_id:
             return "No reference id given", 400
         else:
-            referencefileio = ReferenceFileIo(hash=reference_id)
+            referencefileio = ReferenceFileIo(hash_based_id=reference_id)
             referencefileio.read_from_disk()
             data = referencefileio.data
             if not data:
