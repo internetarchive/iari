@@ -26,25 +26,25 @@
 #
 # import config
 # from src import IASandboxWikibase, Wikibase, console
-# from src.models.wikibase_deprecated.crud import WikibaseCrud
-# from src.models.wikibase_deprecated.dictionaries import wcd_archive_items, wcd_items
-# from src.models.wikibase_deprecated.properties import Properties
+# from src.models.wikibase.crud import WikibaseCrud
+# from src.models.wikibase.dictionaries import wcd_archive_items, wcd_items
+# from src.models.wikibase.properties import Properties
 #
 # logging.basicConfig(level=config.loglevel)
 # logger = logging.getLogger(__name__)
 #
 #
 # class SetupNewWikibase(BaseModel):
-#     wikibase_deprecated: Wikibase = IASandboxWikibase()
+#     wikibase: Wikibase = IASandboxWikibase()
 #
 #     # def __delete_old_properties__(self):
-#     #     wc = WikibaseCrud(wikibase_deprecated=self.wikibase_deprecated)
+#     #     wc = WikibaseCrud(wikibase=self.wikibase)
 #     #     wc.__setup_wikibase_integrator_configuration__()
 #     #     wbi = WikibaseIntegrator(
 #     #         login=wbi_login.Login(
-#     #             user=wc.wikibase_deprecated.user_name,
-#     #             password=wc.wikibase_deprecated.botpassword,
-#     #             mediawiki_api_url=wc.wikibase_deprecated.mediawiki_api_url,
+#     #             user=wc.wikibase.user_name,
+#     #             password=wc.wikibase.botpassword,
+#     #             mediawiki_api_url=wc.wikibase.mediawiki_api_url,
 #     #         )
 #     #     )
 #     #     for number in range(1,51):
@@ -58,13 +58,13 @@
 #         # They rely on each other so they have to be created in a certain order it seems
 #         # then the instance_of=archive item
 #         output_text = []
-#         wc = WikibaseCrud(wikibase_deprecated=self.wikibase_deprecated)
+#         wc = WikibaseCrud(wikibase=self.wikibase)
 #         wc.__setup_wikibase_integrator_configuration__()
 #         wbi = WikibaseIntegrator(
 #             login=wbi_login.Login(
-#                 user=wc.wikibase_deprecated.user_name,
-#                 password=wc.wikibase_deprecated.botpassword,
-#                 mediawiki_api_url=wc.wikibase_deprecated.mediawiki_api_url,
+#                 user=wc.wikibase.user_name,
+#                 password=wc.wikibase.botpassword,
+#                 mediawiki_api_url=wc.wikibase.mediawiki_api_url,
 #             )
 #         )
 #         archive_label = "Archive"
@@ -114,7 +114,7 @@
 #                         claims=[
 #                             # instance of
 #                             datatypes.Item(
-#                                 prop_nr=self.wikibase_deprecated.INSTANCE_OF,
+#                                 prop_nr=self.wikibase.INSTANCE_OF,
 #                                 value=archive_item_qid,
 #                             )
 #                         ]
@@ -163,13 +163,13 @@
 #     def __setup_other_items__(self) -> List[str]:
 #         # first create the wikipedia items
 #         output_text = []
-#         wc = WikibaseCrud(wikibase_deprecated=self.wikibase_deprecated)
+#         wc = WikibaseCrud(wikibase=self.wikibase)
 #         wc.__setup_wikibase_integrator_configuration__()
 #         wbi = WikibaseIntegrator(
 #             login=wbi_login.Login(
-#                 user=wc.wikibase_deprecated.user_name,
-#                 password=wc.wikibase_deprecated.botpassword,
-#                 mediawiki_api_url=wc.wikibase_deprecated.mediawiki_api_url,
+#                 user=wc.wikibase.user_name,
+#                 password=wc.wikibase.botpassword,
+#                 mediawiki_api_url=wc.wikibase.mediawiki_api_url,
 #             )
 #         )
 #         console.print(f"Setting up {len(wcd_items)} other items")
@@ -215,12 +215,12 @@
 #             # self.__delete_old_properties__()
 #         if (args.items or args.properties) is True:
 #             console.print(
-#                 f"Now copy the above output into the {snw.wikibase_deprecated.__repr_name__()} "
+#                 f"Now copy the above output into the {snw.wikibase.__repr_name__()} "
 #                 f"class."
 #             )
 #
 #     def setup_items(self):
-#         if not self.wikibase_deprecated.INSTANCE_OF:
+#         if not self.wikibase.INSTANCE_OF:
 #             raise ValueError(
 #                 "Please setup the properties first before setting up the items. See -h"
 #             )
@@ -233,13 +233,13 @@
 #         # iterate over the dictionary and create all the properties
 #         # output in a form that can be copy-pasted into a Wikibase class
 #         # (ie 'author = "P1"\nauthor_name_string = "P2"'
-#         wc = WikibaseCrud(wikibase_deprecated=self.wikibase_deprecated)
+#         wc = WikibaseCrud(wikibase=self.wikibase)
 #         wc.__setup_wikibase_integrator_configuration__()
 #         wbi = WikibaseIntegrator(
 #             login=wbi_login.Login(
-#                 user=wc.wikibase_deprecated.user_name,
-#                 password=wc.wikibase_deprecated.botpassword,
-#                 mediawiki_api_url=wc.wikibase_deprecated.mediawiki_api_url,
+#                 user=wc.wikibase.user_name,
+#                 password=wc.wikibase.botpassword,
+#                 mediawiki_api_url=wc.wikibase.mediawiki_api_url,
 #             )
 #         )
 #         output_text = []

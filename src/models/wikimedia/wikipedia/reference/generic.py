@@ -1,22 +1,17 @@
+import hashlib
 import logging
 import re
-from datetime import datetime, timezone
 from typing import Any, List, Optional
 
-from pydantic import validate_arguments, validator
+from pydantic import validate_arguments
 
-import config
 from src import WikimediaSite
-from src.models.exceptions import (
-    AmbiguousDateError,
-    MissingInformationError,
-    MoreThanOneNumberError,
-)
-from src.models.person import Person
+from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
+from src.models.wikimedia.wikipedia.reference.person import Person
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 
 logger = logging.getLogger(__name__)
@@ -66,351 +61,352 @@ class WikipediaReference(WcdItem):
     wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
     raw_reference: Optional[WikipediaRawReference] = None
     encountered_parse_error: bool = False
+    reference_id: str = ""
 
-    # These are all the parameters in the supported references
-    #######################
-    # Names
-    #######################
-    first1: Optional[str]
-    first2: Optional[str]
-    first3: Optional[str]
-    first4: Optional[str]
-    first5: Optional[str]
-    first6: Optional[str]
-    first: Optional[str]
-    last1: Optional[str]
-    last2: Optional[str]
-    last3: Optional[str]
-    last4: Optional[str]
-    last5: Optional[str]
-    last6: Optional[str]
-    last: Optional[str]
-
-    #######################
-    # Author first/given (equal)
-    #######################
-    author_given: Optional[str]
-    author_given1: Optional[str]
-    author_given2: Optional[str]
-    author_given3: Optional[str]
-    author_given4: Optional[str]
-    author_given5: Optional[str]
-    author_first: Optional[str]
-    author_first1: Optional[str]
-    author_first2: Optional[str]
-    author_first3: Optional[str]
-    author_first4: Optional[str]
-    author_first5: Optional[str]
-
-    #######################
-    # Author last/surname (equal)
-    #######################
-    author_surname: Optional[str]
-    author_surname1: Optional[str]
-    author_surname2: Optional[str]
-    author_surname3: Optional[str]
-    author_surname4: Optional[str]
-    author_surname5: Optional[str]
-    author_last: Optional[str]
-    author_last1: Optional[str]
-    author_last2: Optional[str]
-    author_last3: Optional[str]
-    author_last4: Optional[str]
-    author_last5: Optional[str]
-
-    # Author
-    author1_first: Optional[str]
-    author1_last: Optional[str]
-    author1_link: Optional[str]
-    author2_first: Optional[str]
-    author2_last: Optional[str]
-    author2_link: Optional[str]
-    author3_first: Optional[str]
-    author3_last: Optional[str]
-    author3_link: Optional[str]
-    author4_first: Optional[str]
-    author4_last: Optional[str]
-    author4_link: Optional[str]
-    author5_first: Optional[str]
-    author5_last: Optional[str]
-    author5_link: Optional[str]
-    author: Optional[str]
-    author_link1: Optional[str]
-    author_link2: Optional[str]
-    author_link3: Optional[str]
-    author_link4: Optional[str]
-    author_link5: Optional[str]
-    author_link: Optional[str]
-    author_mask1: Optional[str]
-    author_mask2: Optional[str]
-    author_mask3: Optional[str]
-    author_mask4: Optional[str]
-    author_mask5: Optional[str]
-    author_mask: Optional[str]
-
-    #######################
-    # Editor
-    #######################
-    editor1_first: Optional[str]
-    editor1_last: Optional[str]
-    editor1_link: Optional[str]
-    editor2_first: Optional[str]
-    editor2_last: Optional[str]
-    editor2_link: Optional[str]
-    editor3_first: Optional[str]
-    editor3_last: Optional[str]
-    editor3_link: Optional[str]
-    editor4_first: Optional[str]
-    editor4_last: Optional[str]
-    editor4_link: Optional[str]
-    editor5_first: Optional[str]
-    editor5_last: Optional[str]
-    editor5_link: Optional[str]
-    editor: Optional[str]
-    editor_first1: Optional[str]
-    editor_first2: Optional[str]
-    editor_first3: Optional[str]
-    editor_first4: Optional[str]
-    editor_first5: Optional[str]
-    editor_first: Optional[str]
-    editor_last1: Optional[str]
-    editor_last2: Optional[str]
-    editor_last3: Optional[str]
-    editor_last4: Optional[str]
-    editor_last5: Optional[str]
-    editor_last: Optional[str]
-    editor_link1: Optional[str]
-    editor_link2: Optional[str]
-    editor_link3: Optional[str]
-    editor_link4: Optional[str]
-    editor_link5: Optional[str]
-    editor_link: Optional[str]
-    editor_mask1: Optional[str]
-    editor_mask2: Optional[str]
-    editor_mask3: Optional[str]
-    editor_mask4: Optional[str]
-    editor_mask5: Optional[str]
-    editor_mask: Optional[str]
-
-    #######################
-    # Translator
-    #######################
-    translator_first1: Optional[str]
-    translator_first2: Optional[str]
-    translator_first3: Optional[str]
-    translator_first4: Optional[str]
-    translator_first5: Optional[str]
-    translator_first: Optional[str]
-    translator_last1: Optional[str]
-    translator_last2: Optional[str]
-    translator_last3: Optional[str]
-    translator_last4: Optional[str]
-    translator_last5: Optional[str]
-    translator_last: Optional[str]
-    translator_link1: Optional[str]
-    translator_link2: Optional[str]
-    translator_link3: Optional[str]
-    translator_link4: Optional[str]
-    translator_link5: Optional[str]
-    translator_link: Optional[str]
-    translator_mask1: Optional[str]
-    translator_mask2: Optional[str]
-    translator_mask3: Optional[str]
-    translator_mask4: Optional[str]
-    translator_mask5: Optional[str]
-    translator_mask: Optional[str]
-
-    #######################
-    # Interviewer
-    #######################
-    interviewer_given: Optional[str]
-    interviewer_first: Optional[str]
-    interviewer_surname: Optional[str]
-    interviewer_last: Optional[str]
-
-    #######################
-    # Host
-    #######################
-    host: Optional[str]
-    host1: Optional[str]
-    host2: Optional[str]
-    host3: Optional[str]
-    host4: Optional[str]
-    host5: Optional[str]
-
-    #######################
-    # Boolean switches
-    #######################
-    display_authors: Optional[str]  # we can ignore this one
-    display_editors: Optional[str]  # we can ignore this one
-    display_translators: Optional[str]  # we can ignore this one
-    display_subjects: Optional[str]  # we can ignore this one
-
-    # Others
-    access_date: Optional[datetime]
-    agency: Optional[str]  # what is this?
-    archive_date: Optional[datetime]
-    archive_url: Optional[str]
-    arxiv: Optional[str]
-    asin: Optional[str]  # what is this?
-    asin_tld: Optional[str]
-    at: Optional[str]  # what is this?
-    bibcode: Optional[str]
-    bibcode_access: Optional[str]
-    biorxiv: Optional[str]
-    book_title: Optional[str]
-    chapter: Optional[str]
-    chapter_format: Optional[str]
-    chapter_url: Optional[str]
-    chapter_url_access: Optional[str]
-    citeseerx: Optional[str]
-    news_class: Optional[str]  # used in cite arxiv
-    conference: Optional[str]
-    conference_url: Optional[str]
-    date: Optional[datetime]
-    degree: Optional[str]
-    department: Optional[str]
-    doi: str = ""
-    doi_access: Optional[str]
-    doi_broken_date: Optional[datetime]
-    edition: Optional[str]
-    eissn: Optional[str]
-    encyclopedia: Optional[str]
-    eprint: Optional[str]
-    format: Optional[str]
-    hdl: Optional[str]
-    hdl_access: Optional[str]
-    id: Optional[str]  # where does this come from?
-    isbn: str = ""
-    ismn: Optional[str]
-    issn: Optional[str]
-    issue: Optional[str]
-    jfm: Optional[str]
-    journal: Optional[str]
-    jstor: Optional[str]
-    jstor_access: Optional[str]
-    language: Optional[str]  # do we want to parse this?
-    lccn: Optional[str]
-    location: Optional[str]
-    mode: Optional[str]  # what is this?
-    mr: Optional[str]
-    name_list_style: Optional[str]
-    no_pp: Optional[str]
-    oclc: Optional[str]
-    ol: Optional[str]  # what is this?
-    ol_access: Optional[str]
-    orig_date: Optional[datetime]
-    orig_year: Optional[datetime]
-    osti: Optional[str]  # what is this?
-    osti_access: Optional[str]
-    others: Optional[str]  # what is this?
-    page: Optional[str]
-    pages: Optional[str]
-    pmc: Optional[str]
-    pmc_embargo_date: Optional[datetime]
-    pmid: Optional[str]
-    postscript: Optional[str]  # what is this?
-    publication_date: Optional[datetime]
-    publication_place: Optional[str]
-    publisher: Optional[str]
-    quote: Optional[str]  # do we want to store this?
-    quote_page: Optional[str]
-    quote_pages: Optional[str]
-    ref: Optional[str]
-    registration: Optional[str]  # what is this?
-    rfc: Optional[str]  # what is this?
-    s2cid: Optional[str]
-    s2cid_access: Optional[str]
-    sbn: Optional[str]
-    script_chapter: Optional[str]
-    script_quote: Optional[str]
-    script_title: Optional[str]
-    series: Optional[str]
-    ssrn: Optional[str]
-    subject: Optional[str]
-    subject_mask: Optional[str]
-    subscription: Optional[str]
-    # title: Optional[str]
-    title_link: Optional[str]
-    trans_chapter: Optional[str]  # this is a translation of a chapter
-    trans_quote: Optional[str]  # this is a translation of a quote
-    trans_title: Optional[str]  # this is a translation of a title
-    type: Optional[str]  # what is this?
-    url: Optional[str]
-    url_access: Optional[str]
-    url_status: Optional[str]
-    via: Optional[str]  # what is this?
-    volume: Optional[str]
-    website: Optional[str]
-    work: Optional[str]
-    year: Optional[datetime]
-    zbl: Optional[str]  # what is this?
-
-    #######################
-    # Deprecated parameters
-    #######################
-    # We ignore these
-    # cite news
-    lay_date: Optional[str]
-    lay_format: Optional[str]
-    lay_source: Optional[str]
-    lay_url: Optional[str]
-    transcripturl: Optional[str]
-
-    # Numbered parameters
-    first_parameter: str = ""  # 1
-    second_parameter: Optional[str]  # 2 # this is not supported yet
-
-    # Fields found in the wild
-    df: Optional[str]
-    magazine: Optional[str]
-    newspaper: Optional[str]
-    author1: Optional[str]
-    author2: Optional[str]
-    author3: Optional[str]
-    author4: Optional[str]
-    author5: Optional[str]
-    author6: Optional[str]
-    author7: Optional[str]
-    author8: Optional[str]
-    author9: Optional[str]
-    author10: Optional[str]
-    editor1: Optional[str]
-    editor2: Optional[str]
-    editor3: Optional[str]
-    editor4: Optional[str]
-    editor5: Optional[str]
-    number: Optional[str]
-    first7: Optional[str]
-    first8: Optional[str]
-    first9: Optional[str]
-    first10: Optional[str]
-    first11: Optional[str]
-    first12: Optional[str]
-    first13: Optional[str]
-    first14: Optional[str]
-    last7: Optional[str]
-    last8: Optional[str]
-    last9: Optional[str]
-    last10: Optional[str]
-    last11: Optional[str]
-    last12: Optional[str]
-    last13: Optional[str]
-    last14: Optional[str]
-    message_id: Optional[str]
-    newsgroup: Optional[str]
-    archive_format: Optional[str]
-    time: Optional[datetime]
-    interviewer: Optional[str]
-    medium: Optional[str]
-    contribution: Optional[str]
-    vauthors: Optional[
-        str
-    ]  # this appears in cite journal and is used to specify authors_list using the Vancouver system
-    authors: Optional[str]
-    place: Optional[str]
-    lang: Optional[str]
-    periodical: Optional[str]
+    # # These are all the parameters in the supported references
+    # #######################
+    # # Names
+    # #######################
+    # first1: Optional[str]
+    # first2: Optional[str]
+    # first3: Optional[str]
+    # first4: Optional[str]
+    # first5: Optional[str]
+    # first6: Optional[str]
+    # first: Optional[str]
+    # last1: Optional[str]
+    # last2: Optional[str]
+    # last3: Optional[str]
+    # last4: Optional[str]
+    # last5: Optional[str]
+    # last6: Optional[str]
+    # last: Optional[str]
+    #
+    # #######################
+    # # Author first/given (equal)
+    # #######################
+    # author_given: Optional[str]
+    # author_given1: Optional[str]
+    # author_given2: Optional[str]
+    # author_given3: Optional[str]
+    # author_given4: Optional[str]
+    # author_given5: Optional[str]
+    # author_first: Optional[str]
+    # author_first1: Optional[str]
+    # author_first2: Optional[str]
+    # author_first3: Optional[str]
+    # author_first4: Optional[str]
+    # author_first5: Optional[str]
+    #
+    # #######################
+    # # Author last/surname (equal)
+    # #######################
+    # author_surname: Optional[str]
+    # author_surname1: Optional[str]
+    # author_surname2: Optional[str]
+    # author_surname3: Optional[str]
+    # author_surname4: Optional[str]
+    # author_surname5: Optional[str]
+    # author_last: Optional[str]
+    # author_last1: Optional[str]
+    # author_last2: Optional[str]
+    # author_last3: Optional[str]
+    # author_last4: Optional[str]
+    # author_last5: Optional[str]
+    #
+    # # Author
+    # author1_first: Optional[str]
+    # author1_last: Optional[str]
+    # author1_link: Optional[str]
+    # author2_first: Optional[str]
+    # author2_last: Optional[str]
+    # author2_link: Optional[str]
+    # author3_first: Optional[str]
+    # author3_last: Optional[str]
+    # author3_link: Optional[str]
+    # author4_first: Optional[str]
+    # author4_last: Optional[str]
+    # author4_link: Optional[str]
+    # author5_first: Optional[str]
+    # author5_last: Optional[str]
+    # author5_link: Optional[str]
+    # author: Optional[str]
+    # author_link1: Optional[str]
+    # author_link2: Optional[str]
+    # author_link3: Optional[str]
+    # author_link4: Optional[str]
+    # author_link5: Optional[str]
+    # author_link: Optional[str]
+    # author_mask1: Optional[str]
+    # author_mask2: Optional[str]
+    # author_mask3: Optional[str]
+    # author_mask4: Optional[str]
+    # author_mask5: Optional[str]
+    # author_mask: Optional[str]
+    #
+    # #######################
+    # # Editor
+    # #######################
+    # editor1_first: Optional[str]
+    # editor1_last: Optional[str]
+    # editor1_link: Optional[str]
+    # editor2_first: Optional[str]
+    # editor2_last: Optional[str]
+    # editor2_link: Optional[str]
+    # editor3_first: Optional[str]
+    # editor3_last: Optional[str]
+    # editor3_link: Optional[str]
+    # editor4_first: Optional[str]
+    # editor4_last: Optional[str]
+    # editor4_link: Optional[str]
+    # editor5_first: Optional[str]
+    # editor5_last: Optional[str]
+    # editor5_link: Optional[str]
+    # editor: Optional[str]
+    # editor_first1: Optional[str]
+    # editor_first2: Optional[str]
+    # editor_first3: Optional[str]
+    # editor_first4: Optional[str]
+    # editor_first5: Optional[str]
+    # editor_first: Optional[str]
+    # editor_last1: Optional[str]
+    # editor_last2: Optional[str]
+    # editor_last3: Optional[str]
+    # editor_last4: Optional[str]
+    # editor_last5: Optional[str]
+    # editor_last: Optional[str]
+    # editor_link1: Optional[str]
+    # editor_link2: Optional[str]
+    # editor_link3: Optional[str]
+    # editor_link4: Optional[str]
+    # editor_link5: Optional[str]
+    # editor_link: Optional[str]
+    # editor_mask1: Optional[str]
+    # editor_mask2: Optional[str]
+    # editor_mask3: Optional[str]
+    # editor_mask4: Optional[str]
+    # editor_mask5: Optional[str]
+    # editor_mask: Optional[str]
+    #
+    # #######################
+    # # Translator
+    # #######################
+    # translator_first1: Optional[str]
+    # translator_first2: Optional[str]
+    # translator_first3: Optional[str]
+    # translator_first4: Optional[str]
+    # translator_first5: Optional[str]
+    # translator_first: Optional[str]
+    # translator_last1: Optional[str]
+    # translator_last2: Optional[str]
+    # translator_last3: Optional[str]
+    # translator_last4: Optional[str]
+    # translator_last5: Optional[str]
+    # translator_last: Optional[str]
+    # translator_link1: Optional[str]
+    # translator_link2: Optional[str]
+    # translator_link3: Optional[str]
+    # translator_link4: Optional[str]
+    # translator_link5: Optional[str]
+    # translator_link: Optional[str]
+    # translator_mask1: Optional[str]
+    # translator_mask2: Optional[str]
+    # translator_mask3: Optional[str]
+    # translator_mask4: Optional[str]
+    # translator_mask5: Optional[str]
+    # translator_mask: Optional[str]
+    #
+    # #######################
+    # # Interviewer
+    # #######################
+    # interviewer_given: Optional[str]
+    # interviewer_first: Optional[str]
+    # interviewer_surname: Optional[str]
+    # interviewer_last: Optional[str]
+    #
+    # #######################
+    # # Host
+    # #######################
+    # host: Optional[str]
+    # host1: Optional[str]
+    # host2: Optional[str]
+    # host3: Optional[str]
+    # host4: Optional[str]
+    # host5: Optional[str]
+    #
+    # #######################
+    # # Boolean switches
+    # #######################
+    # display_authors: Optional[str]  # we can ignore this one
+    # display_editors: Optional[str]  # we can ignore this one
+    # display_translators: Optional[str]  # we can ignore this one
+    # display_subjects: Optional[str]  # we can ignore this one
+    #
+    # # Others
+    # access_date: Optional[datetime]
+    # agency: Optional[str]  # what is this?
+    # archive_date: Optional[datetime]
+    # archive_url: Optional[str]
+    # arxiv: Optional[str]
+    # asin: Optional[str]  # what is this?
+    # asin_tld: Optional[str]
+    # at: Optional[str]  # what is this?
+    # bibcode: Optional[str]
+    # bibcode_access: Optional[str]
+    # biorxiv: Optional[str]
+    # book_title: Optional[str]
+    # chapter: Optional[str]
+    # chapter_format: Optional[str]
+    # chapter_url: Optional[str]
+    # chapter_url_access: Optional[str]
+    # citeseerx: Optional[str]
+    # news_class: Optional[str]  # used in cite arxiv
+    # conference: Optional[str]
+    # conference_url: Optional[str]
+    # date: Optional[datetime]
+    # degree: Optional[str]
+    # department: Optional[str]
+    # doi: str = ""
+    # doi_access: Optional[str]
+    # doi_broken_date: Optional[datetime]
+    # edition: Optional[str]
+    # eissn: Optional[str]
+    # encyclopedia: Optional[str]
+    # eprint: Optional[str]
+    # format: Optional[str]
+    # hdl: Optional[str]
+    # hdl_access: Optional[str]
+    # id: Optional[str]  # where does this come from?
+    # isbn: str = ""
+    # ismn: Optional[str]
+    # issn: Optional[str]
+    # issue: Optional[str]
+    # jfm: Optional[str]
+    # journal: Optional[str]
+    # jstor: Optional[str]
+    # jstor_access: Optional[str]
+    # language: Optional[str]  # do we want to parse this?
+    # lccn: Optional[str]
+    # location: Optional[str]
+    # mode: Optional[str]  # what is this?
+    # mr: Optional[str]
+    # name_list_style: Optional[str]
+    # no_pp: Optional[str]
+    # oclc: Optional[str]
+    # ol: Optional[str]  # what is this?
+    # ol_access: Optional[str]
+    # orig_date: Optional[datetime]
+    # orig_year: Optional[datetime]
+    # osti: Optional[str]  # what is this?
+    # osti_access: Optional[str]
+    # others: Optional[str]  # what is this?
+    # page: Optional[str]
+    # pages: Optional[str]
+    # pmc: Optional[str]
+    # pmc_embargo_date: Optional[datetime]
+    # pmid: Optional[str]
+    # postscript: Optional[str]  # what is this?
+    # publication_date: Optional[datetime]
+    # publication_place: Optional[str]
+    # publisher: Optional[str]
+    # quote: Optional[str]  # do we want to store this?
+    # quote_page: Optional[str]
+    # quote_pages: Optional[str]
+    # ref: Optional[str]
+    # registration: Optional[str]  # what is this?
+    # rfc: Optional[str]  # what is this?
+    # s2cid: Optional[str]
+    # s2cid_access: Optional[str]
+    # sbn: Optional[str]
+    # script_chapter: Optional[str]
+    # script_quote: Optional[str]
+    # script_title: Optional[str]
+    # series: Optional[str]
+    # ssrn: Optional[str]
+    # subject: Optional[str]
+    # subject_mask: Optional[str]
+    # subscription: Optional[str]
+    # # title: Optional[str]
+    # title_link: Optional[str]
+    # trans_chapter: Optional[str]  # this is a translation of a chapter
+    # trans_quote: Optional[str]  # this is a translation of a quote
+    # trans_title: Optional[str]  # this is a translation of a title
+    # type : Optional[str]  # what is this?
+    # url: Optional[str]
+    # url_access: Optional[str]
+    # url_status: Optional[str]
+    # via: Optional[str]  # what is this?
+    # volume: Optional[str]
+    # website: Optional[str]
+    # work: Optional[str]
+    # year: Optional[datetime]
+    # zbl: Optional[str]  # what is this?
+    #
+    # #######################
+    # # Deprecated parameters
+    # #######################
+    # # We ignore these
+    # # cite news
+    # lay_date: Optional[str]
+    # lay_format: Optional[str]
+    # lay_source: Optional[str]
+    # lay_url: Optional[str]
+    # transcripturl: Optional[str]
+    #
+    # # Numbered parameters
+    # first_parameter: str = ""  # 1
+    # second_parameter: Optional[str]  # 2 # this is not supported yet
+    #
+    # # Fields found in the wild
+    # df: Optional[str]
+    # magazine: Optional[str]
+    # newspaper: Optional[str]
+    # author1: Optional[str]
+    # author2: Optional[str]
+    # author3: Optional[str]
+    # author4: Optional[str]
+    # author5: Optional[str]
+    # author6: Optional[str]
+    # author7: Optional[str]
+    # author8: Optional[str]
+    # author9: Optional[str]
+    # author10: Optional[str]
+    # editor1: Optional[str]
+    # editor2: Optional[str]
+    # editor3: Optional[str]
+    # editor4: Optional[str]
+    # editor5: Optional[str]
+    # number: Optional[str]
+    # first7: Optional[str]
+    # first8: Optional[str]
+    # first9: Optional[str]
+    # first10: Optional[str]
+    # first11: Optional[str]
+    # first12: Optional[str]
+    # first13: Optional[str]
+    # first14: Optional[str]
+    # last7: Optional[str]
+    # last8: Optional[str]
+    # last9: Optional[str]
+    # last10: Optional[str]
+    # last11: Optional[str]
+    # last12: Optional[str]
+    # last13: Optional[str]
+    # last14: Optional[str]
+    # message_id: Optional[str]
+    # newsgroup: Optional[str]
+    # archive_format: Optional[str]
+    # time: Optional[datetime]
+    # interviewer: Optional[str]
+    # medium: Optional[str]
+    # contribution: Optional[str]
+    # vauthors: Optional[
+    #     str
+    # ]  # this appears in cite journal and is used to specify authors_list using the Vancouver system
+    # authors: Optional[str]
+    # place: Optional[str]
+    # lang: Optional[str]
+    # periodical: Optional[str]
 
     # @property
     # def has_first_level_domain_url_hash(self) -> bool:
@@ -433,16 +429,16 @@ class WikipediaReference(WcdItem):
     #         return datetime.strftime(self.year, "%Y-%m-%d")
     #     else:
     #         raise ValueError(
-    #             f"missing publication date, in template {self.template_name}, see {self.dict()}"
+    #             f"missing publication date, in templates {self.template_name}, see {self.dict()}"
     #         )
 
     # @property
     # def wikibase_url(self) -> str:
-    #     if not self.wikibase_deprecated:
-    #         raise MissingInformationError("self.wikibase_deprecated was None")
+    #     if not self.wikibase:
+    #         raise MissingInformationError("self.wikibase was None")
     #     if not self.return_:
     #         raise MissingInformationError("self.return_ was None")
-    #     return f"{self.wikibase_deprecated.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
+    #     return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
 
     # @validate_arguments
     # def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
@@ -461,19 +457,19 @@ class WikipediaReference(WcdItem):
     #     else:
     #         raise MissingInformationError("self.return_ was None")
 
-    def __clean_wiki_markup_from_strings__(self):
-        """We clean away [[ and ]]
-        For now we only clean self.publisher"""
-        # TODO use mwparserfromhell strip_code instead
-        if self.publisher:
-            if "[[" in self.publisher and "|" not in self.publisher:
-                self.publisher = self.publisher.replace("[[", "").replace("]]", "")
-            if "[[" in self.publisher and "|" in self.publisher:
-                """We save the first part of the string only
-                e.g. [[University of California, Berkeley|Berkeley]]"""
-                self.publisher = (
-                    self.publisher.replace("[[", "").replace("]]", "").split("|")[0]
-                )
+    # def __clean_wiki_markup_from_strings__(self):
+    #     """We clean away [[ and ]]
+    #     For now we only clean self.publisher"""
+    #     # use mwparserfromhell strip_code instead
+    #     if self.publisher:
+    #         if "[[" in self.publisher and "|" not in self.publisher:
+    #             self.publisher = self.publisher.replace("[[", "").replace("]]", "")
+    #         if "[[" in self.publisher and "|" in self.publisher:
+    #             """We save the first part of the string only
+    #             e.g. [[University of California, Berkeley|Berkeley]]"""
+    #             self.publisher = (
+    #                 self.publisher.replace("[[", "").replace("]]", "").split("|")[0]
+    #             )
 
     # DISABLED - should be moved to Template
     # def __detect_archive_urls__(self):
@@ -481,7 +477,7 @@ class WikipediaReference(WcdItem):
     #     domain from a known web archiver"""
     #     pass
     # logger.debug("__detect_archive_urls__: Running")
-    # from src.models.wikibase_deprecated.enums import KnownArchiveUrl
+    # from src.models.wikibase.enums import KnownArchiveUrl
     #
     # # ARCHIVE_URL
     # if self.first_level_domain_of_archive_url:
@@ -561,20 +557,20 @@ class WikipediaReference(WcdItem):
             # logger.debug(f"Found no numbers.")
             return None
 
-    def __generate_first_level_domain_hash__(self):
-        """This is used as hash for all website items"""
-        pass
-        # Disabled because we don't generate any website items right now
-        # if self.first_level_domain_of_url is not None:
-        #     str2hash = self.first_level_domain_of_url
-        #     self.first_level_domain_of_url_hash = hashlib.md5(
-        #         f'{self.wikibase_deprecated.title}{str2hash.replace(" ", "").lower()}'.encode()
-        #     ).hexdigest()
+    # def __generate_first_level_domain_hash__(self):
+    #     """This is used as hash for all website items"""
+    #     pass
+    #     # Disabled because we don't generate any website items right now
+    #     # if self.first_level_domain_of_url is not None:
+    #     #     str2hash = self.first_level_domain_of_url
+    #     #     self.first_level_domain_of_url_hash = hashlib.md5(
+    #     #         f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
+    #     #     ).hexdigest()
 
     # def __generate_hashes__(self):
     #     """Generate hashes for both website and reference items"""
     #     # if not self.wikibase:
-    #     #     raise MissingInformationError("self.wikibase_deprecated was None")
+    #     #     raise MissingInformationError("self.wikibase was None")
     #     self.__generate_reference_hash__()
     #     # self.__generate_first_level_domain_hash__()
 
@@ -726,85 +722,86 @@ class WikipediaReference(WcdItem):
         # We discard all None-values here to placate mypy
         return [i for i in maybe_persons if i]
 
-    def __merge_date_into_publication_date__(self):
-        """Handle the possibly ambiguous self.date field"""
-        if self.date and self.publication_date and self.date != self.publication_date:
-            raise AmbiguousDateError(
-                f"got both a date and a publication_date and they differ"
-            )
-        if self.date and not self.publication_date:
-            # Assuming date is the publication date
-            self.publication_date = self.date
-            logger.debug("Assumed date == publication_data")
-
-    def __merge_lang_into_language__(self):
-        """We merge lang into language or log if both are populated"""
-        if self.lang and not self.language:
-            self.language = self.lang
-        elif self.lang and self.language:
-            self.__log_to_file__(
-                message=f"both lang: '{self.lang}' and language: '{self.language} is populated",
-                file_name="lang.log",
-            )
-
-    def __merge_place_into_location__(self):
-        """Merge place into location or log if both are populated"""
-        if self.place and not self.location:
-            self.location = self.place
-        elif self.place and self.location:
-            self.__log_to_file__(
-                message=f"both place: '{self.place}' and location: '{self.location} is populated",
-                file_name="place.log",
-            )
+    # def __merge_date_into_publication_date__(self):
+    #     """Handle the possibly ambiguous self.date field"""
+    #     if self.date and self.publication_date:
+    #         if self.date != self.publication_date:
+    #             raise AmbiguousDateError(
+    #                 f"got both a date and a publication_date and they differ"
+    #             )
+    #     if self.date and not self.publication_date:
+    #         # Assuming date is the publication date
+    #         self.publication_date = self.date
+    #         logger.debug("Assumed date == publication_data")
+    #
+    # def __merge_lang_into_language__(self):
+    #     """We merge lang into language or log if both are populated"""
+    #     if self.lang and not self.language:
+    #         self.language = self.lang
+    #     elif self.lang and self.language:
+    #         self.__log_to_file__(
+    #             message=f"both lang: '{self.lang}' and language: '{self.language} is populated",
+    #             file_name="lang.log",
+    #         )
+    #
+    # def __merge_place_into_location__(self):
+    #     """Merge place into location or log if both are populated"""
+    #     if self.place and not self.location:
+    #         self.location = self.place
+    #     elif self.place and self.location:
+    #         self.__log_to_file__(
+    #             message=f"both place: '{self.place}' and location: '{self.location} is populated",
+    #             file_name="place.log",
+    #         )
 
     # DISABLED should be moved to raw reference
-    def __get_and_validate_identifiers__(self) -> None:
-        """Helper method"""
-        self.__get_identifiers_from_templates__()
-        self.__parse_identifiers__()
+    # def __get_and_validate_identifiers__(self) -> None:
+    #     """Helper method"""
+    #     self.__get_identifiers_from_templates__()
+    #     self.__parse_identifiers__()
 
-    def __parse_identifiers__(self):
-        self.__parse_isbn__()
+    # def __parse_identifiers__(self):
+    #     self.__parse_isbn__()
 
     # DEPRECATED since 2.1.0-alpha3
     # def __parse_google_books_template__(self):
-    #     """Parse the Google Books template that sometimes appear in self.url
+    #     """Parse the Google Books templates that sometimes appear in self.url
     #     and save the result in self.google_books and generate the URL
     #     and store it in self.url"""
     #     logger.debug("__parse_google_books__: Running")
     #     template_tuples = extract_templates_and_params(self.url, True)
     #     if template_tuples:
-    #         logger.info("Found Google books template")
+    #         logger.info("Found Google books templates")
     #         for _template_name, content in template_tuples:
     #             google_books: GoogleBooks = GoogleBooksSchema().load(content)
-    #             google_books.wikibase_deprecated = self.wikibase_deprecated
+    #             google_books.wikibase = self.wikibase
     #             google_books.finish_parsing()
     #             self.url = google_books.url
     #             self.google_books_id = google_books.id
     #             self.google_books = google_books
 
-    def __parse_isbn__(self) -> None:
-        if self.isbn:
-            # Replace spaces with dashes to follow the ISBN standard
-            self.isbn = self.isbn.replace(" ", "-")
-            stripped_isbn = self.isbn.replace("-", "")
-            if stripped_isbn in ["", " "]:
-                self.isbn = ""
-            else:
-                if len(stripped_isbn) == 13:
-                    self.isbn_13 = self.isbn
-                elif len(stripped_isbn) == 10:
-                    self.isbn_10 = self.isbn
-                else:
-                    message = (
-                        f"isbn: {self.isbn} was not "
-                        f"10 or 13 chars long after "
-                        f"removing the dashes"
-                    )
-                    logger.warning(message)
-                    self.__log_to_file__(
-                        message=message, file_name="isbn_exceptions.log"
-                    )
+    # def __parse_isbn__(self) -> None:
+    #     if self.isbn:
+    #         # Replace spaces with dashes to follow the ISBN standard
+    #         self.isbn = self.isbn.replace(" ", "-")
+    #         stripped_isbn = self.isbn.replace("-", "")
+    #         if stripped_isbn in ["", " "]:
+    #             self.isbn = ""
+    #         else:
+    #             if len(stripped_isbn) == 13:
+    #                 self.isbn_13 = self.isbn
+    #             elif len(stripped_isbn) == 10:
+    #                 self.isbn_10 = self.isbn
+    #             else:
+    #                 message = (
+    #                     f"isbn: {self.isbn} was not "
+    #                     f"10 or 13 chars long after "
+    #                     f"removing the dashes"
+    #                 )
+    #                 logger.warning(message)
+    #                 self.__log_to_file__(
+    #                     message=message, file_name="isbn_exceptions.log"
+    #                 )
 
     @validate_arguments
     def __parse_known_role_persons__(
@@ -847,72 +844,6 @@ class WikipediaReference(WcdItem):
         # console.print(f"{role.name}s: {persons}")
         return persons
 
-    def __parse_persons__(self) -> None:
-        """Parse all person related data into Person objects"""
-        # find all the attributes but exclude the properties as they lead to weird errors
-        properties = [
-            "has_hash",
-            "isodate",
-            "shortened_raw_template",
-            "template_url",
-            "wikibase_url",
-        ]
-        attributes = [
-            a
-            for a in dir(self)
-            if not a.startswith("_")
-            and a not in properties
-            and not callable(getattr(self, a))
-            and getattr(self, a) is not None
-        ]
-        self.authors_list = self.__parse_known_role_persons__(
-            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.AUTHOR
-        )
-        self.editors_list = self.__parse_known_role_persons__(
-            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.EDITOR
-        )
-        self.hosts_list = self.__parse_known_role_persons__(
-            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.HOST
-        )
-        self.interviewers_list = self.__parse_known_role_persons__(
-            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.INTERVIEWER
-        )
-        self.persons_without_role = self.__parse_roleless_persons__(
-            attributes=attributes
-        )
-        self.translators_list = self.__parse_known_role_persons__(
-            attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
-        )
-
-    @validate_arguments
-    def __parse_roleless_persons__(self, attributes: List[str]) -> List[Person]:
-        persons = []
-        # first last
-        unnumbered_first_last = [
-            attribute
-            for attribute in attributes
-            if self.__find_number__(attribute) is None
-            and (attribute == "first" or attribute == "last")
-        ]
-        logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
-        if len(unnumbered_first_last) > 0:
-            person = Person(
-                role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
-            )
-            for attribute in unnumbered_first_last:
-                # print(attribute, getattr(self, attribute))
-                if attribute == "first":
-                    person.given = self.first
-                if attribute == "last":
-                    person.surname = self.last
-            # console.print(person)
-            persons.append(person)
-            # exit()
-        # We use list comprehension to get the numbered persons to
-        # ease code maintentenance and easily support a larger range if necessary
-        persons.extend(self.__get_numbered_persons__(attributes=attributes))
-        return persons
-
     # TODO move this to Template
     # def __parse_url__(self, url: str = "") -> str:
     #     # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
@@ -924,7 +855,7 @@ class WikipediaReference(WcdItem):
     #     else:
     #         # TODO REGRESSION We don't support nested templates for now during the rewrite
     #         # if self.__has_template_data__(string=url):
-    #         #     logger.info(f"Found template data in url: {url}")
+    #         #     logger.info(f"Found templates data in url: {url}")
     #         #     return self.__get_url_from_template__(url=url)
     #         # else:
     #         logger.warning(
@@ -949,73 +880,73 @@ class WikipediaReference(WcdItem):
     #     if self.transcripturl:
     #         self.transcripturl = self.__parse_url__(url=self.transcripturl)
 
-    # noinspection PyMethodParameters
-    @validator(
-        "access_date",
-        "archive_date",
-        "date",
-        "doi_broken_date",
-        "orig_date",
-        "orig_year",
-        "pmc_embargo_date",
-        "publication_date",
-        "time",
-        "year",
-        pre=True,
-    )
-    def __validate_time__(cls, v) -> Optional[datetime]:  # type: ignore # mypy: ignore
-        """Pydantic validator
-        see https://stackoverflow.com/questions/66472255/"""
-        date = None
-        # Support "2013-01-01"
-        try:
-            date = datetime.strptime(v, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "May 9, 2013"
-        try:
-            date = datetime.strptime(v, "%B %d, %Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "Jul 9, 2013"
-        try:
-            date = datetime.strptime(v, "%b %d, %Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "May 25, 2012a"
-        try:
-            date = datetime.strptime(v[:-1], "%b %d, %Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "1 September 2003"
-        try:
-            date = datetime.strptime(v, "%d %B %Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "26 Dec 1996"
-        try:
-            date = datetime.strptime(v, "%d %b %Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "September 2003"
-        try:
-            date = datetime.strptime(v, "%B %Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "Sep 2003"
-        try:
-            date = datetime.strptime(v, "%b %Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        # Support "2003"
-        try:
-            date = datetime.strptime(v, "%Y").replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-        if date is None:
-            # raise TimeParseException(f"date format '{v}' not supported yet")
-            logger.warning(f"date format '{v}' not supported yet")
-        return date
+    # # noinspection PyMethodParameters
+    # @validator(
+    #     "access_date",
+    #     "archive_date",
+    #     "date",
+    #     "doi_broken_date",
+    #     "orig_date",
+    #     "orig_year",
+    #     "pmc_embargo_date",
+    #     "publication_date",
+    #     "time",
+    #     "year",
+    #     pre=True,
+    # )
+    # def __validate_time__(cls, v) -> Optional[datetime]:  # type: ignore # mypy: ignore
+    #     """Pydantic validator
+    #     see https://stackoverflow.com/questions/66472255/"""
+    #     date = None
+    #     # Support "2013-01-01"
+    #     try:
+    #         date = datetime.strptime(v, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "May 9, 2013"
+    #     try:
+    #         date = datetime.strptime(v, "%B %d, %Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "Jul 9, 2013"
+    #     try:
+    #         date = datetime.strptime(v, "%b %d, %Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "May 25, 2012a"
+    #     try:
+    #         date = datetime.strptime(v[:-1], "%b %d, %Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "1 September 2003"
+    #     try:
+    #         date = datetime.strptime(v, "%d %B %Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "26 Dec 1996"
+    #     try:
+    #         date = datetime.strptime(v, "%d %b %Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "September 2003"
+    #     try:
+    #         date = datetime.strptime(v, "%B %Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "Sep 2003"
+    #     try:
+    #         date = datetime.strptime(v, "%b %Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     # Support "2003"
+    #     try:
+    #         date = datetime.strptime(v, "%Y").replace(tzinfo=timezone.utc)
+    #     except ValueError:
+    #         pass
+    #     if date is None:
+    #         # raise TimeParseException(f"date format '{v}' not supported yet")
+    #         logger.warning(f"date format '{v}' not supported yet")
+    #     return date
 
     # @validate_arguments
     # def __upload_reference_to_wikibase__(self) -> WikibaseReturn:
@@ -1073,20 +1004,14 @@ class WikipediaReference(WcdItem):
         if not self.raw_reference and not testing:
             raise MissingInformationError("self.raw_reference was None")
         if self.raw_reference:
-            if self.raw_reference.multiple_cs1_templates_found:
-                from src.models.api import app
-
-                app.logger.warning(
-                    "Could not parse this reference because multiple "
-                    "CS1 templates were found and that is currently not supported"
-                )
-                self.encountered_parse_error = True
-            self.__get_and_validate_identifiers__()
-            self.__parse_persons__()
-            self.__merge_date_into_publication_date__()
-            self.__merge_lang_into_language__()
-            self.__merge_place_into_location__()
-            self.__clean_wiki_markup_from_strings__()
+            # self.__get_and_validate_identifiers__()
+            self.__generate_reference_id__()
+            # todo move all this to WikipediaTemplate
+            # self.__parse_persons__()
+            # self.__merge_date_into_publication_date__()
+            # self.__merge_lang_into_language__()
+            # self.__merge_place_into_location__()
+            # self.__clean_wiki_markup_from_strings__()
             # We generate the hash last because the parsing needs to be done first
             # self.__generate_hashes__()
 
@@ -1101,16 +1026,16 @@ class WikipediaReference(WcdItem):
     # TODO update to use new models
     # def __get_url_from_template__(self, url: str) -> str:
     #     if "google books" in url.lower():
-    #         logger.info("Found Google books template")
+    #         logger.info("Found Google books templates")
     #         return self.__get_url_from_google_books_template__(url=url)
     #     else:
-    #         logger.warning(f"Parsing the template data in {url} is not supported yet")
+    #         logger.warning(f"Parsing the templates data in {url} is not supported yet")
     #         return ""
 
     # TODO update to use new models
     # @staticmethod
     # def __get_url_from_google_books_template__(url: str) -> str:
-    #     """Parse the Google Books template that sometimes appear in a url
+    #     """Parse the Google Books templates that sometimes appear in a url
     #     and return the generated url"""
     #     logger.debug("__get_url_from_google_books_template__: Running")
     #     template_triples = extract_templates_and_params(url, True)
@@ -1122,101 +1047,111 @@ class WikipediaReference(WcdItem):
     #                 google_books.finish_parsing()
     #                 # We only care about the first
     #                 return str(google_books.url)
-    #         logger.warning(f"Parsing the google books template data in {url} failed")
+    #         logger.warning(f"Parsing the google books templates data in {url} failed")
     #         return ""
     #     else:
-    #         logger.warning(f"Parsing the google books template data in {url} failed")
+    #         logger.warning(f"Parsing the google books templates data in {url} failed")
     #         return ""
     # def get_wcdqid_from_cache(self):
     #     pass
 
-    def __get_isbn__(self) -> None:
-        """This extracts ISBN if found from isbn templates"""
-        isbn_found = False
+    # def __get_isbn__(self) -> None:
+    #     """This extracts ISBN if found from isbn templates"""
+    #     isbn_found = False
+    #     if not self.raw_reference:
+    #         raise MissingInformationError("no raw_reference")
+    #     if self.raw_reference.templates:
+    #         for template in self.raw_reference.templates:
+    #             if template.get_isbn:
+    #                 if isbn_found:
+    #                     # Currently we only support one isbn for each reference
+    #                     from src.models.api import app
+    #
+    #                     app.logger.warning(
+    #                         "Parse error: Multiple ISBN numbers were found in this reference "
+    #                         "and that is currently "
+    #                         "not supported"
+    #                     )
+    #                     self.encountered_parse_error = True
+    #                     return
+    #                 self.isbn = template.get_isbn
+    #                 isbn_found = True
+    #     return
+
+    # def __get_identifiers_from_templates__(self):
+    #     """Helper method"""
+    #     # These are based on first_parameter
+    #     self.__get_isbn__()
+    #     self.__get_url__()
+    #     self.__get_qid__()
+
+    # def __get_url__(self):
+    #     """This extracts URL if found in url templates"""
+    #     url_found = False
+    #     if not self.raw_reference:
+    #         raise MissingInformationError("no raw_reference")
+    #     if self.raw_reference.templates:
+    #         for template in self.raw_reference.templates:
+    #             if template.name == "url":
+    #                 if template.__first_parameter__:
+    #                     if url_found:
+    #                         from src.models.api import app
+    #
+    #                         app.logger.warning(
+    #                             "Parse error: Multiple main reference urls "
+    #                             "were found in this reference "
+    #                             "and that is currently "
+    #                             "not supported"
+    #                         )
+    #                         self.encountered_parse_error = True
+    #                         return False
+    #                     self.url = template.__first_parameter__
+    #                     url_found = True
+    #
+    # def __get_qid__(self):
+    #     qid_found = False
+    #     if not self.raw_reference:
+    #         raise MissingInformationError("no raw_reference")
+    #     if self.raw_reference.templates:
+    #         for template in self.raw_reference.templates:
+    #             if template.name in config.citeq_templates:
+    #                 if qid_found:
+    #                     from src.models.api import app
+    #
+    #                     app.logger.warning(
+    #                         "Parse error: Multiple DOI numbers were found "
+    #                         "in this reference "
+    #                         "and that is currently "
+    #                         "not supported"
+    #                     )
+    #                     self.encountered_parse_error = True
+    #                     return False
+    #                 self.wikidata_qid = template.__first_parameter__
+    #                 qid_found = True
+    #
+    # @property
+    # def is_valid_qid(self) -> bool:
+    #     if self.wikidata_qid:
+    #         # Use WBI to check the QID
+    #         from wikibaseintegrator.datatypes import Item  # type: ignore
+    #
+    #         try:
+    #             Item(value=self.wikidata_qid)
+    #             return True
+    #         # if entity.id == self.wikidata_qid:
+    #         except ValueError:
+    #             logger.warning(
+    #                 f"Wikidata QID '{self.wikidata_qid}' " f"was not a valid " f"WD QID"
+    #             )
+    #             return False
+    #     else:
+    #         return False
+
+    def __generate_reference_id__(self) -> None:
+        """This generates an 8-char long id based on the md5 hash of
+        the raw wikitext for this reference"""
         if not self.raw_reference:
-            raise MissingInformationError("no raw_reference")
-        if self.raw_reference.templates:
-            for template in self.raw_reference.templates:
-                if template.get_isbn:
-                    if isbn_found:
-                        # Currently we only support one isbn for each reference
-                        from src.models.api import app
-
-                        app.logger.warning(
-                            "Parse error: Multiple ISBN numbers were found in this reference "
-                            "and that is currently "
-                            "not supported"
-                        )
-                        self.encountered_parse_error = True
-                        return
-                    self.isbn = template.get_isbn
-                    isbn_found = True
-        return
-
-    def __get_identifiers_from_templates__(self):
-        """Helper method"""
-        # These are based on first_parameter
-        self.__get_isbn__()
-        self.__get_url__()
-        self.__get_qid__()
-
-    def __get_url__(self):
-        """This extracts URL if found in url templates"""
-        url_found = False
-        if not self.raw_reference:
-            raise MissingInformationError("no raw_reference")
-        if self.raw_reference.templates:
-            for template in self.raw_reference.templates:
-                if template.name == "url" and template.__first_parameter__:
-                    if url_found:
-                        from src.models.api import app
-
-                        app.logger.warning(
-                            "Parse error: Multiple main reference urls "
-                            "were found in this reference "
-                            "and that is currently "
-                            "not supported"
-                        )
-                        self.encountered_parse_error = True
-                        return False
-                    self.url = template.__first_parameter__
-                    url_found = True
-
-    def __get_qid__(self):
-        qid_found = False
-        if not self.raw_reference:
-            raise MissingInformationError("no raw_reference")
-        if self.raw_reference.templates:
-            for template in self.raw_reference.templates:
-                if template.name in config.citeq_templates:
-                    if qid_found:
-                        from src.models.api import app
-
-                        app.logger.warning(
-                            "Parse error: Multiple DOI numbers were found "
-                            "in this reference "
-                            "and that is currently "
-                            "not supported"
-                        )
-                        self.encountered_parse_error = True
-                        return False
-                    self.wikidata_qid = template.__first_parameter__
-                    qid_found = True
-
-    @property
-    def is_valid_qid(self) -> bool:
-        if self.wikidata_qid:
-            # Use WBI to check the QID
-            from wikibaseintegrator.datatypes import Item  # type: ignore
-
-            try:
-                Item(value=self.wikidata_qid)
-                return True
-            # if entity.id == self.wikidata_qid:
-            except ValueError:
-                logger.warning(
-                    f"Wikidata QID '{self.wikidata_qid}' " f"was not a valid " f"WD QID"
-                )
-                return False
-        else:
-            return False
+            raise MissingInformationError()
+        self.reference_id = hashlib.md5(
+            f"{self.raw_reference.wikicode}".encode()
+        ).hexdigest()[:8]

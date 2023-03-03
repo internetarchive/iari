@@ -5,7 +5,7 @@
 #
 # import config
 # from src import WikiCitationsWikibase
-# from src.models.wikibase_deprecated.crud.read import WikibaseCrudRead
+# from src.models.wikibase.crud.read import WikibaseCrudRead
 #
 #
 # logging.basicConfig(level=config.loglevel)
@@ -14,12 +14,12 @@
 #
 # class TestWikibaseCrudRead(TestCase):
 #     def test_get_items_via_sparql(self):
-#         wc = WikibaseCrudRead(wikibase_deprecated=IASandboxWikibase())
+#         wc = WikibaseCrudRead(wikibase=IASandboxWikibase())
 #         with self.assertRaises(HTTPError):
 #             wc.__get_items_via_sparql__(query="test")
 #
 #     def test_get_all_items_and_hashes_sandbox(self):
-#         wc = WikibaseCrudRead(wikibase_deprecated=IASandboxWikibase())
+#         wc = WikibaseCrudRead(wikibase=IASandboxWikibase())
 #         result = wc.__get_all_items_and_hashes__()
 #         count = 0
 #         for entry in result:
@@ -30,7 +30,7 @@
 #         assert count == 10
 #
 #     def test_get_all_items_and_hashes_wcd(self):
-#         wc = WikibaseCrudRead(wikibase_deprecated=WikiCitationsWikibase())
+#         wc = WikibaseCrudRead(wikibase=WikiCitationsWikibase())
 #         result = wc.__get_all_items_and_hashes__()
 #         count = 0
 #         for entry in result:

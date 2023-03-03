@@ -40,160 +40,160 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
-    @property
-    def number_of_content_references_with_url_found(self):
-        return len(
-            [
-                reference
-                for reference in self.content_references
-                if reference.raw_reference.url_found
-            ]
-        )
+    # @property
+    # def number_of_content_references_with_url_found(self):
+    #     return len(
+    #         [
+    #             reference
+    #             for reference in self.content_references
+    #             if reference.raw_reference.url_found
+    #         ]
+    #     )
 
     @property
     def has_references(self):
         """Helper method"""
         return bool(self.number_of_references)
 
-    @property
-    def number_of_references_with_a_deprecated_template(self) -> int:
-        return len(
-            [
-                reference
-                for reference in self.content_references
-                if reference.raw_reference.deprecated_reference_template_found
-            ]
-        )
-
-    @property
-    def number_of_other_cs1_references(self):
-        """All other CS1 templates that we don't especially care about"""
-        return len(
-            [
-                reference
-                for reference in self.content_references
-                if reference.raw_reference.cs1_template_found
-                and not (
-                    reference.raw_reference.cite_web_template_found
-                    or reference.raw_reference.cite_book_template_found
-                    or reference.raw_reference.cite_journal_template_found
-                )
-            ]
-        )
-
-    @property
-    def number_of_cite_journal_references_with_doi(self):
-        return len([ref for ref in self.cite_journal_references if ref.doi])
-
-    @property
-    def number_of_cite_web_references_with_google_books_link_or_template(self):
-        return len(
-            [
-                ref
-                for ref in self.cite_web_references
-                if ref.raw_reference.google_books_url_or_template_found
-            ]
-        )
-
-    @property
-    def number_of_cite_book_references_with_isbn(self):
-        return len([ref for ref in self.cite_book_references if ref.isbn])
-
-    @property
-    def number_of_cite_web_references_with_a_url(self):
-        return self.number_of_content_references_with_a_url(
-            list_=self.cite_web_references
-        )
-
-    @property
-    def number_of_cite_web_references_with_ia_details_link(self):
-        return self.number_of_content_references_with_ia_details_link(
-            list_=self.cite_web_references
-        )
-
-    @property
-    def number_of_cite_web_references_with_wm_link(self):
-        return self.number_of_content_references_with_wm_link(
-            list_=self.cite_web_references
-        )
-
-    @property
-    def number_of_cite_journal_references_with_a_url(self):
-        return self.number_of_content_references_with_a_url(
-            list_=self.cite_journal_references
-        )
-
-    @property
-    def number_of_cite_journal_references_with_ia_details_link(self):
-        return self.number_of_content_references_with_ia_details_link(
-            list_=self.cite_journal_references
-        )
-
-    @property
-    def number_of_cite_journal_references_with_wm_link(self):
-        return self.number_of_content_references_with_wm_link(
-            list_=self.cite_journal_references
-        )
-
-    @property
-    def number_of_cite_book_references_with_a_url(self):
-        return self.number_of_content_references_with_a_url(
-            list_=self.cite_book_references
-        )
-
-    @property
-    def number_of_cite_book_references_with_ia_details_link(self):
-        return self.number_of_content_references_with_ia_details_link(
-            list_=self.cite_book_references
-        )
-
-    @property
-    def number_of_cite_book_references_with_wm_link(self):
-        return self.number_of_content_references_with_wm_link(
-            list_=self.cite_book_references
-        )
-
-    @property
-    def number_of_cite_book_references(self):
-        return len(self.cite_book_references)
-
-    @property
-    def cite_web_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.cite_web_template_found
-        ]
-
-    @property
-    def cite_book_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.cite_book_template_found
-        ]
-
-    @property
-    def number_of_cite_journal_references(self):
-        return len(self.cite_journal_references)
-
-    @property
-    def cite_journal_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.cite_journal_template_found
-        ]
-
-    @property
-    def number_of_cite_web_references(self):
-        return len(
-            [
-                reference
-                for reference in self.references
-                if reference.raw_reference.cite_web_template_found
-            ]
-        )
+    # @property
+    # def number_of_references_with_a_deprecated_template(self) -> int:
+    #     return len(
+    #         [
+    #             reference
+    #             for reference in self.content_references
+    #             if reference.raw_reference.deprecated_reference_template_found
+    #         ]
+    #     )
+    #
+    # @property
+    # def number_of_other_cs1_references(self):
+    #     """All other CS1 templates that we don't especially care about"""
+    #     return len(
+    #         [
+    #             reference
+    #             for reference in self.content_references
+    #             if reference.raw_reference.cs1_template_found
+    #             and not (
+    #                 reference.raw_reference.cite_web_template_found
+    #                 or reference.raw_reference.cite_book_template_found
+    #                 or reference.raw_reference.cite_journal_template_found
+    #             )
+    #         ]
+    #     )
+    #
+    # @property
+    # def number_of_cite_journal_references_with_doi(self):
+    #     return len([ref for ref in self.cite_journal_references if ref.doi])
+    #
+    # @property
+    # def number_of_cite_web_references_with_google_books_link_or_template(self):
+    #     return len(
+    #         [
+    #             ref
+    #             for ref in self.cite_web_references
+    #             if ref.raw_reference.google_books_url_or_template_found
+    #         ]
+    #     )
+    #
+    # @property
+    # def number_of_cite_book_references_with_isbn(self):
+    #     return len([ref for ref in self.cite_book_references if ref.isbn])
+    #
+    # @property
+    # def number_of_cite_web_references_with_a_url(self):
+    #     return self.number_of_content_references_with_a_url(
+    #         list_=self.cite_web_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_web_references_with_ia_details_link(self):
+    #     return self.number_of_content_references_with_ia_details_link(
+    #         list_=self.cite_web_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_web_references_with_wm_link(self):
+    #     return self.number_of_content_references_with_wm_link(
+    #         list_=self.cite_web_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_journal_references_with_a_url(self):
+    #     return self.number_of_content_references_with_a_url(
+    #         list_=self.cite_journal_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_journal_references_with_ia_details_link(self):
+    #     return self.number_of_content_references_with_ia_details_link(
+    #         list_=self.cite_journal_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_journal_references_with_wm_link(self):
+    #     return self.number_of_content_references_with_wm_link(
+    #         list_=self.cite_journal_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_book_references_with_a_url(self):
+    #     return self.number_of_content_references_with_a_url(
+    #         list_=self.cite_book_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_book_references_with_ia_details_link(self):
+    #     return self.number_of_content_references_with_ia_details_link(
+    #         list_=self.cite_book_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_book_references_with_wm_link(self):
+    #     return self.number_of_content_references_with_wm_link(
+    #         list_=self.cite_book_references
+    #     )
+    #
+    # @property
+    # def number_of_cite_book_references(self):
+    #     return len(self.cite_book_references)
+    #
+    # @property
+    # def cite_web_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.cite_web_template_found
+    #     ]
+    #
+    # @property
+    # def cite_book_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.cite_book_template_found
+    #     ]
+    #
+    # @property
+    # def number_of_cite_journal_references(self):
+    #     return len(self.cite_journal_references)
+    #
+    # @property
+    # def cite_journal_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.cite_journal_template_found
+    #     ]
+    #
+    # @property
+    # def number_of_cite_web_references(self):
+    #     return len(
+    #         [
+    #             reference
+    #             for reference in self.references
+    #             if reference.raw_reference.cite_web_template_found
+    #         ]
+    #     )
 
     # @property
     # def reference_urls_dictionaries(self):
@@ -202,125 +202,26 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     #         raise MissingInformationError("self.check_urls_done was False")
     #     return [url.dict() for url in self.checked_and_unique_reference_urls]
 
-    @property
-    def number_of_unique_reference_urls_with_other_2xx(self):
-        """This catches 2xx codes which could be good or not"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("2") and url.status_code not in [200]
-            ]
-        )
+    # @property
+    # def number_of_unique_reference_urls_with_malformed_url(self):
+    #     """This can be True while error is also True"""
+    #     if not self.check_urls_done:
+    #         raise MissingInformationError("self.check_urls_done was False")
+    #     return len(self.malformed_urls)
 
-    @property
-    def number_of_unique_reference_urls_with_other_4xx(self):
-        """This catches 2xx codes which could be good or not"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("4") and url.status_code not in [404]
-            ]
-        )
+    # @property
+    # def malformed_urls(self) -> List[str]:
+    #     """List of malformed_urls"""
+    #     return [
+    #         url.url
+    #         for url in self.checked_and_unique_reference_urls
+    #         if url.malformed_url is True
+    #     ]
 
-    @property
-    def number_of_unique_reference_urls_with_code_5xx(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("5")
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_code_404(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.status_code == 404
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_code_3xx(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if str(url.status_code).startswith("3")
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_code_200(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.status_code == 200
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_malformed_url(self):
-        """This can be True while error is also True"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(self.malformed_urls)
-
-    @property
-    def malformed_urls(self) -> List[str]:
-        """List of malformed_urls"""
-        return [
-            url.url
-            for url in self.checked_and_unique_reference_urls
-            if url.malformed_url is True
-        ]
-
-    @property
-    def number_of_unique_reference_urls_with_error(self):
-        """This includes 2 different groups of error types from the request library"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.request_error is True or url.request_url_error
-            ]
-        )
-
-    @property
-    def number_of_unique_reference_urls_with_no_dns(self):
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(
-            [
-                url
-                for url in self.checked_and_unique_reference_urls
-                if url.dns_record_found is False
-            ]
-        )
-
-    @property
-    def number_of_urls(self):
-        """Non-unique URLs"""
-        return len(self.urls)
+    # @property
+    # def number_of_urls(self):
+    #     """Non-unique URLs"""
+    #     return len(self.urls)
 
     @property
     def urls(self) -> List[WikipediaUrl]:
@@ -333,33 +234,43 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return urls
 
     @property
-    def number_of_checked_unique_reference_urls(self):
-        """Unique URLs"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(self.checked_and_unique_reference_urls)
+    def raw_urls(self) -> List[str]:
+        """List of raw non-unique urls found in the reference"""
+        urls: List[str] = list()
+        for reference in self.references:
+            if reference.raw_reference:
+                for url in reference.raw_reference.reference_urls:
+                    urls.append(url.url)
+        return urls
 
-    def __get_checked_and_unique_reference_urls_from_references__(self) -> None:
-        """Get and check unique URLs
-        If check_urls is not enabled we do nothing."""
-        if self.check_urls:
-            if not self.check_urls_done:
-                raise MissingInformationError("url checking has not been done yet")
-            if len(self.raw_references) != len(self.references):
-                raise MissingInformationError(
-                    "conversion to references has not been done yet"
-                )
-            urls: List[WikipediaUrl] = list()
-            for reference in self.references:
-                if reference.raw_reference:
-                    for url in reference.raw_reference.checked_urls:
-                        urls.append(url)
-            # We run them through a set to avoid duplicates and then convert back
-            # to list because objects in sets cannot be updated it seems
-            self.checked_and_unique_reference_urls = list(set(urls))
+    # @property
+    # def number_of_checked_unique_reference_urls(self):
+    #     """Unique URLs"""
+    #     if not self.check_urls_done:
+    #         raise MissingInformationError("self.check_urls_done was False")
+    #     return len(self.checked_and_unique_reference_urls)
+
+    # def __get_checked_and_unique_reference_urls_from_references__(self) -> None:
+    #     """Get and check unique URLs
+    #     If check_urls is not enabled we do nothing."""
+    #     if self.check_urls:
+    #         if not self.check_urls_done:
+    #             raise MissingInformationError("url checking has not been done yet")
+    #         if len(self.raw_references) != len(self.references):
+    #             raise MissingInformationError(
+    #                 "conversion to references has not been done yet"
+    #             )
+    #         urls: List[WikipediaUrl] = list()
+    #         for reference in self.references:
+    #             if reference.raw_reference:
+    #                 for url in reference.raw_reference.checked_urls:
+    #                     urls.append(url)
+    #         # We run them through a set to avoid duplicates and then convert back
+    #         # to list because objects in sets cannot be updated it seems
+    #         self.checked_and_unique_reference_urls = list(set(urls))
 
     @property
-    def reference_first_level_domain_counts(self) -> List[Dict[str, int]]:
+    def reference_first_level_domain_counts(self) -> Dict[str, int]:
         """This returns a dict with fld as key and the count as value"""
         fld_set = set(self.reference_first_level_domains)
         counts = dict()
@@ -368,13 +279,13 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             counts[fld] = count
         # Sort by count, descending
         sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-        sorted_counts_dictionaries = []
+        # Thanks to Sawood for recommending we simplify and return a dictionary
+        sorted_counts_dictionary = {}
         for element in sorted_counts:
             fld = str(element[0])
             count = int(element[1])
-            dictionary: Dict[str, int] = {fld: count}
-            sorted_counts_dictionaries.append(dictionary)
-        return sorted_counts_dictionaries
+            sorted_counts_dictionary[fld] = count
+        return sorted_counts_dictionary
 
     @property
     def reference_first_level_domains(self) -> List[str]:
@@ -389,17 +300,17 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                 flds.append(fld)
         return flds
 
-    @property
-    def number_of_url_template_references(self) -> int:
-        return len(self.url_template_references)
+    # @property
+    # def number_of_url_template_references(self) -> int:
+    #     return len(self.url_template_references)
 
-    @property
-    def url_template_references(self):
-        return [
-            reference
-            for reference in self.content_references
-            if reference.raw_reference.url_template_found
-        ]
+    # @property
+    # def url_template_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.content_references
+    #         if reference.raw_reference.url_template_found
+    #     ]
 
     @property
     def number_of_sections_found(self) -> int:
@@ -419,151 +330,151 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def number_of_general_references(self) -> int:
         return len(self.general_references)
 
-    @property
-    def number_of_content_references_with_any_supported_template(self) -> int:
-        return len(
-            [
-                reference
-                for reference in self.content_references
-                if (
-                    reference.raw_reference.number_of_templates > 0
-                    and (
-                        reference.raw_reference.cs1_template_found
-                        or reference.raw_reference.isbn_template_found
-                        or reference.raw_reference.citeq_template_found
-                        or reference.raw_reference.citation_template_found
-                        or reference.raw_reference.bare_url_template_found
-                    )
-                )
-            ]
-        )
+    # @property
+    # def number_of_content_references_with_any_supported_template(self) -> int:
+    #     return len(
+    #         [
+    #             reference
+    #             for reference in self.content_references
+    #             if (
+    #                 reference.raw_reference.number_of_templates > 0
+    #                 and (
+    #                     reference.raw_reference.cs1_template_found
+    #                     or reference.raw_reference.isbn_template_found
+    #                     or reference.raw_reference.citeq_template_found
+    #                     or reference.raw_reference.citation_template_found
+    #                     or reference.raw_reference.bare_url_template_found
+    #                 )
+    #             )
+    #         ]
+    #     )
 
-    @property
-    def number_of_content_references_with_a_supported_template_we_prefer(self) -> int:
-        """We prefer templates that is easy to generate a graph from
-        Currently that is CS1 templates, CiteQ template and Citation template"""
-        return len(
-            [
-                reference
-                for reference in self.content_references
-                if (
-                    reference.raw_reference.number_of_templates > 0
-                    and (
-                        reference.raw_reference.cs1_template_found
-                        or reference.raw_reference.citeq_template_found
-                        or reference.raw_reference.citation_template_found
-                    )
-                )
-            ]
-        )
+    # @property
+    # def number_of_content_references_with_a_supported_template_we_prefer(self) -> int:
+    #     """We prefer templates that is easy to generate a graph from
+    #     Currently that is CS1 templates, CiteQ templates and Citation templates"""
+    #     return len(
+    #         [
+    #             reference
+    #             for reference in self.content_references
+    #             if (
+    #                 reference.raw_reference.number_of_templates > 0
+    #                 and (
+    #                     reference.raw_reference.cs1_template_found
+    #                     or reference.raw_reference.citeq_template_found
+    #                     or reference.raw_reference.citation_template_found
+    #                 )
+    #             )
+    #         ]
+    #     )
 
-    @property
-    def content_references_without_templates(self):
-        return [
-            reference
-            for reference in self.content_references
-            if reference.raw_reference.number_of_templates == 0
-        ]
+    # @property
+    # def content_references_without_templates(self):
+    #     return [
+    #         reference
+    #         for reference in self.content_references
+    #         if reference.raw_reference.number_of_templates == 0
+    #     ]
 
-    @property
-    def number_of_content_reference_without_a_template(self) -> int:
-        return len(self.content_references_without_templates)
+    # @property
+    # def number_of_content_reference_without_a_template(self) -> int:
+    #     return len(self.content_references_without_templates)
+    #
+    # @property
+    # def content_references_with_at_least_one_template(self):
+    #     return [
+    #         reference
+    #         for reference in self.content_references
+    #         if reference.raw_reference.number_of_templates >= 1
+    #     ]
+    #
+    # @property
+    # def number_of_content_reference_with_at_least_one_template(self) -> int:
+    #     return len(self.content_references_with_at_least_one_template)
+    #
+    # @property
+    # def cs1_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.cs1_template_found
+    #     ]
 
-    @property
-    def content_references_with_at_least_one_template(self):
-        return [
-            reference
-            for reference in self.content_references
-            if reference.raw_reference.number_of_templates >= 1
-        ]
-
-    @property
-    def number_of_content_reference_with_at_least_one_template(self) -> int:
-        return len(self.content_references_with_at_least_one_template)
-
-    @property
-    def cs1_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.cs1_template_found
-        ]
-
-    @property
-    def number_of_cs1_references(self) -> int:
-        return len(self.cs1_references)
+    # @property
+    # def number_of_cs1_references(self) -> int:
+    #     return len(self.cs1_references)
 
     @property
     def citation_references(self):
         return [
             reference
             for reference in self.content_references
-            if reference.raw_reference.is_citation_reference
+            if reference.raw_reference.is_footnote_reference
         ]
 
     @property
     def number_of_citation_references(self) -> int:
         return len(self.citation_references)
 
-    @property
-    def citation_template_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.citation_template_found
-        ]
+    # @property
+    # def citation_template_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.citation_template_found
+    #     ]
 
-    @property
-    def number_of_citation_template_references(self) -> int:
-        return len(self.citation_template_references)
+    # @property
+    # def number_of_citation_template_references(self) -> int:
+    #     return len(self.citation_template_references)
 
-    @property
-    def bare_url_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.bare_url_template_found
-        ]
+    # @property
+    # def bare_url_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.bare_url_template_found
+    #     ]
 
-    @property
-    def number_of_bare_url_references(self) -> int:
-        return len(self.bare_url_references)
+    # @property
+    # def number_of_bare_url_references(self) -> int:
+    #     return len(self.bare_url_references)
 
-    @property
-    def citeq_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.citeq_template_found
-        ]
+    # @property
+    # def citeq_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.citeq_template_found
+    #     ]
+    #
+    # @property
+    # def number_of_citeq_references(self) -> int:
+    #     return len(self.citeq_references)
 
-    @property
-    def number_of_citeq_references(self) -> int:
-        return len(self.citeq_references)
-
-    @property
-    def isbn_template_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.isbn_template_found
-        ]
-
-    @property
-    def number_of_isbn_template_references(self) -> int:
-        return len(self.isbn_template_references)
-
-    @property
-    def multiple_template_references(self):
-        return [
-            reference
-            for reference in self.references
-            if reference.raw_reference.multiple_templates_found
-        ]
-
-    @property
-    def number_of_multiple_template_references(self) -> int:
-        return len(self.multiple_template_references)
+    # @property
+    # def isbn_template_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.isbn_template_found
+    #     ]
+    #
+    # @property
+    # def number_of_isbn_template_references(self) -> int:
+    #     return len(self.isbn_template_references)
+    #
+    # @property
+    # def multiple_template_references(self):
+    #     return [
+    #         reference
+    #         for reference in self.references
+    #         if reference.raw_reference.multiple_templates_found
+    #     ]
+    #
+    # @property
+    # def number_of_multiple_template_references(self) -> int:
+    #     return len(self.multiple_template_references)
 
     @property
     def empty_named_references(self):
@@ -572,7 +483,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return [
             reference
             for reference in self.references
-            if reference.raw_reference.is_named_reference
+            if reference.raw_reference.is_empty_named_reference
         ]
 
     @property
@@ -585,7 +496,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return [
             reference
             for reference in self.references
-            if not reference.raw_reference.is_named_reference
+            if not reference.raw_reference.is_empty_named_reference
         ]
 
     @property
@@ -606,20 +517,20 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     #         [reference for reference in self.content_references if reference.md5hash]
     #     )
 
-    def number_of_content_references_with_google_books_template_or_url(
-        self, list_: List[WikipediaReference] = None
-    ) -> int:
-        if list_ is None:
-            list_ = self.content_references
-        result = len(
-            [
-                ref
-                for ref in list_
-                if ref.raw_reference
-                and ref.raw_reference.google_books_url_or_template_found
-            ]
-        )
-        return result
+    # def number_of_content_references_with_google_books_template_or_url(
+    #     self, list_: List[WikipediaReference] = None
+    # ) -> int:
+    #     if list_ is None:
+    #         list_ = self.content_references
+    #     result = len(
+    #         [
+    #             ref
+    #             for ref in list_
+    #             if ref.raw_reference
+    #             and ref.raw_reference.google_books_url_or_template_found
+    #         ]
+    #     )
+    #     return result
 
     def number_of_content_references_with_a_url(
         self, list_: List[WikipediaReference] = None
@@ -631,34 +542,34 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         )
         return result
 
-    def number_of_content_references_with_wm_link(
-        self, list_: List[WikipediaReference] = None
-    ) -> int:
-        if list_ is None:
-            list_ = self.content_references
-        result = len(
-            [
-                ref
-                for ref in list_
-                if ref.raw_reference and ref.raw_reference.web_archive_org_in_reference
-            ]
-        )
-        return result
+    # def number_of_content_references_with_wm_link(
+    #     self, list_: List[WikipediaReference] = None
+    # ) -> int:
+    #     if list_ is None:
+    #         list_ = self.content_references
+    #     result = len(
+    #         [
+    #             ref
+    #             for ref in list_
+    #             if ref.raw_reference and ref.raw_reference.web_archive_org_in_reference
+    #         ]
+    #     )
+    #     return result
 
-    def number_of_content_references_with_ia_details_link(
-        self, list_: List[WikipediaReference] = None
-    ) -> int:
-        if list_ is None:
-            list_ = self.content_references
-        result = len(
-            [
-                ref
-                for ref in list_
-                if ref.raw_reference
-                and ref.raw_reference.archive_org_slash_details_in_reference
-            ]
-        )
-        return result
+    # def number_of_content_references_with_ia_details_link(
+    #     self, list_: List[WikipediaReference] = None
+    # ) -> int:
+    #     if list_ is None:
+    #         list_ = self.content_references
+    #     result = len(
+    #         [
+    #             ref
+    #             for ref in list_
+    #             if ref.raw_reference
+    #             and ref.raw_reference.archive_org_slash_details_in_reference
+    #         ]
+    #     )
+    #     return result
 
     def __extract_all_raw_citation_references__(self):
         """This extracts everything inside <ref></ref> tags"""
@@ -719,7 +630,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         self.__extract_all_raw_general_references__()
         self.__extract_and_check_urls_on_references__()
         self.__convert_raw_references_to_reference_objects__()
-        self.__get_checked_and_unique_reference_urls_from_references__()
+        # self.__get_checked_and_unique_reference_urls_from_references__()
 
     def __convert_raw_references_to_reference_objects__(self):
         logger.debug("__convert_raw_references_to_reference_objects__: running")
@@ -752,3 +663,10 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         logger.debug("__parse_wikitext__: running")
         if not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)
+
+    @property
+    def reference_ids(self) -> List[str]:
+        ids = []
+        for reference in self.references:
+            ids.append(reference.reference_id)
+        return ids

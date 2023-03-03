@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+[WARI] -- references
+[WARI] -- "reference/id"
+[WARI] -- "check-url"
+[WARI] -- "check-doi"
+[WARI] -- "article"
+
+
+database "file system" {
+
+  folder "references/" {
+  }
+  folder "articles/" {
+  }
+  folder "urls/" {
+  }
+  folder "dois/" {
+  }
+
+}
+@enduml

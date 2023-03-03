@@ -1,0 +1,101 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class parameters{
+## all ~100 parameters in CS1 templates
+## (all hyphens are converted to underscores)
+doi: str
+isbn: str
+hdl: str
+title: str
+...
+}
+class wikidata_details{
+fulltext_url: str
+publisher: wdqid
+journal: wdqid
+authors: List[author1_qid, ...]
+author_strings: int}
+}
+class reference_statistics{
+named: int
+footnote: int
+content: int
+general: int
+}
+class article{
+wari_id: str
+reference_statistics: Dict[str, int]
+references: List[str] #  list of ids
+title: str
+page_id: int
+urls: List[str]
+fld_counts: Dict[str, int] # e.g. {archive.org: 2}
+}
+class references{
+total: int,
+references: List[dehydrated_reference]
+}
+class reference{
+templates: List[Template]
+wikitext: str
+}
+enum reference_type{
+general # this is from headings we know usually contain reference templates
+footnote # this is <ref></ref> footnotes
+external_link # this is all lines in the external link section
+}
+enum footnote_subtype{
+named # an empty footnote only having a name-based reference
+content # a footnote that contain something
+}
+class dehydrated_reference {
+"For identifiers, lookup the whole reference and
+extract them from the templates"
+id: str
+titles: List[str]
+flds: List[str] # raw non-unique flds
+urls: List[str]
+template_names: List[str] e.g. {cite web, !, google books}
+type: reference_type
+subtype: footnote_subtype
+persons: List[Person]
+}
+dehydrated_reference <-- reference
+class check-url{
+"url": "",
+"host": "",
+"domain": "",
+"suffix": "",
+"tld": "", # top level domain
+"status": "",
+"checked": isodate
+error: bool
+fixed: str
+}
+class check-doi{
+doi: str
+"checked": isodate
+retracted_in: Dict[str: bool] # e.g. {openalex: true, open-retractions: false}
+wikidata_qid: str
+wikidata_details: Dict[str, Any]
+}
+class template{
+title: str
+parameters: Dict[str, Any]
+persons: List[Person]
+}
+class person{
+role: Enum
+orcid: str
+# todo check these:
+first_name: str
+last_name: str
+}
+enum role{
+author
+translator
+editor
+no_role
+}
+@enduml

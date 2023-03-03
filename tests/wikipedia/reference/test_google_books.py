@@ -7,7 +7,7 @@ from unittest import TestCase
 #     GoogleBooks,
 #     GoogleBooksSchema,
 # )
-# from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
+# from src.models.wikimedia.wikipedia.reference.templates import WikipediaTemplate
 
 
 class TestGoogleBooks(TestCase):
@@ -16,11 +16,11 @@ class TestGoogleBooks(TestCase):
     # def test_parsing_into_object_numeric_page(self):
     #     data = "{{google books |plainurl=y |id=CDJpAAAAMAAJ |page=313}}"
     #     templates = parse(data).ifilter_templates()
-    #     for template in templates:
-    #         wt = WikipediaTemplate(raw_template=template)
+    #     for templates in templates:
+    #         wt = WikipediaTemplate(raw_template=templates)
     #         wt.extract_and_prepare_parameters()
     #         gb: GoogleBooks = GoogleBooksSchema().load(content)
-    #         gb.wikibase_deprecated = IASandboxWikibase()
+    #         gb.wikibase = IASandboxWikibase()
     #         gb.finish_parsing()
     #         console.print(gb.dict())
     #         assert gb.url == "https://books.google.com/books?id=CDJpAAAAMAAJ"
@@ -30,7 +30,7 @@ class TestGoogleBooks(TestCase):
     #     template_triples = extract_templates_and_params(data, True)
     #     for _template_name, content, _raw_template in template_triples:
     #         gb: GoogleBooks = GoogleBooksSchema().load(content)
-    #         gb.wikibase_deprecated = IASandboxWikibase()
+    #         gb.wikibase = IASandboxWikibase()
     #         gb.finish_parsing()
     #         console.print(gb.dict())
     #         assert gb.url == "https://books.google.com/books?id=CDJpAAAAMAAJ"

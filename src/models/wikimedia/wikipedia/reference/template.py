@@ -1,64 +1,70 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Any, List
+from typing import Any, Dict, List
 
 from mwparserfromhell.nodes import Template  # type: ignore
-from pydantic import validate_arguments
+from pydantic import BaseModel, validate_arguments
 
 import config
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
-from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikipediaTemplate(WcdBaseModel):
+class WikipediaTemplate(BaseModel):
     parameters: OrderedDict = OrderedDict()
     raw_template: Template
     extraction_done: bool = False
     missing_or_empty_first_parameter: bool = False
-    language_code: str = ""
+    language_code: str = ""  # Used only to generate the URI for the template
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
+
+    # @property
+    # def doi_lookup_done(self) -> bool:
+    #     if self.doi:
+    #         return self.doi.doi_lookup_done
+    #     else:
+    #         return False
 
     @property
     def wikitext(self) -> str:
         return str(self.raw_template)
 
-    @property
-    def is_known_multiref_template(self) -> bool:
-        return bool(self.name in config.known_multiref_templates)
-
-    @property
-    def is_isbn_template(self) -> bool:
-        return bool(self.name in config.isbn_template)
-
-    @property
-    def is_bareurl_template(self) -> bool:
-        return bool(self.name in config.citeq_templates)
-
-    @property
-    def is_citeq_template(self) -> bool:
-        return bool(self.name in config.citeq_templates)
-
-    @property
-    def is_citation_template(self) -> bool:
-        return bool(self.name in config.citation_template)
-
-    @property
-    def is_cs1_template(self) -> bool:
-        return bool(self.name in config.cs1_templates)
-
-    @property
-    def is_url_template(self) -> bool:
-        return bool(self.name in config.url_template)
-
-    @property
-    def is_webarchive_template(self) -> bool:
-        return bool(self.name in config.webarchive_templates)
+    # @property
+    # def is_known_multiref_template(self) -> bool:
+    #     return bool(self.name in config.known_multiref_templates)
+    #
+    # @property
+    # def is_isbn_template(self) -> bool:
+    #     return bool(self.name in config.isbn_template)
+    #
+    # @property
+    # def is_bareurl_template(self) -> bool:
+    #     return bool(self.name in config.citeq_templates)
+    #
+    # @property
+    # def is_citeq_template(self) -> bool:
+    #     return bool(self.name in config.citeq_templates)
+    #
+    # @property
+    # def is_citation_template(self) -> bool:
+    #     return bool(self.name in config.citation_template)
+    #
+    # @property
+    # def is_cs1_template(self) -> bool:
+    #     return bool(self.name in config.cs1_templates)
+    #
+    # @property
+    # def is_url_template(self) -> bool:
+    #     return bool(self.name in config.url_template)
+    #
+    # @property
+    # def is_webarchive_template(self) -> bool:
+    #     return bool(self.name in config.webarchive_templates)
 
     @property
     def __first_parameter__(self) -> str:
@@ -83,15 +89,25 @@ class WikipediaTemplate(WcdBaseModel):
         else:
             return ""
 
-    @property
-    def get_isbn(self) -> str:
-        """Helper method"""
-        if self.name == "isbn":
-            return self.__first_parameter__
-        elif self.is_cs1_template and "isbn" in self.parameters.keys():
-            return str(self.parameters["isbn"])
-        # Default to empty
-        return ""
+    # def __extract_and_lookup_doi__(self) -> None:
+    #     logger.debug("__extract_and_lookup_doi__: running")
+    #     if self.parameters and "doi" in self.parameters:
+    # doi = self.parameters["doi"]
+    # if doi:
+    #     self.doi_found = True
+    # self.doi = Doi(doi=doi)
+    # self.doi.lookup_doi()
+
+    # @property
+    # def get_isbn(self) -> str:
+    #     """Helper method"""
+    #     if self.name == "isbn":
+    #         return self.__first_parameter__
+    #     elif self.is_cs1_template:
+    #         if "isbn" in self.parameters.keys():
+    #             return str(self.parameters["isbn"])
+    #     # Default to empty
+    #     return ""
 
     # DISABLED because currently qid is unfortunately not a valid field on cs1 templates
     # @property
@@ -105,7 +121,7 @@ class WikipediaTemplate(WcdBaseModel):
     def urls(self) -> List[WikipediaUrl]:
         """This returns a list"""
         # if not self.extracted:
-        #     raise MissingInformationError("this template has not been extracted")
+        #     raise MissingInformationError("this templates has not been extracted")
         urls = set()
         if "url" in self.parameters:
             url = self.parameters["url"]
@@ -132,7 +148,7 @@ class WikipediaTemplate(WcdBaseModel):
 
     @property
     def name(self):
-        """Lowercased and stripped template name"""
+        """Lowercased and stripped templates name"""
         if not self.raw_template.name:
             raise MissingInformationError("self.raw_template.name was empty")
         return self.raw_template.name.strip().lower()
@@ -175,7 +191,7 @@ class WikipediaTemplate(WcdBaseModel):
         """Return a list of references found in text.
 
         Return value is a list of tuples. There is one tuple for each use of a
-        template in the page, with the template title as the first entry and a
+        templates in the page, with the templates title as the first entry and a
         dict of parameters as the second entry. Parameters are indexed by
         strings; as in MediaWiki, an unnamed parameter is given a parameter name
         with an integer value corresponding to its position among the unnamed
@@ -202,15 +218,15 @@ class WikipediaTemplate(WcdBaseModel):
         if not self.raw_template:
             raise MissingInformationError("self.raw_template was empty")
 
-        # This has been disabled by Dennis
+        # This has been deprecated by Dennis
         # because it is not KISS and it relies on half of
         # pywikibot and we probably don't need it because
-        # references are probably never inside disabled parts.
+        # references are probably never inside deprecated parts.
         # if remove_disabled_parts:
         #     text = removeDisabledParts(text)
 
         # Dennis removed the loop here during OOP-ification
-        logger.debug(f"Working on template: {self.raw_template}")
+        logger.debug(f"Working on templates: {self.raw_template}")
         for parameter in self.raw_template.params:
             value = str(parameter.value)  # mwpfh needs upcast to str
             if strip:
@@ -233,6 +249,7 @@ class WikipediaTemplate(WcdBaseModel):
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()
         self.__rename_one_to_first_parameter__()
+        # self.__extract_and_lookup_doi__()
         self.extraction_done = True
         self.__detect_missing_first_parameter__()
         self.__extract_first_level_domains_from_urls__()
@@ -322,4 +339,75 @@ class WikipediaTemplate(WcdBaseModel):
     def template_url(self) -> str:
         if not self.language_code:
             raise MissingInformationError("self.lang was empty")
-        return f"https://en.wikipedia.org/wiki/Template:{self.name}"
+        return f"https://{self.language_code}.wikipedia.org/wiki/Template:{self.name}"
+
+    def get_dict(self) -> Dict[str, Any]:
+        """Return a dict that we can output to patrons via the API"""
+        return dict(parameters=self.parameters)
+
+    # todo enable parsing of persons
+    # def __parse_persons__(self) -> None:
+    #     """Parse all person related data into Person objects"""
+    #     # find all the attributes but exclude the properties as they lead to weird errors
+    #     properties = [
+    #         "has_hash",
+    #         "isodate",
+    #         "shortened_raw_template",
+    #         "template_url",
+    #         "wikibase_url",
+    #     ]
+    #     attributes = [
+    #         a
+    #         for a in dir(self)
+    #         if not a.startswith("_")
+    #         and a not in properties
+    #         and not callable(getattr(self, a))
+    #         and getattr(self, a) is not None
+    #     ]
+    #     self.authors_list = self.__parse_known_role_persons__(
+    #         attributes=attributes, role=EnglishWikipediaTemplatePersonRole.AUTHOR
+    #     )
+    #     self.editors_list = self.__parse_known_role_persons__(
+    #         attributes=attributes, role=EnglishWikipediaTemplatePersonRole.EDITOR
+    #     )
+    #     self.hosts_list = self.__parse_known_role_persons__(
+    #         attributes=attributes, role=EnglishWikipediaTemplatePersonRole.HOST
+    #     )
+    #     self.interviewers_list = self.__parse_known_role_persons__(
+    #         attributes=attributes, role=EnglishWikipediaTemplatePersonRole.INTERVIEWER
+    #     )
+    #     self.persons_without_role = self.__parse_roleless_persons__(
+    #         attributes=attributes
+    #     )
+    #     self.translators_list = self.__parse_known_role_persons__(
+    #         attributes=attributes, role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
+    #     )
+
+    # @validate_arguments
+    # def __parse_roleless_persons__(self, attributes: List[str]) -> List[Person]:
+    #     persons = []
+    #     # first last
+    #     unnumbered_first_last = [
+    #         attribute
+    #         for attribute in attributes
+    #         if self.__find_number__(attribute) is None
+    #         and (attribute == "first" or attribute == "last")
+    #     ]
+    #     logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
+    #     if len(unnumbered_first_last) > 0:
+    #         person = Person(
+    #             role=EnglishWikipediaTemplatePersonRole.UNKNOWN,
+    #         )
+    #         for attribute in unnumbered_first_last:
+    #             # print(attribute, getattr(self, attribute))
+    #             if attribute == "first":
+    #                 person.given = self.first
+    #             if attribute == "last":
+    #                 person.surname = self.last
+    #         # console.print(person)
+    #         persons.append(person)
+    #         # exit()
+    #     # We use list comprehension to get the numbered persons to
+    #     # ease code maintentenance and easily support a larger range if necessary
+    #     persons.extend(self.__get_numbered_persons__(attributes=attributes))
+    #     return persons
