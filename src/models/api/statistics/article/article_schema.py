@@ -4,7 +4,6 @@ from marshmallow import Schema, fields, post_load
 
 from src import WikimediaSite
 from src.models.api.enums import Lang
-from src.models.api.job import Job
 from src.models.api.job.article_job import ArticleJob
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class ArticleSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     # **kwargs is needed here despite what the validator claims
-    def return_object(self, data, **kwargs) -> Job:  # type: ignore # dead: disable
+    def return_object(self, data, **kwargs) -> ArticleJob:  # type: ignore # dead: disable
         """Return job object"""
         logger.debug("return_object: running")
         job = ArticleJob(**data)

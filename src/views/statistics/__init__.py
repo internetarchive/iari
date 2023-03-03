@@ -7,6 +7,7 @@ from marshmallow import Schema
 
 from src import console
 from src.models.api.job import Job
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 
 
@@ -47,5 +48,7 @@ class StatisticsView(Resource):
 
         app.logger.debug("__parse_into_job__: running")
         # app.logger.debug(request.args)
+        if not self.schema:
+            raise MissingInformationError()
         self.job = self.schema.load(request.args)
-        console.print(self.job.dict())
+        console.print(self.job)
