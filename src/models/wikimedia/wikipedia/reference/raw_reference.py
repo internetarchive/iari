@@ -109,7 +109,7 @@ class WikipediaRawReference(WcdBaseModel):
     #     return identifiers
 
     @property
-    def get_template_dicts(self) -> List[Dict[str,Any]]:
+    def get_template_dicts(self) -> List[Dict[str, Any]]:
         template_dicts = []
         for template in self.templates:
             template_dicts.append(template.get_dict())

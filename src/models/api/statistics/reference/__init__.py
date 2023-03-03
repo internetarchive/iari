@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 from pydantic import BaseModel
 
 from src.models.api.statistics.reference.template_statistics import TemplateStatistics
-from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 
 class ReferenceStatistic(BaseModel):
@@ -17,7 +16,7 @@ class ReferenceStatistic(BaseModel):
     footnote_subtype: str = ""  # [named|content]
     # identifiers: Dict[str, Any]  # {dois: [1234,12345], isbns: [1234]}
     flds: List[str] = []  # non-unique first level domain strings
-    urls: List[str] = [] # non-unique url strings
+    urls: List[str] = []  # non-unique url strings
     templates: List[Dict[str, Any]] = []
     titles: List[str] = []
 
