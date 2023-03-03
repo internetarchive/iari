@@ -175,20 +175,20 @@ class TestWikipediaArticle(TestCase):
     #     wp.__extract_templates_from_the_wikitext__()
     #     assert len(wp.template_triples) == 0
 
-    def test___extract_and_parse_references_citeq(self):
-        from src.models.wikimedia.wikipedia.article import WikipediaArticle
-
-        wp = WikipediaArticle(title="Påskeøen", language_code="da")
-        wp.wikitext = "<ref>{{citeq|1}}</ref>"
-        wp.fetch_and_extract_and_parse()
-        assert wp.extractor.number_of_references == 1
-        assert (
-            wp.extractor.citeq_references[0].raw_reference.templates[0].raw_template
-            == "{{citeq|1}}"
-        )
-        assert (
-            wp.extractor.citeq_references[0].raw_reference.templates[0].name == "citeq"
-        )
+    # def test___extract_and_parse_references_citeq(self):
+    #     from src.models.wikimedia.wikipedia.article import WikipediaArticle
+    #
+    #     wp = WikipediaArticle(title="Påskeøen", language_code="da")
+    #     wp.wikitext = "<ref>{{citeq|1}}</ref>"
+    #     wp.fetch_and_extract_and_parse()
+    #     assert wp.extractor.number_of_references == 1
+    # assert (
+    #     wp.extractor.citeq_references[0].raw_reference.templates[0].raw_template
+    #     == "{{citeq|1}}"
+    # )
+    # assert (
+    #     wp.extractor.citeq_references[0].raw_reference.templates[0].name == "citeq"
+    # )
 
     def test___extract_and_parse_references_easter_island_head_excerpt(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle

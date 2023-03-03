@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class FileIo(WcdBaseModel):
     job: Optional[Job] = None
     data: Dict[str, Any] = dict()
-    hash: str = ""
+    hash_based_id: str = ""
     wari_id: str = ""
     subfolder: str = ""
 
@@ -29,10 +29,10 @@ class FileIo(WcdBaseModel):
     @property
     def filename(self) -> str:
         """Returns the filename of the"""
-        if not self.hash:
+        if not self.hash_based_id:
             raise MissingInformationError()
         else:
-            return f"{self.hash[:8]}.json"
+            return f"{self.hash_based_id}.json"
 
     def write_to_disk(
         self,
