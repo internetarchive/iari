@@ -341,6 +341,6 @@ class WikipediaTemplate(BaseModel):
             raise MissingInformationError("self.lang was empty")
         return f"https://{self.language_code}.wikipedia.org/wiki/Template:{self.name}"
 
-    def get_dict(self) -> Dict[str,Any]:
+    def get_dict(self) -> Dict[str, Any]:
         """Return a dict that we can output to patrons via the API"""
         return dict(parameters=self.parameters)
