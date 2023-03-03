@@ -48,13 +48,13 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre1.extract_all_references()
         assert wre1.number_of_references == 3
 
-    def test_extract_all_references(self):
-        raw_template = "{{citeq|Q1}}"
-        raw_reference = f"<ref>{raw_template}</ref>"
-        wre2 = WikipediaReferenceExtractor(testing=True, wikitext=raw_reference)
-        wre2.extract_all_references()
-        assert wre2.number_of_references == 1
-        assert wre2.references[0].first_parameter == "Q1"
+    # def test_extract_all_references(self):
+    #     raw_template = "{{citeq|Q1}}"
+    #     raw_reference = f"<ref>{raw_template}</ref>"
+    #     wre2 = WikipediaReferenceExtractor(testing=True, wikitext=raw_reference)
+    #     wre2.extract_all_references()
+    #     assert wre2.number_of_references == 1
+    #     assert wre2.references[0].first_parameter == "Q1"
 
     def test_extract_all_references_named_reference(self):
         raw_template = "{{citeq|Q1}}"
@@ -248,40 +248,40 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.has_references is False
 
-    def test_malformed_urls_empty(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="test",
-        )
-        wre.extract_all_references()
-        assert wre.malformed_urls == []
+    # def test_malformed_urls_empty(self):
+    #     wre = WikipediaReferenceExtractor(
+    #         testing=True,
+    #         wikitext="test",
+    #     )
+    #     wre.extract_all_references()
+    #     assert wre.malformed_urls == []
 
-    def test_malformed_urls_one(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref>",
-            check_urls=True,
-        )
-        wre.extract_all_references()
-        assert wre.number_of_urls == 1
-        # print(wre.urls)
-        assert wre.malformed_urls == ["httpwww.google.com"]
+    # def test_malformed_urls_one(self):
+    #     wre = WikipediaReferenceExtractor(
+    #         testing=True,
+    #         wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref>",
+    #         check_urls=True,
+    #     )
+    #     wre.extract_all_references()
+    #     assert wre.number_of_urls == 1
+    #     # print(wre.urls)
+    #     assert wre.malformed_urls == ["httpwww.google.com"]
 
-    def test_malformed_urls_two(self):
-        """Test with two examples of malformed URLs"""
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref><ref>{{cite web|url=google.com}}</ref>",
-            check_urls=True,
-        )
-        wre.extract_all_references()
-        assert wre.number_of_urls == 2
-        # print(wre.urls)
-        sorted_urls = sorted(wre.malformed_urls)
-        assert sorted_urls == [
-            "google.com",
-            "httpwww.google.com",
-        ]
+    # def test_malformed_urls_two(self):
+    #     """Test with two examples of malformed URLs"""
+    #     wre = WikipediaReferenceExtractor(
+    #         testing=True,
+    #         wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref><ref>{{cite web|url=google.com}}</ref>",
+    #         check_urls=True,
+    #     )
+    #     wre.extract_all_references()
+    #     assert wre.number_of_urls == 2
+    #     # print(wre.urls)
+    #     sorted_urls = sorted(wre.malformed_urls)
+    #     assert sorted_urls == [
+    #         "google.com",
+    #         "httpwww.google.com",
+    #     ]
 
     def test_sections_sources(self):
         wre = WikipediaReferenceExtractor(

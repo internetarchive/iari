@@ -1,9 +1,6 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-'class references_count{
-'total: int
-'}
 class parameters{
 ## all ~100 parameters in CS1 templates
 ## (all hyphens are converted to underscores)
@@ -62,6 +59,7 @@ urls: List[str]
 template_names: List[str] e.g. {cite web, !, google books}
 type: reference_type
 subtype: footnote_subtype
+persons: List[Person]
 }
 dehydrated_reference <-- reference
 class check-url{

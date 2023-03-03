@@ -40,15 +40,15 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
-    @property
-    def number_of_content_references_with_url_found(self):
-        return len(
-            [
-                reference
-                for reference in self.content_references
-                if reference.raw_reference.url_found
-            ]
-        )
+    # @property
+    # def number_of_content_references_with_url_found(self):
+    #     return len(
+    #         [
+    #             reference
+    #             for reference in self.content_references
+    #             if reference.raw_reference.url_found
+    #         ]
+    #     )
 
     @property
     def has_references(self):
@@ -202,26 +202,26 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     #         raise MissingInformationError("self.check_urls_done was False")
     #     return [url.dict() for url in self.checked_and_unique_reference_urls]
 
-    @property
-    def number_of_unique_reference_urls_with_malformed_url(self):
-        """This can be True while error is also True"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(self.malformed_urls)
+    # @property
+    # def number_of_unique_reference_urls_with_malformed_url(self):
+    #     """This can be True while error is also True"""
+    #     if not self.check_urls_done:
+    #         raise MissingInformationError("self.check_urls_done was False")
+    #     return len(self.malformed_urls)
 
-    @property
-    def malformed_urls(self) -> List[str]:
-        """List of malformed_urls"""
-        return [
-            url.url
-            for url in self.checked_and_unique_reference_urls
-            if url.malformed_url is True
-        ]
+    # @property
+    # def malformed_urls(self) -> List[str]:
+    #     """List of malformed_urls"""
+    #     return [
+    #         url.url
+    #         for url in self.checked_and_unique_reference_urls
+    #         if url.malformed_url is True
+    #     ]
 
-    @property
-    def number_of_urls(self):
-        """Non-unique URLs"""
-        return len(self.urls)
+    # @property
+    # def number_of_urls(self):
+    #     """Non-unique URLs"""
+    #     return len(self.urls)
 
     @property
     def urls(self) -> List[WikipediaUrl]:
@@ -243,12 +243,12 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                     urls.append(url.url)
         return urls
 
-    @property
-    def number_of_checked_unique_reference_urls(self):
-        """Unique URLs"""
-        if not self.check_urls_done:
-            raise MissingInformationError("self.check_urls_done was False")
-        return len(self.checked_and_unique_reference_urls)
+    # @property
+    # def number_of_checked_unique_reference_urls(self):
+    #     """Unique URLs"""
+    #     if not self.check_urls_done:
+    #         raise MissingInformationError("self.check_urls_done was False")
+    #     return len(self.checked_and_unique_reference_urls)
 
     # def __get_checked_and_unique_reference_urls_from_references__(self) -> None:
     #     """Get and check unique URLs

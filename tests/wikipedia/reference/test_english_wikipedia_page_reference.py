@@ -485,35 +485,35 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         == "https://books.google.com/books?id=MdPDAQAAQBAJ"
     #     )
 
-    def test_parse_first_parameter_citeq(self):
-        raw_template = "{{citeq|Q1}}"
-        raw_reference = f"<ref>{raw_template}</ref>"
-        wikicode = parse(raw_reference)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                wikicode=ref,
-                # wikibase=wikibase
-            )
-            reference = raw_reference_object.get_finished_wikipedia_reference_object()
-            reference.finish_parsing_and_generate_hash()
-            assert reference.first_parameter == "Q1"
-            assert reference.wikidata_qid == "Q1"
+    # def test_parse_first_parameter_citeq(self):
+    #     raw_template = "{{citeq|Q1}}"
+    #     raw_reference = f"<ref>{raw_template}</ref>"
+    #     wikicode = parse(raw_reference)
+    #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+    #     for ref in refs:
+    #         raw_reference_object = WikipediaRawReference(
+    #             wikicode=ref,
+    #             # wikibase=wikibase
+    #         )
+    #         reference = raw_reference_object.get_finished_wikipedia_reference_object()
+    #         reference.finish_parsing_and_generate_hash()
+    #         assert reference.first_parameter == "Q1"
+    #         assert reference.wikidata_qid == "Q1"
 
-    def test_parse_first_parameter_cite_q(self):
-        raw_template1 = "{{cite q|Q1}}"
-        raw_reference1 = f"<ref>{raw_template1}</ref>"
-        wikicode = parse(raw_reference1)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                wikicode=ref,
-                # wikibase=wikibase
-            )
-            reference = raw_reference_object.get_finished_wikipedia_reference_object()
-            reference.finish_parsing_and_generate_hash()
-            assert reference.first_parameter == "Q1"
-            assert reference.wikidata_qid == "Q1"
+    # def test_parse_first_parameter_cite_q(self):
+    #     raw_template1 = "{{cite q|Q1}}"
+    #     raw_reference1 = f"<ref>{raw_template1}</ref>"
+    #     wikicode = parse(raw_reference1)
+    #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+    #     for ref in refs:
+    #         raw_reference_object = WikipediaRawReference(
+    #             wikicode=ref,
+    #             # wikibase=wikibase
+    #         )
+    #         reference = raw_reference_object.get_finished_wikipedia_reference_object()
+    #         reference.finish_parsing_and_generate_hash()
+    #         assert reference.first_parameter == "Q1"
+    #         assert reference.wikidata_qid == "Q1"
 
     # def test_generate_reference_hash_based_on_wikidata_qid(self):
     #     data = dict(
@@ -624,43 +624,43 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     assert reference.has_hash is True
     #     assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
 
-    def test_cite_q(self):
-        """this tests https://en.wikipedia.org/wiki/Template:Cite_q"""
-        raw_template = "{{citeq|Q1}}"
-        raw_reference = f"<ref>{raw_template}</ref>"
-        wikicode = parse(raw_reference)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                wikicode=ref,
-                testing=True,
-                # wikibase=wikibase
-            )
-            # This also runs finish_parsing_and_generate_hash()
-            reference = raw_reference_object.get_finished_wikipedia_reference_object()
-            assert reference.raw_reference.number_of_templates == 1
-            assert reference.raw_reference.templates[0].raw_template == raw_template
-            assert reference.first_parameter == "Q1"
-            assert reference.wikidata_qid == "Q1"
-            assert reference.is_valid_qid is True
-            # assert reference.has_hash is True
-            # assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
+    # def test_cite_q(self):
+    #     """this tests https://en.wikipedia.org/wiki/Template:Cite_q"""
+    #     raw_template = "{{citeq|Q1}}"
+    #     raw_reference = f"<ref>{raw_template}</ref>"
+    #     wikicode = parse(raw_reference)
+    #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+    #     for ref in refs:
+    #         raw_reference_object = WikipediaRawReference(
+    #             wikicode=ref,
+    #             testing=True,
+    #             # wikibase=wikibase
+    #         )
+    #         # This also runs finish_parsing_and_generate_hash()
+    #         reference = raw_reference_object.get_finished_wikipedia_reference_object()
+    #         assert reference.raw_reference.number_of_templates == 1
+    #         assert reference.raw_reference.templates[0].raw_template == raw_template
+    #         assert reference.first_parameter == "Q1"
+    #         assert reference.wikidata_qid == "Q1"
+    #         assert reference.is_valid_qid is True
+    #         # assert reference.has_hash is True
+    #         # assert reference.md5hash == "9fe13e5007b27e99897000a584bf631d"
 
-    def test_combined_url_isbn_template_reference(self):
-        wikitext = ("<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",)
-        wikicode = parse(wikitext)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                wikicode=ref,
-                testing=True,
-                # wikibase=wikibase
-            )
-            # This also runs finish_parsing_and_generate_hash()
-            reference = raw_reference_object.get_finished_wikipedia_reference_object()
-            assert reference.raw_reference
-            assert reference.raw_reference.number_of_templates == 2
-            assert reference.isbn == "1234"
+    # def test_combined_url_isbn_template_reference(self):
+    #     wikitext = ("<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",)
+    #     wikicode = parse(wikitext)
+    #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+    #     for ref in refs:
+    #         raw_reference_object = WikipediaRawReference(
+    #             wikicode=ref,
+    #             testing=True,
+    #             # wikibase=wikibase
+    #         )
+    #         # This also runs finish_parsing_and_generate_hash()
+    #         reference = raw_reference_object.get_finished_wikipedia_reference_object()
+    #         assert reference.raw_reference
+    #         assert reference.raw_reference.number_of_templates == 2
+    #         assert reference.isbn == "1234"
 
     def test_get_qid_from_multitemplate_reference(self):
         wikitext = ("<ref>{{url|http://example.com}}{{citeq|Q1}}</ref>",)
@@ -682,35 +682,35 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             assert reference.raw_reference.multiple_templates_found is True
             assert reference.wikidata_qid == "Q1"
 
-    def test_validate_qid_valid(self):
-        raw_template = "{{citeq|Q1}}"
-        raw_reference = f"<ref>{raw_template}</ref>"
-        wikicode = parse(raw_reference)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                wikicode=ref,
-                testing=True,
-                # wikibase=wikibase
-            )
-            # This also runs finish_parsing_and_generate_hash()
-            reference = raw_reference_object.get_finished_wikipedia_reference_object()
-            assert reference.is_valid_qid is True
+    # def test_validate_qid_valid(self):
+    #     raw_template = "{{citeq|Q1}}"
+    #     raw_reference = f"<ref>{raw_template}</ref>"
+    #     wikicode = parse(raw_reference)
+    #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+    #     for ref in refs:
+    #         raw_reference_object = WikipediaRawReference(
+    #             wikicode=ref,
+    #             testing=True,
+    #             # wikibase=wikibase
+    #         )
+    #         # This also runs finish_parsing_and_generate_hash()
+    #         reference = raw_reference_object.get_finished_wikipedia_reference_object()
+    #         assert reference.is_valid_qid is True
 
-    def test_validate_qid_invalid(self):
-        raw_template = "{{citeq|Q1s}}"
-        raw_reference = f"<ref>{raw_template}</ref>"
-        wikicode = parse(raw_reference)
-        refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        for ref in refs:
-            raw_reference_object = WikipediaRawReference(
-                wikicode=ref,
-                testing=True,
-                # wikibase=wikibase
-            )
-            # This also runs finish_parsing_and_generate_hash()
-            reference = raw_reference_object.get_finished_wikipedia_reference_object()
-            assert reference.is_valid_qid is False
+    # def test_validate_qid_invalid(self):
+    #     raw_template = "{{citeq|Q1s}}"
+    #     raw_reference = f"<ref>{raw_template}</ref>"
+    #     wikicode = parse(raw_reference)
+    #     refs = wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+    #     for ref in refs:
+    #         raw_reference_object = WikipediaRawReference(
+    #             wikicode=ref,
+    #             testing=True,
+    #             # wikibase=wikibase
+    #         )
+    #         # This also runs finish_parsing_and_generate_hash()
+    #         reference = raw_reference_object.get_finished_wikipedia_reference_object()
+    #         assert reference.is_valid_qid is False
 
     def test___get_url__(self):
         """We don't support multiple url templates in a single reference"""
