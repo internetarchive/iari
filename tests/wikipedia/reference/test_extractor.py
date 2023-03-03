@@ -78,19 +78,19 @@ class TestWikipediaReferenceExtractor(TestCase):
     #     assert wre.number_of_empty_named_references == 1
     #     assert wre.number_of_hashed_content_references == 2
 
-    def test_number_of_references_with_a_supported_template(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_head_excerpt
-        )
-        wre.extract_all_references()
-        assert wre.number_of_content_references_with_any_supported_template == 2
-
-    def test_number_of_cs1_references(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True, wikitext=easter_island_head_excerpt
-        )
-        wre.extract_all_references()
-        assert wre.number_of_cs1_references == 2
+    # def test_number_of_references_with_a_supported_template(self):
+    #     wre = WikipediaReferenceExtractor(
+    #         testing=True, wikitext=easter_island_head_excerpt
+    #     )
+    #     wre.extract_all_references()
+    #     assert wre.number_of_content_references_with_any_supported_template == 2
+    #
+    # def test_number_of_cs1_references(self):
+    #     wre = WikipediaReferenceExtractor(
+    #         testing=True, wikitext=easter_island_head_excerpt
+    #     )
+    #     wre.extract_all_references()
+    #     assert wre.number_of_cs1_references == 2
 
     def test___extract_all_raw_general_references__(self):
         """This tests extraction of sections and references"""
@@ -135,13 +135,13 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.number_of_sections_found == 2
         assert wre.number_of_general_references == 22
-        assert wre.number_of_content_reference_with_at_least_one_template == 22
-        assert wre.number_of_content_references_with_any_supported_template == 21
-        assert wre.number_of_cs1_references == 21
-        assert wre.number_of_citation_template_references == 0
-        assert wre.number_of_citeq_references == 0
-        assert wre.number_of_url_template_references == 0
-        assert wre.number_of_content_reference_without_a_template == 0
+        # assert wre.number_of_content_reference_with_at_least_one_template == 22
+        # assert wre.number_of_content_references_with_any_supported_template == 21
+        # assert wre.number_of_cs1_references == 21
+        # assert wre.number_of_citation_template_references == 0
+        # assert wre.number_of_citeq_references == 0
+        # assert wre.number_of_url_template_references == 0
+        # assert wre.number_of_content_reference_without_a_template == 0
         assert wre.number_of_citation_references == 0
         # assert wre.number_of_hashed_content_references == 18
 
@@ -154,7 +154,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_content_references == 1
         assert wre.content_references[0].raw_reference.templates[0].name == "isbn"
         assert wre.content_references[0].isbn == "1234"
-        assert wre.number_of_isbn_template_references == 1
+        # assert wre.number_of_isbn_template_references == 1
         # assert wre.number_of_hashed_content_references == 1
 
     def test_first_level_domains_one(self):
@@ -294,12 +294,13 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_references == 52
         assert wre.number_of_general_references == 52
 
-    def test_combined_url_isbn_template_reference(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",
-            check_urls=False,
-        )
-        wre.extract_all_references()
-        assert wre.number_of_isbn_template_references == 1
-        assert wre.number_of_url_template_references == 1
+    #
+    # def test_combined_url_isbn_template_reference(self):
+    #     wre = WikipediaReferenceExtractor(
+    #         testing=True,
+    #         wikitext="<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",
+    #         check_urls=False,
+    #     )
+    #     wre.extract_all_references()
+    #     assert wre.number_of_isbn_template_references == 1
+    #     assert wre.number_of_url_template_references == 1

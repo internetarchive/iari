@@ -1,21 +1,19 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Any, List
+from typing import Any, List, Dict
 
 from mwparserfromhell.nodes import Template  # type: ignore
-from pydantic import validate_arguments
+from pydantic import validate_arguments, BaseModel
 
 import config
 from src.models.exceptions import MissingInformationError
-from src.models.identifiers_checking.doi import Doi
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
-from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikipediaTemplate(WcdBaseModel):
+class WikipediaTemplate(BaseModel):
     parameters: OrderedDict = OrderedDict()
     raw_template: Template
     extraction_done: bool = False
@@ -25,12 +23,12 @@ class WikipediaTemplate(WcdBaseModel):
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
-    @property
-    def doi_lookup_done(self) -> bool:
-        if self.doi:
-            return self.doi.doi_lookup_done
-        else:
-            return False
+    # @property
+    # def doi_lookup_done(self) -> bool:
+    #     if self.doi:
+    #         return self.doi.doi_lookup_done
+    #     else:
+    #         return False
 
     @property
     def wikitext(self) -> str:
@@ -91,14 +89,14 @@ class WikipediaTemplate(WcdBaseModel):
         else:
             return ""
 
-    def __extract_and_lookup_doi__(self) -> None:
-        logger.debug("__extract_and_lookup_doi__: running")
-        if self.parameters and "doi" in self.parameters:
-            doi = self.parameters["doi"]
-            # if doi:
-            #     self.doi_found = True
-                # self.doi = Doi(doi=doi)
-                # self.doi.lookup_doi()
+    # def __extract_and_lookup_doi__(self) -> None:
+    #     logger.debug("__extract_and_lookup_doi__: running")
+    #     if self.parameters and "doi" in self.parameters:
+    # doi = self.parameters["doi"]
+    # if doi:
+    #     self.doi_found = True
+    # self.doi = Doi(doi=doi)
+    # self.doi.lookup_doi()
 
     @property
     def get_isbn(self) -> str:
@@ -251,7 +249,7 @@ class WikipediaTemplate(WcdBaseModel):
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()
         self.__rename_one_to_first_parameter__()
-        self.__extract_and_lookup_doi__()
+        # self.__extract_and_lookup_doi__()
         self.extraction_done = True
         self.__detect_missing_first_parameter__()
         self.__extract_first_level_domains_from_urls__()
@@ -342,3 +340,7 @@ class WikipediaTemplate(WcdBaseModel):
         if not self.language_code:
             raise MissingInformationError("self.lang was empty")
         return f"https://{self.language_code}.wikipedia.org/wiki/Template:{self.name}"
+
+    def get_dict(self) -> Dict[str,Any]:
+        """Return a dict that we can output to patrons via the API"""
+        return dict(parameters=self.parameters)

@@ -4,9 +4,11 @@ from typing import Any, Tuple
 
 from flask_restful import Resource, abort  # type: ignore
 
+from src import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
+from src.models.file_io.reference_file_io import ReferenceFileIo
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.views.statistics import StatisticsView
@@ -169,13 +171,30 @@ class Article(StatisticsView):
             raise ValueError("not a dict")
 
     def __write_to_disk__(self):
-        # todo update to v2
-        io = ArticleFileIo(
+        """Write both article json and all reference json files"""
+        from src.models.api import app
+
+        app.logger.debug("__write_to_disk__: running")
+        article_io = ArticleFileIo(
             job=self.job,
             data=self.data,
             wari_id=self.wikipedia_analyzer.wari_id,
         )
-        io.write_to_disk()
+        article_io.write_to_disk()
+        app.logger.debug("writing references to disk")
+        for reference in self.wikipedia_analyzer.reference_statistics:
+            # this is a dict
+            if "id" not in reference:
+                console.print(reference)
+                raise MissingInformationError("no id found in reference")
+            reference_io = ReferenceFileIo(
+                job=self.job, hash_based_id=reference["id"], data=reference
+            )
+            reference_io.write_to_disk()
+        app.logger.debug(
+            f"wrote {len(self.wikipedia_analyzer.reference_statistics)} "
+            f"references to disk"
+        )
 
     def __print_log_message_about_refresh__(self):
         from src.models.api import app

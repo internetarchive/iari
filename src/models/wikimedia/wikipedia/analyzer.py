@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from src.models.api import ArticleStatistics
 from src.models.api.job.article_job import ArticleJob
+from src.models.api.statistics.reference import ReferenceStatistic
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
@@ -24,6 +25,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     # wikibase: Wikibase = IASandboxWikibase()
     wikitext: str = ""
     check_urls: bool = False
+    reference_statistics: List[Dict[str, Any]] = []
 
     @property
     def wari_id(self) -> str:
@@ -87,7 +89,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             self.__analyze__()
         if not self.article_statistics:
             self.__gather_article_statistics__()
-            # self.__gather_reference_statistics__()
+            self.__gather_reference_statistics__()
         return self.__get_statistics_dict__()
 
     def __get_statistics_dict__(self) -> Dict[str, Any]:
@@ -105,60 +107,41 @@ class WikipediaAnalyzer(WcdBaseModel):
             if self.article:
                 self.article.fetch_and_extract_and_parse()
 
-    # def __gather_reference_statistics__(self):
-    #     logger.debug("__gather_reference_statistics__: running")
-    #     if (
-    #         self.article_statistics
-    #         and self.article_statistics.references
-    #         and self.article.extractor.number_of_references > 0
-    #     ):
-    #         self.article_statistics.references.details = []
-    #         for reference in self.article.extractor.references:
-    #             if not reference.raw_reference:
-    #                 raise MissingInformationError("raw_reference was None")
-    #             rr = reference.raw_reference
-    #             reference_statistics = ReferenceStatistic(
-    #                 plain_text_in_reference=rr.plain_text_in_reference,
-    #                 citation_template_found=rr.citation_template_found,
-    #                 cs1_template_found=rr.cs1_template_found,
-    #                 citeq_template_found=rr.citeq_template_found,
-    #                 isbn_template_found=rr.isbn_template_found,
-    #                 url_template_found=rr.url_template_found,
-    #                 bare_url_template_found=rr.bare_url_template_found,
-    #                 multiple_templates_found=rr.multiple_templates_found,
-    #                 is_named_reference=rr.is_named_reference,
-    #                 is_citation_reference=rr.is_citation_reference,
-    #                 is_general_reference=rr.is_general_reference,
-    #                 has_archive_details_url=rr.archive_org_slash_details_in_reference,
-    #                 has_google_books_url_or_template=rr.google_books_url_or_template_found,
-    #                 has_web_archive_org_url=rr.web_archive_org_in_reference,
-    #                 url_found=rr.url_found,
-    #                 isbn=reference.isbn,
-    #                 doi=reference.doi,
-    #                 wikitext=rr.get_wikicode_as_string,
-    #                 urls=rr.checked_urls,
-    #                 flds=rr.first_level_domains,
-    #                 multiple_cs1_templates_found=rr.multiple_cs1_templates_found,
-    #                 number_of_bareurl_templates=rr.number_of_bareurl_templates,
-    #                 number_of_citation_templates=rr.number_of_citation_templates,
-    #                 number_of_citeq_templates=rr.number_of_citeq_templates,
-    #                 number_of_isbn_templates=rr.number_of_isbn_templates,
-    #                 number_of_cs1_templates=rr.number_of_cs1_templates,
-    #                 number_of_templates=rr.number_of_templates,
-    #                 number_of_templates_missing_first_parameter=rr.number_of_templates_missing_first_parameter,
-    #                 is_valid_qid=reference.is_valid_qid,
-    #                 wikidata_qid=reference.wikidata_qid,
-    #                 number_of_url_templates=rr.number_of_url_templates,
-    #                 number_of_webarchive_templates=rr.number_of_webarchive_templates,
-    #                 templates=self.__gather_template_statistics__(reference=reference),
-    #                 known_multiref_template_found=rr.known_multiref_template_found,
-    #             )
-    #             self.article_statistics.references.details.append(reference_statistics)
-    #     if not self.article_statistics:
-    #         logger.debug(
-    #             "self.article_statistics was None "
-    #             "so we skip gathering reference statistics"
-    #         )
+    def __gather_reference_statistics__(self):
+        logger.debug("__gather_reference_statistics__: running")
+        if (
+            self.article_statistics
+            and self.article_statistics.references
+            and self.article.extractor.number_of_references > 0
+        ):
+            self.reference_statistics = []
+            for reference in self.article.extractor.references:
+                if not reference.raw_reference:
+                    raise MissingInformationError("raw_reference was None")
+                rr = reference.raw_reference
+                if rr.footnote_subtype:
+                    subtype = rr.footnote_subtype.value
+                else:
+                    subtype = ""
+                self.reference_statistics.append(
+                    ReferenceStatistic(
+                        type=rr.reference_type.value,
+                        footnote_subtype=subtype,
+                        id=reference.reference_id,
+                        # identifiers=rr.identifiers,
+                        wikitext=rr.get_wikicode_as_string,
+                        urls=rr.raw_urls,
+                        flds=rr.first_level_domains,
+                        titles=rr.titles,
+                        template_names=rr.template_names,
+                        templates=rr.get_template_dicts,
+                    ).dict()
+                )
+        if not self.article_statistics:
+            logger.debug(
+                "self.article_statistics was None "
+                "so we skip gathering reference statistics"
+            )
 
     def __populate_article__(self):
         logger.debug("__populate_article__: running")
