@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
-from src.models.wikimedia.wikipedia.reference.person import Person
+from src.models.wikimedia.wikipedia.reference.template.person import Person
 
 
 class TemplateStatistics(BaseModel):

@@ -1,6 +1,6 @@
 from mwparserfromhell import parse  # type: ignore
 
-from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
+from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 

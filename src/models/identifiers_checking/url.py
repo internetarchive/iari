@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict
 
 import requests
 from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer, NoNameservers, resolve
@@ -21,6 +22,7 @@ from requests.exceptions import (
     SSLError,
 )
 
+from src import console
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -47,9 +49,9 @@ class Url(WikipediaUrl):
     status_code: int = 0
     timeout: int = 2
 
-    @property
-    def __check_soft404__(self):
-        raise NotImplementedError()
+    # @property
+    # def __check_soft404__(self):
+    #     raise NotImplementedError()
 
     def check(self):
         self.extract()
@@ -147,5 +149,10 @@ class Url(WikipediaUrl):
         self.__check_with_https_verify__()
         if self.request_error:
             self.__check_without_https_verify__()
-        # logger.debug("setting checked to true")
-        self.checked = True
+
+    def get_dict(self) -> Dict[str, Any]:
+        cleaned_dictionary = self.dict(
+            exclude={"parsing_done", "first_level_domain_done"}
+        )
+        console.print(cleaned_dictionary)
+        return cleaned_dictionary

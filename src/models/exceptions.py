@@ -40,3 +40,7 @@ class WikipediaApiFetchError(BaseException):
 
 class ResolveError(BaseException):
     pass
+
+
+class LanguageNotSupportedError(BaseException):
+    pass

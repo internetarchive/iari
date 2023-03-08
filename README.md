@@ -1,12 +1,12 @@
-# [wcdimportbot](https://www.wikidata.org/wiki/Q115252313) ([graph](https://w.wiki/5$yU))
-This ETL-framework is capable of fetching, extracting, transforming and storing 
+# Wikipedia Article Reference Inventory [WARI](https://www.wikidata.org/wiki/Q117023013)
+This tool is capable of fetching, extracting, transforming and storing 
 reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700). 
 
-We call it Wikipedia Article Reference Inventory (WARI) and it is currently an 
-API with a few endpoints which hopefully makes it easy for others
+WARI is currently an API with a few endpoints which hopefully makes it easy for others
 to interact with.
 
-We hope to later on populate a [Wikibase.cloud](https://wikibase.cloud/) instance based on the data. 
+On the longer term we are planning on populating a [Wikibase.cloud](https://wikibase.cloud/) instance 
+based on the data we extract. 
 We call this resulting database Wikipedia Citations Database (WCD).
 
 WARI has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) 
