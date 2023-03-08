@@ -1,0 +1,1 @@
+This directory holds all code that handles Wikipedia templates.
