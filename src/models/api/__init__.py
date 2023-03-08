@@ -14,6 +14,7 @@ from flask_restful import Api  # type: ignore
 
 import config
 from src.models.api.statistics.article import ArticleStatistics
+from src.views.check_url import CheckUrl
 
 # from src.views.check_doi import CheckDoi
 # from src.views.check_url import CheckUrl
@@ -31,7 +32,7 @@ api = Api(app, prefix="/v2")
 
 # Here we link together the API views and endpoint urls
 # api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
-# api.add_resource(CheckUrl, "/check-url")
+api.add_resource(CheckUrl, "/check-url")
 # api.add_resource(CheckDoi, "/check-doi")
 api.add_resource(Article, "/statistics/article")
 api.add_resource(References, "/statistics/references")

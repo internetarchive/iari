@@ -344,4 +344,3 @@ class WikipediaTemplate(BaseModel):
     def get_dict(self) -> Dict[str, Any]:
         """Return a dict that we can output to patrons via the API"""
         return dict(parameters=self.parameters)
-

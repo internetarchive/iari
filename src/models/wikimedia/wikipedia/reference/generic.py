@@ -1,18 +1,12 @@
 import hashlib
 import logging
-import re
 from typing import Any, List, Optional
 
-from pydantic import validate_arguments
-
 from src import WikimediaSite
-from src.models.exceptions import MissingInformationError, MoreThanOneNumberError
+from src.models.exceptions import MissingInformationError
 from src.models.wcd_item import WcdItem
-from src.models.wikimedia.wikipedia.reference.enums import (
-    EnglishWikipediaTemplatePersonRole,
-)
-from src.models.wikimedia.wikipedia.reference.template.person import Person
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
+from src.models.wikimedia.wikipedia.reference.template.person import Person
 
 logger = logging.getLogger(__name__)
 
@@ -543,7 +537,6 @@ class WikipediaReference(WcdItem):
     #             else:
     #                 raise ValueError(f"could not extract path from {self.url}")
 
-
     # def __generate_first_level_domain_hash__(self):
     #     """This is used as hash for all website items"""
     #     pass
@@ -564,8 +557,6 @@ class WikipediaReference(WcdItem):
     # def __generate_reference_hash__(self):
     #     hashing = Hashing(reference=self)
     #     self.md5hash = hashing.generate_reference_hash()
-
-
 
     # def __merge_date_into_publication_date__(self):
     #     """Handle the possibly ambiguous self.date field"""
@@ -647,7 +638,6 @@ class WikipediaReference(WcdItem):
     #                 self.__log_to_file__(
     #                     message=message, file_name="isbn_exceptions.log"
     #                 )
-
 
     # TODO move this to Template
     # def __parse_url__(self, url: str = "") -> str:

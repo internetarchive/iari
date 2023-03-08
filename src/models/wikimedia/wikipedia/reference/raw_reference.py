@@ -15,7 +15,7 @@ from src.models.wikimedia.wikipedia.reference.enums import (
     FootnoteSubtype,
     ReferenceType,
 )
-from src.models.wikimedia.wikipedia.reference.template import WikipediaTemplate
+from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
 
@@ -299,8 +299,6 @@ class WikipediaRawReference(WcdBaseModel):
                 if url.first_level_domain:
                     logger.debug(f"found fld: {url.first_level_domain}")
                     self.first_level_domains.append(url.first_level_domain)
-        # We sort them for the sake of easier testing
-        # flds = sorted(flds)
         logger.debug(f"found flds: {self.first_level_domains}")
         self.first_level_domains_done = True
 

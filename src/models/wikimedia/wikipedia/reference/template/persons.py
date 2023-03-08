@@ -6,7 +6,9 @@ from pydantic import validate_arguments
 
 from src import WcdBaseModel
 from src.models.exceptions import LanguageNotSupportedError, MoreThanOneNumberError
-from src.models.wikimedia.wikipedia.reference.enums import EnglishWikipediaTemplatePersonRole
+from src.models.wikimedia.wikipedia.reference.enums import (
+    EnglishWikipediaTemplatePersonRole,
+)
 from src.models.wikimedia.wikipedia.reference.template.person import Person
 from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
 
@@ -21,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Persons(WcdBaseModel):
     """This class handles all parsing of persons"""
+
     lang: str = "en"
     template: WikipediaTemplate
     first_lasts: List = []
@@ -50,9 +53,7 @@ class Persons(WcdBaseModel):
         self.interviewers_list = self.__parse_known_role_persons__(
             role=EnglishWikipediaTemplatePersonRole.INTERVIEWER
         )
-        self.persons_without_role = self.__parse_roleless_persons__(
-
-        )
+        self.persons_without_role = self.__parse_roleless_persons__()
         self.translators_list = self.__parse_known_role_persons__(
             role=EnglishWikipediaTemplatePersonRole.TRANSLATOR
         )
@@ -280,5 +281,3 @@ class Persons(WcdBaseModel):
         else:
             logger.debug(f"Found no numbers.")
             return None
-
- 
