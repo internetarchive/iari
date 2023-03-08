@@ -1,9 +1,8 @@
-# [WARI](https://www.wikidata.org/wiki/Q115252313) ([graph](https://w.wiki/5$yU))
-This ETL-framework is capable of fetching, extracting, transforming and storing 
+# Wikipedia Article Reference Inventory [WARI](https://www.wikidata.org/wiki/Q117023013)
+This tool is capable of fetching, extracting, transforming and storing 
 reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700). 
 
-We call it Wikipedia Article Reference Inventory (WARI) and it is currently an 
-API with a few endpoints which hopefully makes it easy for others
+WARI is currently an API with a few endpoints which hopefully makes it easy for others
 to interact with.
 
 On the longer term we are planning on populating a [Wikibase.cloud](https://wikibase.cloud/) instance 
