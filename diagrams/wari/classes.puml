@@ -10,13 +10,13 @@ hdl: str
 title: str
 ...
 }
-class wikidata_details{
-fulltext_url: str
-publisher: wdqid
-journal: wdqid
-authors: List[author1_qid, ...]
-author_strings: int}
-}
+'class wikidata_details{
+'fulltext_url: str
+'publisher: wdqid
+'journal: wdqid
+'authors: List[author1_qid, ...]
+'author_strings: int}
+'}
 class reference_statistics{
 named: int
 footnote: int
@@ -73,12 +73,22 @@ class check-url{
 error: bool
 fixed: str
 }
+class openalex{
+id: str # e.g. https://openalex.org/W3016116441
+retracted: bool
+details: Dict[str, Any] # this is the whole response from OpenAlex
+}
+class wikidata{
+id: str # e.g. Q16116441
+retracted: bool
+details: Dict[str, Any] # this is the whole json entity from WikibaseIntegrator
+}
 class check-doi{
 doi: str
-"checked": isodate
-retracted_in: Dict[str: bool] # e.g. {openalex: true, open-retractions: false}
-wikidata_qid: str
-wikidata_details: Dict[str, Any]
+isodate: isodate
+timestamp: timestamp
+openalex: openalex
+wikidata: wikidata
 }
 class template{
 title: str
