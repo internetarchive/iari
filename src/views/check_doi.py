@@ -42,12 +42,13 @@ class CheckDoi(StatisticsView):
         data["timestamp"] = int(timestamp)
         isodate = datetime.isoformat(datetime.utcnow())
         data["isodate"] = str(isodate)
-        doi_hash_id = self.__doi_hash_id__()
+        doi_hash_id = self.__doi_hash_id__
         data["id"] = doi_hash_id
         write = DoiFileIo(data=data, hash_based_id=doi_hash_id)
         write.write_to_disk()
         return data, 200
 
+    @property
     def __doi_hash_id__(self) -> str:
         """This generates an 8-char long id based on the md5 hash of
         the raw upper cased doi supplied by the user"""
