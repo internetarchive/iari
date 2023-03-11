@@ -1,9 +1,10 @@
 import hashlib
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from src.models.api.check_doi.check_doi_schema import CheckDoiSchema
 from src.models.api.job.check_doi_job import CheckDoiJob
+from src.models.exceptions import MissingInformationError
 from src.models.file_io.doi_file_io import DoiFileIo
 from src.models.identifiers_checking.doi import Doi
 from src.views.statistics import StatisticsView
@@ -18,7 +19,7 @@ class CheckDoi(StatisticsView):
     See src/models/checking
     """
 
-    job: CheckDoiJob = None
+    job: Optional[CheckDoiJob] = None
     schema: CheckDoiSchema = CheckDoiSchema()
     serving_from_json: bool = False
     headers: Dict[str, Any] = {
@@ -50,4 +51,6 @@ class CheckDoi(StatisticsView):
     def __doi_hash_id__(self) -> str:
         """This generates an 8-char long id based on the md5 hash of
         the raw upper cased doi supplied by the user"""
+        if not self.job:
+            raise MissingInformationError()
         return hashlib.md5(f"{self.job.doi.upper()}".encode()).hexdigest()[:8]
