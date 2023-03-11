@@ -41,7 +41,9 @@ class CheckDoi(StatisticsView):
         data["timestamp"] = int(timestamp)
         isodate = datetime.isoformat(datetime.utcnow())
         data["isodate"] = str(isodate)
-        write = DoiFileIo(data=data, hash_based_id=self.__doi_hash_id__())
+        doi_hash_id = self.__doi_hash_id__()
+        data["id"] = doi_hash_id
+        write = DoiFileIo(data=data, hash_based_id=doi_hash_id)
         write.write_to_disk()
         return data, 200
 
