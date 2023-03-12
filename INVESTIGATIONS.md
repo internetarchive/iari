@@ -47,19 +47,8 @@ TODO try it out.
 There are about 200 million in total according to extractions from dumps done by scientists.
 
 ### Many references are plain text ie. no template is used
-
-These are completely ignore by wcdimportbot because we only support references
-entered in one of the currently 30 templates we support.
-
-We currently do not try to analyze all references <ref>...</ref> which lack templates,
-but we could start doing that since we download all the wikitext anyway (and throw away
-everything data in of of the supported templates).
-
 Here you see a graphical overview of the number of references 
 ![image](https://commons.wikimedia.org/wiki/File:Wikipedia%27s_references_and_citation_templates_shift.png)
-
-Suggestion: We should really improve the framework to detect and store these references as well.
-Sometimes they are mixed plain text reference and a naked isbn template in the end.
 
 ## User script investigation
 
