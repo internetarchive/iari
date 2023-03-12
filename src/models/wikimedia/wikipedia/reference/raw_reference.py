@@ -9,7 +9,6 @@ import mwparserfromhell  # type: ignore
 from mwparserfromhell.nodes import ExternalLink, Tag  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
-import config
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.enums import (
     FootnoteSubtype,
@@ -388,12 +387,12 @@ class WikipediaRawReference(WcdBaseModel):
     # def url_template_found(self) -> bool:
     #     return self.specific_template_found(names=config.url_template)
 
-    @property
-    def bare_url_template_found(self) -> bool:
-        for template in self.templates:
-            if config.bare_url_regex in template.name:
-                return True
-        return False
+    # @property
+    # def bare_url_template_found(self) -> bool:
+    #     for template in self.templates:
+    #         if config.bare_url_regex in template.name:
+    #             return True
+    #     return False
 
     @property
     def is_footnote_reference(self):
