@@ -26,21 +26,32 @@ The endpoint providing a detailed analysis of a Wikipedia article and its refere
 enable wikipedians to get an overview of the state of the references and 
 build tools that help curate and improve the references. 
 
-A Wikibase with millions of references and edges between 
-them and the Wikipedia article(s) they are used on is useful
- for both Wikimedians, digital librarians and researchers who wish to understand
- which websites are linked to which pages and used as references.
-
 This is part of a wider initiative help raise the quality of references in 
 Wikipedia to enable everyone in the world to make
  decisions based on trustworthy knowledge that is derived from 
 trustworthy sources.
 
-# Supported templates
-There are a lot of templates in use in the different Wikipedias. For now 
-the bot only supports templates and parameters from English Wikipedia 
-but intention is to code it in a way that avoids hardcoding of 
-enwp specific templates and parameters.
+# Features
+WARI features a number of endpoints that help patrons 
+get structured data about references in a Wikipedia article
+* article endpoint which analyze a given article and returns basic statistics about it 
+* references endpoint which give back all ids of references found
+* reference endpoint which give back all details about a reference including templates
+* check-url endpoint which looks up the URL and give back 
+standardized information about its status
+* check-doi endpoint which looks up the DOI and give back 
+standardized information about it from OpenAlex and Wikidata 
+including abstract, retracted status, and more.
+
+# Limitations
+* support for English Wikipedia only
+
+# Supported Wikipedias
+Currently we support only enwiki but we plan on extending 
+the support to all Wikipedia language versions as soon as the API is 
+a bit more stable.
+
+We also want to support non-Wikimedia wikis using MediaWiki in the future.
 
 ## English Wikipedia templates
 English Wikipedia has hundreds of special reference templates in use 
@@ -102,20 +113,6 @@ https://en.wikipedia.org/w/index.php?title=Wikipedia:CITEBUNDLE
 * **Unbulleted list citebundle reference** - type of nested reference with multiple templates inside, 
 see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
 
-# Features
-WARI features a number of endpoints that help patrons 
-get structured data about references in a Wikipedia article
-* article endpoint which analyze a given article and returns basic statistics about it 
-* references endpoint which give back all ids of references found
-* reference endpoint which give back all details about a reference including templates
-* check-url endpoint which looks up the URL and give back 
-standardized information about its status
-* check-doi endpoint which looks up the DOI and give back 
-standardized information about it from OpenAlex and Wikidata 
-including abstract, retracted status, and more.
-
-# Limitations
-* support for English Wikipedia only
 
 # Diagrams
 ## WARI
@@ -124,7 +121,7 @@ including abstract, retracted status, and more.
 ### Classes
 ![image](diagrams/wari/classes.png)
 
-# History
+# History of this repo
 * version 1.0.0 a proof of concept import tool based on WikidataIntegrator (by James Hare)
 * version 2.0.0+ a scalable ETL-framework with an API and capability of reading EventStreams (by Dennis Priskorn)
 * version 3.0.0+ WARI, a host of API endpoints that returns statistics 
