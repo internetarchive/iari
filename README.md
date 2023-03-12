@@ -105,7 +105,7 @@ These two are similar but appear in different contexts. Both require a trained m
 what they are referring to.
 1) **General reference without a template** - reference outside of <ref>. 
 E.g. part of further reading- or bibliography section. 
-2**Plain text reference without a template**: references inside <ref> tags, but without ANY template. 
+2) **Plain text reference without a template**: references inside <ref> tags, but without ANY template. 
 
 These bundled references are rare (<200 transclusions in enwiki)
 * **Bundled reference** - multiple references in one <ref> see 
