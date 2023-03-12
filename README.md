@@ -91,15 +91,15 @@ information is structured and part of it is not (theoretical so far, we presume 
 E.g. {{cite book|url={{google books|123456}}}} <- this particular subtype we want to support
 7) **multiple template reference with url and bare url x template** - 
 E.g. `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
-1) **reference with a Bare URL template** - as above, but with one of the {{bare url x}} templates 
-2) **Plain text reference with a URL outside a template** - as above, but with no other identifier than the URL
-3) **Short citation reference** aka plain text reference without a URL or identifier - 
+8) **reference with a Bare URL template** - as above, but with one of the {{bare url x}} templates 
+9) **Plain text reference with a URL outside a template** - as above, but with no other identifier than the URL
+10) **Short citation reference** aka plain text reference without a URL or identifier - 
 special type of plain text reference. e.g. reference to a book only by author and title. e.g. "Muller Report, p12". 
 See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
 ![image](https://user-images.githubusercontent.com/68460690/208091737-abc20b6e-8102-4acd-b0fa-409aa72d9ae8.png)
-4) **General reference with a template** - reference outside of <ref>. 
+11) **General reference with a template** - reference outside of <ref>. 
 E.g. part of further reading- or bibliography section that uses a template
-5) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
+12) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
 
 These two are similar but appear in different contexts. Both require a trained machine learning model to recognize 
 what they are referring to.
