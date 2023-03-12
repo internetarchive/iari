@@ -6,7 +6,6 @@ from typing import Any, Dict, List
 from mwparserfromhell.nodes import Template  # type: ignore
 from pydantic import BaseModel, validate_arguments
 
-import config
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -251,7 +250,7 @@ class WikipediaTemplate(BaseModel):
         self.__rename_one_to_first_parameter__()
         # self.__extract_and_lookup_doi__()
         self.extraction_done = True
-        self.__detect_missing_first_parameter__()
+        # self.__detect_missing_first_parameter__()
         self.__extract_first_level_domains_from_urls__()
 
     def __fix_class_key__(self):
@@ -326,14 +325,14 @@ class WikipediaTemplate(BaseModel):
             if url.first_level_domain == ""
         ]
 
-    def __detect_missing_first_parameter__(self):
-        """Url, webarchive and isbn templates should always have a first parameter"""
-        logger.debug("__detect_missing_first_parameter__: running")
-        if (
-            self.name in config.templates_with_mandatory_first_parameter
-            and not self.__first_parameter__
-        ):
-            self.missing_or_empty_first_parameter = True
+    # def __detect_missing_first_parameter__(self):
+    #     """Url, webarchive and isbn templates should always have a first parameter"""
+    #     logger.debug("__detect_missing_first_parameter__: running")
+    #     if (
+    #         self.name in config.templates_with_mandatory_first_parameter
+    #         and not self.__first_parameter__
+    #     ):
+    #         self.missing_or_empty_first_parameter = True
 
     @property
     def template_url(self) -> str:
