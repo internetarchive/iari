@@ -83,10 +83,17 @@ id: str # e.g. Q16116441
 retracted: bool
 details: Dict[str, Any] # this is the whole json entity from WikibaseIntegrator
 }
+class fatcat{
+id: str
+details: Dict[str, Any]
+# details is the raw output from the release endpoint
+# see https://guide.fatcat.wiki/entity_release.html
+}
 class check-doi{
 doi: str
 isodate: isodate
 timestamp: timestamp
+fatcat: fatcat
 openalex: openalex
 wikidata: wikidata
 }
