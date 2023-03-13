@@ -4,8 +4,12 @@
 [WARI] -- references
 [WARI] -- "reference/id"
 [WARI] -- "check-url"
+"check-url" --> url : lookup
 [WARI] -- "check-doi"
 [WARI] -- "article"
+"check-doi" --> OpenAlex : lookup
+"check-doi" --> FatCat : lookup
+"check-doi" --> Wikidata : lookup
 
 
 database "file system" {
