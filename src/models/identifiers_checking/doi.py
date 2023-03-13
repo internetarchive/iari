@@ -185,5 +185,7 @@ class Doi(BaseModel):
         url = f"https://api.fatcat.wiki/v0/release/lookup?doi={self.doi.lower()}"
         response = requests.get(url)
         if response.status_code == 200:
-            self.fatcat = response.json()
+            data = response.json()
+            self.fatcat["id"] = data["ident"]
+            self.fatcat["details"] = data
             # console.print(self.fatcat)
