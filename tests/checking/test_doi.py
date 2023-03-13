@@ -11,7 +11,7 @@ class TestDoi(TestCase):
     unretracted_in_either_lowercase = "10.1136/gut.52.12.1678"
 
     def test___lookup_doi_in_openalex_not_retracted(self):
-        doi = Doi(doi=self.retracted_in_wd_but_not_oa)
+        doi = Doi(doi=self.unretracted_in_either)
         doi.__lookup_doi_in_openalex__()
         assert doi.found_in_openalex is True
         assert doi.marked_as_retracted_in_openalex is False
