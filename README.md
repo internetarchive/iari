@@ -40,7 +40,7 @@ get structured data about references in a Wikipedia article
 * check-url endpoint which looks up the URL and give back 
 standardized information about its status
 * check-doi endpoint which looks up the DOI and give back 
-standardized information about it from OpenAlex and Wikidata 
+standardized information about it from [FatCat](https://fatcat.wiki/), OpenAlex and Wikidata 
 including abstract, retracted status, and more.
 
 # Limitations

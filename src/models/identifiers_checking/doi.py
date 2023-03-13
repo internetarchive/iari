@@ -1,6 +1,8 @@
 from typing import Any, Dict, List, Optional
 
+import fatcat_openapi_client
 import pyalex  # type: ignore
+import requests
 from pyalex import Works  # type: ignore
 from pydantic import BaseModel
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
@@ -8,6 +10,8 @@ from wikibaseintegrator.entities import ItemEntity  # type: ignore
 from wikibaseintegrator.models import Claim  # type: ignore
 from wikibaseintegrator.wbi_config import config  # type: ignore
 from wikibaseintegrator.wbi_helpers import fulltext_search  # type: ignore
+
+from src import console
 
 instance_of = "P31"
 retracted_item = "Q45182324"  # see https://www.wikidata.org/wiki/Q45182324
@@ -21,6 +25,7 @@ class Doi(BaseModel):
 
     wikidata: Dict[str, Any] = {}
     openalex: Dict[str, Any] = {}
+    fatcat: Dict[str, Any] = {}
     doi: str
     found_in_wikidata: bool = False
     found_in_openalex: bool = False
@@ -53,6 +58,7 @@ class Doi(BaseModel):
             retracted=self.marked_as_retracted_in_wikidata,
         )
         self.__log_if_retracted_or_not__()
+        self.__lookup_in_fatcat__()
 
     def __lookup_doi_in_openalex__(self):
         from src.models.api import app
@@ -171,5 +177,13 @@ class Doi(BaseModel):
             app.logger.info("This paper was not found in both OpenAlex and Wikidata")
 
     def get_doi_dictionary(self) -> Dict[str, Any]:
-        data = self.dict(include={"wikidata", "openalex", "timeout", "doi"})
+        data = self.dict(include={"wikidata", "openalex", "timeout", "doi", "fatcat"})
         return data
+
+    def __lookup_in_fatcat__(self):
+        """DOIs in fatcat are all lowercase"""
+        url = f"https://api.fatcat.wiki/v0/release/lookup?doi={self.doi.lower()}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            self.fatcat = response.json()
+            # console.print(self.fatcat)
