@@ -10,7 +10,11 @@
 "check-doi" --> OpenAlex : lookup
 "check-doi" --> FatCat : lookup
 "check-doi" --> Wikidata : lookup
-
+[WARI] -- all
+"reference/id" <-- all
+"check-doi" <-- all
+"check-url" <-- all
+"article" <-- all
 
 database "file system" {
 

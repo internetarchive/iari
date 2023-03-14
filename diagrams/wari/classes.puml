@@ -23,6 +23,21 @@ footnote: int
 content: int
 general: int
 }
+class all{
+wari_id: str
+reference_statistics: Dict[str, int]
+references: List[str] #  list of reference ids
+reference_details: List[Dict[str, Any] #  list of full references
+title: str
+page_id: int
+urls: List[str]
+fld_counts: Dict[str, int] # e.g. {archive.org: 2}
+url_details: Dict[str, check-url] #
+doi_details: Dict[str, check-doi] #
+# Note the DOI-details are very heavy and usually results
+# in 220kb for each DOI, so if there are 50 DOIS
+# this part will weigh 11MB
+}
 class article{
 wari_id: str
 reference_statistics: Dict[str, int]
