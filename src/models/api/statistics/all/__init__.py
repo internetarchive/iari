@@ -3,7 +3,7 @@ please write me some code in python that can fetch asynchronously a reference_id
 http://18.217.22.248/v2/statistics/reference/{reference_id}
 """
 import asyncio
-from typing import Dict, Any, List, Set
+from typing import Any, Dict, List, Set
 
 import aiohttp
 import requests
@@ -136,8 +136,7 @@ class AllHandler(WcdBaseModel):
         if response.status_code == 200:
             self.data = response.json()
             app.logger.info(
-                f"got article data with {self.number_of_references} "
-                f"references"
+                f"got article data with {self.number_of_references} " f"references"
             )
         else:
             app.logger.error(
