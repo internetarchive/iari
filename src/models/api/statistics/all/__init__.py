@@ -10,18 +10,28 @@ import requests
 
 from src import WcdBaseModel
 from src.models.api.job.article_job import ArticleJob
-from src.models.exceptions import MissingInformationError
 
 
 class AllHandler(WcdBaseModel):
     compilation: Dict[str, Any] = {}
     data: Dict[str, Any] = {}
     # We use a set to avoid duplicates
-    dois: Set[str] = {}
+    dois: Set[str] = set()
     doi_details: List[Dict[str, Any]] = []
     job: ArticleJob
     references: List[Dict[str, Any]] = []
     url_details: List[Dict[str, Any]] = []
+    error: bool = False
+    extract_dois_done = False
+
+    @property
+    def number_of_references(self) -> int:
+        return len(self.data["references"])
+
+    @property
+    def number_of_dois(self) -> int:
+        self.__extract_dois__()
+        return len(self.dois)
 
     @staticmethod
     async def fetch_data(session, url):
@@ -59,8 +69,12 @@ class AllHandler(WcdBaseModel):
             return results
 
     def fetch_and_compile(self):
+        from src.models.api import app
+
         self.__fetch_article__()
         self.__fetch_references__()
+        self.__extract_dois__()
+        app.logger.info(f"Found {self.number_of_dois} DOIs")
         self.__fetch_url_details__()
         self.__fetch_doi_details__()
         self.__compile_everything__()
@@ -68,73 +82,86 @@ class AllHandler(WcdBaseModel):
     def __fetch_references__(self):
         from src.models.api import app
 
-        app.logger.debug("__fetch_references__: running")
-        if not self.data:
-            raise MissingInformationError()
-        # this code from chatgpt does not work via flask
-        # loop = asyncio.get_event_loop()
-        # solution from https://techoverflow.net/2020/10/01/how-to-fix-python-asyncio-runtimeerror-there-is-no-current-event-loop-in-thread/
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        self.references = loop.run_until_complete(
-            self.get_reference_ids(self.data["references"])
-        )
+        if not self.error and not self.references:
+            app.logger.debug("__fetch_references__: running")
+            # this code from chatgpt does not work via flask
+            # loop = asyncio.get_event_loop()
+            # solution from https://techoverflow.net/2020/10/01/how-to-fix-python-asyncio-runtimeerror-there-is-no-current-event-loop-in-thread/
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            self.references = loop.run_until_complete(
+                self.get_reference_ids(self.data["references"])
+            )
 
     def __fetch_url_details__(self):
         from src.models.api import app
 
-        app.logger.debug("__fetch_url_details__: running")
-        if not self.data:
-            raise MissingInformationError()
-        # this code from chatgpt does not work via flask
-        # loop = asyncio.get_event_loop()
-        # solution from https://techoverflow.net/2020/10/01/how-to-fix-python-asyncio-runtimeerror-there-is-no-current-event-loop-in-thread/
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        # we use a set here to avoid duplicates
-        urls = set(self.data["urls"])
-        app.logger.info(f"Checking {len(urls)} DOIs")
-        self.url_details = loop.run_until_complete(self.check_urls(urls))
+        if not self.error:
+            app.logger.debug("__fetch_url_details__: running")
+            # this code from chatgpt does not work via flask
+            # loop = asyncio.get_event_loop()
+            # solution from https://techoverflow.net/2020/10/01/how-to-fix-python-asyncio-runtimeerror-there-is-no-current-event-loop-in-thread/
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            # we use a set here to avoid duplicates
+            urls = set(self.data["urls"])
+            app.logger.info(f"Checking {len(urls)} URLs")
+            self.url_details = loop.run_until_complete(self.check_urls(urls))
 
     def __fetch_doi_details__(self):
         from src.models.api import app
 
-        app.logger.debug("__fetch_doi_details__: running")
-        if not self.data:
-            raise MissingInformationError()
-        # this code from chatgpt does not work via flask
-        # loop = asyncio.get_event_loop()
-        # solution from https://techoverflow.net/2020/10/01/how-to-fix-python-asyncio-runtimeerror-there-is-no-current-event-loop-in-thread/
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        self.__extract_dois__()
-        if self.dois:
-            app.logger.info(f"Checking {len(self.dois)} DOIs")
-            self.url_details = loop.run_until_complete(self.check_dois(self.dois))
+        if not self.error:
+            app.logger.debug("__fetch_doi_details__: running")
+            # this code from chatgpt does not work via flask
+            # loop = asyncio.get_event_loop()
+            # solution from https://techoverflow.net/2020/10/01/how-to-fix-python-asyncio-runtimeerror-there-is-no-current-event-loop-in-thread/
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            self.__extract_dois__()
+            if self.dois:
+                app.logger.info(f"Checking {len(self.dois)} DOIs")
+                self.doi_details = loop.run_until_complete(self.check_dois(self.dois))
+            else:
+                app.logger.info(f"Not checking DOIs because none were found")
 
     def __fetch_article__(self):
         from src.models.api import app
 
-        if not self.job:
-            raise MissingInformationError()
+        app.logger.debug("__fetch_article__: running")
         # response = requests.get(f"http://18.217.22.248/v2/statistics/article?url={}")
         response = requests.get(
             f"http://18.217.22.248/v2/statistics/article?lang=en&site=wikipedia&title={self.job.title}"
         )
         if response.status_code == 200:
-            app.logger.info("got article data")
             self.data = response.json()
+            app.logger.info(
+                f"got article data with {self.number_of_references} "
+                f"references"
+            )
+        else:
+            app.logger.error(
+                f"Got status code {response.status_code} when "
+                f"fetching from the article endpoint"
+            )
+            self.error = True
 
     def __compile_everything__(self):
-        self.compilation = self.data
-        # add details
-        self.compilation["reference_details"] = self.references
-        self.compilation["doi_details"] = self.doi_details
-        self.compilation["url_details"] = self.url_details
+        """Here we put the big json object together"""
+        if not self.error:
+            self.compilation = self.data
+            self.compilation["doi_details"] = self.doi_details
+            self.compilation["reference_details"] = self.references
+            self.compilation["url_details"] = self.url_details
 
     def __extract_dois__(self):
-        if self.references:
+        """Extract the DOIs which are hiding in the templates"""
+
+        if self.references and not self.extract_dois_done:
             for reference in self.references:
+                # app.logger.debug(f"working on this reference: {reference}")
                 for template in reference["templates"]:
-                    if "doi" in template:
-                        self.dois.add(template["doi"])
+                    # app.logger.debug(f"working on this template: {template}")
+                    if "doi" in template["parameters"]:
+                        self.dois.add(template["parameters"]["doi"])
+        self.extract_dois_done = True
