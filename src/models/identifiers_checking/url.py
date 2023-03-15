@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict
 
 import requests
+from dns.name import EmptyLabel
 from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer, NoNameservers, resolve
 from requests import (
     ConnectionError,
@@ -21,6 +22,7 @@ from requests.exceptions import (
     RetryError,
     SSLError,
 )
+from requests.models import LocationParseError
 
 from src import console
 from src.models.exceptions import ResolveError
@@ -54,9 +56,10 @@ class Url(WikipediaUrl):
     #     raise NotImplementedError()
 
     def check(self):
-        self.extract()
-        self.__fix_malformed_urls__()
-        self.__check_url__()
+        if self.url:
+            self.extract()
+            self.__fix_malformed_urls__()
+            self.__check_url__()
 
     def __get_dns_record__(self) -> None:
         logger.debug("__get_dns_record__: running")
@@ -71,10 +74,7 @@ class Url(WikipediaUrl):
                     raise ResolveError("no answers")
             except NXDOMAIN:
                 pass
-            except (
-                LifetimeTimeout,
-                NoNameservers,
-            ):
+            except (LifetimeTimeout, NoNameservers, EmptyLabel):
                 self.dns_error = True
             except NoAnswer:
                 self.dns_no_answer = True
@@ -103,6 +103,7 @@ class Url(WikipediaUrl):
             RequestException,
             HTTPError,
             ProxyError,
+            LocationParseError,
         ) as e:
             logger.debug(f"got exception: {e}")
             self.request_error = True
@@ -136,6 +137,7 @@ class Url(WikipediaUrl):
             RequestException,
             HTTPError,
             ProxyError,
+            LocationParseError,
         ) as e:
             logger.debug(f"got exception: {e}")
             self.request_error = True

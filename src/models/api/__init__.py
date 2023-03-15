@@ -10,7 +10,7 @@ https://github.com/pallets/flask/blob/1.1.2/examples/tutorial/flaskr/__init__.py
 import logging
 
 from flask import Flask  # type: ignore
-from flask_restful import Api  # type: ignore
+from flask_restful import Api, Resource  # type: ignore
 
 import config
 from src.models.api.statistics.article import ArticleStatistics

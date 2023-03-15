@@ -43,7 +43,7 @@ class CheckUrl(StatisticsView):
         the raw upper cased URL supplied by the user"""
         if not self.job:
             raise MissingInformationError()
-        return hashlib.md5(f"{self.job.url.upper()}".encode()).hexdigest()[:8]
+        return hashlib.md5(f"{self.job.unquoted_url.upper()}".encode()).hexdigest()[:8]
 
     def get(self):
         """This is the main method and the entrypoint for flask
@@ -52,8 +52,9 @@ class CheckUrl(StatisticsView):
 
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
-        # we default to 2 second timeout
-        url = Url(url=self.job.url, timeout=self.job.timeout)
+        url_string = self.job.unquoted_url
+        app.logger.info(f"Got {url_string}")
+        url = Url(url=url_string, timeout=self.job.timeout)
         url.check()
         data = url.get_dict()
         timestamp = datetime.timestamp(datetime.utcnow())
