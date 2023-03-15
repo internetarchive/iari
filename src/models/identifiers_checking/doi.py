@@ -49,11 +49,7 @@ class Doi(BaseModel):
         self.__lookup_doi_in_openalex__()
         self.__lookup_via_cirrussearch__()
         self.__analyze_wikidata_entity__()
-        self.wikidata = dict(
-            details=self.wikidata_entity.get_json(),
-            id=self.wikidata_entity.id,
-            retracted=self.marked_as_retracted_in_wikidata,
-        )
+        self.__get_wikidata_json__()
         self.__log_if_retracted_or_not__()
         self.__lookup_in_fatcat__()
 
@@ -186,3 +182,11 @@ class Doi(BaseModel):
             self.fatcat["id"] = data["ident"]
             self.fatcat["details"] = data
             # console.print(self.fatcat)
+
+    def __get_wikidata_json__(self):
+        if self.found_in_wikidata and self.wikidata_entity:
+            self.wikidata = dict(
+                details=self.wikidata_entity.get_json(),
+                id=self.wikidata_entity.id,
+                retracted=self.marked_as_retracted_in_wikidata,
+            )
