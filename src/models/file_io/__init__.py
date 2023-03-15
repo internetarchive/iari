@@ -27,9 +27,13 @@ class FileIo(WcdBaseModel):
         if self.testing:
             # go out to repo root first
             print(os.getcwd())
-            path_filename = f"../{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            path_filename = (
+                f"../{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            )
         else:
-            path_filename = f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            path_filename = (
+                f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            )
         app.logger.debug(f"using path: {path_filename}")
         return path_filename
 

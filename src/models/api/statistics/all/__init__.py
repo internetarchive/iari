@@ -49,9 +49,10 @@ class AllHandler(WcdBaseModel):
             results = await asyncio.gather(*tasks)
             return results
 
-    def __quote__(self, string):
+    @staticmethod
+    def __quote__(string):
         """Return a urlencoded string with no safe characters"""
-        return quote(string, safe='')
+        return quote(string, safe="")
 
     async def check_urls(self, urls: Set[str]):
         async with aiohttp.ClientSession() as session:
