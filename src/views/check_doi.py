@@ -34,8 +34,9 @@ class CheckDoi(StatisticsView):
 
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
-        # we default to 2 second timeout
-        doi = Doi(doi=self.job.doi, timeout=self.job.timeout)
+        doi_string = self.job.unquoted_doi
+        app.logger.info(f"Got {doi_string}")
+        doi = Doi(doi=doi_string, timeout=self.job.timeout)
         doi.lookup_doi()
         data = doi.get_doi_dictionary()
         timestamp = datetime.timestamp(datetime.utcnow())

@@ -2,14 +2,12 @@ from os.path import exists
 from unittest import TestCase
 
 from src.models.api import ArticleStatistics
-from src.models.api.job import Job
-from src.models.file_io import FileIo
+from src.models.api.job.article_job import ArticleJob
+from src.models.file_io.article_file_io import ArticleFileIo
 
 
-class TestFileIo(TestCase):
-    @property
-    def __test_job__(self):
-        return Job(title="Test", site="wikipedia", lang="en")
+class TestArticleFileIo(TestCase):
+    job = ArticleJob(title="Test", site="wikipedia", lang="en")
 
     # def test_filename(self):
     #     io = FileIo(job=self.__test_job__)
@@ -27,24 +25,21 @@ class TestFileIo(TestCase):
     #     assert io2.filename == "json/en.wikipedia.org:11089416"
 
     def test_save_to_disk(self):
-        io1 = FileIo(
-            job=self.__test_job__,
-            statistics_dictionary=ArticleStatistics(page_id=1).dict(),
+        io1 = ArticleFileIo(
+            job=self.job, data=ArticleStatistics(page_id=1).dict(), testing=True
         )
         print(io1.data)
         io1.write_to_disk()
-        assert exists(io1.filename) is True
+        assert exists(io1.path_filename) is True
 
     def test_read_from_disk(self):
-        stat = ArticleStatistics(
-            page_id=11089416, served_from_cache=True, refreshed_now=False
-        )
-        io1 = FileIo(job=self.__test_job__, statistics_dictionary=stat)
+        stat = ArticleStatistics(page_id=11089416, served_from_cache=True)
+        io1 = ArticleFileIo(job=self.job, data=stat, testing=True)
         io1.write_to_disk()
         # we set to None here to check that we actually get the data
-        io1.statistics_dictionary = None
+        io1.data = None
         io1.read_from_disk()
-        if io1.statistics_dictionary:
-            assert ArticleStatistics(**io1.statistics_dictionary) == stat
+        if io1.data:
+            assert ArticleStatistics(**io1.data) == stat
         else:
             self.fail("no dictionary")

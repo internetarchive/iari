@@ -41,4 +41,5 @@ class TestAllHandler:
     def test_number_of_dois(self):
         handler = AllHandler(job=ArticleJob(title="Bicycle"))
         handler.__fetch_article__()
+        handler.__fetch_references__()
         assert handler.number_of_dois == 7

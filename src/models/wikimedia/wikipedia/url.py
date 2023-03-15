@@ -31,6 +31,8 @@ class WikipediaUrl(BaseModel):
     unrecognized_tld: bool = False
     added_http_scheme_worked: bool = False
     malformed_url: bool = False
+    scheme_missing: bool = False
+    no_netloc: bool = False
 
     @property
     def __get_url__(self) -> str:
@@ -82,17 +84,17 @@ class WikipediaUrl(BaseModel):
         self.extract_first_level_domain()
 
     # TODO rewrite to expose these in the API also
-    def is_google_books_url(self):
-        return bool("//books.google." in self.__get_url__)
-
+    # def is_google_books_url(self):
+    #     return bool("//books.google." in self.__get_url__)
+    #
     def is_wayback_machine_url(self):
 
         return bool("//web.archive.org" in self.__get_url__)
 
-    def is_ia_details_url(self):
-        """Checks for Internet Archive details url"""
-
-        return bool("//archive.org/details" in self.__get_url__)
+    # def is_ia_details_url(self):
+    #     """Checks for Internet Archive details url"""
+    #
+    #     return bool("//archive.org/details" in self.__get_url__)
 
     def extract_first_level_domain(self) -> None:
         logger.debug("__get_first_level_domain__: Running")

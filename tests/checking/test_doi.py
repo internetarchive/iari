@@ -91,7 +91,7 @@ class TestDoi(TestCase):
     def test__lookup_in_fatcat__(self):
         doi = Doi(doi=self.retracted_in_both)
         doi.__lookup_in_fatcat__()
-        assert doi.fatcat["id"] == ""
+        assert doi.fatcat["id"] == "eacv2anmnfbi3dgco4lfxw2utm"
         assert doi.fatcat["details"] == {
             "abstracts": [],
             "refs": [

@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from os.path import exists
 from typing import Any, Dict, Optional
 
@@ -17,12 +18,22 @@ class FileIo(WcdBaseModel):
     hash_based_id: str = ""
     wari_id: str = ""
     subfolder: str = ""
+    testing: bool = False
 
     @property
     def path_filename(self) -> str:
         from src.models.api import app
 
-        path_filename = f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+        if self.testing:
+            # go out to repo root first
+            print(os.getcwd())
+            path_filename = (
+                f"../{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            )
+        else:
+            path_filename = (
+                f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            )
         app.logger.debug(f"using path: {path_filename}")
         return path_filename
 

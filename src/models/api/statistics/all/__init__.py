@@ -4,6 +4,7 @@ http://18.217.22.248/v2/statistics/reference/{reference_id}
 """
 import asyncio
 from typing import Any, Dict, List, Set
+from urllib.parse import quote
 
 import aiohttp
 import requests
@@ -48,11 +49,16 @@ class AllHandler(WcdBaseModel):
             results = await asyncio.gather(*tasks)
             return results
 
+    @staticmethod
+    def __quote__(string):
+        """Return a urlencoded string with no safe characters"""
+        return quote(string, safe="")
+
     async def check_urls(self, urls: Set[str]):
         async with aiohttp.ClientSession() as session:
             tasks = []
             for url in urls:
-                url = f"http://18.217.22.248/v2/check-url?url={url}"
+                url = f"http://18.217.22.248/v2/check-url?url={self.__quote__(url)}"
                 tasks.append(asyncio.ensure_future(self.fetch_data(session, url)))
 
             results = await asyncio.gather(*tasks)
@@ -62,7 +68,7 @@ class AllHandler(WcdBaseModel):
         async with aiohttp.ClientSession() as session:
             tasks = []
             for doi in dois:
-                url = f"http://18.217.22.248/v2/check-doi?doi={doi}"
+                url = f"http://18.217.22.248/v2/check-doi?doi={self.__quote__(doi)}"
                 tasks.append(asyncio.ensure_future(self.fetch_data(session, url)))
 
             results = await asyncio.gather(*tasks)
