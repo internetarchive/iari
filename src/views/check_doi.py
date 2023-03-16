@@ -49,6 +49,9 @@ class CheckDoi(StatisticsView):
         write.write_to_disk()
         return data, 200
 
+    def __setup_io__(self):
+        pass
+
     @property
     def __doi_hash_id__(self) -> str:
         """This generates an 8-char long id based on the md5 hash of

@@ -8,6 +8,9 @@ from src.views.statistics import StatisticsView
 class References(StatisticsView):
     """This returns up to 100 dehydrated references"""
 
+    def __setup_io__(self):
+        pass
+
     job = ReferencesJob  # type: ignore  # (weird error from mypy)
     schema = ReferencesSchema()
 
