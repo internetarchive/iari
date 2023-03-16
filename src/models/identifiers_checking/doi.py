@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote
 
 import pyalex  # type: ignore
 import requests
@@ -33,6 +34,7 @@ class Doi(BaseModel):
     openalex_work_uri: str = ""
     wbi = WikibaseIntegrator()
     timeout: int = 2
+    internet_archive_scholar: Dict[str, Any] = {}
 
     class Config:
         arbitrary_types_allowed = True
@@ -48,6 +50,7 @@ class Doi(BaseModel):
         app.logger.debug("lookup_doi: running")
         self.__lookup_doi_in_openalex__()
         self.__lookup_via_cirrussearch__()
+        self.__lookup_in_internet_archive_scholar__()
         self.__analyze_wikidata_entity__()
         self.__get_wikidata_json__()
         self.__log_if_retracted_or_not__()
@@ -170,7 +173,16 @@ class Doi(BaseModel):
             app.logger.info("This paper was not found in both OpenAlex and Wikidata")
 
     def get_doi_dictionary(self) -> Dict[str, Any]:
-        data = self.dict(include={"wikidata", "openalex", "timeout", "doi", "fatcat"})
+        data = self.dict(
+            include={
+                "wikidata",
+                "openalex",
+                "timeout",
+                "doi",
+                "fatcat",
+                "internet_archive_scholar",
+            }
+        )
         return data
 
     def __lookup_in_fatcat__(self):
@@ -190,3 +202,12 @@ class Doi(BaseModel):
                 id=self.wikidata_entity.id,
                 retracted=self.marked_as_retracted_in_wikidata,
             )
+
+    def __lookup_in_internet_archive_scholar__(self):
+        """This is a fastapi frontend to elastic search"""
+        query = f"doi{quote(':')}{quote(self.doi, safe='')}"
+        url = f"https://scholar.archive.org/search?q={query}"
+        response = requests.get(url, headers=dict(Accept="application/json"))
+        if response.status_code == 200:
+            data = response.json()
+            self.internet_archive_scholar = data

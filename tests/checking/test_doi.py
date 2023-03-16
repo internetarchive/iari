@@ -9,12 +9,12 @@ class TestDoi(TestCase):
     retracted_in_both = "10.1186/1824-7288-38-34"
     unretracted_in_either = "10.1136/GUT.52.12.1678"
     unretracted_in_either_lowercase = "10.1136/gut.52.12.1678"
-    trouble_doi="10.17645/si.v5i4.1081"
+    trouble_doi = "10.17645/si.v5i4.1081"
 
     def test_lookup_trouble_doi(self):
         doi = Doi(doi=self.trouble_doi)
         doi.lookup_doi()
-        #assert
+        # assert
 
     def test___lookup_doi_in_openalex_not_retracted(self):
         doi = Doi(doi=self.unretracted_in_either)
@@ -222,3 +222,9 @@ class TestDoi(TestCase):
                 }
             },
         }
+
+    def test___lookup_in_internet_archive_scholar__(self):
+        doi = Doi(doi=self.retracted_in_both)
+        doi.__lookup_in_internet_archive_scholar__()
+        assert doi.internet_archive_scholar != {}
+        assert doi.internet_archive_scholar["count_found"] == 1
