@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from flask import request
 from flask_restful import Resource, abort  # type: ignore
@@ -8,6 +8,7 @@ from marshmallow import Schema
 from src import console
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
+from src.models.file_io import FileIo
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 
 
@@ -24,10 +25,10 @@ class StatisticsView(Resource):
     schema: Optional[Schema] = None
     job: Optional[Job]
     wikipedia_analyzer: Optional[WikipediaAnalyzer] = None
-    data: Dict[str, Any] = {}
     time_of_analysis: Optional[datetime] = None
     two_days_ago = datetime.utcnow() - timedelta(hours=48)
     serving_from_json: bool = False
+    io: Optional[FileIo] = None
 
     def __validate_and_get_job__(self):
         """Helper method"""
@@ -52,3 +53,16 @@ class StatisticsView(Resource):
             raise MissingInformationError()
         self.job = self.schema.load(request.args)
         console.print(self.job)
+
+    def __setup_io__(self):
+        raise NotImplementedError()
+
+    def __print_log_message_about_refresh__(self):
+        from src.models.api import app
+
+        if self.job.refresh:
+            app.logger.info("got force refresh from patron")
+
+    def __read_from_cache__(self):
+        self.__setup_io__()
+        self.io.read_from_disk()

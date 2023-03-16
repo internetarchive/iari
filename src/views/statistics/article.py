@@ -65,8 +65,8 @@ class Article(StatisticsView):
         else:
             if not self.job.refresh:
                 app.logger.info("trying to read from cache")
-                self.__read_all_statistics_from_cache__()
-                if self.data and not self.__more_than_2_days_old_cache__():
+                self.__read_from_cache__()
+                if self.data:
                     # We got the statistics from json, return them as is
                     app.logger.info(
                         f"Returning existing json from disk with date: {self.time_of_analysis}"
@@ -93,31 +93,6 @@ class Article(StatisticsView):
         else:
             self.data["served_from_cache"] = True
         return self.data, 200
-
-    def __more_than_2_days_old_cache__(self) -> bool:
-        """This reads from the cache and returns a boolean"""
-        from src.models.api import app
-
-        app.logger.debug("__not_more_than_2_days_old_cache__: running")
-        if not self.data:
-            self.__read_all_statistics_from_cache__()
-        if self.data:
-            self.__convert_analysis_timestamp__()
-            if not self.time_of_analysis:
-                raise MissingInformationError("self.time_of_analysis was None")
-            if self.time_of_analysis < self.two_days_ago:
-                app.logger.debug("more than 48h old data in the cache")
-                return True
-            else:
-                app.logger.debug("not more than 48h data in the cache")
-        # Default to False ie. also return false when no json on disk
-        return False
-
-    def __read_all_statistics_from_cache__(self):
-        io = ArticleFileIo(job=self.job)
-        io.read_from_disk()
-        if io.data:
-            self.data = io.data
 
     def __prepare_wikipedia_analyzer_if_testing__(self):
         from src.models.api import app
@@ -161,12 +136,12 @@ class Article(StatisticsView):
 
     def __update_statistics_with_time_information__(self):
         """Update the dictionary before returning it"""
-        if self.data:
-            self.data["timing"] = self.timing
+        if self.io.data:
+            self.io.data["timing"] = self.timing
             timestamp = datetime.timestamp(datetime.utcnow())
-            self.data["timestamp"] = int(timestamp)
+            self.io.data["timestamp"] = int(timestamp)
             isodate = datetime.isoformat(datetime.utcnow())
-            self.data["isodate"] = str(isodate)
+            self.io.data["isodate"] = str(isodate)
         else:
             raise ValueError("not a dict")
 
@@ -175,12 +150,7 @@ class Article(StatisticsView):
         from src.models.api import app
 
         app.logger.debug("__write_to_disk__: running")
-        article_io = ArticleFileIo(
-            job=self.job,
-            data=self.data,
-            wari_id=self.wikipedia_analyzer.wari_id,
-        )
-        article_io.write_to_disk()
+        self.__write_article_to_disk__()
         app.logger.debug("writing references to disk")
         for reference in self.wikipedia_analyzer.reference_statistics:
             # this is a dict
@@ -195,21 +165,6 @@ class Article(StatisticsView):
             f"wrote {len(self.wikipedia_analyzer.reference_statistics)} "
             f"references to disk"
         )
-
-    def __print_log_message_about_refresh__(self):
-        from src.models.api import app
-
-        if self.job.refresh:
-            app.logger.info("got force refresh from patron")
-        else:
-            app.logger.info("we may have the data but it is too old, refreshing...")
-
-    def __convert_analysis_timestamp__(self):
-        from src.models.api import app
-
-        app.logger.debug(f"two days ago {self.two_days_ago}")
-        self.time_of_analysis = datetime.fromtimestamp(self.data["timestamp"])
-        app.logger.debug(f"analysis time {self.time_of_analysis}")
 
     def __return_meaningful_error__(self):
         from src.models.api import app
@@ -244,3 +199,14 @@ class Article(StatisticsView):
             return self.__handle_valid_job__()
         else:
             return self.__return_meaningful_error__()
+
+    def __setup_io__(self):
+        self.io = ArticleFileIo(job=self.job)
+
+    def __write_article_to_disk__(self):
+        article_io = ArticleFileIo(
+            job=self.job,
+            data=self.data,
+            wari_id=self.wikipedia_analyzer.wari_id,
+        )
+        article_io.write_to_disk()

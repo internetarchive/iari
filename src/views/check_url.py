@@ -29,6 +29,9 @@ class CheckUrl(StatisticsView):
     See src/models/checking
     """
 
+    def __setup_io__(self):
+        pass
+
     job: Optional[CheckUrlJob] = None
     schema: Schema = CheckUrlSchema()
     serving_from_json: bool = False
