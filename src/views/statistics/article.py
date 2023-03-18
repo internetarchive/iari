@@ -60,20 +60,18 @@ class Article(StatisticsView):
         from src.models.api import app
 
         app.logger.debug("got valid job")
-        if self.job.testing:
-            return self.__setup_testing__()
+        self.__read_from_cache__()
+        if self.io.data and not self.job.refresh:
+            app.logger.info("trying to read from cache")
+            self.__read_from_cache__()
+            if self.io.data:
+                # We got the statistics from json, return them as is
+                app.logger.info(
+                    f"Returning existing json from disk with date: {self.time_of_analysis}"
+                )
+                return self.io.data, 200
         else:
-            if not self.job.refresh:
-                app.logger.info("trying to read from cache")
-                self.__read_from_cache__()
-                if self.data:
-                    # We got the statistics from json, return them as is
-                    app.logger.info(
-                        f"Returning existing json from disk with date: {self.time_of_analysis}"
-                    )
-                    return self.data, 200
-            else:
-                app.logger.info("got refresh from patron")
+            app.logger.info("got refresh from patron")
             # This will run if we did not return an analysis from disk yet
             self.__print_log_message_about_refresh__()
             self.__setup_wikipedia_analyzer__()
@@ -89,10 +87,10 @@ class Article(StatisticsView):
         self.__get_timing_and_statistics__()
         # We set this to be able to test the refresh
         if self.job.refresh:
-            self.data["served_from_cache"] = False
+            self.io.data["served_from_cache"] = False
         else:
-            self.data["served_from_cache"] = True
-        return self.data, 200
+            self.io.data["served_from_cache"] = True
+        return self.io.data, 200
 
     def __prepare_wikipedia_analyzer_if_testing__(self):
         from src.models.api import app
@@ -129,7 +127,7 @@ class Article(StatisticsView):
             raise MissingInformationError("self.wikipedia_analyzer was None")
         # https://realpython.com/python-timer/
         start_time = time.perf_counter()
-        self.data = self.wikipedia_analyzer.get_statistics()
+        self.io.data = self.wikipedia_analyzer.get_statistics()
         # app.logger.debug(f"self.wikipedia_analyzer.found:{self.wikipedia_analyzer.found}")
         end_time = time.perf_counter()
         self.timing = round(float(end_time - start_time), 3)
@@ -151,20 +149,7 @@ class Article(StatisticsView):
 
         app.logger.debug("__write_to_disk__: running")
         self.__write_article_to_disk__()
-        app.logger.debug("writing references to disk")
-        for reference in self.wikipedia_analyzer.reference_statistics:
-            # this is a dict
-            if "id" not in reference:
-                console.print(reference)
-                raise MissingInformationError("no id found in reference")
-            reference_io = ReferenceFileIo(
-                job=self.job, hash_based_id=reference["id"], data=reference
-            )
-            reference_io.write_to_disk()
-        app.logger.debug(
-            f"wrote {len(self.wikipedia_analyzer.reference_statistics)} "
-            f"references to disk"
-        )
+        self.__write_references_to_disk__()
 
     def __return_meaningful_error__(self):
         from src.models.api import app
@@ -210,3 +195,21 @@ class Article(StatisticsView):
             wari_id=self.wikipedia_analyzer.wari_id,
         )
         article_io.write_to_disk()
+
+    def __write_references_to_disk__(self):
+        from src.models.api import app
+
+        app.logger.debug("writing references to disk")
+        for reference in self.wikipedia_analyzer.reference_statistics:
+            # this is a dict
+            if "id" not in reference:
+                console.print(reference)
+                raise MissingInformationError("no id found in reference")
+            reference_io = ReferenceFileIo(
+                job=self.job, hash_based_id=reference["id"], data=reference
+            )
+            reference_io.write_to_disk()
+        app.logger.debug(
+            f"wrote {len(self.wikipedia_analyzer.reference_statistics)} "
+            f"references to disk"
+        )

@@ -66,3 +66,9 @@ class StatisticsView(Resource):
     def __read_from_cache__(self):
         self.__setup_io__()
         self.io.read_from_disk()
+
+    # def __write_to_disk__(self):
+    #     raise NotImplementedError()
+
+    def __handle_valid_job__(self):
+        raise NotImplementedError()
