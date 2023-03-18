@@ -10,7 +10,7 @@ from src.models.api.job.check_url_job import CheckUrlJob
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.url_file_io import UrlFileIo
 from src.models.identifiers_checking.url import Url
-from src.views.statistics import StatisticsView
+from src.views.statistics.write_view import StatisticsWriteView
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_short_tail_excerpt,
@@ -20,7 +20,7 @@ from test_data.test_content import (  # type: ignore
 )
 
 
-class CheckUrl(StatisticsView):
+class CheckUrl(StatisticsWriteView):
     """
     This models all action based on requests from the frontend/patron
     It is instantiated at every request

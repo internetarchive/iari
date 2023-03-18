@@ -1,4 +1,3 @@
-import time
 from datetime import datetime
 from typing import Any, Tuple
 
@@ -12,7 +11,7 @@ from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
-from src.views.statistics import StatisticsView
+from src.views.statistics.write_view import StatisticsWriteView
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_short_tail_excerpt,
@@ -21,7 +20,7 @@ from test_data.test_content import (  # type: ignore
 )
 
 
-class Article(StatisticsView):
+class Article(StatisticsWriteView):
     """This models the get-statistics API
     It is instantiated at every request"""
 
@@ -36,7 +35,7 @@ class Article(StatisticsView):
         app.logger.info("__analyze_and_write_and_return__: running")
         if not self.wikipedia_analyzer:
             raise MissingInformationError("self.wikipedia_analyzer was None")
-        self.__get_timing_and_statistics__()
+        self.__get_statistics__()
         if self.wikipedia_analyzer.found:
             app.logger.debug("found article")
             if self.wikipedia_analyzer.is_redirect:
@@ -50,9 +49,11 @@ class Article(StatisticsView):
                 # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
                 # flask calls jsonify automatically
                 self.__write_to_disk__()
-                self.data["served_from_cache"] = False
+                if not self.io:
+                    raise MissingInformationError()
+                self.io.data["served_from_cache"] = False
                 # app.logger.debug("returning dictionary")
-                return self.data, 200
+                return self.io.data, 200
         else:
             return AnalyzerReturn.NOT_FOUND.value, 404
 
@@ -77,65 +78,19 @@ class Article(StatisticsView):
             self.__setup_wikipedia_analyzer__()
             return self.__analyze_and_write_and_return__()
 
-    def __setup_testing__(self):
+    def __get_statistics__(self):
         from src.models.api import app
 
-        app.logger.debug("__setup_testing__: running")
-        self.__prepare_wikipedia_analyzer_if_testing__()
-        if not self.wikipedia_analyzer:
-            MissingInformationError("no self.wikipedia_analyzer")
-        self.__get_timing_and_statistics__()
-        # We set this to be able to test the refresh
-        if self.job.refresh:
-            self.io.data["served_from_cache"] = False
-        else:
-            self.io.data["served_from_cache"] = True
-        return self.io.data, 200
-
-    def __prepare_wikipedia_analyzer_if_testing__(self):
-        from src.models.api import app
-
-        app.logger.debug("__prepare_wikipedia_analyzer_if_testing__: running")
-        supported_test_titles = ["Test", "Easter Island", "Electrical breakdown"]
-        if self.job.testing and self.job.title in supported_test_titles:
-            if self.job.title == "Test":
-                app.logger.info(f"(testing) Analyzing {self.job.title} from test_data")
-                self.wikipedia_analyzer = WikipediaAnalyzer(
-                    job=self.job, wikitext=test_full_article
-                )
-            elif self.job.title == "Electrical_breakdown":
-                app.logger.info(f"(testing) Analyzing {self.job.title} from test_data")
-                self.wikipedia_analyzer = WikipediaAnalyzer(
-                    job=self.job,
-                    wikitext=electrical_breakdown_full_article,
-                    check_urls=True,
-                )
-            elif self.job.title == "Easter Island":
-                app.logger.info(f"(testing) Analyzing {self.job.title} from test_data")
-                self.wikipedia_analyzer = WikipediaAnalyzer(
-                    job=self.job,
-                    wikitext=f"{easter_island_head_excerpt}\n{easter_island_short_tail_excerpt}",
-                )
-            else:
-                app.logger.warning(f"Ignoring unsupported test title {self.job.title}")
-
-    def __get_timing_and_statistics__(self):
-        from src.models.api import app
-
-        app.logger.debug("__get_timing_and_statistics__: running")
+        app.logger.debug("__get_statistics__: running")
         if not self.wikipedia_analyzer:
             raise MissingInformationError("self.wikipedia_analyzer was None")
         # https://realpython.com/python-timer/
-        start_time = time.perf_counter()
+        self.__setup_io__()
         self.io.data = self.wikipedia_analyzer.get_statistics()
-        # app.logger.debug(f"self.wikipedia_analyzer.found:{self.wikipedia_analyzer.found}")
-        end_time = time.perf_counter()
-        self.timing = round(float(end_time - start_time), 3)
 
     def __update_statistics_with_time_information__(self):
         """Update the dictionary before returning it"""
         if self.io.data:
-            self.io.data["timing"] = self.timing
             timestamp = datetime.timestamp(datetime.utcnow())
             self.io.data["timestamp"] = int(timestamp)
             isodate = datetime.isoformat(datetime.utcnow())
@@ -191,7 +146,7 @@ class Article(StatisticsView):
     def __write_article_to_disk__(self):
         article_io = ArticleFileIo(
             job=self.job,
-            data=self.data,
+            data=self.io.data,
             wari_id=self.wikipedia_analyzer.wari_id,
         )
         article_io.write_to_disk()

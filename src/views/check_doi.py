@@ -7,10 +7,10 @@ from src.models.api.job.check_doi_job import CheckDoiJob
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.doi_file_io import DoiFileIo
 from src.models.identifiers_checking.doi import Doi
-from src.views.statistics import StatisticsView
+from src.views.statistics.write_view import StatisticsWriteView
 
 
-class CheckDoi(StatisticsView):
+class CheckDoi(StatisticsWriteView):
     """
     This models all action based on requests from the frontend/patron
     It is instantiated at every request

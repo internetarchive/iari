@@ -11,9 +11,6 @@ class References(StatisticsView):
     def __setup_io__(self):
         pass
 
-    def __setup_io__(self):
-        pass
-
     job = ReferencesJob  # type: ignore  # (weird error from mypy)
     schema = ReferencesSchema()
 

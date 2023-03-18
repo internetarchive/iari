@@ -54,21 +54,11 @@ class StatisticsView(Resource):
         self.job = self.schema.load(request.args)
         console.print(self.job)
 
-    def __setup_io__(self):
-        raise NotImplementedError()
-
     def __print_log_message_about_refresh__(self):
         from src.models.api import app
 
         if self.job.refresh:
             app.logger.info("got force refresh from patron")
 
-    def __read_from_cache__(self):
-        self.__setup_io__()
-        self.io.read_from_disk()
-
     # def __write_to_disk__(self):
     #     raise NotImplementedError()
-
-    def __handle_valid_job__(self):
-        raise NotImplementedError()
