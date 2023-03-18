@@ -8,6 +8,9 @@ class All(StatisticsView):
     """This models the get-statistics API
     It is instantiated at every request"""
 
+    def __setup_io__(self):
+        pass
+
     schema = ArticleSchema()
     job: ArticleJob
 

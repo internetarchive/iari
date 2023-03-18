@@ -10,7 +10,7 @@ from src.models.api.job.check_url_job import CheckUrlJob
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.url_file_io import UrlFileIo
 from src.models.identifiers_checking.url import Url
-from src.views.statistics import StatisticsView
+from src.views.statistics.write_view import StatisticsWriteView
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_short_tail_excerpt,
@@ -20,7 +20,7 @@ from test_data.test_content import (  # type: ignore
 )
 
 
-class CheckUrl(StatisticsView):
+class CheckUrl(StatisticsWriteView):
     """
     This models all action based on requests from the frontend/patron
     It is instantiated at every request
@@ -52,17 +52,37 @@ class CheckUrl(StatisticsView):
 
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
-        url_string = self.job.unquoted_url
-        app.logger.info(f"Got {url_string}")
-        url = Url(url=url_string, timeout=self.job.timeout)
-        url.check()
-        data = url.get_dict()
-        timestamp = datetime.timestamp(datetime.utcnow())
-        data["timestamp"] = int(timestamp)
-        isodate = datetime.isoformat(datetime.utcnow())
-        data["isodate"] = str(isodate)
-        url_hash_id = self.__url_hash_id__
-        data["id"] = url_hash_id
-        write = UrlFileIo(data=data, hash_based_id=url_hash_id)
-        write.write_to_disk()
-        return data, 200
+        if self.job:
+            return self.__handle_valid_job__()
+
+    def __setup_io__(self):
+        self.io = UrlFileIo(hash_based_id=self.__url_hash_id__)
+
+    def __handle_valid_job__(self):
+        from src.models.api import app
+
+        app.logger.debug("__handle_valid_job__; running")
+
+        self.__read_from_cache__()
+        if self.io.data and not self.job.refresh:
+            return self.io.data, 200
+        else:
+            url_string = self.job.unquoted_url
+            app.logger.info(f"Got {url_string}")
+            url = Url(url=url_string, timeout=self.job.timeout)
+            url.check()
+            data = url.get_dict()
+            timestamp = datetime.timestamp(datetime.utcnow())
+            data["timestamp"] = int(timestamp)
+            isodate = datetime.isoformat(datetime.utcnow())
+            data["isodate"] = str(isodate)
+            url_hash_id = self.__url_hash_id__
+            data["id"] = url_hash_id
+            write = UrlFileIo(data=data, hash_based_id=url_hash_id)
+            write.write_to_disk()
+            if self.job.refresh:
+                self.__print_log_message_about_refresh__()
+                data["refreshed_now"] = True
+            else:
+                data["refreshed_now"] = False
+            return data, 200
