@@ -6,7 +6,7 @@ from src.views.statistics import StatisticsView
 
 
 class References(StatisticsView):
-    """This returns up to 100 dehydrated references"""
+    """This returns all references as dehydrated references"""
 
     job = ReferencesJob  # type: ignore  # (weird error from mypy)
     schema = ReferencesSchema()
@@ -19,17 +19,9 @@ class References(StatisticsView):
         if not articlefileio.data:
             return "No json in cache", 404
         references = articlefileio.data["references"]
-        total = len(references)
-        offset = 0
-        if total > 100:
-            # get the offset
-            offset = self.job.offset
-        hashes = references[offset:]
-        # ensure we always return a max of 100 references
-        hashes = hashes[:100]
         # get the references details
         details = []
-        for hash_ in hashes:
+        for hash_ in references:
             referencefileio = ReferenceFileIo(hash_based_id=hash_)
             referencefileio.read_from_disk()
             data = referencefileio.data
@@ -39,5 +31,5 @@ class References(StatisticsView):
             del data["templates"]
             del data["wikitext"]
             details.append(data)
-        data = dict(total=total, references=details)
+        data = dict(total=len(references), references=details)
         return data, 200
