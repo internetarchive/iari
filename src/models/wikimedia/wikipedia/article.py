@@ -158,58 +158,58 @@ class WikipediaArticle(WcdItem):
                 "Not fetching data via the Wikipedia REST API. We have already got all the data we need"
             )
 
-    def __fetch_wikidata_qid__(self):
-        """Fetch the Wikidata QID so we can efficiently look up pages via JS"""
-        url = (
-            f"https://{self.language_code}.wikipedia.org/w/api.php?action=query&prop="
-            f"pageprops&ppprop=wikibase_item&redirects=1&titles={quote(self.title)}&format=json"
-        )
-        headers = {"User-Agent": config.user_agent}
-        logger.debug(url)
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            # console.print(response.text)
-            data = response.json()
-            # console.print(data)
-            query = data.get("query")
-            if query:
-                pages = query.get("pages")
-                if pages:
-                    if len(pages):
-                        for page in pages:
-                            page_data = pages[page]
-                            print(page_data)
-                            if "pageprops" in page_data.keys():
-                                if page_data["pageprops"]:
-                                    if page_data["pageprops"]["wikibase_item"]:
-                                        self.wikidata_qid = page_data["pageprops"][
-                                            "wikibase_item"
-                                        ]
-                                    else:
-                                        raise MissingInformationError(
-                                            f"Did not get any wikibase_item from MediaWiki, see {url}"
-                                        )
-                                else:
-                                    raise MissingInformationError(
-                                        f"Did not get any pageprops from MediaWiki, see {url}"
-                                    )
-                            else:
-                                MissingInformationError("no pageprops")
-                            # We only care about the first page
-                            break
-                    else:
-                        raise MissingInformationError(
-                            f"Did not get any pages from MediaWiki, see {url}"
-                        )
-                else:
-                    raise MissingInformationError(
-                        f"Did not get any pages-key from MediaWiki, see {url}"
-                    )
-            else:
-                raise MissingInformationError(
-                    f"Did not get any query from MediaWiki, see {url}"
-                )
-            logger.info(f"Found Wikidata QID: {self.wikidata_qid}")
+    # def __fetch_wikidata_qid__(self):
+    #     """Fetch the Wikidata QID so we can efficiently look up pages via JS"""
+    #     url = (
+    #         f"https://{self.language_code}.wikipedia.org/w/api.php?action=query&prop="
+    #         f"pageprops&ppprop=wikibase_item&redirects=1&titles={quote(self.title)}&format=json"
+    #     )
+    #     headers = {"User-Agent": config.user_agent}
+    #     logger.debug(url)
+    #     response = requests.get(url, headers=headers)
+    #     if response.status_code == 200:
+    #         # console.print(response.text)
+    #         data = response.json()
+    #         # console.print(data)
+    #         query = data.get("query")
+    #         if query:
+    #             pages = query.get("pages")
+    #             if pages:
+    #                 if len(pages):
+    #                     for page in pages:
+    #                         page_data = pages[page]
+    #                         print(page_data)
+    #                         if "pageprops" in page_data.keys():
+    #                             if page_data["pageprops"]:
+    #                                 if page_data["pageprops"]["wikibase_item"]:
+    #                                     self.wikidata_qid = page_data["pageprops"][
+    #                                         "wikibase_item"
+    #                                     ]
+    #                                 else:
+    #                                     raise MissingInformationError(
+    #                                         f"Did not get any wikibase_item from MediaWiki, see {url}"
+    #                                     )
+    #                             else:
+    #                                 raise MissingInformationError(
+    #                                     f"Did not get any pageprops from MediaWiki, see {url}"
+    #                                 )
+    #                         else:
+    #                             MissingInformationError("no pageprops")
+    #                         # We only care about the first page
+    #                         break
+    #                 else:
+    #                     raise MissingInformationError(
+    #                         f"Did not get any pages from MediaWiki, see {url}"
+    #                     )
+    #             else:
+    #                 raise MissingInformationError(
+    #                     f"Did not get any pages-key from MediaWiki, see {url}"
+    #                 )
+    #         else:
+    #             raise MissingInformationError(
+    #                 f"Did not get any query from MediaWiki, see {url}"
+    #             )
+    #         logger.info(f"Found Wikidata QID: {self.wikidata_qid}")
 
     def __parse_templates__(self):
         """Disabled method because of rewrite"""
