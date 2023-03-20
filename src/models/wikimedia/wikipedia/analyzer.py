@@ -26,6 +26,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     wikitext: str = ""
     check_urls: bool = False
     reference_statistics: List[Dict[str, Any]] = []
+    dehydrated_references = []
 
     @property
     def wari_id(self) -> str:
@@ -74,7 +75,6 @@ class WikipediaAnalyzer(WcdBaseModel):
                     content=ae.number_of_content_references,
                     general=ae.number_of_general_references,
                 ),
-                references=ae.reference_ids,
                 page_id=self.article.page_id,
                 title=self.article.title,
                 urls=ae.raw_urls,
@@ -90,6 +90,8 @@ class WikipediaAnalyzer(WcdBaseModel):
         if not self.article_statistics:
             self.__gather_article_statistics__()
             self.__gather_reference_statistics__()
+            self.__extract_dehydrated_references__()
+            self.__insert_dehydrated_references_into_the_article_statistics__()
         return self.__get_statistics_dict__()
 
     def __get_statistics_dict__(self) -> Dict[str, Any]:
@@ -109,12 +111,7 @@ class WikipediaAnalyzer(WcdBaseModel):
 
     def __gather_reference_statistics__(self):
         logger.debug("__gather_reference_statistics__: running")
-        if (
-            self.article_statistics
-            and self.article_statistics.references
-            and self.article.extractor.number_of_references > 0
-        ):
-            self.reference_statistics = []
+        if self.article.extractor.number_of_references > 0:
             for reference in self.article.extractor.references:
                 if not reference.raw_reference:
                     raise MissingInformationError("raw_reference was None")
@@ -157,47 +154,11 @@ class WikipediaAnalyzer(WcdBaseModel):
         else:
             raise MissingInformationError("Got no title")
 
-    # @validate_arguments
-    # def __gather_template_statistics__(
-    #     self, reference: WikipediaReference
-    # ) -> List[TemplateStatistics]:
-    #     from src.models.api import app
-    #
-    #     app.logger.debug("__gather_template_statistics__: running")
-    #     if not reference.raw_reference:
-    #         raise MissingInformationError("raw_reference missing")
-    #     number_of_templates = reference.raw_reference.number_of_templates
-    #     if not number_of_templates:
-    #         app.logger.info(
-    #             f"no templates found for {reference.raw_reference.wikicode}"
-    #         )
-    #         return []
-    #     else:
-    #         app.logger.info(
-    #             f"found {number_of_templates} templates in {reference.raw_reference.wikicode}"
-    #         )
-    #         template_statistics_list: List[TemplateStatistics] = []
-    #         for template in reference.raw_reference.templates:
-    #             stat = TemplateStatistics(
-    #                 # TODO extract more information that the patrons might want
-    #                 #  to know from the templates, e.g. the different persons
-    #                 doi=template.get_doi,
-    #                 is_bareurl_template=template.is_bareurl_template,
-    #                 is_citation_template=template.is_citation_template,
-    #                 is_citeq_template=template.is_citeq_template,
-    #                 is_cs1_template=template.is_cs1_template,
-    #                 is_isbn_template=template.is_isbn_template,
-    #                 is_known_multiref_template=template.is_known_multiref_template,
-    #                 is_url_template=template.is_url_template,
-    #                 is_webarchive_template=template.is_webarchive_template,
-    #                 isbn=template.get_isbn,
-    #                 wikitext=template.wikitext,
-    #             )
-    #             if template.doi:
-    #                 app.logger.info("Adding DOI details")
-    #                 stat.doi_details = template.doi.get_cleaned_doi_object()
-    #             template_statistics_list.append(stat)
-    #         app.logger.debug(
-    #             f"returning {len(template_statistics_list)} template_statistics objects"
-    #         )
-    #         return template_statistics_list
+    def __extract_dehydrated_references__(self):
+        for data in self.reference_statistics:
+            del data["templates"]
+            del data["wikitext"]
+            self.dehydrated_references.append(data)
+
+    def __insert_dehydrated_references_into_the_article_statistics__(self):
+        self.article_statistics.dehydrated_references = self.dehydrated_references
