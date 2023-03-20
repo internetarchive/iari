@@ -68,7 +68,7 @@ beyond counting because we have not decided if they contain any value)
    (unsupported but we want to support it, see 
    https://github.com/internetarchive/wcdimportbot/labels/general%20reference)
     ![image](https://user-images.githubusercontent.com/68460690/208092363-ba4b5346-cad7-495e-8aff-1aa4f2f0161e.png)
-   2) **citation reference** - subtype of content reference which is inside a <ref> (supported partially, see below)
+   2) **footnote reference** - subtype of content reference which is inside a <ref> (supported partially, see below)
 
 Example of a URL-template reference:
 `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
