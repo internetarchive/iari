@@ -1,7 +1,7 @@
 import logging
 
 from marshmallow import Schema, post_load
-from marshmallow.fields import Int, String
+from marshmallow.fields import Int, String, Bool
 
 from src.models.api.job.references_job import ReferencesJob
 
@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 class ReferencesSchema(Schema):
     offset = Int()
     wari_id = String()
+    chunk_size = Int()
+    all = Bool()
 
     # noinspection PyUnusedLocal
     @post_load

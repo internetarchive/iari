@@ -24,15 +24,24 @@ class References(StatisticsView):
         references = articlefileio.data["references"]
         # get the references details
         details = []
-        for hash_ in references:
-            referencefileio = ReferenceFileIo(hash_based_id=hash_)
-            referencefileio.read_from_disk()
-            data = referencefileio.data
-            if not data:
-                return "No json in cache", 404
-            # convert to dehydrated reference:
-            del data["templates"]
-            del data["wikitext"]
-            details.append(data)
+        if self.job.all:
+            for hash_ in references:
+                referencefileio = ReferenceFileIo(hash_based_id=hash_)
+                referencefileio.read_from_disk()
+                data = referencefileio.data
+                if not data:
+                    return "No json in cache", 404
+                # convert to dehydrated reference:
+                details.append(data)
+        else:
+            # We use offset and chunk size
+            for hash_ in references[self.job.offset:self.job.offset + self.job.chunk_size]:
+                referencefileio = ReferenceFileIo(hash_based_id=hash_)
+                referencefileio.read_from_disk()
+                data = referencefileio.data
+                if not data:
+                    return "No json in cache", 404
+                # convert to dehydrated reference:
+                details.append(data)
         data = dict(total=len(references), references=details)
         return data, 200
