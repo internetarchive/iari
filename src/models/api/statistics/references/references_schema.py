@@ -1,7 +1,7 @@
 import logging
 
 from marshmallow import Schema, post_load
-from marshmallow.fields import Int, String, Bool
+from marshmallow.fields import Bool, Int, String
 
 from src.models.api.job.references_job import ReferencesJob
 

@@ -35,7 +35,9 @@ class References(StatisticsView):
                 details.append(data)
         else:
             # We use offset and chunk size
-            for hash_ in references[self.job.offset:self.job.offset + self.job.chunk_size]:
+            for hash_ in references[
+                self.job.offset : self.job.offset + self.job.chunk_size
+            ]:
                 referencefileio = ReferenceFileIo(hash_based_id=hash_)
                 referencefileio.read_from_disk()
                 data = referencefileio.data
