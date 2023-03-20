@@ -26,7 +26,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     wikitext: str = ""
     check_urls: bool = False
     reference_statistics: List[Dict[str, Any]] = []
-    dehydrated_references = []
+    dehydrated_references: List[Dict[str, Any]] = []
 
     @property
     def wari_id(self) -> str:
