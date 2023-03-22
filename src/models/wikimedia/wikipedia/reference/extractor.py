@@ -653,7 +653,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             self.__parse_wikitext__()
         self.sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
-            matches="bibliography|further reading|works cited|sources",
+            matches="bibliography|further reading|works cited|sources|external links",
             flags=re.I,
             include_headings=False,
         )
