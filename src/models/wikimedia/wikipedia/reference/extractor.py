@@ -651,6 +651,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         logger.debug("__extract_sections__: running")
         if not self.wikicode:
             self.__parse_wikitext__()
+        # TODO rewrite to return a dictionary with the section name as key and the data as value
         self.sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
             matches="bibliography|further reading|works cited|sources|external links",
