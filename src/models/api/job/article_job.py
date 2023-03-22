@@ -1,4 +1,5 @@
 import logging
+import re
 from urllib.parse import quote, unquote
 
 import requests
@@ -7,7 +8,7 @@ import config
 from src.models.api.enums import Lang
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-from src.models.wikimedia.enums import WikimediaSite
+from src.models.wikimedia.enums import WikimediaDomain
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +17,12 @@ class ArticleJob(Job):
     """A generic job that can be submitted via the API"""
 
     lang: Lang = Lang.en
-    site: WikimediaSite = WikimediaSite.wikipedia
-    title: str
+    site: WikimediaDomain = WikimediaDomain.wikipedia
+    title: str = ""
     testing: bool = False
     page_id: int = 0
     refresh: bool = False
+    url: str = ""
 
     @property
     def quoted_title(self):
@@ -65,3 +67,23 @@ class ArticleJob(Job):
     def urldecode_title(self):
         """We decode the title to have a human readable string to pass around"""
         self.title = unquote(self.title)
+
+    def __urldecode_url__(self):
+        """We decode the title to have a human readable string to pass around"""
+        self.url = unquote(self.url)
+
+    def extract_url(self):
+        """This was generated with help of chatgpt using this prompt:
+        I want a python re regex that extracts "en" "wikipedia.or"
+        and "Test" from http://en.wikipedia.org/wiki/Test
+        """
+        if self.url:
+            self.__urldecode_url__()
+            pattern = r"https?://(\w+)\.(\w+\.\w+)/wiki/(\w+)"
+
+            matches = re.match(pattern, self.url)
+            if matches:
+                groups = matches.groups()
+                self.lang = Lang(groups[0])
+                self.site = WikimediaDomain(groups[1])
+                self.title = groups[2]

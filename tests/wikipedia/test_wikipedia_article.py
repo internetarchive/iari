@@ -5,7 +5,7 @@ from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
 from src.models.exceptions import MissingInformationError
-from src.models.wikimedia.enums import WikimediaSite
+from src.models.wikimedia.enums import WikimediaDomain
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_tail_excerpt,
@@ -44,7 +44,7 @@ class TestWikipediaArticle(TestCase):
 
         page = WikipediaArticle(
             language_code="en",
-            wikimedia_site=WikimediaSite.wikipedia,
+            wikimedia_site=WikimediaDomain.wikipedia,
             title="Test",
         )
         page.__fetch_page_data__()
@@ -57,7 +57,7 @@ class TestWikipediaArticle(TestCase):
 
         page = WikipediaArticle(
             language_code="en",
-            wikimedia_site=WikimediaSite.wikipedia,
+            wikimedia_site=WikimediaDomain.wikipedia,
             title="Test2222",
         )
         page.__fetch_page_data__()
@@ -68,7 +68,7 @@ class TestWikipediaArticle(TestCase):
 
         page = WikipediaArticle(
             language_code="en",
-            wikimedia_site=WikimediaSite.wikipedia,
+            wikimedia_site=WikimediaDomain.wikipedia,
             title="GNU/Linux_naming_controversy",
         )
         page.__fetch_page_data__()

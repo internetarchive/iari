@@ -9,7 +9,7 @@ from src.models.api.statistics.article.article_schema import ArticleSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo
-from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
+from src.models.wikimedia.enums import AnalyzerReturn, WikimediaDomain
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.views.statistics.write_view import StatisticsWriteView
 from test_data.test_content import (  # type: ignore
@@ -134,8 +134,8 @@ class Article(StatisticsWriteView):
         if (
             self.job.lang.value == "en"
             and self.job.title
-            and self.job.site == WikimediaSite.wikipedia
-        ):
+            and self.job.site == WikimediaDomain.wikipedia
+        ) or self.job.url:
             return self.__handle_valid_job__()
         else:
             return self.__return_meaningful_error__()

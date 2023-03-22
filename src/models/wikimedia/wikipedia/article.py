@@ -10,7 +10,7 @@ from pydantic import validate_arguments
 import config
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wcd_item import WcdItem
-from src.models.wikimedia.enums import WikimediaSite
+from src.models.wikimedia.enums import WikimediaDomain
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
@@ -31,7 +31,7 @@ class WikipediaArticle(WcdItem):
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: int = 0
-    wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
+    wikimedia_site: WikimediaDomain = WikimediaDomain.wikipedia
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
