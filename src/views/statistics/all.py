@@ -1,5 +1,5 @@
-from src.models.api.job.article_job import ArticleJob
 from src.models.api.all import AllHandler
+from src.models.api.job.article_job import ArticleJob
 from src.models.api.schema.article_schema import ArticleSchema
 from src.views.statistics import StatisticsView
 
