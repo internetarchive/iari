@@ -77,7 +77,7 @@ class ArticleJob(Job):
         """
         if self.url:
             self.__urldecode_url__()
-            pattern = r"https?://(\w+)\.(\w+\.\w+)/wiki/(\w+)"
+            pattern = r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
 
             matches = re.match(pattern, self.url)
             if matches:
