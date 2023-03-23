@@ -91,7 +91,7 @@ class AllHandler(WcdBaseModel):
     def __fetch_references__(self):
         from src.models.api import app
 
-        if not self.error and not self.references:
+        if not self.error and not self.references and "references" in self.data:
             app.logger.debug("__fetch_references__: running")
             # this code from chatgpt does not work via flask
             # loop = asyncio.get_event_loop()
