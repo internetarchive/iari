@@ -1,5 +1,5 @@
 from src.models.api.job.references_job import ReferencesJob
-from src.models.api.statistics.references.references_schema import ReferencesSchema
+from src.models.api.schema.references_schema import ReferencesSchema
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo
 from src.views.statistics import StatisticsView

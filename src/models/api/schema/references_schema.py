@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ReferencesSchema(Schema):
+    """We don't support the refresh parameter here"""
     offset = Int()
     wari_id = String()
     chunk_size = Int()

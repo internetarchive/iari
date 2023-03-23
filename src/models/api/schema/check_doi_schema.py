@@ -1,10 +1,11 @@
-from marshmallow import Schema, post_load
+from marshmallow import post_load
 from marshmallow.fields import Int, String
 
 from src.models.api.job.check_doi_job import CheckDoiJob
+from src.models.api.schema import RefreshSchema
 
 
-class CheckDoiSchema(Schema):
+class CheckDoiSchema(RefreshSchema):
     """This validates the patron input in the get request"""
 
     doi = String()

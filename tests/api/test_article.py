@@ -4,7 +4,7 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src.models.api import ArticleStatistics
+from src.models.api.statistic.article import ArticleStatistics
 from src.views.statistics.article import Article
 
 # This is needed to get the full diff when tests fail

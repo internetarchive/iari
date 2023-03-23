@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from src.models.api import ArticleStatistics
 from src.models.api.job import Job
+from src.models.api.statistic.article import ArticleStatistics
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,

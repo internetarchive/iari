@@ -2,9 +2,9 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from src.models.api import ArticleStatistics
 from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistics.reference import ReferenceStatistic
+from src.models.api.statistic.article import ArticleStatistics
+from src.models.api.statistic.reference import ReferenceStatistic
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel

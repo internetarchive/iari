@@ -13,7 +13,6 @@ from flask import Flask  # type: ignore
 from flask_restful import Api, Resource  # type: ignore
 
 import config
-from src.models.api.statistics.article import ArticleStatistics
 from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
 from src.views.statistics.all import All

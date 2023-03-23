@@ -2,9 +2,8 @@ from unittest import TestCase
 
 from marshmallow import ValidationError
 
-from src.models.api.job import Job
 from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistics.article.article_schema import ArticleSchema
+from src.models.api.schema.article_schema import ArticleSchema
 
 
 class TestArticleSchema(TestCase):

@@ -5,7 +5,7 @@ from flask_restful import Resource, abort  # type: ignore
 
 from src import console
 from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistics.article.article_schema import ArticleSchema
+from src.models.api.schema.article_schema import ArticleSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo
