@@ -287,6 +287,7 @@ class WikipediaRawReference(WcdBaseModel):
     def __extract_first_level_domains__(self) -> None:
         """This aggregates all first level domains from the urls found in the raw references"""
         from src.models.api import app
+
         app.logger.debug("__extract_first_level_domains__: running")
         if not self.reference_urls_done:
             raise MissingInformationError("reference_urls have not been extracted")
@@ -468,7 +469,9 @@ class WikipediaRawReference(WcdBaseModel):
         """Helper method"""
         from src.models.api import app
 
-        app.logger.debug("__extract_templates_and_parameters_from_raw_reference__: running")
+        app.logger.debug(
+            "__extract_templates_and_parameters_from_raw_reference__: running"
+        )
         self.__extract_raw_templates__()
         self.__extract_and_clean_template_parameters__()
         self.extraction_done = True
@@ -516,6 +519,7 @@ class WikipediaRawReference(WcdBaseModel):
     def __extract_and_clean_template_parameters__(self) -> None:
         """We only extract and clean if exactly one templates is found"""
         from src.models.api import app
+
         app.logger.debug("__extract_and_clean_template_parameters__: running")
         if self.number_of_templates == 1:
             [
@@ -529,6 +533,7 @@ class WikipediaRawReference(WcdBaseModel):
     def extract_and_check(self) -> None:
         """Helper method"""
         from src.models.api import app
+
         app.logger.debug("extract_and_check: running")
         self.__extract_templates_and_parameters__()
         # self.__determine_if_multiple_templates__()
@@ -542,6 +547,7 @@ class WikipediaRawReference(WcdBaseModel):
     def get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
         """Make a WikipediaReference based on the extracted information"""
         from src.models.api import app
+
         app.logger.debug("get_finished_wikipedia_reference_object: running")
         if not self.extraction_done:
             self.extract_and_check()

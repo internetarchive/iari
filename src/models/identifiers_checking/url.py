@@ -120,6 +120,7 @@ class Url(WikipediaUrl):
 
     def __check_without_https_verify__(self):
         from src.models.api import app
+
         # https://jcutrer.com/python/requests-ignore-invalid-ssl-certificates
         app.logger.debug("__check_without_https_verify__: running")
 

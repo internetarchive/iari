@@ -20,6 +20,7 @@ class CheckUrlSchema(Schema):
     def return_object(self, data, **kwargs) -> CheckUrlJob:  # type: ignore # dead: disable
         """Return job object"""
         from src.models.api import app
+
         app.logger.debug("return_object: running")
         job = CheckUrlJob(**data)
         return job

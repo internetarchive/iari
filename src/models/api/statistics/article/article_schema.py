@@ -23,6 +23,7 @@ class ArticleSchema(Schema):
     def return_object(self, data, **kwargs) -> ArticleJob:  # type: ignore # dead: disable
         """Return job object"""
         from src.models.api import app
+
         app.logger.debug("return_object: running")
         job = ArticleJob(**data)
         job.extract_url()

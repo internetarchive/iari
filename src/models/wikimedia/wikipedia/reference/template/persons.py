@@ -61,6 +61,7 @@ class Persons(WcdBaseModel):
     @validate_arguments
     def __parse_roleless_persons__(self) -> List[Person]:
         from src.models.api import app
+
         persons = []
         # first last
         unnumbered_first_last = [

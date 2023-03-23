@@ -574,6 +574,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def __extract_all_raw_citation_references__(self):
         """This extracts everything inside <ref></ref> tags"""
         from src.models.api import app
+
         app.logger.debug("__extract_all_raw_citation_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
@@ -596,6 +597,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def __extract_all_raw_general_references__(self):
         """This extracts everything inside <ref></ref> tags"""
         from src.models.api import app
+
         app.logger.debug("__extract_all_raw_general_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
@@ -627,6 +629,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     def extract_all_references(self):
         """Extract all references from self.wikitext"""
         from src.models.api import app
+
         app.logger.debug("extract_all_references: running")
         self.__parse_wikitext__()
         self.__extract_all_raw_citation_references__()
@@ -637,6 +640,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def __convert_raw_references_to_reference_objects__(self):
         from src.models.api import app
+
         app.logger.debug("__convert_raw_references_to_reference_objects__: running")
         self.references = [
             raw_reference.get_finished_wikipedia_reference_object()
@@ -645,6 +649,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def __extract_and_check_urls_on_references__(self):
         from src.models.api import app
+
         app.logger.debug("__extract_and_check_urls_on_raw_references__: running")
         for reference in self.references:
             if not reference.raw_reference:
@@ -669,6 +674,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def __parse_wikitext__(self):
         from src.models.api import app
+
         app.logger.debug("__parse_wikitext__: running")
         if not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)

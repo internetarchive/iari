@@ -16,6 +16,7 @@ class CheckDoiSchema(Schema):
     def return_object(self, data, **kwargs) -> CheckDoiJob:  # type: ignore # dead: disable
         """Return job object"""
         from src.models.api import app
+
         app.logger.debug("return_object: running")
         job = CheckDoiJob(**data)
         return job

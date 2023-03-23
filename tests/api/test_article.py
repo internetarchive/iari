@@ -7,7 +7,6 @@ from flask_restful import Api  # type: ignore
 from src.models.api import ArticleStatistics
 from src.views.statistics.article import Article
 
-
 # This is needed to get the full diff when tests fail
 # https://stackoverflow.com/questions/14493670/how-to-set-self-maxdiff-in-nose-to-get-full-diff-output
 # TestCase.maxDiff = None

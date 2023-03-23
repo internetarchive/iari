@@ -132,9 +132,9 @@ class Article(StatisticsWriteView):
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
         if (
-                self.job.lang.value == "en"
-                and self.job.title
-                and self.job.domain == WikimediaDomain.wikipedia
+            self.job.lang.value == "en"
+            and self.job.title
+            and self.job.domain == WikimediaDomain.wikipedia
         ) or self.job.url:
             return self.__handle_valid_job__()
         else:

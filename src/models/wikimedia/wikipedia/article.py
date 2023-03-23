@@ -122,6 +122,7 @@ class WikipediaArticle(WcdItem):
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
         from src.models.api import app
+
         app.logger.debug("__fetch_page_data__: Running")
         self.__check_if_title_is_empty__()
         if (

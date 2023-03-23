@@ -35,8 +35,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         if not self.article:
             raise MissingInformationError()
         return (
-            f"{self.job.lang.value}."
-            f"{self.job.domain.value}.{self.article.page_id}"
+            f"{self.job.lang.value}." f"{self.job.domain.value}.{self.article.page_id}"
         )
 
     @property
