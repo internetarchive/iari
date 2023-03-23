@@ -2,9 +2,9 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from src.models.api import ArticleStatistics
 from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistics.reference import ReferenceStatistic
+from src.models.api.statistic.article import ArticleStatistics
+from src.models.api.statistic.reference import ReferenceStatistic
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
@@ -35,8 +35,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         if not self.article:
             raise MissingInformationError()
         return (
-            f"{self.job.lang.value}."
-            f"{self.job.site.value}.org.{self.article.page_id}"
+            f"{self.job.lang.value}." f"{self.job.domain.value}.{self.article.page_id}"
         )
 
     @property
@@ -80,7 +79,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 urls=ae.raw_urls,
                 fld_counts=ae.reference_first_level_domain_counts,
                 served_from_cache=False,
-                site=self.job.site.value,
+                site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
             )
 
@@ -102,7 +101,9 @@ class WikipediaAnalyzer(WcdBaseModel):
 
     def __analyze__(self):
         """Helper method"""
-        logger.debug("__analyze__: running")
+        from src.models.api import app
+
+        app.logger.debug("__analyze__: running")
         if self.job:
             if not self.article:
                 self.__populate_article__()
@@ -110,7 +111,9 @@ class WikipediaAnalyzer(WcdBaseModel):
                 self.article.fetch_and_extract_and_parse()
 
     def __gather_reference_statistics__(self):
-        logger.debug("__gather_reference_statistics__: running")
+        from src.models.api import app
+
+        app.logger.debug("__gather_reference_statistics__: running")
         if self.article.extractor.number_of_references > 0:
             for reference in self.article.extractor.references:
                 if not reference.raw_reference:
@@ -135,18 +138,20 @@ class WikipediaAnalyzer(WcdBaseModel):
                     ).dict()
                 )
         if not self.article_statistics:
-            logger.debug(
+            app.logger.debug(
                 "self.article_statistics was None "
                 "so we skip gathering reference statistics"
             )
 
     def __populate_article__(self):
-        logger.debug("__populate_article__: running")
+        from src.models.api import app
+
+        app.logger.debug("__populate_article__: running")
         if self.job.title:
             # Todo consider propagating job further here
             self.article = WikipediaArticle(
                 title=self.job.title,
-                wikimedia_site=self.job.site,
+                wikimedia_domain=self.job.domain,
                 language_code=self.job.lang.value,
                 wikitext=self.wikitext,
                 check_urls=self.check_urls,

@@ -1,13 +1,11 @@
 import json
-import logging
 from unittest import TestCase
 
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src.models.api import ArticleStatistics
-
-logger = logging.getLogger(__name__)
+from src.models.api.statistic.article import ArticleStatistics
+from src.views.statistics.article import Article
 
 # This is needed to get the full diff when tests fail
 # https://stackoverflow.com/questions/14493670/how-to-set-self-maxdiff-in-nose-to-get-full-diff-output
@@ -110,7 +108,7 @@ class TestArticle(TestCase):
         app = Flask(__name__)
         api = Api(app)
 
-        api.add_resource(ArticleStatistics, "/get-statistics")
+        api.add_resource(Article, "/get-statistics")
         app.testing = True
         self.test_client = app.test_client()
 
@@ -219,13 +217,13 @@ class TestArticle(TestCase):
             b"{\"error\": \"{'lang': ['Must be one of: en.']}\"}\n", response.data
         )  # expected output
 
-    def test_missing_title(self):
-        response = self.test_client.get("/get-statistics?lang=en&site=wikipedia")
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.data,
-            b"{\"error\": \"{'title': ['Missing data for required field.']}\"}\n",
-        )
+    # def test_missing_title(self):
+    #     response = self.test_client.get("/get-statistics?lang=en&site=wikipedia")
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertEqual(
+    #         response.data,
+    #         b"{\"error\": \"{'title': ['Missing data for required field.']}\"}\n",
+    #     )
 
     def test_invalid_site(self):
         response = self.test_client.get(

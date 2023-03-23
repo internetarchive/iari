@@ -2,8 +2,6 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
-from src.models.api.statistics.reference.template_statistics import TemplateStatistics
-
 
 class ReferenceStatistic(BaseModel):
     """The purpose of this class is to model the statistics

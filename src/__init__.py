@@ -6,7 +6,7 @@ from wikibaseintegrator.wbi_helpers import execute_sparql_query  # type: ignore
 
 import config
 from src.helpers.console import console
-from src.models.wikimedia.enums import WikimediaSite
+from src.models.wikimedia.enums import WikimediaDomain
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from src.wcd_base_model import WcdBaseModel
 
@@ -24,7 +24,7 @@ class WcdImportBot(WcdBaseModel):
     page_title: Optional[str]
     percent_references_hashed_in_total: Optional[int]
     # wikibase: Wikibase = IASandboxWikibase()
-    wikimedia_site: WikimediaSite = WikimediaSite.wikipedia
+    wikimedia_site: WikimediaDomain = WikimediaDomain.wikipedia
     wikidata_qid: str = ""
     testing: bool = False
     wikipedia_article: Optional[WikipediaArticle] = None

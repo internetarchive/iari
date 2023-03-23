@@ -1,5 +1,5 @@
 from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistics.all import AllHandler
+from src.models.api.all import AllHandler
 
 
 class TestAllHandler:

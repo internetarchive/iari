@@ -1,1 +1,0 @@
-This contain the full reference with all details including templates and urls.

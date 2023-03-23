@@ -1,8 +1,8 @@
 from os.path import exists
 from unittest import TestCase
 
-from src.models.api import ArticleStatistics
 from src.models.api.job.article_job import ArticleJob
+from src.models.api.statistic.article import ArticleStatistics
 from src.models.file_io.article_file_io import ArticleFileIo
 
 

@@ -5,11 +5,11 @@ from flask_restful import Resource, abort  # type: ignore
 
 from src import console
 from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistics.article.article_schema import ArticleSchema
+from src.models.api.schema.article_schema import ArticleSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo
-from src.models.wikimedia.enums import AnalyzerReturn, WikimediaSite
+from src.models.wikimedia.enums import AnalyzerReturn, WikimediaDomain
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.views.statistics.write_view import StatisticsWriteView
 from test_data.test_content import (  # type: ignore
@@ -114,7 +114,7 @@ class Article(StatisticsWriteView):
             return "Only language code 'en' is supported, currently", 400
         if self.job.title == "":
             return "Title was missing", 400
-        if self.job.site != "wikipedia":
+        if self.job.domain != "wikipedia":
             return "Only 'wikipedia' site is supported", 400
 
     def __setup_wikipedia_analyzer__(self):
@@ -134,8 +134,8 @@ class Article(StatisticsWriteView):
         if (
             self.job.lang.value == "en"
             and self.job.title
-            and self.job.site == WikimediaSite.wikipedia
-        ):
+            and self.job.domain == WikimediaDomain.wikipedia
+        ) or self.job.url:
             return self.__handle_valid_job__()
         else:
             return self.__return_meaningful_error__()

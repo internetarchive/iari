@@ -35,8 +35,8 @@ from enum import Enum
 #     CZECH = "Q9056"
 
 
-class WikimediaSite(Enum):
-    wikipedia = "wikipedia"
+class WikimediaDomain(Enum):
+    wikipedia = "wikipedia.org"
 
 
 # class WikimediaEditType(Enum):

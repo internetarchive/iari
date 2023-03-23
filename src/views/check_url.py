@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
-from src.models.api.check_url.check_url_schema import CheckUrlSchema
+from src.models.api.schema.check_url_schema import CheckUrlSchema
 from src.models.api.job.check_url_job import CheckUrlJob
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.url_file_io import UrlFileIo
