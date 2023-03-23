@@ -114,7 +114,11 @@ class WikipediaAnalyzer(WcdBaseModel):
         from src.models.api import app
 
         app.logger.debug("__gather_reference_statistics__: running")
-        if self.article.extractor.number_of_references > 0:
+        if (
+            self.article
+            and self.article.extractor
+            and self.article.extractor.number_of_references > 0
+        ):
             for reference in self.article.extractor.references:
                 if not reference.raw_reference:
                     raise MissingInformationError("raw_reference was None")

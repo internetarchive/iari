@@ -139,8 +139,10 @@ class AllHandler(WcdBaseModel):
 
         app.logger.debug("__fetch_article__: running")
         # response = requests.get(f"http://18.217.22.248/v2/statistics/article?url={}")
+        url = f"http://18.217.22.248/v2/statistics/article?url={self.__quote__(self.job.url)}"
+        app.logger.debug(f"using url: {url}")
         response = requests.get(
-            f"http://18.217.22.248/v2/statistics/article?lang=en&site=wikipedia&title={self.job.title}"
+            url
         )
         if response.status_code == 200:
             self.data = response.json()
