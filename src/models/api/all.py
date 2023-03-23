@@ -168,8 +168,9 @@ class AllHandler(WcdBaseModel):
         if self.references and not self.extract_dois_done:
             for reference in self.references:
                 # app.logger.debug(f"working on this reference: {reference}")
-                for template in reference["templates"]:
-                    # app.logger.debug(f"working on this template: {template}")
-                    if "doi" in template["parameters"]:
-                        self.dois.add(template["parameters"]["doi"])
+                if "templates" in reference:
+                    for template in reference["templates"]:
+                        # app.logger.debug(f"working on this template: {template}")
+                        if "doi" in template["parameters"]:
+                            self.dois.add(template["parameters"]["doi"])
         self.extract_dois_done = True
