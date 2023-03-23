@@ -19,7 +19,7 @@ class WikipediaAnalyzer(WcdBaseModel):
     It does not handle storing on disk.
     """
 
-    job: ArticleJob
+    job: Optional[ArticleJob] = None
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
@@ -58,7 +58,8 @@ class WikipediaAnalyzer(WcdBaseModel):
 
     def __gather_article_statistics__(self) -> None:
         if (
-            self.article
+            self.job
+            and self.article
             and not self.article.is_redirect
             and self.article.found_in_wikipedia
         ):
@@ -84,6 +85,8 @@ class WikipediaAnalyzer(WcdBaseModel):
             )
 
     def get_statistics(self) -> Dict[str, Any]:
+        if not self.job:
+            raise MissingInformationError()
         if not self.article:
             self.__analyze__()
         if not self.article_statistics:
@@ -151,7 +154,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         from src.models.api import app
 
         app.logger.debug("__populate_article__: running")
-        if self.job.title:
+        if self.job and self.job.title:
             # Todo consider propagating job further here
             self.article = WikipediaArticle(
                 title=self.job.title,
@@ -170,4 +173,5 @@ class WikipediaAnalyzer(WcdBaseModel):
             self.dehydrated_references.append(data)
 
     def __insert_dehydrated_references_into_the_article_statistics__(self):
-        self.article_statistics.dehydrated_references = self.dehydrated_references
+        if self.article_statistics:
+            self.article_statistics.dehydrated_references = self.dehydrated_references
