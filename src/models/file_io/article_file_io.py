@@ -24,7 +24,7 @@ class ArticleFileIo(FileIo):
                 raise MissingInformationError()
             wari_id = (
                 f"{self.job.lang.value}."
-                f"{self.job.domain.value}.org.{self.job.page_id}"
+                f"{self.job.domain.value}.{self.job.page_id}"
             )
             filename = f"{wari_id}.json"
             return filename
