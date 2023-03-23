@@ -27,7 +27,10 @@ class AllHandler(WcdBaseModel):
 
     @property
     def number_of_references(self) -> int:
-        return len(self.data["references"])
+        if "references" in self.data:
+            return len(self.data["references"])
+        else:
+            return 0
 
     @property
     def number_of_dois(self) -> int:

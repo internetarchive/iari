@@ -2,8 +2,8 @@ import hashlib
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from src.models.api.schema.check_doi_schema import CheckDoiSchema
 from src.models.api.job.check_doi_job import CheckDoiJob
+from src.models.api.schema.check_doi_schema import CheckDoiSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.doi_file_io import DoiFileIo
 from src.models.identifiers_checking.doi import Doi
