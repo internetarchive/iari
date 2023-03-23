@@ -114,7 +114,7 @@ class Article(StatisticsWriteView):
             return "Only language code 'en' is supported, currently", 400
         if self.job.title == "":
             return "Title was missing", 400
-        if self.job.site != "wikipedia":
+        if self.job.domain != "wikipedia":
             return "Only 'wikipedia' site is supported", 400
 
     def __setup_wikipedia_analyzer__(self):
@@ -132,9 +132,9 @@ class Article(StatisticsWriteView):
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
         if (
-            self.job.lang.value == "en"
-            and self.job.title
-            and self.job.site == WikimediaDomain.wikipedia
+                self.job.lang.value == "en"
+                and self.job.title
+                and self.job.domain == WikimediaDomain.wikipedia
         ) or self.job.url:
             return self.__handle_valid_job__()
         else:

@@ -286,7 +286,8 @@ class WikipediaRawReference(WcdBaseModel):
 
     def __extract_first_level_domains__(self) -> None:
         """This aggregates all first level domains from the urls found in the raw references"""
-        logger.debug("__extract_first_level_domains__: running")
+        from src.models.api import app
+        app.logger.debug("__extract_first_level_domains__: running")
         if not self.reference_urls_done:
             raise MissingInformationError("reference_urls have not been extracted")
         if self.reference_urls:
@@ -298,7 +299,7 @@ class WikipediaRawReference(WcdBaseModel):
                 if url.first_level_domain:
                     logger.debug(f"found fld: {url.first_level_domain}")
                     self.first_level_domains.append(url.first_level_domain)
-        logger.debug(f"found flds: {self.first_level_domains}")
+        app.logger.debug(f"found flds: {self.first_level_domains}")
         self.first_level_domains_done = True
 
     # @property
@@ -330,12 +331,14 @@ class WikipediaRawReference(WcdBaseModel):
 
     @property
     def plain_text_in_reference(self) -> bool:
+        from src.models.api import app
+
         # Try removing everything that is inside templates markup and see if anything is left
         if isinstance(self.wikicode, Tag):
             stripped_wikicode = self.wikicode.contents.strip_code().strip()
         else:
             stripped_wikicode = self.wikicode.strip_code().strip()
-        logger.debug(f"Stripped wikicode: '{stripped_wikicode}'")
+        app.logger.debug(f"Stripped wikicode: '{stripped_wikicode}'")
         if len(stripped_wikicode) == 0:
             return False
         else:
@@ -463,14 +466,18 @@ class WikipediaRawReference(WcdBaseModel):
 
     def __extract_templates_and_parameters__(self) -> None:
         """Helper method"""
-        logger.debug("__extract_templates_and_parameters_from_raw_reference__: running")
+        from src.models.api import app
+
+        app.logger.debug("__extract_templates_and_parameters_from_raw_reference__: running")
         self.__extract_raw_templates__()
         self.__extract_and_clean_template_parameters__()
         self.extraction_done = True
 
     def __extract_raw_templates__(self) -> None:
         """Extract the templates from self.wikicode"""
-        logger.debug("__extract_raw_templates__: running")
+        from src.models.api import app
+
+        app.logger.debug("__extract_raw_templates__: running")
         if not self.wikicode:
             raise MissingInformationError("self.wikicode was None")
         if isinstance(self.wikicode, str):
@@ -508,7 +515,8 @@ class WikipediaRawReference(WcdBaseModel):
 
     def __extract_and_clean_template_parameters__(self) -> None:
         """We only extract and clean if exactly one templates is found"""
-        logger.debug("__extract_and_clean_template_parameters__: running")
+        from src.models.api import app
+        app.logger.debug("__extract_and_clean_template_parameters__: running")
         if self.number_of_templates == 1:
             [
                 template.extract_and_prepare_parameter_and_flds()
@@ -520,7 +528,8 @@ class WikipediaRawReference(WcdBaseModel):
 
     def extract_and_check(self) -> None:
         """Helper method"""
-        logger.debug("extract_and_check: running")
+        from src.models.api import app
+        app.logger.debug("extract_and_check: running")
         self.__extract_templates_and_parameters__()
         # self.__determine_if_multiple_templates__()
         self.__extract_reference_urls__()
@@ -532,7 +541,8 @@ class WikipediaRawReference(WcdBaseModel):
 
     def get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
         """Make a WikipediaReference based on the extracted information"""
-        logger.debug("get_finished_wikipedia_reference_object: running")
+        from src.models.api import app
+        app.logger.debug("get_finished_wikipedia_reference_object: running")
         if not self.extraction_done:
             self.extract_and_check()
         from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference

@@ -22,7 +22,8 @@ class ArticleSchema(Schema):
     # **kwargs is needed here despite what the validator claims
     def return_object(self, data, **kwargs) -> ArticleJob:  # type: ignore # dead: disable
         """Return job object"""
-        logger.debug("return_object: running")
+        from src.models.api import app
+        app.logger.debug("return_object: running")
         job = ArticleJob(**data)
         job.extract_url()
         job.urldecode_title()

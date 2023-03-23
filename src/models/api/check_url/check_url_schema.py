@@ -19,6 +19,7 @@ class CheckUrlSchema(Schema):
     # **kwargs is needed here despite what the validator claims
     def return_object(self, data, **kwargs) -> CheckUrlJob:  # type: ignore # dead: disable
         """Return job object"""
-        logger.debug("return_object: running")
+        from src.models.api import app
+        app.logger.debug("return_object: running")
         job = CheckUrlJob(**data)
         return job

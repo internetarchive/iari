@@ -1,4 +1,3 @@
-import logging
 import re
 from urllib.parse import quote, unquote
 
@@ -10,14 +9,12 @@ from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaDomain
 
-logger = logging.getLogger(__name__)
-
 
 class ArticleJob(Job):
     """A generic job that can be submitted via the API"""
 
     lang: Lang = Lang.en
-    site: WikimediaDomain = WikimediaDomain.wikipedia
+    domain: WikimediaDomain = WikimediaDomain.wikipedia
     title: str = ""
     testing: bool = False
     page_id: int = 0
@@ -35,13 +32,14 @@ class ArticleJob(Job):
 
         app.logger.debug("get_page_id: running")
         if not self.page_id:
-            if not self.lang or not self.title or not self.site:
-                MissingInformationError()
+            if not self.lang or not self.title or not self.domain:
+                raise MissingInformationError()
             # https://stackoverflow.com/questions/31683508/wikipedia-mediawiki-api-get-pageid-from-url
             url = (
-                f"https://{self.lang.value}.{self.site.value}.org/"
+                f"https://{self.lang.value}.{self.domain.value}/"
                 f"w/api.php?action=query&format=json&titles={self.quoted_title}"
             )
+            app.logger.debug(f"api url: {url}")
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
             # console.print(response.json())
@@ -57,7 +55,7 @@ class ArticleJob(Job):
                                 self.page_id = int(page)
             elif response.status_code == 404:
                 app.logger.error(
-                    f"Could not fetch page data from {self.site} because of 404. See {url}"
+                    f"Could not fetch page data from {self.domain} because of 404. See {url}"
                 )
             else:
                 raise WikipediaApiFetchError(
@@ -85,5 +83,5 @@ class ArticleJob(Job):
             if matches:
                 groups = matches.groups()
                 self.lang = Lang(groups[0])
-                self.site = WikimediaDomain(groups[1])
+                self.domain = WikimediaDomain(groups[1])
                 self.title = groups[2]

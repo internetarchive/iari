@@ -50,7 +50,7 @@ class FileIo(WcdBaseModel):
     ) -> None:
         from src.models.api import app
 
-        logger.debug("write_to_disk: running")
+        app.logger.debug("write_to_disk: running")
         app.logger.debug("write_to_disk: running")
         if self.data:
             path_filename = self.path_filename
@@ -74,7 +74,7 @@ class FileIo(WcdBaseModel):
         from src.models.api import app
 
         message = "read_from_disk: running"
-        logger.debug(message)
+        app.logger.debug(message)
         app.logger.debug(message)
         path_filename = self.path_filename
         if exists(path_filename):

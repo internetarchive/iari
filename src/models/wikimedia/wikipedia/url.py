@@ -79,7 +79,9 @@ class WikipediaUrl(BaseModel):
             self.parsing_done = True
 
     def extract(self):
-        logger.debug("fix_and_extract_and_check: running")
+        from src.models.api import app
+
+        app.logger.debug("fix_and_extract_and_check: running")
         self.__parse_extract_and_validate__()
         self.extract_first_level_domain()
 
@@ -97,7 +99,9 @@ class WikipediaUrl(BaseModel):
     #     return bool("//archive.org/details" in self.__get_url__)
 
     def extract_first_level_domain(self) -> None:
-        logger.debug("__get_first_level_domain__: Running")
+        from src.models.api import app
+
+        app.logger.debug("__get_first_level_domain__: Running")
         try:
             logger.debug(f"Trying to get FLD from {self.__get_url__}")
             fld = get_fld(self.__get_url__)
@@ -126,7 +130,9 @@ class WikipediaUrl(BaseModel):
 
     def __check_tld__(self):
         """We only check the length for now"""
-        logger.debug("__check_tld__: running")
+        from src.models.api import app
+
+        app.logger.debug("__check_tld__: running")
         if not self.netloc:
             logger.warning("netloc was empty")
         else:

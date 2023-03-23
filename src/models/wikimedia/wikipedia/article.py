@@ -31,7 +31,7 @@ class WikipediaArticle(WcdItem):
     latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: int = 0
-    wikimedia_site: WikimediaDomain = WikimediaDomain.wikipedia
+    wikimedia_domain: WikimediaDomain = WikimediaDomain.wikipedia
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
@@ -71,7 +71,7 @@ class WikipediaArticle(WcdItem):
     @property
     def url(self):
         return (
-            f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
+            f"https://{self.language_code}.{self.wikimedia_domain.value}.org/"
             f"wiki/{quote(self.underscored_title)}"
         )
 
@@ -87,8 +87,10 @@ class WikipediaArticle(WcdItem):
     #     self.md5hash = hashing.generate_article_hash()
 
     def fetch_and_extract_and_parse(self):
-        logger.debug("fetch_and_extract_and_parse_and_generate_hash: running")
-        logger.info("Extracting templates and parsing the references now")
+        from src.models.api import app
+
+        app.logger.debug("fetch_and_extract_and_parse_and_generate_hash: running")
+        app.logger.info("Extracting templates and parsing the references now")
         # We only fetch data from Wikipedia if we don't already have wikitext to work on
         if not self.wikitext:
             self.__fetch_page_data__()
@@ -119,7 +121,8 @@ class WikipediaArticle(WcdItem):
     def __fetch_page_data__(self) -> None:
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
-        logger.debug("__fetch_page_data__: Running")
+        from src.models.api import app
+        app.logger.debug("__fetch_page_data__: Running")
         self.__check_if_title_is_empty__()
         if (
             not self.latest_revision_id
@@ -130,7 +133,7 @@ class WikipediaArticle(WcdItem):
             # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base or
             # https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy
             url = (
-                f"https://{self.language_code}.{self.wikimedia_site.value}.org/"
+                f"https://{self.language_code}.{self.wikimedia_domain.value}/"
                 f"w/rest.php/v1/page/{self.quoted_title}"
             )
             headers = {"User-Agent": config.user_agent}
@@ -147,7 +150,7 @@ class WikipediaArticle(WcdItem):
             elif response.status_code == 404:
                 self.found_in_wikipedia = False
                 logger.error(
-                    f"Could not fetch page data from {self.wikimedia_site.name} because of 404. See {url}"
+                    f"Could not fetch page data from {self.wikimedia_domain.name} because of 404. See {url}"
                 )
             else:
                 raise WikipediaApiFetchError(

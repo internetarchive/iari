@@ -573,14 +573,15 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def __extract_all_raw_citation_references__(self):
         """This extracts everything inside <ref></ref> tags"""
-        logger.debug("__extract_all_raw_citation_references__: running")
+        from src.models.api import app
+        app.logger.debug("__extract_all_raw_citation_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
         self.__parse_wikitext__()
         # tag = Tag
         # tag.tag
         refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        logger.debug(f"Number of refs found: {len(refs)}")
+        app.logger.debug(f"Number of refs found: {len(refs)}")
         for ref in refs:
             self.raw_references.append(
                 WikipediaRawReference(
@@ -594,7 +595,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def __extract_all_raw_general_references__(self):
         """This extracts everything inside <ref></ref> tags"""
-        logger.debug("__extract_all_raw_general_references__: running")
+        from src.models.api import app
+        app.logger.debug("__extract_all_raw_general_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
         self.__extract_sections__()
@@ -624,7 +626,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def extract_all_references(self):
         """Extract all references from self.wikitext"""
-        logger.debug("extract_all_references: running")
+        from src.models.api import app
+        app.logger.debug("extract_all_references: running")
         self.__parse_wikitext__()
         self.__extract_all_raw_citation_references__()
         self.__extract_all_raw_general_references__()
@@ -633,14 +636,16 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         # self.__get_checked_and_unique_reference_urls_from_references__()
 
     def __convert_raw_references_to_reference_objects__(self):
-        logger.debug("__convert_raw_references_to_reference_objects__: running")
+        from src.models.api import app
+        app.logger.debug("__convert_raw_references_to_reference_objects__: running")
         self.references = [
             raw_reference.get_finished_wikipedia_reference_object()
             for raw_reference in self.raw_references
         ]
 
     def __extract_and_check_urls_on_references__(self):
-        logger.debug("__extract_and_check_urls_on_raw_references__: running")
+        from src.models.api import app
+        app.logger.debug("__extract_and_check_urls_on_raw_references__: running")
         for reference in self.references:
             if not reference.raw_reference:
                 raise MissingInformationError("no raw_reference")
@@ -648,7 +653,9 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         self.check_urls_done = True
 
     def __extract_sections__(self):
-        logger.debug("__extract_sections__: running")
+        from src.models.api import app
+
+        app.logger.debug("__extract_sections__: running")
         if not self.wikicode:
             self.__parse_wikitext__()
         # TODO rewrite to return a dictionary with the section name as key and the data as value
@@ -658,10 +665,11 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             flags=re.I,
             include_headings=False,
         )
-        logger.debug(f"Number of sections found: {len(self.sections)}")
+        app.logger.debug(f"Number of sections found: {len(self.sections)}")
 
     def __parse_wikitext__(self):
-        logger.debug("__parse_wikitext__: running")
+        from src.models.api import app
+        app.logger.debug("__parse_wikitext__: running")
         if not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)
 

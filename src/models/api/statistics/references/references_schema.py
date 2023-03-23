@@ -19,6 +19,8 @@ class ReferencesSchema(Schema):
     # **kwargs is needed here despite what the validator claims
     def return_object(self, data, **kwargs) -> ReferencesJob:  # type: ignore # dead: disable
         """Return job object"""
-        logger.debug("return_object: running")
+        from src.models.api import app
+
+        app.logger.debug("return_object: running")
         job = ReferencesJob(**data)
         return job

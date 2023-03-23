@@ -1,11 +1,7 @@
-import logging
-
 from marshmallow import Schema, post_load
 from marshmallow.fields import Int, String
 
 from src.models.api.job.check_doi_job import CheckDoiJob
-
-logger = logging.getLogger(__name__)
 
 
 class CheckDoiSchema(Schema):
@@ -19,6 +15,7 @@ class CheckDoiSchema(Schema):
     # **kwargs is needed here despite what the validator claims
     def return_object(self, data, **kwargs) -> CheckDoiJob:  # type: ignore # dead: disable
         """Return job object"""
-        logger.debug("return_object: running")
+        from src.models.api import app
+        app.logger.debug("return_object: running")
         job = CheckDoiJob(**data)
         return job

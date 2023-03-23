@@ -214,6 +214,8 @@ class WikipediaTemplate(BaseModel):
 
         Copyright pywikibot authors
         """
+        from src.models.api import app
+
         if not self.raw_template:
             raise MissingInformationError("self.raw_template was empty")
 
@@ -225,7 +227,7 @@ class WikipediaTemplate(BaseModel):
         #     text = removeDisabledParts(text)
 
         # Dennis removed the loop here during OOP-ification
-        logger.debug(f"Working on templates: {self.raw_template}")
+        app.logger.debug(f"Working on templates: {self.raw_template}")
         for parameter in self.raw_template.params:
             value = str(parameter.value)  # mwpfh needs upcast to str
             if strip:
@@ -243,7 +245,8 @@ class WikipediaTemplate(BaseModel):
             self.parameters[key] = cleaned_value
 
     def extract_and_prepare_parameter_and_flds(self) -> Any:
-        logger.debug("extract_and_prepare_parameter_and_flds: running")
+        from src.models.api import app
+        app.logger.debug("extract_and_prepare_parameter_and_flds: running")
         self.__extract_and_clean_template_parameters__()
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()

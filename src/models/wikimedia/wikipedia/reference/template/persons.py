@@ -60,6 +60,7 @@ class Persons(WcdBaseModel):
 
     @validate_arguments
     def __parse_roleless_persons__(self) -> List[Person]:
+        from src.models.api import app
         persons = []
         # first last
         unnumbered_first_last = [
@@ -68,7 +69,7 @@ class Persons(WcdBaseModel):
             if self.__find_number__(attribute) is None
             and (attribute == "first" or attribute == "last")
         ]
-        logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
+        app.logger.debug(f"{len(unnumbered_first_last)} unnumbered first lasts found.")
         if len(unnumbered_first_last) > 0:
             person = Person(
                 role=EnglishWikipediaTemplatePersonRole.UNKNOWN,

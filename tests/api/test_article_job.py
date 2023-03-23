@@ -15,10 +15,10 @@ class TestArticleJob(TestCase):
 
     def test_site(self):
         job = ArticleJob(title="", site="wikipedia")
-        assert job.site == WikimediaDomain.wikipedia
+        assert job.domain == WikimediaDomain.wikipedia
 
     def test_get_page_id(self):
-        job = ArticleJob(title="Test", site="wikipedia", lang="en")
+        job = ArticleJob(title="Test", site="wikipedia.org", lang="en")
         job.get_page_id()
         assert job.page_id == 11089416
 
@@ -36,7 +36,7 @@ class TestArticleJob(TestCase):
         job.extract_url()
 
         self.assertEqual(job.lang, Lang.en)
-        self.assertEqual(job.site, WikimediaDomain.wikipedia)
+        self.assertEqual(job.domain, WikimediaDomain.wikipedia)
         self.assertEqual(job.title, "Test")
 
     def test_extract_url_https(self):
@@ -45,5 +45,5 @@ class TestArticleJob(TestCase):
         job.extract_url()
 
         self.assertEqual(job.lang, Lang.en)
-        self.assertEqual(job.site, WikimediaDomain.wikipedia)
+        self.assertEqual(job.domain, WikimediaDomain.wikipedia)
         self.assertEqual(job.title, "Test")

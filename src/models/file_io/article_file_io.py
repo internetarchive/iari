@@ -1,11 +1,8 @@
-import logging
 from typing import Any, Dict, Optional
 
 from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
-
-logger = logging.getLogger(__name__)
 
 
 class ArticleFileIo(FileIo):
@@ -27,7 +24,7 @@ class ArticleFileIo(FileIo):
                 raise MissingInformationError()
             wari_id = (
                 f"{self.job.lang.value}."
-                f"{self.job.site.value}.org.{self.job.page_id}"
+                f"{self.job.domain.value}.org.{self.job.page_id}"
             )
             filename = f"{wari_id}.json"
             return filename
