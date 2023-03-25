@@ -51,20 +51,17 @@ class FileIo(WcdBaseModel):
         from src.models.api import app
 
         app.logger.debug("write_to_disk: running")
-        app.logger.debug("write_to_disk: running")
         if self.data:
             path_filename = self.path_filename
             if exists(path_filename):
                 with open(file=path_filename, mode="w") as file:
-                    logger.debug(f"writing to new file")
-                    app.logger.debug(f"writing to new file")
+                    app.logger.debug("overwriting existing file")
                     # https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
                     json.dump(self.data, file, ensure_ascii=False, indent=4)
             else:
-                # create and write
+                # x = create and write
                 with open(file=path_filename, mode="x") as file:
-                    logger.debug("overwriting existing file")
-                    app.logger.debug("overwriting existing file")
+                    app.logger.debug(f"writing to new file")
                     # https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
                     json.dump(self.data, file, ensure_ascii=False, indent=4)
         else:
