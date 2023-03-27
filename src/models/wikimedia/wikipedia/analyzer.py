@@ -160,7 +160,6 @@ class WikipediaAnalyzer(WcdBaseModel):
                 title=self.job.title,
                 wikimedia_domain=self.job.domain,
                 language_code=self.job.lang.value,
-                wikitext=self.wikitext,
                 check_urls=self.check_urls,
             )
         else:
