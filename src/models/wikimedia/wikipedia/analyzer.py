@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from src import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.statistic.article import ArticleStatistics
 from src.models.api.statistic.reference import ReferenceStatistic
@@ -121,8 +122,10 @@ class WikipediaAnalyzer(WcdBaseModel):
             and self.article.extractor
             and self.article.extractor.number_of_references > 0
         ):
-            app.logger.debug(f"Gathering reference statistics for "
-                             f"{self.article.extractor.number_of_references} references")
+            app.logger.debug(
+                f"Gathering reference statistics for "
+                f"{self.article.extractor.number_of_references} references"
+            )
             for reference in self.article.extractor.references:
                 if not reference.raw_reference:
                     raise MissingInformationError("raw_reference was None")
@@ -133,20 +136,22 @@ class WikipediaAnalyzer(WcdBaseModel):
                     subtype = ""
                 if not rr.get_wikicode_as_string:
                     raise MissingInformationError()
-                self.reference_statistics.append(
-                    ReferenceStatistic(
-                        # identifiers=rr.identifiers,
-                        flds=rr.first_level_domains,
-                        footnote_subtype=subtype,
-                        id=reference.reference_id,
-                        template_names=rr.template_names,
-                        templates=rr.get_template_dicts,
-                        titles=rr.titles,
-                        type=rr.reference_type.value,
-                        urls=rr.raw_urls,
-                        wikitext=rr.get_wikicode_as_string,
-                    ).dict()
-                )
+                data = ReferenceStatistic(
+                    # identifiers=rr.identifiers,
+                    flds=rr.first_level_domains,
+                    footnote_subtype=subtype,
+                    id=reference.reference_id,
+                    template_names=rr.template_names,
+                    templates=rr.get_template_dicts,
+                    titles=rr.titles,
+                    type=rr.reference_type.value,
+                    urls=rr.raw_urls,
+                    wikitext=rr.get_wikicode_as_string,
+                ).dict()
+                if not "wikitext" in data:
+                    console.print(data)
+                    raise MissingInformationError()
+                self.reference_statistics.append(data)
         if not self.article_statistics:
             app.logger.debug(
                 "self.article_statistics was None "
