@@ -102,8 +102,9 @@ class Article(StatisticsWriteView):
         from src.models.api import app
 
         app.logger.debug("__write_to_disk__: running")
-        self.__write_article_to_disk__()
-        self.__write_references_to_disk__()
+        if not self.job.testing:
+            self.__write_article_to_disk__()
+            self.__write_references_to_disk__()
 
     def __return_meaningful_error__(self):
         from src.models.api import app
@@ -151,7 +152,7 @@ class Article(StatisticsWriteView):
         article_io.write_to_disk()
 
     def __write_references_to_disk__(self):
-        references_file_io = ReferencesFileIo(data=self.wikipedia_analyzer.reference_statistics)
+        references_file_io = ReferencesFileIo(
+            data=self.wikipedia_analyzer.reference_statistics
+        )
         references_file_io.write_references_to_disk()
-
-

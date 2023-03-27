@@ -8,6 +8,7 @@ from src.models.file_io.reference_file_io import ReferenceFileIo
 
 class ReferencesFileIo(FileIo):
     data: List[Dict[str, Any]] = []
+
     def write_references_to_disk(self):
         from src.models.api import app
 
@@ -24,7 +25,4 @@ class ReferencesFileIo(FileIo):
                 job=self.job, hash_based_id=reference["id"], data=reference
             )
             reference_io.write_to_disk()
-        app.logger.debug(
-            f"wrote {len(self.data)} "
-            f"references to disk"
-        )
+        app.logger.debug(f"wrote {len(self.data)} " f"references to disk")
