@@ -135,16 +135,16 @@ class WikipediaAnalyzer(WcdBaseModel):
                     raise MissingInformationError()
                 self.reference_statistics.append(
                     ReferenceStatistic(
-                        type=rr.reference_type.value,
+                        # identifiers=rr.identifiers,
+                        flds=rr.first_level_domains,
                         footnote_subtype=subtype,
                         id=reference.reference_id,
-                        # identifiers=rr.identifiers,
-                        wikitext=rr.get_wikicode_as_string,
-                        urls=rr.raw_urls,
-                        flds=rr.first_level_domains,
-                        titles=rr.titles,
                         template_names=rr.template_names,
                         templates=rr.get_template_dicts,
+                        titles=rr.titles,
+                        type=rr.reference_type.value,
+                        urls=rr.raw_urls,
+                        wikitext=rr.get_wikicode_as_string,
                     ).dict()
                 )
         if not self.article_statistics:
