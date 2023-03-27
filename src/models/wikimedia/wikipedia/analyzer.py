@@ -23,7 +23,6 @@ class WikipediaAnalyzer(WcdBaseModel):
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
-    wikitext: str = ""
     check_urls: bool = False
     reference_statistics: List[Dict[str, Any]] = []
     dehydrated_references: List[Dict[str, Any]] = []
@@ -122,6 +121,8 @@ class WikipediaAnalyzer(WcdBaseModel):
             and self.article.extractor
             and self.article.extractor.number_of_references > 0
         ):
+            app.logger.debug(f"Gathering reference statistics for "
+                             f"{self.article.extractor.number_of_references} references")
             for reference in self.article.extractor.references:
                 if not reference.raw_reference:
                     raise MissingInformationError("raw_reference was None")
@@ -130,6 +131,8 @@ class WikipediaAnalyzer(WcdBaseModel):
                     subtype = rr.footnote_subtype.value
                 else:
                     subtype = ""
+                if not rr.get_wikicode_as_string:
+                    raise MissingInformationError()
                 self.reference_statistics.append(
                     ReferenceStatistic(
                         type=rr.reference_type.value,
@@ -166,7 +169,10 @@ class WikipediaAnalyzer(WcdBaseModel):
             raise MissingInformationError("Got no title")
 
     def __extract_dehydrated_references__(self):
-        for data in self.reference_statistics:
+        # We use a local variable here to avoid this regression
+        # https://github.com/internetarchive/wari/issues/700
+        statistics = self.reference_statistics
+        for data in statistics:
             del data["templates"]
             del data["wikitext"]
             self.dehydrated_references.append(data)

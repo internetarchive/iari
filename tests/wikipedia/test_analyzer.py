@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-from src.models.api.job import Job
-from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistic.article import ArticleStatistics
-from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     test_full_article,
 )
+
+from src.models.api.job.article_job import ArticleJob
+from src.models.api.statistic.article import ArticleStatistics
+from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 
 
 class TestWikipediaAnalyzer(TestCase):
@@ -71,8 +71,10 @@ class TestWikipediaAnalyzer(TestCase):
         assert wa.article.wikitext != ""
         assert wa.is_redirect is False
         assert wa.found is True
-        wa.__gather_reference_statistics__()
+        wa.get_statistics()
         assert len(wa.reference_statistics) == 45
+        for reference in wa.reference_statistics:
+            assert "wikitext" in reference
 
     # def test__get_statistics_easter_island(self):
     #     """This test takes forever (11s)"""
