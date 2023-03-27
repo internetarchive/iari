@@ -26,10 +26,9 @@ class FileIo(WcdBaseModel):
 
         if self.testing:
             # go out to repo root first
-            print(os.getcwd())
-            path_filename = (
-                f"../{config.subdirectory_for_json}{self.subfolder}{self.filename}"
-            )
+            # print(os.getcwd())
+            # we hard code the json directory for now
+            path_filename = f"/home/dpriskorn/src/python/wcdimportbot/{config.subdirectory_for_json}{self.subfolder}{self.filename}"
         else:
             path_filename = (
                 f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
@@ -51,6 +50,7 @@ class FileIo(WcdBaseModel):
         from src.models.api import app
 
         app.logger.debug("write_to_disk: running")
+        # app.logger.debug(os.getcwd())
         if self.data:
             path_filename = self.path_filename
             if exists(path_filename):
