@@ -1,4 +1,4 @@
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 from src import console
 from src.models.exceptions import MissingInformationError
@@ -7,13 +7,13 @@ from src.models.file_io.reference_file_io import ReferenceFileIo
 
 
 class ReferencesFileIo(FileIo):
-    data: List[Dict[str, Any]] = []
+    references: List[Dict[str, Any]] = []
 
     def write_references_to_disk(self):
         from src.models.api import app
 
         app.logger.debug("writing references to disk")
-        for reference in self.data:
+        for reference in self.references:
             # this is a dict
             if "id" not in reference:
                 console.print(reference)

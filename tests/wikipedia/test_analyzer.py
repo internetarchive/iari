@@ -1,13 +1,12 @@
 from unittest import TestCase
 
+from src.models.api.job.article_job import ArticleJob
+from src.models.api.statistic.article import ArticleStatistics
+from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     test_full_article,
 )
-
-from src.models.api.job.article_job import ArticleJob
-from src.models.api.statistic.article import ArticleStatistics
-from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 
 
 class TestWikipediaAnalyzer(TestCase):

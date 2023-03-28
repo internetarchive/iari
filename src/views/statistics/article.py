@@ -153,6 +153,6 @@ class Article(StatisticsWriteView):
 
     def __write_references_to_disk__(self):
         references_file_io = ReferencesFileIo(
-            data=self.wikipedia_analyzer.reference_statistics
+            references=self.wikipedia_analyzer.reference_statistics
         )
         references_file_io.write_references_to_disk()
