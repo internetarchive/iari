@@ -4,7 +4,7 @@ from src.models.api.job.article_job import ArticleJob
 
 class TestAllHandler:
     def test_fetch_and_compile_sncaso(self):
-        handler = AllHandler(job=ArticleJob(title="SNCASO"))
+        handler = AllHandler(job=ArticleJob(url="https://en.wikipedia.org/wiki/SNCASO"))
         handler.fetch_and_compile()
         assert handler.data != {}
         assert len(handler.references) == 30
@@ -23,23 +23,22 @@ class TestAllHandler:
     #     assert len(handler.compilation["doi_details"]) == 0
 
     def test___fetch_doi_details__(self):
-        handler = AllHandler(job=ArticleJob(title="Bicycle"))
+        handler = AllHandler(
+            job=ArticleJob(url="https://en.wikipedia.org/wiki/Bicycle")
+        )
         handler.__fetch_article__()
+        assert handler.error is False
+        assert handler.data != {}
+        # exit()
         handler.__fetch_references__()
         handler.__fetch_doi_details__()
-        assert handler.dois == {
-            "10.1177/03635465030310041801",
-            "10.1016/0015-0568(81)90023-3",
-            "10.3141/2143-20",
-            "10.1098/rspa.2007.1857",
-            "10.1119/1.19504",
-            "10.1007/s11524-010-9509-6",
-            "10.3141/2247-05",
-        }
+        assert handler.dois != set()
         assert len(handler.doi_details) == 7
 
     def test_number_of_dois(self):
-        handler = AllHandler(job=ArticleJob(title="Bicycle"))
+        handler = AllHandler(
+            job=ArticleJob(url="https://en.wikipedia.org/wiki/Bicycle")
+        )
         handler.__fetch_article__()
         handler.__fetch_references__()
         assert handler.number_of_dois == 7

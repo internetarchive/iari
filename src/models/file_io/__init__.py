@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from os.path import exists
 from typing import Any, Dict, Optional
 
@@ -26,10 +25,9 @@ class FileIo(WcdBaseModel):
 
         if self.testing:
             # go out to repo root first
-            print(os.getcwd())
-            path_filename = (
-                f"../{config.subdirectory_for_json}{self.subfolder}{self.filename}"
-            )
+            # print(os.getcwd())
+            # we hard code the json directory for now
+            path_filename = f"/home/dpriskorn/src/python/wcdimportbot/{config.subdirectory_for_json}{self.subfolder}{self.filename}"
         else:
             path_filename = (
                 f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
@@ -51,20 +49,18 @@ class FileIo(WcdBaseModel):
         from src.models.api import app
 
         app.logger.debug("write_to_disk: running")
-        app.logger.debug("write_to_disk: running")
+        # app.logger.debug(os.getcwd())
         if self.data:
             path_filename = self.path_filename
             if exists(path_filename):
                 with open(file=path_filename, mode="w") as file:
-                    logger.debug(f"writing to new file")
-                    app.logger.debug(f"writing to new file")
+                    app.logger.debug("overwriting existing file")
                     # https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
                     json.dump(self.data, file, ensure_ascii=False, indent=4)
             else:
-                # create and write
+                # x = create and write
                 with open(file=path_filename, mode="x") as file:
-                    logger.debug("overwriting existing file")
-                    app.logger.debug("overwriting existing file")
+                    app.logger.debug(f"writing to new file")
                     # https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
                     json.dump(self.data, file, ensure_ascii=False, indent=4)
         else:

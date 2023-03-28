@@ -3,12 +3,11 @@ from typing import Any, Tuple
 
 from flask_restful import Resource, abort  # type: ignore
 
-from src import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.schema.article_schema import ArticleSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
-from src.models.file_io.reference_file_io import ReferenceFileIo
+from src.models.file_io.references import ReferencesFileIo
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaDomain
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.views.statistics.write_view import StatisticsWriteView
@@ -103,8 +102,9 @@ class Article(StatisticsWriteView):
         from src.models.api import app
 
         app.logger.debug("__write_to_disk__: running")
-        self.__write_article_to_disk__()
-        self.__write_references_to_disk__()
+        if not self.job.testing:
+            self.__write_article_to_disk__()
+            self.__write_references_to_disk__()
 
     def __return_meaningful_error__(self):
         from src.models.api import app
@@ -152,19 +152,7 @@ class Article(StatisticsWriteView):
         article_io.write_to_disk()
 
     def __write_references_to_disk__(self):
-        from src.models.api import app
-
-        app.logger.debug("writing references to disk")
-        for reference in self.wikipedia_analyzer.reference_statistics:
-            # this is a dict
-            if "id" not in reference:
-                console.print(reference)
-                raise MissingInformationError("no id found in reference")
-            reference_io = ReferenceFileIo(
-                job=self.job, hash_based_id=reference["id"], data=reference
-            )
-            reference_io.write_to_disk()
-        app.logger.debug(
-            f"wrote {len(self.wikipedia_analyzer.reference_statistics)} "
-            f"references to disk"
+        references_file_io = ReferencesFileIo(
+            references=self.wikipedia_analyzer.reference_statistics
         )
+        references_file_io.write_references_to_disk()

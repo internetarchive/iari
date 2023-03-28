@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -23,7 +24,6 @@ class WikipediaAnalyzer(WcdBaseModel):
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
-    wikitext: str = ""
     check_urls: bool = False
     reference_statistics: List[Dict[str, Any]] = []
     dehydrated_references: List[Dict[str, Any]] = []
@@ -122,6 +122,10 @@ class WikipediaAnalyzer(WcdBaseModel):
             and self.article.extractor
             and self.article.extractor.number_of_references > 0
         ):
+            app.logger.debug(
+                f"Gathering reference statistics for "
+                f"{self.article.extractor.number_of_references} references"
+            )
             for reference in self.article.extractor.references:
                 if not reference.raw_reference:
                     raise MissingInformationError("raw_reference was None")
@@ -130,20 +134,24 @@ class WikipediaAnalyzer(WcdBaseModel):
                     subtype = rr.footnote_subtype.value
                 else:
                     subtype = ""
-                self.reference_statistics.append(
-                    ReferenceStatistic(
-                        type=rr.reference_type.value,
-                        footnote_subtype=subtype,
-                        id=reference.reference_id,
-                        # identifiers=rr.identifiers,
-                        wikitext=rr.get_wikicode_as_string,
-                        urls=rr.raw_urls,
-                        flds=rr.first_level_domains,
-                        titles=rr.titles,
-                        template_names=rr.template_names,
-                        templates=rr.get_template_dicts,
-                    ).dict()
-                )
+                # if not rr.get_wikicode_as_string:
+                #     raise MissingInformationError()
+                data = ReferenceStatistic(
+                    # identifiers=rr.identifiers,
+                    flds=rr.first_level_domains,
+                    footnote_subtype=subtype,
+                    id=reference.reference_id,
+                    template_names=rr.template_names,
+                    templates=rr.get_template_dicts,
+                    titles=rr.titles,
+                    type=rr.reference_type.value,
+                    urls=rr.raw_urls,
+                    wikitext=rr.get_wikicode_as_string,
+                ).dict()
+                # if not "wikitext" in data:
+                #     console.print(data)
+                #     raise MissingInformationError()
+                self.reference_statistics.append(data)
         if not self.article_statistics:
             app.logger.debug(
                 "self.article_statistics was None "
@@ -160,17 +168,18 @@ class WikipediaAnalyzer(WcdBaseModel):
                 title=self.job.title,
                 wikimedia_domain=self.job.domain,
                 language_code=self.job.lang.value,
-                wikitext=self.wikitext,
                 check_urls=self.check_urls,
             )
         else:
             raise MissingInformationError("Got no title")
 
     def __extract_dehydrated_references__(self):
-        for data in self.reference_statistics:
+        # We use a local variable here to avoid this regression
+        # https://github.com/internetarchive/wari/issues/700
+        self.dehydrated_references = deepcopy(self.reference_statistics)
+        for data in self.dehydrated_references:
             del data["templates"]
             del data["wikitext"]
-            self.dehydrated_references.append(data)
 
     def __insert_dehydrated_references_into_the_article_statistics__(self):
         if self.article_statistics:
