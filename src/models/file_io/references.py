@@ -19,8 +19,7 @@ class ReferencesFileIo(FileIo):
                 console.print(reference)
                 raise MissingInformationError("no id found in reference")
             # if "wikitext" in reference:
-            app.logger.debug(reference)
-            exit()
+            # app.logger.debug(reference)
             reference_io = ReferenceFileIo(
                 job=self.job, hash_based_id=reference["id"], data=reference
             )
