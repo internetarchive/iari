@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -134,8 +135,8 @@ class WikipediaAnalyzer(WcdBaseModel):
                     subtype = rr.footnote_subtype.value
                 else:
                     subtype = ""
-                if not rr.get_wikicode_as_string:
-                    raise MissingInformationError()
+                # if not rr.get_wikicode_as_string:
+                #     raise MissingInformationError()
                 data = ReferenceStatistic(
                     # identifiers=rr.identifiers,
                     flds=rr.first_level_domains,
@@ -148,9 +149,9 @@ class WikipediaAnalyzer(WcdBaseModel):
                     urls=rr.raw_urls,
                     wikitext=rr.get_wikicode_as_string,
                 ).dict()
-                if not "wikitext" in data:
-                    console.print(data)
-                    raise MissingInformationError()
+                # if not "wikitext" in data:
+                #     console.print(data)
+                #     raise MissingInformationError()
                 self.reference_statistics.append(data)
         if not self.article_statistics:
             app.logger.debug(
@@ -176,11 +177,10 @@ class WikipediaAnalyzer(WcdBaseModel):
     def __extract_dehydrated_references__(self):
         # We use a local variable here to avoid this regression
         # https://github.com/internetarchive/wari/issues/700
-        statistics = self.reference_statistics
-        for data in statistics:
+        self.dehydrated_references = deepcopy(self.reference_statistics)
+        for data in self.dehydrated_references:
             del data["templates"]
             del data["wikitext"]
-            self.dehydrated_references.append(data)
 
     def __insert_dehydrated_references_into_the_article_statistics__(self):
         if self.article_statistics:

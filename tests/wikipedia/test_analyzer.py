@@ -74,7 +74,9 @@ class TestWikipediaAnalyzer(TestCase):
         wa.get_statistics()
         assert len(wa.reference_statistics) == 45
         for reference in wa.reference_statistics:
+            # this tests whether the deepcopy worked correctly
             assert "wikitext" in reference
+            assert "templates" in reference
 
     # def test__get_statistics_easter_island(self):
     #     """This test takes forever (11s)"""
