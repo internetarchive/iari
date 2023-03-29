@@ -39,6 +39,8 @@ class Url(WikipediaUrl):
 
     We define a malformed URL as any URL that the reader cannot easily
     click and successfully get the contents of in a normal web browser session
+
+    We send spoofing headers by default and do not offer turning them off for now.
     """
 
     request_error: bool = False
@@ -91,7 +93,12 @@ class Url(WikipediaUrl):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(self.__get_url__, timeout=self.timeout, verify=True)
+            r = requests.head(
+                self.__get_url__,
+                timeout=self.timeout,
+                verify=True,
+                headers=self.__spoofing_headers__,
+            )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
             # if r.status_code == 200:
@@ -127,7 +134,12 @@ class Url(WikipediaUrl):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(self.__get_url__, timeout=self.timeout, verify=False)
+            r = requests.head(
+                self.__get_url__,
+                timeout=self.timeout,
+                verify=False,
+                headers=self.__spoofing_headers__,
+            )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
             # if r.status_code == 200:
@@ -164,3 +176,29 @@ class Url(WikipediaUrl):
         )
         console.print(cleaned_dictionary)
         return cleaned_dictionary
+
+    @property
+    def __spoofing_headers__(self) -> Dict[str, str]:
+        """We decided to use these headers because of https://github.com/internetarchive/wari/issues/698"""
+        # From sawood at https://internetarchive.slack.com/archives/
+        # C04PLJVSPAP/p1679596686133449?thread_ts=1679594636.835119&cid=C04PLJVSPAP
+        return {
+            "authority": "www.sciencedaily.com",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-language": "en-US,en;q=0.9",
+            "cache-control": "max-age=0",
+            # 'cookie': 'usprivacy=1YYN; usprivacy=1YYN; _ga_GT6V1PPT8H=GS1.1.1679596300.1.0.1679596300.60.0.0; _ga=GA1.1.787963363.1679596301',
+            "dnt": "1",
+            "if-modified-since": "Thu, 23 Mar 2023 14:24:45 GMT",
+            "if-none-match": 'W/"329ecfdc8f2ee5caed98ffc465000dc9"',
+            "referer": "https://github.com/internetarchive/ware/issues/6",
+            "sec-ch-ua": '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Linux"',
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+        }
