@@ -104,8 +104,7 @@ class Url(WikipediaUrl):
             )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
-            for header_entry in r.headers:
-                self.response_headers[header_entry] = r.headers[header_entry]
+            self.response_headers = dict(r.headers)
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
@@ -147,8 +146,7 @@ class Url(WikipediaUrl):
             )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
-            for header_entry in r.headers:
-                self.response_headers[header_entry] = r.headers[header_entry]
+            self.response_headers = dict(r.headers)
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
