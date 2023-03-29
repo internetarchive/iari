@@ -52,6 +52,8 @@ class Url(WikipediaUrl):
     # soft404_probability: float = 0.0  # not implemented yet
     status_code: int = 0
     timeout: int = 2
+    dns_error_details: str = ""
+    response_headers: Dict = {}
 
     # @property
     # def __check_soft404__(self):
@@ -78,8 +80,9 @@ class Url(WikipediaUrl):
                     raise ResolveError("no answers")
             except NXDOMAIN:
                 pass
-            except (LifetimeTimeout, NoNameservers, EmptyLabel):
+            except (LifetimeTimeout, NoNameservers, EmptyLabel) as e:
                 self.dns_error = True
+                self.dns_error_details = str(e)
             except NoAnswer:
                 self.dns_no_answer = True
         else:
@@ -101,6 +104,8 @@ class Url(WikipediaUrl):
             )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
+            for header_entry in r.headers:
+                self.response_headers[header_entry] = r.headers[header_entry]
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
@@ -142,6 +147,8 @@ class Url(WikipediaUrl):
             )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
+            for header_entry in r.headers:
+                self.response_headers[header_entry] = r.headers[header_entry]
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
