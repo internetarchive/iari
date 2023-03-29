@@ -5,7 +5,9 @@ class TestUrl:
     no_url = ""
     good_url = "https://www.easterisland.travel"
     bad_url = "ht.test..."
-    forbidden_url_if_not_spoofed_headers = "https://www.sciencedaily.com/releases/2021/07/210713090153.htm"
+    forbidden_url_if_not_spoofed_headers = (
+        "https://www.sciencedaily.com/releases/2021/07/210713090153.htm"
+    )
 
     def test_check_good(self):
         url = Url(url=self.good_url, timeout=2)

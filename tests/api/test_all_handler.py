@@ -7,9 +7,9 @@ class TestAllHandler:
         handler = AllHandler(job=ArticleJob(url="https://en.wikipedia.org/wiki/SNCASO"))
         handler.fetch_and_compile()
         assert handler.data != {}
-        assert len(handler.references) == 30
+        assert len(handler.references) == 45
         assert handler.compilation != {}
-        assert len(handler.compilation["url_details"]) == 8
+        assert len(handler.compilation["url_details"]) == 10
         assert len(handler.compilation["doi_details"]) == 0
 
     # DISABLED because check-url bug causes return of non json which is terrible
