@@ -11,6 +11,7 @@ import requests
 
 from src import WcdBaseModel
 from src.models.api.job.article_job import ArticleJob
+from src.models.exceptions import MissingInformationError
 
 
 class AllHandler(WcdBaseModel):
@@ -24,11 +25,12 @@ class AllHandler(WcdBaseModel):
     url_details: List[Dict[str, Any]] = []
     error: bool = False
     extract_dois_done = False
+    reference_ids: List[str] = []
 
     @property
     def number_of_references(self) -> int:
-        if "references" in self.data:
-            return len(self.data["references"])
+        if "dehydrated_references" in self.data:
+            return len(self.data["dehydrated_references"])
         else:
             return 0
 
@@ -42,7 +44,7 @@ class AllHandler(WcdBaseModel):
         async with session.get(url) as response:
             return await response.json()
 
-    async def get_reference_ids(self, ids: List[str]):
+    async def get_reference_details(self, ids: List[str]):
         async with aiohttp.ClientSession() as session:
             tasks = []
             for reference_id in ids:
@@ -91,7 +93,9 @@ class AllHandler(WcdBaseModel):
     def __fetch_references__(self):
         from src.models.api import app
 
-        if not self.error and not self.references and "references" in self.data:
+        # Only proceed if no error and it has references and we have not fetched already
+        if not self.error and not self.references and self.number_of_references:
+            self.__extract_reference_ids__()
             app.logger.debug("__fetch_references__: running")
             # this code from chatgpt does not work via flask
             # loop = asyncio.get_event_loop()
@@ -99,7 +103,7 @@ class AllHandler(WcdBaseModel):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             self.references = loop.run_until_complete(
-                self.get_reference_ids(self.data["references"])
+                self.get_reference_details(self.reference_ids)
             )
 
     def __fetch_url_details__(self):
@@ -174,3 +178,10 @@ class AllHandler(WcdBaseModel):
                         if "doi" in template["parameters"]:
                             self.dois.add(template["parameters"]["doi"])
         self.extract_dois_done = True
+
+    def __extract_reference_ids__(self) -> None:
+        if self.number_of_references:
+            for reference in self.data["dehydrated_references"]:
+                if "id" not in reference:
+                    raise MissingInformationError()
+                self.reference_ids.append(reference["id"])
