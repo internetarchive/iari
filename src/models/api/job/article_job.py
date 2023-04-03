@@ -62,10 +62,6 @@ class ArticleJob(Job):
                     f"Could not fetch page data. Got {response.status_code} from {url}"
                 )
 
-    def urldecode_title(self):
-        """We decode the title to have a human readable string to pass around"""
-        self.title = unquote(self.title)
-
     def __urldecode_url__(self):
         """We decode the title to have a human readable string to pass around"""
         self.url = unquote(self.url)
@@ -75,6 +71,9 @@ class ArticleJob(Job):
         I want a python re regex that extracts "en" "wikipedia.or"
         and "Test" from http://en.wikipedia.org/wiki/Test
         """
+        from src.models.api import app
+
+        app.logger.debug("extract_url: running")
         if self.url:
             self.__urldecode_url__()
             pattern = r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
@@ -85,3 +84,5 @@ class ArticleJob(Job):
                 self.lang = Lang(groups[0])
                 self.domain = WikimediaDomain(groups[1])
                 self.title = groups[2]
+            if not matches:
+                app.logger.error("Not a supported Wikimedia URL")

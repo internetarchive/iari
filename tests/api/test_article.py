@@ -138,12 +138,12 @@ class TestArticle(TestCase):
     def test_valid_request_easter_island(self):
         """This tests against an excerpt of the whole article (head+tail)"""
         response = self.test_client.get(
-            "/get-statistics?lang=en&site=wikipedia&title=Easter Island&testing=true"
+            "/get-statistics?url=https://en.wikipedia.org/wiki/Easter_Island&testing=true"
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
         console.print(data)
-        assert data["title"] == "Easter Island"
+        assert data["title"] == "Easter_Island"
         assert data["dehydrated_references"] != []
         assert data["urls"] != []
 
@@ -199,7 +199,7 @@ class TestArticle(TestCase):
 
     def test_valid_request_test_refresh_true(self):
         response = self.test_client.get(
-            "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True&refresh=True"
+            "/get-statistics?url=https://en.wikipedia.org/wiki/Test&testing=True&refresh=True"
         )
         data = json.loads(response.data)
         print(response.data)
