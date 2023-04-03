@@ -12,13 +12,23 @@ class TestArticleSchema(TestCase):
 
     def test_return_object_valid(self):
         gss = ArticleSchema()
-        job = gss.load(dict(url="https://en.wikipedia.org/wiki/Easter_Island", refresh=True))
-        assert job == ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island", refresh=True, title="Easter_Island", lang="en", site=WikimediaDomain.wikipedia)
+        job = gss.load(
+            dict(url="https://en.wikipedia.org/wiki/Easter_Island", refresh=True)
+        )
+        assert job == ArticleJob(
+            url="https://en.wikipedia.org/wiki/Easter_Island",
+            refresh=True,
+            title="Easter_Island",
+            lang="en",
+            site=WikimediaDomain.wikipedia,
+        )
 
     def test_return_object_invalid(self):
         gss = ArticleSchema()
         with self.assertRaises(ValidationError):
-            gss.load(dict(url="https://en.wikipedia.org/wiki/Easter_Island", refresh=11))
+            gss.load(
+                dict(url="https://en.wikipedia.org/wiki/Easter_Island", refresh=11)
+            )
 
     def test_validate_invalid_refresh(self):
         gss = ArticleSchema()

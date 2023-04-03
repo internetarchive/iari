@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from mwparserfromhell import parse  # type: ignore
 
 from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
@@ -185,21 +187,47 @@ class TestTemplate:
 
     def test_extract_isbn_from_cite_book_template(self):
         """Using real template from https://en.wikipedia.org/wiki/Bicycle"""
-        data = ('<ref name="Wilson">{{cite book | title = Bicycling Science | '
-                'url = https://archive.org/details/isbn_9780262731546 | url-access = '
-                'registration | edition = Third | last = Wilson | first = David Gordon |'
-                'author2=Jim Papadopoulos | year = 2004 | publisher = The MIT Press | '
-                'isbn = 978-0-262-73154-6 | pages = '
-                '[https://archive.org/details/isbn_9780262731546/page/270 270–72]}}</ref>')
+        data = (
+            '<ref name="Wilson">{{cite book | title = Bicycling Science | '
+            "url = https://archive.org/details/isbn_9780262731546 | url-access = "
+            "registration | edition = Third | last = Wilson | first = David Gordon |"
+            "author2=Jim Papadopoulos | year = 2004 | publisher = The MIT Press | "
+            "isbn = 978-0-262-73154-6 | pages = "
+            "[https://archive.org/details/isbn_9780262731546/page/270 270–72]}}</ref>"
+        )
         templates = parse(data).ifilter_templates()
         for template in templates:
             wt = WikipediaTemplate(raw_template=template)
             wt.extract_and_prepare_parameter_and_flds()
             assert wt.isbn == "978-0-262-73154-6"
+            assert wt.get_dict() == {
+                "isbn": "978-0-262-73154-6",
+                "parameters": OrderedDict(
+                    [
+                        ("title", "Bicycling Science"),
+                        ("url", "https://archive.org/details/isbn_9780262731546"),
+                        ("url_access", "registration"),
+                        ("edition", "Third"),
+                        ("last", "Wilson"),
+                        ("first", "David Gordon"),
+                        ("author2", "Jim Papadopoulos"),
+                        ("year", "2004"),
+                        ("publisher", "The MIT Press"),
+                        ("isbn", "978-0-262-73154-6"),
+                        (
+                            "pages",
+                            "[https://archive.org/details/isbn_9780262731546/page/270 "
+                            "270–72]",
+                        ),
+                        ("template_name", "cite book"),
+                    ]
+                ),
+            }
+            # print(wt.parameters)
 
     def test_extract_isbn_from_isbn_template(self):
         """This template is made up"""
-        data = ('<ref name="Wilson">{{isbn|978-0-262-73154-6}}</ref>')
+        data = '<ref name="Wilson">{{isbn|978-0-262-73154-6}}</ref>'
         templates = parse(data).ifilter_templates()
         for template in templates:
             wt = WikipediaTemplate(raw_template=template)
