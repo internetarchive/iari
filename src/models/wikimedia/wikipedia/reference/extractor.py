@@ -686,6 +686,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             ids.append(reference.reference_id)
         return ids
 
-    def star_found_at_line_start(self, line) -> bool:
+    @staticmethod
+    def star_found_at_line_start(line) -> bool:
         """This determines if the line in the current section has a star"""
         return bool("*" in line[:1])
