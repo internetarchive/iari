@@ -79,15 +79,15 @@ class WikipediaTemplate(BaseModel):
         else:
             return ""
 
-    @property
-    def get_doi(self) -> str:
-        """Helper method"""
-        if not self.extraction_done:
-            self.extract_and_prepare_parameter_and_flds()
-        if "doi" in self.parameters.keys():
-            return str(self.parameters["doi"])
-        else:
-            return ""
+    # @property
+    # def get_doi(self) -> str:
+    #     """Helper method"""
+    #     if not self.extraction_done:
+    #         self.extract_and_prepare_parameter_and_flds()
+    #     if "doi" in self.parameters.keys():
+    #         return str(self.parameters["doi"])
+    #     else:
+    #         return ""
 
     # def __extract_and_lookup_doi__(self) -> None:
     #     logger.debug("__extract_and_lookup_doi__: running")
