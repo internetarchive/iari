@@ -17,7 +17,8 @@ class WikipediaTemplate(BaseModel):
     raw_template: Template
     extraction_done: bool = False
     missing_or_empty_first_parameter: bool = False
-    language_code: str = ""  # Used only to generate the URI for the template
+    # language_code: str = ""  # Used only to generate the URI for the template
+    isbn: str = ""
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -338,11 +339,11 @@ class WikipediaTemplate(BaseModel):
     #     ):
     #         self.missing_or_empty_first_parameter = True
 
-    @property
-    def template_url(self) -> str:
-        if not self.language_code:
-            raise MissingInformationError("self.lang was empty")
-        return f"https://{self.language_code}.wikipedia.org/wiki/Template:{self.name}"
+    # @property
+    # def template_url(self) -> str:
+    #     if not self.language_code:
+    #         raise MissingInformationError("self.lang was empty")
+    #     return f"https://{self.language_code}.wikipedia.org/wiki/Template:{self.name}"
 
     def get_dict(self) -> Dict[str, Any]:
         """Return a dict that we can output to patrons via the API"""
