@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from unittest import TestCase
 
 from mwparserfromhell import parse  # type: ignore
@@ -544,3 +545,44 @@ class TestWikipediaRawReference(TestCase):
     #     assert raw_reference_object.number_of_templates == 1
     #     print(raw_reference_object.templates[0].dict())
     #     assert raw_reference_object.number_of_templates_missing_first_parameter == 1
+
+    def test_get_template_dicts_cite_book(self):
+        data = (
+            '<ref name="Wilson">{{cite book | title = Bicycling Science | '
+            "url = https://archive.org/details/isbn_9780262731546 | url-access = "
+            "registration | edition = Third | last = Wilson | first = David Gordon |"
+            "author2=Jim Papadopoulos | year = 2004 | publisher = The MIT Press | "
+            "isbn = 978-0-262-73154-6 | pages = "
+            "[https://archive.org/details/isbn_9780262731546/page/270 270–72]}}</ref>"
+        )
+        wikicode = parse(data)
+        raw_reference_object = WikipediaRawReference(
+            wikicode=wikicode,
+            testing=True,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.get_template_dicts == [
+            {
+                "parameters": OrderedDict(
+                    [
+                        ("title", "Bicycling Science"),
+                        ("url", "https://archive.org/details/isbn_9780262731546"),
+                        ("url_access", "registration"),
+                        ("edition", "Third"),
+                        ("last", "Wilson"),
+                        ("first", "David Gordon"),
+                        ("author2", "Jim Papadopoulos"),
+                        ("year", "2004"),
+                        ("publisher", "The MIT Press"),
+                        ("isbn", "978-0-262-73154-6"),
+                        (
+                            "pages",
+                            "[https://archive.org/details/isbn_9780262731546/page/270 270–72]",
+                        ),
+                        ("template_name", "cite book"),
+                    ]
+                ),
+                "isbn": "978-0-262-73154-6",
+            }
+        ]

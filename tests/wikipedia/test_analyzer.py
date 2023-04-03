@@ -71,7 +71,7 @@ class TestWikipediaAnalyzer(TestCase):
         assert wa.is_redirect is False
         assert wa.found is True
         wa.get_statistics()
-        assert len(wa.reference_statistics) == 45
+        assert len(wa.reference_statistics) == 31
         for reference in wa.reference_statistics:
             # this tests whether the deepcopy worked correctly
             assert "wikitext" in reference

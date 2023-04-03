@@ -611,11 +611,11 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                 # Guard against empty line
                 if line:
                     logger.debug("Parsing line")
-                    parsed_line = mwparserfromhell.parse(line)
-                    heading_found = bool("==" in line)
-                    logger.info(f"Heading found in line {bool(heading_found)}")
-                    if not heading_found:
-                        logger.debug("Appending to self.raw_references")
+                    # We discard all lines not starting with a star to avoid all
+                    # categories and other templates not containing any references
+                    if self.star_found_at_line_start(line=line):
+                        parsed_line = mwparserfromhell.parse(line)
+                        logger.debug("Appending line with star to self.raw_references")
                         # We don't know what the line contains so we assume it is a reference
                         self.raw_references.append(
                             WikipediaRawReference(
@@ -685,3 +685,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         for reference in self.references:
             ids.append(reference.reference_id)
         return ids
+
+    @staticmethod
+    def star_found_at_line_start(line) -> bool:
+        """This determines if the line in the current section has a star"""
+        return bool("*" in line[:1])

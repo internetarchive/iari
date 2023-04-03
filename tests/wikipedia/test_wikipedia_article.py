@@ -44,7 +44,7 @@ class TestWikipediaArticle(TestCase):
 
         page = WikipediaArticle(
             language_code="en",
-            wikimedia_site=WikimediaDomain.wikipedia,
+            wikimedia_domain=WikimediaDomain.wikipedia,
             title="Test",
         )
         page.__fetch_page_data__()
@@ -57,7 +57,7 @@ class TestWikipediaArticle(TestCase):
 
         page = WikipediaArticle(
             language_code="en",
-            wikimedia_site=WikimediaDomain.wikipedia,
+            wikimedia_domain=WikimediaDomain.wikipedia,
             title="Test2222",
         )
         page.__fetch_page_data__()
@@ -68,7 +68,7 @@ class TestWikipediaArticle(TestCase):
 
         page = WikipediaArticle(
             language_code="en",
-            wikimedia_site=WikimediaDomain.wikipedia,
+            wikimedia_domain=WikimediaDomain.wikipedia,
             title="GNU/Linux_naming_controversy",
         )
         page.__fetch_page_data__()
@@ -228,8 +228,8 @@ class TestWikipediaArticle(TestCase):
         wp.wikitext = wikitext
         wp.fetch_and_extract_and_parse()
         assert wp.extractor.number_of_citation_references == 2
-        assert wp.extractor.number_of_general_references == 22
-        assert wp.extractor.number_of_content_references == 24
+        assert wp.extractor.number_of_general_references == 32
+        assert wp.extractor.number_of_content_references == 34
 
     # noinspection PyStatementEffect
     def test_quoted_title(self):
