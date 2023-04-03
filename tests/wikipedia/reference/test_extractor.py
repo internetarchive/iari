@@ -66,7 +66,10 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.number_of_content_references == 1
         assert wre2.number_of_empty_named_references == 1
         assert wre2.references[0].raw_reference.templates[0].name == "citeq"
-        assert wre2.references[0].raw_reference.templates[0].parameters["first_parameter"] == "Q1"
+        assert (
+            wre2.references[0].raw_reference.templates[0].parameters["first_parameter"]
+            == "Q1"
+        )
 
     # def test_number_of_hashed_content_references(self):
     #     wre = WikipediaReferenceExtractor(
@@ -183,7 +186,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             check_urls=True,
         )
         wre.extract_all_references()
-        assert wre.reference_first_level_domain_counts == {'google.com': 2}
+        assert wre.reference_first_level_domain_counts == {"google.com": 2}
 
     # DISABLED because it takes to long
     # def test_first_level_domain_counts_excerpt(self):
@@ -305,6 +308,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.number_of_sections_found == 3
         assert wre.number_of_general_references == 32
+
     #
     # def test_combined_url_isbn_template_reference(self):
     #     wre = WikipediaReferenceExtractor(
