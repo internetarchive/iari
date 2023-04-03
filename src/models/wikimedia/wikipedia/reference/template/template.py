@@ -69,8 +69,6 @@ class WikipediaTemplate(BaseModel):
     @property
     def __first_parameter__(self) -> str:
         """Private helper method"""
-        if not self.extraction_done:
-            self.extract_and_prepare_parameter_and_flds()
         if self.parameters:
             if "first_parameter" in self.parameters.keys():
                 return str(self.parameters["first_parameter"])
@@ -98,16 +96,14 @@ class WikipediaTemplate(BaseModel):
     # self.doi = Doi(doi=doi)
     # self.doi.lookup_doi()
 
-    # @property
-    # def get_isbn(self) -> str:
-    #     """Helper method"""
-    #     if self.name == "isbn":
-    #         return self.__first_parameter__
-    #     elif self.is_cs1_template:
-    #         if "isbn" in self.parameters.keys():
-    #             return str(self.parameters["isbn"])
-    #     # Default to empty
-    #     return ""
+    def __extract_isbn__(self) -> None:
+        """Extract ISBN to make the life of data consumers a little bit easier"""
+        # todo make this work for multiple language editions
+        if self.name == "isbn":
+            self.isbn = self.__first_parameter__
+        else:
+            if "isbn" in self.parameters.keys():
+                self.isbn = str(self.parameters["isbn"])
 
     # DISABLED because currently qid is unfortunately not a valid field on cs1 templates
     # @property
@@ -253,9 +249,8 @@ class WikipediaTemplate(BaseModel):
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()
         self.__rename_one_to_first_parameter__()
-        # self.__extract_and_lookup_doi__()
+        self.__extract_isbn__()
         self.extraction_done = True
-        # self.__detect_missing_first_parameter__()
         self.__extract_first_level_domains_from_urls__()
 
     def __fix_class_key__(self):
@@ -347,4 +342,4 @@ class WikipediaTemplate(BaseModel):
 
     def get_dict(self) -> Dict[str, Any]:
         """Return a dict that we can output to patrons via the API"""
-        return dict(parameters=self.parameters)
+        return dict(parameters=self.parameters, isbn=self.isbn)
