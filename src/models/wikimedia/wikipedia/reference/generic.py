@@ -2,7 +2,6 @@ import hashlib
 import logging
 from typing import Any, List, Optional
 
-from src import WikimediaDomain
 from src.models.exceptions import MissingInformationError
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
@@ -52,7 +51,6 @@ class WikipediaReference(WcdItem):
     orcid: Optional[str]  # Is this present in the wild?
     persons_without_role: Optional[List[Person]]
     translators_list: Optional[List[Person]]
-    wikimedia_site: WikimediaDomain = WikimediaDomain.wikipedia
     raw_reference: Optional[WikipediaRawReference] = None
     encountered_parse_error: bool = False
     reference_id: str = ""

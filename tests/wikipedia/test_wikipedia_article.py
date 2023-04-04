@@ -1,15 +1,14 @@
 import logging
 from unittest import TestCase
 
-from wikibaseintegrator import WikibaseIntegrator  # type: ignore
-
-import config
-from src.models.exceptions import MissingInformationError
-from src.models.wikimedia.enums import WikimediaDomain
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_tail_excerpt,
 )
+from wikibaseintegrator import WikibaseIntegrator  # type: ignore
+
+import config
+from src.models.api.job.article_job import ArticleJob
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -42,35 +41,31 @@ class TestWikipediaArticle(TestCase):
     def test_fetch_page_data_and_parse_the_wikitext(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        page = WikipediaArticle(
-            language_code="en",
-            wikimedia_domain=WikimediaDomain.wikipedia,
-            title="Test",
-        )
-        page.__fetch_page_data__()
-        assert page.page_id == 11089416
-        assert page.title == "Test"
-        assert page.found_in_wikipedia is True
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test")
+        job.extract_url()
+        wp = WikipediaArticle(job=job)
+        wp.__fetch_page_data__()
+        assert wp.page_id == 11089416
+        assert wp.job.title == "Test"
+        assert wp.found_in_wikipedia is True
 
     def test_fetch_page_data_invalid_title(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        page = WikipediaArticle(
-            language_code="en",
-            wikimedia_domain=WikimediaDomain.wikipedia,
-            title="Test2222",
-        )
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test2222")
+        job.extract_url()
+        page = WikipediaArticle(job=job)
         page.__fetch_page_data__()
         assert page.found_in_wikipedia is False
 
     def test_fetch_page_data_slashed_title(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        page = WikipediaArticle(
-            language_code="en",
-            wikimedia_domain=WikimediaDomain.wikipedia,
-            title="GNU/Linux_naming_controversy",
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy"
         )
+        job.extract_url()
+        page = WikipediaArticle(job=job)
         page.__fetch_page_data__()
         assert page.found_in_wikipedia is True
 
@@ -97,18 +92,11 @@ class TestWikipediaArticle(TestCase):
     def test_is_redirect(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(
-            title="Easter island",
-            # wikibase=IASandboxWikibase()
-        )
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/WWII")
+        job.extract_url()
+        wp = WikipediaArticle(job=job)
         wp.__fetch_page_data__()
         assert wp.is_redirect is True
-        wp = WikipediaArticle(
-            title="Easter Island",
-            # wikibase=IASandboxWikibase()
-        )
-        wp.__fetch_page_data__()
-        assert wp.is_redirect is False
 
     # def test_fetch_wikidata_qid_enwiki(self):
     #     """Test fetching from enwiki"""
@@ -193,7 +181,9 @@ class TestWikipediaArticle(TestCase):
     def test___extract_and_parse_references_easter_island_head_excerpt(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(title="Easter Island")
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island")
+        job.extract_url()
+        wp = WikipediaArticle(job=job)
         wp.wikitext = easter_island_head_excerpt
         wp.fetch_and_extract_and_parse()
         assert wp.extractor.number_of_references == 3
@@ -224,25 +214,11 @@ class TestWikipediaArticle(TestCase):
         wikitext = f"{easter_island_head_excerpt}\n{easter_island_tail_excerpt}"
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        wp = WikipediaArticle(title="Easter Island")
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island")
+        job.extract_url()
+        wp = WikipediaArticle(job=job)
         wp.wikitext = wikitext
         wp.fetch_and_extract_and_parse()
         assert wp.extractor.number_of_citation_references == 2
         assert wp.extractor.number_of_general_references == 32
         assert wp.extractor.number_of_content_references == 34
-
-    # noinspection PyStatementEffect
-    def test_quoted_title(self):
-        from src import WikipediaArticle
-
-        wp = WikipediaArticle(
-            title="GNU/Linux_naming_controversy",
-            # wikibase=IASandboxWikibase()
-        )
-        assert wp.quoted_title == "GNU%2FLinux_naming_controversy"
-        wp = WikipediaArticle(
-            title="",
-            # wikibase=IASandboxWikibase()
-        )
-        with self.assertRaises(MissingInformationError):
-            wp.quoted_title

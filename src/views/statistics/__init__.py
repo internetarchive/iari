@@ -5,7 +5,7 @@ from flask import request
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
-from src import console
+from src.helpers.console import console
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo

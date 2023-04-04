@@ -42,3 +42,11 @@ class TestArticleJob(TestCase):
         self.assertEqual(job.lang, Lang.en)
         self.assertEqual(job.domain, WikimediaDomain.wikipedia)
         self.assertEqual(job.title, "Test")
+
+    # noinspection PyStatementEffect
+    def test_quoted_title(self):
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy"
+        )
+        job.extract_url()
+        assert job.quoted_title == "GNU%2FLinux_naming_controversy"
