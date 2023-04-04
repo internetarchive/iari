@@ -5,18 +5,17 @@ from typing import Dict, List
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
-import config
+from src.models.basemodels.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
-from src.wcd_base_model import WcdBaseModel
 
-logging.basicConfig(level=config.loglevel)
+# logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class WikipediaReferenceExtractor(WcdBaseModel):
+class WikipediaReferenceExtractor(JobBaseModel):
     """This class handles all extraction of references from wikicode
 
     Design:

@@ -4,9 +4,9 @@ from os.path import exists
 from typing import Any, Dict, Optional
 
 import config
-from src import WcdBaseModel
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from src import console
+from src.helpers.console import console
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo

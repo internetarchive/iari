@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from pydantic import BaseModel, Extra
 
-from src import WikimediaDomain
+from src.models.wikimedia.enums import WikimediaDomain
 
 
 class ArticleStatistics(BaseModel):

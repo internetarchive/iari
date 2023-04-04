@@ -9,9 +9,9 @@ from urllib.parse import quote
 import aiohttp
 import requests
 
-from src import WcdBaseModel
 from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
+from src.wcd_base_model import WcdBaseModel
 
 
 class AllHandler(WcdBaseModel):

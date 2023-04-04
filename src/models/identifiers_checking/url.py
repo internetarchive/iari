@@ -24,7 +24,7 @@ from requests.exceptions import (
 )
 from requests.models import LocationParseError
 
-from src import console
+from src.helpers.console import console
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 

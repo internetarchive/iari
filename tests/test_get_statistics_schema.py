@@ -2,9 +2,9 @@ from unittest import TestCase
 
 from marshmallow import ValidationError
 
-from src import WikimediaDomain
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.schema.article_schema import ArticleSchema
+from src.models.wikimedia.enums import WikimediaDomain
 
 
 class TestArticleSchema(TestCase):

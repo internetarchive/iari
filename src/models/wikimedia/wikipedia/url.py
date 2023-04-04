@@ -28,7 +28,7 @@ class WikipediaUrl(BaseModel):
     netloc: str = ""  # network location e.g. google.com
     tld: str = ""  # top level domain
     unrecognized_scheme: bool = False
-    unrecognized_tld: bool = False
+    unrecognized_tld_length: bool = False
     added_http_scheme_worked: bool = False
     malformed_url: bool = False
     scheme_missing: bool = False
@@ -136,9 +136,10 @@ class WikipediaUrl(BaseModel):
         if not self.netloc:
             logger.warning("netloc was empty")
         else:
-            if len(self.tld) not in [2, 6]:
-                logger.warning(f"TLD '{self.tld}' in {self.__get_url__} not recognized")
-                self.unrecognized_tld = True
+            length = len(self.tld)
+            if not (6 > length > 2):
+                logger.warning(f"TLD '{self.tld}' with length {length} was not a recognized length")
+                self.unrecognized_tld_length = True
                 self.malformed_url = True
             else:
                 logger.debug(

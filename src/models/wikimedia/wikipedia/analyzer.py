@@ -76,7 +76,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                     general=ae.number_of_general_references,
                 ),
                 page_id=self.article.page_id,
-                title=self.article.title,
+                title=self.job.title,
                 urls=ae.raw_urls,
                 fld_counts=ae.reference_first_level_domain_counts,
                 served_from_cache=False,
@@ -165,10 +165,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         if self.job and self.job.title:
             # Todo consider propagating job further here
             self.article = WikipediaArticle(
-                title=self.job.title,
-                wikimedia_domain=self.job.domain,
-                language_code=self.job.lang.value,
-                check_urls=self.check_urls,
+                job=self.job,
             )
         else:
             raise MissingInformationError("Got no title")

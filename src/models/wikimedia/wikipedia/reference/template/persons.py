@@ -4,13 +4,13 @@ from typing import List, Optional
 
 from pydantic import validate_arguments
 
-from src import WcdBaseModel
 from src.models.exceptions import LanguageNotSupportedError, MoreThanOneNumberError
 from src.models.wikimedia.wikipedia.reference.enums import (
     EnglishWikipediaTemplatePersonRole,
 )
 from src.models.wikimedia.wikipedia.reference.template.person import Person
 from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 

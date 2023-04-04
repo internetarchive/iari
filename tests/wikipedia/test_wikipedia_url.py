@@ -191,21 +191,21 @@ class TestWikipediaUrl(TestCase):
     def test_extract_first_level_domain_malformed4(self):
         url = WikipediaUrl(url="https://www1.geocities.")
         url.extract()
-        assert url.unrecognized_tld is True
+        assert url.unrecognized_tld_length is True
 
     def test___check_tld__invalid(self):
         url = WikipediaUrl(url="https://www1.geocities.")
         url.__parse_and_extract_url__()
         url.__extract_tld__()
         url.__check_tld__()
-        assert url.unrecognized_tld is True
+        assert url.unrecognized_tld_length is True
 
     def test___check_tld__valid(self):
         url = WikipediaUrl(url="https://www.google.com")
         url.__parse_and_extract_url__()
         url.__extract_tld__()
         url.__check_tld__()
-        assert url.unrecognized_tld is False
+        assert url.unrecognized_tld_length is False
 
     def test_check_scheme(self):
         url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")

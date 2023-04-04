@@ -1,13 +1,13 @@
 import logging
 from datetime import datetime
 from typing import Optional
-from urllib.parse import quote
 
 import requests
 from dateutil.parser import isoparse
 from pydantic import validate_arguments
 
 import config
+from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaDomain
@@ -38,17 +38,12 @@ class WikipediaArticle(WcdItem):
     extractor: Optional[WikipediaReferenceExtractor] = None
     check_urls: bool = False
     testing: bool = False
+    job: ArticleJob
     # TODO add language_code to avoid enwiki hardcoding
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
         extra = "forbid"  # dead: disable
-
-    @property
-    def quoted_title(self):
-        if not self.title:
-            raise MissingInformationError("self.title was empty")
-        return quote(self.title, safe="")
 
     # @property
     # def absolute_url(self):
@@ -64,16 +59,13 @@ class WikipediaArticle(WcdItem):
     @property
     def underscored_title(self):
         """Helper property"""
-        if self.title is None:
-            raise ValueError("self.title was None")
-        return self.title.replace(" ", "_")
+        if not self.job.title:
+            raise ValueError("self.title was empty")
+        return self.job.title.replace(" ", "_")
 
     @property
     def url(self):
-        return (
-            f"https://{self.language_code}.{self.wikimedia_domain.value}.org/"
-            f"wiki/{quote(self.underscored_title)}"
-        )
+        return self.job.url
 
     # @property
     # def wikibase_url(self):
@@ -110,8 +102,7 @@ class WikipediaArticle(WcdItem):
             self.extractor = WikipediaReferenceExtractor(
                 wikitext=self.wikitext,
                 # wikibase=self.wikibase,
-                check_urls=self.check_urls,
-                language_code=self.language_code,
+                job=self.job,
             )
             self.extractor.extract_all_references()
             # self.__generate_hash__()
@@ -134,8 +125,8 @@ class WikipediaArticle(WcdItem):
             # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base or
             # https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy
             url = (
-                f"https://{self.language_code}.{self.wikimedia_domain.value}/"
-                f"w/rest.php/v1/page/{self.quoted_title}"
+                f"https://{self.job.lang.value}.{self.job.domain.value}/"
+                f"w/rest.php/v1/page/{self.job.quoted_title}"
             )
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
@@ -491,5 +482,5 @@ class WikipediaArticle(WcdItem):
         #     raise MissingInformationError("no entities from Wikidata")
 
     def __check_if_title_is_empty__(self):
-        if not self.title:
-            raise MissingInformationError("self.title was empty string")
+        if not self.job.title:
+            raise MissingInformationError("self.job.title was empty string")
