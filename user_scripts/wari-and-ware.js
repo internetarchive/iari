@@ -4,11 +4,13 @@
 // Inspired by https://en.wikipedia.org/wiki/User:Dipankan001/New_pages.js
 // Note: This user script was created as part of wcdimportbot, see https://www.wikidata.org/wiki/Q115252313
 
-let api_url = "https://archive.org/services/context/wari/"
-let version = "v2"
+let wari_url = "https://archive.org/services/context/wari/"
+let ware_staging_url = "https://internetarchive.github.io/ware/"
+let ware_production_url = "https://archive.org/services/context/ware/"
+let wari_version = "v2"
 
 function get_article_url(refresh){
-    let url = api_url + version + "/statistics/article"+
+    let url = wari_url + wari_version + "/statistics/article"+
           "?url=" + encodeURIComponent(window.location.href)
     if (refresh) {
         return url + "&refresh=true"
@@ -19,13 +21,22 @@ function get_article_url(refresh){
 }
 
 function get_all_url(refresh){
-    let url = api_url + version + "/statistics/all"+
+    let url = wari_url + wari_version + "/statistics/all"+
           "?url=" + encodeURIComponent(window.location.href)
     if (refresh) {
         return url + "&refresh=true"
     }
     else {
         return url + "&refresh=false"
+    }
+}
+
+function get_ware_url(version){
+    if (version == "staging") {
+        return ware_staging_url + "?url=" + encodeURIComponent(window.location.href)
+    }
+    else {
+        return ware_production_url + "?url=" + encodeURIComponent(window.location.href)
     }
 }
 
@@ -66,22 +77,33 @@ function addPortletLinkArticleRefresh(){
           "View fresh statistics for this article by the WARI API. "
           );
 }
-function addPortletWare(){
+function addPortletWareStaging(){
           mw.util.addPortletLink(
           "p-tb",
-          "https://archive.org/services/context/ware/",
+          get_ware_url("staging"),
+          "Go to WARE (staging)",
+          "tb-ware",
+          "View statistics for this article in the staging version of WARE."
+          );
+}
+
+function addPortletWareProduction(){
+          mw.util.addPortletLink(
+          "p-tb",
+          get_ware_url(),
           "Go to WARE",
           "tb-ware",
-          "View statistics for this article in WARE."
+          "View statistics for this article in the production version of WARE."
           );
 }
 
 if(mw.config.values.wgNamespaceNumber === 0) {
+    $(addPortletWareProduction);
+    $(addPortletWareStaging);
     $(addPortletLinkAll);
     $(addPortletLinkAllRefresh);
     $(addPortletLinkArticle);
     $(addPortletLinkArticleRefresh);
-    $(addPortletWare);
 }
 
 
