@@ -1,14 +1,14 @@
 import logging
 from unittest import TestCase
 
-from test_data.test_content import (  # type: ignore
-    easter_island_head_excerpt,
-    easter_island_tail_excerpt,
-)
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
 from src.models.api.job.article_job import ArticleJob
+from test_data.test_content import (  # type: ignore
+    easter_island_head_excerpt,
+    easter_island_tail_excerpt,
+)
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)

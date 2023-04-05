@@ -1,6 +1,5 @@
 from src.models.basemodels.job import JobBaseModel
 
-
 # if TYPE_CHECKING:
 #     from src.models.wikibase.crud.create import WikibaseCrudCreate
 #     from src.models.wikibase.crud.read import WikibaseCrudRead

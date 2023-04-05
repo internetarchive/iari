@@ -138,7 +138,9 @@ class WikipediaUrl(BaseModel):
         else:
             length = len(self.tld)
             if not (6 > length > 2):
-                logger.warning(f"TLD '{self.tld}' with length {length} was not a recognized length")
+                logger.warning(
+                    f"TLD '{self.tld}' with length {length} was not a recognized length"
+                )
                 self.unrecognized_tld_length = True
                 self.malformed_url = True
             else:
