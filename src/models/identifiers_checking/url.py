@@ -101,6 +101,7 @@ class Url(WikipediaUrl):
                 timeout=self.timeout,
                 verify=True,
                 headers=self.__spoofing_headers__,
+                allow_redirects=True,
             )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
@@ -143,6 +144,7 @@ class Url(WikipediaUrl):
                 timeout=self.timeout,
                 verify=False,
                 headers=self.__spoofing_headers__,
+                allow_redirects=True,
             )
             self.status_code = r.status_code
             logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
