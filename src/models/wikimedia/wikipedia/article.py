@@ -8,8 +8,8 @@ from pydantic import validate_arguments
 
 import config
 from src.models.api.job.article_job import ArticleJob
+from src.models.basemodels.job import JobBaseModel
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaDomain
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
@@ -18,7 +18,7 @@ from src.models.wikimedia.wikipedia.reference.extractor import (
 logger = logging.getLogger(__name__)
 
 
-class WikipediaArticle(WcdItem):
+class WikipediaArticle(JobBaseModel):
     """Models a WMF Wikipedia article
 
     Implementation details:

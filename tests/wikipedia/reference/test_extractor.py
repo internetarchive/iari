@@ -11,6 +11,7 @@ from test_data.test_content import (  # type: ignore
     test_full_article,
 )
 
+
 # wikibase = IASandboxWikibase()
 
 
@@ -67,8 +68,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.number_of_empty_named_references == 1
         assert wre2.references[0].raw_reference.templates[0].name == "citeq"
         assert (
-            wre2.references[0].raw_reference.templates[0].parameters["first_parameter"]
-            == "Q1"
+                wre2.references[0].raw_reference.templates[0].parameters["first_parameter"]
+                == "Q1"
         )
 
     # def test_number_of_hashed_content_references(self):
@@ -245,41 +246,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.has_references is False
 
-    # def test_malformed_urls_empty(self):
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="test",
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.malformed_urls == []
-
-    # def test_malformed_urls_one(self):
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref>",
-    #         check_urls=True,
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.number_of_urls == 1
-    #     # print(wre.urls)
-    #     assert wre.malformed_urls == ["httpwww.google.com"]
-
-    # def test_malformed_urls_two(self):
-    #     """Test with two examples of malformed URLs"""
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref><ref>{{cite web|url=google.com}}</ref>",
-    #         check_urls=True,
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.number_of_urls == 2
-    #     # print(wre.urls)
-    #     sorted_urls = sorted(wre.malformed_urls)
-    #     assert sorted_urls == [
-    #         "google.com",
-    #         "httpwww.google.com",
-    #     ]
-
     def test_sections_sources(self):
         wre = WikipediaReferenceExtractor(
             testing=True,
@@ -309,13 +275,14 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_sections_found == 3
         assert wre.number_of_general_references == 32
 
-    #
-    # def test_combined_url_isbn_template_reference(self):
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",
-    #         check_urls=False,
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.number_of_isbn_template_references == 1
-    #     assert wre.number_of_url_template_references == 1
+    def test_parameters_easter_island_tail(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext=easter_island_tail_excerpt,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_sections_found == 3
+        assert wre.number_of_general_references == 32
+        for reference in wre.references:
+            print(reference)
+            exit()

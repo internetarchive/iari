@@ -156,9 +156,8 @@ class WikipediaReferenceExtractor(JobBaseModel):
     def number_of_references(self) -> int:
         return len(self.references)
 
-
     def number_of_content_references_with_a_url(
-        self, list_: List[WikipediaReference] = None
+            self, list_: List[WikipediaReference] = None
     ) -> int:
         if list_ is None:
             list_ = self.content_references

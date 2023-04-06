@@ -2,8 +2,8 @@ import hashlib
 import logging
 from typing import Any, List, Optional
 
+from src.models.basemodels.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
-from src.models.wcd_item import WcdItem
 from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 from src.models.wikimedia.wikipedia.reference.template.person import Person
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # https://github.com/samuelcolvin/pydantic/discussions/3855
 
 
-class WikipediaReference(WcdItem):
+class WikipediaReference(JobBaseModel):
     """This models any page_reference on a Wikipedia page
 
     As we move to support more than one Wikipedia this model should be generalized further.
@@ -38,7 +38,7 @@ class WikipediaReference(WcdItem):
     first_level_domain_of_archive_url: Optional[str]
     first_level_domain_of_url: Optional[str]
     first_level_domain_of_url_hash: Optional[str]
-    website_item: Optional[WcdItem]
+    # website_item: Optional[WcdItem]
     # google_books: Optional[GoogleBooks]
     # google_books_id: Optional[str]
     hosts_list: Optional[List[Person]]
