@@ -28,7 +28,9 @@ class TestArticleFileIo(TestCase):
     #     assert io2.filename == "json/en.wikipedia.org:11089416"
 
     # https://stackoverflow.com/questions/73973332/check-if-were-in-a-github-action-tracis-ci-circle-ci-etc-testing-environme
-    @pytest.mark.skipif('GITHUB_ACTIONS' in os.environ, reason="test is skipped in GitHub Actions")
+    @pytest.mark.skipif(
+        "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
+    )
     def test_save_to_disk(self):
         io1 = ArticleFileIo(
             job=self.job, data=ArticleStatistics(page_id=1).dict(), testing=True
@@ -37,7 +39,9 @@ class TestArticleFileIo(TestCase):
         io1.write_to_disk()
         assert exists(io1.path_filename) is True
 
-    @pytest.mark.skipif('GITHUB_ACTIONS' in os.environ, reason="test is skipped in GitHub Actions")
+    @pytest.mark.skipif(
+        "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
+    )
     def test_read_from_disk(self):
         stat = ArticleStatistics(page_id=11089416, served_from_cache=True)
         io1 = ArticleFileIo(job=self.job, data=stat, testing=True)
