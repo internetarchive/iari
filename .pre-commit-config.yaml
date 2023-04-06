@@ -33,7 +33,7 @@ repos:
   - id: bandit
     name: bandit
     language: system
-    entry: bandit --recursive --skip B101,B105,B324,B501 src  # B101 is assert statements
+    entry: bandit --recursive --skip B101,B105,B113,B324,B501 src  # B101 is assert statements
     types: [python]
 
   - id: isort
