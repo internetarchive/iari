@@ -11,12 +11,6 @@ from src.models.file_io.references import ReferencesFileIo
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaDomain
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.views.statistics.write_view import StatisticsWriteView
-from test_data.test_content import (  # type: ignore
-    easter_island_head_excerpt,
-    easter_island_short_tail_excerpt,
-    electrical_breakdown_full_article,
-    test_full_article,
-)
 
 
 class Article(StatisticsWriteView):

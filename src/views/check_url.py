@@ -11,13 +11,6 @@ from src.models.exceptions import MissingInformationError
 from src.models.file_io.url_file_io import UrlFileIo
 from src.models.identifiers_checking.url import Url
 from src.views.statistics.write_view import StatisticsWriteView
-from test_data.test_content import (  # type: ignore
-    easter_island_head_excerpt,
-    easter_island_short_tail_excerpt,
-    easter_island_tail_excerpt,
-    electrical_breakdown_full_article,
-    test_full_article,
-)
 
 
 class CheckUrl(StatisticsWriteView):

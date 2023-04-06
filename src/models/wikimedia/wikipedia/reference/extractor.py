@@ -154,9 +154,9 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(self.references)
 
     def number_of_content_references_with_a_url(
-        self, list_: List[WikipediaReference] = None
+        self, list_: List[WikipediaReference]
     ) -> int:
-        if list_ is None:
+        if not list_:
             list_ = self.content_references
         result = len([ref for ref in list_ if ref and ref.url_found])
         return result
