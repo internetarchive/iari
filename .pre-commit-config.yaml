@@ -27,6 +27,7 @@ repos:
 #      - "tests/"
 #      - "*.md"
 #      - "*.py"
+    # pass_filenames: false
     types_or: [python, markdown]
     exclude: ^test_data/
 

@@ -14,7 +14,7 @@ https://en.wikipedia.org/wiki/User:BrandonXLF/Citoid
 
 ### [Web2cit](https://www.wikidata.org/wiki/Q115473545) (launched in september 2022)
 
-This is not the default but way more accurate and customizeable than citoid it seems.
+This is not the default but way more accurate and customizable than citoid it seems.
 It was made by Diego de la hara who seems competent at writing JavaScript and got a grant
 for creating Web2Cit in 2022
 It currently has
