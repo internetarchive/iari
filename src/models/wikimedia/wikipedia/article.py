@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import requests
 from dateutil.parser import isoparse
@@ -9,16 +9,13 @@ from pydantic import validate_arguments
 import config
 from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-from src.models.wcd_item import WcdItem
 from src.models.wikimedia.enums import WikimediaDomain
-from src.models.wikimedia.wikipedia.reference.extractor import (
-    WikipediaReferenceExtractor,
-)
+from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikipediaArticle(WcdItem):
+class WikipediaArticle(WcdBaseModel):
     """Models a WMF Wikipedia article
 
     Implementation details:
@@ -35,11 +32,10 @@ class WikipediaArticle(WcdItem):
     wikitext: Optional[str]
     wdqid: str = ""
     found_in_wikipedia: bool = True
-    extractor: Optional[WikipediaReferenceExtractor] = None
+    extractor: Optional[Any] = None
     check_urls: bool = False
     testing: bool = False
     job: ArticleJob
-    # TODO add language_code to avoid enwiki hardcoding
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -99,6 +95,10 @@ class WikipediaArticle(WcdItem):
                 raise MissingInformationError("self.wikitext was empty")
             # We got what we need now to make the extraction and parsing
             # print(self.wikitext)
+            from src.models.wikimedia.wikipedia.reference.extractor import (
+                WikipediaReferenceExtractor,
+            )
+
             self.extractor = WikipediaReferenceExtractor(
                 wikitext=self.wikitext,
                 # wikibase=self.wikibase,

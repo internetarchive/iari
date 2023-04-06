@@ -5,7 +5,6 @@ from typing import Any, Dict, Optional
 
 import config
 from src.models.api.job import Job
-from src.models.exceptions import MissingInformationError
 from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
@@ -14,10 +13,13 @@ logger = logging.getLogger(__name__)
 class FileIo(WcdBaseModel):
     job: Optional[Job] = None
     data: Dict[str, Any] = dict()
-    hash_based_id: str = ""
     wari_id: str = ""
     subfolder: str = ""
     testing: bool = False
+
+    @property
+    def filename(self):
+        return f"{self.wari_id}.json"
 
     @property
     def path_filename(self) -> str:
@@ -34,14 +36,6 @@ class FileIo(WcdBaseModel):
             )
         app.logger.debug(f"using path: {path_filename}")
         return path_filename
-
-    @property
-    def filename(self) -> str:
-        """Returns the filename of the"""
-        if not self.hash_based_id:
-            raise MissingInformationError()
-        else:
-            return f"{self.hash_based_id}.json"
 
     def write_to_disk(
         self,

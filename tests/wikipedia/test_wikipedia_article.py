@@ -171,11 +171,11 @@ class TestWikipediaArticle(TestCase):
     #     wp.fetch_and_extract_and_parse()
     #     assert wp.extractor.number_of_references == 1
     # assert (
-    #     wp.extractor.citeq_references[0].raw_reference.templates[0].raw_template
+    #     wp.extractor.citeq_references[0].templates[0].raw_template
     #     == "{{citeq|1}}"
     # )
     # assert (
-    #     wp.extractor.citeq_references[0].raw_reference.templates[0].name == "citeq"
+    #     wp.extractor.citeq_references[0].templates[0].name == "citeq"
     # )
 
     def test___extract_and_parse_references_easter_island_head_excerpt(self):
@@ -189,10 +189,8 @@ class TestWikipediaArticle(TestCase):
         assert wp.extractor.number_of_references == 3
         assert wp.extractor.number_of_empty_named_references == 1
         assert wp.extractor.number_of_content_references == 2
-        assert wp.extractor.content_references[0].raw_reference.number_of_templates == 1
-        assert wp.extractor.content_references[0].raw_reference.templates[
-            0
-        ].raw_template == (
+        assert wp.extractor.content_references[0].number_of_templates == 1
+        assert wp.extractor.content_references[0].templates[0].raw_template == (
             "{{cite web | url= http://www.ine.cl/canales/chile_estadistico/censos_poblacion_viviend"
             "a/censo_pobl_vivi.php | title= Censo de Población y Vivienda 2002 | work= [[National Statistics Institute "
             "(Chile)|National Statistics Institute]] | access-date= 1 May 2010 | url-stat"
@@ -200,10 +198,8 @@ class TestWikipediaArticle(TestCase):
             "l= https://web.archive.org/web/20100715195638/http://www.ine.cl/canales/chile_estadistic"
             "o/censos_poblacion_vivienda/censo_pobl_vivi.php | archive-date= 15 July 2010}}"
         )
-        # print(wp.extractor.references[1].raw_reference.templates)
-        assert wp.extractor.content_references[1].raw_reference.templates[
-            0
-        ].raw_template == (
+        # print(wp.extractor.references[1].templates)
+        assert wp.extractor.content_references[1].templates[0].raw_template == (
             "{{cite web |language= es |url= https://resultados.censo2017.cl/Home/Download |title= Censo 2017 |wo"
             "rk= [[National Statistics Institute (Chile)|National Statistics Institute]] |access-d"
             "ate= 11 May 2018 |archive-url= https://web.archive.org/web/20180511145942/https://resultados.censo2"

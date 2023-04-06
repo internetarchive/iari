@@ -127,9 +127,9 @@ class WikipediaAnalyzer(WcdBaseModel):
                 f"{self.article.extractor.number_of_references} references"
             )
             for reference in self.article.extractor.references:
-                if not reference.raw_reference:
+                if not reference:
                     raise MissingInformationError("raw_reference was None")
-                rr = reference.raw_reference
+                rr = reference
                 if rr.footnote_subtype:
                     subtype = rr.footnote_subtype.value
                 else:

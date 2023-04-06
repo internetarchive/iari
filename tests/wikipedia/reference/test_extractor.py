@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from src.helpers.console import console
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
@@ -65,11 +67,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.number_of_references == 2
         assert wre2.number_of_content_references == 1
         assert wre2.number_of_empty_named_references == 1
-        assert wre2.references[0].raw_reference.templates[0].name == "citeq"
-        assert (
-            wre2.references[0].raw_reference.templates[0].parameters["first_parameter"]
-            == "Q1"
-        )
+        assert wre2.references[0].templates[0].name == "citeq"
+        assert wre2.references[0].templates[0].parameters["first_parameter"] == "Q1"
 
     # def test_number_of_hashed_content_references(self):
     #     wre = WikipediaReferenceExtractor(
@@ -115,8 +114,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.number_of_sections_found == 0
         assert wre.number_of_citation_references == 2
-        assert wre.content_references[0].raw_reference.number_of_templates == 1
-        assert wre.content_references[1].raw_reference.number_of_templates == 1
+        assert wre.content_references[0].number_of_templates == 1
+        assert wre.content_references[1].number_of_templates == 1
 
     def test__extract_sections_test(self):
         wre = WikipediaReferenceExtractor(testing=True, wikitext=test_full_article)
@@ -155,8 +154,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         wre.extract_all_references()
         assert wre.number_of_content_references == 1
-        assert wre.content_references[0].raw_reference.templates[0].name == "isbn"
-        assert wre.content_references[0].raw_reference.templates[0].isbn == "1234"
+        assert wre.content_references[0].templates[0].name == "isbn"
+        assert wre.content_references[0].templates[0].isbn == "1234"
         # assert wre.number_of_isbn_template_references == 1
         # assert wre.number_of_hashed_content_references == 1
 
@@ -245,41 +244,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.has_references is False
 
-    # def test_malformed_urls_empty(self):
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="test",
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.malformed_urls == []
-
-    # def test_malformed_urls_one(self):
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref>",
-    #         check_urls=True,
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.number_of_urls == 1
-    #     # print(wre.urls)
-    #     assert wre.malformed_urls == ["httpwww.google.com"]
-
-    # def test_malformed_urls_two(self):
-    #     """Test with two examples of malformed URLs"""
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="<ref>{{cite web|url=httpwww.google.com}}</ref><ref>{{cite web|url=google.com}}</ref>",
-    #         check_urls=True,
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.number_of_urls == 2
-    #     # print(wre.urls)
-    #     sorted_urls = sorted(wre.malformed_urls)
-    #     assert sorted_urls == [
-    #         "google.com",
-    #         "httpwww.google.com",
-    #     ]
-
     def test_sections_sources(self):
         wre = WikipediaReferenceExtractor(
             testing=True,
@@ -309,13 +273,45 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_sections_found == 3
         assert wre.number_of_general_references == 32
 
-    #
-    # def test_combined_url_isbn_template_reference(self):
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext="<ref>{{url|http://example.com}}{{isbn|1234}}</ref>",
-    #         check_urls=False,
-    #     )
-    #     wre.extract_all_references()
-    #     assert wre.number_of_isbn_template_references == 1
-    #     assert wre.number_of_url_template_references == 1
+    def test_parameters_easter_island_tail(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext=easter_island_tail_excerpt,
+        )
+        wre.extract_all_references()
+        assert wre.number_of_sections_found == 3
+        assert wre.number_of_general_references == 32
+        for reference in wre.references:
+            if reference.template_names and not reference.get_template_dicts:
+                console.print(reference)
+                exit()
+
+    def test_parameters_yardbirds_reference(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext=(
+                "<ref>The following sources refer to the Yardbirds as blues rock:\n"
+                "*{{cite book |last= Knowles|first= Christopher|date= 2010|title"
+                "= The Secret History of Rock 'n' Roll|url= https://"
+                "books.google.com/books?id=TMHr1g7T8gQC&q=The+Yardbirds+blues+rock"
+                "&pg=PT93|publisher= Viva Editions|isbn= 978-1573444057}}\n*{{"
+                "cite book|last= Talevski|first= Nick|date= 1999|title= The Encyclopedia of Rock Obituaries"
+                "|url= https://archive.org/details/tombstoneblues00nick/page/356|publisher= Omnibus Press"
+                "|page= [https://archive.org/details/tombstoneblues00nick/page/"
+                "356 356]|isbn= 978-0711975484}}\n*{{cite book|last= Witmer|first= Scott|"
+                "date= 2009|title= History of Rock Bands|url= https://archive.org/details/"
+                "historyofrockban0000witm/page/18|publisher= Abdo Publishing Company|page= [https://archive"
+                ".org/details/historyofrockban0000witm/page/18 18]|isbn= 978-1604536928}}\n"
+                "*{{cite book |last= Wadhams|first= Wayne|date= 2001|title= Inside the Hits: The Seduction of"
+                " a Rock and Roll Generation (Pop Culture)|publisher= Omnibus Press|page= 189|"
+                "isbn= 978-0634014307}}</ref>"
+            ),
+        )
+        wre.extract_all_references()
+        assert wre.number_of_references == 1
+        for reference in wre.references:
+            for template in reference.templates:
+                if not template.parameters:
+                    console.print(template)
+                    raise MissingInformationError()
+        # console.print(wre.references)

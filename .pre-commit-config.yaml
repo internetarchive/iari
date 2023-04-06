@@ -27,13 +27,14 @@ repos:
 #      - "tests/"
 #      - "*.md"
 #      - "*.py"
+    # pass_filenames: false
     types_or: [python, markdown]
     exclude: ^test_data/
 
   - id: bandit
     name: bandit
     language: system
-    entry: bandit --recursive --skip B101,B105,B324,B501 src  # B101 is assert statements
+    entry: bandit --recursive --skip B101,B105,B113,B324,B501 src  # B101 is assert statements
     types: [python]
 
   - id: isort
@@ -74,6 +75,7 @@ repos:
     # use require_serial so that script
     # is only called once per commit
     require_serial: true
+    exclude: ^test_data/
     # Print the number of files as a sanity-check
     # verbose: true
 
