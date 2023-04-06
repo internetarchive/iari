@@ -23,48 +23,9 @@ class WikipediaTemplate(BaseModel):
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
-    # @property
-    # def doi_lookup_done(self) -> bool:
-    #     if self.doi:
-    #         return self.doi.doi_lookup_done
-    #     else:
-    #         return False
-
     @property
     def wikitext(self) -> str:
         return str(self.raw_template)
-
-    # @property
-    # def is_known_multiref_template(self) -> bool:
-    #     return bool(self.name in config.known_multiref_templates)
-    #
-    # @property
-    # def is_isbn_template(self) -> bool:
-    #     return bool(self.name in config.isbn_template)
-    #
-    # @property
-    # def is_bareurl_template(self) -> bool:
-    #     return bool(self.name in config.citeq_templates)
-    #
-    # @property
-    # def is_citeq_template(self) -> bool:
-    #     return bool(self.name in config.citeq_templates)
-    #
-    # @property
-    # def is_citation_template(self) -> bool:
-    #     return bool(self.name in config.citation_template)
-    #
-    # @property
-    # def is_cs1_template(self) -> bool:
-    #     return bool(self.name in config.cs1_templates)
-    #
-    # @property
-    # def is_url_template(self) -> bool:
-    #     return bool(self.name in config.url_template)
-    #
-    # @property
-    # def is_webarchive_template(self) -> bool:
-    #     return bool(self.name in config.webarchive_templates)
 
     @property
     def __first_parameter__(self) -> str:
@@ -77,25 +38,6 @@ class WikipediaTemplate(BaseModel):
         else:
             return ""
 
-    # @property
-    # def get_doi(self) -> str:
-    #     """Helper method"""
-    #     if not self.extraction_done:
-    #         self.extract_and_prepare_parameter_and_flds()
-    #     if "doi" in self.parameters.keys():
-    #         return str(self.parameters["doi"])
-    #     else:
-    #         return ""
-
-    # def __extract_and_lookup_doi__(self) -> None:
-    #     logger.debug("__extract_and_lookup_doi__: running")
-    #     if self.parameters and "doi" in self.parameters:
-    # doi = self.parameters["doi"]
-    # if doi:
-    #     self.doi_found = True
-    # self.doi = Doi(doi=doi)
-    # self.doi.lookup_doi()
-
     def __extract_isbn__(self) -> None:
         """Extract ISBN to make the life of data consumers a little bit easier"""
         # todo make this work for multiple language editions
@@ -104,14 +46,6 @@ class WikipediaTemplate(BaseModel):
         else:
             if "isbn" in self.parameters.keys():
                 self.isbn = str(self.parameters["isbn"])
-
-    # DISABLED because currently qid is unfortunately not a valid field on cs1 templates
-    # @property
-    # def get_qid(self) -> str:
-    #     """Helper method"""
-    #     if not self.parameters:
-    #         raise MissingInformationError("no parameters")
-    #     return self.parameters[""]
 
     @property
     def urls(self) -> List[WikipediaUrl]:
@@ -324,21 +258,6 @@ class WikipediaTemplate(BaseModel):
             for url in self.urls
             if url.first_level_domain == ""
         ]
-
-    # def __detect_missing_first_parameter__(self):
-    #     """Url, webarchive and isbn templates should always have a first parameter"""
-    #     logger.debug("__detect_missing_first_parameter__: running")
-    #     if (
-    #         self.name in config.templates_with_mandatory_first_parameter
-    #         and not self.__first_parameter__
-    #     ):
-    #         self.missing_or_empty_first_parameter = True
-
-    # @property
-    # def template_url(self) -> str:
-    #     if not self.language_code:
-    #         raise MissingInformationError("self.lang was empty")
-    #     return f"https://{self.language_code}.wikipedia.org/wiki/Template:{self.name}"
 
     def get_dict(self) -> Dict[str, Any]:
         """Return a dict that we can output to patrons via the API"""
