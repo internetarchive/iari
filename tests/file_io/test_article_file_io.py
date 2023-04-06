@@ -2,6 +2,8 @@ import os
 from os.path import exists
 from unittest import TestCase
 
+import pytest
+
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.statistic.article import ArticleStatistics
 from src.models.file_io.article_file_io import ArticleFileIo
@@ -25,8 +27,7 @@ class TestArticleFileIo(TestCase):
     #     io2.job.get_page_id()
     #     assert io2.filename == "json/en.wikipedia.org:11089416"
 
-    import pytest
-
+    # https://stackoverflow.com/questions/73973332/check-if-were-in-a-github-action-tracis-ci-circle-ci-etc-testing-environme
     @pytest.mark.skipif('GITHUB_ACTIONS' in os.environ, reason="test is skipped in GitHub Actions")
     def test_save_to_disk(self):
         io1 = ArticleFileIo(
