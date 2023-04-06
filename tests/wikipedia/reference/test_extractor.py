@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from src.helpers.console import console
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
@@ -284,3 +285,33 @@ class TestWikipediaReferenceExtractor(TestCase):
             if reference.template_names and not reference.get_template_dicts:
                 console.print(reference)
                 exit()
+
+    def test_parameters_yardbirds_reference(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True,
+            wikitext=(
+                "<ref>The following sources refer to the Yardbirds as blues rock:\n"
+                "*{{cite book |last= Knowles|first= Christopher|date= 2010|title"
+                "= The Secret History of Rock 'n' Roll|url= https://"
+                "books.google.com/books?id=TMHr1g7T8gQC&q=The+Yardbirds+blues+rock"
+                "&pg=PT93|publisher= Viva Editions|isbn= 978-1573444057}}\n*{{"
+                "cite book|last= Talevski|first= Nick|date= 1999|title= The Encyclopedia of Rock Obituaries"
+                "|url= https://archive.org/details/tombstoneblues00nick/page/356|publisher= Omnibus Press"
+                "|page= [https://archive.org/details/tombstoneblues00nick/page/"
+                "356 356]|isbn= 978-0711975484}}\n*{{cite book|last= Witmer|first= Scott|"
+                "date= 2009|title= History of Rock Bands|url= https://archive.org/details/"
+                "historyofrockban0000witm/page/18|publisher= Abdo Publishing Company|page= [https://archive"
+                ".org/details/historyofrockban0000witm/page/18 18]|isbn= 978-1604536928}}\n"
+                "*{{cite book |last= Wadhams|first= Wayne|date= 2001|title= Inside the Hits: The Seduction of"
+                " a Rock and Roll Generation (Pop Culture)|publisher= Omnibus Press|page= 189|"
+                "isbn= 978-0634014307}}</ref>"
+            ),
+        )
+        wre.extract_all_references()
+        assert wre.number_of_references == 1
+        for reference in wre.references:
+            for template in reference.templates:
+                if not template.parameters:
+                    console.print(template)
+                    raise MissingInformationError()
+        # console.print(wre.references)

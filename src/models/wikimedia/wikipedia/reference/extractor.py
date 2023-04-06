@@ -6,7 +6,6 @@ import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 from src.models.api.job.article_job import ArticleJob
-from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
@@ -170,20 +169,18 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
         self.__parse_wikitext__()
-        # tag = Tag
-        # tag.tag
         refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         app.logger.debug(f"Number of refs found: {len(refs)}")
         for ref in refs:
-            self.references.append(
-                WikipediaReference(
-                    wikicode=ref,
-                    # wikibase=self.wikibase,
-                    testing=self.testing,
-                    check_urls=self.check_urls,
-                    language_code=self.language_code,
-                )
+            reference = WikipediaReference(
+                wikicode=ref,
+                # wikibase=self.wikibase,
+                testing=self.testing,
+                check_urls=self.check_urls,
+                language_code=self.language_code,
             )
+            reference.extract_and_check()
+            self.references.append(reference)
 
     def __extract_all_raw_general_references__(self):
         """This extracts everything inside <ref></ref> tags"""
@@ -200,22 +197,24 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             for line in lines:
                 logger.info(f"Working on line: {line}")
                 # Guard against empty line
-                if line:
-                    logger.debug("Parsing line")
-                    # We discard all lines not starting with a star to avoid all
-                    # categories and other templates not containing any references
-                    if self.star_found_at_line_start(line=line):
-                        parsed_line = mwparserfromhell.parse(line)
-                        logger.debug("Appending line with star to references")
-                        # We don't know what the line contains so we assume it is a reference
-                        self.references.append(
-                            WikipediaReference(
-                                wikicode=parsed_line,
-                                # wikibase=self.wikibase,
-                                testing=self.testing,
-                                is_general_reference=True,
-                            )
-                        )
+                # logger.debug("Parsing line")
+                # We discard all lines not starting with a star to avoid all
+                # categories and other templates not containing any references
+                if line and self.star_found_at_line_start(line=line):
+                    parsed_line = mwparserfromhell.parse(line)
+                    logger.debug("Appending line with star to references")
+                    # We don't know what the line contains besides a start
+                    # but we assume it is a reference
+                    reference = WikipediaReference(
+                        wikicode=parsed_line,
+                        # wikibase=self.wikibase,
+                        testing=self.testing,
+                        check_urls=self.check_urls,
+                        language_code=self.language_code,
+                        is_general_reference=True,
+                    )
+                    reference.extract_and_check()
+                    self.references.append(reference)
 
     def extract_all_references(self):
         """Extract all references from self.wikitext"""
@@ -225,16 +224,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         self.__parse_wikitext__()
         self.__extract_all_raw_citation_references__()
         self.__extract_all_raw_general_references__()
-        self.__extract_and_check_urls_on_references__()
-
-    def __extract_and_check_urls_on_references__(self):
-        from src.models.api import app
-
-        app.logger.debug("__extract_and_check_urls_on_raw_references__: running")
-        for reference in self.references:
-            if not reference:
-                raise MissingInformationError("no raw_reference")
-            reference.extract_and_check()
+        app.logger.info("Done extracting all references")
 
     def __extract_sections__(self):
         from src.models.api import app
@@ -242,9 +232,9 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         app.logger.debug("__extract_sections__: running")
         if not self.wikicode:
             self.__parse_wikitext__()
-        # TODO rewrite to return a dictionary with the section name as key and the data as value
         self.sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
+            # TODO rewrite to support all language editions of Wikipedia
             matches="bibliography|further reading|works cited|sources|external links",
             flags=re.I,
             include_headings=False,

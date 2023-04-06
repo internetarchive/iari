@@ -305,18 +305,14 @@ class WikipediaReference(JobBaseModel):
                 logger.debug(f"Found no templates in {self.wikicode}")
 
     def __extract_and_clean_template_parameters__(self) -> None:
-        """We only extract and clean if exactly one templates is found"""
+        """We extract all templates"""
         from src.models.api import app
 
         app.logger.debug("__extract_and_clean_template_parameters__: running")
-        if self.number_of_templates == 1:
-            [
-                template.extract_and_prepare_parameter_and_flds()
-                for template in self.templates
-            ]
-            for template in self.templates:
-                if not template.extraction_done:
-                    raise ValueError()
+        [
+            template.extract_and_prepare_parameter_and_flds()
+            for template in self.templates
+        ]
 
     def extract_and_check(self) -> None:
         """Helper method"""
