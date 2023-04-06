@@ -235,7 +235,6 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             if not reference:
                 raise MissingInformationError("no raw_reference")
             reference.extract_and_check()
-        self.check_urls_done = True
 
     def __extract_sections__(self):
         from src.models.api import app

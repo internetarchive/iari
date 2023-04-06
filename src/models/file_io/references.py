@@ -18,6 +18,9 @@ class ReferencesFileIo(FileIo):
             if "id" not in reference:
                 console.print(reference)
                 raise MissingInformationError("no id found in reference")
+            if not reference["id"]:
+                console.print(reference)
+                raise MissingInformationError("empty id found in reference")
             # if "wikitext" in reference:
             # app.logger.debug(reference)
             reference_io = ReferenceFileIo(

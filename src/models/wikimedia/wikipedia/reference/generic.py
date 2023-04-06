@@ -59,21 +59,6 @@ class WikipediaReference(JobBaseModel):
     language_code: str = ""
     reference_id: str = ""
 
-    def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
-        """Parse the rest of the information and generate a hash"""
-        # We parse the first parameter before isbn
-        if not self and not testing:
-            raise MissingInformationError("self was None")
-        if self:
-            self.__generate_reference_id__()
-
-    def __generate_reference_id__(self) -> None:
-        """This generates an 8-char long id based on the md5 hash of
-        the raw wikitext for this reference"""
-        if not self:
-            raise MissingInformationError()
-        self.reference_id = hashlib.md5(f"{self.wikicode}".encode()).hexdigest()[:8]
-
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
@@ -339,30 +324,11 @@ class WikipediaReference(JobBaseModel):
 
         app.logger.debug("extract_and_check: running")
         self.__extract_templates_and_parameters__()
-        # self.__determine_if_multiple_templates__()
         self.__extract_reference_urls__()
         self.__extract_first_level_domains__()
-        # if self.check_urls:
-        #     self.__check_urls__()
-        # else:
-        #     logger.info("Not checking urls for this raw reference")
+        self.__generate_reference_id__()
 
-    # def get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
-    #     """Make a WikipediaReference based on the extracted information"""
-    #     from src.models.api import app
-    #
-    #     app.logger.debug("get_finished_wikipedia_reference_object: running")
-    #     if not self.extraction_done:
-    #         self.extract_and_check()
-    #     from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
-    #
-    #     if self.number_of_templates:
-    #         reference = WikipediaReference(**self.templates[0].parameters)
-    #     else:
-    #         reference = WikipediaReference()
-    #     # propagate attributes
-    #     reference = self
-    #     reference.cache = self.cache
-    #     # reference.wikibase = self.wikibase
-    #     reference.finish_parsing_and_generate_hash(testing=self.testing)
-    #     return reference
+    def __generate_reference_id__(self) -> None:
+        """This generates an 8-char long id based on the md5 hash of
+        the raw wikitext for this reference"""
+        self.reference_id = hashlib.md5(f"{self.wikicode}".encode()).hexdigest()[:8]
