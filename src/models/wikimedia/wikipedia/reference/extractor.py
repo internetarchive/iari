@@ -5,28 +5,28 @@ from typing import Dict, List
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
-from src.models.basemodels.job import JobBaseModel
+from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
-from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
+from src.wcd_base_model import WcdBaseModel
 
 # logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class WikipediaReferenceExtractor(JobBaseModel):
+class WikipediaReferenceExtractor(WcdBaseModel):
     """This class handles all extraction of references from wikicode
 
     Design:
     * first we get the wikicode
     * we parse it with mwparser from hell
-    * we extract the raw references -> WikipediaRawReference
+    * we extract the raw references -> WikipediaReference
     """
 
+    job = ArticleJob
     wikitext: str
     wikicode: Wikicode = None
-    raw_references: List[WikipediaRawReference] = []  # private
     references: List[WikipediaReference] = []
     sections: List[Wikicode] = []
     # wikibase: Wikibase
@@ -49,9 +49,8 @@ class WikipediaReferenceExtractor(JobBaseModel):
         """List of non-unique urls"""
         urls: List[WikipediaUrl] = list()
         for reference in self.references:
-            if reference.raw_reference:
-                for url in reference.raw_reference.reference_urls:
-                    urls.append(url)
+            for url in reference.reference_urls:
+                urls.append(url)
         return urls
 
     @property
@@ -59,9 +58,8 @@ class WikipediaReferenceExtractor(JobBaseModel):
         """List of raw non-unique urls found in the reference"""
         urls: List[str] = list()
         for reference in self.references:
-            if reference.raw_reference:
-                for url in reference.raw_reference.reference_urls:
-                    urls.append(url.url)
+            for url in reference.reference_urls:
+                urls.append(url.url)
         return urls
 
     @property
@@ -89,9 +87,9 @@ class WikipediaReferenceExtractor(JobBaseModel):
             return []
         flds = []
         for reference in self.content_references:
-            if not reference.raw_reference.first_level_domains_done:
-                reference.raw_reference.__extract_first_level_domains__()
-            for fld in reference.raw_reference.first_level_domains:
+            if not reference.first_level_domains_done:
+                reference.__extract_first_level_domains__()
+            for fld in reference.first_level_domains:
                 flds.append(fld)
         return flds
 
@@ -106,7 +104,7 @@ class WikipediaReferenceExtractor(JobBaseModel):
         return [
             reference
             for reference in self.content_references
-            if reference.raw_reference.is_general_reference
+            if reference.is_general_reference
         ]
 
     @property
@@ -118,7 +116,7 @@ class WikipediaReferenceExtractor(JobBaseModel):
         return [
             reference
             for reference in self.content_references
-            if reference.raw_reference.is_footnote_reference
+            if reference.is_footnote_reference
         ]
 
     @property
@@ -132,7 +130,7 @@ class WikipediaReferenceExtractor(JobBaseModel):
         return [
             reference
             for reference in self.references
-            if reference.raw_reference.is_empty_named_reference
+            if reference.is_empty_named_reference
         ]
 
     @property
@@ -145,7 +143,7 @@ class WikipediaReferenceExtractor(JobBaseModel):
         return [
             reference
             for reference in self.references
-            if not reference.raw_reference.is_empty_named_reference
+            if not reference.is_empty_named_reference
         ]
 
     @property
@@ -157,13 +155,11 @@ class WikipediaReferenceExtractor(JobBaseModel):
         return len(self.references)
 
     def number_of_content_references_with_a_url(
-            self, list_: List[WikipediaReference] = None
+        self, list_: List[WikipediaReference] = None
     ) -> int:
         if list_ is None:
             list_ = self.content_references
-        result = len(
-            [ref for ref in list_ if ref.raw_reference and ref.raw_reference.url_found]
-        )
+        result = len([ref for ref in list_ if ref and ref.url_found])
         return result
 
     def __extract_all_raw_citation_references__(self):
@@ -179,8 +175,8 @@ class WikipediaReferenceExtractor(JobBaseModel):
         refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
         app.logger.debug(f"Number of refs found: {len(refs)}")
         for ref in refs:
-            self.raw_references.append(
-                WikipediaRawReference(
+            self.references.append(
+                WikipediaReference(
                     wikicode=ref,
                     # wikibase=self.wikibase,
                     testing=self.testing,
@@ -210,10 +206,10 @@ class WikipediaReferenceExtractor(JobBaseModel):
                     # categories and other templates not containing any references
                     if self.star_found_at_line_start(line=line):
                         parsed_line = mwparserfromhell.parse(line)
-                        logger.debug("Appending line with star to self.raw_references")
+                        logger.debug("Appending line with star to references")
                         # We don't know what the line contains so we assume it is a reference
-                        self.raw_references.append(
-                            WikipediaRawReference(
+                        self.references.append(
+                            WikipediaReference(
                                 wikicode=parsed_line,
                                 # wikibase=self.wikibase,
                                 testing=self.testing,
@@ -230,26 +226,15 @@ class WikipediaReferenceExtractor(JobBaseModel):
         self.__extract_all_raw_citation_references__()
         self.__extract_all_raw_general_references__()
         self.__extract_and_check_urls_on_references__()
-        self.__convert_raw_references_to_reference_objects__()
-        # self.__get_checked_and_unique_reference_urls_from_references__()
-
-    def __convert_raw_references_to_reference_objects__(self):
-        from src.models.api import app
-
-        app.logger.debug("__convert_raw_references_to_reference_objects__: running")
-        self.references = [
-            raw_reference.get_finished_wikipedia_reference_object()
-            for raw_reference in self.raw_references
-        ]
 
     def __extract_and_check_urls_on_references__(self):
         from src.models.api import app
 
         app.logger.debug("__extract_and_check_urls_on_raw_references__: running")
         for reference in self.references:
-            if not reference.raw_reference:
+            if not reference:
                 raise MissingInformationError("no raw_reference")
-            reference.raw_reference.extract_and_check()
+            reference.extract_and_check()
         self.check_urls_done = True
 
     def __extract_sections__(self):

@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from src.helpers.console import console
 from src.models.wikimedia.wikipedia.reference.extractor import (
     WikipediaReferenceExtractor,
 )
@@ -10,7 +11,6 @@ from test_data.test_content import (  # type: ignore
     old_norse_sources,
     test_full_article,
 )
-
 
 # wikibase = IASandboxWikibase()
 
@@ -66,11 +66,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre2.number_of_references == 2
         assert wre2.number_of_content_references == 1
         assert wre2.number_of_empty_named_references == 1
-        assert wre2.references[0].raw_reference.templates[0].name == "citeq"
-        assert (
-                wre2.references[0].raw_reference.templates[0].parameters["first_parameter"]
-                == "Q1"
-        )
+        assert wre2.references[0].templates[0].name == "citeq"
+        assert wre2.references[0].templates[0].parameters["first_parameter"] == "Q1"
 
     # def test_number_of_hashed_content_references(self):
     #     wre = WikipediaReferenceExtractor(
@@ -116,8 +113,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         wre.extract_all_references()
         assert wre.number_of_sections_found == 0
         assert wre.number_of_citation_references == 2
-        assert wre.content_references[0].raw_reference.number_of_templates == 1
-        assert wre.content_references[1].raw_reference.number_of_templates == 1
+        assert wre.content_references[0].number_of_templates == 1
+        assert wre.content_references[1].number_of_templates == 1
 
     def test__extract_sections_test(self):
         wre = WikipediaReferenceExtractor(testing=True, wikitext=test_full_article)
@@ -156,8 +153,8 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         wre.extract_all_references()
         assert wre.number_of_content_references == 1
-        assert wre.content_references[0].raw_reference.templates[0].name == "isbn"
-        assert wre.content_references[0].raw_reference.templates[0].isbn == "1234"
+        assert wre.content_references[0].templates[0].name == "isbn"
+        assert wre.content_references[0].templates[0].isbn == "1234"
         # assert wre.number_of_isbn_template_references == 1
         # assert wre.number_of_hashed_content_references == 1
 
@@ -284,5 +281,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         assert wre.number_of_sections_found == 3
         assert wre.number_of_general_references == 32
         for reference in wre.references:
-            print(reference)
-            exit()
+            if reference.template_names and not reference.get_template_dicts:
+                console.print(reference)
+                exit()

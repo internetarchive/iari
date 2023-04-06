@@ -1,13 +1,22 @@
 import hashlib
 import logging
-from typing import Any, List, Optional
+import re
+from typing import Any, Dict, List, Optional, Union
+
+from mwparserfromhell.nodes import Tag  # type: ignore
+from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 from src.models.basemodels.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
-from src.models.wikimedia.wikipedia.reference.raw_reference import WikipediaRawReference
-from src.models.wikimedia.wikipedia.reference.template.person import Person
+from src.models.wikimedia.wikipedia.reference.enums import (
+    FootnoteSubtype,
+    ReferenceType,
+)
+from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
+from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
+
 
 # We use marshmallow here because pydantic did not seem to support optional alias fields.
 # https://github.com/samuelcolvin/pydantic/discussions/3855
@@ -26,925 +35,334 @@ class WikipediaReference(JobBaseModel):
     Support date ranges like "May-June 2011"? See https://stackoverflow.com/questions/10340029/
     """
 
-    authors_list: Optional[List[Person]]
-    detected_archive_of_archive_url: Optional[
-        Any
-    ]  # KnownArchiveUrl: we don't type this because of circular imports
-    detected_archive_of_url: Optional[
-        Any
-    ]  # KnownArchiveUrl: we don't type this because of circular imports
-    editors_list: Optional[List[Person]]
-    first_lasts: Optional[List]
-    first_level_domain_of_archive_url: Optional[str]
-    first_level_domain_of_url: Optional[str]
-    first_level_domain_of_url_hash: Optional[str]
-    # website_item: Optional[WcdItem]
-    # google_books: Optional[GoogleBooks]
-    # google_books_id: Optional[str]
-    hosts_list: Optional[List[Person]]
-    interviewers_list: Optional[List[Person]]
-    isbn_10: Optional[str]
-    isbn_13: Optional[str]
-    internet_archive_id: Optional[str]
-    md5hash: Optional[str]
-    numbered_first_lasts: Optional[List]
-    orcid: Optional[str]  # Is this present in the wild?
-    persons_without_role: Optional[List[Person]]
-    translators_list: Optional[List[Person]]
-    raw_reference: Optional[WikipediaRawReference] = None
-    encountered_parse_error: bool = False
+    wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
+    templates: List[WikipediaTemplate] = []
+    multiple_templates_found: bool = False
+    testing: bool = False
+    # wikibase: Wikibase
+    extraction_done: bool = False
+    is_empty_named_reference: bool = False
+    is_general_reference: bool = False
+    check_urls_done: bool = False
+    checked_urls: List[WikipediaUrl] = []
+    check_urls: bool = False
+    wikicoded_links: List[WikipediaUrl] = []
+    wikicoded_links_done: bool = False
+    bare_urls: List[WikipediaUrl] = []
+    bare_urls_done: bool = False
+    template_urls: List[WikipediaUrl] = []
+    template_urls_done: bool = False
+    reference_urls: List[WikipediaUrl] = []
+    reference_urls_done: bool = False
+    first_level_domains: List[str] = []
+    first_level_domains_done = True
+    language_code: str = ""
     reference_id: str = ""
-
-    # # These are all the parameters in the supported references
-    # #######################
-    # # Names
-    # #######################
-    # first1: Optional[str]
-    # first2: Optional[str]
-    # first3: Optional[str]
-    # first4: Optional[str]
-    # first5: Optional[str]
-    # first6: Optional[str]
-    # first: Optional[str]
-    # last1: Optional[str]
-    # last2: Optional[str]
-    # last3: Optional[str]
-    # last4: Optional[str]
-    # last5: Optional[str]
-    # last6: Optional[str]
-    # last: Optional[str]
-    #
-    # #######################
-    # # Author first/given (equal)
-    # #######################
-    # author_given: Optional[str]
-    # author_given1: Optional[str]
-    # author_given2: Optional[str]
-    # author_given3: Optional[str]
-    # author_given4: Optional[str]
-    # author_given5: Optional[str]
-    # author_first: Optional[str]
-    # author_first1: Optional[str]
-    # author_first2: Optional[str]
-    # author_first3: Optional[str]
-    # author_first4: Optional[str]
-    # author_first5: Optional[str]
-    #
-    # #######################
-    # # Author last/surname (equal)
-    # #######################
-    # author_surname: Optional[str]
-    # author_surname1: Optional[str]
-    # author_surname2: Optional[str]
-    # author_surname3: Optional[str]
-    # author_surname4: Optional[str]
-    # author_surname5: Optional[str]
-    # author_last: Optional[str]
-    # author_last1: Optional[str]
-    # author_last2: Optional[str]
-    # author_last3: Optional[str]
-    # author_last4: Optional[str]
-    # author_last5: Optional[str]
-    #
-    # # Author
-    # author1_first: Optional[str]
-    # author1_last: Optional[str]
-    # author1_link: Optional[str]
-    # author2_first: Optional[str]
-    # author2_last: Optional[str]
-    # author2_link: Optional[str]
-    # author3_first: Optional[str]
-    # author3_last: Optional[str]
-    # author3_link: Optional[str]
-    # author4_first: Optional[str]
-    # author4_last: Optional[str]
-    # author4_link: Optional[str]
-    # author5_first: Optional[str]
-    # author5_last: Optional[str]
-    # author5_link: Optional[str]
-    # author: Optional[str]
-    # author_link1: Optional[str]
-    # author_link2: Optional[str]
-    # author_link3: Optional[str]
-    # author_link4: Optional[str]
-    # author_link5: Optional[str]
-    # author_link: Optional[str]
-    # author_mask1: Optional[str]
-    # author_mask2: Optional[str]
-    # author_mask3: Optional[str]
-    # author_mask4: Optional[str]
-    # author_mask5: Optional[str]
-    # author_mask: Optional[str]
-    #
-    # #######################
-    # # Editor
-    # #######################
-    # editor1_first: Optional[str]
-    # editor1_last: Optional[str]
-    # editor1_link: Optional[str]
-    # editor2_first: Optional[str]
-    # editor2_last: Optional[str]
-    # editor2_link: Optional[str]
-    # editor3_first: Optional[str]
-    # editor3_last: Optional[str]
-    # editor3_link: Optional[str]
-    # editor4_first: Optional[str]
-    # editor4_last: Optional[str]
-    # editor4_link: Optional[str]
-    # editor5_first: Optional[str]
-    # editor5_last: Optional[str]
-    # editor5_link: Optional[str]
-    # editor: Optional[str]
-    # editor_first1: Optional[str]
-    # editor_first2: Optional[str]
-    # editor_first3: Optional[str]
-    # editor_first4: Optional[str]
-    # editor_first5: Optional[str]
-    # editor_first: Optional[str]
-    # editor_last1: Optional[str]
-    # editor_last2: Optional[str]
-    # editor_last3: Optional[str]
-    # editor_last4: Optional[str]
-    # editor_last5: Optional[str]
-    # editor_last: Optional[str]
-    # editor_link1: Optional[str]
-    # editor_link2: Optional[str]
-    # editor_link3: Optional[str]
-    # editor_link4: Optional[str]
-    # editor_link5: Optional[str]
-    # editor_link: Optional[str]
-    # editor_mask1: Optional[str]
-    # editor_mask2: Optional[str]
-    # editor_mask3: Optional[str]
-    # editor_mask4: Optional[str]
-    # editor_mask5: Optional[str]
-    # editor_mask: Optional[str]
-    #
-    # #######################
-    # # Translator
-    # #######################
-    # translator_first1: Optional[str]
-    # translator_first2: Optional[str]
-    # translator_first3: Optional[str]
-    # translator_first4: Optional[str]
-    # translator_first5: Optional[str]
-    # translator_first: Optional[str]
-    # translator_last1: Optional[str]
-    # translator_last2: Optional[str]
-    # translator_last3: Optional[str]
-    # translator_last4: Optional[str]
-    # translator_last5: Optional[str]
-    # translator_last: Optional[str]
-    # translator_link1: Optional[str]
-    # translator_link2: Optional[str]
-    # translator_link3: Optional[str]
-    # translator_link4: Optional[str]
-    # translator_link5: Optional[str]
-    # translator_link: Optional[str]
-    # translator_mask1: Optional[str]
-    # translator_mask2: Optional[str]
-    # translator_mask3: Optional[str]
-    # translator_mask4: Optional[str]
-    # translator_mask5: Optional[str]
-    # translator_mask: Optional[str]
-    #
-    # #######################
-    # # Interviewer
-    # #######################
-    # interviewer_given: Optional[str]
-    # interviewer_first: Optional[str]
-    # interviewer_surname: Optional[str]
-    # interviewer_last: Optional[str]
-    #
-    # #######################
-    # # Host
-    # #######################
-    # host: Optional[str]
-    # host1: Optional[str]
-    # host2: Optional[str]
-    # host3: Optional[str]
-    # host4: Optional[str]
-    # host5: Optional[str]
-    #
-    # #######################
-    # # Boolean switches
-    # #######################
-    # display_authors: Optional[str]  # we can ignore this one
-    # display_editors: Optional[str]  # we can ignore this one
-    # display_translators: Optional[str]  # we can ignore this one
-    # display_subjects: Optional[str]  # we can ignore this one
-    #
-    # # Others
-    # access_date: Optional[datetime]
-    # agency: Optional[str]  # what is this?
-    # archive_date: Optional[datetime]
-    # archive_url: Optional[str]
-    # arxiv: Optional[str]
-    # asin: Optional[str]  # what is this?
-    # asin_tld: Optional[str]
-    # at: Optional[str]  # what is this?
-    # bibcode: Optional[str]
-    # bibcode_access: Optional[str]
-    # biorxiv: Optional[str]
-    # book_title: Optional[str]
-    # chapter: Optional[str]
-    # chapter_format: Optional[str]
-    # chapter_url: Optional[str]
-    # chapter_url_access: Optional[str]
-    # citeseerx: Optional[str]
-    # news_class: Optional[str]  # used in cite arxiv
-    # conference: Optional[str]
-    # conference_url: Optional[str]
-    # date: Optional[datetime]
-    # degree: Optional[str]
-    # department: Optional[str]
-    # doi: str = ""
-    # doi_access: Optional[str]
-    # doi_broken_date: Optional[datetime]
-    # edition: Optional[str]
-    # eissn: Optional[str]
-    # encyclopedia: Optional[str]
-    # eprint: Optional[str]
-    # format: Optional[str]
-    # hdl: Optional[str]
-    # hdl_access: Optional[str]
-    # id: Optional[str]  # where does this come from?
-    # isbn: str = ""
-    # ismn: Optional[str]
-    # issn: Optional[str]
-    # issue: Optional[str]
-    # jfm: Optional[str]
-    # journal: Optional[str]
-    # jstor: Optional[str]
-    # jstor_access: Optional[str]
-    # language: Optional[str]  # do we want to parse this?
-    # lccn: Optional[str]
-    # location: Optional[str]
-    # mode: Optional[str]  # what is this?
-    # mr: Optional[str]
-    # name_list_style: Optional[str]
-    # no_pp: Optional[str]
-    # oclc: Optional[str]
-    # ol: Optional[str]  # what is this?
-    # ol_access: Optional[str]
-    # orig_date: Optional[datetime]
-    # orig_year: Optional[datetime]
-    # osti: Optional[str]  # what is this?
-    # osti_access: Optional[str]
-    # others: Optional[str]  # what is this?
-    # page: Optional[str]
-    # pages: Optional[str]
-    # pmc: Optional[str]
-    # pmc_embargo_date: Optional[datetime]
-    # pmid: Optional[str]
-    # postscript: Optional[str]  # what is this?
-    # publication_date: Optional[datetime]
-    # publication_place: Optional[str]
-    # publisher: Optional[str]
-    # quote: Optional[str]  # do we want to store this?
-    # quote_page: Optional[str]
-    # quote_pages: Optional[str]
-    # ref: Optional[str]
-    # registration: Optional[str]  # what is this?
-    # rfc: Optional[str]  # what is this?
-    # s2cid: Optional[str]
-    # s2cid_access: Optional[str]
-    # sbn: Optional[str]
-    # script_chapter: Optional[str]
-    # script_quote: Optional[str]
-    # script_title: Optional[str]
-    # series: Optional[str]
-    # ssrn: Optional[str]
-    # subject: Optional[str]
-    # subject_mask: Optional[str]
-    # subscription: Optional[str]
-    # # title: Optional[str]
-    # title_link: Optional[str]
-    # trans_chapter: Optional[str]  # this is a translation of a chapter
-    # trans_quote: Optional[str]  # this is a translation of a quote
-    # trans_title: Optional[str]  # this is a translation of a title
-    # type : Optional[str]  # what is this?
-    # url: Optional[str]
-    # url_access: Optional[str]
-    # url_status: Optional[str]
-    # via: Optional[str]  # what is this?
-    # volume: Optional[str]
-    # website: Optional[str]
-    # work: Optional[str]
-    # year: Optional[datetime]
-    # zbl: Optional[str]  # what is this?
-    #
-    # #######################
-    # # Deprecated parameters
-    # #######################
-    # # We ignore these
-    # # cite news
-    # lay_date: Optional[str]
-    # lay_format: Optional[str]
-    # lay_source: Optional[str]
-    # lay_url: Optional[str]
-    # transcripturl: Optional[str]
-    #
-    # # Numbered parameters
-    # first_parameter: str = ""  # 1
-    # second_parameter: Optional[str]  # 2 # this is not supported yet
-    #
-    # # Fields found in the wild
-    # df: Optional[str]
-    # magazine: Optional[str]
-    # newspaper: Optional[str]
-    # author1: Optional[str]
-    # author2: Optional[str]
-    # author3: Optional[str]
-    # author4: Optional[str]
-    # author5: Optional[str]
-    # author6: Optional[str]
-    # author7: Optional[str]
-    # author8: Optional[str]
-    # author9: Optional[str]
-    # author10: Optional[str]
-    # editor1: Optional[str]
-    # editor2: Optional[str]
-    # editor3: Optional[str]
-    # editor4: Optional[str]
-    # editor5: Optional[str]
-    # number: Optional[str]
-    # first7: Optional[str]
-    # first8: Optional[str]
-    # first9: Optional[str]
-    # first10: Optional[str]
-    # first11: Optional[str]
-    # first12: Optional[str]
-    # first13: Optional[str]
-    # first14: Optional[str]
-    # last7: Optional[str]
-    # last8: Optional[str]
-    # last9: Optional[str]
-    # last10: Optional[str]
-    # last11: Optional[str]
-    # last12: Optional[str]
-    # last13: Optional[str]
-    # last14: Optional[str]
-    # message_id: Optional[str]
-    # newsgroup: Optional[str]
-    # archive_format: Optional[str]
-    # time: Optional[datetime]
-    # interviewer: Optional[str]
-    # medium: Optional[str]
-    # contribution: Optional[str]
-    # vauthors: Optional[
-    #     str
-    # ]  # this appears in cite journal and is used to specify authors_list using the Vancouver system
-    # authors: Optional[str]
-    # place: Optional[str]
-    # lang: Optional[str]
-    # periodical: Optional[str]
-
-    # @property
-    # def has_first_level_domain_url_hash(self) -> bool:
-    #     return bool(self.first_level_domain_of_url_hash is not None)
-
-    # @property
-    # def has_hash(self) -> bool:
-    #     if self.md5hash is None:
-    #         return False
-    #     else:
-    #         return bool(self.md5hash != "")
-
-    # @property
-    # def isodate(self) -> str:
-    #     if self.publication_date is not None:
-    #         return datetime.strftime(self.publication_date, "%Y-%m-%d")
-    #     elif self.date is not None:
-    #         return datetime.strftime(self.date, "%Y-%m-%d")
-    #     elif self.year is not None:
-    #         return datetime.strftime(self.year, "%Y-%m-%d")
-    #     else:
-    #         raise ValueError(
-    #             f"missing publication date, in templates {self.template_name}, see {self.dict()}"
-    #         )
-
-    # @property
-    # def wikibase_url(self) -> str:
-    #     if not self.wikibase:
-    #         raise MissingInformationError("self.wikibase was None")
-    #     if not self.return_:
-    #         raise MissingInformationError("self.return_ was None")
-    #     return f"{self.wikibase.wikibase_url}" f"wiki/Item:{self.return_.item_qid}"
-
-    # @validate_arguments
-    # def check_and_upload_reference_item_to_wikibase_if_missing(self) -> None:
-    #     """Check and upload reference item to Wikibase if missing and return an
-    #     updated reference with the attribute return_ set"""
-    #     logger.debug(
-    #         "__check_and_upload_reference_item_to_wikicitations_if_missing__: Running"
-    #     )
-    #     self.get_wcdqid_from_cache()
-    #     if self.return_:
-    #         if not self.return_.item_qid:
-    #             logger.info(
-    #                 f"Could not find reference with {self.md5hash} in the cache"
-    #             )
-    #             self.upload_reference_and_insert_in_the_cache_if_enabled()
-    #     else:
-    #         raise MissingInformationError("self.return_ was None")
-
-    # def __clean_wiki_markup_from_strings__(self):
-    #     """We clean away [[ and ]]
-    #     For now we only clean self.publisher"""
-    #     # use mwparserfromhell strip_code instead
-    #     if self.publisher:
-    #         if "[[" in self.publisher and "|" not in self.publisher:
-    #             self.publisher = self.publisher.replace("[[", "").replace("]]", "")
-    #         if "[[" in self.publisher and "|" in self.publisher:
-    #             """We save the first part of the string only
-    #             e.g. [[University of California, Berkeley|Berkeley]]"""
-    #             self.publisher = (
-    #                 self.publisher.replace("[[", "").replace("]]", "").split("|")[0]
-    #             )
-
-    # DISABLED - should be moved to Template
-    # def __detect_archive_urls__(self):
-    #     """Try to detect if self.url contains first level
-    #     domain from a known web archiver"""
-    #     pass
-    # logger.debug("__detect_archive_urls__: Running")
-    # from src.models.wikibase.enums import KnownArchiveUrl
-    #
-    # # ARCHIVE_URL
-    # if self.first_level_domain_of_archive_url:
-    #     logger.debug("__detect_archive_urls__: Working on self.archive_url")
-    #     try:
-    #         logger.debug(
-    #             f"Trying to detect archive from {self.first_level_domain_of_archive_url}"
-    #         )
-    #         self.detected_archive_of_archive_url = KnownArchiveUrl(
-    #             self.first_level_domain_of_archive_url
-    #         )
-    #     except ValueError:
-    #         self.__log_to_file__(
-    #             message=f"No archive detected for {self.archive_url}",
-    #             file_name="undetected_archive.log",
-    #         )
-    #
-    # # URL
-    # if self.first_level_domain_of_url:
-    #     try:
-    #         logger.debug(
-    #             f"Trying to detect archive from {self.first_level_domain_of_url}"
-    #         )
-    #         self.detected_archive_of_url = KnownArchiveUrl(
-    #             self.first_level_domain_of_url
-    #         )
-    #     except ValueError:
-    #         # We don't log this because it would clog the
-    #         # log file very quickly and not yield anything useful
-    #         pass
-
-    # DEPRECATED since 2.1.0-alpha3
-    # def __detect_google_books_id__(self):
-    #     """We detect GOOGLE_BOOKS_ID to populate the property later
-    #     Example: https://books.google.ca/books?id=on0TaPqFXbcC&pg=PA431
-    #     NOTE: we don't parse the page number for now"""
-    #     if (
-    #         self.first_level_domain_of_url
-    #         and "google." in self.first_level_domain_of_url
-    #     ):
-    #         if self.url and "/books.google." in self.url:
-    #             query = str(urlparse(self.url).query)
-    #             parsed_query = parse_qs(query)
-    #             if parsed_query and "id" in parsed_query.keys():
-    #                 self.google_books_id = parsed_query["id"][0]
-    #             else:
-    #                 raise ValueError(
-    #                     f"could not extract query from {self.url} or no id found in the url"
-    #                 )
-
-    # DISABLED should be moved to Template
-    # def __detect_internet_archive_id__(self):
-    #     """We detect INTERNET_ARCHIVE_ID to populate the property later
-    #     Example: https://archive.org/details/catalogueofshipw0000wils/"""
-    #     if (
-    #         self.first_level_domain_of_url
-    #         and self.first_level_domain_of_url == "archive.org"
-    #     ):
-    #         if self.url and "/details/" in self.url:
-    #             path = str(urlparse(self.url).path)
-    #             if path:
-    #                 self.internet_archive_id = path.split("/")[2]
-    #             else:
-    #                 raise ValueError(f"could not extract path from {self.url}")
-
-    # def __generate_first_level_domain_hash__(self):
-    #     """This is used as hash for all website items"""
-    #     pass
-    #     # Disabled because we don't generate any website items right now
-    #     # if self.first_level_domain_of_url is not None:
-    #     #     str2hash = self.first_level_domain_of_url
-    #     #     self.first_level_domain_of_url_hash = hashlib.md5(
-    #     #         f'{self.wikibase.title}{str2hash.replace(" ", "").lower()}'.encode()
-    #     #     ).hexdigest()
-
-    # def __generate_hashes__(self):
-    #     """Generate hashes for both website and reference items"""
-    #     # if not self.wikibase:
-    #     #     raise MissingInformationError("self.wikibase was None")
-    #     self.__generate_reference_hash__()
-    #     # self.__generate_first_level_domain_hash__()
-
-    # def __generate_reference_hash__(self):
-    #     hashing = Hashing(reference=self)
-    #     self.md5hash = hashing.generate_reference_hash()
-
-    # def __merge_date_into_publication_date__(self):
-    #     """Handle the possibly ambiguous self.date field"""
-    #     if self.date and self.publication_date:
-    #         if self.date != self.publication_date:
-    #             raise AmbiguousDateError(
-    #                 f"got both a date and a publication_date and they differ"
-    #             )
-    #     if self.date and not self.publication_date:
-    #         # Assuming date is the publication date
-    #         self.publication_date = self.date
-    #         logger.debug("Assumed date == publication_data")
-    #
-    # def __merge_lang_into_language__(self):
-    #     """We merge lang into language or log if both are populated"""
-    #     if self.lang and not self.language:
-    #         self.language = self.lang
-    #     elif self.lang and self.language:
-    #         self.__log_to_file__(
-    #             message=f"both lang: '{self.lang}' and language: '{self.language} is populated",
-    #             file_name="lang.log",
-    #         )
-    #
-    # def __merge_place_into_location__(self):
-    #     """Merge place into location or log if both are populated"""
-    #     if self.place and not self.location:
-    #         self.location = self.place
-    #     elif self.place and self.location:
-    #         self.__log_to_file__(
-    #             message=f"both place: '{self.place}' and location: '{self.location} is populated",
-    #             file_name="place.log",
-    #         )
-
-    # DISABLED should be moved to raw reference
-    # def __get_and_validate_identifiers__(self) -> None:
-    #     """Helper method"""
-    #     self.__get_identifiers_from_templates__()
-    #     self.__parse_identifiers__()
-
-    # def __parse_identifiers__(self):
-    #     self.__parse_isbn__()
-
-    # DEPRECATED since 2.1.0-alpha3
-    # def __parse_google_books_template__(self):
-    #     """Parse the Google Books templates that sometimes appear in self.url
-    #     and save the result in self.google_books and generate the URL
-    #     and store it in self.url"""
-    #     logger.debug("__parse_google_books__: Running")
-    #     template_tuples = extract_templates_and_params(self.url, True)
-    #     if template_tuples:
-    #         logger.info("Found Google books templates")
-    #         for _template_name, content in template_tuples:
-    #             google_books: GoogleBooks = GoogleBooksSchema().load(content)
-    #             google_books.wikibase = self.wikibase
-    #             google_books.finish_parsing()
-    #             self.url = google_books.url
-    #             self.google_books_id = google_books.id
-    #             self.google_books = google_books
-
-    # def __parse_isbn__(self) -> None:
-    #     if self.isbn:
-    #         # Replace spaces with dashes to follow the ISBN standard
-    #         self.isbn = self.isbn.replace(" ", "-")
-    #         stripped_isbn = self.isbn.replace("-", "")
-    #         if stripped_isbn in ["", " "]:
-    #             self.isbn = ""
-    #         else:
-    #             if len(stripped_isbn) == 13:
-    #                 self.isbn_13 = self.isbn
-    #             elif len(stripped_isbn) == 10:
-    #                 self.isbn_10 = self.isbn
-    #             else:
-    #                 message = (
-    #                     f"isbn: {self.isbn} was not "
-    #                     f"10 or 13 chars long after "
-    #                     f"removing the dashes"
-    #                 )
-    #                 logger.warning(message)
-    #                 self.__log_to_file__(
-    #                     message=message, file_name="isbn_exceptions.log"
-    #                 )
-
-    # TODO move this to Template
-    # def __parse_url__(self, url: str = "") -> str:
-    #     # Guard against URLs like "[[:sq:Shkrime për historinë e Shqipërisë|Shkrime për historinë e Shqipërisë]]"
-    #     parsed_url = urlparse(url)
-    #     if parsed_url.scheme:
-    #         url = parsed_url.geturl()
-    #         logger.info(f"Found scheme in {url}")
-    #         return url
-    #     else:
-    #         # TODO REGRESSION We don't support nested templates for now during the rewrite
-    #         # if self.__has_template_data__(string=url):
-    #         #     logger.info(f"Found templates data in url: {url}")
-    #         #     return self.__get_url_from_template__(url=url)
-    #         # else:
-    #         logger.warning(
-    #             f"Skipped the URL '{self.url}' because of missing URL scheme"
-    #         )
-    #         return ""
-    #
-    # def __parse_urls__(self) -> None:
-    #     """This function looks for Google Books references and
-    #     parse the URLs to avoid complaints from Wikibase"""
-    #     logger.debug("__parse_urls__: Running")
-    #     if self.url:
-    #         self.url = self.__parse_url__(url=self.url)
-    #     if self.archive_url:
-    #         self.archive_url = self.__parse_url__(url=self.archive_url)
-    #     if self.lay_url:
-    #         self.lay_url = self.__parse_url__(url=self.lay_url)
-    #     if self.chapter_url:
-    #         self.chapter_url = self.__parse_url__(url=self.chapter_url)
-    #     if self.conference_url:
-    #         self.conference_url = self.__parse_url__(url=self.conference_url)
-    #     if self.transcripturl:
-    #         self.transcripturl = self.__parse_url__(url=self.transcripturl)
-
-    # # noinspection PyMethodParameters
-    # @validator(
-    #     "access_date",
-    #     "archive_date",
-    #     "date",
-    #     "doi_broken_date",
-    #     "orig_date",
-    #     "orig_year",
-    #     "pmc_embargo_date",
-    #     "publication_date",
-    #     "time",
-    #     "year",
-    #     pre=True,
-    # )
-    # def __validate_time__(cls, v) -> Optional[datetime]:  # type: ignore # mypy: ignore
-    #     """Pydantic validator
-    #     see https://stackoverflow.com/questions/66472255/"""
-    #     date = None
-    #     # Support "2013-01-01"
-    #     try:
-    #         date = datetime.strptime(v, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "May 9, 2013"
-    #     try:
-    #         date = datetime.strptime(v, "%B %d, %Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "Jul 9, 2013"
-    #     try:
-    #         date = datetime.strptime(v, "%b %d, %Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "May 25, 2012a"
-    #     try:
-    #         date = datetime.strptime(v[:-1], "%b %d, %Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "1 September 2003"
-    #     try:
-    #         date = datetime.strptime(v, "%d %B %Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "26 Dec 1996"
-    #     try:
-    #         date = datetime.strptime(v, "%d %b %Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "September 2003"
-    #     try:
-    #         date = datetime.strptime(v, "%B %Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "Sep 2003"
-    #     try:
-    #         date = datetime.strptime(v, "%b %Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     # Support "2003"
-    #     try:
-    #         date = datetime.strptime(v, "%Y").replace(tzinfo=timezone.utc)
-    #     except ValueError:
-    #         pass
-    #     if date is None:
-    #         # raise TimeParseException(f"date format '{v}' not supported yet")
-    #         logger.warning(f"date format '{v}' not supported yet")
-    #     return date
-
-    # @validate_arguments
-    # def __upload_reference_to_wikibase__(self) -> WikibaseReturn:
-    #     """This method tries to upload the reference to Wikibase
-    #     and returns a WikibaseReturn."""
-    #     logger.debug("__upload_reference_to_wikicitations__: Running")
-    #     if self.wikibase_crud_create is None:
-    #         self.__setup_wikibase_crud_create__()
-    #     if self.wikibase_crud_create:
-    #         return_ = self.wikibase_crud_create.prepare_and_upload_reference_item(
-    #             page_reference=self
-    #         )
-    #         if isinstance(return_, WikibaseReturn):
-    #             return return_
-    #         else:
-    #             raise ValueError(f"we did not get a WikibaseReturn back")
-    #
-    #     else:
-    #         raise ValueError("self.wikibase_crud_create was None")
-
-    # @validate_arguments
-    # def get_wcdqid_from_cache(self) -> None:
-    #     if not self.cache:
-    #         raise ValueError("self.cache was None")
-    #     if self.cache is not None:
-    #         self.return_: CacheReturn = self.cache.check_reference_and_get_wikibase_qid(
-    #             reference=self
-    #         )
-    #         if self.return_:
-    #             logger.debug(f"result from the cache:{self.return_.item_qid}")
-    #
-    # @validate_arguments
-    # def __insert_reference_in_cache__(self, wcdqid: str):
-    #     """Insert reference in the cache"""
-    #     logger.debug("__insert_in_cache__: Running")
-    #     if not self.cache:
-    #         raise ValueError("self.cache was None")
-    #     if self.cache is not None:
-    #         self.cache.add_reference(reference=self, wcdqid=wcdqid)
-    #     logger.info("Reference inserted into the hash database")
-    #
-    # @validate_arguments
-    # def upload_reference_and_insert_in_the_cache_if_enabled(self) -> None:
-    #     """Upload the reference and insert into the cache if enabled. Always add return_"""
-    #     logger.debug("__upload_reference_and_insert_in_the_cache_if_enabled__: Running")
-    #     return_ = self.__upload_reference_to_wikibase__()
-    #     if not return_ or not self.md5hash:
-    #         raise MissingInformationError("hash or WCDQID was None")
-    #     self.__insert_reference_in_cache__(wcdqid=return_.item_qid)
-    #     self.return_ = return_
 
     def finish_parsing_and_generate_hash(self, testing: bool = False) -> None:
         """Parse the rest of the information and generate a hash"""
         # We parse the first parameter before isbn
-        if not self.raw_reference and not testing:
-            raise MissingInformationError("self.raw_reference was None")
-        if self.raw_reference:
-            # self.__get_and_validate_identifiers__()
+        if not self and not testing:
+            raise MissingInformationError("self was None")
+        if self:
             self.__generate_reference_id__()
-            # todo move all this to WikipediaTemplate
-            # self.__parse_persons__()
-            # self.__merge_date_into_publication_date__()
-            # self.__merge_lang_into_language__()
-            # self.__merge_place_into_location__()
-            # self.__clean_wiki_markup_from_strings__()
-            # We generate the hash last because the parsing needs to be done first
-            # self.__generate_hashes__()
-
-    # @staticmethod
-    # def __has_template_data__(string: str) -> bool:
-    #     """This is a very simple test for two opening curly brackets"""
-    #     if "{{" in string:
-    #         return True
-    #     else:
-    #         return False
-
-    # TODO update to use new models
-    # def __get_url_from_template__(self, url: str) -> str:
-    #     if "google books" in url.lower():
-    #         logger.info("Found Google books templates")
-    #         return self.__get_url_from_google_books_template__(url=url)
-    #     else:
-    #         logger.warning(f"Parsing the templates data in {url} is not supported yet")
-    #         return ""
-
-    # TODO update to use new models
-    # @staticmethod
-    # def __get_url_from_google_books_template__(url: str) -> str:
-    #     """Parse the Google Books templates that sometimes appear in a url
-    #     and return the generated url"""
-    #     logger.debug("__get_url_from_google_books_template__: Running")
-    #     template_triples = extract_templates_and_params(url, True)
-    #     if template_triples:
-    #         for _template_name, content, _raw_template in template_triples:
-    #             # We only care about the first one found
-    #             google_books: Optional[GoogleBooks] = GoogleBooksSchema().load(content)
-    #             if google_books:
-    #                 google_books.finish_parsing()
-    #                 # We only care about the first
-    #                 return str(google_books.url)
-    #         logger.warning(f"Parsing the google books templates data in {url} failed")
-    #         return ""
-    #     else:
-    #         logger.warning(f"Parsing the google books templates data in {url} failed")
-    #         return ""
-    # def get_wcdqid_from_cache(self):
-    #     pass
-
-    # def __get_isbn__(self) -> None:
-    #     """This extracts ISBN if found from isbn templates"""
-    #     isbn_found = False
-    #     if not self.raw_reference:
-    #         raise MissingInformationError("no raw_reference")
-    #     if self.raw_reference.templates:
-    #         for template in self.raw_reference.templates:
-    #             if template.get_isbn:
-    #                 if isbn_found:
-    #                     # Currently we only support one isbn for each reference
-    #                     from src.models.api import app
-    #
-    #                     app.logger.warning(
-    #                         "Parse error: Multiple ISBN numbers were found in this reference "
-    #                         "and that is currently "
-    #                         "not supported"
-    #                     )
-    #                     self.encountered_parse_error = True
-    #                     return
-    #                 self.isbn = template.get_isbn
-    #                 isbn_found = True
-    #     return
-
-    # def __get_identifiers_from_templates__(self):
-    #     """Helper method"""
-    #     # These are based on first_parameter
-    #     self.__get_isbn__()
-    #     self.__get_url__()
-    #     self.__get_qid__()
-
-    # def __get_url__(self):
-    #     """This extracts URL if found in url templates"""
-    #     url_found = False
-    #     if not self.raw_reference:
-    #         raise MissingInformationError("no raw_reference")
-    #     if self.raw_reference.templates:
-    #         for template in self.raw_reference.templates:
-    #             if template.name == "url":
-    #                 if template.__first_parameter__:
-    #                     if url_found:
-    #                         from src.models.api import app
-    #
-    #                         app.logger.warning(
-    #                             "Parse error: Multiple main reference urls "
-    #                             "were found in this reference "
-    #                             "and that is currently "
-    #                             "not supported"
-    #                         )
-    #                         self.encountered_parse_error = True
-    #                         return False
-    #                     self.url = template.__first_parameter__
-    #                     url_found = True
-    #
-    # def __get_qid__(self):
-    #     qid_found = False
-    #     if not self.raw_reference:
-    #         raise MissingInformationError("no raw_reference")
-    #     if self.raw_reference.templates:
-    #         for template in self.raw_reference.templates:
-    #             if template.name in config.citeq_templates:
-    #                 if qid_found:
-    #                     from src.models.api import app
-    #
-    #                     app.logger.warning(
-    #                         "Parse error: Multiple DOI numbers were found "
-    #                         "in this reference "
-    #                         "and that is currently "
-    #                         "not supported"
-    #                     )
-    #                     self.encountered_parse_error = True
-    #                     return False
-    #                 self.wikidata_qid = template.__first_parameter__
-    #                 qid_found = True
-    #
-    # @property
-    # def is_valid_qid(self) -> bool:
-    #     if self.wikidata_qid:
-    #         # Use WBI to check the QID
-    #         from wikibaseintegrator.datatypes import Item  # type: ignore
-    #
-    #         try:
-    #             Item(value=self.wikidata_qid)
-    #             return True
-    #         # if entity.id == self.wikidata_qid:
-    #         except ValueError:
-    #             logger.warning(
-    #                 f"Wikidata QID '{self.wikidata_qid}' " f"was not a valid " f"WD QID"
-    #             )
-    #             return False
-    #     else:
-    #         return False
 
     def __generate_reference_id__(self) -> None:
         """This generates an 8-char long id based on the md5 hash of
         the raw wikitext for this reference"""
-        if not self.raw_reference:
+        if not self:
             raise MissingInformationError()
-        self.reference_id = hashlib.md5(
-            f"{self.raw_reference.wikicode}".encode()
-        ).hexdigest()[:8]
+        self.reference_id = hashlib.md5(f"{self.wikicode}".encode()).hexdigest()[:8]
+
+    class Config:  # dead: disable
+        arbitrary_types_allowed = True  # dead: disable
+
+    @property
+    def reference_type(self) -> Optional[ReferenceType]:
+        if self.is_general_reference:
+            type_ = ReferenceType.GENERAL
+        elif self.is_footnote_reference:
+            type_ = ReferenceType.FOOTNOTE
+        else:
+            logger.error("Could not determine type")
+            type_ = None
+        return type_
+
+    @property
+    def footnote_subtype(self) -> Optional[FootnoteSubtype]:
+        type_ = None
+        if self.is_footnote_reference:
+            if self.is_empty_named_reference:
+                type_ = FootnoteSubtype.NAMED
+            else:
+                type_ = FootnoteSubtype.CONTENT
+        return type_
+
+    @property
+    def titles(self) -> List[str]:
+        titles = []
+        for template in self.templates:
+            if template.parameters and "title" in template.parameters:
+                titles.append(template.parameters["title"])
+        return titles
+
+    @property
+    def get_template_dicts(self) -> List[Dict[str, Any]]:
+        template_dicts = []
+        for template in self.templates:
+            template_dicts.append(template.get_dict())
+        return template_dicts
+
+    @property
+    def template_names(self) -> List[str]:
+        template_names = []
+        for template in self.templates:
+            template_names.append(template.name)
+        return template_names
+
+    @property
+    def raw_urls(self) -> List[str]:
+        """Get a list of the raw urls"""
+        urls = []
+        for url in self.reference_urls:
+            urls.append(url.url)
+        return urls
+
+    @property
+    def common_url_scheme_found(self) -> bool:
+        """Simple, quick and inexpensive search for valid URLs with a common scheme
+        This should catch >95% of all URLs in Wikipedia references"""
+        return bool("http://" or "https://" or "ftp://" in self.get_wikicode_as_string)
+
+    @property
+    def url_found(self) -> bool:
+        # first try inexpensive ones
+        if self.common_url_scheme_found:
+            return True
+        elif not self.bare_urls_done:
+            self.__extract_bare_urls__()
+            return bool(self.bare_urls)
+        elif not self.wikicoded_links_done:
+            self.__extract_external_wikicoded_links_from_the_reference__()
+            return bool(self.wikicoded_links)
+        elif not self.template_urls_done:
+            self.__extract_template_urls__()
+            return bool(self.template_urls)
+        else:
+            return False
+
+    @property
+    def get_stripped_wikicode(self):
+        if isinstance(self.wikicode, Wikicode):
+            return self.wikicode.strip_code()
+        else:
+            # support Tag
+            return self.wikicode.contents.strip_code()
+
+    def __extract_template_urls__(self) -> None:
+        urls = list()
+        for template in self.templates:
+            if template.urls:
+                urls.extend(template.urls)
+        self.template_urls = list(urls)
+        self.template_urls_done = True
+
+    def __extract_bare_urls__(self) -> None:
+        """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
+        urls = list()
+        for url in self.__find_bare_urls__():
+            # We get a tuple back so we join it
+            urls.append(WikipediaUrl(url="".join(url)))
+        self.bare_urls = urls
+        self.bare_urls_done = True
+
+    def __extract_external_wikicoded_links_from_the_reference__(self) -> None:
+        """This relies on mwparserfromhell to find links like [google.com Google] in the wikitext"""
+        urls = set()
+        if isinstance(self.wikicode, Wikicode):
+            for url in self.wikicode.ifilter_external_links():
+                # url: ExternalLink
+                # we throw away the title here
+                urls.add(WikipediaUrl(url=str(url.url)))
+        else:
+            for url in self.wikicode.contents.ifilter_external_links():
+                # url: ExternalLink
+                # we throw away the title here
+                urls.add(WikipediaUrl(url=str(url.url)))
+        self.wikicoded_links = list(urls)
+        self.wikicoded_links_done = True
+
+    def __extract_reference_urls__(self) -> None:
+        """We support both URLs in templates and outside aka bare URLs"""
+        urls_list = list()
+        if not self.template_urls_done:
+            self.__extract_template_urls__()
+        urls_list.extend(self.template_urls)
+        if not self.bare_urls_done:
+            self.__extract_bare_urls__()
+        urls_list.extend(self.bare_urls)
+        if not self.wikicoded_links_done:
+            self.__extract_external_wikicoded_links_from_the_reference__()
+        urls_list.extend(self.wikicoded_links)
+        # We set it to avoid duplicates
+        self.reference_urls = list(set(urls_list))
+        self.reference_urls_done = True
+
+    def __extract_first_level_domains__(self) -> None:
+        """This aggregates all first level domains from the urls found in the raw references"""
+        from src.models.api import app
+
+        app.logger.debug("__extract_first_level_domains__: running")
+        if not self.reference_urls_done:
+            raise MissingInformationError("reference_urls have not been extracted")
+        if self.reference_urls:
+            logger.debug("found at least one url")
+            for url in self.reference_urls:
+                logger.debug("working on url")
+                if not url.first_level_domain_done:
+                    url.extract_first_level_domain()
+                if url.first_level_domain:
+                    logger.debug(f"found fld: {url.first_level_domain}")
+                    self.first_level_domains.append(url.first_level_domain)
+        app.logger.debug(f"found flds: {self.first_level_domains}")
+        self.first_level_domains_done = True
+
+    @property
+    def plain_text_in_reference(self) -> bool:
+        from src.models.api import app
+
+        # Try removing everything that is inside templates markup and see if anything is left
+        if isinstance(self.wikicode, Tag):
+            stripped_wikicode = self.wikicode.contents.strip_code().strip()
+        else:
+            stripped_wikicode = self.wikicode.strip_code().strip()
+        app.logger.debug(f"Stripped wikicode: '{stripped_wikicode}'")
+        if len(stripped_wikicode) == 0:
+            return False
+        else:
+            return True
+
+    @property
+    def is_footnote_reference(self):
+        """This could also be implemented based on the class type of the wikicode attribute.
+        I choose not to because it could perhaps be brittle."""
+        if self.is_general_reference:
+            return False
+        else:
+            return True
+
+    @property
+    def get_wikicode_as_string(self):
+        return str(self.wikicode)
+
+    @property
+    def number_of_templates(self) -> int:
+        return len(self.templates)
+
+    def __find_bare_urls__(self, stripped_wikicode: str = "") -> List[tuple]:
+        """Return bare urls from the stripped wikitext"""
+        if not stripped_wikicode:
+            stripped_wikicode = self.get_stripped_wikicode
+        return re.findall(
+            r"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?",
+            stripped_wikicode,
+        )
+
+    def __extract_templates_and_parameters__(self) -> None:
+        """Helper method"""
+        from src.models.api import app
+
+        app.logger.debug(
+            "__extract_templates_and_parameters_from_raw_reference__: running"
+        )
+        self.__extract_raw_templates__()
+        self.__extract_and_clean_template_parameters__()
+        self.extraction_done = True
+
+    def __extract_raw_templates__(self) -> None:
+        """Extract the templates from self.wikicode"""
+        from src.models.api import app
+
+        app.logger.debug("__extract_raw_templates__: running")
+        if not self.wikicode:
+            raise MissingInformationError("self.wikicode was None")
+        if isinstance(self.wikicode, str):
+            raise MissingInformationError("self.wikicode was str")
+        # Skip named references like "<ref name="INE"/>"
+        wikicode_string = str(self.wikicode)
+        if self.is_footnote_reference and (
+            "</ref>" not in wikicode_string or "></ref>" in wikicode_string
+        ):
+            logger.info(f"Skipping named reference with no content {wikicode_string}")
+            self.is_empty_named_reference = True
+        else:
+            logger.debug(f"Extracting templates from: {self.wikicode}")
+            if isinstance(self.wikicode, Tag):
+                # contents is needed here to get a Wikicode object
+                raw_templates = self.wikicode.contents.ifilter_templates(
+                    matches=lambda x: not x.name.lstrip().startswith("#"),
+                    recursive=True,
+                )
+            else:
+                raw_templates = self.wikicode.ifilter_templates(
+                    matches=lambda x: not x.name.lstrip().startswith("#"),
+                    recursive=True,
+                )
+            count = 0
+            for raw_template in raw_templates:
+                count += 1
+                self.templates.append(
+                    WikipediaTemplate(
+                        raw_template=raw_template, language_code=self.language_code
+                    )
+                )
+            if count == 0:
+                logger.debug(f"Found no templates in {self.wikicode}")
+
+    def __extract_and_clean_template_parameters__(self) -> None:
+        """We only extract and clean if exactly one templates is found"""
+        from src.models.api import app
+
+        app.logger.debug("__extract_and_clean_template_parameters__: running")
+        if self.number_of_templates == 1:
+            [
+                template.extract_and_prepare_parameter_and_flds()
+                for template in self.templates
+            ]
+            for template in self.templates:
+                if not template.extraction_done:
+                    raise ValueError()
+
+    def extract_and_check(self) -> None:
+        """Helper method"""
+        from src.models.api import app
+
+        app.logger.debug("extract_and_check: running")
+        self.__extract_templates_and_parameters__()
+        # self.__determine_if_multiple_templates__()
+        self.__extract_reference_urls__()
+        self.__extract_first_level_domains__()
+        # if self.check_urls:
+        #     self.__check_urls__()
+        # else:
+        #     logger.info("Not checking urls for this raw reference")
+
+    # def get_finished_wikipedia_reference_object(self) -> "WikipediaReference":
+    #     """Make a WikipediaReference based on the extracted information"""
+    #     from src.models.api import app
+    #
+    #     app.logger.debug("get_finished_wikipedia_reference_object: running")
+    #     if not self.extraction_done:
+    #         self.extract_and_check()
+    #     from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
+    #
+    #     if self.number_of_templates:
+    #         reference = WikipediaReference(**self.templates[0].parameters)
+    #     else:
+    #         reference = WikipediaReference()
+    #     # propagate attributes
+    #     reference = self
+    #     reference.cache = self.cache
+    #     # reference.wikibase = self.wikibase
+    #     reference.finish_parsing_and_generate_hash(testing=self.testing)
+    #     return reference
