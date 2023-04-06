@@ -16,7 +16,7 @@ Mark Graham, head of The
 [Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the 
 [Internet Archive](https://www.wikidata.org/wiki/Q461).
 
-There is [at least 200 million references in at least 40 million articles](
+There are [at least 200 million references in at least 40 million articles](
 https://ieeexplore.ieee.org/abstract/document/9908858) 
 and together with the article text in the Wikipedias 
 one of the most valuable collections of knowledge ever made by humans, 
@@ -27,19 +27,19 @@ enable wikipedians to get an overview of the state of the references and
 build tools that help curate and improve the references. 
 
 This is part of a wider initiative help raise the quality of references in 
-Wikipedia to enable everyone in the world to make
- decisions based on trustworthy knowledge that is derived from 
-trustworthy sources.
+Wikipedia to enable everyone in the world to make decisions 
+based on trustworthy knowledge 
+that is derived from trustworthy sources.
 
 # Features
 WARI features a number of endpoints that help patrons 
-get structured data about references in a Wikipedia article
-* article endpoint which analyze a given article and returns basic statistics about it 
-* references endpoint which give back all ids of references found
-* reference endpoint which give back all details about a reference including templates
-* check-url endpoint which looks up the URL and give back 
+get structured data about references in a Wikipedia article:
+* an _article_ endpoint which analyzes a given article and returns basic statistics about it 
+* a _references_ endpoint which gives back all ids of references found
+* a _reference_ endpoint which gives back all details about a reference including templates
+* a _check-url_ endpoint which looks up the URL and gives back 
 standardized information about its status
-* check-doi endpoint which looks up the DOI and give back 
+* a _check-doi_ endpoint which looks up the DOI and gives back 
 standardized information about it from [FatCat](https://fatcat.wiki/), OpenAlex and Wikidata 
 including abstract, retracted status, and more.
 
@@ -55,7 +55,7 @@ We also want to support non-Wikimedia wikis using MediaWiki in the future.
 
 ## English Wikipedia templates
 English Wikipedia has hundreds of special reference templates in use 
-and a handful of widely used generic templates. WARI expose them all when found in a reference.
+and a handful of widely used generic templates. WARI exposes them all when found in a reference.
 
 ## Reference types detected by the ArticleAnalyzer
 We support detecting the following types. A reference cannot have multiple types. 
@@ -71,7 +71,7 @@ beyond counting because we have not decided if they contain any value)
    2) **footnote reference** - subtype of content reference which is inside a <ref> (supported partially, see below)
 
 Example of a URL-template reference:
-`<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
+`<ref>Mueller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
 This is a content reference -> a citation reference -> a mixed reference with a URL template. 
 
 Example of an plain text reference:
