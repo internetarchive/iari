@@ -1,3 +1,4 @@
+from src.helpers.console import console
 from src.models.api.job.references_job import ReferencesJob
 from src.models.api.schema.references_schema import ReferencesSchema
 from src.models.file_io.article_file_io import ArticleFileIo
@@ -21,7 +22,8 @@ class References(StatisticsView):
         articlefileio.read_from_disk()
         if not articlefileio.data:
             return "No json in cache", 404
-        references = articlefileio.data["references"]
+        # console.print(articlefileio.data)
+        references = articlefileio.data["dehydrated_references"]
         # get the references details
         details = []
         if self.job.all:
