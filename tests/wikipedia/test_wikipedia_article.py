@@ -215,6 +215,6 @@ class TestWikipediaArticle(TestCase):
         wp = WikipediaArticle(job=job)
         wp.wikitext = wikitext
         wp.fetch_and_extract_and_parse()
-        assert wp.extractor.number_of_citation_references == 2
+        assert wp.extractor.number_of_footnote_references == 2
         assert wp.extractor.number_of_general_references == 32
         assert wp.extractor.number_of_content_references == 34
