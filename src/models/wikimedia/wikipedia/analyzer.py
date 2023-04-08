@@ -71,7 +71,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 lang=self.job.lang.value,
                 reference_statistics=dict(
                     named=ae.number_of_empty_named_references,
-                    footnote=ae.number_of_citation_references,
+                    footnote=ae.number_of_footnote_references,
                     content=ae.number_of_content_references,
                     general=ae.number_of_general_references,
                 ),
@@ -120,7 +120,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         if (
             self.article
             and self.article.extractor
-            and self.article.extractor.number_of_references > 0
+            and self.article.extractor.references
         ):
             app.logger.debug(
                 f"Gathering reference statistics for "

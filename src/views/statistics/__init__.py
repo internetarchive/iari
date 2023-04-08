@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 
 from flask import request
@@ -26,7 +26,6 @@ class StatisticsView(Resource):
     job: Optional[Job]
     wikipedia_analyzer: Optional[WikipediaAnalyzer] = None
     time_of_analysis: Optional[datetime] = None
-    two_days_ago = datetime.utcnow() - timedelta(hours=48)
     serving_from_json: bool = False
     io: Optional[FileIo] = None
 

@@ -52,12 +52,12 @@ class WikipediaArticle(WcdBaseModel):
         else:
             return False
 
-    @property
-    def underscored_title(self):
-        """Helper property"""
-        if not self.job.title:
-            raise ValueError("self.title was empty")
-        return self.job.title.replace(" ", "_")
+    # @property
+    # def underscored_title(self):
+    #     """Helper property"""
+    #     if not self.job.title:
+    #         raise ValueError("self.title was empty")
+    #     return self.job.title.replace(" ", "_")
 
     @property
     def url(self):

@@ -212,20 +212,20 @@ class WikipediaReference(JobBaseModel):
         app.logger.debug(f"found flds: {self.first_level_domains}")
         self.first_level_domains_done = True
 
-    @property
-    def plain_text_in_reference(self) -> bool:
-        from src.models.api import app
-
-        # Try removing everything that is inside templates markup and see if anything is left
-        if isinstance(self.wikicode, Tag):
-            stripped_wikicode = self.wikicode.contents.strip_code().strip()
-        else:
-            stripped_wikicode = self.wikicode.strip_code().strip()
-        app.logger.debug(f"Stripped wikicode: '{stripped_wikicode}'")
-        if len(stripped_wikicode) == 0:
-            return False
-        else:
-            return True
+    # @property
+    # def plain_text_in_reference(self) -> bool:
+    #     from src.models.api import app
+    #
+    #     # Try removing everything that is inside templates markup and see if anything is left
+    #     if isinstance(self.wikicode, Tag):
+    #         stripped_wikicode = self.wikicode.contents.strip_code().strip()
+    #     else:
+    #         stripped_wikicode = self.wikicode.strip_code().strip()
+    #     app.logger.debug(f"Stripped wikicode: '{stripped_wikicode}'")
+    #     if len(stripped_wikicode) == 0:
+    #         return False
+    #     else:
+    #         return True
 
     @property
     def is_footnote_reference(self):
@@ -242,6 +242,7 @@ class WikipediaReference(JobBaseModel):
 
     @property
     def number_of_templates(self) -> int:
+        """Convenience method for tests"""
         return len(self.templates)
 
     def __find_bare_urls__(self, stripped_wikicode: str = "") -> List[tuple]:
