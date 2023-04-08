@@ -39,11 +39,6 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         arbitrary_types_allowed = True  # dead: disable
 
     @property
-    def has_references(self):
-        """Helper method"""
-        return bool(self.number_of_references)
-
-    @property
     def urls(self) -> List[WikipediaUrl]:
         """List of non-unique urls"""
         urls: List[WikipediaUrl] = list()
@@ -111,7 +106,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         return len(self.general_references)
 
     @property
-    def citation_references(self):
+    def footnote_references(self):
         return [
             reference
             for reference in self.content_references
@@ -119,8 +114,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         ]
 
     @property
-    def number_of_citation_references(self) -> int:
-        return len(self.citation_references)
+    def number_of_footnote_references(self) -> int:
+        return len(self.footnote_references)
 
     @property
     def empty_named_references(self):
@@ -132,9 +127,9 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             if reference.is_empty_named_reference
         ]
 
-    @property
-    def number_of_empty_named_references(self) -> int:
-        return len(self.empty_named_references)
+    # @property
+    # def number_of_empty_named_references(self) -> int:
+    #     return len(self.empty_named_references)
 
     @property
     def content_references(self):
@@ -145,22 +140,22 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             if not reference.is_empty_named_reference
         ]
 
-    @property
-    def number_of_content_references(self) -> int:
-        return len(self.content_references)
+    # @property
+    # def number_of_content_references(self) -> int:
+    #     return len(self.content_references)
 
-    @property
-    def number_of_references(self) -> int:
-        return len(self.references)
+    # @property
+    # def number_of_references(self) -> int:
+    #     return len(self.references)
 
-    def number_of_content_references_with_a_url(
-        self, list_: List[WikipediaReference]
-    ) -> int:
-        if not list_:
-            list_ = self.content_references
-        result = len([ref for ref in list_ if ref and ref.url_found])
-        return result
-
+    # def number_of_content_references_with_a_url(
+    #     self, list_: List[WikipediaReference]
+    # ) -> int:
+    #     if not list_:
+    #         list_ = self.content_references
+    #     result = len([ref for ref in list_ if ref and ref.url_found])
+    #     return result
+    #
     def __extract_all_raw_citation_references__(self):
         """This extracts everything inside <ref></ref> tags"""
         from src.models.api import app

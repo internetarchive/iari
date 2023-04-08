@@ -20,7 +20,7 @@ class TestWikipediaReferenceExtractor(TestCase):
     def test_number_of_references_zero(self):
         wre0 = WikipediaReferenceExtractor(testing=True, wikitext="")
         wre0.extract_all_references()
-        assert wre0.number_of_references == 0
+        assert len(wre0.references) == 0
 
     def test_number_of_references_two(self):
         raw_template = "{{citeq|Q1}}"
@@ -32,7 +32,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         # print(wre.wikitext)
         wre.extract_all_references()
-        assert wre.number_of_references == 2
+        assert len(wre.references) == 2
 
     def test_number_of_references_three(self):
         raw_template = "{{citeq|Q1}}"
@@ -48,7 +48,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         )
         # print(wre1.wikitext)
         wre1.extract_all_references()
-        assert wre1.number_of_references == 3
+        assert len(wre1.references) == 3
 
     # def test_extract_all_references(self):
     #     raw_template = "{{citeq|Q1}}"
@@ -64,9 +64,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         raw_reference = f"<ref>{raw_template}</ref>{named_reference}"
         wre2 = WikipediaReferenceExtractor(testing=True, wikitext=raw_reference)
         wre2.extract_all_references()
-        assert wre2.number_of_references == 2
-        assert wre2.number_of_content_references == 1
-        assert wre2.number_of_empty_named_references == 1
+        assert len(wre2.references) == 2
         assert wre2.references[0].templates[0].name == "citeq"
         assert wre2.references[0].templates[0].parameters["first_parameter"] == "Q1"
 
@@ -113,7 +111,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         # print(wre.wikitext)
         wre.extract_all_references()
         assert wre.number_of_sections_found == 0
-        assert wre.number_of_citation_references == 2
         assert wre.content_references[0].number_of_templates == 1
         assert wre.content_references[1].number_of_templates == 1
 
@@ -144,7 +141,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         # assert wre.number_of_citeq_references == 0
         # assert wre.number_of_url_template_references == 0
         # assert wre.number_of_content_reference_without_a_template == 0
-        assert wre.number_of_citation_references == 0
+        assert wre.number_of_footnote_references == 0
         # assert wre.number_of_hashed_content_references == 18
 
     def test_isbn_template(self):
@@ -153,7 +150,6 @@ class TestWikipediaReferenceExtractor(TestCase):
             wikitext="<ref>{{isbn|1234}}</ref>",
         )
         wre.extract_all_references()
-        assert wre.number_of_content_references == 1
         assert wre.content_references[0].templates[0].name == "isbn"
         assert wre.content_references[0].templates[0].isbn == "1234"
         # assert wre.number_of_isbn_template_references == 1
@@ -213,7 +209,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             check_urls=True,
         )
         wre.extract_all_references()
-        assert wre.number_of_references == 1
+        assert len(wre.references) == 1
         assert len(wre.urls) == 1
 
     def test_reference_urls(self):
@@ -227,22 +223,6 @@ class TestWikipediaReferenceExtractor(TestCase):
         for url in wre.urls:
             assert url.url == "http://google.com"
             assert url.first_level_domain == "google.com"
-
-    def test_has_references_true(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="<ref>{{isbn|1234}}</ref>",
-        )
-        wre.extract_all_references()
-        assert wre.has_references is True
-
-    def test_has_references_false(self):
-        wre = WikipediaReferenceExtractor(
-            testing=True,
-            wikitext="test",
-        )
-        wre.extract_all_references()
-        assert wre.has_references is False
 
     def test_sections_sources(self):
         wre = WikipediaReferenceExtractor(
@@ -308,7 +288,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             ),
         )
         wre.extract_all_references()
-        assert wre.number_of_references == 1
+        assert len(wre.references) == 1
         for reference in wre.references:
             for template in reference.templates:
                 if not template.parameters:
