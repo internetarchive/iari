@@ -1,71 +1,9 @@
-# Based on https://github.com/GregaVrbancic/fastapi-celery by Grega Vrbančič <grega.vrbancic@gmail.com>
-version: "3.7"
+version: "3"
 
 services:
-  rabbitmq:
-    image: "bitnami/rabbitmq:3.10"
-    environment:
-      - RABBITMQ_DISK_FREE_ABSOLUTE_LIMIT=50MB
+  wari:
+    build: .
     ports:
-      - "4369:4369"
-      - "5672:5672"
-      - "25672:25672"
-      - "15672:15672"
+      - "8000:8000"
     volumes:
-      - "rabbitmq_data:/bitnami"
-    logging:
-        options:
-            max-size: "50M"
-            max-file: "2"
-
-  redis:
-    image: "bitnami/redis:5.0.4"
-    environment:
-      - REDIS_PASSWORD=password123
-    ports:
-      - "6379:6379"
-    volumes:
-      - "redis_data:/bitnami/redis/data"
-    logging:
-        options:
-            max-size: "50M"
-            max-file: "2"
-
-#  celery-flower:
-#    image: gregsi/latest-celery-flower-docker:latest
-#    environment:
-#      - AMQP_USERNAME=user
-#      - AMQP_PASSWORD=bitnami
-#      - AMQP_ADMIN_USERNAME=user
-#      - AMQP_ADMIN_PASSWORD=bitnami
-#      - AMQP_HOST=rabbitmq
-#      - AMQP_PORT=5672
-#      - AMQP_ADMIN_HOST=rabbitmq
-#      - AMQP_ADMIN_PORT=15672
-#      - FLOWER_BASIC_AUTH=user:test
-#    ports:
-#      - "5555:5555"
-#    depends_on:
-#      - rabbitmq
-#      - redis
-#    logging:
-#        options:
-#            max-size: "50M"
-#            max-file: "2"
-
-#  fastapi:
-#    build: .
-#    ports:
-#      - "8000:8000"
-#    depends_on:
-#      - rabbitmq
-#      - redis
-#    volumes:
-#      - "./:/app"
-#    command: "poetry run hypercorn app/app/main:app --bind 0.0.0.0:8000 --reload"
-
-volumes:
-  rabbitmq_data:
-    driver: local
-  redis_data:
-    driver: local
+      - /tmp/wikicitations-api:/tmp/wikicitations-api
