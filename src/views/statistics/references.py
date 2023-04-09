@@ -1,4 +1,3 @@
-from src.helpers.console import console
 from src.models.api.job.references_job import ReferencesJob
 from src.models.api.schema.references_schema import ReferencesSchema
 from src.models.exceptions import MissingInformationError

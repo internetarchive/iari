@@ -43,7 +43,10 @@ class TestUrl:
         assert url.response_headers["Server"] == "Apache"
 
     def test_alternating_status_code_url(self):
-        url = Url(url="https://web.archive.org/web/20111026115104/http://scholarspace."
-                      "manoa.hawaii.edu/handle/10125/6262", timeout=60)
+        url = Url(
+            url="https://web.archive.org/web/20111026115104/http://scholarspace."
+            "manoa.hawaii.edu/handle/10125/6262",
+            timeout=60,
+        )
         url.check()
         assert url.status_code == 200
