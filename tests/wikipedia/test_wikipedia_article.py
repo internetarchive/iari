@@ -42,7 +42,7 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(url="https://en.wikipedia.org/wiki/Test")
-        job.extract_url()
+        job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.__fetch_page_data__()
         assert wp.page_id == 11089416
@@ -53,7 +53,7 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(url="https://en.wikipedia.org/wiki/Test2222")
-        job.extract_url()
+        job.__extract_url__()
         page = WikipediaArticle(job=job)
         page.__fetch_page_data__()
         assert page.found_in_wikipedia is False
@@ -64,7 +64,7 @@ class TestWikipediaArticle(TestCase):
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy"
         )
-        job.extract_url()
+        job.__extract_url__()
         page = WikipediaArticle(job=job)
         page.__fetch_page_data__()
         assert page.found_in_wikipedia is True
@@ -93,7 +93,7 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(url="https://en.wikipedia.org/wiki/WWII")
-        job.extract_url()
+        job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.__fetch_page_data__()
         assert wp.is_redirect is True
@@ -182,7 +182,7 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island")
-        job.extract_url()
+        job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.wikitext = easter_island_head_excerpt
         wp.fetch_and_extract_and_parse()
@@ -211,7 +211,7 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island")
-        job.extract_url()
+        job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.wikitext = wikitext
         wp.fetch_and_extract_and_parse()

@@ -136,9 +136,8 @@ class TestArticle(TestCase):
     #     self.assertEqual(200, response.status_code)
 
     def test_valid_request_easter_island(self):
-        """This tests against an excerpt of the whole article (head+tail)"""
         response = self.test_client.get(
-            "/get-statistics?url=https://en.wikipedia.org/wiki/Easter_Island&testing=true"
+            "/get-statistics?url=https://en.wikipedia.org/wiki/Easter_Island&testing=true&regex=test"
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
@@ -199,7 +198,7 @@ class TestArticle(TestCase):
 
     def test_valid_request_test_refresh_true(self):
         response = self.test_client.get(
-            "/get-statistics?url=https://en.wikipedia.org/wiki/Test&testing=True&refresh=True"
+            "/get-statistics?url=https://en.wikipedia.org/wiki/Test&testing=True&refresh=True&regex=test"
         )
         data = json.loads(response.data)
         print(response.data)
@@ -207,21 +206,21 @@ class TestArticle(TestCase):
         stats = ArticleStatistics(**data)
         assert stats.served_from_cache is False
 
-    def test_valid_request_test_refresh_false(self):
-        # this is not possible to test
-        pass
-        # response = self.test_client.get(
-        #     "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True"
-        # )
-        # data = json.loads(response.data)
-        # print(response.data)
-        # self.assertEqual(200, response.status_code)
-        # stats = ArticleStatistics(**data)
-        # assert stats.served_from_cache is True
+    # def test_valid_request_test_refresh_false(self):
+    #     # this is not possible to test
+    #     pass
+    # response = self.test_client.get(
+    #     "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True"
+    # )
+    # data = json.loads(response.data)
+    # print(response.data)
+    # self.assertEqual(200, response.status_code)
+    # stats = ArticleStatistics(**data)
+    # assert stats.served_from_cache is True
 
-    def test___validate_and_get_job__(self):
-        """We dont test this since the dev/team does not yet
-        know how to mock flask that well yet.
-        We do however test the scheme in another file
-        and the job it returns"""
-        pass
+    # def test___validate_and_get_job__(self):
+    #     """We dont test this since the dev/team does not yet
+    #     know how to mock flask that well yet.
+    #     We do however test the scheme in another file
+    #     and the job it returns"""
+    #     pass

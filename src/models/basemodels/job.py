@@ -6,3 +6,6 @@ from src.wcd_base_model import WcdBaseModel
 
 class JobBaseModel(WcdBaseModel):
     job: Optional[Job] = None
+
+    class Config:
+        extra = "forbid"

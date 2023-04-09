@@ -43,9 +43,6 @@ class WikipediaReference(JobBaseModel):
     extraction_done: bool = False
     is_empty_named_reference: bool = False
     is_general_reference: bool = False
-    check_urls_done: bool = False
-    checked_urls: List[WikipediaUrl] = []
-    check_urls: bool = False
     wikicoded_links: List[WikipediaUrl] = []
     wikicoded_links_done: bool = False
     bare_urls: List[WikipediaUrl] = []
