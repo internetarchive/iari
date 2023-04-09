@@ -1,8 +1,8 @@
 import logging
 from unittest import TestCase
 
-from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.models.wikimedia.wikipedia.enums import MalformedUrlError
+from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
 

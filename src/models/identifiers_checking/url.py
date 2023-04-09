@@ -26,8 +26,8 @@ from requests.models import LocationParseError
 
 from src.helpers.console import console
 from src.models.exceptions import ResolveError
-from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.models.wikimedia.wikipedia.enums import MalformedUrlError
+from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
 
