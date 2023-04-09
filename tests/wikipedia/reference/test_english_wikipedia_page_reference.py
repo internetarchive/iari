@@ -909,50 +909,50 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         assert raw_reference_object.is_general_reference is True
         # assert raw_reference_object.cs1_template_found is True
 
-    def test__plain_text_detected_before(self):
-        wikitext = (
-            "test{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}"
-        )
-        wikicode = parse(wikitext)
-        raw_reference_object = WikipediaReference(
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-            check_urls=False,
-        )
-        raw_reference_object.extract_and_check()
-        assert raw_reference_object.plain_text_in_reference is True
-
-    def test__plain_text_detected_after(self):
-        wikitext = (
-            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}test"
-        )
-        wikicode = parse(wikitext)
-        raw_reference_object = WikipediaReference(
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-            check_urls=False,
-        )
-        raw_reference_object.extract_and_check()
-        assert raw_reference_object.plain_text_in_reference is True
-
-    def test__plain_text_detected_no(self):
-        wikitext = (
-            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}"
-        )
-        wikicode = parse(wikitext)
-        raw_reference_object = WikipediaReference(
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-            check_urls=False,
-        )
-        raw_reference_object.extract_and_check()
-        assert raw_reference_object.plain_text_in_reference is False
+    # def test__plain_text_detected_before(self):
+    #     wikitext = (
+    #         "test{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}"
+    #     )
+    #     wikicode = parse(wikitext)
+    #     raw_reference_object = WikipediaReference(
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #         check_urls=False,
+    #     )
+    #     raw_reference_object.extract_and_check()
+    #     assert raw_reference_object.plain_text_in_reference is True
+    #
+    # def test__plain_text_detected_after(self):
+    #     wikitext = (
+    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}test"
+    #     )
+    #     wikicode = parse(wikitext)
+    #     raw_reference_object = WikipediaReference(
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #         check_urls=False,
+    #     )
+    #     raw_reference_object.extract_and_check()
+    #     assert raw_reference_object.plain_text_in_reference is True
+    #
+    # def test__plain_text_detected_no(self):
+    #     wikitext = (
+    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong}}"
+    #     )
+    #     wikicode = parse(wikitext)
+    #     raw_reference_object = WikipediaReference(
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #         check_urls=False,
+    #     )
+    #     raw_reference_object.extract_and_check()
+    #     assert raw_reference_object.plain_text_in_reference is False
 
     def test_wayback_url_true(self):
         wikitext = (

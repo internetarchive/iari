@@ -1,5 +1,6 @@
 from src.models.api.job.references_job import ReferencesJob
 from src.models.api.schema.references_schema import ReferencesSchema
+from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.reference_file_io import ReferenceFileIo
 from src.views.statistics import StatisticsView
@@ -21,12 +22,15 @@ class References(StatisticsView):
         articlefileio.read_from_disk()
         if not articlefileio.data:
             return "No json in cache", 404
-        references = articlefileio.data["references"]
+        # console.print(articlefileio.data)
+        references = articlefileio.data["dehydrated_references"]
         # get the references details
         details = []
         if self.job.all:
-            for hash_ in references:
-                referencefileio = ReferenceFileIo(hash_based_id=hash_)
+            for reference in references:
+                if "id" not in reference or not reference["id"]:
+                    raise MissingInformationError()
+                referencefileio = ReferenceFileIo(hash_based_id=reference["id"])
                 referencefileio.read_from_disk()
                 data = referencefileio.data
                 if not data:

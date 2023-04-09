@@ -1,17 +1,17 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class WikipediaTemplatePersonRole(Enum):
     pass
 
 
-class EnglishWikipediaTemplatePersonRole(WikipediaTemplatePersonRole):
-    AUTHOR = "author"
-    EDITOR = "editor"
-    HOST = "host"
-    INTERVIEWER = "interviewer"
-    TRANSLATOR = "translator"
-    UNKNOWN = auto()
+# class EnglishWikipediaTemplatePersonRole(WikipediaTemplatePersonRole):
+#     AUTHOR = "author"
+#     EDITOR = "editor"
+#     HOST = "host"
+#     INTERVIEWER = "interviewer"
+#     TRANSLATOR = "translator"
+#     UNKNOWN = auto()
 
 
 class ReferenceType(Enum):
