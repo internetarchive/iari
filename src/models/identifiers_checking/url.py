@@ -27,6 +27,7 @@ from requests.models import LocationParseError
 from src.helpers.console import console
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
+from src.models.wikimedia.wikipedia.enums import MalformedUrlError
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +41,14 @@ class Url(WikipediaUrl):
     We define a malformed URL as any URL that the reader cannot easily
     click and successfully get the contents of in a normal web browser session
 
-    We send spoofing headers by default and do not offer turning them off for now.
+    We send spoofing headers by default to avoid 4xx as much as possible
+    and do not offer turning them off for now.
     """
 
     request_error: bool = False
-    malformed_url: bool = False
+    request_error_details: str = ""
     dns_record_found: bool = False
     dns_no_answer: bool = False
-    request_url_error: bool = False
     dns_error: bool = False
     # soft404_probability: float = 0.0  # not implemented yet
     status_code: int = 0
@@ -123,11 +124,14 @@ class Url(WikipediaUrl):
         ) as e:
             logger.debug(f"got exception: {e}")
             self.request_error = True
+            self.request_error_details = str(e)
         except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
             logger.debug(f"got exception: {e}")
-            self.request_url_error = True
             self.malformed_url = True
+            self.request_error = True
+            self.request_error_details = str(e)
         except SSLError:
+            self.request_error = True
             self.ssl_error = True
 
     def __check_without_https_verify__(self):
@@ -166,9 +170,12 @@ class Url(WikipediaUrl):
         ) as e:
             logger.debug(f"got exception: {e}")
             self.request_error = True
+            self.request_error_details = str(e)
         except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
             logger.debug(f"got exception: {e}")
             self.malformed_url = True
+            self.request_error = True
+            self.request_error_details = str(e)
 
     def __check_url__(self):
         print(f"Trying to check: {self.__get_url__}")
