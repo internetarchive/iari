@@ -229,7 +229,8 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             self.__parse_wikitext__()
         self.sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
-            # TODO rewrite to support all language editions of Wikipedia
+            # TODO rewrite to support all language editions
+            #  of Wikipedia see https://github.com/internetarchive/wari/issues/727
             matches="bibliography|further reading|works cited|sources|external links",
             flags=re.I,
             include_headings=False,
