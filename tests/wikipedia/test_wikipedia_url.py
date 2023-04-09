@@ -1,6 +1,7 @@
 import logging
 from unittest import TestCase
 
+from src.models.wikimedia.wikipedia.enums import MalformedUrlError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
@@ -172,14 +173,14 @@ class TestWikipediaUrl(TestCase):
         url = WikipediaUrl(url="127.0.0.1/test")
         url.extract()
         assert url.malformed_url is True
-        assert url.scheme_missing is True
+        assert url.malformed_url_details == MalformedUrlError.NO_NETLOC_FOUND
         assert url.added_http_scheme_worked is True
 
     def test_extract_first_level_domain_malformed2(self):
         url = WikipediaUrl(url="httproe.ru/pdfs/pdf_1914.pdf")
         url.extract()
         assert url.malformed_url is True
-        assert url.scheme_missing is True
+        assert url.malformed_url_details == MalformedUrlError.NO_NETLOC_FOUND
         assert url.added_http_scheme_worked is True
 
     def test_extract_first_level_domain_malformed3(self):
@@ -191,23 +192,32 @@ class TestWikipediaUrl(TestCase):
     def test_extract_first_level_domain_malformed4(self):
         url = WikipediaUrl(url="https://www1.geocities.")
         url.extract()
-        assert url.unrecognized_tld_length is True
+        assert url.malformed_url is True
+        assert url.malformed_url_details == MalformedUrlError.UNRECOGNIZED_TLD_LENGTH
 
     def test___check_tld__invalid(self):
         url = WikipediaUrl(url="https://www1.geocities.")
         url.__parse_and_extract_url__()
         url.__extract_tld__()
         url.__check_tld__()
-        assert url.unrecognized_tld_length is True
+        assert url.malformed_url is True
+        assert url.malformed_url_details == MalformedUrlError.UNRECOGNIZED_TLD_LENGTH
 
     def test___check_tld__valid(self):
         url = WikipediaUrl(url="https://www.google.com")
         url.__parse_and_extract_url__()
         url.__extract_tld__()
         url.__check_tld__()
-        assert url.unrecognized_tld_length is False
+        assert url.malformed_url is False
+
+    def test___check_tld__valid_long(self):
+        url = WikipediaUrl(url="https://www.easterisland.travel")
+        url.__parse_and_extract_url__()
+        url.__extract_tld__()
+        url.__check_tld__()
+        assert url.malformed_url is False
 
     def test_check_scheme(self):
         url = WikipediaUrl(url="http://media.hoover.org/documents/clm7_jm.pdf")
         url.extract()
-        assert url.unrecognized_scheme is False
+        assert url.malformed_url is False

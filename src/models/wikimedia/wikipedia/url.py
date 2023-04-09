@@ -1,10 +1,13 @@
 import logging
 from ipaddress import ip_address
+from typing import Optional
 from urllib.parse import urlparse
 
 from pydantic import BaseModel
 from tld import get_fld
 from tld.exceptions import TldBadUrl, TldDomainNotFound
+
+from src.models.wikimedia.wikipedia.enums import MalformedUrlError
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +30,10 @@ class WikipediaUrl(BaseModel):
     scheme: str = ""  # url scheme e.g. http
     netloc: str = ""  # network location e.g. google.com
     tld: str = ""  # top level domain
-    unrecognized_scheme: bool = False
     unrecognized_tld_length: bool = False
     added_http_scheme_worked: bool = False
     malformed_url: bool = False
-    scheme_missing: bool = False
-    no_netloc: bool = False
+    malformed_url_details: Optional[MalformedUrlError] = None
 
     @property
     def __get_url__(self) -> str:
@@ -60,12 +61,14 @@ class WikipediaUrl(BaseModel):
         """This fixes a common error found in Wikipedia urls"""
         if self.__get_url__.startswith("httpwww"):
             self.malformed_url = True
+            self.malformed_url_details = MalformedUrlError.HTTPWWW
             self.fixed_url = self.__get_url__.replace("httpwww", "http://www")
 
     def __fix_malformed_httpswww__(self):
         """This fixes a common error found in Wikipedia urls"""
         if self.__get_url__.startswith("httpswww"):
             self.malformed_url = True
+            self.malformed_url_details = MalformedUrlError.HTTPSWWW
             self.fixed_url = self.__get_url__.replace("httpswww", "https://www")
 
     def __parse_extract_and_validate__(self) -> None:
@@ -85,18 +88,9 @@ class WikipediaUrl(BaseModel):
         self.__parse_extract_and_validate__()
         self.extract_first_level_domain()
 
-    # TODO rewrite to expose these in the API also
-    # def is_google_books_url(self):
-    #     return bool("//books.google." in self.__get_url__)
-    #
     def is_wayback_machine_url(self):
 
         return bool("//web.archive.org" in self.__get_url__)
-
-    # def is_ia_details_url(self):
-    #     """Checks for Internet Archive details url"""
-    #
-    #     return bool("//archive.org/details" in self.__get_url__)
 
     def extract_first_level_domain(self) -> None:
         from src.models.api import app
@@ -134,15 +128,17 @@ class WikipediaUrl(BaseModel):
 
         app.logger.debug("__check_tld__: running")
         if not self.netloc:
-            logger.warning("netloc was empty")
+            logger.warning("netloc was empty, skipping check")
         else:
             length = len(self.tld)
-            if not (6 > length > 2):
+            # Allow up to 6 length to support "travel"
+            # and down to 2 length to support "se"
+            if not (6 >= length >= 2):
                 logger.warning(
                     f"TLD '{self.tld}' with length {length} was not a recognized length"
                 )
-                self.unrecognized_tld_length = True
                 self.malformed_url = True
+                self.malformed_url_details = MalformedUrlError.UNRECOGNIZED_TLD_LENGTH
             else:
                 logger.debug(
                     f"TLD '{self.tld}' in {self.__get_url__} was correct length"
@@ -152,12 +148,13 @@ class WikipediaUrl(BaseModel):
         """Check for one of 4 know schemes that Wikipedia accepts"""
         if not self.scheme:
             logger.debug(f"Could not find urlscheme in {self.__get_url__}")
-            self.scheme_missing = True
+            self.malformed_url = True
+            self.malformed_url_details = MalformedUrlError.MISSING_SCHEME
         else:
             if self.scheme not in ["http", "https", "ftp", "sftp"]:
                 logger.debug(f"Unrecognized scheme: {self.scheme}")
                 self.malformed_url = True
-                self.unrecognized_scheme = True
+                self.malformed_url_details = MalformedUrlError.UNRECOGNIZED_SCHEME
             else:
                 logger.debug(f"Found valid urlscheme: {self.scheme}")
 
@@ -168,11 +165,13 @@ class WikipediaUrl(BaseModel):
                 f"Could not get netloc from {self.__get_url__} so we consider it malformed"
             )
             self.malformed_url = True
+            self.malformed_url_details = MalformedUrlError.NO_NETLOC_FOUND
             # try fixing urls like these: httproe.ru/pdfs/pdf_1914.pdf
             parsed_url = urlparse("http://" + self.__get_url__)
             netloc = parsed_url.netloc
             if not netloc:
-                self.no_netloc = True
+                self.malformed_url = True
+                self.malformed_url_details = MalformedUrlError.NO_NETLOC_FOUND
                 return ""
             else:
                 logger.info(
