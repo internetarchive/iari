@@ -6,6 +6,7 @@ import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 from src.models.api.job.article_job import ArticleJob
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 from src.wcd_base_model import WcdBaseModel
@@ -23,7 +24,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     * we extract the raw references -> WikipediaReference
     """
 
-    job = ArticleJob
+    job: ArticleJob
     wikitext: str
     wikicode: Wikicode = None
     references: List[WikipediaReference] = []
@@ -171,7 +172,6 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                 wikicode=ref,
                 # wikibase=self.wikibase,
                 testing=self.testing,
-                check_urls=self.check_urls,
                 language_code=self.language_code,
             )
             reference.extract_and_check()
@@ -204,7 +204,6 @@ class WikipediaReferenceExtractor(WcdBaseModel):
                         wikicode=parsed_line,
                         # wikibase=self.wikibase,
                         testing=self.testing,
-                        check_urls=self.check_urls,
                         language_code=self.language_code,
                         is_general_reference=True,
                     )
@@ -216,12 +215,15 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         from src.models.api import app
 
         app.logger.debug("extract_all_references: running")
+        if not self.job:
+            raise MissingInformationError("no job")
         self.__parse_wikitext__()
         self.__extract_all_raw_citation_references__()
         self.__extract_all_raw_general_references__()
         app.logger.info("Done extracting all references")
 
     def __extract_sections__(self):
+        """This uses the regex supplied by the patron via the API"""
         from src.models.api import app
 
         app.logger.debug("__extract_sections__: running")
@@ -229,9 +231,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
             self.__parse_wikitext__()
         self.sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
-            # TODO rewrite to support all language editions
-            #  of Wikipedia see https://github.com/internetarchive/wari/issues/727
-            matches="bibliography|further reading|works cited|sources|external links",
+            matches=self.job.regex,
             flags=re.I,
             include_headings=False,
         )

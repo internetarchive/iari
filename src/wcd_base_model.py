@@ -14,6 +14,9 @@ class WcdBaseModel(BaseModel):
     # We set to Any here because of cyclic dependency or pydantic forward ref error
     cache: Optional[Any] = None
 
+    class Config:
+        extra = "forbid"
+
     @validate_arguments
     def __log_to_file__(self, message: str, file_name: str) -> None:
         if not exists(file_name):

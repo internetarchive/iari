@@ -888,7 +888,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
-            check_urls=False,
         )
         assert raw_reference_object.is_footnote_reference is False
         assert raw_reference_object.is_general_reference is True
@@ -903,7 +902,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
-            check_urls=False,
         )
         raw_reference_object.extract_and_check()
         assert raw_reference_object.is_general_reference is True
@@ -919,7 +917,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         wikicode=wikicode,
     #         testing=True,
     #         is_general_reference=True,
-    #         check_urls=False,
+    #
     #     )
     #     raw_reference_object.extract_and_check()
     #     assert raw_reference_object.plain_text_in_reference is True
@@ -934,7 +932,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         wikicode=wikicode,
     #         testing=True,
     #         is_general_reference=True,
-    #         check_urls=False,
+    #
     #     )
     #     raw_reference_object.extract_and_check()
     #     assert raw_reference_object.plain_text_in_reference is True
@@ -949,7 +947,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         wikicode=wikicode,
     #         testing=True,
     #         is_general_reference=True,
-    #         check_urls=False,
+    #
     #     )
     #     raw_reference_object.extract_and_check()
     #     assert raw_reference_object.plain_text_in_reference is False
@@ -1086,7 +1084,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
-            check_urls=True,
         )
         raw_reference_object.extract_and_check()
         assert raw_reference_object.reference_urls == [
@@ -1115,7 +1112,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
-            check_urls=True,
         )
         raw_reference_object.extract_and_check()
         flds = sorted(raw_reference_object.first_level_domains)
@@ -1135,7 +1131,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         wikicode=wikicode,
     #         testing=True,
     #         is_general_reference=True,
-    #         check_urls=False,
+    #
     #     )
     #     with self.assertRaises(MissingInformationError):
     #         raw_reference_object.__check_urls__()
@@ -1151,7 +1147,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         wikicode=wikicode,
     #         testing=True,
     #         is_general_reference=True,
-    #         check_urls=True,
+    #
     #     )
     #     raw_reference_object.extract_and_check()
     #     urls = raw_reference_object.checked_urls
@@ -1171,7 +1167,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #         wikicode=wikicode,
     #         testing=True,
     #         is_general_reference=True,
-    #         check_urls=True,
+    #
     #     )
     #     raw_reference_object.extract_and_check()
     #     urls = raw_reference_object.checked_urls
@@ -1194,7 +1190,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
-            check_urls=False,
         )
         bare_urls = raw_reference_object.__find_bare_urls__()
         assert len(bare_urls) == 0

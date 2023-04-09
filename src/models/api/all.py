@@ -82,6 +82,8 @@ class AllHandler(WcdBaseModel):
     def fetch_and_compile(self):
         from src.models.api import app
 
+        if not self.job:
+            raise MissingInformationError()
         self.__fetch_article__()
         self.__fetch_references__()
         self.__extract_dois__()
@@ -142,8 +144,7 @@ class AllHandler(WcdBaseModel):
         from src.models.api import app
 
         app.logger.debug("__fetch_article__: running")
-        # response = requests.get(f"http://18.217.22.248/v2/statistics/article?url={}")
-        url = f"http://18.217.22.248/v2/statistics/article?url={self.__quote__(self.job.url)}"
+        url = f"http://18.217.22.248/v2/statistics/article?url={self.__quote__(self.job.url)}&regex={self.__quote__(self.job.regex)}&refresh={self.job.refresh}"
         app.logger.debug(f"using url: {url}")
         response = requests.get(url)
         if response.status_code == 200:

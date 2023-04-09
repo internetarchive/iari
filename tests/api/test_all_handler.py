@@ -4,8 +4,14 @@ from src.models.api.job.article_job import ArticleJob
 
 class TestAllHandler:
     def test_fetch_and_compile_sncaso(self):
-        handler = AllHandler(job=ArticleJob(url="https://en.wikipedia.org/wiki/SNCASO"))
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/SNCASO",
+            regex="bibliography|further reading|works cited|sources|external links",
+        )
+        job.validate_regex_and_extract_url()
+        handler = AllHandler(job=job)
         handler.fetch_and_compile()
+        assert handler.error is False
         assert handler.data != {}
         assert len(handler.references) == 45
         assert handler.compilation != {}
@@ -23,9 +29,12 @@ class TestAllHandler:
     #     assert len(handler.compilation["doi_details"]) == 0
 
     def test___fetch_doi_details__(self):
-        handler = AllHandler(
-            job=ArticleJob(url="https://en.wikipedia.org/wiki/Bicycle")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Bicycle",
+            regex="bibliography|further reading|works cited|sources|external links",
         )
+        job.validate_regex_and_extract_url()
+        handler = AllHandler(job=job)
         handler.__fetch_article__()
         assert handler.error is False
         assert handler.data != {}
@@ -36,9 +45,13 @@ class TestAllHandler:
         assert len(handler.doi_details) == 7
 
     def test_number_of_dois(self):
-        handler = AllHandler(
-            job=ArticleJob(url="https://en.wikipedia.org/wiki/Bicycle")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Bicycle",
+            regex="bibliography|further reading|works cited|sources|external links",
         )
+        job.validate_regex_and_extract_url()
+        handler = AllHandler(job=job)
         handler.__fetch_article__()
         handler.__fetch_references__()
+        assert handler.error is False
         assert handler.number_of_dois == 7

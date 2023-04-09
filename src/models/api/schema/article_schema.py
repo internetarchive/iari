@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 class ArticleSchema(RefreshSchema):
     testing = fields.Bool(required=False)
     url = fields.Str(required=True)
+    regex = fields.Str(required=True)
 
     # noinspection PyUnusedLocal
     @post_load
@@ -21,6 +22,5 @@ class ArticleSchema(RefreshSchema):
 
         app.logger.debug("return_object: running")
         job = ArticleJob(**data)
-        job.extract_url()
-        # print(job.title)
+        job.validate_regex_and_extract_url()
         return job

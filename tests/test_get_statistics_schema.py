@@ -13,7 +13,11 @@ class TestArticleSchema(TestCase):
     def test_return_object_valid(self):
         gss = ArticleSchema()
         job = gss.load(
-            dict(url="https://en.wikipedia.org/wiki/Easter_Island", refresh=True)
+            dict(
+                url="https://en.wikipedia.org/wiki/Easter_Island",
+                refresh=True,
+                regex="test",
+            )
         )
         assert job == ArticleJob(
             url="https://en.wikipedia.org/wiki/Easter_Island",
@@ -21,18 +25,27 @@ class TestArticleSchema(TestCase):
             title="Easter_Island",
             lang="en",
             site=WikimediaDomain.wikipedia,
+            regex="test",
         )
 
     def test_return_object_invalid(self):
         gss = ArticleSchema()
         with self.assertRaises(ValidationError):
             gss.load(
-                dict(url="https://en.wikipedia.org/wiki/Easter_Island", refresh=11)
+                dict(
+                    url="https://en.wikipedia.org/wiki/Easter_Island",
+                    refresh=11,
+                    regex="test",
+                )
             )
 
     def test_validate_invalid_refresh(self):
         gss = ArticleSchema()
         errors = gss.validate(
-            dict(url="https://en.wikipedia.org/wiki/Easter_Island", refresh="truest")
+            dict(
+                url="https://en.wikipedia.org/wiki/Easter_Island",
+                refresh="truest",
+                regex="test",
+            )
         )
         assert errors == {"refresh": ["Not a valid boolean."]}

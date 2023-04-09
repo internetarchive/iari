@@ -28,7 +28,7 @@ class TestArticleJob(TestCase):
     def test_extract_url_http(self):
         job = ArticleJob()
         job.url = "http://en.wikipedia.org/wiki/Test"
-        job.extract_url()
+        job.__extract_url__()
 
         self.assertEqual(job.lang, Lang.en)
         self.assertEqual(job.domain, WikimediaDomain.wikipedia)
@@ -37,7 +37,7 @@ class TestArticleJob(TestCase):
     def test_extract_url_https(self):
         job = ArticleJob()
         job.url = "https://en.wikipedia.org/wiki/Test"
-        job.extract_url()
+        job.__extract_url__()
 
         self.assertEqual(job.lang, Lang.en)
         self.assertEqual(job.domain, WikimediaDomain.wikipedia)
@@ -48,5 +48,25 @@ class TestArticleJob(TestCase):
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy"
         )
-        job.extract_url()
+        job.__extract_url__()
         assert job.quoted_title == "GNU%2FLinux_naming_controversy"
+
+    def test_valid_regex_valid_input(self):
+        job = ArticleJob(regex="test string | another string | a third string")
+        assert job.__valid_regex__ is False
+        job2 = ArticleJob(regex="test|string|another|string")
+        assert job2.__valid_regex__ is True
+        job3 = ArticleJob(regex="teststring")
+        assert job3.__valid_regex__ is True
+        job4 = ArticleJob(
+            regex="bibliography|further reading|works cited|sources|external links"
+        )
+        assert job4.__valid_regex__ is True
+
+    def test_valid_regex_invalid_input(self):
+        job = ArticleJob(regex="test string | another string | a third string")
+        assert job.__valid_regex__ is False
+        job2 = ArticleJob(regex="test||string")
+        assert job2.__valid_regex__ is False
+        job3 = ArticleJob(regex="teststring_")
+        assert job3.__valid_regex__ is False
