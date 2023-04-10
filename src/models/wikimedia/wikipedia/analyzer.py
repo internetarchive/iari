@@ -35,7 +35,7 @@ class WikipediaAnalyzer(WcdBaseModel):
         if not self.article:
             raise MissingInformationError()
         return (
-            f"{self.job.lang.value}." f"{self.job.domain.value}.{self.article.page_id}"
+            f"{self.job.lang}." f"{self.job.domain.value}.{self.article.page_id}"
         )
 
     @property
@@ -68,7 +68,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             ae = self.article.extractor
             self.article_statistics = ArticleStatistics(
                 wari_id=self.wari_id,
-                lang=self.job.lang.value,
+                lang=self.job.lang,
                 reference_statistics=dict(
                     named=ae.number_of_empty_named_references,
                     footnote=ae.number_of_footnote_references,

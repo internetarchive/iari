@@ -104,8 +104,6 @@ class Article(StatisticsWriteView):
         from src.models.api import app
 
         app.logger.error("__return_meaningful_error__: running")
-        if self.job.lang != "en":
-            return "Only language code 'en' is supported, currently", 400
         if self.job.title == "":
             return "Title was missing", 400
         if self.job.domain != "wikipedia":
@@ -126,7 +124,7 @@ class Article(StatisticsWriteView):
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
         if (
-            self.job.lang.value == "en"
+            self.job.lang == "en"
             and self.job.title
             and self.job.domain == WikimediaDomain.wikipedia
         ) or self.job.url:

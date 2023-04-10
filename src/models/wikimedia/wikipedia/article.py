@@ -125,7 +125,7 @@ class WikipediaArticle(WcdBaseModel):
             # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base or
             # https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy
             url = (
-                f"https://{self.job.lang.value}.{self.job.domain.value}/"
+                f"https://{self.job.lang}.{self.job.domain.value}/"
                 f"w/rest.php/v1/page/{self.job.quoted_title}"
             )
             headers = {"User-Agent": config.user_agent}

@@ -36,7 +36,7 @@ WARI features a number of endpoints that help patrons
 get structured data about references in a Wikipedia article:
 * an _article_ endpoint which analyzes a given article and returns basic statistics about it 
 * a _references_ endpoint which gives back all ids of references found
-* a _reference_ endpoint which gives back all details about a reference including templates
+* a _reference_ endpoint which gives back all details about a reference including templates and wikitext
 * a _check-url_ endpoint which looks up the URL and gives back 
 standardized information about its status
 * a _check-doi_ endpoint which looks up the DOI and gives back 
@@ -44,18 +44,23 @@ standardized information about it from [FatCat](https://fatcat.wiki/), OpenAlex 
 including abstract, retracted status, and more.
 
 # Limitations
-* support for English Wikipedia only
+* the general references parsing relies on 2 things: 
+  * a manually supplied list of sections to search
+  * that every line with a general reference begins with a star character (*)
 
 # Supported Wikipedias
-Currently we support only enwiki but we plan on extending 
-the support to all Wikipedia language versions as soon as the API is 
-a bit more stable.
+Currently we support a handful of the 200+ language versions of Wikipedia 
+but we plan on extending the support to all Wikipedia language versions 
+and you can help us by submitting sections to search for references in issues and 
+pull requests.
 
-We also want to support non-Wikimedia wikis using MediaWiki in the future.
+We also would like to support non-Wikimedia wikis using MediaWiki in the future 
+and perhaps also any webpage on the internet with outlinks (e.g. news articles).
 
-## English Wikipedia templates
-English Wikipedia has hundreds of special reference templates in use 
-and a handful of widely used generic templates. WARI exposes them all when found in a reference.
+## Wikipedia templates
+English Wikipedia for example has hundreds of special reference templates in use 
+and a handful of widely used generic templates. 
+WARI exposes them all when found in a reference.
 
 ## Reference types detected by the ArticleAnalyzer
 We support detecting the following types. A reference cannot have multiple types. 
@@ -72,13 +77,13 @@ beyond counting because we have not decided if they contain any value)
 
 Example of a URL-template reference:
 `<ref>Mueller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
-This is a content reference -> a citation reference -> a mixed reference with a URL template. 
+This is a content reference -> a footnote reference -> a mixed reference with a URL template. 
 
 Example of an plain text reference:
 `<ref>Muller Report, p12</ref>`
-This is a footnote reference -> content reference -> Short citation reference. 
+This is a footnote reference -> content reference -> Short citation reference aka naked named footnote. 
 
-### Footnote reference subtypes
+### Footnote reference subtypes we have identified in the wild
 1) **mixed reference with an ISBN template** - reference with plain text and a {{isbn}} template
 2) **mixed reference with a URL template** - reference with plain text and a URL (these are very rare)
 3) **ISBN template reference** - reference with only a {{isbn}} template

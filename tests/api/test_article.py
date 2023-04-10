@@ -135,7 +135,7 @@ class TestArticle(TestCase):
     #     # data = json.loads(response.data)
     #     self.assertEqual(200, response.status_code)
 
-    def test_valid_request_easter_island(self):
+    def test_valid_request_enwiki_easter_island(self):
         response = self.test_client.get(
             "/get-statistics?url=https://en.wikipedia.org/wiki/Easter_Island&testing=true&regex=test"
         )
@@ -146,57 +146,29 @@ class TestArticle(TestCase):
         assert data["dehydrated_references"] != []
         assert data["urls"] != []
 
-    # def test_invalid_language(self):
-    #     response = self.test_client.get(
-    #         "/get-statistics?lang=fr&site=wikipedia&title=Test"
-    #     )
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertEqual(
-    #         b"{\"error\": \"{'lang': ['Must be one of: en.']}\"}\n", response.data
-    #     )  # expected output
+    def test_valid_request_svwiki1(self):
+        response = self.test_client.get(
+            "/get-statistics?url=https://sv.wikipedia.org/wiki/Boy_Rozendal&testing=true&regex=test"
+        )
+        self.assertEqual(200, response.status_code)
+        data = json.loads(response.data)
+        console.print(data)
+        assert data["title"] == "Boy_Rozendal"
+        assert len(data["dehydrated_references"]) == 3
+        assert len(data["urls"]) == 5
 
-    # def test_missing_title(self):
-    #     response = self.test_client.get("/get-statistics?lang=en&site=wikipedia")
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertEqual(
-    #         response.data,
-    #         b"{\"error\": \"{'title': ['Missing data for required field.']}\"}\n",
-    #     )
+    def test_valid_request_dawiki1(self):
+        response = self.test_client.get(
+            "/get-statistics?url=https://da.wikipedia.org/wiki/Kleptoparasitisme&testing=true&regex=test"
+        )
+        self.assertEqual(200, response.status_code)
+        data = json.loads(response.data)
+        console.print(data)
+        assert data["title"] == "Kleptoparasitisme"
+        assert len(data["dehydrated_references"]) == 35
+        assert len(data["urls"]) == 19
 
-    # def test_invalid_site(self):
-    #     response = self.test_client.get(
-    #         "/get-statistics?lang=en&site=example.com&title=Test"
-    #     )
-    #     print(response.data)
-    #     self.assertEqual(400, response.status_code)
-    #     self.assertEqual(
-    #         b"{\"error\": \"{'site': ['Must be one of: wikipedia.']}\"}\n",
-    #         response.data,
-    #     )
-
-    # def test_site_capitalized(self):
-    #     response = self.test_client.get(
-    #         "/get-statistics?lang=en&site=WIKIPEDIA&title=Test"
-    #     )
-    #     # print(response.data)
-    #     self.assertEqual(400, response.status_code)
-
-    # def test_valid_site(self):
-    #     response = self.test_client.get(
-    #         "/get-statistics?lang=en&site=wikipedia&title=Test"
-    #     )
-    #     # print(response.data)
-    #     self.assertEqual(200, response.status_code)
-
-    # @staticmethod
-    # def __make_reproducible__(data):
-    #     """Remove all timing information"""
-    #     # delete non reproducible output
-    #     data["timing"] = 0
-    #     data["timestamp"] = 0
-    #     return data
-
-    def test_valid_request_test_refresh_true(self):
+    def test_valid_request_enwiki_test_refresh_true(self):
         response = self.test_client.get(
             "/get-statistics?url=https://en.wikipedia.org/wiki/Test&testing=True&refresh=True&regex=test"
         )
@@ -205,22 +177,3 @@ class TestArticle(TestCase):
         self.assertEqual(200, response.status_code)
         stats = ArticleStatistics(**data)
         assert stats.served_from_cache is False
-
-    # def test_valid_request_test_refresh_false(self):
-    #     # this is not possible to test
-    #     pass
-    # response = self.test_client.get(
-    #     "/get-statistics?lang=en&site=wikipedia&title=Test&testing=True"
-    # )
-    # data = json.loads(response.data)
-    # print(response.data)
-    # self.assertEqual(200, response.status_code)
-    # stats = ArticleStatistics(**data)
-    # assert stats.served_from_cache is True
-
-    # def test___validate_and_get_job__(self):
-    #     """We dont test this since the dev/team does not yet
-    #     know how to mock flask that well yet.
-    #     We do however test the scheme in another file
-    #     and the job it returns"""
-    #     pass
