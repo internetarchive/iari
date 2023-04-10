@@ -6,7 +6,7 @@ repos:
     entry: dead
     args:
       - "--exclude"
-      - "test_data/test_content.py" # regex separate by "|"
+      - "test_data/test_content.py|^deprecated/" # regex separate by "|"
     language: system
     pass_filenames: false
     # types: [python]

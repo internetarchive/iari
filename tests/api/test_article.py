@@ -4,9 +4,9 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
+from src import Article
 from src.helpers.console import console
 from src.models.api.statistic.article import ArticleStatistics
-from src.views.statistics.article import Article
 
 # This is needed to get the full diff when tests fail
 # https://stackoverflow.com/questions/14493670/how-to-set-self-maxdiff-in-nose-to-get-full-diff-output

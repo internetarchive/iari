@@ -5,7 +5,7 @@
 # from flask import Flask
 # from flask_restful import Api  # type: ignore
 #
-# from src import console
+# from src.helpers.console import console
 #
 # logger = logging.getLogger(__name__)
 #

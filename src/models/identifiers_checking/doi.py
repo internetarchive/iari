@@ -36,7 +36,7 @@ class Doi(BaseModel):
     timeout: int = 2
     internet_archive_scholar: Dict[str, Any] = {}
 
-    class Config:
+    class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
     @property
@@ -45,7 +45,7 @@ class Doi(BaseModel):
 
     def lookup_doi(self):
         """Helper method"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("lookup_doi: running")
         self.__lookup_doi_in_openalex__()
@@ -57,7 +57,7 @@ class Doi(BaseModel):
         self.__lookup_in_fatcat__()
 
     def __lookup_doi_in_openalex__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.info("Looking up DOI in OpenAlex")
         work = Works()[f"https://doi.org/{self.doi}"]
@@ -75,7 +75,7 @@ class Doi(BaseModel):
             )
 
     def __get_wikidata_entity__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__get_wikidata_entity__: running")
         if self.found_in_wikidata:
@@ -93,7 +93,7 @@ class Doi(BaseModel):
         # self.get_count_of_all_statements()
 
     def __determine_if_retracted_in_wikidata__(self):
-        from src.models.api import app
+        from src import app
 
         if self.wikidata_entity:
             instance_of_claims = self.wikidata_entity.claims.get(property=instance_of)
@@ -102,7 +102,7 @@ class Doi(BaseModel):
             self.__iterate_claims__(claims=instance_of_claims)
 
     def __lookup_via_cirrussearch__(self) -> None:
-        from src.models.api import app
+        from src import app
 
         entities = fulltext_search(
             search=f"haswbstatement:P356={self.doi}", max_results=1
@@ -117,7 +117,7 @@ class Doi(BaseModel):
             app.logger.info("DOI not found via CirrusSearch")
 
     def __determine_if_retracted__(self, claim: Claim) -> None:
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__determine_if_retracted__: running")
         # console.print(claim)
@@ -136,7 +136,7 @@ class Doi(BaseModel):
             self.__determine_if_retracted__(claim=claim)
 
     def __log_if_retracted_or_not__(self):
-        from src.models.api import app
+        from src import app
 
         if self.found_in_openalex and self.found_in_wikidata:
             if (

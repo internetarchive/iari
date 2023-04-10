@@ -8,14 +8,14 @@ from pydantic import validate_arguments
 
 import config
 from src.models.api.job.article_job import ArticleJob
+from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaDomain
-from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikipediaArticle(WcdBaseModel):
+class WikipediaArticle(WariBaseModel):
     """Models a WMF Wikipedia article
 
     Implementation details:
@@ -75,7 +75,7 @@ class WikipediaArticle(WcdBaseModel):
     #     self.md5hash = hashing.generate_article_hash()
 
     def fetch_and_extract_and_parse(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("fetch_and_extract_and_parse_and_generate_hash: running")
         app.logger.info("Extracting templates and parsing the references now")
@@ -112,7 +112,7 @@ class WikipediaArticle(WcdBaseModel):
     def __fetch_page_data__(self) -> None:
         """This fetches metadata and the latest revision id
         and date from the MediaWiki REST v1 API if needed"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__fetch_page_data__: Running")
         self.__check_if_title_is_empty__()

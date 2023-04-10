@@ -28,7 +28,7 @@ class ArticleJob(Job):
         return quote(self.title, safe="")
 
     def get_page_id(self) -> None:
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("get_page_id: running")
         if not self.page_id:
@@ -71,7 +71,7 @@ class ArticleJob(Job):
         I want a python re regex that extracts "en" "wikipedia.or"
         and "Test" from http://en.wikipedia.org/wiki/Test
         """
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("extract_url: running")
         if self.url:
@@ -98,16 +98,18 @@ class ArticleJob(Job):
         Words separated by spaces are allowed.
         _ is not allowed anywhere"""
         underscore_pattern = re.compile(r"^[^_]*$")
-        if re.fullmatch(underscore_pattern, self.regex):
-            regex = r"^(\s*[^\s]+\s*)+(\s*\|\s*[^\s]+\s*)*$"
-            if re.fullmatch(regex, self.regex):
-                # print('The string is formatted correctly.')
-                return True
-            else:
-                # print('The string is not formatted correctly.')
-                return False
+        horizontal_line_regex = r"^(\s*[^\s]+\s*)+(\s*\|\s*[^\s]+\s*)*$"
+        if " | " in self.regex:
+            return False
+        if "||" in self.regex:
+            return False
+        if not re.fullmatch(underscore_pattern, self.regex):
+            return False
+        if re.fullmatch(horizontal_line_regex, self.regex):
+            # print('The string is formatted correctly.')
+            return True
         else:
-            # string contained underscore
+            # print('The string is not formatted correctly.')
             return False
 
     def validate_regex_and_extract_url(self):

@@ -23,7 +23,7 @@ class Article(StatisticsWriteView):
     def __analyze_and_write_and_return__(self) -> Tuple[Any, int]:
         """Analyze, calculate the time, write statistics to disk and return it
         If we did not get statistics, return a meaningful error to the patron"""
-        from src.models.api import app
+        from src import app
 
         app.logger.info("__analyze_and_write_and_return__: running")
         if not self.wikipedia_analyzer:
@@ -51,7 +51,7 @@ class Article(StatisticsWriteView):
             return AnalyzerReturn.NOT_FOUND.value, 404
 
     def __handle_valid_job__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("got valid job")
         self.__read_from_cache__()
@@ -72,7 +72,7 @@ class Article(StatisticsWriteView):
             return self.__analyze_and_write_and_return__()
 
     def __get_statistics__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__get_statistics__: running")
         if not self.wikipedia_analyzer:
@@ -93,7 +93,7 @@ class Article(StatisticsWriteView):
 
     def __write_to_disk__(self):
         """Write both article json and all reference json files"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__write_to_disk__: running")
         if not self.job.testing:
@@ -101,7 +101,7 @@ class Article(StatisticsWriteView):
             self.__write_references_to_disk__()
 
     def __return_meaningful_error__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.error("__return_meaningful_error__: running")
         if self.job.title == "":
@@ -111,7 +111,7 @@ class Article(StatisticsWriteView):
 
     def __setup_wikipedia_analyzer__(self):
         if not self.wikipedia_analyzer:
-            from src.models.api import app
+            from src import app
 
             app.logger.info(f"Analyzing {self.job.title}...")
             self.wikipedia_analyzer = WikipediaAnalyzer(job=self.job, check_urls=True)
@@ -119,7 +119,7 @@ class Article(StatisticsWriteView):
     def get(self):
         """This is the main method and the entrypoint for flask
         Every branch in this method has to return a tuple (Any,response_code)"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("get: running")
         self.__validate_and_get_job__()

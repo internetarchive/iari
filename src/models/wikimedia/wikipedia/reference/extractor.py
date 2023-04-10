@@ -6,16 +6,16 @@ import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 from src.models.api.job.article_job import ArticleJob
+from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
-from src.wcd_base_model import WcdBaseModel
 
 # logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 
-class WikipediaReferenceExtractor(WcdBaseModel):
+class WikipediaReferenceExtractor(WariBaseModel):
     """This class handles all extraction of references from wikicode
 
     Design:
@@ -159,7 +159,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
     #
     def __extract_all_raw_citation_references__(self):
         """This extracts everything inside <ref></ref> tags"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__extract_all_raw_citation_references__: running")
         # Thanks to https://github.com/JJMC89,
@@ -179,7 +179,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def __extract_all_raw_general_references__(self):
         """This extracts everything inside <ref></ref> tags"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__extract_all_raw_general_references__: running")
         # Thanks to https://github.com/JJMC89,
@@ -212,7 +212,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def extract_all_references(self):
         """Extract all references from self.wikitext"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("extract_all_references: running")
         if not self.job:
@@ -224,7 +224,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
 
     def __extract_sections__(self):
         """This uses the regex supplied by the patron via the API"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__extract_sections__: running")
         if not self.wikicode:
@@ -238,7 +238,7 @@ class WikipediaReferenceExtractor(WcdBaseModel):
         app.logger.debug(f"Number of sections found: {len(self.sections)}")
 
     def __parse_wikitext__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__parse_wikitext__: running")
         if not self.wikicode:
