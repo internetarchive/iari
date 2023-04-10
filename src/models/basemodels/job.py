@@ -8,4 +8,4 @@ class JobBaseModel(WcdBaseModel):
     job: Optional[Job] = None
 
     class Config:
-        extra = "forbid"
+        extra = "forbid"  # dead: disable

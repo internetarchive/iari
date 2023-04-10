@@ -22,8 +22,6 @@ class ArticleFileIo(FileIo):
             self.job.get_page_id()
             if not self.job.page_id:
                 raise MissingInformationError()
-            wari_id = (
-                f"{self.job.lang}." f"{self.job.domain.value}.{self.job.page_id}"
-            )
+            wari_id = f"{self.job.lang}." f"{self.job.domain.value}.{self.job.page_id}"
             filename = f"{wari_id}.json"
             return filename

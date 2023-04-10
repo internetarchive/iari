@@ -37,7 +37,7 @@ class Doi(BaseModel):
     internet_archive_scholar: Dict[str, Any] = {}
 
     class Config:
-        arbitrary_types_allowed = True
+        arbitrary_types_allowed = True  # dead: disable
 
     @property
     def wikidata_entity_uri(self):

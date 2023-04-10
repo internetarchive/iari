@@ -15,7 +15,7 @@ class WcdBaseModel(BaseModel):
     cache: Optional[Any] = None
 
     class Config:
-        extra = "forbid"
+        extra = "forbid"  # dead: disable
 
     @validate_arguments
     def __log_to_file__(self, message: str, file_name: str) -> None:

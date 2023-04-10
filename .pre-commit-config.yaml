@@ -75,7 +75,7 @@ repos:
     # use require_serial so that script
     # is only called once per commit
     require_serial: true
-    exclude: ^test_data/
+    exclude: ^test_data/|^deprecated
     # Print the number of files as a sanity-check
     # verbose: true
 
