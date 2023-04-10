@@ -10,7 +10,7 @@ class ReferencesFileIo(FileIo):
     references: List[Dict[str, Any]] = []
 
     def write_references_to_disk(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("writing references to disk")
         for reference in self.references:

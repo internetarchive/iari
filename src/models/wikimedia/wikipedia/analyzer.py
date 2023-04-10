@@ -6,14 +6,14 @@ from typing import Any, Dict, List, Optional
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.statistic.article import ArticleStatistics
 from src.models.api.statistic.reference import ReferenceStatistic
+from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
-from src.wcd_base_model import WcdBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class WikipediaAnalyzer(WcdBaseModel):
+class WikipediaAnalyzer(WariBaseModel):
     """This model contain all the logic for getting the
     article and reference statistics and mapping them to the API output model
 
@@ -34,9 +34,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             raise MissingInformationError()
         if not self.article:
             raise MissingInformationError()
-        return (
-            f"{self.job.lang.value}." f"{self.job.domain.value}.{self.article.page_id}"
-        )
+        return f"{self.job.lang}." f"{self.job.domain.value}.{self.article.page_id}"
 
     @property
     def testing(self):
@@ -68,7 +66,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             ae = self.article.extractor
             self.article_statistics = ArticleStatistics(
                 wari_id=self.wari_id,
-                lang=self.job.lang.value,
+                lang=self.job.lang,
                 reference_statistics=dict(
                     named=ae.number_of_empty_named_references,
                     footnote=ae.number_of_footnote_references,
@@ -104,7 +102,7 @@ class WikipediaAnalyzer(WcdBaseModel):
 
     def __analyze__(self):
         """Helper method"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__analyze__: running")
         if self.job:
@@ -114,7 +112,7 @@ class WikipediaAnalyzer(WcdBaseModel):
                 self.article.fetch_and_extract_and_parse()
 
     def __gather_reference_statistics__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__gather_reference_statistics__: running")
         if (
@@ -159,7 +157,7 @@ class WikipediaAnalyzer(WcdBaseModel):
             )
 
     def __populate_article__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__populate_article__: running")
         if self.job and self.job.title:

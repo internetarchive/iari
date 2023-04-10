@@ -145,7 +145,7 @@ class WikipediaTemplate(BaseModel):
 
         Copyright pywikibot authors
         """
-        from src.models.api import app
+        from src import app
 
         if not self.raw_template:
             raise MissingInformationError("self.raw_template was empty")
@@ -176,7 +176,7 @@ class WikipediaTemplate(BaseModel):
             self.parameters[key] = cleaned_value
 
     def extract_and_prepare_parameter_and_flds(self) -> Any:
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("extract_and_prepare_parameter_and_flds: running")
         self.__extract_and_clean_template_parameters__()

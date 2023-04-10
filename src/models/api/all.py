@@ -10,11 +10,11 @@ import aiohttp
 import requests
 
 from src.models.api.job.article_job import ArticleJob
+from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
-from src.wcd_base_model import WcdBaseModel
 
 
-class AllHandler(WcdBaseModel):
+class AllHandler(WariBaseModel):
     compilation: Dict[str, Any] = {}
     data: Dict[str, Any] = {}
     # We use a set to avoid duplicates
@@ -80,7 +80,7 @@ class AllHandler(WcdBaseModel):
             return results
 
     def fetch_and_compile(self):
-        from src.models.api import app
+        from src import app
 
         if not self.job:
             raise MissingInformationError()
@@ -93,7 +93,7 @@ class AllHandler(WcdBaseModel):
         self.__compile_everything__()
 
     def __fetch_references__(self):
-        from src.models.api import app
+        from src import app
 
         # Only proceed if no error and it has references and we have not fetched already
         if not self.error and not self.references and self.number_of_references:
@@ -109,7 +109,7 @@ class AllHandler(WcdBaseModel):
             )
 
     def __fetch_url_details__(self):
-        from src.models.api import app
+        from src import app
 
         if not self.error:
             app.logger.debug("__fetch_url_details__: running")
@@ -124,7 +124,7 @@ class AllHandler(WcdBaseModel):
             self.url_details = loop.run_until_complete(self.check_urls(urls))
 
     def __fetch_doi_details__(self):
-        from src.models.api import app
+        from src import app
 
         if not self.error:
             app.logger.debug("__fetch_doi_details__: running")
@@ -141,7 +141,7 @@ class AllHandler(WcdBaseModel):
                 app.logger.info(f"Not checking DOIs because none were found")
 
     def __fetch_article__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__fetch_article__: running")
         url = f"http://18.217.22.248/v2/statistics/article?url={self.__quote__(self.job.url)}&regex={self.__quote__(self.job.regex)}&refresh={self.job.refresh}"

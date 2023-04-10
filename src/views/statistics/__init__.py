@@ -35,7 +35,7 @@ class StatisticsView(Resource):
         self.__parse_into_job__()
 
     def __validate__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__validate__: running")
         errors = self.schema.validate(request.args)
@@ -44,7 +44,7 @@ class StatisticsView(Resource):
             abort(400, error=str(errors))
 
     def __parse_into_job__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__parse_into_job__: running")
         # app.logger.debug(request.args)
@@ -54,7 +54,7 @@ class StatisticsView(Resource):
         console.print(self.job)
 
     def __print_log_message_about_refresh__(self):
-        from src.models.api import app
+        from src import app
 
         if self.job.refresh:
             app.logger.info("got force refresh from patron")

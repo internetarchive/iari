@@ -1,3 +1,3 @@
-from src.models.api import app
+from src import app
 
 app.run(debug=True)

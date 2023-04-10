@@ -66,7 +66,7 @@ class Url(WikipediaUrl):
             self.__check_url__()
 
     def __get_dns_record__(self) -> None:
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__get_dns_record__: running")
         # if domain name is available
@@ -89,7 +89,7 @@ class Url(WikipediaUrl):
             logger.warning("Could not get DNS because netloc was empty")
 
     def __check_with_https_verify__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__check_with_https_verify__: running")
 
@@ -134,7 +134,7 @@ class Url(WikipediaUrl):
             self.ssl_error = True
 
     def __check_without_https_verify__(self):
-        from src.models.api import app
+        from src import app
 
         # https://jcutrer.com/python/requests-ignore-invalid-ssl-certificates
         app.logger.debug("__check_without_https_verify__: running")

@@ -6,7 +6,7 @@ repos:
     entry: dead
     args:
       - "--exclude"
-      - "test_data/test_content.py" # regex separate by "|"
+      - "test_data/test_content.py|^deprecated/" # regex separate by "|"
     language: system
     pass_filenames: false
     # types: [python]
@@ -75,7 +75,7 @@ repos:
     # use require_serial so that script
     # is only called once per commit
     require_serial: true
-    exclude: ^test_data/
+    exclude: ^test_data/|^deprecated
     # Print the number of files as a sanity-check
     # verbose: true
 

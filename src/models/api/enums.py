@@ -1,9 +1,4 @@
-from enum import Enum
-
-
-class Lang(Enum):
-    # We only support English for now
-    en = "en"
+# from enum import Enum
 
 
 # class Return(Enum):

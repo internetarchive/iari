@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 from mwparserfromhell.nodes import Tag  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
-from src.models.basemodels.job import JobBaseModel
+from src.models.base.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.enums import (
     FootnoteSubtype,
@@ -111,29 +111,6 @@ class WikipediaReference(JobBaseModel):
         return urls
 
     @property
-    def common_url_scheme_found(self) -> bool:
-        """Simple, quick and inexpensive search for valid URLs with a common scheme
-        This should catch >95% of all URLs in Wikipedia references"""
-        return bool("http://" or "https://" or "ftp://" in self.get_wikicode_as_string)
-
-    @property
-    def url_found(self) -> bool:
-        # first try inexpensive ones
-        if self.common_url_scheme_found:
-            return True
-        elif not self.bare_urls_done:
-            self.__extract_bare_urls__()
-            return bool(self.bare_urls)
-        elif not self.wikicoded_links_done:
-            self.__extract_external_wikicoded_links_from_the_reference__()
-            return bool(self.wikicoded_links)
-        elif not self.template_urls_done:
-            self.__extract_template_urls__()
-            return bool(self.template_urls)
-        else:
-            return False
-
-    @property
     def get_stripped_wikicode(self):
         if isinstance(self.wikicode, Wikicode):
             return self.wikicode.strip_code()
@@ -192,7 +169,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_first_level_domains__(self) -> None:
         """This aggregates all first level domains from the urls found in the raw references"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__extract_first_level_domains__: running")
         if not self.reference_urls_done:
@@ -253,7 +230,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_templates_and_parameters__(self) -> None:
         """Helper method"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug(
             "__extract_templates_and_parameters_from_raw_reference__: running"
@@ -264,7 +241,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_raw_templates__(self) -> None:
         """Extract the templates from self.wikicode"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__extract_raw_templates__: running")
         if not self.wikicode:
@@ -304,7 +281,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_and_clean_template_parameters__(self) -> None:
         """We extract all templates"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__extract_and_clean_template_parameters__: running")
         [
@@ -314,7 +291,7 @@ class WikipediaReference(JobBaseModel):
 
     def extract_and_check(self) -> None:
         """Helper method"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("extract_and_check: running")
         self.__extract_templates_and_parameters__()

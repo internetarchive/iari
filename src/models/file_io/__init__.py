@@ -5,12 +5,12 @@ from typing import Any, Dict, Optional
 
 import config
 from src.models.api.job import Job
-from src.wcd_base_model import WcdBaseModel
+from src.models.base import WariBaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class FileIo(WcdBaseModel):
+class FileIo(WariBaseModel):
     job: Optional[Job] = None
     data: Dict[str, Any] = dict()
     wari_id: str = ""
@@ -23,7 +23,7 @@ class FileIo(WcdBaseModel):
 
     @property
     def path_filename(self) -> str:
-        from src.models.api import app
+        from src import app
 
         if self.testing:
             # go out to repo root first
@@ -40,7 +40,7 @@ class FileIo(WcdBaseModel):
     def write_to_disk(
         self,
     ) -> None:
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("write_to_disk: running")
         # app.logger.debug(os.getcwd())
@@ -61,7 +61,7 @@ class FileIo(WcdBaseModel):
             app.logger.info("Skipping write because self.data is empty")
 
     def read_from_disk(self) -> None:
-        from src.models.api import app
+        from src import app
 
         message = "read_from_disk: running"
         app.logger.debug(message)

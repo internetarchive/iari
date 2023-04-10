@@ -1,8 +1,7 @@
 from enum import Enum
 
-
-class WikipediaTemplatePersonRole(Enum):
-    pass
+# class WikipediaTemplatePersonRole(Enum):
+#     pass
 
 
 # class EnglishWikipediaTemplatePersonRole(WikipediaTemplatePersonRole):

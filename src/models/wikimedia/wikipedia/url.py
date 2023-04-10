@@ -82,7 +82,7 @@ class WikipediaUrl(BaseModel):
             self.parsing_done = True
 
     def extract(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("fix_and_extract_and_check: running")
         self.__parse_extract_and_validate__()
@@ -93,7 +93,7 @@ class WikipediaUrl(BaseModel):
         return bool("//web.archive.org" in self.__get_url__)
 
     def extract_first_level_domain(self) -> None:
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__get_first_level_domain__: Running")
         try:
@@ -124,7 +124,7 @@ class WikipediaUrl(BaseModel):
 
     def __check_tld__(self):
         """We only check the length for now"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__check_tld__: running")
         if not self.netloc:

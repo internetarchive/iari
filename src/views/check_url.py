@@ -41,7 +41,7 @@ class CheckUrl(StatisticsWriteView):
     def get(self):
         """This is the main method and the entrypoint for flask
         Every branch in this method has to return a tuple (Any,response_code)"""
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
@@ -52,7 +52,7 @@ class CheckUrl(StatisticsWriteView):
         self.io = UrlFileIo(hash_based_id=self.__url_hash_id__)
 
     def __handle_valid_job__(self):
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("__handle_valid_job__; running")
 

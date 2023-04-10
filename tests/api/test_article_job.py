@@ -2,7 +2,6 @@ from unittest import TestCase
 
 from pydantic import ValidationError
 
-from src.models.api.enums import Lang
 from src.models.api.job.article_job import ArticleJob
 from src.models.wikimedia.enums import WikimediaDomain
 
@@ -30,7 +29,7 @@ class TestArticleJob(TestCase):
         job.url = "http://en.wikipedia.org/wiki/Test"
         job.__extract_url__()
 
-        self.assertEqual(job.lang, Lang.en)
+        self.assertEqual(job.lang, "en")
         self.assertEqual(job.domain, WikimediaDomain.wikipedia)
         self.assertEqual(job.title, "Test")
 
@@ -39,7 +38,7 @@ class TestArticleJob(TestCase):
         job.url = "https://en.wikipedia.org/wiki/Test"
         job.__extract_url__()
 
-        self.assertEqual(job.lang, Lang.en)
+        self.assertEqual(job.lang, "en")
         self.assertEqual(job.domain, WikimediaDomain.wikipedia)
         self.assertEqual(job.title, "Test")
 

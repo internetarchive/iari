@@ -4,7 +4,6 @@ from urllib.parse import quote, unquote
 import requests
 
 import config
-from src.models.api.enums import Lang
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaDomain
@@ -13,7 +12,7 @@ from src.models.wikimedia.enums import WikimediaDomain
 class ArticleJob(Job):
     """A generic job that can be submitted via the API"""
 
-    lang: Lang = Lang.en
+    lang: str = "en"
     domain: WikimediaDomain = WikimediaDomain.wikipedia
     title: str = ""
     testing: bool = False
@@ -29,7 +28,7 @@ class ArticleJob(Job):
         return quote(self.title, safe="")
 
     def get_page_id(self) -> None:
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("get_page_id: running")
         if not self.page_id:
@@ -37,7 +36,7 @@ class ArticleJob(Job):
                 raise MissingInformationError()
             # https://stackoverflow.com/questions/31683508/wikipedia-mediawiki-api-get-pageid-from-url
             url = (
-                f"https://{self.lang.value}.{self.domain.value}/"
+                f"https://{self.lang}.{self.domain.value}/"
                 f"w/api.php?action=query&format=json&titles={self.quoted_title}"
             )
             app.logger.debug(f"api url: {url}")
@@ -72,7 +71,7 @@ class ArticleJob(Job):
         I want a python re regex that extracts "en" "wikipedia.or"
         and "Test" from http://en.wikipedia.org/wiki/Test
         """
-        from src.models.api import app
+        from src import app
 
         app.logger.debug("extract_url: running")
         if self.url:
@@ -82,7 +81,7 @@ class ArticleJob(Job):
             matches = re.match(pattern, self.url)
             if matches:
                 groups = matches.groups()
-                self.lang = Lang(groups[0])
+                self.lang = groups[0]
                 self.domain = WikimediaDomain(groups[1])
                 self.title = groups[2]
             if not matches:
@@ -99,16 +98,18 @@ class ArticleJob(Job):
         Words separated by spaces are allowed.
         _ is not allowed anywhere"""
         underscore_pattern = re.compile(r"^[^_]*$")
-        if re.fullmatch(underscore_pattern, self.regex):
-            regex = r"^(\s*[^\s]+\s*)+(\s*\|\s*[^\s]+\s*)*$"
-            if re.fullmatch(regex, self.regex):
-                # print('The string is formatted correctly.')
-                return True
-            else:
-                # print('The string is not formatted correctly.')
-                return False
+        horizontal_line_regex = r"^(\s*[^\s]+\s*)+(\s*\|\s*[^\s]+\s*)*$"
+        if " | " in self.regex:
+            return False
+        if "||" in self.regex:
+            return False
+        if not re.fullmatch(underscore_pattern, self.regex):
+            return False
+        if re.fullmatch(horizontal_line_regex, self.regex):
+            # print('The string is formatted correctly.')
+            return True
         else:
-            # string contained underscore
+            # print('The string is not formatted correctly.')
             return False
 
     def validate_regex_and_extract_url(self):
