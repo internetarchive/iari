@@ -3,8 +3,8 @@
 ## Installation
 Clone the git repo:
 
-`$ git clone https://github.com/internetarchive/wari.git`
-`$ cd wari`
+`$ git clone https://github.com/internetarchive/iari.git`
+`$ cd iari`
 
 We recommend checking out the latest release before proceeding.
 
@@ -24,7 +24,7 @@ Run it with
 `$ ./run-api.sh`
 
 Test it with
-`$ curl -i "localhost:8000/v2/statistics/article?lang=en&site=wikipedia&title=Test"`
+`$ curl -i "localhost:8000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
 
 ## CLI Usage examples
 
