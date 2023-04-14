@@ -120,7 +120,7 @@ see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
 
 
 # Diagrams
-## WARI
+## IARI
 ### Components
 ![image](diagrams/wari/components.png)
 ### Classes
