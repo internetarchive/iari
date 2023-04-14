@@ -1,15 +1,15 @@
-# Wikipedia Article Reference Inventory [WARI](https://www.wikidata.org/wiki/Q117023013)
+# Internet Archive Reference Inventory [IARI](https://www.wikidata.org/wiki/Q117023013)
 This tool is capable of fetching, extracting, transforming and storing 
 reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700). 
 
-WARI is currently an API with a few endpoints which hopefully makes it easy for others
+IARI is currently an API with a few endpoints which hopefully makes it easy for others
 to interact with.
 
 On the longer term we are planning on populating a [Wikibase.cloud](https://wikibase.cloud/) instance 
 based on the data we extract. 
 We call this resulting database Wikipedia Citations Database (WCD).
 
-WARI has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) 
+IARI has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486) 
 and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) as part of the 
 [Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by 
 Mark Graham, head of The 
@@ -32,7 +32,7 @@ based on trustworthy knowledge
 that is derived from trustworthy sources.
 
 # Features
-WARI features a number of endpoints that help patrons 
+IARI features a number of endpoints that help patrons 
 get structured data about references in a Wikipedia article:
 * an _article_ endpoint which analyzes a given article and returns basic statistics about it 
 * a _references_ endpoint which gives back all ids of references found
@@ -45,7 +45,7 @@ including abstract, retracted status, and more.
 
 # Limitations
 * the general references parsing relies on 2 things: 
-  * a manually supplied list of sections to search
+  * a manually supplied list of sections to search using the 'regex' to the article and all endpoints. The list is case insensitive and should be delimited by the '|' character.
   * that every line with a general reference begins with a star character (*)
 
 # Supported Wikipedias
