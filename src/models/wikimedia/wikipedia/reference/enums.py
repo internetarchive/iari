@@ -20,4 +20,6 @@ class ReferenceType(Enum):
 
 class FootnoteSubtype(Enum):
     NAMED = "named"  # this an empty named reference like <ref name="test"/>
-    CONTENT = "content"  # this is footnotes marked up with <ref></ref>
+    CONTENT = (
+        "content"  # this is footnotes marked up with <ref>this is content example</ref>
+    )
