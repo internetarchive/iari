@@ -90,7 +90,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return flds
 
     @property
-    def number_of_sections_found(self) -> int:
+    def number_of_sections(self) -> int:
         if not self.sections:
             self.__extract_sections__()
         return len(self.sections)
@@ -159,14 +159,14 @@ class WikipediaReferenceExtractor(WariBaseModel):
     #     return result
     #
 
-    def __extract_all_raw_general_references__(self):
-        """This extracts everything inside <ref></ref> tags"""
-        from src import app
-
-        app.logger.debug("__extract_all_raw_general_references__: running")
-        # Thanks to https://github.com/JJMC89,
-        # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
-        self.__extract_sections__()
+    # def __extract_all_raw_general_references__(self):
+    #     """This extracts everything inside <ref></ref> tags"""
+    #     from src import app
+    #
+    #     app.logger.debug("__extract_all_raw_general_references__: running")
+    #     # Thanks to https://github.com/JJMC89,
+    #     # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
+    #     self.__extract_sections__()
 
     def extract_all_references(self):
         """Extract all references from self.wikitext"""
@@ -177,11 +177,14 @@ class WikipediaReferenceExtractor(WariBaseModel):
             raise MissingInformationError("no job")
         self.__parse_wikitext__()
         self.__extract_sections__()
+        self.__populate_references__()
         app.logger.info("Done extracting all references")
 
     def __extract_sections__(self) -> None:
         """This uses the regex supplied by the patron via the API
-        and populate the reference_sections attribute with a list of MediawikiSection objects"""
+        and populate the reference_sections attribute with a list of MediawikiSection objects
+
+        We only consider level 2 sections beginning with =="""
         from src import app
 
         app.logger.debug("__extract_sections__: running")
@@ -189,17 +192,30 @@ class WikipediaReferenceExtractor(WariBaseModel):
             self.__parse_wikitext__()
         sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
-            matches=self.job.regex,
-            flags=re.I,
             include_headings=True,
         )
-        """turn mwparserfromhell sections into MediawikiSections"""
-        for section in sections:
+        if not sections:
+            app.logger.debug("No level 2 sections detected, creating root section")
             mw_section = MediawikiSection(
-                wikicode=section, testing=self.testing, language_code=self.language_code
+                # We add the whole article to the root section
+                wikicode=self.wikicode,
+                testing=self.testing,
+                language_code=self.language_code,
+                job=self.job,
             )
             mw_section.extract()
             self.sections.append(mw_section)
+        else:
+            self.__extract_root_section__()
+            for section in sections:
+                mw_section = MediawikiSection(
+                    wikicode=section,
+                    testing=self.testing,
+                    language_code=self.language_code,
+                    job=self.job,
+                )
+                mw_section.extract()
+                self.sections.append(mw_section)
         app.logger.debug(f"Number of sections found: {len(self.sections)}")
 
     def __parse_wikitext__(self):
@@ -215,3 +231,26 @@ class WikipediaReferenceExtractor(WariBaseModel):
         for reference in self.references:
             ids.append(reference.reference_id)
         return ids
+
+    def __populate_references__(self):
+        for section in self.sections:
+            for reference in section.references:
+                self.references.append(reference)
+
+    def __extract_root_section__(self):
+        """This extracts the root section from the beginning until the first level 2 heading"""
+        first_level2_heading = 0
+        for index, line in enumerate(str(self.wikicode).splitlines()):
+            if "==" in line:
+                first_level2_heading = index
+        root_section_wikicode = self.wikicode[
+            :first_level2_heading
+        ]  # add minus 1 here?
+        mw_section = MediawikiSection(
+            wikicode=root_section_wikicode,
+            testing=self.testing,
+            language_code=self.language_code,
+            job=self.job,
+        )
+        mw_section.extract()
+        self.sections.append(mw_section)

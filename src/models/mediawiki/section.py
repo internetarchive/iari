@@ -1,10 +1,12 @@
 import logging
+import re
 from typing import List, Union
 
 import mwparserfromhell
 from mwparserfromhell.wikicode import Wikicode
 from pydantic import BaseModel
 
+from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 
@@ -16,19 +18,30 @@ class MediawikiSection(BaseModel):
     language_code: str = ""
     wikicode: Union[Wikicode, str]
     references: List[WikipediaReference] = []
+    job: ArticleJob
 
     class Config:
         arbitrary_types_allowed = True
+
+    @property
+    def is_general_reference_section(self):
+        if not self.job.regex:
+            raise MissingInformationError("No regex in job")
+        return bool(re.findall(pattern=self.job.regex, flags=re.I, string=self.name))
 
     @property
     def __get_lines__(self):
         return str(self.wikicode).split("\n")
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Extracts a section name from the first line of the output from mwparserfromhell"""
         line = self.__get_lines__[0]
-        return self.__extract_name_from_line__(line=line)
+        # Handle special case where no level 2 heading is at the beginning of the section
+        if "==" not in line:
+            return "root"
+        else:
+            return self.__extract_name_from_line__(line=line)
 
     @property
     def number_of_references(self):
@@ -49,31 +62,35 @@ class MediawikiSection(BaseModel):
         from src import app
 
         app.logger.debug("__extract_all_general_references__: running")
-        # Discard the header line
-        lines = str(self.wikicode).split("\n")
-        lines_without_heading = lines[1:]
-        logger.debug(f"Extracting {len(lines_without_heading)} lines form section {lines[0]}")
-        for line in lines_without_heading:
-            logger.info(f"Working on line: {line}")
-            # Guard against empty line
-            # logger.debug("Parsing line")
-            # We discard all lines not starting with a star to avoid all
-            # categories and other templates not containing any references
-            if line and self.star_found_at_line_start(line=line):
-                parsed_line = mwparserfromhell.parse(line)
-                logger.debug("Appending line with star to references")
-                # We don't know what the line contains besides a start
-                # but we assume it is a reference
-                reference = WikipediaReference(
-                    wikicode=parsed_line,
-                    # wikibase=self.wikibase,
-                    testing=self.testing,
-                    language_code=self.language_code,
-                    is_general_reference=True,
-                    section=self.name,
-                )
-                reference.extract_and_check()
-                self.references.append(reference)
+        if self.is_general_reference_section:
+            app.logger.info("Regex match on section name")
+            # Discard the header line
+            lines = str(self.wikicode).split("\n")
+            lines_without_heading = lines[1:]
+            logger.debug(
+                f"Extracting {len(lines_without_heading)} lines form section {lines[0]}"
+            )
+            for line in lines_without_heading:
+                logger.info(f"Working on line: {line}")
+                # Guard against empty line
+                # logger.debug("Parsing line")
+                # We discard all lines not starting with a star to avoid all
+                # categories and other templates not containing any references
+                if line and self.star_found_at_line_start(line=line):
+                    parsed_line = mwparserfromhell.parse(line)
+                    logger.debug("Appending line with star to references")
+                    # We don't know what the line contains besides a start
+                    # but we assume it is a reference
+                    reference = WikipediaReference(
+                        wikicode=parsed_line,
+                        # wikibase=self.wikibase,
+                        testing=self.testing,
+                        language_code=self.language_code,
+                        is_general_reference=True,
+                        section=self.name,
+                    )
+                    reference.extract_and_check()
+                    self.references.append(reference)
 
     def __extract_all_footnote_references__(self):
         """This extracts everything inside <ref></ref> tags"""
@@ -112,4 +129,3 @@ class MediawikiSection(BaseModel):
     def extract(self):
         self.__extract_all_general_references__()
         self.__extract_all_footnote_references__()
-

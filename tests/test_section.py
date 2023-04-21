@@ -4,26 +4,28 @@ from unittest import TestCase
 from test_data.test_content import (  # type: ignore
     easter_island_tail_excerpt,
     easter_island_head_excerpt,
-    sncaso_tail_excerpt
+    sncaso_tail_excerpt,
 )
 
+from src.models.api.job.article_job import ArticleJob
 from src.models.mediawiki.section import MediawikiSection
 from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
 
 
 class TestMediawikiSection(TestCase):
+    regex_job = ArticleJob(
+        regex="bibliography|further reading|works cited|sources|external links"
+    )
 
     def test_name(self):
         section = MediawikiSection(
-            testing=True,
-            wikicode=sncaso_tail_excerpt,
+            testing=True, wikicode=sncaso_tail_excerpt, job=self.regex_job
         )
         assert section.name == "External links"
 
     def test_star_found_at_line_start(self):
         section = MediawikiSection(
-            testing=True,
-            wikicode=sncaso_tail_excerpt,
+            testing=True, wikicode=sncaso_tail_excerpt, job=self.regex_job
         )
         lines = str(section.wikicode).split("\n")
         assert section.star_found_at_line_start(line=lines[1]) is False
@@ -31,8 +33,7 @@ class TestMediawikiSection(TestCase):
 
     def test_extract(self):
         section = MediawikiSection(
-            testing=True,
-            wikicode=sncaso_tail_excerpt,
+            testing=True, wikicode=sncaso_tail_excerpt, job=self.regex_job
         )
         section.extract()
         assert section.number_of_references == 1
@@ -42,8 +43,7 @@ class TestMediawikiSection(TestCase):
 
     def test_extract_all_general_references__(self):
         section = MediawikiSection(
-            testing=True,
-            wikicode=sncaso_tail_excerpt,
+            testing=True, wikicode=sncaso_tail_excerpt, job=self.regex_job
         )
         section.__extract_all_general_references__()
         print(section.references)
@@ -53,7 +53,9 @@ class TestMediawikiSection(TestCase):
         assert ref.reference_id == "ab202d2e"
 
     def test_extract_all_footnote_references__(self):
-        section2 = MediawikiSection(wikicode=easter_island_head_excerpt, testing=True)
+        section2 = MediawikiSection(
+            wikicode=easter_island_head_excerpt, testing=True, job=self.regex_job
+        )
         section2.__extract_all_footnote_references__()
         assert section2.number_of_references == 3
         ref = section2.references[0]
@@ -87,3 +89,17 @@ class TestMediawikiSection(TestCase):
             )
         ]
         assert ref.reference_id == "b64ae445"
+
+    def test_is_general_reference_section_true(self):
+        section = MediawikiSection(
+            testing=True, wikicode=sncaso_tail_excerpt, job=self.regex_job
+        )
+        assert section.name == "External links"
+        assert section.is_general_reference_section is True
+
+    def test_is_general_reference_section_false(self):
+        section = MediawikiSection(
+            testing=True, wikicode="==Test==", job=self.regex_job
+        )
+        assert section.name == "Test"
+        assert section.is_general_reference_section is False

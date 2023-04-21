@@ -179,6 +179,7 @@ class TestWikipediaArticle(TestCase):
     # )
 
     def test___extract_and_parse_references_easter_island_head_excerpt(self):
+        """This is special, because we have no level 2 headings"""
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island")

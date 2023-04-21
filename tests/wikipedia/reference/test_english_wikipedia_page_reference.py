@@ -1203,9 +1203,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaReference(
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
+            wikicode=wikicode, testing=True, is_general_reference=True, section="test"
         )
         raw_reference_object.__extract_external_wikicoded_links_from_the_reference__()
         assert raw_reference_object.wikicoded_links_done is True

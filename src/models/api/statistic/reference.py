@@ -17,6 +17,7 @@ class ReferenceStatistic(BaseModel):
     urls: List[str] = []  # non-unique url strings
     templates: List[Dict[str, Any]]
     titles: List[str] = []
+    section: str = ""
 
     class Config:  # dead: disable
         extra = "forbid"  # dead: disable

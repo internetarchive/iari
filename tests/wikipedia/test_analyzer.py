@@ -14,6 +14,7 @@ class TestWikipediaAnalyzer(TestCase):
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy",
             testing=True,
+            regex="bibliography|further reading|works cited|sources|external links",
         )
         job.__extract_url__()
         wa = WikipediaAnalyzer(job=job)
@@ -41,21 +42,30 @@ class TestWikipediaAnalyzer(TestCase):
         )
 
     def test_get_statistics_redirect(self):
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/WWII")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/WWII",
+            regex="bibliography|further reading|works cited|sources|external links",
+        )
         job.__extract_url__()
         wa = WikipediaAnalyzer(job=job)
         wa.get_statistics()
         assert wa.is_redirect is True
 
     def test_get_statistics_not_found(self):
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test2222")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Test2222",
+            regex="bibliography|further reading|works cited|sources|external links",
+        )
         job.__extract_url__()
         wa = WikipediaAnalyzer(job=job)
         wa.get_statistics()
         assert wa.found is False
 
     def test__gather_reference_statistics_test(self):
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Test",
+            regex="bibliography|further reading|works cited|sources|external links",
+        )
         job.__extract_url__()
         wa = WikipediaAnalyzer(job=job)
         wa.__analyze__()
@@ -63,10 +73,14 @@ class TestWikipediaAnalyzer(TestCase):
         assert wa.is_redirect is False
         assert wa.found is True
         wa.__gather_reference_statistics__()
-        assert len(wa.reference_statistics) == 35
+        # We expect zero because this article does not have any references at all
+        assert len(wa.reference_statistics) == 0
 
     def test__gather_reference_statistics_sncaso(self):
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/SNCASO")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/SNCASO",
+            regex="bibliography|further reading|works cited|sources|external links",
+        )
         job.__extract_url__()
         wa = WikipediaAnalyzer(job=job)
         wa.__analyze__()
@@ -74,11 +88,12 @@ class TestWikipediaAnalyzer(TestCase):
         assert wa.is_redirect is False
         assert wa.found is True
         wa.get_statistics()
-        assert len(wa.reference_statistics) == 63
+        assert len(wa.reference_statistics) == 31
         for reference in wa.reference_statistics:
             # this tests whether the deepcopy worked correctly
             assert "wikitext" in reference
             assert "templates" in reference
+            assert "section" in reference
 
     # def test__get_statistics_easter_island(self):
     #     """This test takes forever (11s)"""
