@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
 from mwparserfromhell.nodes import Template  # type: ignore
 from pydantic import BaseModel, validate_arguments

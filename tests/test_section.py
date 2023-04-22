@@ -2,16 +2,15 @@ from collections import OrderedDict
 from unittest import TestCase
 
 from mwparserfromhell.nodes import Template  # type: ignore
-
-from src.helpers.console import console
-from src.models.api.job.article_job import ArticleJob
-from src.models.mediawiki.section import MediawikiSection
-from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_tail_excerpt,
     sncaso_tail_excerpt,
 )
+
+from src.models.api.job.article_job import ArticleJob
+from src.models.mediawiki.section import MediawikiSection
+from src.models.wikimedia.wikipedia.reference.template.template import WikipediaTemplate
 
 
 class TestMediawikiSection(TestCase):

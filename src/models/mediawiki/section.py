@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
@@ -58,7 +58,8 @@ class MediawikiSection(BaseModel):
         """This determines if the line in the current section has a star"""
         return bool("*" in line[:1])
 
-    def __extract_name_from_line__(self, line):
+    @staticmethod
+    def __extract_name_from_line__(line):
         from src import app
 
         app.logger.debug("extract_name_from_line: running")
