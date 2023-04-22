@@ -118,6 +118,18 @@ https://en.wikipedia.org/w/index.php?title=Wikipedia:CITEBUNDLE
 * **Unbulleted list citebundle reference** - type of nested reference with multiple templates inside, 
 see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
 
+# Endpoints
+## Statistics
+### PDF
+the statistics/pdf endpoint accepts the following parameters:
+* url (mandatory)
+* refresh (optional)
+* testing (optional)
+
+It will return json similar to:
+```
+{links: ["https://s1.q4cdn.com/806093406/files/doc_downloads/test.pdf]}
+```
 
 # Diagrams
 ## IARI
