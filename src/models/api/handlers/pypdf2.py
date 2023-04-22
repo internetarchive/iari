@@ -4,9 +4,9 @@ from io import BytesIO
 from typing import List
 
 import requests
+from pydantic import BaseModel
 from PyPDF2 import PdfReader  # type: ignore
 from PyPDF2.errors import PdfReadError
-from pydantic import BaseModel
 
 from src.models.api.job.check_url_job import UrlJob
 from src.models.exceptions import MissingInformationError
