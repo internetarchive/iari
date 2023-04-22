@@ -1,4 +1,4 @@
-from src.models.api.all import AllHandler
+from src.models.api.handlers.all import AllHandler
 from src.models.api.job.article_job import ArticleJob
 
 
