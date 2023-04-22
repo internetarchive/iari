@@ -1,12 +1,11 @@
 import logging
 import re
 from io import BytesIO
-from typing import List, Optional
+from typing import List
 
-import PyPDF2
 import requests
-from pydantic import BaseModel
 from PyPDF2 import PdfReader  # type: ignore
+from pydantic import BaseModel
 
 from src.models.api.job.check_url_job import UrlJob
 from src.models.exceptions import MissingInformationError
