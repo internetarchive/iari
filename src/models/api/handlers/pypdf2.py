@@ -5,6 +5,7 @@ from typing import List
 
 import requests
 from PyPDF2 import PdfReader  # type: ignore
+from PyPDF2.errors import PdfReadError
 from pydantic import BaseModel
 
 from src.models.api.job.check_url_job import UrlJob
@@ -17,12 +18,16 @@ class PyPdf2Handler(BaseModel):
     job: UrlJob
     content: bytes = b""
     links: List[str] = []
+    error: bool = False
 
     def __download_pdf__(self):
         """Download PDF file from URL"""
         if not self.content:
             response = requests.get(self.job.url, timeout=self.job.timeout)
-            self.content = response.content
+            if response.content:
+                self.content = response.content
+            else:
+                logger.warning("Got no pdf content from requests")
 
     def __extract_links__(self) -> None:
         """Extract all links from PDF file"""
@@ -30,20 +35,25 @@ class PyPdf2Handler(BaseModel):
             raise MissingInformationError()
         links = []
         with BytesIO(self.content) as pdf_file:
-            pdf_reader = PdfReader(pdf_file)
-            for page in pdf_reader.pages:
-                text = page.extract_text()
-                # provided by chatgpt
-                regex = r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
-                url = re.findall(regex, text)
-                links.extend(url)
-        self.links = links
+            try:
+                pdf_reader = PdfReader(pdf_file)
+                for page in pdf_reader.pages:
+                    text = page.extract_text()
+                    # provided by chatgpt
+                    regex = r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
+                    url = re.findall(regex, text)
+                    links.extend(url)
+                self.links = links
+            except PdfReadError:
+                logger.error("Not a valid PDF")
+                self.error = True
 
     def download_and_extract(self):
         self.__download_pdf__()
         self.__extract_links__()
-        self.__discard_invalid_urls__()
-        self.__clean_spaces__()
+        if not self.error:
+            self.__discard_invalid_urls__()
+            self.__clean_spaces__()
 
     def get_dict(self):
         return dict(links=self.links)
@@ -80,7 +90,7 @@ class PyPdf2Handler(BaseModel):
                 .replace("\u205F", "")
                 .replace("\u3000", "")
             )
-            logger.debug(f"output: {clean_link}")
+            # logger.debug(f"output: {clean_link}")
             links.append(clean_link)
         self.links = links
 

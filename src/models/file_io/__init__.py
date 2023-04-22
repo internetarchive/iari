@@ -45,6 +45,8 @@ class FileIo(WariBaseModel):
         app.logger.debug("write_to_disk: running")
         # app.logger.debug(os.getcwd())
         if self.data:
+            # # todo check if subfolder exists and create it if not
+            # if exists(self.subfolder)
             path_filename = self.path_filename
             if exists(path_filename):
                 with open(file=path_filename, mode="w") as file:

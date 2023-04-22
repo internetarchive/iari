@@ -3,13 +3,12 @@ import logging
 from marshmallow import fields, post_load
 
 from src.models.api.job.article_job import ArticleJob
-from src.models.api.schema.refresh import RefreshSchema
+from src.models.api.schema.refresh import BaseSchema
 
 logger = logging.getLogger(__name__)
 
 
-class ArticleSchema(RefreshSchema):
-    testing = fields.Bool(required=False)
+class ArticleSchema(BaseSchema):
     url = fields.Str(required=True)
     regex = fields.Str(required=True)
 

@@ -15,7 +15,6 @@ class ArticleJob(Job):
     lang: str = "en"
     domain: WikimediaDomain = WikimediaDomain.wikipedia
     title: str = ""
-    testing: bool = False
     page_id: int = 0
     refresh: bool = False
     url: str = ""

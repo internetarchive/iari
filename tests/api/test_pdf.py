@@ -19,18 +19,24 @@ class TestPdf(TestCase):
 
     def test_valid_request_test_pdf(self):
         response = self.test_client.get(
-            "/statistics/pdf?url=https://s1.q4cdn.com/806093406/files/doc_downloads/test.pdf"
+            "/statistics/pdf?url=https://s1.q4cdn.com/806093406/files/doc_downloads/test.pdf&testing=true"
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
-        console.print(data)
-        exit()
+        assert data["links"] == []
 
     def test_valid_request_nonexistent_pdf(self):
         response = self.test_client.get(
-            "/statistics/pdf?url=https://example.com/nonexistent.pdf"
+            "/statistics/pdf?url=https://example.com/nonexistent.pdf&testing=true"
         )
         self.assertEqual(400, response.status_code)
         data = json.loads(response.data)
         console.print(data)
-        assert data["error"] == "Invalid URL: https://example.com/nonexistent.pdf"
+        assert data == 'Not a valid PDF according to PyPDF2'
+
+    def test_valid_request_test_pdf2(self):
+        url = "https://www.campusdrugprevention.gov/sites/default/files/2021-11/Addressing-College-Drinking-and-Drug-Use%20(ACTA).pdf"
+        response = self.test_client.get(f"/statistics/pdf?url={url}&testing=true")
+        assert response.status_code == 200
+        data = json.loads(response.data)
+        assert len(data["links"]) == 79

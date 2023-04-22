@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
 
 
-class RefreshSchema(Schema):
+class BaseSchema(Schema):
     refresh = fields.Bool(required=False)
+    testing = fields.Bool(required=False)
