@@ -65,7 +65,7 @@ class Pdf(StatisticsWriteView):
             if pdf.error:
                 return "Not a valid PDF according to PyPDF2", 400
             data = pdf.get_dict()
-            console.print(data)
+            # console.print(data)
             # exit()
             timestamp = datetime.timestamp(datetime.utcnow())
             data["timestamp"] = int(timestamp)
