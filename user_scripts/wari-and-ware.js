@@ -4,8 +4,8 @@
 // Inspired by https://en.wikipedia.org/wiki/User:Dipankan001/New_pages.js
 // Note: This user script was created as part of wcdimportbot, see https://www.wikidata.org/wiki/Q115252313
 
-let wari_url = "https://archive.org/services/context/wari/"
-let ware_staging_url = "https://internetarchive.github.io/ware/"
+let wari_url = "https://archive.org/services/context/iari/"
+let ware_staging_url = "https://internetarchive.github.io/iare/"
 let ware_production_url = "https://archive.org/services/context/ware/"
 let wari_version = "v2"
 
@@ -45,45 +45,45 @@ function addPortletLinkAll(){
           mw.util.addPortletLink(
           "p-tb",
           get_all_url(false),
-          "Get WARI statistics",
+          "Get IARI statistics",
           "tb-wari-get-all-stats",
-          "View the statistics for this article by the WARI all API endpoint."
+          "View the statistics for this article by the IARI all API endpoint."
           );
 }
 function addPortletLinkAllRefresh(){
           mw.util.addPortletLink(
           "p-tb",
           get_all_url(true),
-          "Get WARI statistics (force refresh)",
+          "Get IARI statistics (force refresh)",
           "tb-wari-get-all-stats",
-          "View fresh statistics for this article by the WARI all API endpoint."
+          "View fresh statistics for this article by the IARI all API endpoint."
           );
 }
 function addPortletLinkArticle(){
           mw.util.addPortletLink(
           "p-tb",
           get_article_url(false),
-          "Get WARI article statistics",
+          "Get IARI article statistics",
           "tb-wari-get-stats",
-          "View the statistics for this article by the WARI article API endpoint."
+          "View the statistics for this article by the IARI article API endpoint."
           );
 }
 function addPortletLinkArticleRefresh(){
           mw.util.addPortletLink(
           "p-tb",
           get_article_url(true),
-          "Get WARI article statistics (force refresh)",
+          "Get IARI article statistics (force refresh)",
           "tb-wari-get-stats-ref",
-          "View fresh statistics for this article by the WARI API. "
+          "View fresh statistics for this article by the IARI API. "
           );
 }
 function addPortletWareStaging(){
           mw.util.addPortletLink(
           "p-tb",
           get_ware_url("staging"),
-          "Go to WARE (staging)",
+          "Go to IARE (staging)",
           "tb-ware",
-          "View statistics for this article in the staging version of WARE."
+          "View statistics for this article in the staging version of IARE."
           );
 }
 
@@ -91,19 +91,19 @@ function addPortletWareProduction(){
           mw.util.addPortletLink(
           "p-tb",
           get_ware_url(),
-          "Go to WARE",
+          "Go to IARE",
           "tb-ware",
-          "View statistics for this article in the production version of WARE."
+          "View statistics for this article in the production version of IARE."
           );
 }
 
 if(mw.config.values.wgNamespaceNumber === 0) {
     $(addPortletWareProduction);
     $(addPortletWareStaging);
-    $(addPortletLinkAll);
-    $(addPortletLinkAllRefresh);
-    $(addPortletLinkArticle);
-    $(addPortletLinkArticleRefresh);
+//    $(addPortletLinkAll);
+//    $(addPortletLinkAllRefresh);
+//    $(addPortletLinkArticle);
+//    $(addPortletLinkArticleRefresh);
 }
 
 
