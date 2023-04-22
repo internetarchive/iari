@@ -17,6 +17,7 @@ from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
 from src.views.statistics.all import All
 from src.views.statistics.article import Article
+from src.views.statistics.pdf import Pdf
 from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
 
@@ -36,6 +37,7 @@ api.add_resource(Article, "/statistics/article")
 api.add_resource(All, "/statistics/all")
 api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
+api.add_resource(Pdf, "/statistics/pdf")
 # return app_
 # api.add_resource(
 #     AddJobToQueue, "/add-job"
