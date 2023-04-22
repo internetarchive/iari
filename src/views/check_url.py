@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
-from src.models.api.job.check_url_job import CheckUrlJob
-from src.models.api.schema.check_url_schema import CheckUrlSchema
+from src.models.api.job.check_url_job import UrlJob
+from src.models.api.schema.check_url_schema import UrlSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.url_file_io import UrlFileIo
 from src.models.identifiers_checking.url import Url
@@ -22,8 +22,8 @@ class CheckUrl(StatisticsWriteView):
     See src/models/checking
     """
 
-    job: Optional[CheckUrlJob] = None
-    schema: Schema = CheckUrlSchema()
+    job: Optional[UrlJob] = None
+    schema: Schema = UrlSchema()
     serving_from_json: bool = False
     headers: Dict[str, Any] = {
         "Access-Control-Allow-Origin": "*",
