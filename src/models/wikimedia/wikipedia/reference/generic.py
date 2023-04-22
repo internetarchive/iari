@@ -55,6 +55,7 @@ class WikipediaReference(JobBaseModel):
     first_level_domains_done = True
     language_code: str = ""
     reference_id: str = ""
+    section: str
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -215,7 +216,7 @@ class WikipediaReference(JobBaseModel):
         return str(self.wikicode)
 
     @property
-    def number_of_templates(self) -> int:
+    def number_of_templates(self) -> int:  # dead: disable
         """Convenience method for tests"""
         return len(self.templates)
 

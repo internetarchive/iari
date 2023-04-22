@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 class WikipediaTemplate(BaseModel):
     parameters: OrderedDict = OrderedDict()
-    raw_template: Template
+    # We allow union here to enable easier testing
+    raw_template: Template  # Union[Template, str]
     extraction_done: bool = False
     missing_or_empty_first_parameter: bool = False
     # language_code: str = ""  # Used only to generate the URI for the template

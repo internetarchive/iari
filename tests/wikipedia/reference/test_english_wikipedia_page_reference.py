@@ -885,6 +885,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         ref = "{{citeq|Q1}}"
         wikicode = parse(ref)
         raw_reference_object = WikipediaReference(
+            section="test",
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
@@ -899,6 +900,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaReference(
+            section="test",
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
@@ -960,6 +962,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaReference(
+            section="test",
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
@@ -1081,6 +1084,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaReference(
+            section="test",
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
@@ -1109,6 +1113,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaReference(
+            section="test",
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
@@ -1186,12 +1191,13 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "Retrieved: 16 September 2017.</ref>"
         )
         wikicode = parse(wikitext)
-        raw_reference_object = WikipediaReference(
+        reference = WikipediaReference(
+            section="test",
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,
         )
-        bare_urls = raw_reference_object.__find_bare_urls__()
+        bare_urls = reference.__find_bare_urls__()
         assert len(bare_urls) == 0
 
     def test___external_links_in_reference__(self):
@@ -1203,9 +1209,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaReference(
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
+            wikicode=wikicode, testing=True, is_general_reference=True, section="test"
         )
         raw_reference_object.__extract_external_wikicoded_links_from_the_reference__()
         assert raw_reference_object.wikicoded_links_done is True
@@ -1285,6 +1289,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         )
         wikicode = parse(data)
         raw_reference_object = WikipediaReference(
+            section="test",
             wikicode=wikicode,
             testing=True,
             is_general_reference=True,

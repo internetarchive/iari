@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Dict, List
 
 import mwparserfromhell  # type: ignore
@@ -8,6 +7,7 @@ from mwparserfromhell.wikicode import Wikicode  # type: ignore
 from src.models.api.job.article_job import ArticleJob
 from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
+from src.models.mediawiki.section import MediawikiSection
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -28,13 +28,13 @@ class WikipediaReferenceExtractor(WariBaseModel):
     wikitext: str
     wikicode: Wikicode = None
     references: List[WikipediaReference] = []
-    sections: List[Wikicode] = []
     # wikibase: Wikibase
     testing: bool = False
     check_urls: bool = False
     check_urls_done: bool = False
     checked_and_unique_reference_urls: List[WikipediaUrl] = []
     language_code: str = ""
+    sections: List[MediawikiSection] = []
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -89,7 +89,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return flds
 
     @property
-    def number_of_sections_found(self) -> int:
+    def number_of_sections(self) -> int:  # dead: disable
         if not self.sections:
             self.__extract_sections__()
         return len(self.sections)
@@ -157,58 +157,15 @@ class WikipediaReferenceExtractor(WariBaseModel):
     #     result = len([ref for ref in list_ if ref and ref.url_found])
     #     return result
     #
-    def __extract_all_raw_citation_references__(self):
-        """This extracts everything inside <ref></ref> tags"""
-        from src import app
 
-        app.logger.debug("__extract_all_raw_citation_references__: running")
-        # Thanks to https://github.com/JJMC89,
-        # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
-        self.__parse_wikitext__()
-        refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        app.logger.debug(f"Number of refs found: {len(refs)}")
-        for ref in refs:
-            reference = WikipediaReference(
-                wikicode=ref,
-                # wikibase=self.wikibase,
-                testing=self.testing,
-                language_code=self.language_code,
-            )
-            reference.extract_and_check()
-            self.references.append(reference)
-
-    def __extract_all_raw_general_references__(self):
-        """This extracts everything inside <ref></ref> tags"""
-        from src import app
-
-        app.logger.debug("__extract_all_raw_general_references__: running")
-        # Thanks to https://github.com/JJMC89,
-        # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
-        self.__extract_sections__()
-        for section in self.sections:
-            # Get section line by line
-            lines = str(section).split("\n")
-            logger.debug(f"Extracting {len(lines)} lines form section {lines[0]}")
-            for line in lines:
-                logger.info(f"Working on line: {line}")
-                # Guard against empty line
-                # logger.debug("Parsing line")
-                # We discard all lines not starting with a star to avoid all
-                # categories and other templates not containing any references
-                if line and self.star_found_at_line_start(line=line):
-                    parsed_line = mwparserfromhell.parse(line)
-                    logger.debug("Appending line with star to references")
-                    # We don't know what the line contains besides a start
-                    # but we assume it is a reference
-                    reference = WikipediaReference(
-                        wikicode=parsed_line,
-                        # wikibase=self.wikibase,
-                        testing=self.testing,
-                        language_code=self.language_code,
-                        is_general_reference=True,
-                    )
-                    reference.extract_and_check()
-                    self.references.append(reference)
+    # def __extract_all_raw_general_references__(self):
+    #     """This extracts everything inside <ref></ref> tags"""
+    #     from src import app
+    #
+    #     app.logger.debug("__extract_all_raw_general_references__: running")
+    #     # Thanks to https://github.com/JJMC89,
+    #     # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
+    #     self.__extract_sections__()
 
     def extract_all_references(self):
         """Extract all references from self.wikitext"""
@@ -218,23 +175,48 @@ class WikipediaReferenceExtractor(WariBaseModel):
         if not self.job:
             raise MissingInformationError("no job")
         self.__parse_wikitext__()
-        self.__extract_all_raw_citation_references__()
-        self.__extract_all_raw_general_references__()
+        self.__extract_sections__()
+        self.__populate_references__()
         app.logger.info("Done extracting all references")
 
-    def __extract_sections__(self):
-        """This uses the regex supplied by the patron via the API"""
+    def __extract_sections__(self) -> None:
+        """This uses the regex supplied by the patron via the API
+        and populate the reference_sections attribute with a list of MediawikiSection objects
+
+        We only consider level 2 sections beginning with =="""
         from src import app
 
         app.logger.debug("__extract_sections__: running")
         if not self.wikicode:
             self.__parse_wikitext__()
-        self.sections: List[Wikicode] = self.wikicode.get_sections(
+        sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
-            matches=self.job.regex,
-            flags=re.I,
-            include_headings=False,
+            include_headings=True,
         )
+        if not sections:
+            app.logger.debug("No level 2 sections detected, creating root section")
+            # console.print(self.wikicode)
+            # exit()
+            mw_section = MediawikiSection(
+                # We add the whole article to the root section
+                wikicode=self.wikicode,
+                testing=self.testing,
+                language_code=self.language_code,
+                job=self.job,
+            )
+            mw_section.extract()
+            self.sections.append(mw_section)
+        else:
+            self.__extract_root_section__()
+            for section in sections:
+                mw_section = MediawikiSection(
+                    wikicode=section,
+                    testing=self.testing,
+                    language_code=self.language_code,
+                    job=self.job,
+                )
+                mw_section.extract()
+                self.sections.append(mw_section)
         app.logger.debug(f"Number of sections found: {len(self.sections)}")
 
     def __parse_wikitext__(self):
@@ -251,7 +233,48 @@ class WikipediaReferenceExtractor(WariBaseModel):
             ids.append(reference.reference_id)
         return ids
 
-    @staticmethod
-    def star_found_at_line_start(line) -> bool:
-        """This determines if the line in the current section has a star"""
-        return bool("*" in line[:1])
+    def __populate_references__(self):
+        for section in self.sections:
+            for reference in section.references:
+                self.references.append(reference)
+
+    def __extract_root_section__(self):
+        """This extracts the root section from the beginning until the first level 2 heading"""
+        if not self.wikitext:
+            raise MissingInformationError()
+        first_level2_heading_line_number = 0
+        for index, line in enumerate(self.wikitext.splitlines()):
+            if "==" in line:
+                logger.debug(f"found == in line: {line}, with index {index}")
+                first_level2_heading_line_number = index
+                # We break at first hit
+                break
+        if first_level2_heading_line_number:
+            root_section_wikitext = self.extract_lines(
+                end=first_level2_heading_line_number
+            )
+            # console.print(root_section_wikitext)
+            # exit()
+            mw_section = MediawikiSection(
+                wikitext=root_section_wikitext,
+                testing=self.testing,
+                language_code=self.language_code,
+                job=self.job,
+            )
+            mw_section.extract()
+            self.sections.append(mw_section)
+        else:
+            logger.debug(
+                "Special case, wikitext started with a "
+                "level 2 heading so we don't do anything"
+            )
+
+    def extract_lines(self, end) -> str:
+        """Extract lines until end"""
+        lines = ""
+        if not end:
+            raise MissingInformationError("did not get what we need")
+        for index, line in enumerate(str(self.wikicode).splitlines()):
+            if index < end:
+                lines += f"{line}\n"
+        return lines

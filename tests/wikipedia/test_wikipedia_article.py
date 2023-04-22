@@ -41,7 +41,7 @@ class TestWikipediaArticle(TestCase):
     def test_fetch_page_data_and_parse_the_wikitext(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test")
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test", regex="test")
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.__fetch_page_data__()
@@ -52,7 +52,7 @@ class TestWikipediaArticle(TestCase):
     def test_fetch_page_data_invalid_title(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test2222")
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/Test2222", regex="test")
         job.__extract_url__()
         page = WikipediaArticle(job=job)
         page.__fetch_page_data__()
@@ -62,7 +62,8 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(
-            url="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy"
+            url="https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy",
+            regex="test",
         )
         job.__extract_url__()
         page = WikipediaArticle(job=job)
@@ -92,7 +93,7 @@ class TestWikipediaArticle(TestCase):
     def test_is_redirect(self):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/WWII")
+        job = ArticleJob(url="https://en.wikipedia.org/wiki/WWII", regex="test")
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.__fetch_page_data__()
@@ -179,9 +180,12 @@ class TestWikipediaArticle(TestCase):
     # )
 
     def test___extract_and_parse_references_easter_island_head_excerpt(self):
+        """This is special, because we have no level 2 headings"""
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Easter_Island", regex="test"
+        )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.wikitext = easter_island_head_excerpt
@@ -210,7 +214,10 @@ class TestWikipediaArticle(TestCase):
         wikitext = f"{easter_island_head_excerpt}\n{easter_island_tail_excerpt}"
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
-        job = ArticleJob(url="https://en.wikipedia.org/wiki/Easter_Island")
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Easter_Island",
+            regex="bibliography|further reading|works cited|sources|external links",
+        )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.wikitext = wikitext

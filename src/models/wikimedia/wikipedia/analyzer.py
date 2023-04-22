@@ -127,24 +127,24 @@ class WikipediaAnalyzer(WariBaseModel):
             for reference in self.article.extractor.references:
                 if not reference:
                     raise MissingInformationError("raw_reference was None")
-                rr = reference
-                if rr.footnote_subtype:
-                    subtype = rr.footnote_subtype.value
+                if reference.footnote_subtype:
+                    subtype = reference.footnote_subtype.value
                 else:
                     subtype = ""
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
                 data = ReferenceStatistic(
                     # identifiers=rr.identifiers,
-                    flds=rr.first_level_domains,
+                    flds=reference.first_level_domains,
                     footnote_subtype=subtype,
                     id=reference.reference_id,
-                    template_names=rr.template_names,
-                    templates=rr.get_template_dicts,
-                    titles=rr.titles,
-                    type=rr.reference_type.value,
-                    urls=rr.raw_urls,
-                    wikitext=rr.get_wikicode_as_string,
+                    template_names=reference.template_names,
+                    templates=reference.get_template_dicts,
+                    titles=reference.titles,
+                    type=reference.reference_type.value,
+                    urls=reference.raw_urls,
+                    wikitext=reference.get_wikicode_as_string,
+                    section=reference.section,
                 ).dict()
                 # if not "wikitext" in data:
                 #     console.print(data)

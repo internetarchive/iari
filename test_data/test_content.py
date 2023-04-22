@@ -508,3 +508,21 @@ old_norse_sources = """
 * {{citation | title = Old Norse for Beginners | first1 = Haukur | last1 = Þorgeirsson | first2 = Óskar | last2 = Guðlaugsson | url = https://notendur.hi.is/~haukurth/norse/ | ref = {{harvid | Old Norse for Beginners}} }}
 {{refend}}
 """
+sncaso_tail_excerpt = """==External links==
+{{Commons category|SNCASO}}
+* [http://www.aviafrance.com/constructeur.php?ID_CONSTRUCTEUR=1145 SNCASO page] on [http://www.aviafrance.com AviaFrance].
+
+{{SNCASO aircraft}}
+{{Sud Aviation}}
+{{SNCASO}}
+{{Defunct aircraft manufacturers of France}}
+{{Authority control}}
+
+{{DEFAULTSORT:Sncaso}}
+[[Category:Defunct aircraft manufacturers of France]]
+[[Category:Sud Aviation]]
+[[Category:Vehicle manufacturing companies established in 1936]]
+[[Category:Vehicle manufacturing companies disestablished in 1957]]
+[[Category:French companies established in 1936]]
+[[Category:1957 disestablishments in France]]
+[[Category:Sud-Ouest aircraft| ]] """
