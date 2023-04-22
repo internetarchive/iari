@@ -2,18 +2,16 @@ import hashlib
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from flask_restful import Resource, abort  # type: ignore
-from marshmallow import Schema
-
+from src.helpers.console import console
+from src.models.api.handlers.pypdf2 import PyPdf2Handler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.schema.check_url_schema import UrlSchema
 from src.models.exceptions import MissingInformationError
-from src.models.file_io.url_file_io import UrlFileIo
-from src.models.identifiers_checking.url import Url
+from src.models.file_io.pdf_file_io import PdfFileIo
 from src.views.statistics.write_view import StatisticsWriteView
 
 
-class CheckUrl(StatisticsWriteView):
+class Pdf(StatisticsWriteView):
     """
     This models all action based on requests from the frontend/patron
     It is instantiated at every request
@@ -23,7 +21,7 @@ class CheckUrl(StatisticsWriteView):
     """
 
     job: Optional[UrlJob] = None
-    schema: Schema = UrlSchema()
+    schema: UrlSchema = UrlSchema()
     serving_from_json: bool = False
     headers: Dict[str, Any] = {
         "Access-Control-Allow-Origin": "*",
@@ -49,7 +47,7 @@ class CheckUrl(StatisticsWriteView):
             return self.__handle_valid_job__()
 
     def __setup_io__(self):
-        self.io = UrlFileIo(hash_based_id=self.__url_hash_id__)
+        self.io = PdfFileIo(hash_based_id=self.__url_hash_id__)
 
     def __handle_valid_job__(self):
         from src import app
@@ -62,17 +60,23 @@ class CheckUrl(StatisticsWriteView):
         else:
             url_string = self.job.unquoted_url
             app.logger.info(f"Got {url_string}")
-            url = Url(url=url_string, timeout=self.job.timeout)
-            url.check()
-            data = url.get_dict()
+            pdf = PyPdf2Handler(job=self.job)
+            pdf.download_and_extract()
+            if pdf.error:
+                return "Not a valid PDF according to PyPDF2", 400
+            data = pdf.get_dict()
+            console.print(data)
+            # exit()
             timestamp = datetime.timestamp(datetime.utcnow())
             data["timestamp"] = int(timestamp)
             isodate = datetime.isoformat(datetime.utcnow())
             data["isodate"] = str(isodate)
             url_hash_id = self.__url_hash_id__
             data["id"] = url_hash_id
-            write = UrlFileIo(data=data, hash_based_id=url_hash_id)
-            write.write_to_disk()
+            # We don't write during tests because it breaks the CI
+            if not self.job.testing:
+                write = PdfFileIo(data=data, hash_based_id=url_hash_id)
+                write.write_to_disk()
             if self.job.refresh:
                 self.__print_log_message_about_refresh__()
                 data["refreshed_now"] = True
