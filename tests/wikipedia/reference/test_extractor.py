@@ -132,14 +132,14 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=test_full_article, job=self.job
         )
         wre.__extract_sections__()
-        assert wre.number_of_sections == 7
+        assert wre.number_of_sections == 8
 
     def test__extract_sections_easter_island(self):
         wre = WikipediaReferenceExtractor(
             testing=True, wikitext=easter_island_tail_excerpt, job=self.job
         )
         wre.__extract_sections__()
-        assert wre.number_of_sections == 4
+        assert wre.number_of_sections == 5
 
     def test_extract_general_references_only(self):
         """This tests extraction of sections and references"""
@@ -147,7 +147,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=easter_island_tail_excerpt, job=self.job
         )
         wre.extract_all_references()
-        assert wre.number_of_sections == 4
+        assert wre.number_of_sections == 5
         assert wre.number_of_general_references == 22
         assert wre.number_of_footnote_references == 0
 
@@ -239,7 +239,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=old_norse_sources, job=self.job
         )
         wre.extract_all_references()
-        assert wre.number_of_sections == 1
+        assert wre.number_of_sections == 2
         assert wre.number_of_general_references == 42
 
     def test_sections_no_general_references(self):
@@ -247,7 +247,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=electrical_breakdown_full_article, job=self.job
         )
         wre.extract_all_references()
-        assert wre.number_of_sections == 7
+        assert wre.number_of_sections == 8
         assert wre.number_of_general_references == 0
 
     def test_sections_easter_island_tail(self):
@@ -255,7 +255,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=easter_island_tail_excerpt, job=self.job
         )
         wre.extract_all_references()
-        assert wre.number_of_sections == 4
+        assert wre.number_of_sections == 5
 
     def test_root_section_easter_island_head(self):
         wre = WikipediaReferenceExtractor(
@@ -270,7 +270,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=easter_island_tail_excerpt, job=self.job
         )
         wre.extract_all_references()
-        assert wre.number_of_sections == 4
+        assert wre.number_of_sections == 5
         assert wre.number_of_general_references == 22
         for reference in wre.references:
             if reference.template_names and not reference.get_template_dicts:
@@ -317,3 +317,12 @@ class TestWikipediaReferenceExtractor(TestCase):
             if not template.parameters:
                 console.print(template)
                 raise MissingInformationError()
+
+    def test___extract_root_section__(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=electrical_breakdown_full_article, job=self.job
+        )
+        wre.__parse_wikitext__()
+        wre.__extract_root_section__()
+        assert wre.number_of_sections == 1
+        assert wre.sections[0].name == "root"

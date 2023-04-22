@@ -5,6 +5,7 @@ from typing import Dict, List
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
+from src.helpers.console import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
@@ -90,7 +91,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return flds
 
     @property
-    def number_of_sections(self) -> int:
+    def number_of_sections(self) -> int:  # dead: disable
         if not self.sections:
             self.__extract_sections__()
         return len(self.sections)
@@ -196,6 +197,8 @@ class WikipediaReferenceExtractor(WariBaseModel):
         )
         if not sections:
             app.logger.debug("No level 2 sections detected, creating root section")
+            # console.print(self.wikicode)
+            # exit()
             mw_section = MediawikiSection(
                 # We add the whole article to the root section
                 wikicode=self.wikicode,
@@ -239,18 +242,41 @@ class WikipediaReferenceExtractor(WariBaseModel):
 
     def __extract_root_section__(self):
         """This extracts the root section from the beginning until the first level 2 heading"""
-        first_level2_heading = 0
-        for index, line in enumerate(str(self.wikicode).splitlines()):
+        if not self.wikitext:
+            raise MissingInformationError()
+        first_level2_heading_line_number = 0
+        for index, line in enumerate(self.wikitext.splitlines()):
             if "==" in line:
-                first_level2_heading = index
-        root_section_wikicode = self.wikicode[
-            :first_level2_heading
-        ]  # add minus 1 here?
-        mw_section = MediawikiSection(
-            wikicode=root_section_wikicode,
-            testing=self.testing,
-            language_code=self.language_code,
-            job=self.job,
-        )
-        mw_section.extract()
-        self.sections.append(mw_section)
+                logger.debug(f"found == in line: {line}, with index {index}")
+                first_level2_heading_line_number = index
+                # We break at first hit
+                break
+        if first_level2_heading_line_number:
+            root_section_wikitext = self.extract_lines(
+                end=first_level2_heading_line_number
+            )
+            # console.print(root_section_wikitext)
+            # exit()
+            mw_section = MediawikiSection(
+                wikitext=root_section_wikitext,
+                testing=self.testing,
+                language_code=self.language_code,
+                job=self.job,
+            )
+            mw_section.extract()
+            self.sections.append(mw_section)
+        else:
+            logger.debug(
+                "Special case, wikitext started with a "
+                "level 2 heading so we don't do anything"
+            )
+
+    def extract_lines(self, end) -> str:
+        """Extract lines until end"""
+        lines = ""
+        if not end:
+            raise MissingInformationError("did not get what we need")
+        for index, line in enumerate(str(self.wikicode).splitlines()):
+            if index < end:
+                lines += f"{line}\n"
+        return lines

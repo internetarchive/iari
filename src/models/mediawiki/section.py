@@ -1,9 +1,9 @@
 import logging
 import re
-from typing import List, Union
+from typing import List, Optional, Union
 
-import mwparserfromhell
-from mwparserfromhell.wikicode import Wikicode
+import mwparserfromhell  # type: ignore
+from mwparserfromhell.wikicode import Wikicode  # type: ignore
 from pydantic import BaseModel
 
 from src.models.api.job.article_job import ArticleJob
@@ -14,14 +14,17 @@ logger = logging.getLogger(__name__)
 
 
 class MediawikiSection(BaseModel):
+    """This accepts both wikicode directly from mwparserfromhell and wikitext"""
+
     testing: bool = False
     language_code: str = ""
-    wikicode: Union[Wikicode, str]
+    wikicode: Optional[Wikicode] = None
+    wikitext: str = ""
     references: List[WikipediaReference] = []
     job: ArticleJob
 
-    class Config:
-        arbitrary_types_allowed = True
+    class Config:  # dead: disable
+        arbitrary_types_allowed = True  # dead: disable
 
     @property
     def is_general_reference_section(self):
@@ -31,7 +34,9 @@ class MediawikiSection(BaseModel):
 
     @property
     def __get_lines__(self):
-        return str(self.wikicode).split("\n")
+        if not self.wikitext:
+            self.__populate_wikitext__()
+        return self.wikitext.split("\n")
 
     @property
     def name(self) -> str:
@@ -39,9 +44,10 @@ class MediawikiSection(BaseModel):
         line = self.__get_lines__[0]
         # Handle special case where no level 2 heading is at the beginning of the section
         if "==" not in line:
+            logger.info(f"== not found in line {line}")
             return "root"
         else:
-            return self.__extract_name_from_line__(line=line)
+            return str(self.__extract_name_from_line__(line=line))
 
     @property
     def number_of_references(self):
@@ -65,7 +71,7 @@ class MediawikiSection(BaseModel):
         if self.is_general_reference_section:
             app.logger.info("Regex match on section name")
             # Discard the header line
-            lines = str(self.wikicode).split("\n")
+            lines = self.wikitext.split("\n")
             lines_without_heading = lines[1:]
             logger.debug(
                 f"Extracting {len(lines_without_heading)} lines form section {lines[0]}"
@@ -93,39 +99,49 @@ class MediawikiSection(BaseModel):
                     self.references.append(reference)
 
     def __extract_all_footnote_references__(self):
-        """This extracts everything inside <ref></ref> tags"""
+        """This extracts everything inside <ref></ref> tags and needs self.wikicode"""
         from src import app
 
         app.logger.debug("__extract_all_footnote_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
-        # self.__parse_wikitext__()
         if not self.wikicode:
-            raise MissingInformationError()
-        if self.testing:
-            app.logger.info("Testing detected")
-            if isinstance(self.wikicode, str):
-                app.logger.info("Parsing the test wikitext into wikicode")
-                self.wikicode = mwparserfromhell.parse(self.wikicode)
-        if isinstance(self.wikicode, Wikicode):
-            app.logger.debug("Wikicode detected")
-            refs = self.wikicode.filter_tags(
-                matches=lambda tag: tag.tag.lower() == "ref"
+            raise MissingInformationError(
+                f"The section {self} did not have any wikicode"
             )
-            app.logger.debug(f"Number of refs found: {len(refs)}")
-            for ref in refs:
-                reference = WikipediaReference(
-                    wikicode=ref,
-                    # wikibase=self.wikibase,
-                    testing=self.testing,
-                    language_code=self.language_code,
-                    section=self.name,
-                )
-                reference.extract_and_check()
-                self.references.append(reference)
-        else:
-            raise MissingInformationError("The section did not have any wikicode")
+        refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
+        app.logger.debug(f"Number of refs found: {len(refs)}")
+        for ref in refs:
+            reference = WikipediaReference(
+                wikicode=ref,
+                # wikibase=self.wikibase,
+                testing=self.testing,
+                language_code=self.language_code,
+                section=self.name,
+            )
+            reference.extract_and_check()
+            self.references.append(reference)
 
     def extract(self):
+        if not self.wikicode and not self.wikitext:
+            raise MissingInformationError(
+                "We need either wikicode or wikitext to continue"
+            )
+        self.__populate_wikitext__()
+        self.__parse_wikitext__()
         self.__extract_all_general_references__()
         self.__extract_all_footnote_references__()
+
+    def __populate_wikitext__(self):
+        from src import app
+
+        app.logger.debug("__populate_wikitext__: running")
+        if self.wikicode and not self.wikitext:
+            self.wikitext = str(self.wikicode)
+
+    def __parse_wikitext__(self):
+        from src import app
+
+        app.logger.debug("__parse_wikitext__: running")
+        if self.wikitext and not self.wikicode:
+            self.wikicode = mwparserfromhell.parse(self.wikitext)

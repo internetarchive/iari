@@ -216,7 +216,7 @@ class WikipediaReference(JobBaseModel):
         return str(self.wikicode)
 
     @property
-    def number_of_templates(self) -> int:
+    def number_of_templates(self) -> int:  # dead: disable
         """Convenience method for tests"""
         return len(self.templates)
 
