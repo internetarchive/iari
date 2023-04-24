@@ -2,7 +2,6 @@ import hashlib
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from src.helpers.console import console
 from src.models.api.handlers.pypdf2 import PyPdf2Handler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.schema.check_url_schema import UrlSchema

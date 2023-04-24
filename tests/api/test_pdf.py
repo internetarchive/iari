@@ -23,7 +23,7 @@ class TestPdf(TestCase):
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
-        assert data["links"] == []
+        assert data["links_total"] == 0
 
     def test_valid_request_nonexistent_pdf(self):
         response = self.test_client.get(
@@ -39,4 +39,5 @@ class TestPdf(TestCase):
         response = self.test_client.get(f"/statistics/pdf?url={url}&testing=true")
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert len(data["links"]) == 79
+        assert len(data["links"]) == 40
+        assert data["links_total"] == 79
