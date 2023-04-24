@@ -14,44 +14,74 @@ class TestPyPdf2Handler(unittest.TestCase):
     pdf_handler2 = PyPdf2Handler(
         job=UrlJob(url="https://s1.q4cdn.com/806093406/files/doc_downloads/test.pdf")
     )
-
+    pdf_handler3 = PyPdf2Handler(
+        job=UrlJob(url="https://www.foundationforfreedomonline.com/wp-content/uploads/2023/03/FFO-FLASH-REPORT-REV.pdf")
+    )
     def test_extract_links1(self):
         self.pdf_handler1.download_and_extract()
-        assert len(self.pdf_handler1.links) == 79
-        assert self.pdf_handler1.links[:10] == [
-            "https://www.chronicle.com/resource/alcohol-s-influence-on-campus/6113/.",
-            "https://www.samhsa.gov/data/sites/default/files/report_2361/ShortReport-2361.html.",
-            "https://www.ncbi.nlm.nih.gov/pubmed/28728636.",
-            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2701090/.",
-            "http://archive.sph.harvard.edu/cas/Documents/",
-            "https://nces.ed.gov/",
-            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3161136/;",
-            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5280574/;",
-            "https://www.ncbi.nlm.nih.gov/",
-            "https://www.ncbi.nlm.nih.gov/pubmed/29680476.",
-        ]
+        assert self.pdf_handler1.total_number_of_links == 79
 
     def test_extract_links2(self):
         self.pdf_handler2.download_and_extract()
-        assert self.pdf_handler2.links[:10] == []
+        assert self.pdf_handler2.total_number_of_links == 0
 
     def test___fix_spaces__(self):
         string = "https://d oi.org/10.1186/s40779"
+        correct = "https://doi.org/10.1186/s40779"
         pdf = PyPdf2Handler(job=UrlJob(url="test"))
-        pdf.links = [string]
-        pdf.__clean_spaces__()
-        assert pdf.links[0] == "https://doi.org/10.1186/s40779"
+        assert pdf.__clean_urls__(urls=[string]) == [correct]
 
     def test___discard_invalid_urls1(self):
         string = "https://www.science"
         pdf = PyPdf2Handler(job=UrlJob(url="test"))
-        pdf.links = [string]
-        pdf.__discard_invalid_urls__()
-        assert pdf.links == []
+        assert pdf.__discard_invalid_urls__(urls=[string]) == []
 
     def test___discard_invalid_urls2(self):
         string = "https://patents.google.com/patent/CN210078382U/en?assignee=Wuhan+Institute+of+Virology+of+CAS&sort=new"
         pdf = PyPdf2Handler(job=UrlJob(url="test"))
-        pdf.links = [string]
-        pdf.__discard_invalid_urls__()
-        assert pdf.links == [string]
+        assert pdf.__discard_invalid_urls__(urls=[string]) == [string]
+
+    def test_linebreak_url_extraction(self):
+        pdf = self.pdf_handler3
+        pdf.download_and_extract()
+        for page in pdf.pages:
+            print(page)
+
+    def test_get_dict1(self):
+        self.pdf_handler1.download_and_extract()
+        data = self.pdf_handler1.get_dict()
+        assert "links_total" in data
+        assert data["links_total"] == 79
+        assert "links" in data
+        assert len(data["links"]) == 40
+        assert data["links"][30] == ['https://www.chronicle.com/resource/alcohol-s-influence-on-campus/6113/.']
+        assert "pages" in data
+        assert len(data["pages"]) == 40
+        assert data["pages"][30] == ('27\n'
+ 'A Primer for T rustees, Administrators, and Alumniother harmful substances '
+ 'on individual campuses. And collaborating with other \n'
+ 'institutions will magnify the impact. University leaders must share '
+ 'effective strategies \n'
+ 'that have worked for their respective institutions and consider broader '
+ 'policies at the \n'
+ 'local and state levels. Statewide initiatives can help solve states’ '
+ 'long-term problems, \n'
+ 'and these initiatives can also garner state funding. \n'
+ 'Together, college leadership can help to impress upon students from every '
+ 'region that \n'
+ 'they must not allow substance use to interfere with the precious opportunity '
+ 'that \n'
+ 'college students have to learn and grow.  \n'
+ 'n    n     n\n'
+ 'RECOMMENDED\tREADING\n'
+ 'Alcohol’s Influence on Campus . Chronicle  Focus Collection. Washington, DC: '
+ 'The Chronicle of Higher Education , 2016. \n'
+ 'https://www.chronicle.com/resource/alcohol-s-influence-on-campus/6113/.\n'
+ 'Berenson, Alex. T ell Your Children: The Truth about Marijuana, Mental '
+ 'Illness, and Violence . New York: Free Press, 2019. \n'
+ 'Cimini, M. Dolores and Estela M. Rivero (Eds.). Promoting Behavioral Health '
+ 'and Reducing Risk Among College Students: \n'
+ 'A Comprehensive Approach . United Kingdom: Routledge, 2018. \n'
+ 'DuPont, Robert L. Chemical Slavery: Understanding Addiction and Stopping the '
+ 'Drug Epidemic . Rockville, MD: Institute \n'
+ 'for Behavior and Health, 2018.   ')
