@@ -128,7 +128,7 @@ the statistics/pdf endpoint accepts the following parameters:
 
 It will return json similar to:
 ```
-{links: ["https://s1.q4cdn.com/806093406/files/doc_downloads/test.pdf]}
+{'links': {'0': []}, 'pages': {'0': ' \n  \n   \nThis is a test PDF document. \nIf you can read this, you have Adobe Acrobat Reader installed on your computer. '}, 'links_total': 0, 'timestamp': 1682357398, 'isodate': '2023-04-24T19:29:58.569077', 'id': '70dee2f7', 'refreshed_now': False}
 ```
 
 # Diagrams
