@@ -1,7 +1,7 @@
 import logging
 import re
 from io import BytesIO
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 import requests
 from pydantic import BaseModel
@@ -77,7 +77,9 @@ class PyPdf2Handler(BaseModel):
 
     def get_dict(self):
         """Return data to the patron"""
-        return dict(links=self.links, pages=self.pages, links_total=self.total_number_of_links)
+        return dict(
+            links=self.links, pages=self.pages, links_total=self.total_number_of_links
+        )
 
     def __clean_urls__(self, urls: List[str]) -> List[str]:
         """Some links have spaces in them when returned from pypdf2 so we fix that"""
