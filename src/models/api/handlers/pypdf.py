@@ -1,12 +1,12 @@
 import logging
 import re
 from io import BytesIO
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import requests
 from pydantic import BaseModel
-from PyPDF2 import PdfReader  # type: ignore
-from PyPDF2.errors import PdfReadError
+from pypdf import PdfReader
+from pypdf.errors import PdfReadError
 
 from src.models.api.job.check_url_job import UrlJob
 from src.models.exceptions import MissingInformationError
@@ -14,7 +14,7 @@ from src.models.exceptions import MissingInformationError
 logger = logging.getLogger(__name__)
 
 
-class PyPdf2Handler(BaseModel):
+class PypdfHandler(BaseModel):
     job: UrlJob
     content: bytes = b""
     links: Dict[int, List[str]] = {}
@@ -81,7 +81,8 @@ class PyPdf2Handler(BaseModel):
             links=self.links, pages=self.pages, links_total=self.total_number_of_links
         )
 
-    def __clean_urls__(self, urls: List[str]) -> List[str]:
+    @staticmethod
+    def __clean_urls__(urls: List[str]) -> List[str]:
         """Some links have spaces in them when returned from pypdf2 so we fix that"""
         cleaned_links = []
         for link in urls:
@@ -117,7 +118,8 @@ class PyPdf2Handler(BaseModel):
             cleaned_links.append(clean_link)
         return cleaned_links
 
-    def __discard_invalid_urls__(self, urls: List[str]) -> List[str]:
+    @staticmethod
+    def __discard_invalid_urls__(urls: List[str]) -> List[str]:
         """This should discard any url with "www" and without 2 dots and a tld
         e.g. https://www.science"""
         valid_links = []

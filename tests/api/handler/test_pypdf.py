@@ -1,20 +1,20 @@
 import unittest
 
-from src.models.api.handlers.pypdf2 import PyPdf2Handler
+from src.models.api.handlers.pypdf import PypdfHandler
 from src.models.api.job.check_url_job import UrlJob
 
 
 class TestPyPdf2Handler(unittest.TestCase):
-    pdf_handler1 = PyPdf2Handler(
+    pdf_handler1 = PypdfHandler(
         job=UrlJob(
             url="https://www.campusdrugprevention.gov/sites/default/files/2021-11/Addressing-College-Drinking-and-Drug-Use%20(ACTA).pdf",
             timeout=10,
         )
     )
-    pdf_handler2 = PyPdf2Handler(
+    pdf_handler2 = PypdfHandler(
         job=UrlJob(url="https://s1.q4cdn.com/806093406/files/doc_downloads/test.pdf")
     )
-    pdf_handler3 = PyPdf2Handler(
+    pdf_handler3 = PypdfHandler(
         job=UrlJob(
             url="https://www.foundationforfreedomonline.com/wp-content/uploads/2023/03/FFO-FLASH-REPORT-REV.pdf"
         )
@@ -31,17 +31,17 @@ class TestPyPdf2Handler(unittest.TestCase):
     def test___fix_spaces__(self):
         string = "https://d oi.org/10.1186/s40779"
         correct = "https://doi.org/10.1186/s40779"
-        pdf = PyPdf2Handler(job=UrlJob(url="test"))
+        pdf = PypdfHandler(job=UrlJob(url="test"))
         assert pdf.__clean_urls__(urls=[string]) == [correct]
 
     def test___discard_invalid_urls1(self):
         string = "https://www.science"
-        pdf = PyPdf2Handler(job=UrlJob(url="test"))
+        pdf = PypdfHandler(job=UrlJob(url="test"))
         assert pdf.__discard_invalid_urls__(urls=[string]) == []
 
     def test___discard_invalid_urls2(self):
         string = "https://patents.google.com/patent/CN210078382U/en?assignee=Wuhan+Institute+of+Virology+of+CAS&sort=new"
-        pdf = PyPdf2Handler(job=UrlJob(url="test"))
+        pdf = PypdfHandler(job=UrlJob(url="test"))
         assert pdf.__discard_invalid_urls__(urls=[string]) == [string]
 
     def test_linebreak_url_extraction(self):
