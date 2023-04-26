@@ -20,6 +20,7 @@ from src.views.statistics.article import Article
 from src.views.statistics.pdf import Pdf
 from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
+from src.views.statistics.xhtml import Xhtml
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ api.add_resource(All, "/statistics/all")
 api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
 api.add_resource(Pdf, "/statistics/pdf")
+api.add_resource(Xhtml, "/statistics/xhtml")
 # return app_
 # api.add_resource(
 #     AddJobToQueue, "/add-job"

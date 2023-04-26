@@ -27,6 +27,8 @@ pyalex = "^0.7"
 aiohttp = "^3.8.4"
 asyncio = "^3.4.3"
 pypdf = "^3.8.1"
+beautifulsoup4 = "^4.12.2"
+lxml = "^4.9.2"
 
 
 [tool.poetry.group.dev.dependencies]

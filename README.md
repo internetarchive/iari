@@ -126,9 +126,43 @@ the statistics/pdf endpoint accepts the following parameters:
 * refresh (optional)
 * testing (optional)
 
+On error it returns 400.
+
 It will return json similar to:
 ```
 {'links': {'0': []}, 'pages': {'0': ' \n  \n   \nThis is a test PDF document. \nIf you can read this, you have Adobe Acrobat Reader installed on your computer. '}, 'links_total': 0, 'timestamp': 1682357398, 'isodate': '2023-04-24T19:29:58.569077', 'id': '70dee2f7', 'refreshed_now': False}
+```
+### XHTML
+the statistics/pdf endpoint accepts the following parameters:
+* url (mandatory)
+* refresh (optional)
+* testing (optional)
+
+On error it returns 400.
+
+It will return json similar to:
+```
+{
+    "links": [
+        {
+            "context": "<a accesskey=\"t\" href=\"http://www.hut.fi/u/hsivonen/test/xhtml-suite/\" title=\"The main page of this test suite\">This is a link to the <acronym title=\"Extensible HyperText Markup Language\">XHTML</acronym> test suite table of contents.</a>",
+            "parent": "<p><a accesskey=\"t\" href=\"http://www.hut.fi/u/hsivonen/test/xhtml-suite/\" title=\"The main page of this test suite\">This is a link to the <acronym title=\"Extensible HyperText Markup Language\">XHTML</acronym> test suite table of contents.</a> The link contain inline markup (<code>&lt;acronym&gt;</code>), has a title and an accesskey \u2018t\u2019.</p>",
+            "title": "The main page of this test suite",
+            "href": "http://www.hut.fi/u/hsivonen/test/xhtml-suite/"
+        },
+        {
+            "context": "<a href=\"base-target\">This is a relative link.</a>",
+            "parent": "<p><a href=\"base-target\">This is a relative link.</a> If the link points to http://www.hut.fi/u/hsivonen/test/base-test/base-target, the user agent supports <code>&lt;base/&gt;</code>. if it points to http://www.hut.fi/u/hsivonen/test/xhtml-suite/base-target, the user agent has failed the test.</p>",
+            "title": "",
+            "href": "base-target"
+        }
+    ],
+    "links_total": 2,
+    "timestamp": 1682497512,
+    "isodate": "2023-04-26T10:25:12.798840",
+    "id": "fc5aa88d",
+    "refreshed_now": false
+}
 ```
 
 # Diagrams
