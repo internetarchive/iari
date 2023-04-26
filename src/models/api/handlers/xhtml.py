@@ -32,7 +32,7 @@ class XhtmlHandler(BaseModel):
         # see https://stackoverflow.com/questions/23714383/what-are-all-the-possible-values-for-http-content-type-header
         valid_content_types = [
             "application/xhtml+xml",
-            "text/html; charset=UTF-8",
+            "text/html; charset=utf-8",
             "text/html",
         ]
         if not self.content:
@@ -44,7 +44,7 @@ class XhtmlHandler(BaseModel):
                 logger.error(self.error_details)
                 return
             # We keep strict to the types above for now
-            if content_type not in valid_content_types:
+            if content_type.lower() not in valid_content_types:
                 self.error = True
                 self.error_details = (
                     f"Invalid content type for XHTML file. Got {content_type}"
