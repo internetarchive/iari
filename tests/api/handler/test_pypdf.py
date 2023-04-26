@@ -4,7 +4,7 @@ from src.models.api.handlers.pypdf import PypdfHandler
 from src.models.api.job.check_url_job import UrlJob
 
 
-class TestPyPdf2Handler(unittest.TestCase):
+class TestPypdfHandler(unittest.TestCase):
     pdf_handler1 = PypdfHandler(
         job=UrlJob(
             url="https://www.campusdrugprevention.gov/sites/default/files/2021-11/Addressing-College-Drinking-and-Drug-Use%20(ACTA).pdf",
