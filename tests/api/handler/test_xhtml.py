@@ -24,7 +24,10 @@ class TestXhtmlHandler(unittest.TestCase):
     def test_extract_links1(self):
         self.pdf_handler1.download_and_extract()
         assert self.pdf_handler1.error is True
-        assert self.pdf_handler1.error_details == 'Invalid content type for XHTML file. Got application/pdf'
+        assert (
+            self.pdf_handler1.error_details
+            == "Invalid content type for XHTML file. Got application/pdf"
+        )
 
     def test_extract_links2(self):
         self.pdf_handler2.download_and_extract()
