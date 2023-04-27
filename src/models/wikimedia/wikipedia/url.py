@@ -89,7 +89,6 @@ class WikipediaUrl(BaseModel):
         self.extract_first_level_domain()
 
     def is_wayback_machine_url(self):
-
         return bool("//web.archive.org" in self.__get_url__)
 
     def extract_first_level_domain(self) -> None:
@@ -185,7 +184,7 @@ class WikipediaUrl(BaseModel):
 
     def __extract_tld__(self):
         if not self.netloc:
-            logger.warning(f"Could not extract tld because self.netloc was empty")
+            logger.warning("Could not extract tld because self.netloc was empty")
         else:
             self.tld = self.netloc.split(".")[-1]
             logger.debug(f"tld found: {self.tld}")

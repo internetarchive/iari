@@ -12,7 +12,7 @@ class TestTemplate:
         templates = parse(data).ifilter_templates()
         for template in templates:
             wt = WikipediaTemplate(raw_template=template)
-            assert "test" == wt.__remove_comments__(text="test<!--test-->")
+            assert wt.__remove_comments__(text="test<!--test-->") == "test"
 
     def test_name(self):
         data = "{{test}}"

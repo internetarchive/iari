@@ -1,3 +1,4 @@
+import sys
 from unittest import TestCase
 
 from src.helpers.console import console
@@ -275,7 +276,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         for reference in wre.references:
             if reference.template_names and not reference.get_template_dicts:
                 console.print(reference)
-                exit()
+                sys.exit()
 
     def test_parameters_yardbirds_reference(self):
         """This should result in 1 footnote reference and 0 general references

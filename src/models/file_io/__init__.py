@@ -54,7 +54,7 @@ class FileIo(WariBaseModel):
             else:
                 # x = create and write
                 with open(file=path_filename, mode="x") as file:
-                    app.logger.debug(f"writing to new file")
+                    app.logger.debug("writing to new file")
                     # https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
                     json.dump(self.data, file, ensure_ascii=False, indent=4)
         else:

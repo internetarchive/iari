@@ -247,7 +247,7 @@ class WikipediaTemplate(BaseModel):
         if "1" in self.parameters:
             logger.debug(f"Found first parameter '{self.parameters['1']}'")
             if not self.parameters["1"]:
-                logger.debug(f"first parameter was empty")
+                logger.debug("first parameter was empty")
             self.parameters["first_parameter"] = self.parameters["1"]
         else:
             logger.debug("No first parameter found")

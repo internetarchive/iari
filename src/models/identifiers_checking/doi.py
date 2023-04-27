@@ -160,14 +160,14 @@ class Doi(BaseModel):
                 and self.marked_as_retracted_in_wikidata
             ):
                 app.logger.info(
-                    f"This paper is marked retracted in both Wikidata and OpenAlex"
+                    "This paper is marked retracted in both Wikidata and OpenAlex"
                 )
             elif (
                 not self.marked_as_retracted_in_openalex
                 and not self.marked_as_retracted_in_wikidata
             ):
                 app.logger.info(
-                    f"This paper is not marked retracted in any of the catalog sources we support."
+                    "This paper is not marked retracted in any of the catalog sources we support."
                 )
         else:
             app.logger.info("This paper was not found in both OpenAlex and Wikidata")

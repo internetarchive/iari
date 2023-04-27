@@ -1,7 +1,19 @@
 name: lint_python
-on: [push]
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: pip install --user ruff
+    - run: ruff --format=github --target-version=py37 .
+
   lint_python:
+    needs: ruff
     runs-on: ubuntu-latest
     env:
       ia_sandbox: ${{ secrets.ia_sandbox }}
@@ -17,17 +29,12 @@ jobs:
 #        uses: supercharge/redis-github-action@1.4.0
       - run: pip install --upgrade pip wheel
       - run: poetry install --with=dev
-      - run: poetry run bandit --recursive --skip B101,B105,B113,B324,B501 .  # B101 is assert statements # B501 cert security issue
       - run: poetry run black --check .
       - run: poetry run codespell src/ tests/ *.md *.py # --ignore-words-list="" --skip="*.css,*.js,*.lock"
-      - run: poetry run flake8 --ignore=C408,C416,E203,F401,F541,R501,R502,R503,R504,R505,R506,W503
-                    --max-complexity=21 --max-line-length=162 --show-source . #--statistics .
-      - run: poetry run isort --check-only --profile black . || true
       - run: mkdir --parents --verbose .mypy_cache
       - run: poetry run mypy --ignore-missing-imports --install-types --non-interactive --exclude test_data --exclude deprecated .
       - run: cp config_sample.py config.py
         # https://docs.pytest.org/en/latest/how-to/usage.html#specifying-which-tests-to-run
       - run: mkdir json
       - run: poetry run pytest .
-      - run: shopt -s globstar && poetry run pyupgrade --keep-runtime-typing --py37-plus **/*.py
       - run: poetry run safety check
