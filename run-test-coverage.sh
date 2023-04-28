@@ -1,1 +1,1 @@
-python -m coverage run -m unittest && python -m coverage report > TEST_COVERAGE.txt
+python -m coverage run -m pytest && python -m coverage report > TEST_COVERAGE.txt
