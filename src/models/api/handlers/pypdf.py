@@ -20,6 +20,7 @@ class PypdfHandler(BaseModel):
     links: Dict[int, List[str]] = {}
     error: bool = False
     pages: Dict[int, str] = {}
+    error_details: str = ""
 
     @property
     def total_number_of_links(self):
@@ -40,7 +41,11 @@ class PypdfHandler(BaseModel):
                 self.content = response.content
             else:
                 self.error = True
-                logger.warning("Got no pdf content from requests")
+                self.error_details = (
+                    f"Got no content from URL using "
+                    f"requests and timeout {self.job.timeout}"
+                )
+                logger.warning(self.error_details)
 
     def __extract_links__(self) -> None:
         """Extract all links from the text extract per page"""
@@ -65,8 +70,9 @@ class PypdfHandler(BaseModel):
                     text = page.extract_text()
                     self.pages[index] = text
             except PdfReadError:
-                logger.error("Not a valid PDF")
                 self.error = True
+                self.error_details = "Not a valid PDF according to pypdf"
+                logger.error(self.error_details)
 
     def download_and_extract(self):
         self.__download_pdf__()

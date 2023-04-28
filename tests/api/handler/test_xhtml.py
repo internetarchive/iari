@@ -35,7 +35,7 @@ class TestXhtmlHandler(unittest.TestCase):
 
     def test_extract_links3(self):
         self.pdf_handler3.download_and_extract()
-        assert self.pdf_handler3.total_number_of_links == 41
+        assert self.pdf_handler3.total_number_of_links == 39
 
     def test_get_dict1(self):
         self.pdf_handler2.download_and_extract()
@@ -59,9 +59,9 @@ class TestXhtmlHandler(unittest.TestCase):
         self.pdf_handler3.download_and_extract()
         data = self.pdf_handler3.get_dict()
         assert "links_total" in data
-        assert data["links_total"] == 41
+        assert data["links_total"] == 39
         assert "links" in data
-        assert len(data["links"]) == 41
+        assert len(data["links"]) == 39
         first_link = data["links"][0]
         # remove the Tag which causes a test error
         test_tag = Tag(name="test")

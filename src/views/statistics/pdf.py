@@ -62,7 +62,7 @@ class Pdf(StatisticsWriteView):
             pdf = PypdfHandler(job=self.job)
             pdf.download_and_extract()
             if pdf.error:
-                return "Not a valid PDF according to PyPDF2", 400
+                return pdf.error_details, 400
             data = pdf.get_dict()
             # console.print(data)
             # exit()
