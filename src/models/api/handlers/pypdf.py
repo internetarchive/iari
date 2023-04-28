@@ -41,8 +41,10 @@ class PypdfHandler(BaseModel):
                 self.content = response.content
             else:
                 self.error = True
-                self.error_details = (f"Got no content from URL using "
-                                      f"requests and timeout {self.job.timeout}")
+                self.error_details = (
+                    f"Got no content from URL using "
+                    f"requests and timeout {self.job.timeout}"
+                )
                 logger.warning(self.error_details)
 
     def __extract_links__(self) -> None:
