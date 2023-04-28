@@ -32,7 +32,7 @@ class TestPdf(TestCase):
         self.assertEqual(400, response.status_code)
         data = json.loads(response.data)
         console.print(data)
-        assert data == "Not a valid PDF according to PyPDF2"
+        assert data == "Not a valid PDF according to pypdf"
 
     def test_valid_request_test_pdf2(self):
         url = "https://www.campusdrugprevention.gov/sites/default/files/2021-11/Addressing-College-Drinking-and-Drug-Use%20(ACTA).pdf"
