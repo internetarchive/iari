@@ -138,7 +138,7 @@ class AllHandler(WariBaseModel):
                 app.logger.info(f"Checking {len(self.dois)} DOIs")
                 self.doi_details = loop.run_until_complete(self.check_dois(self.dois))
             else:
-                app.logger.info(f"Not checking DOIs because none were found")
+                app.logger.info("Not checking DOIs because none were found")
 
     def __fetch_article__(self):
         from src import app
@@ -150,12 +150,12 @@ class AllHandler(WariBaseModel):
         if response.status_code == 200:
             self.data = response.json()
             app.logger.info(
-                f"got article data with {self.number_of_references} " f"references"
+                f"got article data with {self.number_of_references} references"
             )
         else:
             app.logger.error(
                 f"Got status code {response.status_code} when "
-                f"fetching from the article endpoint"
+                "fetching from the article endpoint"
             )
             self.error = True
 

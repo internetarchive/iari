@@ -31,37 +31,11 @@ repos:
     types_or: [python, markdown]
     exclude: ^test_data/
 
-  - id: bandit
-    name: bandit
+  - id: ruff
+    name: ruff
     language: system
-    entry: bandit --recursive --skip B101,B105,B113,B324,B501 src  # B101 is assert statements
+    entry: ruff
     types: [python]
-
-  - id: isort
-    name: isort
-    language: system
-    entry: isort
-    args: ["--profile", "black", "--filter-files"]
-    types: [python]
-
-  - id: pyupgrade
-    name: pyupgrade
-    language: system
-    entry: pyupgrade
-    args: ["--keep-runtime-typing", "--py37-plus"]
-    types: [python]
-
-# https://flake8.pycqa.org/en/latest/user/using-hooks.html
-  - id: flake8
-    name: flake8
-    language: system
-    entry: flake8
-    # R505 unnecessary elif after return statement.
-    # R506 unnecessary else after raise statement.
-    args: ["--ignore=C408,C416,E203,F401,F541,R501,R502,R503,R504,R505,R506,W503",
-           "--max-complexity=21", "--max-line-length=162", "--show-source",
-           "--statistics"]
-    types: [ python ]
 
  # https://jaredkhan.com/blog/mypy-pre-commit
   - id: mypy
