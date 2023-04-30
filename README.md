@@ -128,10 +128,20 @@ the statistics/pdf endpoint accepts the following parameters:
 
 On error it returns 400.
 
+The `urls_fixed` object has an array of fixed url fragments in case any were fixed. See [this output](https://archive.org/services/context/wari/v2/statistics/pdf?url=https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf&refresh=true).
+
 It will return json similar to:
 ```
-{'links': {'0': []}, 'pages': {'0': ' \n  \n   \nThis is a test PDF document. \nIf you can read this, you have Adobe Acrobat Reader installed on your computer. '}, 'links_total': 0, 'timestamp': 1682357398, 'isodate': '2023-04-24T19:29:58.569077', 'id': '70dee2f7', 'refreshed_now': False}
+{"links": [{"url": "https://www.cisa.gov/topics/election-security/foreign-influence-operations-and-disinformationAll", "page": 3}], "links_total": 1, "url": "https://www.foundationforfreedomonline.com/wp-content/uploads/2023/03/FFO-FLASH-REPORT-REV.pdf", "timeout": 2, "urls_fixed": null, "timestamp": 1682865244, "isodate": "2023-04-30T14:34:04.516025", "id": "a07f3f88", "refreshed_now": true}
 ```
+
+This output permits the data consumer to count number of links per page, which links or domains appear most, etc.
+
+#### Known limitations
+Because of the way PDFs are structured it is quite difficult to reliably extract links correctly since they are not marked up when we do a pure text extraction using PyMuPDF. We thus rely on a regex to discern what is a link and what is not. In at least one case this results in output from the next line following the link to be appended to the end of the link which is incorrect. In the only case we know that resulted in a still working URL.
+
+Using a regex is a suboptimal solution, but the best we have been able to come up with so far. You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
+
 ### XHTML
 the statistics/pdf endpoint accepts the following parameters:
 * url (mandatory)
