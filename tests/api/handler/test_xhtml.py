@@ -4,7 +4,7 @@ from bs4 import Tag
 
 from src.models.api.handlers.xhtml import XhtmlHandler
 from src.models.api.job.check_url_job import UrlJob
-from src.models.api.link import Link
+from src.models.api.link.xhtml_link import XhtmlLink
 
 
 class TestXhtmlHandler(unittest.TestCase):
@@ -48,7 +48,7 @@ class TestXhtmlHandler(unittest.TestCase):
         # remove the Tag which causes a test error
         test_tag = Tag(name="test")
         first_link["context"] = first_link["parent"] = test_tag
-        assert first_link == Link(
+        assert first_link == XhtmlLink(
             context=test_tag,
             href="http://www.hut.fi/u/hsivonen/test/xhtml-suite/",
             title="The main page of this test suite",
@@ -66,7 +66,7 @@ class TestXhtmlHandler(unittest.TestCase):
         # remove the Tag which causes a test error
         test_tag = Tag(name="test")
         first_link["context"] = first_link["parent"] = test_tag
-        assert first_link == Link(
+        assert first_link == XhtmlLink(
             context=test_tag,
             href="https://www.foundationforfreedomonline.com",
             title="",

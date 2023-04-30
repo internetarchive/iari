@@ -29,6 +29,7 @@ requests = "^2.28.1"
 rich = "^12.6.0"
 tld = "^0.12.6"
 wikibaseintegrator = "^0.12.1"
+pymupdf = "^1.22.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.8.0"

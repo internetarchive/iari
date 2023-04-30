@@ -2,7 +2,7 @@ from bs4 import Tag
 from pydantic import BaseModel
 
 
-class Link(BaseModel):
+class XhtmlLink(BaseModel):
     """This models an xhtml link"""
 
     context: Tag  # this is usually the <a>
@@ -14,6 +14,7 @@ class Link(BaseModel):
         arbitrary_types_allowed = True  # dead: disable
 
     def get_dict(self):
+        """This is needed to enable json encoding in the API"""
         return dict(
             context=str(self.context),
             parent=str(self.parent),

@@ -2,7 +2,7 @@ import hashlib
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from src.models.api.handlers.pypdf import PypdfHandler
+from src.models.api.handlers.pypdf import PdfHandler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.schema.check_url_schema import UrlSchema
 from src.models.exceptions import MissingInformationError
@@ -59,7 +59,7 @@ class Pdf(StatisticsWriteView):
         else:
             url_string = self.job.unquoted_url
             app.logger.info(f"Got {url_string}")
-            pdf = PypdfHandler(job=self.job)
+            pdf = PdfHandler(job=self.job)
             pdf.download_and_extract()
             if pdf.error:
                 return pdf.error_details, 400
