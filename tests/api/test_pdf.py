@@ -32,12 +32,11 @@ class TestPdf(TestCase):
         self.assertEqual(400, response.status_code)
         data = json.loads(response.data)
         console.print(data)
-        assert data == "Not a valid PDF according to pypdf"
+        assert data == "Not a valid PDF according to PyMuPDF"
 
     def test_valid_request_test_pdf2(self):
         url = "https://www.campusdrugprevention.gov/sites/default/files/2021-11/Addressing-College-Drinking-and-Drug-Use%20(ACTA).pdf"
         response = self.test_client.get(f"/statistics/pdf?url={url}&testing=true")
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert len(data["links"]) == 40
-        assert data["links_total"] == 79
+        assert len(data["links"]) == data["links_total"] == 95

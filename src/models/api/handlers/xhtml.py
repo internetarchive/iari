@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
 from src.models.api.job.check_url_job import UrlJob
-from src.models.api.link import Link
+from src.models.api.link.xhtml_link import XhtmlLink
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class XhtmlHandler(BaseModel):
 
     job: UrlJob
     content: bytes = b""
-    links: List[Link] = []
+    links: List[XhtmlLink] = []
     error: bool = False
     error_details: str = ""
 
@@ -60,7 +60,7 @@ class XhtmlHandler(BaseModel):
         for link in soup.find_all("a"):
             href = link.get("href")
             if href is not None:
-                link_obj = Link(
+                link_obj = XhtmlLink(
                     context=link,
                     href=href,
                     title=link.get("title", ""),
