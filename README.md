@@ -132,7 +132,22 @@ The `urls_fixed` object has an array of fixed url fragments in case any were fix
 
 It will return json similar to:
 ```
-{"links": [{"url": "https://www.cisa.gov/topics/election-security/foreign-influence-operations-and-disinformationAll", "page": 3}], "links_total": 1, "url": "https://www.foundationforfreedomonline.com/wp-content/uploads/2023/03/FFO-FLASH-REPORT-REV.pdf", "timeout": 2, "urls_fixed": null, "timestamp": 1682865244, "isodate": "2023-04-30T14:34:04.516025", "id": "a07f3f88", "refreshed_now": true}
+{
+  "links": [
+    {
+      "url": "https://www.cisa.gov/topics/election-security/foreign-influence-operations-and-disinformationAll",
+      "page": 3
+    }
+  ],
+  "links_total": 1,
+  "url": "https://www.foundationforfreedomonline.com/wp-content/uploads/2023/03/FFO-FLASH-REPORT-REV.pdf",
+  "timeout": 2,
+  "urls_fixed": null,
+  "timestamp": 1682865244,
+  "isodate": "2023-04-30T14:34:04.516025",
+  "id": "a07f3f88",
+  "refreshed_now": true
+}
 ```
 
 This output permits the data consumer to count number of links per page, which links or domains appear most, etc.
