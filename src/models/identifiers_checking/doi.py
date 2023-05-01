@@ -124,7 +124,7 @@ class Doi(BaseModel):
         datavalue = claim.mainsnak.datavalue
         # print(datavalue)
         value = datavalue["value"]
-        if isinstance(value, dict) and "id" in value.keys():
+        if isinstance(value, dict) and "id" in value:
             qid_value = value["id"]
             app.logger.debug(f"found P31: '{qid_value}'")
             if qid_value == retracted_item:

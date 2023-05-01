@@ -32,7 +32,7 @@ class WikipediaTemplate(BaseModel):
     def __first_parameter__(self) -> str:
         """Private helper method"""
         if self.parameters:
-            if "first_parameter" in self.parameters.keys():
+            if "first_parameter" in self.parameters:
                 return str(self.parameters["first_parameter"])
             else:
                 return ""
@@ -45,7 +45,7 @@ class WikipediaTemplate(BaseModel):
         if self.name == "isbn":
             self.isbn = self.__first_parameter__
         else:
-            if "isbn" in self.parameters.keys():
+            if "isbn" in self.parameters:
                 self.isbn = str(self.parameters["isbn"])
 
     @property
@@ -164,10 +164,11 @@ class WikipediaTemplate(BaseModel):
             value = str(parameter.value)  # mwpfh needs upcast to str
             if strip:
                 key = parameter.name.strip()
-                if self.__explicit__(parameter):
-                    value = parameter.value.strip()
-                else:
-                    value = str(parameter.value)
+                value = (
+                    parameter.value.strip()
+                    if self.__explicit__(parameter)
+                    else str(parameter.value)
+                )
             else:
                 key = str(parameter.name)
             # Remove comments added by Dennis
