@@ -18,7 +18,9 @@ class TestXhtmlHandler(unittest.TestCase):
         job=UrlJob(url="https://hsivonen.com/test/xhtml-suite/xhtml11.xhtml")
     )
     pdf_handler3 = XhtmlHandler(
-        job=UrlJob(url="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/html/static/index.html")
+        job=UrlJob(
+            url="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/html/static/index.html"
+        )
     )
 
     def test_extract_links1(self):
