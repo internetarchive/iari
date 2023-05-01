@@ -18,7 +18,7 @@ class TestXhtmlHandler(unittest.TestCase):
         job=UrlJob(url="https://hsivonen.com/test/xhtml-suite/xhtml11.xhtml")
     )
     pdf_handler3 = XhtmlHandler(
-        job=UrlJob(url="https://www.foundationforfreedomonline.com/?page_id=692")
+        job=UrlJob(url="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/html/static/index.html")
     )
 
     def test_extract_links1(self):
@@ -35,7 +35,7 @@ class TestXhtmlHandler(unittest.TestCase):
 
     def test_extract_links3(self):
         self.pdf_handler3.download_and_extract()
-        assert self.pdf_handler3.total_number_of_links == 39
+        assert self.pdf_handler3.total_number_of_links == 13
 
     def test_get_dict1(self):
         self.pdf_handler2.download_and_extract()
@@ -59,16 +59,14 @@ class TestXhtmlHandler(unittest.TestCase):
         self.pdf_handler3.download_and_extract()
         data = self.pdf_handler3.get_dict()
         assert "links_total" in data
-        assert data["links_total"] == 39
-        assert "links" in data
-        assert len(data["links"]) == 39
+        assert data["links_total"] == len(data["links"]) == 13
         first_link = data["links"][0]
         # remove the Tag which causes a test error
         test_tag = Tag(name="test")
         first_link["context"] = first_link["parent"] = test_tag
         assert first_link == XhtmlLink(
             context=test_tag,
-            href="https://www.foundationforfreedomonline.com",
+            href="flat/index.html",
             title="",
             parent=test_tag,
         )
