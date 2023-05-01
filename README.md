@@ -119,12 +119,30 @@ https://en.wikipedia.org/w/index.php?title=Wikipedia:CITEBUNDLE
 see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
 
 # Endpoints
+## Checking endpoints 
+### Check URL
+the check-url endpoint accepts the following parameters:
+* url (mandatory)
+* refresh (optional)
+* testing (optional)
+* timeout (optional)
+
+On error it returns 400.
+
+#### Known limitations
+Sometimes we get back a 403 because an intermediary like Cloudflare detected that we are not a person behind a browser doing the request. We don't have any ways to detect these soft200s.
+
+Also sometimes a server returns status code 200 but the content is an error page or any other content than what the person asking for the information wants. These are called soft404s and we currently do not make any effort to detect them.
+
+You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
+
 ## Statistics
 ### PDF
 the statistics/pdf endpoint accepts the following parameters:
 * url (mandatory)
 * refresh (optional)
 * testing (optional)
+* timeout (optional)
 
 On error it returns 400.
 
@@ -153,9 +171,13 @@ It will return json similar to:
 This output permits the data consumer to count number of links per page, which links or domains appear most, etc.
 
 #### Known limitations
-Because of the way PDFs are structured it is quite difficult to reliably extract links correctly since they are not marked up when we do a pure text extraction using PyMuPDF. We thus rely on a regex to discern what is a link and what is not. In at least one case this results in output from the next line following the link to be appended to the end of the link which is incorrect. In the only case we know that resulted in a still working URL.
+The extraction of URLs from unstructured text in any random PDF is a difficult thing to do reliably. This is because PDF is not a structured data format with clear boundaries between different type of information.
 
-Using a regex is a suboptimal solution, but the best we have been able to come up with so far. You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
+We currently use PyMuPDF to extract all the text as it appears on the page, remove all linebreaks and a use a regex to extract anything looking like a URL. This approach results in some links containing information that was part of the text after.
+
+We are currently investigating if using Machine Learning could improve the output.
+
+You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
 
 ### XHTML
 the statistics/pdf endpoint accepts the following parameters:
@@ -204,6 +226,8 @@ None
 * version 2.0.0+ a scalable ETL-framework with an API and capability of reading EventStreams (by Dennis Priskorn)
 * version 3.0.0+ WARI, a host of API endpoints that returns statistics 
 about a Wikipedia article and its references. (by Dennis Priskorn)
+* version 4.0.0+ IARI, a host of API endpoints that returns statistics 
+about both Wikipedia articles and its references and can extract links from any PDF or XHTML page. (by Dennis Priskor
 
 # License
 This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022
