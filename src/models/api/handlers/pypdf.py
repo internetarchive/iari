@@ -59,21 +59,6 @@ class PdfHandler(BaseModel):
             for url in urls:
                 self.links.append(PdfLink(url=url, page=index))
 
-    # def __extract_pages_using_pypdf__(self) -> None:
-    #     """Extract all text from all pages"""
-    #     if not self.content:
-    #         raise MissingInformationError()
-    #     with BytesIO(self.content) as pdf_file:
-    #         try:
-    #             pdf_reader = PdfReader(pdf_file)
-    #             for index, page in enumerate(pdf_reader.pages):
-    #                 text = page.extract_text()
-    #                 self.pages[index] = text
-    #         except PdfReadError:
-    #             self.error = True
-    #             self.error_details = "Not a valid PDF according to pypdf"
-    #             logger.error(self.error_details)
-
     def __extract_pages_using_pymupdf__(self) -> None:
         """Extract all text from all pages"""
         if not self.content:
