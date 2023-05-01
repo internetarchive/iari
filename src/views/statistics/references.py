@@ -53,5 +53,5 @@ class References(StatisticsView):
                     return "No json in cache", 404
                 # convert to dehydrated reference:
                 details.append(data)
-        data = dict(total=len(references), references=details)
+        data = {"total": len(references), "references": details}
         return data, 200

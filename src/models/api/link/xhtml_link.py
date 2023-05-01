@@ -15,9 +15,9 @@ class XhtmlLink(BaseModel):
 
     def get_dict(self):
         """This is needed to enable json encoding in the API"""
-        return dict(
-            context=str(self.context),
-            parent=str(self.parent),
-            title=self.title,
-            href=self.href,
-        )
+        return {
+            "context": str(self.context),
+            "parent": str(self.parent),
+            "title": self.title,
+            "href": self.href,
+        }

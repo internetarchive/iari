@@ -7,5 +7,5 @@ logger = logging.getLogger(__name__)
 
 
 class ReferenceFileIo(HashBasedFileIo):
-    data: Dict[str, Any] = dict()
+    data: Dict[str, Any] = {}
     subfolder = "references/"

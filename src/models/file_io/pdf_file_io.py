@@ -7,5 +7,5 @@ logger = logging.getLogger(__name__)
 
 
 class PdfFileIo(HashBasedFileIo):
-    data: Dict[str, Any] = dict()
+    data: Dict[str, Any] = {}
     subfolder = "pdfs/"

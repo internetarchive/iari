@@ -120,7 +120,7 @@ class WikipediaReference(JobBaseModel):
             return self.wikicode.contents.strip_code()
 
     def __extract_template_urls__(self) -> None:
-        urls = list()
+        urls = []
         for template in self.templates:
             if template.urls:
                 urls.extend(template.urls)
@@ -129,7 +129,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_bare_urls__(self) -> None:
         """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
-        urls = list()
+        urls = []
         for url in self.__find_bare_urls__():
             # We get a tuple back so we join it
             urls.append(WikipediaUrl(url="".join(url)))
@@ -154,7 +154,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_reference_urls__(self) -> None:
         """We support both URLs in templates and outside aka bare URLs"""
-        urls_list = list()
+        urls_list = []
         if not self.template_urls_done:
             self.__extract_template_urls__()
         urls_list.extend(self.template_urls)

@@ -65,11 +65,11 @@ class Doi(BaseModel):
             app.logger.debug("found work :)")
             self.found_in_openalex = True
             self.marked_as_retracted_in_openalex = bool(work["is_retracted"])
-            self.openalex = dict(
-                id=work["id"],
-                details=work,
-                retracted=self.marked_as_retracted_in_openalex,
-            )
+            self.openalex = {
+                "id": work["id"],
+                "details": work,
+                "retracted": self.marked_as_retracted_in_openalex,
+            }
             app.logger.info(
                 f"Retracted in OpenAlex: {self.marked_as_retracted_in_openalex}"
             )
@@ -197,17 +197,17 @@ class Doi(BaseModel):
 
     def __get_wikidata_json__(self):
         if self.found_in_wikidata and self.wikidata_entity:
-            self.wikidata = dict(
-                details=self.wikidata_entity.get_json(),
-                id=self.wikidata_entity.id,
-                retracted=self.marked_as_retracted_in_wikidata,
-            )
+            self.wikidata = {
+                "details": self.wikidata_entity.get_json(),
+                "id": self.wikidata_entity.id,
+                "retracted": self.marked_as_retracted_in_wikidata,
+            }
 
     def __lookup_in_internet_archive_scholar__(self):
         """This is a fastapi frontend to elastic search"""
         query = f"doi{quote(':')}{quote(self.doi, safe='')}"
         url = f"https://scholar.archive.org/search?q={query}"
-        response = requests.get(url, headers=dict(Accept="application/json"))
+        response = requests.get(url, headers={"Accept": "application/json"})
         if response.status_code == 200:
             data = response.json()
             self.internet_archive_scholar = data
