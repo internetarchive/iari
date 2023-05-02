@@ -25,11 +25,11 @@ class TestPdfHandler(unittest.TestCase):
 
     def test_extract_links1(self):
         self.pdf_handler1.download_and_extract()
-        assert self.pdf_handler1.number_of_links == 95
+        assert self.pdf_handler1.number_of_text_links == 95
 
     def test_extract_links2(self):
         self.pdf_handler2.download_and_extract()
-        assert self.pdf_handler2.number_of_links == 0
+        assert self.pdf_handler2.number_of_text_links == 0
 
     def test_get_dict1(self):
         self.pdf_handler1.download_and_extract()
@@ -37,7 +37,7 @@ class TestPdfHandler(unittest.TestCase):
         assert "links_total" in data
         assert "links" in data
         assert data["links_total"] == len(data["links"]) == 190
-        links = self.pdf_handler1.links
+        links = self.pdf_handler1.all_text_links
         print(links)
         # This is failing because of over-extraction which we currently don't have a good way to avoid.
         # assert (
@@ -59,8 +59,8 @@ class TestPdfHandler(unittest.TestCase):
         pdf_handler.__extract_pages_and_links__()
         assert pdf_handler.number_of_pages == 1
         # print(pdf_handler.__get_cleaned_page_string__(number=0))
-        assert pdf_handler.number_of_links == 14
-        links = pdf_handler.links
+        assert pdf_handler.number_of_text_links == 14
+        links = pdf_handler.all_text_links
         # print(pdf_handler.links)
         assert (
             links[1].url
@@ -70,3 +70,38 @@ class TestPdfHandler(unittest.TestCase):
             links[2].url
             == "https://gop-foreignaffairs.house.gov/wp-content/uploads/2021/08/ORIGINS-OF-COVID-19-REPORT.pdf"
         )
+
+    def test___extract_links_from_annotations__(self):
+        pdf_handler = PdfHandler(
+            job=UrlJob(url=""),
+            testing=True,
+            file_path="../test_data/mwg-fdr-document-04-16-23-1-270.pdf",
+        )
+        pdf_handler.read_pdf_from_file()
+        pdf_handler.__extract_pdf_document__()
+        pdf_handler.__extract_links_from_annotations__()
+        assert pdf_handler.number_of_annotation_links == 14
+
+    def test_extract_links_same_number_found(self):
+        pdf_handler = PdfHandler(
+            job=UrlJob(url=""),
+            testing=True,
+            file_path="../test_data/mwg-fdr-document-04-16-23-1-270.pdf",
+        )
+        pdf_handler.read_pdf_from_file()
+        pdf_handler.__extract_pages_and_links__()
+        assert (
+            pdf_handler.number_of_annotation_links
+            == pdf_handler.number_of_text_links
+            == 14
+        )
+
+    def test_extracted_links_are_identical(self):
+        pdf_handler = PdfHandler(
+            job=UrlJob(url=""),
+            testing=True,
+            file_path="../test_data/mwg-fdr-document-04-16-23-1-270.pdf",
+        )
+        pdf_handler.read_pdf_from_file()
+        pdf_handler.__extract_pages_and_links__()
+        assert pdf_handler.annotation_links == pdf_handler.annotation_links

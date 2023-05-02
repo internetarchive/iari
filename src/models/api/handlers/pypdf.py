@@ -1,11 +1,14 @@
 import logging
 import re
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import fitz  # type: ignore
 import requests
-from fitz import FileDataError
+from fitz import (
+    Document,  # type: ignore
+    FileDataError,  # type: ignore
+)
 from pydantic import BaseModel
 
 from src.models.api.job.check_url_job import UrlJob
@@ -18,20 +21,29 @@ logger = logging.getLogger(__name__)
 class PdfHandler(BaseModel):
     job: UrlJob
     content: bytes = b""
-    links: List[PdfLink] = []
+    all_text_links: List[PdfLink] = []
+    annotation_links: List[PdfLink] = []
     error: bool = False
-    pages: Dict[int, str] = {}
+    text_pages: Dict[int, str] = {}
     error_details: str = ""
     urls_fixed: List[str] = []
     file_path: str = ""
+    pdf_document: Optional[Document] = None
+
+    class Config:  # dead: disable
+        arbitrary_types_allowed = True  # dead: disable
 
     @property
-    def number_of_links(self):
-        return len(self.links)
+    def number_of_text_links(self):
+        return len(self.all_text_links)
+
+    @property
+    def number_of_annotation_links(self):  # dead: disable
+        return len(self.annotation_links)
 
     @property
     def number_of_pages(self):
-        return len(self.pages)
+        return self.pdf_document.page_count
 
     def __download_pdf__(self):
         """Download PDF file from URL"""
@@ -47,9 +59,9 @@ class PdfHandler(BaseModel):
                 )
                 logger.warning(self.error_details)
 
-    def __extract_links__(self) -> None:
+    def __extract_links_from_all_text__(self) -> None:
         """Extract all links from the text extract per page"""
-        for index, _ in enumerate(self.pages):
+        for index, _ in enumerate(self.text_pages):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
             regex = r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
@@ -57,19 +69,36 @@ class PdfHandler(BaseModel):
             # cleaned_urls = self.__clean_urls__(urls=urls)
             # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
             for url in urls:
-                self.links.append(PdfLink(url=url, page=index))
+                self.all_text_links.append(PdfLink(url=url, page=index))
 
-    def __extract_pages_using_pymupdf__(self) -> None:
+    def __extract_links_from_annotations__(self) -> None:
+        if not self.pdf_document:
+            raise MissingInformationError()
+        for page_num in range(self.pdf_document.page_count):
+            page = self.pdf_document.load_page(page_num)
+            annotations = page.get_links()
+            for annotation in annotations:
+                # print(annotation)
+                if annotation["kind"] == fitz.LINK_URI:
+                    self.annotation_links.append(
+                        PdfLink(url=annotation["uri"], page=page_num)
+                    )
+
+    def __extract_text_pages__(self) -> None:
         """Extract all text from all pages"""
+        if not self.pdf_document:
+            raise MissingInformationError()
+        for index, page in enumerate(self.pdf_document.pages()):
+            text = page.get_text()
+            self.text_pages[index] = text
+
+    def __extract_pdf_document__(self):
         if not self.content:
             raise MissingInformationError()
         with BytesIO(self.content) as pdf_file:
             try:
                 # noinspection PyUnresolvedReferences
-                pdf_document = fitz.open(stream=pdf_file.read(), filetype="pdf")
-                for index, page in enumerate(pdf_document.pages()):
-                    text = page.get_text()
-                    self.pages[index] = text
+                self.pdf_document = Document(stream=pdf_file.read(), filetype="pdf")
             except FileDataError:
                 self.error = True
                 self.error_details = "Not a valid PDF according to PyMuPDF"
@@ -81,11 +110,11 @@ class PdfHandler(BaseModel):
 
     def get_dict(self):
         """Return data to the patron"""
-        links = [link.dict() for link in self.links]
+        links = [link.dict() for link in self.all_text_links]
         if self.urls_fixed:
             return dict(
                 links=links,
-                links_total=self.number_of_links,
+                links_total=self.number_of_text_links,
                 url=self.job.url,
                 timeout=self.job.timeout,
                 urls_fixed=self.urls_fixed,
@@ -94,14 +123,14 @@ class PdfHandler(BaseModel):
         else:
             return dict(
                 links=links,
-                links_total=self.number_of_links,
+                links_total=self.number_of_text_links,
                 url=self.job.url,
                 timeout=self.job.timeout,
                 urls_fixed=None,
             )
 
     def __get_cleaned_page_string__(self, number) -> str:
-        page_string = self.pages[number]
+        page_string = self.text_pages[number]
         page_string = self.__clean_linebreaks__(string=page_string)
         page_string = self.__fix_doi_typing_errors__(string=page_string)
         return page_string
@@ -125,10 +154,12 @@ class PdfHandler(BaseModel):
 
     def __extract_pages_and_links__(self):
         if not self.error:
-            # self.__extract_pages_using_pypdf__()
-            self.__extract_pages_using_pymupdf__()
+            self.__extract_pdf_document__()
         if not self.error:
-            self.__extract_links__()
+            self.__extract_links_from_annotations__()
+            self.__extract_text_pages__()
+        if not self.error:
+            self.__extract_links_from_all_text__()
 
     @staticmethod
     def __clean_linebreaks__(string):
