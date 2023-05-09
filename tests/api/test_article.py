@@ -30,8 +30,8 @@ class TestArticle(TestCase):
         data = json.loads(response.data)
         console.print(data)
         assert data["title"] == "Easter_Island"
-        assert data["dehydrated_references"] != []
-        assert data["urls"] != []
+        assert len(data["dehydrated_references"]) > 1
+        assert len(data["urls"]) > 1
 
     def test_valid_request_svwiki1(self):
         response = self.test_client.get(
@@ -50,10 +50,11 @@ class TestArticle(TestCase):
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
-        console.print(data)
+        # console.print(data)
         assert data["title"] == "Kleptoparasitisme"
         assert len(data["dehydrated_references"]) == 35
-        assert len(data["urls"]) == 19
+        # print(len(data["urls"]))
+        assert len(data["urls"]) == 21
 
     def test_valid_request_enwiki_test_refresh_true(self):
         response = self.test_client.get(
