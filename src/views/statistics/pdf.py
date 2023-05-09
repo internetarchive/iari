@@ -2,7 +2,7 @@ import hashlib
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from src.models.api.handlers.pypdf import PdfHandler
+from src.models.api.handlers.pdf import PdfHandler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.schema.check_url_schema import UrlSchema
 from src.models.exceptions import MissingInformationError
