@@ -151,6 +151,9 @@ The `urls_fixed` object has an array of fixed url fragments in case any were fix
 It will return json similar to:
 ```
 {
+    "words_mean": 213,
+    "words_max": 842,
+    "words_min": 41,
     "annotation_links": [
         {
             "url": "https://web.archive.org/web/20210501230502/cisa.gov/mdm",
@@ -199,9 +202,10 @@ It will return json similar to:
     "annotation_links_total": 9,
     "url": "https://www.foundationforfreedomonline.com/wp-content/uploads/2023/03/FFO-FLASH-REPORT-REV.pdf",
     "timeout": 2,
-    "urls_fixed": null,
-    "timestamp": 1683613441,
-    "isodate": "2023-05-09T08:24:01.777426",
+    "urls_fixed": [],
+    "pages_total": 6,
+    "timestamp": 1683621700,
+    "isodate": "2023-05-09T10:41:40.148210",
     "id": "a07f3f88",
     "refreshed_now": true
 }
