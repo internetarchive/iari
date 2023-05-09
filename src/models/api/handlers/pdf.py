@@ -38,7 +38,7 @@ class PdfHandler(BaseModel):
         return len(self.all_text_links)
 
     @property
-    def number_of_annotation_links(self):  # dead: disable
+    def number_of_annotation_links(self):
         return len(self.annotation_links)
 
     @property
@@ -110,11 +110,14 @@ class PdfHandler(BaseModel):
 
     def get_dict(self):
         """Return data to the patron"""
-        links = [link.dict() for link in self.all_text_links]
+        text_links = [link.dict() for link in self.all_text_links]
+        annotation_links = [link.dict() for link in self.annotation_links]
         if self.urls_fixed:
             return dict(
-                links=links,
-                links_total=self.number_of_text_links,
+                annotation_links=annotation_links,
+                text_links=text_links,
+                text_links_total=self.number_of_text_links,
+                annotation_links_total=self.number_of_annotation_links,
                 url=self.job.url,
                 timeout=self.job.timeout,
                 urls_fixed=self.urls_fixed,
@@ -122,8 +125,10 @@ class PdfHandler(BaseModel):
             )
         else:
             return dict(
-                links=links,
-                links_total=self.number_of_text_links,
+                annotation_links=annotation_links,
+                text_links=text_links,
+                text_links_total=self.number_of_text_links,
+                annotation_links_total=self.number_of_annotation_links,
                 url=self.job.url,
                 timeout=self.job.timeout,
                 urls_fixed=None,
