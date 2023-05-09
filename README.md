@@ -137,6 +137,118 @@ Also sometimes a server returns status code 200 but the content is an error page
 You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
 
 ## Statistics
+### article
+the statistics/article endpoint accepts the following parameters:
+* url (mandatory)
+* refresh (optional)
+* testing (optional)
+
+On error it returns 400. On timeout it returns 504 or 502 (this is a bug and should be reported).
+
+It will return json similar to:
+```
+{
+    "wari_id": "en.wikipedia.org.999263",
+    "lang": "en",
+    "page_id": 999263,
+    "dehydrated_references": [
+        {
+            "id": "cfa8b438",
+            "template_names": [],
+            "type": "footnote",
+            "footnote_subtype": "named",
+            "flds": [],
+            "urls": [],
+            "titles": [],
+            "section": "History"
+        },
+    ],
+    "reference_statistics": {
+        "named": 10,
+        "footnote": 20,
+        "content": 21,
+        "general": 1
+    },
+    "served_from_cache": false,
+    "site": "wikipedia.org",
+    "timestamp": 1683625128,
+    "isodate": "2023-05-09T11:38:48.597443",
+    "timing": 0,
+    "title": "SNCASO",
+    "fld_counts": {
+        "aviafrance.com": 3,
+        "flightglobal.com": 2,
+        "google.com": 1,
+        "hydroretro.net": 1,
+        "jewishvirtuallibrary.org": 1,
+        "gouvernement.fr": 1
+    },
+    "urls": [
+        "http://www.hydroretro.net/etudegh/sncase.pdf",
+    ]
+}
+```
+#### Known limitations
+None
+
+### references
+the statistics/references endpoint accepts the following parameters:
+* wari_id (mandatory, str) (this is obtained from the article endpoint)
+* all (optional, boolean) (default: false)
+* offset (optional, int) (default: 0)
+* chunk_size (optional, int) (default: 10)
+
+On error it returns 400. If data is not found it returns 404.
+
+It will return json similar to:
+```
+{
+    "total": 31,
+    "references": [
+        {
+            "id": "cfa8b438",
+            "template_names": [],
+            "wikitext": "<ref name = \"Hartmann1\" />",
+            "type": "footnote",
+            "footnote_subtype": "named",
+            "flds": [],
+            "urls": [],
+            "templates": [],
+            "titles": [],
+            "section": "History",
+            "served_from_cache": true
+        },
+    ]
+}
+```
+#### Known limitations
+None
+
+### reference
+the statistics/reference/id endpoint accepts the following parameters:
+* id (mandatory) (this is unique for each reference and is obtained from the article or references endpoint)
+
+On error it returns 400. If data is not found it returns 404.
+
+It will return json similar to:
+```
+{
+    "id": "cfa8b438",
+    "template_names": [],
+    "wikitext": "<ref name = \"Hartmann1\" />",
+    "type": "footnote",
+    "footnote_subtype": "named",
+    "flds": [],
+    "urls": [],
+    "templates": [],
+    "titles": [],
+    "section": "History",
+    "served_from_cache": true
+}
+```
+#### Known limitations
+None
+
 ### PDF
 the statistics/pdf endpoint accepts the following parameters:
 * url (mandatory)
