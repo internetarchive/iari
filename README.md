@@ -370,12 +370,13 @@ Run it with
 Test it with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
 
+# Deployed instances
+See [KNOWN_DEPLOYED_INSTANCES.md](KNOWN_DEPLOYED_INSTANCES.md)
+
 # Diagrams
 ## IARI
 ### Components
-![image](diagrams/wari/components.png)
-### Classes
-![image](diagrams/wari/classes.png)
+![image](diagrams/components.png)
 
 # History of this repo
 * version 1.0.0 a proof of concept import tool based on WikidataIntegrator (by James Hare)
