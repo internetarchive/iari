@@ -339,8 +339,7 @@ None
 # Installation
 Clone the git repo:
 
-`$ git clone https://github.com/internetarchive/iari.git`
-`$ cd iari`
+`$ git clone https://github.com/internetarchive/iari.git && cd iari`
 
 We recommend checking out the latest release before proceeding.
 
@@ -348,6 +347,9 @@ We recommend checking out the latest release before proceeding.
 We use pip and poetry to set everything up.
 
 `$ pip install poetry && poetry install`
+
+## Oneliner
+`$ git clone https://github.com/internetarchive/iari.git && cd iari && pip install poetry && poetry install`
 
 ## Run
 Run these commands in different shells or in GNU screen.
