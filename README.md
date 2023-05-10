@@ -343,13 +343,15 @@ Clone the git repo:
 
 We recommend checking out the latest release before proceeding.
 
+## Requirements
+* python pip
+* python gunicorn
+* python poetry 
+ 
 ## Setup
 We use pip and poetry to set everything up.
 
-`$ pip install poetry && poetry install`
-
-## Oneliner
-`$ git clone https://github.com/internetarchive/iari.git && cd iari && pip install poetry && poetry install`
+`$ pip install poetry gunicorn && poetry install`
 
 ## Run
 Run these commands in different shells or in GNU screen.
@@ -362,14 +364,14 @@ Start GNU screen (if you want to have a persisting session)
 Run it with
 `$ ./run-debug-api.sh`
 
-Test it with
+Test it in another Screen window or local terminal with
 `$ curl -i "localhost:5000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
 
 ### Production mode
 Run it with
 `$ ./run-api.sh`
 
-Test it with
+Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
 
 # Deployed instances
