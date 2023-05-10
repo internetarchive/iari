@@ -46,9 +46,7 @@ including abstract, retracted status, and more.
 * a _xhtml_ endpoint which extracts links both from any XHTML-page.
 
 # Limitations
-* the general references parsing relies on 2 things:
-  * a manually supplied list of sections to search using the 'regex' to the article and all endpoints. The list is case insensitive and should be delimited by the '|' character.
-  * that every line with a general reference begins with a star character (*)
+See know limitations under each endpoint below.
 
 # Supported Wikipedias
 Currently we support a handful of the 200+ language versions of Wikipedia
@@ -156,7 +154,11 @@ It will return json similar to:
 }
 ```
 #### Known limitations
-None
+* the general references parsing relies on 2 things:
+  * a manually supplied list of sections to search using the 'regex' to the article and all endpoints. The list is case insensitive and should be delimited by the '|' character.
+  * that every line with a general reference begins with a star character (*)
+
+Any line that doesn't begin with a star is ignored.
 
 ### references
 the statistics/references endpoint accepts the following parameters:
