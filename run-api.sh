@@ -1,1 +1,1 @@
-gunicorn -w 4 wsgi:app
+poetry run gunicorn -w 4 wsgi:app
