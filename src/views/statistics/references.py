@@ -39,10 +39,14 @@ class References(StatisticsView):
                 details.append(data)
         else:
             # We use offset and chunk size
-            for hash_ in references[
+            for reference in references[
                 self.job.offset : self.job.offset + self.job.chunk_size
             ]:
-                referencefileio = ReferenceFileIo(hash_based_id=hash_)
+                if not reference:
+                    raise MissingInformationError("reference was empty")
+                if not isinstance(reference, dict):
+                    raise TypeError(f"has was: {reference}")
+                referencefileio = ReferenceFileIo(hash_based_id=reference["id"])
                 referencefileio.read_from_disk()
                 data = referencefileio.data
                 if not data:

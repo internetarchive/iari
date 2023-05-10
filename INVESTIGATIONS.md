@@ -47,7 +47,7 @@ TODO try it out.
 There are about 200 million in total according to extractions from dumps done by scientists.
 
 ### Many references are plain text ie. no template is used
-Here you see a graphical overview of the number of references 
+Here you see a graphical overview of the number of references
 ![image](https://commons.wikimedia.org/wiki/File:Wikipedia%27s_references_and_citation_templates_shift.png)
 
 ## User script investigation
