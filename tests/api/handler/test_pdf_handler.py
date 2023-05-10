@@ -12,25 +12,25 @@ class TestPdfHandler(unittest.TestCase):
         self.pdf_handler1 = PdfHandler(
             job=UrlJob(url=""),
             testing=True,
-            file_path="../test_data/Addressing-College-Drinking-and-Drug-Use.pdf",
+            file_path="test_data/Addressing-College-Drinking-and-Drug-Use.pdf",
         )
         self.pdf_handler1.read_and_extract()
         self.pdf_handler2 = PdfHandler(
             job=UrlJob(url=""),
             testing=True,
-            file_path="../test_data/test.pdf",
+            file_path="test_data/test.pdf",
         )
         self.pdf_handler2.read_and_extract()
         self.pdf_handler3 = PdfHandler(
             job=UrlJob(url=""),
             testing=True,
-            file_path="../test_data/FFO-FLASH-REPORT-REV.pdf",
+            file_path="test_data/FFO-FLASH-REPORT-REV.pdf",
         )
         self.pdf_handler3.read_and_extract()
         self.pdf_handler4 = PdfHandler(
             job=UrlJob(url=""),
             testing=True,
-            file_path="../test_data/mwg-fdr-document-04-16-23-1-270.pdf",
+            file_path="test_data/mwg-fdr-document-04-16-23-1-270.pdf",
         )
         self.pdf_handler4.read_and_extract()
 

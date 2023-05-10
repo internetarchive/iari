@@ -33,10 +33,7 @@ jobs:
       - run: poetry run codespell src/ tests/ *.md *.py # --ignore-words-list="" --skip="*.css,*.js,*.lock"
       - run: mkdir --parents --verbose .mypy_cache
       - run: poetry run mypy --ignore-missing-imports --install-types --non-interactive --exclude test_data --exclude deprecated .
-      - run: cp config_sample.py config.py
-        # https://docs.pytest.org/en/latest/how-to/usage.html#specifying-which-tests-to-run
       - run: poetry run safety check
       # - run: mkdir json
       # This is needed for the tests to find the files in test_data/ correctly
-      - run: cd tests
       - run: poetry run pytest .
