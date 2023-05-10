@@ -1,16 +1,18 @@
 @startuml
 'https://plantuml.com/component-diagram
 
-[WARI] -- references
-[WARI] -- "reference/id"
-[WARI] -- "check-url"
+[IARI] -- xhtml
+[IARI] -- pdf
+[IARI] -- references
+[IARI] -- "reference/id"
+[IARI] -- "check-url"
 "check-url" --> url : lookup
-[WARI] -- "check-doi"
-[WARI] -- "article"
+[IARI] -- "check-doi"
+[IARI] -- "article"
 "check-doi" --> OpenAlex : lookup
 "check-doi" --> FatCat : lookup
 "check-doi" --> Wikidata : lookup
-[WARI] -- all
+[IARI] -- all
 "reference/id" <-- all
 "check-doi" <-- all
 "check-url" <-- all
@@ -25,6 +27,10 @@ database "file system" {
   folder "urls/" {
   }
   folder "dois/" {
+  }
+  folder "xhtmls/" {
+  }
+  folder "pdfs/" {
   }
 
 }

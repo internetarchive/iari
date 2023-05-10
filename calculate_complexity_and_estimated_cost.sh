@@ -13,4 +13,4 @@ scc \
 --exclude-dir .pytest_cache \
 --exclude-dir lib \
 --exclude-dir venv \
- -M ".*\.csv"
+ -M ".*\\.csv"

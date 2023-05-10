@@ -42,6 +42,8 @@ standardized information about its status
 * a _check-doi_ endpoint which looks up the DOI and gives back
 standardized information about it from [FatCat](https://fatcat.wiki/), OpenAlex and Wikidata
 including abstract, retracted status, and more.
+* a _pdf_ endpoint which extracts links both from annotations and free text from PDFs.
+* a _xhtml_ endpoint which extracts links both from any XHTML-page.
 
 # Limitations
 * the general references parsing relies on 2 things:
@@ -83,41 +85,6 @@ Example of an plain text reference:
 `<ref>Muller Report, p12</ref>`
 This is a footnote reference -> content reference -> Short citation reference aka naked named footnote.
 
-### Footnote reference subtypes we have identified in the wild
-1) **mixed reference with an ISBN template** - reference with plain text and a {{isbn}} template
-2) **mixed reference with a URL template** - reference with plain text and a URL (these are very rare)
-3) **ISBN template reference** - reference with only a {{isbn}} template
-4) **URL template reference** - reference with only a {{url}} template
-5) **Plain text reference with a cs1 template** - reference as above but where part of the
-information is structured and part of it is not (theoretical so far, we presume it exists)
-(defined as: begins with {{ and ends with }})
-6) **multiple template reference with Google books template** -
-(defined as: contains multiple templates according to mwparserfromhell)
-E.g. {{cite book|url={{google books|123456}}}} <- this particular subtype we want to support
-7) **multiple template reference with url and bare url x template** -
-E.g. `<ref>Muller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
-8) **reference with a Bare URL template** - as above, but with one of the {{bare url x}} templates
-9) **Plain text reference with a URL outside a template** - as above, but with no other identifier than the URL
-10) **Short citation reference** aka plain text reference without a URL or identifier -
-special type of plain text reference. e.g. reference to a book only by author and title. e.g. "Muller Report, p12".
-See https://en.wikipedia.org/w/index.php?title=Wikipedia:CITETYPE
-![image](https://user-images.githubusercontent.com/68460690/208091737-abc20b6e-8102-4acd-b0fa-409aa72d9ae8.png)
-11) **General reference with a template** - reference outside of <ref>.
-E.g. part of further reading- or bibliography section that uses a template
-12) **multiple template reference** - (defined as: contains multiple templates according to mwparserfromhell)
-
-These two are similar but appear in different contexts. Both require a trained machine learning model to recognize
-what they are referring to.
-1) **General reference without a template** - reference outside of <ref>.
-E.g. part of further reading- or bibliography section.
-2) **Plain text reference without a template**: references inside <ref> tags, but without ANY template.
-
-These bundled references are rare (<200 transclusions in enwiki)
-* **Bundled reference** - multiple references in one <ref> see
-https://en.wikipedia.org/w/index.php?title=Wikipedia:CITEBUNDLE
-* **Unbulleted list citebundle reference** - type of nested reference with multiple templates inside,
-see https://en.wikipedia.org/wiki/Template:Unbulleted_list_citebundle
-
 # Endpoints
 ## Checking endpoints
 ### Check URL
@@ -137,6 +104,118 @@ Also sometimes a server returns status code 200 but the content is an error page
 You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
 
 ## Statistics
+### article
+the statistics/article endpoint accepts the following parameters:
+* url (mandatory)
+* refresh (optional)
+* testing (optional)
+
+On error it returns 400. On timeout it returns 504 or 502 (this is a bug and should be reported).
+
+It will return json similar to:
+```
+{
+    "wari_id": "en.wikipedia.org.999263",
+    "lang": "en",
+    "page_id": 999263,
+    "dehydrated_references": [
+        {
+            "id": "cfa8b438",
+            "template_names": [],
+            "type": "footnote",
+            "footnote_subtype": "named",
+            "flds": [],
+            "urls": [],
+            "titles": [],
+            "section": "History"
+        },
+    ],
+    "reference_statistics": {
+        "named": 10,
+        "footnote": 20,
+        "content": 21,
+        "general": 1
+    },
+    "served_from_cache": false,
+    "site": "wikipedia.org",
+    "timestamp": 1683625128,
+    "isodate": "2023-05-09T11:38:48.597443",
+    "timing": 0,
+    "title": "SNCASO",
+    "fld_counts": {
+        "aviafrance.com": 3,
+        "flightglobal.com": 2,
+        "google.com": 1,
+        "hydroretro.net": 1,
+        "jewishvirtuallibrary.org": 1,
+        "gouvernement.fr": 1
+    },
+    "urls": [
+        "http://www.hydroretro.net/etudegh/sncase.pdf",
+    ]
+}
+```
+#### Known limitations
+None
+
+### references
+the statistics/references endpoint accepts the following parameters:
+* wari_id (mandatory, str) (this is obtained from the article endpoint)
+* all (optional, boolean) (default: false)
+* offset (optional, int) (default: 0)
+* chunk_size (optional, int) (default: 10)
+
+On error it returns 400. If data is not found it returns 404.
+
+It will return json similar to:
+```
+{
+    "total": 31,
+    "references": [
+        {
+            "id": "cfa8b438",
+            "template_names": [],
+            "wikitext": "<ref name = \"Hartmann1\" />",
+            "type": "footnote",
+            "footnote_subtype": "named",
+            "flds": [],
+            "urls": [],
+            "templates": [],
+            "titles": [],
+            "section": "History",
+            "served_from_cache": true
+        },
+    ]
+}
+```
+#### Known limitations
+None
+
+### reference
+the statistics/reference/id endpoint accepts the following parameters:
+* id (mandatory) (this is unique for each reference and is obtained from the article or references endpoint)
+
+On error it returns 400. If data is not found it returns 404.
+
+It will return json similar to:
+```
+{
+    "id": "cfa8b438",
+    "template_names": [],
+    "wikitext": "<ref name = \"Hartmann1\" />",
+    "type": "footnote",
+    "footnote_subtype": "named",
+    "flds": [],
+    "urls": [],
+    "templates": [],
+    "titles": [],
+    "section": "History",
+    "served_from_cache": true
+}
+```
+#### Known limitations
+None
+
 ### PDF
 the statistics/pdf endpoint accepts the following parameters:
 * url (mandatory)
@@ -257,12 +336,47 @@ It will return json similar to:
 #### Known limitations
 None
 
+# Installation
+Clone the git repo:
+
+`$ git clone https://github.com/internetarchive/iari.git`
+`$ cd iari`
+
+We recommend checking out the latest release before proceeding.
+
+## Setup
+We use pip and poetry to set everything up.
+
+`$ pip install poetry && poetry install`
+
+## Run
+Run these commands in different shells or in GNU screen.
+
+Start GNU screen (if you want to have a persisting session)
+
+`$ screen -D -RR`
+
+### Development mode
+Run it with
+`$ ./run-debug-api.sh`
+
+Test it with
+`$ curl -i "localhost:5000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
+
+### Production mode
+Run it with
+`$ ./run-api.sh`
+
+Test it with
+`$ curl -i "localhost:8000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
+
+# Deployed instances
+See [KNOWN_DEPLOYED_INSTANCES.md](KNOWN_DEPLOYED_INSTANCES.md)
+
 # Diagrams
 ## IARI
 ### Components
-![image](diagrams/wari/components.png)
-### Classes
-![image](diagrams/wari/classes.png)
+![image](diagrams/components.png)
 
 # History of this repo
 * version 1.0.0 a proof of concept import tool based on WikidataIntegrator (by James Hare)
