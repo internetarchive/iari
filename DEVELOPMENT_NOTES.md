@@ -1,31 +1,5 @@
 # Developer notes
 
-## Installation
-Clone the git repo:
-
-`$ git clone https://github.com/internetarchive/iari.git`
-`$ cd iari`
-
-We recommend checking out the latest release before proceeding.
-
-## Setup
-We use pip and poetry to set everything up.
-
-`$ pip install poetry`
-`$ poetry install `
-
-## Run
-Run these commands in different shells or in GNU screen.
-
-Start GNU screen (if you want to have a persisting session)
-`$ screen -D -RR`
-
-Run it with
-`$ ./run-api.sh`
-
-Test it with
-`$ curl -i "localhost:8000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
-
 ## CLI Usage examples
 
 ## Architecture design ideas for future graph generation
@@ -45,13 +19,13 @@ Generation phase:
 10. keep a record of which articles has which raw reference hashes in ssdb with key=article_hash+"refs" as key and a list of reference_wikitext_hash as value if any
 11. keep a record of hashed references for each article in ssdb with key=article_hash+reference_hash, value list of identifier hashes if any)
 
-We intentionally do not generate website items, nor handle the non-hashable references in this first iteration. 
+We intentionally do not generate website items, nor handle the non-hashable references in this first iteration.
 
 Upload phase:
 1. Open a connection to Wikibase using WikibaseIntegrator.
 2. Loop over all references and upload the json to Wikibase for each unique reference
 3. store the resulting wcdqid in ssdb (key=reference_hash+"wcdqid" value=wcdqid)
-4. loop over all articles and finish generating the item using unihash list and get the wcdqids for references from ssdb. 
+4. loop over all articles and finish generating the item using unihash list and get the wcdqids for references from ssdb.
    * Upload up to a max of 500 references on an article in one go, discard any above that.
 
 Improvements for next iteration:
@@ -63,9 +37,9 @@ to distribute workloads efficiently and scale horizontally.
 
 Decisions and principles guiding the design:
 * The [KISS-principle](https://www.wikidata.org/wiki/Q131560)
-* The [IASandboxWikibase.cloud](https://ia-sandbox.wikibase.cloud/) is the default Wikibase used. 
+* The [IASandboxWikibase.cloud](https://ia-sandbox.wikibase.cloud/) is the default Wikibase used.
 * Test coverage >90% is desired
-* CI integration is desired (Currently we lack SSDB in 
+* CI integration is desired (Currently we lack SSDB in
 Github Actions so that does not work)
 * One class one concern ([separation of concerns](https://www.wikidata.org/wiki/Q2465506))
 * Docker compose is used to bring up most of the architecture
@@ -78,5 +52,5 @@ We have a helper script which updates [TEST_COVERAGE.txt](TEST_COVERAGE.txt):
 `./run-test-coverage.sh`
 
 ### Find slow tests
-Run 
+Run
 `python -m pytest --durations=10`
