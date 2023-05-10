@@ -369,6 +369,40 @@ It will return json similar to:
 #### Known limitations
 None
 
+# Installation
+Clone the git repo:
+
+`$ git clone https://github.com/internetarchive/iari.git`
+`$ cd iari`
+
+We recommend checking out the latest release before proceeding.
+
+## Setup
+We use pip and poetry to set everything up.
+
+`$ pip install poetry && poetry install`
+
+## Run
+Run these commands in different shells or in GNU screen.
+
+Start GNU screen (if you want to have a persisting session)
+
+`$ screen -D -RR`
+
+### Development mode
+Run it with
+`$ ./run-debug-api.sh`
+
+Test it with
+`$ curl -i "localhost:5000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
+
+### Production mode
+Run it with
+`$ ./run-api.sh`
+
+Test it with
+`$ curl -i "localhost:8000/v2/statistics/article?regex=external links&url=https://en.wikipedia.org/wiki/Test"`
+
 # Diagrams
 ## IARI
 ### Components
