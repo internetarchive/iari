@@ -29,9 +29,33 @@ class PdfHandler(BaseModel):
     urls_fixed: List[str] = []
     file_path: str = ""
     pdf_document: Optional[Document] = None
+    word_counts: List[int] = []
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
+
+    def __count_words__(self) -> None:
+        self.word_counts = [
+            len(page_text.split()) for page_text in self.text_pages.values()
+        ]
+
+    @property
+    def mean_number_of_words_per_page(self) -> int:
+        if not self.word_counts:
+            self.__count_words__()
+        return round(sum(self.word_counts) / len(self.word_counts))
+
+    @property
+    def max_number_of_words_per_page(self) -> int:
+        if not self.word_counts:
+            self.__count_words__()
+        return max(self.word_counts)
+
+    @property
+    def min_number_of_words_per_page(self) -> int:
+        if not self.word_counts:
+            self.__count_words__()
+        return min(self.word_counts)
 
     @property
     def number_of_text_links(self):
@@ -87,6 +111,8 @@ class PdfHandler(BaseModel):
     def __extract_text_pages__(self) -> None:
         """Extract all text from all pages"""
         if not self.pdf_document:
+            self.__extract_pdf_document__()
+        if not self.pdf_document:
             raise MissingInformationError()
         for index, page in enumerate(self.pdf_document.pages()):
             text = page.get_text()
@@ -108,31 +134,28 @@ class PdfHandler(BaseModel):
         self.__download_pdf__()
         self.__extract_pages_and_links__()
 
+    def read_and_extract(self):  # dead: disable
+        self.__read_pdf_from_file__()
+        self.__extract_pages_and_links__()
+
     def get_dict(self):
         """Return data to the patron"""
         text_links = [link.dict() for link in self.all_text_links]
         annotation_links = [link.dict() for link in self.annotation_links]
-        if self.urls_fixed:
-            return dict(
-                annotation_links=annotation_links,
-                text_links=text_links,
-                text_links_total=self.number_of_text_links,
-                annotation_links_total=self.number_of_annotation_links,
-                url=self.job.url,
-                timeout=self.job.timeout,
-                urls_fixed=self.urls_fixed,
-                pages_total=self.number_of_pages,
-            )
-        else:
-            return dict(
-                annotation_links=annotation_links,
-                text_links=text_links,
-                text_links_total=self.number_of_text_links,
-                annotation_links_total=self.number_of_annotation_links,
-                url=self.job.url,
-                timeout=self.job.timeout,
-                urls_fixed=None,
-            )
+        data = dict(
+            words_mean=self.mean_number_of_words_per_page,
+            words_max=self.max_number_of_words_per_page,
+            words_min=self.min_number_of_words_per_page,
+            annotation_links=annotation_links,
+            text_links=text_links,
+            text_links_total=self.number_of_text_links,
+            annotation_links_total=self.number_of_annotation_links,
+            url=self.job.url,
+            timeout=self.job.timeout,
+            urls_fixed=self.urls_fixed,
+            pages_total=self.number_of_pages,
+        )
+        return data
 
     def __get_cleaned_page_string__(self, number) -> str:
         page_string = self.text_pages[number]
@@ -152,7 +175,7 @@ class PdfHandler(BaseModel):
             string = string.replace("https://doi.or/", "https://doi.org/")
         return string
 
-    def read_pdf_from_file(self):  # dead: disable
+    def __read_pdf_from_file__(self):
         """This is needed for fast testing on pdfs in test_data"""
         with open(self.file_path, "rb") as file:
             self.content = file.read()
