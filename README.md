@@ -42,6 +42,8 @@ standardized information about its status
 * a _check-doi_ endpoint which looks up the DOI and gives back
 standardized information about it from [FatCat](https://fatcat.wiki/), OpenAlex and Wikidata
 including abstract, retracted status, and more.
+* a _pdf_ endpoint which extracts links both from annotations and free text from PDFs.
+* a _xhtml_ endpoint which extracts links both from any XHTML-page.
 
 # Limitations
 * the general references parsing relies on 2 things:
