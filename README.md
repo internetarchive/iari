@@ -353,6 +353,10 @@ We use pip and poetry to set everything up.
 
 `$ pip install poetry gunicorn && poetry install`
 
+Lastly setup the directories for the json cache files
+
+`$ ./setup_json_directories.sh` 
+ 
 ## Run
 Run these commands in different shells or in GNU screen.
 
