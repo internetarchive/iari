@@ -46,7 +46,7 @@ including abstract, retracted status, and more.
 * a _xhtml_ endpoint which extracts links both from any XHTML-page.
 
 # Limitations
-See know limitations under each endpoint below.
+See known limitations under each endpoint below.
 
 # Supported Wikipedias
 Currently we support a handful of the 200+ language versions of Wikipedia
