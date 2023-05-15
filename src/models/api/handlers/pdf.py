@@ -1,7 +1,7 @@
 import logging
 import re
 from io import BytesIO
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import fitz  # type: ignore
 import requests
@@ -10,6 +10,7 @@ from fitz import (
     FileDataError,  # type: ignore
 )
 from pydantic import BaseModel
+from requests import ReadTimeout
 
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.link.pdf_link import PdfLink
@@ -25,7 +26,7 @@ class PdfHandler(BaseModel):
     annotation_links: List[PdfLink] = []
     error: bool = False
     text_pages: Dict[int, str] = {}
-    error_details: str = ""
+    error_details: Tuple[int, str] = ()
     urls_fixed: List[str] = []
     file_path: str = ""
     pdf_document: Optional[Document] = None
@@ -72,15 +73,20 @@ class PdfHandler(BaseModel):
     def __download_pdf__(self):
         """Download PDF file from URL"""
         if not self.content:
-            response = requests.get(self.job.url, timeout=self.job.timeout)
-            if response.content:
-                self.content = response.content
-            else:
+            try:
+                response = requests.get(self.job.url, timeout=self.job.timeout)
+                if response.content:
+                    self.content = response.content
+                else:
+                    self.error = True
+                    self.error_details = (404, (
+                        f"Got no content from URL using "
+                        f"requests and timeout {self.job.timeout}"
+                    ))
+                    logger.warning(self.error_details)
+            except ReadTimeout:
                 self.error = True
-                self.error_details = (
-                    f"Got no content from URL using "
-                    f"requests and timeout {self.job.timeout}"
-                )
+                self.error_details = (404, f"Got a ReadTimeout when trying to reach the url {self.job.url}")
                 logger.warning(self.error_details)
 
     def __extract_links_from_all_text__(self) -> None:
@@ -127,7 +133,7 @@ class PdfHandler(BaseModel):
                 self.pdf_document = Document(stream=pdf_file.read(), filetype="pdf")
             except FileDataError:
                 self.error = True
-                self.error_details = "Not a valid PDF according to PyMuPDF"
+                self.error_details = (415, "Not a valid PDF according to PyMuPDF")
                 logger.error(self.error_details)
 
     def download_and_extract(self):
