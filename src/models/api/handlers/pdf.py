@@ -26,7 +26,7 @@ class PdfHandler(BaseModel):
     annotation_links: List[PdfLink] = []
     error: bool = False
     text_pages: Dict[int, str] = {}
-    error_details: Tuple[int, str] = ()
+    error_details: Tuple[int, str] = (0, "")
     urls_fixed: List[str] = []
     file_path: str = ""
     pdf_document: Optional[Document] = None
@@ -79,14 +79,20 @@ class PdfHandler(BaseModel):
                     self.content = response.content
                 else:
                     self.error = True
-                    self.error_details = (404, (
-                        f"Got no content from URL using "
-                        f"requests and timeout {self.job.timeout}"
-                    ))
+                    self.error_details = (
+                        404,
+                        (
+                            f"Got no content from URL using "
+                            f"requests and timeout {self.job.timeout}"
+                        ),
+                    )
                     logger.warning(self.error_details)
             except ReadTimeout:
                 self.error = True
-                self.error_details = (404, f"Got a ReadTimeout when trying to reach the url {self.job.url}")
+                self.error_details = (
+                    404,
+                    f"Got a ReadTimeout when trying to reach the url {self.job.url}",
+                )
                 logger.warning(self.error_details)
 
     def __extract_links_from_all_text__(self) -> None:
