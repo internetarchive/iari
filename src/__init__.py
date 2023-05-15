@@ -1,46 +1,54 @@
-"""
-The purpose of this API is
-* to analyze a Wikipedia article based on the title, wikimedia site and language code
-* to easily link between a Wikipedia article and the corresponding Wikipedia Citations Database item
-
-Inspired by: https://rapidapi.com/blog/how-to-build-an-api-in-python/ and
-https://medium.com/analytics-vidhya/how-to-test-flask-applications-aef12ae5181c and
-https://github.com/pallets/flask/blob/1.1.2/examples/tutorial/flaskr/__init__.py
-"""
 import logging
-
-from flask import Flask  # type: ignore
-from flask_restful import Api, Resource  # type: ignore
+from fastapi import FastAPI
+from fastapi import APIRouter
 
 import config
-from src.views.check_doi import CheckDoi
-from src.views.check_url import CheckUrl
-from src.views.statistics.all import All
-from src.views.statistics.article import Article
-from src.views.statistics.pdf import Pdf
-from src.views.statistics.reference import Reference
-from src.views.statistics.references import References
-from src.views.statistics.xhtml import Xhtml
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-# We use a prefix here to enable us to stabilize the api over time
-# and bump the version when making breaking changes
-api = Api(app, prefix="/v2")
+app = FastAPI()
 
-# Here we link together the API views and endpoint urls
-# api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
-api.add_resource(CheckUrl, "/check-url")
-api.add_resource(CheckDoi, "/check-doi")
-api.add_resource(Article, "/statistics/article")
-api.add_resource(All, "/statistics/all")
-api.add_resource(References, "/statistics/references")
-api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
-api.add_resource(Pdf, "/statistics/pdf")
-api.add_resource(Xhtml, "/statistics/xhtml")
-# return app_
-# api.add_resource(
-#     AddJobToQueue, "/add-job"
-# )  # ?lang=<string:language_code>&site=<string:wikimedia_site>&title=<string:title>")
+# We use a prefix here to enable us to stabilize the API over time
+# and bump the version when making breaking changes
+router = APIRouter(prefix="/v2")
+app.include_router(router)
+
+# v2
+from src.v2.views.check_doi import CheckDoi
+from src.v2.views.check_url import CheckUrl
+from src.v2.views.statistics.all import All
+from src.v2.views.statistics.article import Article
+from src.v2.views.statistics.pdf import Pdf
+from src.v2.views.statistics.reference import Reference
+from src.v2.views.statistics.references import References
+from src.v2.views.statistics.xhtml import Xhtml
+
+router.add_api_route("/check-url", CheckUrl())
+router.add_api_route("/check-doi", CheckDoi())
+router.add_api_route("/statistics/article", Article())
+router.add_api_route("/statistics/all", All())
+router.add_api_route("/statistics/references", References())
+router.add_api_route("/statistics/reference/{reference_id}", Reference())
+router.add_api_route("/statistics/pdf", Pdf())
+router.add_api_route("/statistics/xhtml", Xhtml())
+
+# v3
+from src.v3.views.check_doi import CheckDoi as CheckDoi_v3
+from src.v3.views.check_url import CheckUrl as CheckUrl_v3
+from src.v3.views.statistics.article import Article as Article_v3
+from src.v3.views.statistics.pdf import Pdf as Pdf_v3
+from src.v3.views.statistics.reference import Reference as Reference_v3
+from src.v3.views.statistics.references import References as References_v3
+from src.v3.views.statistics.xhtml import Xhtml as Xhtml_v3
+
+router_v3 = APIRouter(prefix="/v3")
+app.include_router(router_v3)
+
+router_v3.add_api_route("/check-url", CheckUrl_v3())
+router_v3.add_api_route("/check-doi", CheckDoi_v3())
+router_v3.add_api_route("/statistics/article", Article_v3())
+router_v3.add_api_route("/statistics/references", References_v3())
+router_v3.add_api_route("/statistics/reference/{reference_id}", Reference_v3())
+router_v3.add_api_route("/statistics/pdf", Pdf_v3())
+router_v3.add_api_route("/statistics/xhtml", Xhtml_v3())
