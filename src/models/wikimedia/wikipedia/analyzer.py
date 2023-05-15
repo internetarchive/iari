@@ -80,6 +80,7 @@ class WikipediaAnalyzer(WariBaseModel):
                 served_from_cache=False,
                 site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
+                ores_score=self.article.ores_details,
             )
 
     def get_statistics(self) -> Dict[str, Any]:

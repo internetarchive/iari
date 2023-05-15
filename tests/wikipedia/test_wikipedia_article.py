@@ -5,6 +5,7 @@ from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
 from src.models.api.job.article_job import ArticleJob
+from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from test_data.test_content import (  # type: ignore
     easter_island_head_excerpt,
     easter_island_tail_excerpt,
@@ -184,7 +185,9 @@ class TestWikipediaArticle(TestCase):
         from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
         job = ArticleJob(
-            url="https://en.wikipedia.org/wiki/Easter_Island", regex="test"
+            url="https://en.wikipedia.org/wiki/Easter_Island",
+            regex="test",
+            testing=True,
         )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
@@ -217,6 +220,7 @@ class TestWikipediaArticle(TestCase):
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/Easter_Island",
             regex="bibliography|further reading|works cited|sources|external links",
+            testing=True,
         )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
@@ -225,3 +229,25 @@ class TestWikipediaArticle(TestCase):
         assert wp.extractor.number_of_footnote_references == 2
         assert wp.extractor.number_of_general_references == 32
         assert wp.extractor.number_of_content_references == 34
+
+    def test_ores_score(self):
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Easter_Island", regex="test"
+        )
+        job.__extract_url__()
+        wp = WikipediaArticle(job=job)
+        wp.__fetch_page_data__()
+        wp.__get_ores_scores__()
+        assert wp.ores_quality_prediction == "B"
+        print(wp.ores_details)
+        assert wp.ores_details == {
+            "prediction": "B",
+            "probability": {
+                "B": 0.6541036152021443,
+                "C": 0.1395663135841622,
+                "FA": 0.07020948799248741,
+                "GA": 0.12348515224009447,
+                "Start": 0.009268472204264279,
+                "Stub": 0.003366958776847205,
+            },
+        }

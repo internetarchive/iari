@@ -32,8 +32,11 @@ class TestWikipediaAnalyzer(TestCase):
         job.__extract_url__()
         wa = WikipediaAnalyzer(job=job)
         data = wa.get_statistics()
+        # Remove non-reproducible information
         data["isodate"] = ""
         data["reference_statistics"] = {}
+        data["ores_score"] = {}
+        print(data)
         assert (
             data
             == ArticleStatistics(

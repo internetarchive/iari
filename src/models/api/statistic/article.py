@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from pydantic import BaseModel, Extra
 
@@ -24,6 +24,7 @@ class ArticleStatistics(BaseModel):
     title: str = ""
     fld_counts: Dict[str, int] = {}
     urls: List[str] = []
+    ores_score: Any = {}
 
     class Config:  # dead: disable
         extra = Extra.forbid  # dead: disable
