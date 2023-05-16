@@ -108,7 +108,8 @@ the statistics/article endpoint accepts the following parameters:
 * refresh (optional)
 * testing (optional)
 
-On error it returns 400. On timeout it returns 504 or 502 (this is a bug and should be reported).
+On error it returns 400. On timeout it returns 504 or 502 
+(this is a bug and should be reported).
 
 It will return json similar to:
 ```
@@ -127,6 +128,24 @@ It will return json similar to:
             "titles": [],
             "section": "History"
         },
+        {
+            "id": "1db10c83",
+            "template_names": [
+                "citation"
+            ],
+            "type": "footnote",
+            "footnote_subtype": "content",
+            "flds": [
+                "hydroretro.net"
+            ],
+            "urls": [
+                "http://www.hydroretro.net/etudegh/sncase.pdf"
+            ],
+            "titles": [
+                "Les r\u00e9alisations de la SNCASE"
+            ],
+            "section": "History"
+        }
     ],
     "reference_statistics": {
         "named": 10,
@@ -136,21 +155,41 @@ It will return json similar to:
     },
     "served_from_cache": false,
     "site": "wikipedia.org",
-    "timestamp": 1683625128,
-    "isodate": "2023-05-09T11:38:48.597443",
+    "timestamp": 1684217693,
+    "isodate": "2023-05-16T08:14:53.932785",
     "timing": 0,
     "title": "SNCASO",
     "fld_counts": {
         "aviafrance.com": 3,
         "flightglobal.com": 2,
-        "google.com": 1,
-        "hydroretro.net": 1,
+        "gouvernement.fr": 1,
         "jewishvirtuallibrary.org": 1,
-        "gouvernement.fr": 1
+        "hydroretro.net": 1,
+        "google.com": 1
     },
     "urls": [
         "http://www.hydroretro.net/etudegh/sncase.pdf",
-    ]
+        "http://www.aviafrance.com/aviafrance1.php?ID_CONSTRUCTEUR=1145&ANNEE=0&ID_MISSION=0&CLE=CONSTRUCTEUR&MOTCLEF=",
+        "https://www.gouvernement.fr/partage/9703-vol-historique-du-premier-avion-a-reaction-francais-le-so-6000-triton",
+        "https://books.google.com/books?id=3y0DAAAAMBAJ&pg=PA128",
+        "http://www.flightglobal.com/pdfarchive/view/1953/1953%20-%201657.html",
+        "https://www.flightglobal.com/pdfarchive/view/1959/1959%20-%201053.html",
+        "http://xplanes.free.fr/so4000/so4000-5.htm",
+        "http://www.jewishvirtuallibrary.org/sud-ouest-s-o-4050-vautour",
+        "http://www.aviafrance.com/constructeur.php?ID_CONSTRUCTEUR=1145",
+        "http://www.aviafrance.com"
+    ],
+    "ores_score": {
+        "prediction": "GA",
+        "probability": {
+            "B": 0.3001074961272599,
+            "C": 0.2989581851995906,
+            "FA": 0.03238239107761332,
+            "GA": 0.33793161511968084,
+            "Start": 0.0251506380008608,
+            "Stub": 0.005469674474994447
+        }
+    }
 }
 ```
 #### Known limitations
