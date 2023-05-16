@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 import requests
 from dateutil.parser import isoparse
@@ -36,6 +36,8 @@ class WikipediaArticle(WariBaseModel):
     check_urls: bool = False
     testing: bool = False
     job: ArticleJob
+    ores_quality_prediction: str = ""
+    ores_details: Dict = {}
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -105,6 +107,7 @@ class WikipediaArticle(WariBaseModel):
                 job=self.job,
             )
             self.extractor.extract_all_references()
+            self.__get_ores_scores__()
             # self.__generate_hash__()
         else:
             raise Exception("This branch should never be hit.")
@@ -484,3 +487,27 @@ class WikipediaArticle(WariBaseModel):
     def __check_if_title_is_empty__(self):
         if not self.job.title:
             raise MissingInformationError("self.job.title was empty string")
+
+    def __get_ores_scores__(self):
+        if not self.latest_revision_id and not self.job.testing:
+            raise MissingInformationError()
+        if self.latest_revision_id:
+            # get the rating from https://ores.wikimedia.org/v3/scores/enwiki/234234320/articlequality
+            # Make a request to the ORES API to get the latest score
+            # We only support Wikipedia for now
+            wiki_project = f"{self.job.lang}wiki"
+            response = requests.get(
+                f"https://ores.wikimedia.org/v3/scores/{wiki_project}/{self.latest_revision_id}/articlequality"
+            )
+            if response.status_code == 200:
+                data = response.json()
+                # console.print(data)
+                string_id = str(self.latest_revision_id)
+                self.ores_quality_prediction = data[wiki_project]["scores"][string_id][
+                    "articlequality"
+                ]["score"]["prediction"]
+                self.ores_details = data[wiki_project]["scores"][string_id][
+                    "articlequality"
+                ]["score"]
+            else:
+                print("Error:", response.status_code)

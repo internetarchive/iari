@@ -35,6 +35,9 @@ repos:
     name: ruff
     language: system
     entry: ruff
+    args:
+      # Tell ruff to fix sorting of imports
+      - "--fix"
     types: [python]
 
  # https://jaredkhan.com/blog/mypy-pre-commit

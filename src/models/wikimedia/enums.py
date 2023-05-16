@@ -36,6 +36,7 @@ from enum import Enum
 
 
 class WikimediaDomain(Enum):
+    # For now we only support Wikipedia
     wikipedia = "wikipedia.org"
 
 
