@@ -495,17 +495,18 @@ class WikipediaArticle(WariBaseModel):
             # get the rating from https://ores.wikimedia.org/v3/scores/enwiki/234234320/articlequality
             # Make a request to the ORES API to get the latest score
             # We only support Wikipedia for now
+            wiki_project = f"{self.job.lang}wiki"
             response = requests.get(
-                f"https://ores.wikimedia.org/v3/scores/{self.job.lang}wiki/{self.latest_revision_id}/articlequality"
+                f"https://ores.wikimedia.org/v3/scores/{wiki_project}/{self.latest_revision_id}/articlequality"
             )
             if response.status_code == 200:
                 data = response.json()
                 # console.print(data)
                 string_id = str(self.latest_revision_id)
-                self.ores_quality_prediction = data["enwiki"]["scores"][string_id][
+                self.ores_quality_prediction = data[wiki_project]["scores"][string_id][
                     "articlequality"
                 ]["score"]["prediction"]
-                self.ores_details = data["enwiki"]["scores"][string_id][
+                self.ores_details = data[wiki_project]["scores"][string_id][
                     "articlequality"
                 ]["score"]
             else:
