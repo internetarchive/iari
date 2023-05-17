@@ -78,12 +78,13 @@ class PdfHandler(BaseModel):
                 if response.content:
                     self.content = response.content
                 else:
+                    # We got a response but there is no content to work on
                     self.error = True
                     self.error_details = (
-                        404,
+                        400,
                         (
-                            f"Got no content from URL using "
-                            f"requests and timeout {self.job.timeout}"
+                            f"Got status code {response.status_code} but no "
+                            f"content from the URL"
                         ),
                     )
                     logger.warning(self.error_details)
