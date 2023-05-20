@@ -142,19 +142,19 @@ class PdfHandler(BaseModel):
         """Return data to the patron"""
         text_links = [link.dict() for link in self.all_text_links]
         annotation_links = [link.dict() for link in self.annotation_links]
-        data = dict(
-            words_mean=self.mean_number_of_words_per_page,
-            words_max=self.max_number_of_words_per_page,
-            words_min=self.min_number_of_words_per_page,
-            annotation_links=annotation_links,
-            text_links=text_links,
-            text_links_total=self.number_of_text_links,
-            annotation_links_total=self.number_of_annotation_links,
-            url=self.job.url,
-            timeout=self.job.timeout,
-            urls_fixed=self.urls_fixed,
-            pages_total=self.number_of_pages,
-        )
+        data = {
+            "words_mean": self.mean_number_of_words_per_page,
+            "words_max": self.max_number_of_words_per_page,
+            "words_min": self.min_number_of_words_per_page,
+            "annotation_links": annotation_links,
+            "text_links": text_links,
+            "text_links_total": self.number_of_text_links,
+            "annotation_links_total": self.number_of_annotation_links,
+            "url": self.job.url,
+            "timeout": self.job.timeout,
+            "urls_fixed": self.urls_fixed,
+            "pages_total": self.number_of_pages,
+        }
         return data
 
     def __get_cleaned_page_string__(self, number) -> str:
