@@ -39,7 +39,7 @@ class TestMediawikiSection(TestCase):
         section.extract()
         assert section.number_of_references == 1
         ref = section.references[0]
-        assert ref.templates == list()
+        assert ref.templates == []
         assert ref.reference_id == "ab202d2e"
 
     def test_extract_all_general_references__(self):
@@ -50,7 +50,7 @@ class TestMediawikiSection(TestCase):
         print(section.references)
         assert section.number_of_references == 1
         ref = section.references[0]
-        assert ref.templates == list()
+        assert ref.templates == []
         assert ref.reference_id == "ab202d2e"
 
     def test_extract_all_footnote_references__(self):

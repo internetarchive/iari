@@ -42,7 +42,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
     @property
     def urls(self) -> List[WikipediaUrl]:
         """List of non-unique urls"""
-        urls: List[WikipediaUrl] = list()
+        urls: List[WikipediaUrl] = []
         for reference in self.references:
             for url in reference.reference_urls:
                 urls.append(url)
@@ -51,7 +51,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
     @property
     def raw_urls(self) -> List[str]:
         """List of raw non-unique urls found in the reference"""
-        urls: List[str] = list()
+        urls: List[str] = []
         for reference in self.references:
             for url in reference.reference_urls:
                 urls.append(url.url)
@@ -61,7 +61,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
     def reference_first_level_domain_counts(self) -> Dict[str, int]:
         """This returns a dict with fld as key and the count as value"""
         fld_set = set(self.reference_first_level_domains)
-        counts = dict()
+        counts = {}
         for fld in fld_set:
             count = self.reference_first_level_domains.count(fld)
             counts[fld] = count

@@ -202,18 +202,18 @@ class WikipediaTemplate(BaseModel):
 
     def __fix_aliases__(self):
         """Replace alias keys"""
-        replacements = dict(
-            accessdate="access_date",
-            archiveurl="archive_url",
-            archivedate="archive_date",
-            ISBN="isbn",
-            authorlink1="author_link1",
-            authorlink2="author_link2",
-            authorlink3="author_link3",
-            authorlink4="author_link4",
-            authorlink5="author_link5",
-            authorurl="author_link",
-        )
+        replacements = {
+            "accessdate": "access_date",
+            "archiveurl": "archive_url",
+            "archivedate": "archive_date",
+            "ISBN": "isbn",
+            "authorlink1": "author_link1",
+            "authorlink2": "author_link2",
+            "authorlink3": "author_link3",
+            "authorlink4": "author_link4",
+            "authorlink5": "author_link5",
+            "authorurl": "author_link",
+        }
         newdict = OrderedDict()
         for key in self.parameters:
             replacement_made = False
@@ -263,4 +263,4 @@ class WikipediaTemplate(BaseModel):
 
     def get_dict(self) -> Dict[str, Any]:
         """Return a dict that we can output to patrons via the API"""
-        return dict(parameters=self.parameters, isbn=self.isbn)
+        return {"parameters": self.parameters, "isbn": self.isbn}

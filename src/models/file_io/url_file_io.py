@@ -7,5 +7,5 @@ logger = logging.getLogger(__name__)
 
 
 class UrlFileIo(HashBasedFileIo):
-    data: Dict[str, Any] = dict()
+    data: Dict[str, Any] = {}
     subfolder = "urls/"

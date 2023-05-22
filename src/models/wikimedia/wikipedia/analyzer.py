@@ -67,12 +67,12 @@ class WikipediaAnalyzer(WariBaseModel):
             self.article_statistics = ArticleStatistics(
                 wari_id=self.wari_id,
                 lang=self.job.lang,
-                reference_statistics=dict(
-                    named=ae.number_of_empty_named_references,
-                    footnote=ae.number_of_footnote_references,
-                    content=ae.number_of_content_references,
-                    general=ae.number_of_general_references,
-                ),
+                reference_statistics={
+                    "named": ae.number_of_empty_named_references,
+                    "footnote": ae.number_of_footnote_references,
+                    "content": ae.number_of_content_references,
+                    "general": ae.number_of_general_references,
+                },
                 page_id=self.article.page_id,
                 title=self.job.title,
                 urls=ae.raw_urls,

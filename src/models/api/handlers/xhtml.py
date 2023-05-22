@@ -79,6 +79,7 @@ class XhtmlHandler(BaseModel):
 
     def get_dict(self):
         """Return data to the patron"""
-        return dict(
-            links=self.__get_links_dicts__(), links_total=self.total_number_of_links
-        )
+        return {
+            "links": self.__get_links_dicts__(),
+            "links_total": self.total_number_of_links,
+        }

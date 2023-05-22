@@ -7,5 +7,5 @@ logger = logging.getLogger(__name__)
 
 
 class DoiFileIo(HashBasedFileIo):
-    data: Dict[str, Any] = dict()
+    data: Dict[str, Any] = {}
     subfolder = "dois/"
