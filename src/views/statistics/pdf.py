@@ -62,7 +62,9 @@ class Pdf(StatisticsWriteView):
             pdf = PdfHandler(job=self.job)
             pdf.download_and_extract()
             if pdf.error:
-                return pdf.error_details, 400
+                if not isinstance(pdf.error_details, tuple):
+                    raise TypeError()
+                return pdf.error_details[1], pdf.error_details[0]
             data = pdf.get_dict()
             # console.print(data)
             # exit()

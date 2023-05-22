@@ -264,7 +264,8 @@ the statistics/pdf endpoint accepts the following parameters:
 * testing (optional)
 * timeout (optional)
 
-On error it returns 400.
+On error it returns 404 or 415. The first is when we could not find/fetch the url 
+and the second is when it is not a valid PDF.
 
 The `urls_fixed` object has an array of fixed url fragments in case any were fixed. See [this output](https://archive.org/services/context/wari/v2/statistics/pdf?url=https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf&refresh=true).
 
