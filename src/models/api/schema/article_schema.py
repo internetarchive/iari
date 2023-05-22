@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ArticleSchema(BaseSchema):
     url = fields.Str(required=True)
+    revision = fields.Int(required=False)
     regex = fields.Str(required=True)
 
     # noinspection PyUnusedLocal

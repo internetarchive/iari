@@ -32,9 +32,15 @@ class WikipediaAnalyzer(WariBaseModel):
     def wari_id(self) -> str:
         if not self.job:
             raise MissingInformationError()
+        if not self.job.lang:
+            raise MissingInformationError()
         if not self.article:
             raise MissingInformationError()
-        return f"{self.job.lang}.{self.job.domain.value}.{self.article.page_id}"
+        if not self.article.page_id:
+            raise MissingInformationError()
+        if not self.article.revision_id:
+            raise MissingInformationError()
+        return f"{self.job.lang}.{self.job.domain.value}.{self.article.page_id}.{self.article.revision_id}"
 
     @property
     def testing(self):

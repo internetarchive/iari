@@ -19,6 +19,7 @@ class ArticleJob(Job):
     refresh: bool = False
     url: str = ""
     regex: str = ""
+    revision: int = 0
 
     @property
     def quoted_title(self):
