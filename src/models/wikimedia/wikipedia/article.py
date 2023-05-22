@@ -49,10 +49,7 @@ class WikipediaArticle(WariBaseModel):
 
     @property
     def is_redirect(self) -> bool:
-        if "#REDIRECT" in str(self.wikitext)[:10]:
-            return True
-        else:
-            return False
+        return "#REDIRECT" in str(self.wikitext)[:10]
 
     # @property
     # def underscored_title(self):

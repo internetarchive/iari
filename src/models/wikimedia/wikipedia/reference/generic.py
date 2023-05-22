@@ -75,10 +75,11 @@ class WikipediaReference(JobBaseModel):
     def footnote_subtype(self) -> Optional[FootnoteSubtype]:
         type_ = None
         if self.is_footnote_reference:
-            if self.is_empty_named_reference:
-                type_ = FootnoteSubtype.NAMED
-            else:
-                type_ = FootnoteSubtype.CONTENT
+            type_ = (
+                FootnoteSubtype.NAMED
+                if self.is_empty_named_reference
+                else FootnoteSubtype.CONTENT
+            )
         return type_
 
     @property

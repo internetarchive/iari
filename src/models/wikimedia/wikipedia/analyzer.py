@@ -128,10 +128,11 @@ class WikipediaAnalyzer(WariBaseModel):
             for reference in self.article.extractor.references:
                 if not reference:
                     raise MissingInformationError("raw_reference was None")
-                if reference.footnote_subtype:
-                    subtype = reference.footnote_subtype.value
-                else:
-                    subtype = ""
+                subtype = (
+                    reference.footnote_subtype.value
+                    if reference.footnote_subtype
+                    else ""
+                )
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
                 data = ReferenceStatistic(
