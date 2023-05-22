@@ -126,7 +126,6 @@ class WikipediaArticle(WariBaseModel):
 
         app.logger.debug("__fetch_page_data__: Running")
         self.__check_if_title_is_empty__()
-        # TODO support fetching any revision
         if not self.wikitext:
             if self.revision_id:
                 self.__fetch_wikitext_for_a_specific_revision__()
@@ -536,7 +535,6 @@ class WikipediaArticle(WariBaseModel):
         # console.print(response.json())
         if response.status_code == 200:
             data = response.json()
-            # TODO read up on the documentation to find out if this is reliable
             self.job.revision = int(data["latest"]["id"])
             # self.latest_revision_date = isoparse(data["latest"]["timestamp"])
             self.page_id = int(data["id"])
