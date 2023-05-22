@@ -8,7 +8,6 @@ from dateutil.parser import isoparse
 from pydantic import validate_arguments
 
 import config
-from src.helpers.console import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
