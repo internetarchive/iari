@@ -1,21 +1,20 @@
 import logging
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 import mwclient  # type: ignore
 import requests
+from dateutil.parser import isoparse
 from pydantic import validate_arguments
 
 import config
+from src.helpers.console import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaDomain
 
 logger = logging.getLogger(__name__)
-
-
-class RevisionNotFoundError(BaseException):
-    pass
 
 
 class WikipediaArticle(WariBaseModel):
@@ -43,7 +42,7 @@ class WikipediaArticle(WariBaseModel):
     job: ArticleJob
     ores_quality_prediction: str = ""
     ores_details: Dict = {}
-    revision_timestamp: int = 0
+    revision_date: Optional[datetime] = None
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -501,26 +500,45 @@ class WikipediaArticle(WariBaseModel):
                 print("Error:", response.status_code)
 
     def __fetch_wikitext_for_a_specific_revision__(self):
-        """Get wikitext for a specific revision"""
-        # TODO handle errors
+        """Get wikitext for a specific revision
+
+        Action-specific parameters
+
+        titles= takes one or more titles for the query to operate on.
+
+        pageids= takes one or more page ids for the query to operate on. revids= takes a list of revision IDs to work on.
+        """
+        from src import app
+
+        app.logger.debug("__fetch_wikitext_for_a_specific_revision__: running")
         site = mwclient.Site(self.job.domain.value)
         # Retrieve the page
         page = site.pages[self.job.title]
         # Store the page_id
         self.page_id = page.pageid
-        # Iterate over revisions starting from the specified revision ID
-        revisions = page.revisions(
-            startid=self.revision_id, prop="ids|timestamp|content"
+        url = (
+            f"https://{self.job.lang}.{self.job.domain.value}/"
+            f"w/rest.php/v1/revision/{self.job.revision}"
         )
-        for revision in revisions:
-            if revision["revid"] == self.revision_id:
-                # print(revision)
-                # exit()
-                # Return the wikitext and timestamp of the revision
-                self.wikitext = revision["*"]
-                self.revision_timestamp = revision["timestamp"]
-        if not self.wikitext and not self.revision_timestamp:
-            raise RevisionNotFoundError()
+        prop = "ids|timestamp|content"
+        response = requests.get(url, params={"action": "query", "prop": prop})
+        # console.print(response.json())
+        if response.status_code == 200:
+            data = response.json()
+            # self.revision_timestamp = data["timestamp"]
+            self.revision_date = isoparse(data["timestamp"])
+            self.page_id = int(data["id"])
+            # logger.debug(f"Got pageid: {self.page_id}")
+            self.wikitext = data["source"]
+        elif response.status_code == 404:
+            self.found_in_wikipedia = False
+            logger.error(
+                f"Could not fetch page data from {self.wikimedia_domain.name} because of 404. See {url}"
+            )
+        else:
+            raise WikipediaApiFetchError(
+                f"Could not fetch page data. Got {response.status_code} from {url}"
+            )
 
     def __fetch_wikitext_for_the_latest_revision__(self):
         # TODO rewrite to use mwclient
@@ -536,9 +554,9 @@ class WikipediaArticle(WariBaseModel):
         if response.status_code == 200:
             data = response.json()
             self.job.revision = int(data["latest"]["id"])
-            # self.latest_revision_date = isoparse(data["latest"]["timestamp"])
+            self.revision_date = isoparse(data["latest"]["timestamp"])
             self.page_id = int(data["id"])
-            logger.debug(f"Got pageid: {self.page_id}")
+            # logger.debug(f"Got pageid: {self.page_id}")
             self.wikitext = data["source"]
         elif response.status_code == 404:
             self.found_in_wikipedia = False
