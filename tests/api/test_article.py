@@ -53,14 +53,14 @@ class TestArticle(TestCase):
         data = json.loads(response.data)
         # console.print(data)
         assert data["title"] == "Kleptoparasitisme"
-        assert len(data["dehydrated_references"]) == 35
+        assert len(data["dehydrated_references"]) == 40
         # print(len(data["urls"]))
-        assert len(data["urls"]) == 21
+        assert len(data["urls"]) == 23
         # print(data["fld_counts"])
         assert data["fld_counts"] == {
             "archive.org": 5,
             "unm.edu": 2,
-            "americanarachnology.org": 2,
+            "americanarachnology.org": 4,
             "nina.no": 2,
             "fcla.edu": 1,
             "africaninvertebrates.org.za": 1,
