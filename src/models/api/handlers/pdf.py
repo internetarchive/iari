@@ -31,6 +31,9 @@ class PdfHandler(BaseModel):
     file_path: str = ""
     pdf_document: Optional[Document] = None
     word_counts: List[int] = []
+    link_extraction_regex = re.compile(
+        r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
+    )
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -101,8 +104,10 @@ class PdfHandler(BaseModel):
         for index, _ in enumerate(self.text_pages):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
-            regex = r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
-            urls = re.findall(regex, self.__get_cleaned_page_string__(number=index))
+            urls = re.findall(
+                self.link_extraction_regex,
+                self.__get_cleaned_page_string__(number=index),
+            )
             # cleaned_urls = self.__clean_urls__(urls=urls)
             # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
             for url in urls:
