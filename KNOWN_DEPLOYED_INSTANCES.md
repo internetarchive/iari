@@ -27,7 +27,3 @@ https://archive.org/services/context/wari/v2/check-url?url=https%3A%2F%2Fwww.eas
 endpoint …/check-doi
 The check-doi endpoint looks up the DOI in 4 different sources (openalex, wikidata, fatcat and internet archive scholar) and tries to determine whether it has been retracted in openalex or wikidata.
 https://archive.org/services/context/wari/v2/check-doi?doi=10.1136%2FGUT.52.12.1678&timeout=3&refresh=true
-
-endpoint …/statistics/all
-The all endpoint serves all data for a given article utilizing the other endpoints described above. In the case of many DOIs it will possibly return megabytes of data because it includes the full responses from 4 endpoints (which weigh about 200 kb per DOI).
-https://archive.org/services/context/wari/v2/statistics/all?url=https://en.wikipedia.org/wiki/Easter_Island&refresh=true/false&regex=bibliography|further reading|works cited|sources|external links
