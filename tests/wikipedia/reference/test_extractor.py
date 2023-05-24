@@ -172,7 +172,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=example_reference, job=self.job
         )
         wre.extract_all_references()
-        assert wre.reference_first_level_domains == ["google.com"]
+        assert wre.first_level_domains == ["google.com"]
 
     def test_first_level_domains_two(self):
         example_reference = (
@@ -182,7 +182,7 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=example_reference + example_reference, job=self.job
         )
         wre.extract_all_references()
-        assert wre.reference_first_level_domains == ["google.com", "google.com"]
+        assert wre.first_level_domains == ["google.com", "google.com"]
 
     def test_first_level_domain_counts_simple(self):
         example_reference = (
@@ -192,26 +192,135 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=example_reference + example_reference, job=self.job
         )
         wre.extract_all_references()
-        assert wre.reference_first_level_domain_counts == {"google.com": 2}
+        assert wre.first_level_domain_counts == {"google.com": 2}
 
-    # DISABLED because it takes to long
-    # def test_first_level_domain_counts_excerpt(self):
-    #     wre = WikipediaReferenceExtractor(
-    #         testing=True,
-    #         wikitext=easter_island_tail_excerpt,
-    #         wikibase=wikibase,
-    #     )
-    #     wre.extract_all_references()
-    #     assert len(wre.reference_first_level_domain_counts) == 7
-    #     assert wre.reference_first_level_domain_counts == [
-    #         {"archive.org": 4},
-    #         {"google.com": 1},
-    #         {"auckland.ac.nz": 1},
-    #         {"usatoday.com": 1},
-    #         {"oclc.org": 1},
-    #         {"bnf.fr": 1},
-    #         {"pisc.org.uk": 1},
-    #     ]
+    def test_first_level_domain_counts_excerpt(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=easter_island_tail_excerpt, job=self.job
+        )
+        wre.extract_all_references()
+        assert len(wre.first_level_domains) == 10
+        assert len(wre.first_level_domain_counts) == 7
+        assert wre.first_level_domain_counts == {
+            "archive.org": 4,
+            "usatoday.com": 1,
+            "bnf.fr": 1,
+            "google.com": 1,
+            "auckland.ac.nz": 1,
+            "pisc.org.uk": 1,
+            "oclc.org": 1,
+        }
+
+    def test_first_level_domain_counts_excerpt_electrical(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=electrical_breakdown_full_article, job=self.job
+        )
+        wre.extract_all_references()
+        assert wre.first_level_domains == [
+            "google.com",
+            "hypertextbook.com",
+            "arcsuppressiontechnologies.com",
+            "google.com",
+            "archive.org",
+        ]
+        assert len(wre.first_level_domains) == 5
+        assert len(wre.first_level_domain_counts) == 4
+        assert wre.first_level_domain_counts == {
+            "archive.org": 1,
+            "arcsuppressiontechnologies.com": 1,
+            "google.com": 2,
+            "hypertextbook.com": 1,
+        }
+
+    def test_first_level_domain_counts_excerpt_oldnorse(self):
+        wre = WikipediaReferenceExtractor(
+            testing=True, wikitext=old_norse_sources, job=self.job
+        )
+        wre.extract_all_references()
+        assert len(wre.urls) == 24
+        assert wre.urls[0].dict() == {
+            "first_level_domain": "menota.org",
+            "fld_is_ip": False,
+            "url": "http://www.menota.org/HB2_index.xml",
+            "scheme": "http",
+            "netloc": "www.menota.org",
+            "tld": "org",
+            "malformed_url": False,
+            "malformed_url_details": None,
+            "archived_url": "",
+            "wayback_machine_timestamp": "",
+            "is_valid": True,
+        }
+        assert len(wre.raw_urls) == 24
+        assert wre.raw_urls == [
+            "http://www.menota.org/HB2_index.xml",
+            "https://archive.org/details/johnsonsuniversa07adam",
+            "https://archive.org/details/bub_gb_RnEJAAAAQAAJ",
+            "http://www.germanic-lexicon-project.org/texts/oi_cleasbyvigfusson_about.html",
+            "https://old-norse.net",
+            "https://archive.org/details/enskslenzkorabk00zogoog",
+            "https://archive.org/details/slenzkenskorab00zouoft",
+            "http://lexicon.ff.cuni.cz/texts/oi_zoega_about.html",
+            "http://norroen.info/dct/zoega/",
+            "https://onp.ku.dk/onp/onp.php",
+            "https://archive.org/details/lexiconpoticuma00copegoog",
+            "http://www.septentrionalia.net/etexts/",
+            "https://archive.org/details/elementarygramma00bayluoft",
+            "https://archive.org/details/icelandicprosere00guuoft",
+            "https://digital-humanities.uni-tuebingen.de/altn-gram/noreen1923.html",
+            "https://archive.org/details/altschwedischegr00noreuoft/page/n11/mode/2up",
+            "https://digital-humanities.uni-tuebingen.de/altn-gram/haugen2015.html",
+            "http://runeberg.org/gutasaga/",
+            "http://www.germanicmythology.com/works/Gutasagan.html",
+            "https://archive.org/details/introductiontool00gord",
+            "https://archive.org/details/icelandicprimerw00swee",
+            "http://lexicon.ff.cuni.cz/texts/oi_sweet_about.html",
+            "http://www.gutenberg.org/ebooks/5424",
+            "https://notendur.hi.is/~haukurth/norse/",
+        ]
+        assert wre.first_level_domains == [
+            "menota.org",
+            "archive.org",
+            "archive.org",
+            "germanic-lexicon-project.org",
+            "old-norse.net",
+            "archive.org",
+            "archive.org",
+            "cuni.cz",
+            "norroen.info",
+            "ku.dk",
+            "archive.org",
+            "septentrionalia.net",
+            "archive.org",
+            "archive.org",
+            "uni-tuebingen.de",
+            "archive.org",
+            "uni-tuebingen.de",
+            "runeberg.org",
+            "germanicmythology.com",
+            "archive.org",
+            "archive.org",
+            "cuni.cz",
+            "gutenberg.org",
+            "hi.is",
+        ]
+        assert len(wre.first_level_domains) == 24
+        assert len(wre.first_level_domain_counts) == 13
+        assert wre.first_level_domain_counts == {
+            "archive.org": 10,
+            "uni-tuebingen.de": 2,
+            "cuni.cz": 2,
+            "norroen.info": 1,
+            "hi.is": 1,
+            "menota.org": 1,
+            "germanicmythology.com": 1,
+            "runeberg.org": 1,
+            "old-norse.net": 1,
+            "gutenberg.org": 1,
+            "germanic-lexicon-project.org": 1,
+            "ku.dk": 1,
+            "septentrionalia.net": 1,
+        }
 
     def test___get_checked_and_unique_reference_urls__(self):
         wre = WikipediaReferenceExtractor(

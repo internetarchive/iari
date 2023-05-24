@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Dict
 
 import requests
 from dns.name import EmptyLabel
@@ -24,7 +24,6 @@ from requests.exceptions import (
 )
 from requests.models import LocationParseError
 
-from src.helpers.console import console
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -62,8 +61,8 @@ class Url(WikipediaUrl):
     def check(self):
         if self.url:
             self.extract()
-            self.__fix_malformed_urls__()
-            self.__check_url__()
+            if self.is_valid:
+                self.__check_url__()
 
     def __get_dns_record__(self) -> None:
         from src import app
@@ -97,14 +96,14 @@ class Url(WikipediaUrl):
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
             r = requests.head(
-                self.__get_url__,
+                self.url,
                 timeout=self.timeout,
                 verify=True,
                 headers=self.__spoofing_headers__,
                 allow_redirects=True,
             )
             self.status_code = r.status_code
-            logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
+            logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
             # if r.status_code == 200:
             #     self.check_soft404
@@ -143,14 +142,14 @@ class Url(WikipediaUrl):
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
             r = requests.head(
-                self.__get_url__,
+                self.url,
                 timeout=self.timeout,
                 verify=False,
                 headers=self.__spoofing_headers__,
                 allow_redirects=True,
             )
             self.status_code = r.status_code
-            logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
+            logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
             # if r.status_code == 200:
             #     self.check_soft404
@@ -177,18 +176,11 @@ class Url(WikipediaUrl):
             self.request_error_details = str(e)
 
     def __check_url__(self):
-        print(f"Trying to check: {self.__get_url__}")
+        print(f"Trying to check: {self.url}")
         self.__get_dns_record__()
         self.__check_with_https_verify__()
         if self.request_error:
             self.__check_without_https_verify__()
-
-    def get_dict(self) -> Dict[str, Any]:
-        cleaned_dictionary = self.dict(
-            exclude={"parsing_done", "first_level_domain_done"}
-        )
-        console.print(cleaned_dictionary)
-        return cleaned_dictionary
 
     @property
     def __spoofing_headers__(self) -> Dict[str, str]:

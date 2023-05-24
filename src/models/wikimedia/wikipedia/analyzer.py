@@ -76,7 +76,7 @@ class WikipediaAnalyzer(WariBaseModel):
                 page_id=self.article.page_id,
                 title=self.job.title,
                 urls=ae.raw_urls,
-                fld_counts=ae.reference_first_level_domain_counts,
+                fld_counts=ae.first_level_domain_counts,
                 served_from_cache=False,
                 site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
@@ -147,6 +147,7 @@ class WikipediaAnalyzer(WariBaseModel):
                     urls=reference.raw_urls,
                     wikitext=reference.get_wikicode_as_string,
                     section=reference.section,
+                    url_objects=reference.get_reference_url_dicts,
                 ).dict()
                 # if not "wikitext" in data:
                 #     console.print(data)
