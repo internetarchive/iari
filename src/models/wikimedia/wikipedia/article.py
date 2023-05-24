@@ -2,7 +2,6 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-import mwclient  # type: ignore
 import requests
 from dateutil.parser import isoparse
 from pydantic import validate_arguments
@@ -511,11 +510,6 @@ class WikipediaArticle(WariBaseModel):
         from src import app
 
         app.logger.debug("__fetch_wikitext_for_a_specific_revision__: running")
-        site = mwclient.Site(self.job.domain.value)
-        # Retrieve the page
-        page = site.pages[self.job.title]
-        # Store the page_id
-        self.page_id = page.pageid
         url = (
             f"https://{self.job.lang}.{self.job.domain.value}/"
             f"w/rest.php/v1/revision/{self.job.revision}"
@@ -528,7 +522,7 @@ class WikipediaArticle(WariBaseModel):
             # self.revision_timestamp = data["timestamp"]
             self.revision_isodate = isoparse(data["timestamp"])
             self.revision_timestamp = round(self.revision_isodate.timestamp())
-            self.page_id = int(data["id"])
+            self.page_id = data["page"]["id"]
             # logger.debug(f"Got pageid: {self.page_id}")
             self.wikitext = data["source"]
         elif response.status_code == 404:
