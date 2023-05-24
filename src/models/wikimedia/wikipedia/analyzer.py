@@ -153,7 +153,6 @@ class WikipediaAnalyzer(WariBaseModel):
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
                 data = ReferenceStatistic(
-                    # identifiers=rr.identifiers,
                     flds=reference.first_level_domains,
                     footnote_subtype=subtype,
                     id=reference.reference_id,
@@ -166,9 +165,6 @@ class WikipediaAnalyzer(WariBaseModel):
                     section=reference.section,
                     url_objects=reference.get_reference_url_dicts,
                 ).dict()
-                # if not "wikitext" in data:
-                #     console.print(data)
-                #     raise MissingInformationError()
                 self.reference_statistics.append(data)
         if not self.article_statistics:
             app.logger.debug(
