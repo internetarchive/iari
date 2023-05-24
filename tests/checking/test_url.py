@@ -1,7 +1,9 @@
+from unittest import TestCase
+
 from src.models.identifiers_checking.url import Url
 
 
-class TestUrl:
+class TestUrl(TestCase):
     no_url = ""
     good_url = "https://www.easterisland.travel"
     bad_url = "ht.test..."
@@ -9,6 +11,8 @@ class TestUrl:
     forbidden_url_if_not_spoofed_headers = (
         "https://www.sciencedaily.com/releases/2021/07/210713090153.htm"
     )
+    archive_url1 = "https://web.archive.org/web/20220000000000*/https://www.regeringen.se/rattsliga-dokument/statens-offentliga-utredningar/2016/11/sou-20167?test=2"
+    archive_url2 = "https://web.archive.org/web/20141031094104/http://collections.rmg.co.uk/collections/objects/13275.html"
 
     def test_check_good(self):
         url = Url(url=self.good_url, timeout=2)
@@ -90,3 +94,46 @@ class TestUrl:
         assert url.dns_error is False
         assert url.request_error is False
         assert url.malformed_url is False
+
+    def test__parse_wayback_machine_url__1(self):
+        url = Url(url=self.archive_url1)
+        print(url.__get_url__)
+        url.__parse_wayback_machine_url__()
+        assert url.wayback_machine_timestamp == "20220000000000*"
+        assert (
+            url.archived_url
+            == "https://www.regeringen.se/rattsliga-dokument/statens-offentliga-utredningar/2016/11/sou-20167?test=2"
+        )
+
+    def test__parse_wayback_machine_url__2(self):
+        url = Url(url=self.archive_url2)
+        print(url.__get_url__)
+        url.__parse_wayback_machine_url__()
+        assert url.wayback_machine_timestamp == "20141031094104"
+        assert (
+            url.archived_url
+            == "http://collections.rmg.co.uk/collections/objects/13275.html"
+        )
+
+    def test_fld_empty_archived_url(self):
+        url = Url(url="https://web.archive.org/web/")
+        url.__get_fld__()
+        assert url.first_level_domain == "archive.org"
+
+    def test_fld_archived_url_1(self):
+        url = Url(url=self.archive_url1)
+        url.__get_fld__()
+        self.assertEqual(url.wayback_machine_timestamp, "")
+        self.assertEqual(url.archived_url, "")
+
+    def test_fld_archived_url_2(self):
+        url = Url(url=self.archive_url2)
+        url.__get_fld__()
+        self.assertEqual(url.wayback_machine_timestamp, "")
+        self.assertEqual(url.archived_url, "")
+
+    def test_fld_good_url(self):
+        url = Url(url=self.good_url)
+        url.__get_fld__()
+        self.assertEqual(url.wayback_machine_timestamp, "")
+        self.assertEqual(url.archived_url, "")

@@ -1,4 +1,5 @@
 import logging
+import re
 from ipaddress import ip_address
 from typing import Optional
 from urllib.parse import urlparse
@@ -34,6 +35,8 @@ class WikipediaUrl(BaseModel):
     added_http_scheme_worked: bool = False
     malformed_url: bool = False
     malformed_url_details: Optional[MalformedUrlError] = None
+    archived_url: str = ""
+    wayback_machine_timestamp: str = ""
 
     @property
     def __get_url__(self) -> str:
@@ -97,15 +100,19 @@ class WikipediaUrl(BaseModel):
         app.logger.debug("__get_first_level_domain__: Running")
         try:
             logger.debug(f"Trying to get FLD from {self.__get_url__}")
-            fld = get_fld(self.__get_url__)
-            if fld:
-                logger.debug(f"Found FLD: {fld}")
-                self.first_level_domain = fld
-            self.first_level_domain_done = True
+            self.__get_fld__()
         except (TldBadUrl, TldDomainNotFound):
             """The library does not support Wayback Machine URLs"""
             if self.is_wayback_machine_url():
-                self.first_level_domain = "archive.org"
+                self.__parse_wayback_machine_url__()
+                if self.archived_url:
+                    # Try again
+                    try:
+                        logger.debug(f"Trying to get FLD from {self.__get_url__}")
+                        self.__get_fld__()
+                    except (TldBadUrl, TldDomainNotFound):
+                        message = f"Could not extract fld from archived url {self.archived_url}"
+                        logger.warning(message)
             else:
                 try:
                     ip = ip_address(self.netloc)
@@ -196,3 +203,36 @@ class WikipediaUrl(BaseModel):
         self.netloc = parsed_url.netloc
         self.scheme = parsed_url.scheme
         # We ignore the other parts for now
+
+    def __parse_wayback_machine_url__(self):
+        """Parse Wayback Machine URLs and extract both timestamp and archived url
+        Is there no official library to do this?
+        Example urls:
+        https://web.archive.org/web/20220000000000*/https://www.regeringen.se/rattsliga-dokument/statens-offentliga-utredningar/2016/11/sou-20167?test=2
+        https://web.archive.org/web/20141031094104/http://collections.rmg.co.uk/collections/objects/13275.html
+        """
+        # Extract the remaining portion of the URL after the timestamp
+        result = re.search(
+            r"https?://web\.archive\.org/web/([\d*]+)/(.*)", self.__get_url__
+        )
+        if result:
+            self.wayback_machine_timestamp = result.group(1)
+            self.archived_url = result.group(2)
+        if not self.archived_url:
+            message = f"Could not parse the archived url from '{self.__get_url__}'"
+            logger.warning(message)
+            # self.__log_to_file__(
+            #     message=str(message), file_name="url_exceptions.log"
+            # )
+
+    def __get_fld__(self):
+        fld = ""
+        if self.archived_url:
+            fld = get_fld(self.archived_url)
+        else:
+            if self.__get_url__:
+                fld = get_fld(self.__get_url__)
+        if fld:
+            logger.debug(f"Found FLD: {fld}")
+            self.first_level_domain = fld
+        self.first_level_domain_done = True
