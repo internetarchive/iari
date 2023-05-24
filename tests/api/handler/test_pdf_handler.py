@@ -96,3 +96,17 @@ class TestPdfHandler(unittest.TestCase):
         assert self.pdf_handler1.mean_number_of_words_per_page == 344
         assert self.pdf_handler1.min_number_of_words_per_page == 0
         assert self.pdf_handler1.max_number_of_words_per_page == 578
+
+    def test_dict1(self):
+        data = self.pdf_handler1.get_dict()
+        assert data["detected_language"] == "en"
+        assert data["detected_language_error"] is False
+
+    def test_dict2(self):
+        data = self.pdf_handler2.get_dict()
+        assert data["detected_language"] == ""
+        assert data["detected_language_error"] is True
+        assert (
+            data["detected_language_error_details"]
+            == "Not enough text for us to reliably detect the language"
+        )

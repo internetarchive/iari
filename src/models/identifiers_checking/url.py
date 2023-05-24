@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Any, Dict
 
 import requests
 from dns.name import EmptyLabel
@@ -24,6 +24,7 @@ from requests.exceptions import (
 )
 from requests.models import LocationParseError
 
+from src.models.api.handlers import BaseHandler
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -53,6 +54,10 @@ class Url(WikipediaUrl):
     timeout: int = 2
     dns_error_details: str = ""
     response_headers: Dict = {}
+    text: str = ""
+    detected_language: str = ""
+    detected_language_error: bool = False
+    detected_language_error_details: str = ""
 
     # @property
     # def __check_soft404__(self):
@@ -63,6 +68,7 @@ class Url(WikipediaUrl):
             self.extract()
             if self.is_valid:
                 self.__check_url__()
+                self.__detect_language__()
 
     def __get_dns_record__(self) -> None:
         from src import app
@@ -95,7 +101,7 @@ class Url(WikipediaUrl):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(
+            r = requests.get(
                 self.url,
                 timeout=self.timeout,
                 verify=True,
@@ -105,6 +111,8 @@ class Url(WikipediaUrl):
             self.status_code = r.status_code
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
+            if r.status_code == 200:
+                self.text = r.text
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
@@ -141,7 +149,7 @@ class Url(WikipediaUrl):
         try:
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.head(
+            r = requests.get(
                 self.url,
                 timeout=self.timeout,
                 verify=False,
@@ -151,6 +159,8 @@ class Url(WikipediaUrl):
             self.status_code = r.status_code
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
+            if r.status_code == 200:
+                self.text = r.text
             # if r.status_code == 200:
             #     self.check_soft404
         # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
@@ -207,3 +217,19 @@ class Url(WikipediaUrl):
             "upgrade-insecure-requests": "1",
             "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
         }
+
+    def __detect_language__(self):
+        handler = BaseHandler(text=self.text)
+        handler.__detect_language__()
+        # carry over attributes
+        self.detected_language = handler.detected_language
+        self.detected_language_error = handler.detected_language_error
+        self.detected_language_error_details = self.detected_language_error_details
+
+    @property
+    def get_dict(self) -> Dict[str, Any]:
+        # Don't export the page text by default
+        url = self.dict(exclude=set("text"))
+        if self.malformed_url_details:
+            url.update({"malformed_url_details": self.malformed_url_details.value})
+        return url
