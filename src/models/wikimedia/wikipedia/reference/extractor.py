@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from typing import Dict, List
 
 import mwparserfromhell  # type: ignore
@@ -30,9 +31,6 @@ class WikipediaReferenceExtractor(WariBaseModel):
     references: List[WikipediaReference] = []
     # wikibase: Wikibase
     testing: bool = False
-    check_urls: bool = False
-    check_urls_done: bool = False
-    checked_and_unique_reference_urls: List[WikipediaUrl] = []
     language_code: str = ""
     sections: List[MediawikiSection] = []
 
@@ -58,12 +56,12 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return urls
 
     @property
-    def reference_first_level_domain_counts(self) -> Dict[str, int]:
+    def first_level_domain_counts(self) -> Dict[str, int]:
         """This returns a dict with fld as key and the count as value"""
-        fld_set = set(self.reference_first_level_domains)
+        fld_set = set(deepcopy(self.first_level_domains))
         counts = {}
         for fld in fld_set:
-            count = self.reference_first_level_domains.count(fld)
+            count = self.first_level_domains.count(fld)
             counts[fld] = count
         # Sort by count, descending
         sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
@@ -76,16 +74,16 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return sorted_counts_dictionary
 
     @property
-    def reference_first_level_domains(self) -> List[str]:
+    def first_level_domains(self) -> List[str]:
         """This is a list and duplicates are likely and wanted"""
         if not self.content_references:
             return []
         flds = []
-        for reference in self.content_references:
-            if not reference.first_level_domains_done:
-                reference.__extract_first_level_domains__()
-            for fld in reference.first_level_domains:
-                flds.append(fld)
+        for url in self.urls:
+            if url.first_level_domain:
+                flds.append(url.first_level_domain)
+            else:
+                raise MissingInformationError(f"no fld in {url}")
         return flds
 
     @property

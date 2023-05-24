@@ -39,23 +39,20 @@ class WikipediaReference(JobBaseModel):
     templates: List[WikipediaTemplate] = []
     multiple_templates_found: bool = False
     testing: bool = False
-    # wikibase: Wikibase
     extraction_done: bool = False
     is_empty_named_reference: bool = False
     is_general_reference: bool = False
     wikicoded_links: List[WikipediaUrl] = []
-    wikicoded_links_done: bool = False
     bare_urls: List[WikipediaUrl] = []
-    bare_urls_done: bool = False
     template_urls: List[WikipediaUrl] = []
-    template_urls_done: bool = False
     reference_urls: List[WikipediaUrl] = []
-    reference_urls_done: bool = False
     first_level_domains: List[str] = []
-    first_level_domains_done = True
     language_code: str = ""
     reference_id: str = ""
     section: str
+    bare_url_regex = re.compile(
+        r"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?"
+    )
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -126,16 +123,16 @@ class WikipediaReference(JobBaseModel):
             if template.urls:
                 urls.extend(template.urls)
         self.template_urls = list(urls)
-        self.template_urls_done = True
 
     def __extract_bare_urls__(self) -> None:
         """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
         urls = []
         for url in self.__find_bare_urls__():
             # We get a tuple back so we join it
-            urls.append(WikipediaUrl(url="".join(url)))
+            url_object = WikipediaUrl(url="".join(url))
+            url_object.extract()
+            urls.append(url_object)
         self.bare_urls = urls
-        self.bare_urls_done = True
 
     def __extract_external_wikicoded_links_from_the_reference__(self) -> None:
         """This relies on mwparserfromhell to find links like [google.com Google] in the wikitext"""
@@ -144,47 +141,50 @@ class WikipediaReference(JobBaseModel):
             for url in self.wikicode.ifilter_external_links():
                 # url: ExternalLink
                 # we throw away the title here
-                urls.add(WikipediaUrl(url=str(url.url)))
+                url = WikipediaUrl(url=str(url.url))
+                url.extract()
+                urls.add(url)
         else:
             for url in self.wikicode.contents.ifilter_external_links():
                 # url: ExternalLink
                 # we throw away the title here
-                urls.add(WikipediaUrl(url=str(url.url)))
+                url = WikipediaUrl(url=str(url.url))
+                url.extract()
+                urls.add(url)
         self.wikicoded_links = list(urls)
-        self.wikicoded_links_done = True
 
     def __extract_reference_urls__(self) -> None:
         """We support both URLs in templates and outside aka bare URLs"""
         urls_list = []
-        if not self.template_urls_done:
+        if not self.template_urls:
             self.__extract_template_urls__()
         urls_list.extend(self.template_urls)
-        if not self.bare_urls_done:
+        if not self.bare_urls:
             self.__extract_bare_urls__()
         urls_list.extend(self.bare_urls)
-        if not self.wikicoded_links_done:
+        if not self.wikicoded_links:
             self.__extract_external_wikicoded_links_from_the_reference__()
         urls_list.extend(self.wikicoded_links)
         # We set it to avoid duplicates
         self.reference_urls = list(set(urls_list))
-        self.reference_urls_done = True
 
     def __extract_first_level_domains__(self) -> None:
         """This aggregates all first level domains from the urls found in the raw references"""
         from src import app
 
         app.logger.debug("__extract_first_level_domains__: running")
-        if not self.reference_urls_done:
-            raise MissingInformationError("reference_urls have not been extracted")
-        if self.reference_urls:
+        if not self.reference_urls:
+            app.logger.info("no reference_urls found so we skip extraction")
+        else:
             logger.debug("found at least one url")
             for url in self.reference_urls:
                 logger.debug("working on url")
                 if url.first_level_domain:
-                    logger.debug(f"found fld: {url.first_level_domain}")
+                    app.logger.debug(f"found fld: {url.first_level_domain}")
                     self.first_level_domains.append(url.first_level_domain)
+                else:
+                    app.logger.warning(f"no fld found for: {url.url}")
         app.logger.debug(f"found flds: {self.first_level_domains}")
-        self.first_level_domains_done = True
 
     # @property
     # def plain_text_in_reference(self) -> bool:
@@ -224,7 +224,7 @@ class WikipediaReference(JobBaseModel):
         if not stripped_wikicode:
             stripped_wikicode = self.get_stripped_wikicode
         return re.findall(
-            r"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?",
+            self.bare_url_regex,
             stripped_wikicode,
         )
 
@@ -277,7 +277,7 @@ class WikipediaReference(JobBaseModel):
                     )
                 )
             if count == 0:
-                logger.debug(f"Found no templates in {self.wikicode}")
+                logger.debug("Found no templates")
 
     def __extract_and_clean_template_parameters__(self) -> None:
         """We extract all templates"""

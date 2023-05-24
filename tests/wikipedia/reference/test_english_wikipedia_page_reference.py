@@ -1102,7 +1102,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
                 url="https://www1.geocities.com/",
             )
         ]
-        assert raw_reference_object.first_level_domains_done is True
         assert raw_reference_object.first_level_domains == ["geocities.com"]
 
     def test_template_first_level_domains_two(self):
@@ -1212,7 +1211,6 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             wikicode=wikicode, testing=True, is_general_reference=True, section="test"
         )
         raw_reference_object.__extract_external_wikicoded_links_from_the_reference__()
-        assert raw_reference_object.wikicoded_links_done is True
         assert len(raw_reference_object.wikicoded_links) == 1
         assert raw_reference_object.wikicoded_links[0] == WikipediaUrl(
             url="http://www.jewishvirtuallibrary.org/sud-ouest-s-o-4050-vautour"

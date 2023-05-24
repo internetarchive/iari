@@ -1,10 +1,7 @@
 import unittest
 
-from bs4 import Tag
-
 from src.models.api.handlers.xhtml import XhtmlHandler
 from src.models.api.job.check_url_job import UrlJob
-from src.models.api.link.xhtml_link import XhtmlLink
 
 
 class TestXhtmlHandler(unittest.TestCase):

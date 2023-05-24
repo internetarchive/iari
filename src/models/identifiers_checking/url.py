@@ -63,7 +63,6 @@ class Url(WikipediaUrl):
         if self.url:
             self.extract()
             if self.valid:
-                self.__fix_malformed_urls__()
                 self.__check_url__()
 
     def __get_dns_record__(self) -> None:
@@ -98,14 +97,14 @@ class Url(WikipediaUrl):
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
             r = requests.head(
-                self.__get_url__,
+                self.url,
                 timeout=self.timeout,
                 verify=True,
                 headers=self.__spoofing_headers__,
                 allow_redirects=True,
             )
             self.status_code = r.status_code
-            logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
+            logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
             # if r.status_code == 200:
             #     self.check_soft404
@@ -144,14 +143,14 @@ class Url(WikipediaUrl):
             # https://stackoverflow.com/questions/66710047/
             # python-requests-library-get-the-status-code-without-downloading-the-target
             r = requests.head(
-                self.__get_url__,
+                self.url,
                 timeout=self.timeout,
                 verify=False,
                 headers=self.__spoofing_headers__,
                 allow_redirects=True,
             )
             self.status_code = r.status_code
-            logger.debug(self.__get_url__ + "\tStatus: " + str(r.status_code))
+            logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
             # if r.status_code == 200:
             #     self.check_soft404
@@ -178,7 +177,7 @@ class Url(WikipediaUrl):
             self.request_error_details = str(e)
 
     def __check_url__(self):
-        print(f"Trying to check: {self.__get_url__}")
+        print(f"Trying to check: {self.url}")
         self.__get_dns_record__()
         self.__check_with_https_verify__()
         if self.request_error:

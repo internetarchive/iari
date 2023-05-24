@@ -56,20 +56,19 @@ class TestArticle(TestCase):
         assert len(data["dehydrated_references"]) == 35
         # print(len(data["urls"]))
         assert len(data["urls"]) == 21
-        print(data["fld_counts"])
-        assert data["fld_counts"] != {
-            "archive.org": 10,
-            "unm.edu": 1,
-            "theguardian.com": 1,
-            "google.com": 1,
-            "africaninvertebrates.org": 1,
-            "americanarachnology.org": 1,
-            "nina.no": 1,
+        # print(data["fld_counts"])
+        assert data["fld_counts"] == {
+            "archive.org": 5,
+            "unm.edu": 2,
+            "americanarachnology.org": 2,
+            "nina.no": 2,
             "fcla.edu": 1,
-            "oup.com": 1,
-            "nature.com": 1,
             "africaninvertebrates.org.za": 1,
             "bbc.co.uk": 1,
+            "google.com": 1,
+            "nature.com": 1,
+            "theguardian.com": 1,
+            "oup.com": 1,
         }
 
     def test_valid_request_enwiki_test_refresh_true(self):
