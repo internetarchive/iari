@@ -18,14 +18,16 @@ logger = logging.getLogger(__name__)
 class WikipediaArticle(WariBaseModel):
     """Models a WMF Wikipedia article
 
+    Mediawiki specifics:
+    * A page has a permanent and stable page_id
+    * Every edit creates a new revision that is incremented across all pages to a specific page_id
+
     Implementation details:
     Cache setup occurs only in this class and
     not in the classes below (ie Website and WikipediaReference)
     because of
     https://github.com/internetarchive/wcdimportbot/issues/261"""
 
-    latest_revision_date: Optional[datetime]
-    latest_revision_id: Optional[int]
     md5hash: Optional[str]
     page_id: int = 0
     wikimedia_domain: WikimediaDomain = WikimediaDomain.wikipedia
@@ -38,6 +40,8 @@ class WikipediaArticle(WariBaseModel):
     job: ArticleJob
     ores_quality_prediction: str = ""
     ores_details: Dict = {}
+    revision_isodate: Optional[datetime] = None
+    revision_timestamp: int = 0
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -57,6 +61,10 @@ class WikipediaArticle(WariBaseModel):
     #     if not self.job.title:
     #         raise ValueError("self.title was empty")
     #     return self.job.title.replace(" ", "_")
+
+    @property
+    def revision_id(self) -> int:
+        return self.job.revision or 0
 
     @property
     def url(self):
@@ -116,38 +124,11 @@ class WikipediaArticle(WariBaseModel):
 
         app.logger.debug("__fetch_page_data__: Running")
         self.__check_if_title_is_empty__()
-        if (
-            not self.latest_revision_id
-            or not self.latest_revision_date
-            or not self.wikitext
-            or not self.page_id
-        ):
-            # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base or
-            # https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy
-            url = (
-                f"https://{self.job.lang}.{self.job.domain.value}/"
-                f"w/rest.php/v1/page/{self.job.quoted_title}"
-            )
-            headers = {"User-Agent": config.user_agent}
-            response = requests.get(url, headers=headers)
-            # console.print(response.json())
-            if response.status_code == 200:
-                data = response.json()
-                # TODO read up on the documentation to find out if this is reliable
-                self.latest_revision_id = int(data["latest"]["id"])
-                self.latest_revision_date = isoparse(data["latest"]["timestamp"])
-                self.page_id = int(data["id"])
-                logger.debug(f"Got pageid: {self.page_id}")
-                self.wikitext = data["source"]
-            elif response.status_code == 404:
-                self.found_in_wikipedia = False
-                logger.error(
-                    f"Could not fetch page data from {self.wikimedia_domain.name} because of 404. See {url}"
-                )
+        if not self.wikitext:
+            if self.revision_id:
+                self.__fetch_data_for_a_specific_revision__()
             else:
-                raise WikipediaApiFetchError(
-                    f"Could not fetch page data. Got {response.status_code} from {url}"
-                )
+                self.__fetch_data_for_the_latest_revision__()
         else:
             logger.info(
                 "Not fetching data via the Wikipedia REST API. We have already got all the data we need"
@@ -486,20 +467,28 @@ class WikipediaArticle(WariBaseModel):
             raise MissingInformationError("self.job.title was empty string")
 
     def __get_ores_scores__(self):
-        if not self.latest_revision_id and not self.job.testing:
-            raise MissingInformationError()
-        if self.latest_revision_id:
+        if not self.revision_id:
+            if self.job.testing:
+                logger.warning(
+                    "Not testing getting ores score during testing "
+                    "when no revision_id or latest_revision_id are present"
+                )
+            else:
+                raise MissingInformationError("No revision_id fetched, this is a bug")
+        else:
             # get the rating from https://ores.wikimedia.org/v3/scores/enwiki/234234320/articlequality
             # Make a request to the ORES API to get the latest score
             # We only support Wikipedia for now
+            # if self.job.lang == "da":
+            #     ores_error = "This "
             wiki_project = f"{self.job.lang}wiki"
             response = requests.get(
-                f"https://ores.wikimedia.org/v3/scores/{wiki_project}/{self.latest_revision_id}/articlequality"
+                f"https://ores.wikimedia.org/v3/scores/{wiki_project}/{self.revision_id}/articlequality"
             )
             if response.status_code == 200:
                 data = response.json()
                 # console.print(data)
-                string_id = str(self.latest_revision_id)
+                string_id = str(self.revision_id)
                 self.ores_quality_prediction = data[wiki_project]["scores"][string_id][
                     "articlequality"
                 ]["score"]["prediction"]
@@ -508,3 +497,68 @@ class WikipediaArticle(WariBaseModel):
                 ]["score"]
             else:
                 print("Error:", response.status_code)
+
+    def __fetch_data_for_a_specific_revision__(self):
+        """Get wikitext for a specific revision
+
+        Action-specific parameters
+
+        titles= takes one or more titles for the query to operate on.
+
+        pageids= takes one or more page ids for the query to operate on. revids= takes a list of revision IDs to work on.
+        """
+        from src import app
+
+        app.logger.debug("__fetch_wikitext_for_a_specific_revision__: running")
+        url = (
+            f"https://{self.job.lang}.{self.job.domain.value}/"
+            f"w/rest.php/v1/revision/{self.job.revision}"
+        )
+        prop = "ids|timestamp|content"
+        response = requests.get(url, params={"action": "query", "prop": prop})
+        # console.print(response.json())
+        if response.status_code == 200:
+            data = response.json()
+            # self.revision_timestamp = data["timestamp"]
+            self.revision_isodate = isoparse(data["timestamp"])
+            self.revision_timestamp = round(self.revision_isodate.timestamp())
+            self.page_id = data["page"]["id"]
+            # logger.debug(f"Got pageid: {self.page_id}")
+            self.wikitext = data["source"]
+        elif response.status_code == 404:
+            self.found_in_wikipedia = False
+            logger.error(
+                f"Could not fetch page data from {self.wikimedia_domain.name} because of 404. See {url}"
+            )
+        else:
+            raise WikipediaApiFetchError(
+                f"Could not fetch page data. Got {response.status_code} from {url}"
+            )
+
+    def __fetch_data_for_the_latest_revision__(self):
+        # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base or
+        # https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy
+        url = (
+            f"https://{self.job.lang}.{self.job.domain.value}/"
+            f"w/rest.php/v1/page/{self.job.quoted_title}"
+        )
+        headers = {"User-Agent": config.user_agent}
+        response = requests.get(url, headers=headers)
+        # console.print(response.json())
+        if response.status_code == 200:
+            data = response.json()
+            self.job.revision = int(data["latest"]["id"])
+            self.revision_isodate = isoparse(data["latest"]["timestamp"])
+            self.revision_timestamp = round(self.revision_isodate.timestamp())
+            self.page_id = int(data["id"])
+            # logger.debug(f"Got pageid: {self.page_id}")
+            self.wikitext = data["source"]
+        elif response.status_code == 404:
+            self.found_in_wikipedia = False
+            logger.error(
+                f"Could not fetch page data from {self.wikimedia_domain.name} because of 404. See {url}"
+            )
+        else:
+            raise WikipediaApiFetchError(
+                f"Could not fetch page data. Got {response.status_code} from {url}"
+            )

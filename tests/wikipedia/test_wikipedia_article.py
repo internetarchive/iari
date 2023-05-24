@@ -246,16 +246,22 @@ class TestWikipediaArticle(TestCase):
     # 'rapanui.org.uk': 1,
     # 'usatoday.com': 1}
 
-    def test_ores_score(self):
+    def test_ores_score_latest_rev(self):
+        """This uses the internet"""
         job = ArticleJob(
-            url="https://en.wikipedia.org/wiki/Easter_Island", regex="test"
+            url="https://en.wikipedia.org/wiki/Easter_Island",
+            regex="test",
+            testing=True,
         )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
         wp.__fetch_page_data__()
+        assert wp.revision_id != 0
+        # print(wp.revision_id)
         wp.__get_ores_scores__()
         assert wp.ores_quality_prediction == "B"
-        print(wp.ores_details)
+        # print(wp.ores_details)
+        # This will break over time as predictions are updated on each edit
         assert wp.ores_details == {
             "prediction": "B",
             "probability": {
@@ -267,3 +273,77 @@ class TestWikipediaArticle(TestCase):
                 "Stub": 0.003366958776847205,
             },
         }
+
+    def test_ores_score_specific_rev(self):
+        """Uses internet. Also test the date and timestamp"""
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Easter_Island",
+            regex="test",
+            testing=True,
+            revision=1153824462,
+        )
+        job.__extract_url__()
+        wp = WikipediaArticle(job=job)
+        wp.__fetch_page_data__()
+        assert wp.revision_id == 1153824462
+        # print(wp.revision_timestamp)
+        assert wp.revision_timestamp == 1683558390
+        # print(wp.revision_isodate)
+        assert str(wp.revision_isodate) == "2023-05-08 15:06:30+00:00"
+        # print(wp.revision_id)
+        wp.__get_ores_scores__()
+        assert wp.ores_quality_prediction == "B"
+        # print(wp.ores_details)
+        # This will not break over time if the ORES model remains unchanged
+        assert wp.ores_details == {
+            "prediction": "B",
+            "probability": {
+                "B": 0.6541036152021443,
+                "C": 0.1395663135841622,
+                "FA": 0.07020948799248741,
+                "GA": 0.12348515224009447,
+                "Start": 0.009268472204264279,
+                "Stub": 0.003366958776847205,
+            },
+        }
+
+    def test___fetch_wikitext_for_a_specific_revision__(self):
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Test", regex="test", revision=1143480404
+        )
+        job.__extract_url__()
+        wp = WikipediaArticle(job=job)
+        wp.__fetch_data_for_a_specific_revision__()
+        # print(wp.page_id)
+        assert wp.page_id == 11089416
+        assert wp.revision_id == 1143480404
+        # print(wp.wikitext[:100])
+        # this should never fail
+        assert (
+            wp.wikitext[:100].replace("\n", "")
+            == "{{Wiktionary|test|testing|Test|TEST}}<!--*********************************************************"
+        )
+
+    def test___fetch_wikitext_for_latest__(self):
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/Test", regex="test", revision=0
+        )
+        job.__extract_url__()
+        wp = WikipediaArticle(job=job)
+        wp.__fetch_data_for_the_latest_revision__()
+        print(wp.page_id)
+        assert wp.page_id == 11089416
+        # print(wp.latest_revision_id)
+        assert wp.revision_id == 1154511761
+        # print(wp.revision_timestamp)
+        assert wp.revision_timestamp > 1683558390
+        # print(wp.revision_isodate)
+        # we only check the year as this test is not reproducible
+        assert str(wp.revision_isodate)[:4] == "2023"
+        print(wp.wikitext[:100].replace("\n", ""))
+        # This will break over time but we cannot do
+        # anything about it besides mocking the request
+        assert (
+            wp.wikitext[:100].replace("\n", "")
+            == "{{pp-vandalism|small=yes}}{{pp-move-indef}}{{Wiktionary|test|testing|Test|TEST}}<!--***********"
+        )

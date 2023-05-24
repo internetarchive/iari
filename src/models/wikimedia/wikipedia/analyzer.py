@@ -32,9 +32,15 @@ class WikipediaAnalyzer(WariBaseModel):
     def wari_id(self) -> str:
         if not self.job:
             raise MissingInformationError()
+        if not self.job.lang:
+            raise MissingInformationError()
         if not self.article:
             raise MissingInformationError()
-        return f"{self.job.lang}.{self.job.domain.value}.{self.article.page_id}"
+        if not self.article.page_id:
+            raise MissingInformationError()
+        if not self.article.revision_id:
+            raise MissingInformationError()
+        return f"{self.job.lang}.{self.job.domain.value}.{self.article.page_id}.{self.article.revision_id}"
 
     @property
     def testing(self):
@@ -63,6 +69,14 @@ class WikipediaAnalyzer(WariBaseModel):
         ):
             if not self.article.extractor:
                 raise MissingInformationError("self.article.extractor was None")
+            if not self.article.revision_id:
+                raise MissingInformationError("self.article.revision_id was None")
+            if not self.article.revision_isodate:
+                raise MissingInformationError("self.article.revision_isodate was None")
+            if not self.article.revision_timestamp:
+                raise MissingInformationError(
+                    "self.article.revision_timestamp was None"
+                )
             ae = self.article.extractor
             self.article_statistics = ArticleStatistics(
                 wari_id=self.wari_id,
@@ -81,6 +95,9 @@ class WikipediaAnalyzer(WariBaseModel):
                 site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
                 ores_score=self.article.ores_details,
+                revision_isodate=self.article.revision_isodate.isoformat(),
+                revision_timestamp=self.article.revision_timestamp,
+                revision_id=self.article.revision_id,
             )
 
     def get_statistics(self) -> Dict[str, Any]:
@@ -136,7 +153,6 @@ class WikipediaAnalyzer(WariBaseModel):
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
                 data = ReferenceStatistic(
-                    # identifiers=rr.identifiers,
                     flds=reference.first_level_domains,
                     footnote_subtype=subtype,
                     id=reference.reference_id,
@@ -149,9 +165,6 @@ class WikipediaAnalyzer(WariBaseModel):
                     section=reference.section,
                     url_objects=reference.get_reference_url_dicts,
                 ).dict()
-                # if not "wikitext" in data:
-                #     console.print(data)
-                #     raise MissingInformationError()
                 self.reference_statistics.append(data)
         if not self.article_statistics:
             app.logger.debug(

@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 
 import fitz  # type: ignore
 import requests
+import validators  # type: ignore
 from fitz import (
     Document,  # type: ignore
     FileDataError,  # type: ignore
@@ -31,6 +32,9 @@ class PdfHandler(BaseModel):
     file_path: str = ""
     pdf_document: Optional[Document] = None
     word_counts: List[int] = []
+    link_extraction_regex = re.compile(
+        r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
+    )
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -101,12 +105,15 @@ class PdfHandler(BaseModel):
         for index, _ in enumerate(self.text_pages):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
-            regex = r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
-            urls = re.findall(regex, self.__get_cleaned_page_string__(number=index))
+            urls = re.findall(
+                self.link_extraction_regex,
+                self.__get_cleaned_page_string__(number=index),
+            )
             # cleaned_urls = self.__clean_urls__(urls=urls)
             # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
             for url in urls:
-                self.all_text_links.append(PdfLink(url=url, page=index))
+                if validators.url(url):
+                    self.all_text_links.append(PdfLink(url=url, page=index))
 
     def __extract_links_from_annotations__(self) -> None:
         if not self.pdf_document:
@@ -117,9 +124,9 @@ class PdfHandler(BaseModel):
             for annotation in annotations:
                 # print(annotation)
                 if annotation["kind"] == fitz.LINK_URI:
-                    self.annotation_links.append(
-                        PdfLink(url=annotation["uri"], page=page_num)
-                    )
+                    url = annotation["uri"]
+                    if validators.url(url):
+                        self.annotation_links.append(PdfLink(url=url, page=page_num))
 
     def __extract_text_pages__(self) -> None:
         """Extract all text from all pages"""
