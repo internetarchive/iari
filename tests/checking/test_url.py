@@ -20,6 +20,8 @@ class TestUrl(TestCase):
         assert url.request_error is False
         assert url.response_headers != {}
         assert url.response_headers["Server"] == "Apache"
+        data = url.get_dict
+        assert data["detected_language"] == "en"
 
     def test_check_no(self):
         url = Url(url=self.no_url, timeout=2)
@@ -27,11 +29,15 @@ class TestUrl(TestCase):
         assert url.status_code == 0
         assert url.malformed_url is False
         assert url.response_headers == {}
+        data = url.get_dict
+        assert data["detected_language"] == ""
 
     def test_check_bad_dots(self):
         url = Url(url=self.bad_url, timeout=2)
         url.check()
         assert url.is_valid is False
+        data = url.get_dict
+        assert data["detected_language"] == ""
         # assert url.status_code == 0
         # # assert url.dns_error is True
         # assert url.request_error is True
@@ -45,6 +51,8 @@ class TestUrl(TestCase):
         url = Url(url=self.bad_url2, timeout=2)
         url.check()
         assert url.is_valid is False
+        data = url.get_dict
+        assert data["detected_language"] == ""
         # assert url.status_code == 0
         # assert url.malformed_url is True
         # assert url.dns_error is False
@@ -63,6 +71,8 @@ class TestUrl(TestCase):
         assert url.request_error is False
         assert url.malformed_url is False
         assert url.response_headers["Server"] == "AmazonS3"
+        data = url.get_dict
+        assert data["detected_language"] == "en"
 
     def test_check_response_header(self):
         url = Url(url=self.good_url, timeout=2)
@@ -71,6 +81,8 @@ class TestUrl(TestCase):
         assert url.response_headers != {}
         assert url.malformed_url is False
         assert url.response_headers["Server"] == "Apache"
+        data = url.get_dict
+        assert data["detected_language"] == "en"
 
     def test_alternating_status_code_url(self):
         url = Url(
@@ -83,6 +95,8 @@ class TestUrl(TestCase):
         assert url.dns_error is False
         assert url.request_error is False
         assert url.malformed_url is False
+        data = url.get_dict
+        assert data["detected_language"] == "en"
 
     def test_wm_url(self):
         url = Url(
@@ -95,3 +109,5 @@ class TestUrl(TestCase):
         assert url.dns_error is False
         assert url.request_error is False
         assert url.malformed_url is False
+        data = url.get_dict
+        assert data["detected_language"] == "en"

@@ -10,9 +10,9 @@ from fitz import (
     Document,  # type: ignore
     FileDataError,  # type: ignore
 )
-from pydantic import BaseModel
 from requests import ReadTimeout
 
+from src.models.api.handlers import BaseHandler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.link.pdf_link import PdfLink
 from src.models.exceptions import MissingInformationError
@@ -20,7 +20,7 @@ from src.models.exceptions import MissingInformationError
 logger = logging.getLogger(__name__)
 
 
-class PdfHandler(BaseModel):
+class PdfHandler(BaseHandler):
     job: UrlJob
     content: bytes = b""
     all_text_links: List[PdfLink] = []
@@ -174,6 +174,9 @@ class PdfHandler(BaseModel):
             "timeout": self.job.timeout,
             "urls_fixed": self.urls_fixed,
             "pages_total": self.number_of_pages,
+            "detected_language": self.detected_language,
+            "detected_language_error": self.detected_language_error,
+            "detected_language_error_details": self.detected_language_error_details,
         }
         return data
 
@@ -208,9 +211,15 @@ class PdfHandler(BaseModel):
             self.__extract_text_pages__()
         if not self.error:
             self.__extract_links_from_all_text__()
+        self.__concatenate_text_from_all_pages__()
+        self.__detect_language__()
 
     @staticmethod
     def __clean_linebreaks__(string):
         for char in ["\n", "\r", "\v", "\f", "\u2028", "\u2029"]:
             string = string.replace(char, "")
         return string
+
+    def __concatenate_text_from_all_pages__(self):
+        for index, _ in enumerate(self.text_pages):
+            self.text += self.text_pages[index]

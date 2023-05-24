@@ -28,6 +28,7 @@ tld = "^0.12.6"
 wikibaseintegrator = "^0.12.1"
 pymupdf = "^1.22.2"
 validators = "^0.20.0"
+langdetect = "^1.0.9"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.8.0"
