@@ -1,7 +1,7 @@
 import logging
 import re
 from ipaddress import ip_address
-from typing import Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 import validators  # type: ignore
@@ -29,13 +29,23 @@ class WikipediaUrl(BaseModel):
     scheme: str = ""  # url scheme e.g. http
     netloc: str = ""  # network location e.g. google.com
     tld: str = ""  # top level domain
-    # unrecognized_tld_length: bool = False
-    added_http_scheme_worked: bool = False
     malformed_url: bool = False
     malformed_url_details: Optional[MalformedUrlError] = None
     archived_url: str = ""
     wayback_machine_timestamp: str = ""
-    valid: bool = True
+    is_valid: bool = True
+
+    @property
+    def __is_wayback_machine_url__(self):
+        logger.debug("is_wayback_machine_url: running")
+        return bool("//web.archive.org" in self.url)
+
+    @property
+    def get_dict(self) -> Dict[str, Any]:
+        url = self.dict()
+        if self.malformed_url_details:
+            url.update({"malformed_url_details": self.malformed_url_details.value})
+        return url
 
     def __hash__(self):
         return hash(self.url)
@@ -49,8 +59,8 @@ class WikipediaUrl(BaseModel):
     def __parse_extract_and_validate__(self) -> None:
         logger.debug("__parse_extract_and_validate__: running")
         self.__check_if_valid__()
-        if self.valid:
-            if self.is_wayback_machine_url:
+        if self.is_valid:
+            if self.__is_wayback_machine_url__:
                 self.__parse_wayback_machine_url__()
             self.__parse_and_extract_url__()
             self.__extract_tld__()
@@ -58,18 +68,6 @@ class WikipediaUrl(BaseModel):
             self.__check_scheme__()
         else:
             logger.warning(f"{self.url} not valid")
-
-    def extract(self):
-        from src import app
-
-        app.logger.debug("extract: running")
-        self.__parse_extract_and_validate__()
-        self.__extract_first_level_domain__()
-
-    @property
-    def is_wayback_machine_url(self):
-        logger.debug("is_wayback_machine_url: running")
-        return bool("//web.archive.org" in self.url)
 
     def __extract_first_level_domain__(self) -> None:
         from src import app
@@ -90,28 +88,6 @@ class WikipediaUrl(BaseModel):
                 # self.__log_to_file__(
                 #     message=str(message), file_name="url_exceptions.log"
                 # )
-
-    # def __check_tld__(self):
-    #     """We only check the length for now"""
-    #     from src import app
-    #
-    #     app.logger.debug("__check_tld__: running")
-    #     if not self.netloc:
-    #         logger.warning("netloc was empty, skipping check")
-    #     else:
-    #         length = len(self.tld)
-    #         # Allow up to 6 length to support "travel"
-    #         # and down to 2 length to support "se"
-    #         if not (6 >= length >= 2):
-    #             logger.warning(
-    #                 f"TLD '{self.tld}' with length {length} was not a recognized length"
-    #             )
-    #             self.malformed_url = True
-    #             self.malformed_url_details = MalformedUrlError.UNRECOGNIZED_TLD_LENGTH
-    #         else:
-    #             logger.debug(
-    #                 f"TLD '{self.tld}' was correct length"
-    #             )
 
     def __check_scheme__(self):
         """Check for one of 4 know schemes that Wikipedia accepts"""
@@ -185,5 +161,12 @@ class WikipediaUrl(BaseModel):
         """Validate using external package"""
         logger.debug("__check_if_valid__: running")
         # We don't validate WM urls because they are not supported by the library
-        if not self.is_wayback_machine_url and not validators.url(self.url):
-            self.valid = False
+        if not self.__is_wayback_machine_url__ and not validators.url(self.url):
+            self.is_valid = False
+
+    def extract(self):
+        from src import app
+
+        app.logger.debug("extract: running")
+        self.__parse_extract_and_validate__()
+        self.__extract_first_level_domain__()

@@ -64,7 +64,7 @@ class CheckUrl(StatisticsWriteView):
             app.logger.info(f"Got {url_string}")
             url = Url(url=url_string, timeout=self.job.timeout)
             url.check()
-            data = url.get_dict()
+            data = url.get_dict
             timestamp = datetime.timestamp(datetime.utcnow())
             data["timestamp"] = int(timestamp)
             isodate = datetime.isoformat(datetime.utcnow())

@@ -31,8 +31,8 @@ class TestWikipediaUrl(TestCase):
     wikipediaurl4 = WikipediaUrl(url=valid_url4)
 
     def test_is_wayback_machine_url(self):
-        self.assertTrue(self.wikipediaurl3.is_wayback_machine_url)
-        self.assertFalse(self.wikipediaurl.is_wayback_machine_url)
+        self.assertTrue(self.wikipediaurl3.__is_wayback_machine_url__)
+        self.assertFalse(self.wikipediaurl.__is_wayback_machine_url__)
 
     def test_get_first_level_domain(self):
         self.wikipediaurl.__extract_first_level_domain__()
@@ -55,7 +55,7 @@ class TestWikipediaUrl(TestCase):
     def test_extract_first_level_domain_malformed1(self):
         url = WikipediaUrl(url="127.0.0.1/test")
         url.extract()
-        assert url.valid is False
+        assert url.is_valid is False
         # assert url.malformed_url is True
         # assert url.malformed_url_details == MalformedUrlError.NO_NETLOC_FOUND
         # assert url.added_http_scheme_worked is True
@@ -63,7 +63,7 @@ class TestWikipediaUrl(TestCase):
     def test_extract_first_level_domain_malformed2(self):
         url = WikipediaUrl(url="httproe.ru/pdfs/pdf_1914.pdf")
         url.extract()
-        assert url.valid is False
+        assert url.is_valid is False
         #
         # assert url.malformed_url is True
         # assert url.malformed_url_details == MalformedUrlError.NO_NETLOC_FOUND
@@ -72,14 +72,14 @@ class TestWikipediaUrl(TestCase):
     def test_extract_first_level_domain_malformed3(self):
         url = WikipediaUrl(url="httpss://www1.geocities.com/")
         url.extract()
-        assert url.valid is False
+        assert url.is_valid is False
         # assert url.first_level_domain == "geocities.com"
         # assert url.malformed_url is True
 
     def test_extract_first_level_domain_malformed4(self):
         url = WikipediaUrl(url="https://www1.geocities.")
         url.extract()
-        assert url.valid is False
+        assert url.is_valid is False
         #
         # assert url.malformed_url is True
         # assert url.malformed_url_details == MalformedUrlError.UNRECOGNIZED_TLD_LENGTH
@@ -87,7 +87,7 @@ class TestWikipediaUrl(TestCase):
     def test___check_tld__invalid(self):
         url = WikipediaUrl(url="https://www1.geocities.")
         url.extract()
-        assert url.valid is False
+        assert url.is_valid is False
         # url.__extract_tld__()
         # assert url.malformed_url is True
         # assert url.malformed_url_details == MalformedUrlError.UNRECOGNIZED_TLD_LENGTH
@@ -96,7 +96,7 @@ class TestWikipediaUrl(TestCase):
         url = WikipediaUrl(url="https://www.google.com")
         url.extract()
         assert url.malformed_url is False
-        assert url.valid is True
+        assert url.is_valid is True
 
     def test___check_tld__valid_long(self):
         url = WikipediaUrl(url="https://www.easterisland.travel")
@@ -153,9 +153,9 @@ class TestWikipediaUrl(TestCase):
 
     def test_is_wm_url(self):
         url = WikipediaUrl(url=self.archive_url1)
-        assert url.is_wayback_machine_url is True
+        assert url.__is_wayback_machine_url__ is True
         url = WikipediaUrl(url=self.archive_url2)
-        assert url.is_wayback_machine_url is True
+        assert url.__is_wayback_machine_url__ is True
 
     def test_fld_archiveorg(self):
         url = WikipediaUrl(url="https://archive.org/details/tepitotehenuaor00thomgoog")

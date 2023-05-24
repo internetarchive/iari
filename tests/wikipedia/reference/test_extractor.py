@@ -245,12 +245,11 @@ class TestWikipediaReferenceExtractor(TestCase):
             "scheme": "http",
             "netloc": "www.menota.org",
             "tld": "org",
-            "added_http_scheme_worked": False,
             "malformed_url": False,
             "malformed_url_details": None,
             "archived_url": "",
             "wayback_machine_timestamp": "",
-            "valid": True,
+            "is_valid": True,
         }
         assert len(wre.raw_urls) == 24
         assert wre.raw_urls == [

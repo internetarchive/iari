@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Dict
 
 import requests
 from dns.name import EmptyLabel
@@ -24,7 +24,6 @@ from requests.exceptions import (
 )
 from requests.models import LocationParseError
 
-from src.helpers.console import console
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -62,7 +61,7 @@ class Url(WikipediaUrl):
     def check(self):
         if self.url:
             self.extract()
-            if self.valid:
+            if self.is_valid:
                 self.__check_url__()
 
     def __get_dns_record__(self) -> None:
@@ -182,13 +181,6 @@ class Url(WikipediaUrl):
         self.__check_with_https_verify__()
         if self.request_error:
             self.__check_without_https_verify__()
-
-    def get_dict(self) -> Dict[str, Any]:
-        cleaned_dictionary = self.dict(
-            exclude={"parsing_done", "first_level_domain_done"}
-        )
-        console.print(cleaned_dictionary)
-        return cleaned_dictionary
 
     @property
     def __spoofing_headers__(self) -> Dict[str, str]:

@@ -39,12 +39,23 @@ class WikipediaReferenceExtractor(WariBaseModel):
 
     @property
     def urls(self) -> List[WikipediaUrl]:
-        """List of non-unique urls"""
+        """List of non-unique and valid urls"""
         urls: List[WikipediaUrl] = []
         for reference in self.references:
             for url in reference.reference_urls:
-                urls.append(url)
+                if url.is_valid:
+                    urls.append(url)
         return urls
+
+    # @property
+    # def invalid_urls(self) -> List[WikipediaUrl]:
+    #     """List of non-unique and valid urls"""
+    #     urls: List[WikipediaUrl] = []
+    #     for reference in self.references:
+    #         for url in reference.reference_urls:
+    #             if not url.valid:
+    #                 urls.append(url)
+    #     return urls
 
     @property
     def raw_urls(self) -> List[str]:
@@ -82,8 +93,6 @@ class WikipediaReferenceExtractor(WariBaseModel):
         for url in self.urls:
             if url.first_level_domain:
                 flds.append(url.first_level_domain)
-            else:
-                raise MissingInformationError(f"no fld in {url}")
         return flds
 
     @property

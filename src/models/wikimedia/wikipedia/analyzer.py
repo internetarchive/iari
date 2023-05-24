@@ -147,6 +147,7 @@ class WikipediaAnalyzer(WariBaseModel):
                     urls=reference.raw_urls,
                     wikitext=reference.get_wikicode_as_string,
                     section=reference.section,
+                    url_objects=reference.get_reference_url_dicts,
                 ).dict()
                 # if not "wikitext" in data:
                 #     console.print(data)

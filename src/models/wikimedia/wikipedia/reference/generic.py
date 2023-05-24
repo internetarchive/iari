@@ -169,7 +169,7 @@ class WikipediaReference(JobBaseModel):
         self.reference_urls = list(set(urls_list))
 
     def __extract_first_level_domains__(self) -> None:
-        """This aggregates all first level domains from the urls found in the raw references"""
+        """This aggregates all first level domains from the urls found in the urls"""
         from src import app
 
         app.logger.debug("__extract_first_level_domains__: running")
@@ -303,3 +303,11 @@ class WikipediaReference(JobBaseModel):
         """This generates an 8-char long id based on the md5 hash of
         the raw wikitext for this reference"""
         self.reference_id = hashlib.md5(f"{self.wikicode}".encode()).hexdigest()[:8]
+
+    @property
+    def get_reference_url_dicts(self) -> List[Dict[str, Any]]:
+        urls = []
+        if self.reference_urls:
+            for url in self.reference_urls:
+                urls.append(url.get_dict)
+        return urls

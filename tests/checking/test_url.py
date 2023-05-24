@@ -31,7 +31,7 @@ class TestUrl(TestCase):
     def test_check_bad_dots(self):
         url = Url(url=self.bad_url, timeout=2)
         url.check()
-        assert url.valid is False
+        assert url.is_valid is False
         # assert url.status_code == 0
         # # assert url.dns_error is True
         # assert url.request_error is True
@@ -44,7 +44,7 @@ class TestUrl(TestCase):
     def test_check_bad_long_tld(self):
         url = Url(url=self.bad_url2, timeout=2)
         url.check()
-        assert url.valid is False
+        assert url.is_valid is False
         # assert url.status_code == 0
         # assert url.malformed_url is True
         # assert url.dns_error is False

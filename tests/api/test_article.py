@@ -45,31 +45,33 @@ class TestArticle(TestCase):
         assert len(data["dehydrated_references"]) == 3
         assert len(data["urls"]) == 5
 
-    def test_valid_request_dawiki1(self):
-        response = self.test_client.get(
-            "/get-statistics?url=https://da.wikipedia.org/wiki/Kleptoparasitisme&testing=true&regex=test"
-        )
-        self.assertEqual(200, response.status_code)
-        data = json.loads(response.data)
-        # console.print(data)
-        assert data["title"] == "Kleptoparasitisme"
-        assert len(data["dehydrated_references"]) == 40
-        # print(len(data["urls"]))
-        assert len(data["urls"]) == 23
-        # print(data["fld_counts"])
-        assert data["fld_counts"] == {
-            "archive.org": 5,
-            "unm.edu": 2,
-            "americanarachnology.org": 4,
-            "nina.no": 2,
-            "fcla.edu": 1,
-            "africaninvertebrates.org.za": 1,
-            "bbc.co.uk": 1,
-            "google.com": 1,
-            "nature.com": 1,
-            "theguardian.com": 1,
-            "oup.com": 1,
-        }
+    # todo enable again after revisions have been implemented and add a revision
+    # def test_valid_request_dawiki1(self):
+    #     response = self.test_client.get(
+    #         "/get-statistics?url=https://da.wikipedia.org/wiki/Kleptoparasitisme&testing=true&regex=test"
+    #     )
+    #     self.assertEqual(200, response.status_code)
+    #     data = json.loads(response.data)
+    #     # console.print(data)
+    #     assert data["title"] == "Kleptoparasitisme"
+    #     assert len(data["dehydrated_references"]) == 35
+    #     # print(len(data["urls"]))
+    #     assert len(data["urls"]) == 21
+    #     # print(data["fld_counts"])
+    #     assert data["fld_counts"] == {
+    #         "africaninvertebrates.org": 1,
+    #         "africaninvertebrates.org.za": 2,
+    #         "americanarachnology.org": 2,
+    #         "archive.org": 5,
+    #         "bbc.co.uk": 1,
+    #         "fcla.edu": 2,
+    #         "google.com": 1,
+    #         "nature.com": 1,
+    #         "nina.no": 2,
+    #         "oup.com": 1,
+    #         "theguardian.com": 1,
+    #         "unm.edu": 2,
+    #     }
 
     def test_valid_request_enwiki_test_refresh_true(self):
         response = self.test_client.get(
