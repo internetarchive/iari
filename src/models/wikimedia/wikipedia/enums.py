@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class MalformedUrlError(Enum):
-    UNRECOGNIZED_TLD_LENGTH = "unrecognized tld length"
     MISSING_SCHEME = "missing scheme"
     UNRECOGNIZED_SCHEME = "unrecognized scheme"
     HTTPWWW = "fix httpwww -> http://www"

@@ -180,8 +180,6 @@ class WikipediaReference(JobBaseModel):
             logger.debug("found at least one url")
             for url in self.reference_urls:
                 logger.debug("working on url")
-                if not url.first_level_domain_done:
-                    url.extract_first_level_domain()
                 if url.first_level_domain:
                     logger.debug(f"found fld: {url.first_level_domain}")
                     self.first_level_domains.append(url.first_level_domain)

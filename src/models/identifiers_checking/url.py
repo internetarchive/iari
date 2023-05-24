@@ -62,8 +62,9 @@ class Url(WikipediaUrl):
     def check(self):
         if self.url:
             self.extract()
-            self.__fix_malformed_urls__()
-            self.__check_url__()
+            if self.valid:
+                self.__fix_malformed_urls__()
+                self.__check_url__()
 
     def __get_dns_record__(self) -> None:
         from src import app

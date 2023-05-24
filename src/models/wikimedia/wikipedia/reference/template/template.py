@@ -58,23 +58,33 @@ class WikipediaTemplate(BaseModel):
             url = self.parameters["url"]
             if url:
                 logger.debug(f"url: {url}")
-                urls.add(WikipediaUrl(url=url))
+                url = WikipediaUrl(url=url)
+                url.extract()
+                urls.add(url)
         if "archive_url" in self.parameters:
             url = self.parameters["archive_url"]
             if url:
-                urls.add(WikipediaUrl(url=url))
+                url = WikipediaUrl(url=url)
+                url.extract()
+                urls.add(url)
         if "conference_url" in self.parameters:
             url = self.parameters["conference_url"]
             if url:
-                urls.add(WikipediaUrl(url=url))
+                url = WikipediaUrl(url=url)
+                url.extract()
+                urls.add(url)
         if "transcript_url" in self.parameters:
             url = self.parameters["transcript_url"]
             if url:
-                urls.add(WikipediaUrl(url=url))
+                url = WikipediaUrl(url=url)
+                url.extract()
+                urls.add(url)
         if "chapter_url" in self.parameters:
             url = self.parameters["chapter_url"]
             if url:
-                urls.add(WikipediaUrl(url=url))
+                url = WikipediaUrl(url=url)
+                url.extract()
+                urls.add(url)
         return list(urls)
 
     @property
@@ -187,7 +197,7 @@ class WikipediaTemplate(BaseModel):
         self.__rename_one_to_first_parameter__()
         self.__extract_isbn__()
         self.extraction_done = True
-        self.__extract_first_level_domains_from_urls__()
+        # self.__extract_first_level_domains_from_urls__()
 
     def __fix_class_key__(self):
         """convert "class" key to "_class" to avoid collision with reserved python expression"""
@@ -253,13 +263,13 @@ class WikipediaTemplate(BaseModel):
         else:
             logger.debug("No first parameter found")
 
-    def __extract_first_level_domains_from_urls__(self):
-        """Extract from all URLs"""
-        [
-            url.extract_first_level_domain()
-            for url in self.urls
-            if url.first_level_domain == ""
-        ]
+    # def __extract_first_level_domains_from_urls__(self):
+    #     """Extract from all URLs"""
+    #     [
+    #         url.extract_first_level_domain()
+    #         for url in self.urls
+    #         if url.first_level_domain == ""
+    #     ]
 
     def get_dict(self) -> Dict[str, Any]:
         """Return a dict that we can output to patrons via the API"""
