@@ -41,7 +41,8 @@ class WikipediaArticle(WariBaseModel):
     job: ArticleJob
     ores_quality_prediction: str = ""
     ores_details: Dict = {}
-    revision_date: Optional[datetime] = None
+    revision_isodate: Optional[datetime] = None
+    revision_timestamp: int = 0
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -126,9 +127,9 @@ class WikipediaArticle(WariBaseModel):
         self.__check_if_title_is_empty__()
         if not self.wikitext:
             if self.revision_id:
-                self.__fetch_wikitext_for_a_specific_revision__()
+                self.__fetch_data_for_a_specific_revision__()
             else:
-                self.__fetch_wikitext_for_the_latest_revision__()
+                self.__fetch_data_for_the_latest_revision__()
         else:
             logger.info(
                 "Not fetching data via the Wikipedia REST API. We have already got all the data we need"
@@ -498,7 +499,7 @@ class WikipediaArticle(WariBaseModel):
             else:
                 print("Error:", response.status_code)
 
-    def __fetch_wikitext_for_a_specific_revision__(self):
+    def __fetch_data_for_a_specific_revision__(self):
         """Get wikitext for a specific revision
 
         Action-specific parameters
@@ -525,7 +526,8 @@ class WikipediaArticle(WariBaseModel):
         if response.status_code == 200:
             data = response.json()
             # self.revision_timestamp = data["timestamp"]
-            self.revision_date = isoparse(data["timestamp"])
+            self.revision_isodate = isoparse(data["timestamp"])
+            self.revision_timestamp = round(self.revision_isodate.timestamp())
             self.page_id = int(data["id"])
             # logger.debug(f"Got pageid: {self.page_id}")
             self.wikitext = data["source"]
@@ -539,8 +541,7 @@ class WikipediaArticle(WariBaseModel):
                 f"Could not fetch page data. Got {response.status_code} from {url}"
             )
 
-    def __fetch_wikitext_for_the_latest_revision__(self):
-        # TODO rewrite to use mwclient
+    def __fetch_data_for_the_latest_revision__(self):
         # This is needed to support e.g. https://en.wikipedia.org/wiki/Musk%C3%B6_naval_base or
         # https://en.wikipedia.org/wiki/GNU/Linux_naming_controversy
         url = (
@@ -553,7 +554,8 @@ class WikipediaArticle(WariBaseModel):
         if response.status_code == 200:
             data = response.json()
             self.job.revision = int(data["latest"]["id"])
-            self.revision_date = isoparse(data["latest"]["timestamp"])
+            self.revision_isodate = isoparse(data["latest"]["timestamp"])
+            self.revision_timestamp = round(self.revision_isodate.timestamp())
             self.page_id = int(data["id"])
             # logger.debug(f"Got pageid: {self.page_id}")
             self.wikitext = data["source"]

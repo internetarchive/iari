@@ -26,6 +26,8 @@ class ArticleStatistics(BaseModel):
     urls: List[str] = []
     ores_score: Any = {}
     revision: int = 0
+    revision_isodate: str = ""
+    revision_timestamp: int = 0
 
     class Config:  # dead: disable
         extra = Extra.forbid  # dead: disable

@@ -247,6 +247,7 @@ class TestWikipediaArticle(TestCase):
     # 'usatoday.com': 1}
 
     def test_ores_score_latest_rev(self):
+        """This uses the internet"""
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/Easter_Island",
             regex="test",
@@ -274,6 +275,7 @@ class TestWikipediaArticle(TestCase):
         }
 
     def test_ores_score_specific_rev(self):
+        """Uses internet. Also test the date and timestamp"""
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/Easter_Island",
             regex="test",
@@ -284,6 +286,10 @@ class TestWikipediaArticle(TestCase):
         wp = WikipediaArticle(job=job)
         wp.__fetch_page_data__()
         assert wp.revision_id == 1153824462
+        # print(wp.revision_timestamp)
+        assert wp.revision_timestamp == 1683558390
+        # print(wp.revision_isodate)
+        assert str(wp.revision_isodate) == "2023-05-08 15:06:30+00:00"
         # print(wp.revision_id)
         wp.__get_ores_scores__()
         assert wp.ores_quality_prediction == "B"
@@ -307,7 +313,7 @@ class TestWikipediaArticle(TestCase):
         )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
-        wp.__fetch_wikitext_for_a_specific_revision__()
+        wp.__fetch_data_for_a_specific_revision__()
         assert wp.revision_id == 1143480404
         # print(wp.wikitext[:100])
         # this should never fail
@@ -322,9 +328,14 @@ class TestWikipediaArticle(TestCase):
         )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
-        wp.__fetch_wikitext_for_the_latest_revision__()
+        wp.__fetch_data_for_the_latest_revision__()
         # print(wp.latest_revision_id)
         assert wp.revision_id == 1154511761
+        # print(wp.revision_timestamp)
+        assert wp.revision_timestamp > 1683558390
+        # print(wp.revision_isodate)
+        # we only check the year as this test is not reproducible
+        assert str(wp.revision_isodate)[:4] == "2023"
         print(wp.wikitext[:100].replace("\n", ""))
         # This will break over time but we cannot do
         # anything about it besides mocking the request

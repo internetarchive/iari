@@ -87,6 +87,8 @@ class WikipediaAnalyzer(WariBaseModel):
                 site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
                 ores_score=self.article.ores_details,
+                revision_isodate=self.article.revision_isodate,
+                revision_timestamp=self.article.revision_timestamp,
             )
 
     def get_statistics(self) -> Dict[str, Any]:
