@@ -116,9 +116,9 @@ class TestUrl(TestCase):
         )
 
     def test_fld_empty_archived_url(self):
-        url = Url(url="")
+        url = Url(url="https://web.archive.org/web/")
         url.__get_fld__()
-        assert url.first_level_domain == "test"
+        assert url.first_level_domain == "archive.org"
 
     def test_fld_archived_url_1(self):
         url = Url(url=self.archive_url1)
