@@ -31,14 +31,14 @@ class TestWikipediaUrl(TestCase):
     wikipediaurl4 = WikipediaUrl(url=valid_url4)
 
     def test_is_wayback_machine_url(self):
-        self.assertTrue(self.wikipediaUrl3.is_wayback_machine_url)
-        self.assertFalse(self.wikipediaUrl.is_wayback_machine_url)
+        self.assertTrue(self.wikipediaurl3.is_wayback_machine_url)
+        self.assertFalse(self.wikipediaurl.is_wayback_machine_url)
 
     def test_get_first_level_domain(self):
-        self.wikipediaUrl.__extract_first_level_domain__()
-        assert self.wikipediaUrl.first_level_domain == "wikipedia.org"
-        self.wikipediaUrl2.__extract_first_level_domain__()
-        assert self.wikipediaUrl2.first_level_domain == "google.com"
+        self.wikipediaurl.__extract_first_level_domain__()
+        assert self.wikipediaurl.first_level_domain == "wikipedia.org"
+        self.wikipediaurl2.__extract_first_level_domain__()
+        assert self.wikipediaurl2.first_level_domain == "google.com"
 
     def test_fld_ip_adress(self):
         url = WikipediaUrl(url="http://127.0.0.1")
