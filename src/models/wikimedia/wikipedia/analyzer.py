@@ -69,6 +69,14 @@ class WikipediaAnalyzer(WariBaseModel):
         ):
             if not self.article.extractor:
                 raise MissingInformationError("self.article.extractor was None")
+            if not self.article.revision_id:
+                raise MissingInformationError("self.article.revision_id was None")
+            if not self.article.revision_isodate:
+                raise MissingInformationError("self.article.revision_isodate was None")
+            if not self.article.revision_timestamp:
+                raise MissingInformationError(
+                    "self.article.revision_timestamp was None"
+                )
             ae = self.article.extractor
             self.article_statistics = ArticleStatistics(
                 wari_id=self.wari_id,
@@ -87,8 +95,9 @@ class WikipediaAnalyzer(WariBaseModel):
                 site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
                 ores_score=self.article.ores_details,
-                revision_isodate=self.article.revision_isodate,
+                revision_isodate=self.article.revision_isodate.isoformat(),
                 revision_timestamp=self.article.revision_timestamp,
+                revision_id=self.article.revision_id,
             )
 
     def get_statistics(self) -> Dict[str, Any]:

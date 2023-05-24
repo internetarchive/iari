@@ -25,7 +25,7 @@ class ArticleStatistics(BaseModel):
     fld_counts: Dict[str, int] = {}
     urls: List[str] = []
     ores_score: Any = {}
-    revision: int = 0
+    revision_id: int = 0
     revision_isodate: str = ""
     revision_timestamp: int = 0
 
