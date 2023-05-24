@@ -2,6 +2,7 @@ import logging
 from typing import Dict, List
 
 import requests
+import validators  # type: ignore
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
@@ -59,7 +60,7 @@ class XhtmlHandler(BaseModel):
         soup = BeautifulSoup(self.content, "lxml")
         for link in soup.find_all("a"):
             href = link.get("href")
-            if href is not None:
+            if href is not None and validators.url(href):
                 link_obj = XhtmlLink(
                     context=link,
                     href=href,

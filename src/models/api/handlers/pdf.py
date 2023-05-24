@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 
 import fitz  # type: ignore
 import requests
+import validators  # type: ignore
 from fitz import (
     Document,  # type: ignore
     FileDataError,  # type: ignore
@@ -111,7 +112,8 @@ class PdfHandler(BaseModel):
             # cleaned_urls = self.__clean_urls__(urls=urls)
             # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
             for url in urls:
-                self.all_text_links.append(PdfLink(url=url, page=index))
+                if validators.url(url):
+                    self.all_text_links.append(PdfLink(url=url, page=index))
 
     def __extract_links_from_annotations__(self) -> None:
         if not self.pdf_document:
@@ -122,9 +124,9 @@ class PdfHandler(BaseModel):
             for annotation in annotations:
                 # print(annotation)
                 if annotation["kind"] == fitz.LINK_URI:
-                    self.annotation_links.append(
-                        PdfLink(url=annotation["uri"], page=page_num)
-                    )
+                    url = annotation["uri"]
+                    if validators.url(url):
+                        self.annotation_links.append(PdfLink(url=url, page=page_num))
 
     def __extract_text_pages__(self) -> None:
         """Extract all text from all pages"""
