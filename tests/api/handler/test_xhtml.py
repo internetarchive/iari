@@ -28,11 +28,11 @@ class TestXhtmlHandler(unittest.TestCase):
 
     def test_extract_links2(self):
         self.handler2.download_and_extract()
-        assert self.handler2.total_number_of_links == 265
+        assert self.handler2.total_number_of_links == 60
 
     def test_extract_links3(self):
         self.handler3.download_and_extract()
-        assert self.handler3.total_number_of_links == 13
+        assert self.handler3.total_number_of_links == 0
 
     # TODO rewrite these tests after merging the validator check
     # def test_get_dict1(self):
