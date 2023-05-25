@@ -189,8 +189,10 @@ class WikipediaAnalyzer(WariBaseModel):
         # https://github.com/internetarchive/wari/issues/700
         self.dehydrated_references = deepcopy(self.reference_statistics)
         for data in self.dehydrated_references:
+            # We return most of the data including the wikitext to accommodate
+            # see https://github.com/internetarchive/iari/issues/831
             del data["templates"]
-            del data["wikitext"]
+            del data["url_objects"]
 
     def __insert_dehydrated_references_into_the_article_statistics__(self):
         if self.article_statistics:
