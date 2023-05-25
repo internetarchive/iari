@@ -10,7 +10,7 @@ from src.models.api.link.xhtml_link import XhtmlLink
 class TestXhtmlHandler(unittest.TestCase):
     handler1 = XhtmlHandler(
         job=UrlJob(
-            url="https://www.campusdrugprevention.gov/sites/default/files/2021-11/Addressing-College-Drinking-and-Drug-Use%20(ACTA).pdf",
+            url="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
             timeout=10,
         )
     )
@@ -26,7 +26,7 @@ class TestXhtmlHandler(unittest.TestCase):
         assert self.handler1.error is True
         assert (
             self.handler1.error_details
-            == "Invalid content type for XHTML file. Got application/pdf"
+            == "Invalid content type for XHTML file. Got application/pdf; qs=0.001"
         )
 
     def test_extract_links2(self):
