@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from src.helpers.console import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.statistic.article import ArticleStatistics
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
@@ -119,16 +120,15 @@ class TestWikipediaAnalyzer(TestCase):
         assert wa.article.wikitext != ""
         assert wa.is_redirect is False
         assert wa.found is True
-        wa.get_statistics()
+        data = wa.get_statistics()
         assert len(wa.reference_statistics) == 31
         for reference in wa.reference_statistics:
             # this tests whether the deepcopy worked correctly
             assert "wikitext" in reference
             assert "templates" in reference
             assert "section" in reference
-
-    # def test__get_statistics_easter_island(self):
-    #     """This test takes forever (11s)"""
-    #     # TODO update to v2
-    #     # # FIXME implement mock requests to reduce test time
-    #     self.fail()
+        # this tests if the wikitext is retained in the output of article
+        # console.print(data)
+        for reference in data["dehydrated_references"]:
+            # this tests whether the deepcopy worked correctly
+            assert "wikitext" in reference

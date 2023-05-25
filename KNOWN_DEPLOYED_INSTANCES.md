@@ -1,6 +1,6 @@
 # Known deployed instances of IARI
 ## Internet Archive
-* Production (http, ip adress): http://18.217.22.248/
+* Production (http, ip address): http://18.217.22.248/
 * Production: (proxied to add https and domain): https://archive.org/services/context/wari/
 * Development: None
 
