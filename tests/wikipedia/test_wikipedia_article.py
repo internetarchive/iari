@@ -259,19 +259,8 @@ class TestWikipediaArticle(TestCase):
         # print(wp.revision_id)
         wp.__get_ores_scores__()
         assert wp.ores_quality_prediction == "B"
-        # print(wp.ores_details)
-        # This will break over time as predictions are updated on each edit
-        assert wp.ores_details == {
-            "prediction": "B",
-            "probability": {
-                "B": 0.6541036152021443,
-                "C": 0.1395663135841622,
-                "FA": 0.07020948799248741,
-                "GA": 0.12348515224009447,
-                "Start": 0.009268472204264279,
-                "Stub": 0.003366958776847205,
-            },
-        }
+        assert len(wp.ores_details) == 2
+        assert len(wp.ores_details["probability"]) == 6
 
     def test_ores_score_specific_rev(self):
         """Uses internet. Also test the date and timestamp"""
