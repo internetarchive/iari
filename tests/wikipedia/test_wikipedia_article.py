@@ -229,11 +229,10 @@ class TestWikipediaArticle(TestCase):
         assert wp.extractor.number_of_footnote_references == 2
         assert wp.extractor.number_of_general_references == 32
         assert wp.extractor.number_of_content_references == 34
-        assert len(wp.extractor.urls) == 23
+        assert len(wp.extractor.urls) == 24
         for url in wp.extractor.urls:
             logger.info(f"checking {url.url}")
             assert url.first_level_domain != ""
-        # FIXME These should equal 23 but they dont
 
     #        assert wp.extractor.reference_first_level_domain_counts == {'archive.org': 0,
     # 'auckland.ac.nz': 1,
