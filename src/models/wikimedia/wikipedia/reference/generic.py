@@ -253,12 +253,15 @@ class WikipediaReference(JobBaseModel):
 
     def __find_bare_urls_outside_templates__(self) -> List[str]:
         """Return bare urls from the the stripped wikitext (templates are stripped away)"""
-        wikicode = str(self.wikicode.strip_code)
-        # logger.debug(wikicode)
-        return re.findall(
-            link_extraction_regex,
-            wikicode,
-        )
+        if isinstance(self.wikicode, Wikicode):
+            wikicode = str(self.wikicode.strip_code)
+            # logger.debug(wikicode)
+            return re.findall(
+                link_extraction_regex,
+                wikicode,
+            )
+        else:
+            return []
 
     def __find_bare_urls_in_comments__(self) -> List[str]:
         """Return non-unique bare urls from the the stripped wikitext (templates are stripped away)"""
