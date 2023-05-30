@@ -1141,7 +1141,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             testing=True,
             is_general_reference=True,
         )
-        bare_urls = reference.__find_bare_urls__()
+        bare_urls = reference.__find_bare_urls_outside_templates__()
         assert len(bare_urls) == 1
 
     def test___external_links_in_reference__(self):
@@ -1296,7 +1296,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             is_general_reference=True,
         )
         console.print(wikicode)
-        assert len(raw_reference_object.__find_bare_urls__()) == 2
+        assert len(raw_reference_object.__find_bare_urls_outside_templates__()) == 2
         assert raw_reference_object.raw_urls == []
 
     def test_unique_first_level_domains2(self):

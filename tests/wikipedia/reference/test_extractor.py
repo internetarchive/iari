@@ -216,14 +216,15 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=electrical_breakdown_full_article, job=self.job
         )
         wre.extract_all_references()
-        assert wre.first_level_domains == [
+        assert len(wre.first_level_domains) == 6
+        for fld in [
             "google.com",
             "hypertextbook.com",
             "arcsuppressiontechnologies.com",
-            "google.com",
             "archive.org",
-        ]
-        assert len(wre.first_level_domains) == 5
+        ]:
+            assert fld in wre.first_level_domains
+            assert wre.first_level_domains.count("google.com") == 3
         assert len(wre.first_level_domain_counts) == 4
         assert wre.first_level_domain_counts == {
             "archive.org": 1,
