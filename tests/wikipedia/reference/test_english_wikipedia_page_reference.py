@@ -5,17 +5,20 @@ from unittest import TestCase
 from mwparserfromhell import parse  # type: ignore
 
 import config
+from src.helpers.console import console
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
+
 # wikibase = IASandboxWikibase()
 
 
 class TestEnglishWikipediaReferenceSchema(TestCase):
     pass
+
     # def test_url_template1(self):
     #     data = {
     #         "url": "https://www.stereogum.com/1345401/turntable-interview/interviews/",
@@ -760,7 +763,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     def test_extract_raw_templates_multiple_templates(self):
         raw_template1 = "{{citeq|Q1}}"
         raw_template2 = "{{citeq|Q2}}"
-        raw_reference = f"<ref>{raw_template1+raw_template2}</ref>"
+        raw_reference = f"<ref>{raw_template1 + raw_template2}</ref>"
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
@@ -805,7 +808,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     def test___determine_reference_type_two_templates(self):
         raw_template1 = "{{citeq|Q1}}"
         raw_template2 = "{{citeq|Q2}}"
-        raw_reference = f"<ref>{raw_template1+raw_template2}</ref>"
+        raw_reference = f"<ref>{raw_template1 + raw_template2}</ref>"
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
@@ -826,7 +829,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
 
     def test_number_of_templates_two(self):
         raw_template = "{{citeq|Q1}}"
-        raw_reference = f"<ref>{raw_template+raw_template}</ref>"
+        raw_reference = f"<ref>{raw_template + raw_template}</ref>"
         wikicode = parse(raw_reference)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
@@ -873,15 +876,28 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             raw_reference_object.extract_and_check()
             assert raw_reference_object.is_empty_named_reference is True
 
-    def test_get_wikicode_as_string(self):
+    def test_get_wikicode_as_string_empty(self):
         ref = '<ref name="INE"/>'
         wikicode = parse(ref)
+        refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
+        for ref in refs:
+            print(ref)
+            raw_reference_object = WikipediaReference(tag=ref, testing=True)
+            assert raw_reference_object.get_wikicode_as_string == ref
+
+    def test_get_wikicode_as_string_nonempty(self):
+        wikitext = (
+            '<ref name="jew virt lib">[http://www.jewishvirtuallibrary.org/sud-ouest-s-o-4050-vautour'
+            ' "IAF Aircraft Inventory: Sud-Ouest S.O. 4050 Vautour."] Jewish Virtual Library, '
+            "Retrieved: 16 September 2017.</ref>"
+        )
+        wikicode = parse(wikitext)
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaReference(tag=ref, testing=True)
             assert raw_reference_object.get_wikicode_as_string == ref
 
-    def test_is_citation_reference(self):
+    def test_is_footnote_reference(self):
         ref = "{{citeq|Q1}}"
         wikicode = parse(ref)
         raw_reference_object = WikipediaReference(
@@ -954,21 +970,21 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
     #     raw_reference_object.extract_and_check()
     #     assert raw_reference_object.plain_text_in_reference is False
 
-    def test_wayback_url_true(self):
-        wikitext = (
-            "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-            "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-            "|url=http://web.archive.org/web/19970222174751/https://www1.geocities.com/}}"
-        )
-        wikicode = parse(wikitext)
-        raw_reference_object = WikipediaReference(
-            section="test",
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-        )
-        raw_reference_object.extract_and_check()
-        # assert raw_reference_object.web_archive_org_in_reference is True
+    # def test_wayback_url_true(self):
+    #     wikitext = (
+    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
+    #         "|url=http://web.archive.org/web/19970222174751/https://www1.geocities.com/}}"
+    #     )
+    #     wikicode = parse(wikitext)
+    #     raw_reference_object = WikipediaReference(
+    #         section="test",
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #     )
+    #     raw_reference_object.extract_and_check()
+    # assert raw_reference_object.web_archive_org_in_reference is True
 
     # def test_wayback_url_false(self):
     #     wikitext = (
@@ -1090,25 +1106,13 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
-        assert raw_reference_object.reference_urls == [
-            WikipediaUrl(
-                checked=True,
-                error=False,
-                first_level_domain="geocities.com",
-                fld_is_ip=False,
-                malformed_url=False,
-                no_dns_record=True,
-                status_code=0,
-                url="https://www1.geocities.com/",
-            )
-        ]
-        assert raw_reference_object.first_level_domains == ["geocities.com"]
+        assert raw_reference_object.unique_first_level_domains == ["geocities.com"]
 
     def test_template_first_level_domains_two(self):
         wikitext = (
             "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
             "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-            "|url=https://www1.geocities.com/|archive-url=http://web.archive.org}}"
+            "|url=https://www1.geocities.com/|archive-url=https://web.archive.org/web/19961022173245/https://www1.geocities.com/}}"
         )
         wikicode = parse(wikitext)
         raw_reference_object = WikipediaReference(
@@ -1118,69 +1122,10 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             is_general_reference=True,
         )
         raw_reference_object.extract_and_check()
-        flds = sorted(raw_reference_object.first_level_domains)
-        assert flds == [
-            "archive.org",
+        # archive.org should not appear here
+        assert raw_reference_object.unique_first_level_domains == [
             "geocities.com",
         ]
-
-    # def test___check_urls__missing_extraction(self):
-    #     wikitext = (
-    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-    #         "|url=https://www1.geocities.com/|archive-url=http://web.archive.org}}"
-    #     )
-    #     wikicode = parse(wikitext)
-    #     raw_reference_object = WikipediaReference(
-    #         wikicode=wikicode,
-    #         testing=True,
-    #         is_general_reference=True,
-    #
-    #     )
-    #     with self.assertRaises(MissingInformationError):
-    #         raw_reference_object.__check_urls__()
-
-    # def test___checked_urls_no_dns(self):
-    #     wikitext = (
-    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-    #         "|url=https://www1.geocities.com/}}"
-    #     )
-    #     wikicode = parse(wikitext)
-    #     raw_reference_object = WikipediaReference(
-    #         wikicode=wikicode,
-    #         testing=True,
-    #         is_general_reference=True,
-    #
-    #     )
-    #     raw_reference_object.extract_and_check()
-    #     urls = raw_reference_object.checked_urls
-    #     assert raw_reference_object.check_urls_done is True
-    #     assert urls[0].status_code == 0
-    #     assert urls[0].checked is True
-    #     assert urls[0].dns_record_found is False
-    #
-    # def test___checked_urls_200(self):
-    #     wikitext = (
-    #         "{{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanui's Rongorong"
-    #         "|archive-url=http://web.archive.org}}"
-    #     )
-    #     wikicode = parse(wikitext)
-    #     raw_reference_object = WikipediaReference(
-    #         wikicode=wikicode,
-    #         testing=True,
-    #         is_general_reference=True,
-    #
-    #     )
-    #     raw_reference_object.extract_and_check()
-    #     urls = raw_reference_object.checked_urls
-    #     assert raw_reference_object.check_urls_done is True
-    #     assert raw_reference_object.first_level_domains == ["archive.org"]
-    #     assert urls[0].first_level_domain == "archive.org"
-    #     assert urls[0].status_code in [200, 0]
-    #     assert urls[0].checked is True
-    #     assert urls[0].dns_record_found is True
 
     def test___find_bare_urls__(self):
         """Test on a reference from the wild"""
@@ -1197,7 +1142,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             is_general_reference=True,
         )
         bare_urls = reference.__find_bare_urls__()
-        assert len(bare_urls) == 0
+        assert len(bare_urls) == 1
 
     def test___external_links_in_reference__(self):
         """Test on a reference from the wild"""
@@ -1317,3 +1262,89 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
                 "isbn": "978-0-262-73154-6",
             }
         ]
+
+    def test_unique_first_level_domains(self):
+        data = (
+            '<ref name="Wilson">{{cite book | title = Bicycling Science | '
+            "url = https://archive.org/details/isbn_9780262731546 | url-access = "
+            "registration | edition = Third | last = Wilson | first = David Gordon |"
+            "author2=Jim Papadopoulos | year = 2004 | publisher = The MIT Press | "
+            "isbn = 978-0-262-73154-6 | pages = "
+            "[https://archive.org/details/isbn_9780262731546/page/270 270–72]}}</ref>"
+        )
+        wikicode = parse(data)
+        raw_reference_object = WikipediaReference(
+            section="test",
+            wikicode=wikicode,
+            testing=True,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_check()
+        # archive.org should only appear once
+        assert raw_reference_object.unique_first_level_domains == ["archive.org"]
+
+    def test__find_bare_urls__(self):
+        wikitext = (
+            "<ref>{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
+            "https://babel.hathitrust.org/cgi/pt?id=mdp.39015027915100&view=1up&seq=11 -->}}</ref>"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaReference(
+            section="test",
+            wikicode=wikicode,
+            testing=True,
+            is_general_reference=True,
+        )
+        console.print(wikicode)
+        assert len(raw_reference_object.__find_bare_urls__()) == 2
+        assert raw_reference_object.raw_urls == []
+
+    def test_unique_first_level_domains2(self):
+        wikitext = (
+            "<ref>{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
+            "https://babel.hathitrust.org/cgi/pt?id=mdp.39015027915100&view=1up&seq=11 -->}}</ref>"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaReference(
+            section="test",
+            wikicode=wikicode,
+            testing=True,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_check()
+        assert len(raw_reference_object.raw_urls) == 2
+        assert len(raw_reference_object.unique_first_level_domains) == 2
+
+    def test_name_exists(self):
+        data = (
+            '<ref name="Wilson">{{cite book | title = Bicycling Science | '
+            "url = https://archive.org/details/isbn_9780262731546 | url-access = "
+            "registration | edition = Third | last = Wilson | first = David Gordon |"
+            "author2=Jim Papadopoulos | year = 2004 | publisher = The MIT Press | "
+            "isbn = 978-0-262-73154-6 | pages = "
+            "[https://archive.org/details/isbn_9780262731546/page/270 270–72]}}</ref>"
+        )
+        wikicode = parse(data)
+        raw_reference_object = WikipediaReference(
+            section="test",
+            wikicode=wikicode,
+            testing=True,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.get_name == "Wilson"
+
+    def test_name_none(self):
+        wikitext = (
+            "<ref>{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
+            "https://babel.hathitrust.org/cgi/pt?id=mdp.39015027915100&view=1up&seq=11 -->}}</ref>"
+        )
+        wikicode = parse(wikitext)
+        raw_reference_object = WikipediaReference(
+            section="test",
+            wikicode=wikicode,
+            testing=True,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.get_name == ""

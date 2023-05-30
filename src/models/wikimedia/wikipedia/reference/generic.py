@@ -3,9 +3,11 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Union
 
+from bs4 import BeautifulSoup
 from mwparserfromhell.nodes import Tag  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
+from config import link_extraction_regex
 from src.models.base.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.enums import (
@@ -46,16 +48,25 @@ class WikipediaReference(JobBaseModel):
     bare_urls: List[WikipediaUrl] = []
     template_urls: List[WikipediaUrl] = []
     reference_urls: List[WikipediaUrl] = []
-    first_level_domains: List[str] = []
+    unique_first_level_domains: List[str] = []
     language_code: str = ""
     reference_id: str = ""
     section: str
-    bare_url_regex = re.compile(
-        r"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?"
-    )
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
+
+    @property
+    def get_name(self) -> str:
+        soup = BeautifulSoup(str(self.wikicode), "lxml")
+        # Find the <ref> tag
+        ref_tag = soup.find("ref")
+        if ref_tag:
+            # Extract the value of the 'name' attribute
+            name = ref_tag.get("name")  # type: ignore # see https://github.com/python/typeshed/issues/8356
+            return name if isinstance(name, str) else ""
+        else:
+            return ""
 
     @property
     def reference_type(self) -> Optional[ReferenceType]:
@@ -103,19 +114,11 @@ class WikipediaReference(JobBaseModel):
 
     @property
     def raw_urls(self) -> List[str]:
-        """Get a list of the raw urls"""
+        """Get a list of the raw unique urls"""
         urls = []
         for url in self.reference_urls:
             urls.append(url.url)
         return urls
-
-    @property
-    def get_stripped_wikicode(self):
-        if isinstance(self.wikicode, Wikicode):
-            return self.wikicode.strip_code()
-        else:
-            # support Tag
-            return self.wikicode.contents.strip_code()
 
     def __extract_template_urls__(self) -> None:
         urls = []
@@ -128,8 +131,7 @@ class WikipediaReference(JobBaseModel):
         """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
         urls = []
         for url in self.__find_bare_urls__():
-            # We get a tuple back so we join it
-            url_object = WikipediaUrl(url="".join(url))
+            url_object = WikipediaUrl(url=url)
             url_object.extract()
             urls.append(url_object)
         self.bare_urls = urls
@@ -168,7 +170,7 @@ class WikipediaReference(JobBaseModel):
         # We set it to avoid duplicates
         self.reference_urls = list(set(urls_list))
 
-    def __extract_first_level_domains__(self) -> None:
+    def __extract_unique_first_level_domains__(self) -> None:
         """This aggregates all first level domains from the urls found in the urls"""
         from src import app
 
@@ -177,14 +179,18 @@ class WikipediaReference(JobBaseModel):
             app.logger.info("no reference_urls found so we skip extraction")
         else:
             logger.debug("found at least one url")
+            first_level_domains = set()
             for url in self.reference_urls:
                 logger.debug("working on url")
                 if url.first_level_domain:
                     app.logger.debug(f"found fld: {url.first_level_domain}")
-                    self.first_level_domains.append(url.first_level_domain)
+                    first_level_domains.add(url.first_level_domain)
                 else:
                     app.logger.warning(f"no fld found for: {url.url}")
-        app.logger.debug(f"found flds: {self.first_level_domains}")
+            # Return unique domains to avoid confusion
+            # https://github.com/internetarchive/iari/issues/834
+            self.unique_first_level_domains = list(first_level_domains)
+            app.logger.debug(f"found unique flds: {self.unique_first_level_domains}")
 
     # @property
     # def plain_text_in_reference(self) -> bool:
@@ -219,13 +225,13 @@ class WikipediaReference(JobBaseModel):
         """Convenience method for tests"""
         return len(self.templates)
 
-    def __find_bare_urls__(self, stripped_wikicode: str = "") -> List[tuple]:
-        """Return bare urls from the stripped wikitext"""
-        if not stripped_wikicode:
-            stripped_wikicode = self.get_stripped_wikicode
+    def __find_bare_urls__(self) -> List[tuple]:
+        """Return bare urls from the the raw wikitext"""
+        wikicode = str(self.wikicode)
+        # logger.debug(wikicode)
         return re.findall(
-            self.bare_url_regex,
-            stripped_wikicode,
+            link_extraction_regex,
+            wikicode,
         )
 
     def __extract_templates_and_parameters__(self) -> None:
@@ -296,7 +302,7 @@ class WikipediaReference(JobBaseModel):
         app.logger.debug("extract_and_check: running")
         self.__extract_templates_and_parameters__()
         self.__extract_reference_urls__()
-        self.__extract_first_level_domains__()
+        self.__extract_unique_first_level_domains__()
         self.__generate_reference_id__()
 
     def __generate_reference_id__(self) -> None:
