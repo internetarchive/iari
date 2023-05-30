@@ -19,6 +19,7 @@ class ReferenceStatistic(BaseModel):
     titles: List[str] = []
     section: str = ""
     url_objects: List[Dict[str, Any]]
+    name: str = ""
 
     class Config:  # dead: disable
         extra = "forbid"  # dead: disable

@@ -36,14 +36,15 @@ class TestArticle(TestCase):
 
     def test_valid_request_svwiki1(self):
         response = self.test_client.get(
-            "/get-statistics?url=https://sv.wikipedia.org/wiki/Boy_Rozendal&testing=true&regex=test"
+            "/get-statistics?url=https://sv.wikipedia.org/wiki/Boy_Rozendal&testing=true&regex=Externa%20länkar&refresh=true"
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
-        console.print(data)
+        # console.print(data)
         assert data["title"] == "Boy_Rozendal"
-        assert len(data["dehydrated_references"]) == 3
-        assert len(data["urls"]) == 5
+        assert len(data["dehydrated_references"]) == 4
+        # print(data["urls"])
+        assert len(data["urls"]) == 4
 
     # todo enable again after revisions have been implemented and add a revision
     # def test_valid_request_dawiki1(self):

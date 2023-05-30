@@ -199,13 +199,13 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=easter_island_tail_excerpt, job=self.job
         )
         wre.extract_all_references()
-        assert len(wre.first_level_domains) == 10
+        assert len(wre.first_level_domains) == 11
         assert len(wre.first_level_domain_counts) == 7
         assert wre.first_level_domain_counts == {
             "archive.org": 4,
             "usatoday.com": 1,
             "bnf.fr": 1,
-            "google.com": 1,
+            "google.com": 2,
             "auckland.ac.nz": 1,
             "pisc.org.uk": 1,
             "oclc.org": 1,
@@ -216,14 +216,15 @@ class TestWikipediaReferenceExtractor(TestCase):
             testing=True, wikitext=electrical_breakdown_full_article, job=self.job
         )
         wre.extract_all_references()
-        assert wre.first_level_domains == [
+        assert len(wre.first_level_domains) == 5
+        for fld in [
             "google.com",
             "hypertextbook.com",
             "arcsuppressiontechnologies.com",
-            "google.com",
             "archive.org",
-        ]
-        assert len(wre.first_level_domains) == 5
+        ]:
+            assert fld in wre.first_level_domains
+            assert wre.first_level_domains.count("google.com") == 2
         assert len(wre.first_level_domain_counts) == 4
         assert wre.first_level_domain_counts == {
             "archive.org": 1,

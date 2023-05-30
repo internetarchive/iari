@@ -3,9 +3,11 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Union
 
+from bs4 import BeautifulSoup, Comment
 from mwparserfromhell.nodes import Tag  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
+from config import link_extraction_regex
 from src.models.base.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.enums import (
@@ -46,16 +48,29 @@ class WikipediaReference(JobBaseModel):
     bare_urls: List[WikipediaUrl] = []
     template_urls: List[WikipediaUrl] = []
     reference_urls: List[WikipediaUrl] = []
-    first_level_domains: List[str] = []
+    comment_urls: List[WikipediaUrl] = []
+    unique_first_level_domains: List[str] = []
     language_code: str = ""
     reference_id: str = ""
     section: str
-    bare_url_regex = re.compile(
-        r"(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?"
-    )
+    soup: Optional[Any] = None
+    comments: List[Comment] = []
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
+
+    @property
+    def get_name(self) -> str:
+        if not self.soup:
+            raise MissingInformationError()
+        # Find the <ref> tag
+        ref_tag = self.soup.find("ref")
+        if ref_tag:
+            # Extract the value of the 'name' attribute
+            name = ref_tag.get("name")  # type: ignore # see https://github.com/python/typeshed/issues/8356
+            return name if isinstance(name, str) else ""
+        else:
+            return ""
 
     @property
     def reference_type(self) -> Optional[ReferenceType]:
@@ -103,19 +118,40 @@ class WikipediaReference(JobBaseModel):
 
     @property
     def raw_urls(self) -> List[str]:
-        """Get a list of the raw urls"""
+        """Get a list of the raw unique urls"""
         urls = []
         for url in self.reference_urls:
             urls.append(url.url)
         return urls
 
     @property
-    def get_stripped_wikicode(self):
-        if isinstance(self.wikicode, Wikicode):
-            return self.wikicode.strip_code()
+    def get_reference_url_dicts(self) -> List[Dict[str, Any]]:
+        urls = []
+        if self.reference_urls:
+            for url in self.reference_urls:
+                urls.append(url.get_dict)
+        return urls
+
+    @property
+    def is_footnote_reference(self):
+        """This could also be implemented based on the class type of the wikicode attribute.
+        I choose not to because it could perhaps be brittle."""
+        if self.is_general_reference:
+            return False
         else:
-            # support Tag
-            return self.wikicode.contents.strip_code()
+            return True
+
+    @property
+    def get_wikicode_as_string(self):
+        return str(self.wikicode)
+
+    @property
+    def number_of_templates(self) -> int:  # dead: disable
+        """Convenience method for tests"""
+        return len(self.templates)
+
+    def __parse_xhtml__(self):
+        self.soup = BeautifulSoup(str(self.wikicode), "lxml")
 
     def __extract_template_urls__(self) -> None:
         urls = []
@@ -124,15 +160,22 @@ class WikipediaReference(JobBaseModel):
                 urls.extend(template.urls)
         self.template_urls = list(urls)
 
-    def __extract_bare_urls__(self) -> None:
+    def __extract_bare_urls_outside_templates__(self) -> None:
         """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
         urls = []
-        for url in self.__find_bare_urls__():
-            # We get a tuple back so we join it
-            url_object = WikipediaUrl(url="".join(url))
+        for url in self.__find_bare_urls_outside_templates__():
+            url_object = WikipediaUrl(url=url)
             url_object.extract()
             urls.append(url_object)
         self.bare_urls = urls
+
+    def __extract_urls_from_comments__(self):
+        urls = []
+        for url in self.__find_bare_urls_in_comments__():
+            url_object = WikipediaUrl(url=url)
+            url_object.extract()
+            urls.append(url_object)
+        self.comment_urls = urls
 
     def __extract_external_wikicoded_links_from_the_reference__(self) -> None:
         """This relies on mwparserfromhell to find links like [google.com Google] in the wikitext"""
@@ -160,15 +203,18 @@ class WikipediaReference(JobBaseModel):
             self.__extract_template_urls__()
         urls_list.extend(self.template_urls)
         if not self.bare_urls:
-            self.__extract_bare_urls__()
+            self.__extract_bare_urls_outside_templates__()
         urls_list.extend(self.bare_urls)
         if not self.wikicoded_links:
             self.__extract_external_wikicoded_links_from_the_reference__()
         urls_list.extend(self.wikicoded_links)
+        if not self.comment_urls:
+            self.__extract_urls_from_comments__()
+        urls_list.extend(self.comment_urls)
         # We set it to avoid duplicates
         self.reference_urls = list(set(urls_list))
 
-    def __extract_first_level_domains__(self) -> None:
+    def __extract_unique_first_level_domains__(self) -> None:
         """This aggregates all first level domains from the urls found in the urls"""
         from src import app
 
@@ -177,14 +223,18 @@ class WikipediaReference(JobBaseModel):
             app.logger.info("no reference_urls found so we skip extraction")
         else:
             logger.debug("found at least one url")
+            first_level_domains = set()
             for url in self.reference_urls:
                 logger.debug("working on url")
                 if url.first_level_domain:
                     app.logger.debug(f"found fld: {url.first_level_domain}")
-                    self.first_level_domains.append(url.first_level_domain)
+                    first_level_domains.add(url.first_level_domain)
                 else:
                     app.logger.warning(f"no fld found for: {url.url}")
-        app.logger.debug(f"found flds: {self.first_level_domains}")
+            # Return unique domains to avoid confusion
+            # https://github.com/internetarchive/iari/issues/834
+            self.unique_first_level_domains = list(first_level_domains)
+            app.logger.debug(f"found unique flds: {self.unique_first_level_domains}")
 
     # @property
     # def plain_text_in_reference(self) -> bool:
@@ -201,32 +251,29 @@ class WikipediaReference(JobBaseModel):
     #     else:
     #         return True
 
-    @property
-    def is_footnote_reference(self):
-        """This could also be implemented based on the class type of the wikicode attribute.
-        I choose not to because it could perhaps be brittle."""
-        if self.is_general_reference:
-            return False
+    def __find_bare_urls_outside_templates__(self) -> List[str]:
+        """Return bare urls from the the stripped wikitext (templates are stripped away)"""
+        if isinstance(self.wikicode, Wikicode):
+            wikicode = str(self.wikicode.strip_code)
+            # logger.debug(wikicode)
+            return re.findall(
+                link_extraction_regex,
+                wikicode,
+            )
         else:
-            return True
+            return []
 
-    @property
-    def get_wikicode_as_string(self):
-        return str(self.wikicode)
-
-    @property
-    def number_of_templates(self) -> int:  # dead: disable
-        """Convenience method for tests"""
-        return len(self.templates)
-
-    def __find_bare_urls__(self, stripped_wikicode: str = "") -> List[tuple]:
-        """Return bare urls from the stripped wikitext"""
-        if not stripped_wikicode:
-            stripped_wikicode = self.get_stripped_wikicode
-        return re.findall(
-            self.bare_url_regex,
-            stripped_wikicode,
-        )
+    def __find_bare_urls_in_comments__(self) -> List[str]:
+        """Return non-unique bare urls from the the stripped wikitext (templates are stripped away)"""
+        urls = []
+        for comment in self.comments:
+            urls_found = re.findall(
+                link_extraction_regex,
+                comment,
+            )
+            if urls_found:
+                urls.extend(urls_found)
+        return urls
 
     def __extract_templates_and_parameters__(self) -> None:
         """Helper method"""
@@ -294,9 +341,11 @@ class WikipediaReference(JobBaseModel):
         from src import app
 
         app.logger.debug("extract_and_check: running")
+        self.__parse_xhtml__()
+        self.__extract_xhtml_comments__()
         self.__extract_templates_and_parameters__()
         self.__extract_reference_urls__()
-        self.__extract_first_level_domains__()
+        self.__extract_unique_first_level_domains__()
         self.__generate_reference_id__()
 
     def __generate_reference_id__(self) -> None:
@@ -304,10 +353,8 @@ class WikipediaReference(JobBaseModel):
         the raw wikitext for this reference"""
         self.reference_id = hashlib.md5(f"{self.wikicode}".encode()).hexdigest()[:8]
 
-    @property
-    def get_reference_url_dicts(self) -> List[Dict[str, Any]]:
-        urls = []
-        if self.reference_urls:
-            for url in self.reference_urls:
-                urls.append(url.get_dict)
-        return urls
+    def __extract_xhtml_comments__(self):
+        if not self.soup:
+            raise MissingInformationError()
+        # Find all comment tags in the HTML
+        return self.soup.find_all(text=lambda text: isinstance(text, Comment))

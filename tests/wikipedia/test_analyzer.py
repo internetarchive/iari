@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from src.helpers.console import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.statistic.article import ArticleStatistics
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
@@ -127,6 +126,7 @@ class TestWikipediaAnalyzer(TestCase):
             assert "wikitext" in reference
             assert "templates" in reference
             assert "section" in reference
+            assert "name" in reference
         # this tests if the wikitext is retained in the output of article
         # console.print(data)
         for reference in data["dehydrated_references"]:
