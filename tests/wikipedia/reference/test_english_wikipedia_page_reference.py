@@ -1346,6 +1346,19 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         raw_reference_object.extract_and_check()
         assert raw_reference_object.get_name == "Wilson"
 
+    def test_name_exists_forward_slash(self):
+        """test edge case with missing quotes"""
+        data = "<ref name=terry_hunt/>"
+        wikicode = parse(data)
+        raw_reference_object = WikipediaReference(
+            section="test",
+            wikicode=wikicode,
+            testing=True,
+            is_general_reference=True,
+        )
+        raw_reference_object.extract_and_check()
+        assert raw_reference_object.get_name == "terry_hunt"
+
     def test_name_none(self):
         wikitext = (
             "<ref>{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
