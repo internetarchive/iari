@@ -67,7 +67,10 @@ class WikipediaReference(JobBaseModel):
         ref_tag = self.soup.find("ref")
         if ref_tag:
             # Extract the value of the 'name' attribute
-            name = ref_tag.get("name")  # type: ignore # see https://github.com/python/typeshed/issues/8356
+            name = str(ref_tag.get("name"))  # type: ignore # see https://github.com/python/typeshed/issues/8356
+            if name.endswith("\\"):
+                # Cut off the trailing forward slash
+                name = name[:-1]
             return name if isinstance(name, str) else ""
         else:
             return ""
