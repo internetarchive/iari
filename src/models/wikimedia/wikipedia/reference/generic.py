@@ -69,6 +69,9 @@ class WikipediaReference(JobBaseModel):
             # Extract the value of the 'name' attribute
             name = str(ref_tag.get("name"))  # type: ignore # see https://github.com/python/typeshed/issues/8356
             if name.endswith("\\"):
+                # Cut off the trailing backward slash
+                name = name[:-1]
+            if name.endswith("/"):
                 # Cut off the trailing forward slash
                 name = name[:-1]
             if name == "None" or name is None:
