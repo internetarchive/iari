@@ -86,13 +86,13 @@ class WikipediaReferenceExtractor(WariBaseModel):
 
     @property
     def first_level_domains(self) -> List[str]:
-        """This is a list and duplicates are likely and wanted"""
+        """This is a list and duplicates are likely and wanted across the references"""
         if not self.content_references:
             return []
         flds = []
-        for url in self.urls:
-            if url.first_level_domain:
-                flds.append(url.first_level_domain)
+        for reference in self.references:
+            if reference.unique_first_level_domains:
+                flds.extend(reference.unique_first_level_domains)
         return flds
 
     @property
