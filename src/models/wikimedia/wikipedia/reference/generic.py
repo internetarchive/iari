@@ -71,7 +71,10 @@ class WikipediaReference(JobBaseModel):
             if name.endswith("\\"):
                 # Cut off the trailing forward slash
                 name = name[:-1]
-            return name if isinstance(name, str) else ""
+            if name == "None" or name is None:
+                return ""
+            else:
+                return name
         else:
             return ""
 
