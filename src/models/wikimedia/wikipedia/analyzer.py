@@ -64,6 +64,8 @@ class WikipediaAnalyzer(WariBaseModel):
                     "self.article.revision_timestamp was None"
                 )
             ae = self.article.extractor
+            if not self.job.page_id:
+                self.job.get_ids_from_mediawiki_api()
             self.article_statistics = ArticleStatistics(
                 wari_id=self.job.wari_id,
                 lang=self.job.lang,

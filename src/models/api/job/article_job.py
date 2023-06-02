@@ -54,7 +54,9 @@ class ArticleJob(Job):
             # console.print(response.json())
             if response.status_code == 200:
                 data = response.json()
-                self.revision = int(data["latest"]["id"])
+                # We only set this if the patron did not specify a revision they want
+                if not self.revision:
+                    self.revision = int(data["latest"]["id"])
                 self.page_id = int(data["id"])
             elif response.status_code == 404:
                 app.logger.error(
