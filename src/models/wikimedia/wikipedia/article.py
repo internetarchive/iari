@@ -515,7 +515,10 @@ class WikipediaArticle(WariBaseModel):
             f"w/rest.php/v1/revision/{self.job.revision}"
         )
         prop = "ids|timestamp|content"
-        response = requests.get(url, params={"action": "query", "prop": prop})
+        headers = {"User-Agent": config.user_agent}
+        response = requests.get(
+            url, params={"action": "query", "prop": prop}, headers=headers
+        )
         # console.print(response.json())
         if response.status_code == 200:
             data = response.json()

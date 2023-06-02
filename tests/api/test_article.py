@@ -41,7 +41,20 @@ class TestArticle(TestCase):
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
-        console.print(data)
+        # # will this test the cache? no because we dont cache during testing
+        # del data["isodate"]
+        # del data["timestamp"]
+        # response2 = self.test_client.get(
+        #     "/get-statistics?url=https://sv.wikipedia.org/wiki/Boy_Rozendal&testing=true&regex=Externa%20länkar&refresh=false"
+        # )
+        # self.assertEqual(200, response2.status_code)
+        # data2 = json.loads(response2.data)
+        # if "isodate" in data:
+        #     del data["isodate"]
+        # if "timestamp" in data:
+        #     del data["timestamp"]
+        # assert data == data2
+        # console.print(data)
         assert data["title"] == "Boy_Rozendal"
         assert len(data["dehydrated_references"]) == 4
         # print(data["urls"])

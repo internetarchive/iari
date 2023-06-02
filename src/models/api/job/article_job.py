@@ -19,7 +19,17 @@ class ArticleJob(Job):
     refresh: bool = False
     url: str = ""
     regex: str = ""
-    revision: int = 0
+    revision: int = 0  # this is named just as in the MediaWiki API
+
+    @property
+    def wari_id(self) -> str:
+        if not self.lang:
+            raise MissingInformationError()
+        if not self.page_id:
+            raise MissingInformationError()
+        if not self.revision:
+            raise MissingInformationError()
+        return f"{self.lang}.{self.domain.value}.{self.page_id}.{self.revision}"
 
     @property
     def quoted_title(self):
@@ -27,7 +37,7 @@ class ArticleJob(Job):
             raise MissingInformationError("self.title was empty")
         return quote(self.title, safe="")
 
-    def get_page_id(self) -> None:
+    def get_ids_from_mediawiki_api(self) -> None:
         from src import app
 
         app.logger.debug("get_page_id: running")
@@ -37,22 +47,15 @@ class ArticleJob(Job):
             # https://stackoverflow.com/questions/31683508/wikipedia-mediawiki-api-get-pageid-from-url
             url = (
                 f"https://{self.lang}.{self.domain.value}/"
-                f"w/api.php?action=query&format=json&titles={self.quoted_title}"
+                f"w/rest.php/v1/page/{self.quoted_title}"
             )
-            app.logger.debug(f"api url: {url}")
             headers = {"User-Agent": config.user_agent}
             response = requests.get(url, headers=headers)
             # console.print(response.json())
             if response.status_code == 200:
                 data = response.json()
-                query = data.get("query")
-                if query:
-                    pages = query.get("pages")
-                    if pages:
-                        for page in pages:
-                            if page:
-                                app.logger.info("Got page id")
-                                self.page_id = int(page)
+                self.revision = int(data["latest"]["id"])
+                self.page_id = int(data["id"])
             elif response.status_code == 404:
                 app.logger.error(
                     f"Could not fetch page data from {self.domain} because of 404. See {url}"
