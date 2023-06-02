@@ -5,7 +5,6 @@ from flask import Flask
 from flask_restful import Api  # type: ignore
 
 from src import Article
-from src.helpers.console import console
 from src.models.api.statistic.article import ArticleStatistics
 
 # This is needed to get the full diff when tests fail
