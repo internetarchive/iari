@@ -12,17 +12,23 @@ class BaseHandler(BaseModel):
         from src import app
 
         # langdetect does not work reliably for text with less than 200 characters
-        if len(self.text) < 200:
-            message = "Not enough text for us to reliably detect the language"
+        if not self.text:
+            message = "No text, skipping language detection"
             self.detected_language_error = True
             self.detected_language_error_details = message
             app.logger.error(message)
         else:
-            try:
-                self.detected_language = detect(self.text)
-                print(f"The detected language is: {self.detected_language}")
-            except LangDetectException as e:
-                message = f"An error occurred while detecting the language: {e}"
+            if len(self.text) < 200:
+                message = "Not enough text for us to reliably detect the language"
                 self.detected_language_error = True
                 self.detected_language_error_details = message
                 app.logger.error(message)
+            else:
+                try:
+                    self.detected_language = detect(self.text)
+                    print(f"The detected language is: {self.detected_language}")
+                except LangDetectException as e:
+                    message = f"An error occurred while detecting the language: {e}"
+                    self.detected_language_error = True
+                    self.detected_language_error_details = message
+                    app.logger.error(message)

@@ -1,5 +1,8 @@
 # Developer notes
 
+## Extract single page from pdf
+Use browser -> print -> save to pdf
+
 ## CLI Usage examples
 
 ## Architecture design ideas for future graph generation

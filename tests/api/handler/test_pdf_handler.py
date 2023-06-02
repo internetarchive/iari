@@ -33,6 +33,12 @@ class TestPdfHandler(unittest.TestCase):
             file_path="test_data/mwg-fdr-document-04-16-23-1-270.pdf",
         )
         self.pdf_handler4.read_and_extract()
+        self.pdf_handler5 = PdfHandler(
+            job=UrlJob(url=""),
+            testing=True,
+            file_path="test_data/d-ind-global.01-2022-pdf-e-184.pdf",
+        )
+        self.pdf_handler5.read_and_extract()
 
     def test_extract_links1(self):
         assert self.pdf_handler1.number_of_text_links == 95
@@ -72,6 +78,15 @@ class TestPdfHandler(unittest.TestCase):
     def test___extract_links_from_annotations__(self):
         assert self.pdf_handler4.number_of_annotation_links == 14
 
+    def test___extract_links_from_weird_pdf__(self):
+        """This pdf has spaces in the urls from pymupdf.
+        Weird and not something we can really fix"""
+        # print(self.pdf_handler5.get_dict())
+        assert self.pdf_handler5.number_of_total_text_characters == 2148
+        assert self.pdf_handler5.number_of_pages == 1
+        assert self.pdf_handler5.number_of_text_links == 0
+        assert self.pdf_handler5.number_of_annotation_links == 0
+
     def test_extract_links_same_number_found(self):
         assert (
             self.pdf_handler4.number_of_annotation_links
@@ -99,6 +114,7 @@ class TestPdfHandler(unittest.TestCase):
 
     def test_dict1(self):
         data = self.pdf_handler1.get_dict()
+        # print(data)
         assert data["detected_language"] == "en"
         assert data["detected_language_error"] is False
 

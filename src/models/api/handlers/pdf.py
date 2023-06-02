@@ -1,7 +1,7 @@
 import logging
 import re
 from io import BytesIO
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import fitz  # type: ignore
 import requests
@@ -28,14 +28,21 @@ class PdfHandler(BaseHandler):
     annotation_links: List[PdfLink] = []
     error: bool = False
     text_pages: Dict[int, str] = {}
+    cleaned_text_pages: Dict[int, str] = {}
+    url_annotations: Dict[int, List[Any]] = {}
     error_details: Tuple[int, str] = (0, "")
     urls_fixed: List[str] = []
     file_path: str = ""
     pdf_document: Optional[Document] = None
     word_counts: List[int] = []
+    # html_pages: Dict[int, str] = {}
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
+
+    @property
+    def number_of_total_text_characters(self) -> int:
+        return len(self.text)
 
     def __count_words__(self) -> None:
         self.word_counts = [
@@ -74,6 +81,9 @@ class PdfHandler(BaseHandler):
 
     def __download_pdf__(self):
         """Download PDF file from URL"""
+        from src import app
+
+        app.logger.debug("__download_pdf__: running")
         if not self.content:
             try:
                 response = requests.get(self.job.url, timeout=self.job.timeout)
@@ -98,6 +108,24 @@ class PdfHandler(BaseHandler):
                 )
                 logger.warning(self.error_details)
 
+    def __clean_page_text__(self):
+        """Clean the page strings and put them into a dictionary attribute"""
+        for index, _ in enumerate(self.text_pages):
+            self.cleaned_text_pages[index] = self.__get_cleaned_page_string__(
+                number=index
+            )
+
+    # def __extract_links_from_html__(self) -> None:
+    #     """Extract all links from the html extract per page"""
+    #     for index, _ in enumerate(self.html_pages):
+    #         xhtml = XhtmlHandler(content=self.html_pages[index])
+    #         xhtml.__parse_into_soup__()
+    #         xhtml.__extract_links__()
+    #         print(xhtml.links)
+    #         # for url in urls:
+    #         #     if validators.url(url):
+    #         #         self.all_text_links.append(PdfLink(url=url, page=index))
+
     def __extract_links_from_all_text__(self) -> None:
         """Extract all links from the text extract per page"""
         for index, _ in enumerate(self.text_pages):
@@ -112,6 +140,24 @@ class PdfHandler(BaseHandler):
             for url in urls:
                 if validators.url(url):
                     self.all_text_links.append(PdfLink(url=url, page=index))
+
+    def __get_annotations__(self):
+        """Extract the raw annotations into an attribute dictionary"""
+        if not self.pdf_document:
+            raise MissingInformationError()
+        for page_num in range(self.pdf_document.page_count):
+            page = self.pdf_document.load_page(page_num)
+            # todo is this zero based?
+            all_annotations = page.get_links()
+            url_annotations = []
+            for annotation in all_annotations:
+                if annotation["kind"] == fitz.LINK_URI:
+                    url_annotations.append(annotation)
+            # print(type(annotations))
+            # console.print(annotations)
+            # exit()
+            if url_annotations:
+                self.url_annotations[page_num] = url_annotations
 
     def __extract_links_from_annotations__(self) -> None:
         if not self.pdf_document:
@@ -133,8 +179,20 @@ class PdfHandler(BaseHandler):
         if not self.pdf_document:
             raise MissingInformationError()
         for index, page in enumerate(self.pdf_document.pages()):
-            text = page.get_text()
+            # See https://pymupdf.readthedocs.io/en/latest/app1.html
+            text = page.get_text("text")
             self.text_pages[index] = text
+
+    # def __extract_html_pages__(self) -> None:
+    #     """Extract all text from all pages"""
+    #     if not self.pdf_document:
+    #         self.__extract_pdf_document__()
+    #     if not self.pdf_document:
+    #         raise MissingInformationError()
+    #     for index, page in enumerate(self.pdf_document.pages()):
+    #         # See https://pymupdf.readthedocs.io/en/latest/app1.html
+    #         html = page.get_text("html")
+    #         self.html_pages[index] = html
 
     def __extract_pdf_document__(self):
         if not self.content:
@@ -175,26 +233,32 @@ class PdfHandler(BaseHandler):
             "detected_language": self.detected_language,
             "detected_language_error": self.detected_language_error,
             "detected_language_error_details": self.detected_language_error_details,
+            "debug_text_original": self.text_pages,
+            "debug_text_cleaned": self.cleaned_text_pages,
+            "debug_url_annotations": self.url_annotations,
+            "characters": self.number_of_total_text_characters,
         }
+        # console.print(data)
+        # exit()
         return data
 
     def __get_cleaned_page_string__(self, number) -> str:
         page_string = self.text_pages[number]
         page_string = self.__clean_linebreaks__(string=page_string)
-        page_string = self.__fix_doi_typing_errors__(string=page_string)
+        # page_string = self.__fix_doi_typing_errors__(string=page_string)
         return page_string
 
-    def __fix_doi_typing_errors__(self, string):
-        """This fixes common typing errors that we found"""
-        # From https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf page 298
-        if "https://doi.org:" in string:
-            self.urls_fixed.append("https://doi.org:")
-            string = string.replace("https://doi.org:", "https://doi.org/")
-        # From https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf page 298
-        if "https://doi.or/" in string:
-            self.urls_fixed.append("https://doi.or/")
-            string = string.replace("https://doi.or/", "https://doi.org/")
-        return string
+    # def __fix_doi_typing_errors__(self, string):
+    #     """This fixes common typing errors that we found"""
+    #     # From https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf page 298
+    #     if "https://doi.org:" in string:
+    #         self.urls_fixed.append("https://doi.org:")
+    #         string = string.replace("https://doi.org:", "https://doi.org/")
+    #     # From https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf page 298
+    #     if "https://doi.or/" in string:
+    #         self.urls_fixed.append("https://doi.or/")
+    #         string = string.replace("https://doi.or/", "https://doi.org/")
+    #     return string
 
     def __read_pdf_from_file__(self):
         """This is needed for fast testing on pdfs in test_data"""
@@ -202,13 +266,18 @@ class PdfHandler(BaseHandler):
             self.content = file.read()
 
     def __extract_pages_and_links__(self):
+        from src import app
+
+        app.logger.debug("__extract_pages_and_links__: running")
         if not self.error:
             self.__extract_pdf_document__()
         if not self.error:
+            self.__get_annotations__()
             self.__extract_links_from_annotations__()
             self.__extract_text_pages__()
         if not self.error:
             self.__extract_links_from_all_text__()
+            self.__clean_page_text__()
         self.__concatenate_text_from_all_pages__()
         self.__detect_language__()
 
@@ -219,5 +288,6 @@ class PdfHandler(BaseHandler):
         return string
 
     def __concatenate_text_from_all_pages__(self):
+        """This is needed for language detection"""
         for index, _ in enumerate(self.text_pages):
             self.text += self.text_pages[index]
