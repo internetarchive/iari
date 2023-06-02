@@ -29,20 +29,6 @@ class WikipediaAnalyzer(WariBaseModel):
     dehydrated_references: List[Dict[str, Any]] = []
 
     @property
-    def wari_id(self) -> str:
-        if not self.job:
-            raise MissingInformationError()
-        if not self.job.lang:
-            raise MissingInformationError()
-        if not self.article:
-            raise MissingInformationError()
-        if not self.article.page_id:
-            raise MissingInformationError()
-        if not self.article.revision_id:
-            raise MissingInformationError()
-        return f"{self.job.lang}.{self.job.domain.value}.{self.article.page_id}.{self.article.revision_id}"
-
-    @property
     def testing(self):
         if not self.job:
             raise MissingInformationError("no job")
@@ -78,8 +64,10 @@ class WikipediaAnalyzer(WariBaseModel):
                     "self.article.revision_timestamp was None"
                 )
             ae = self.article.extractor
+            if not self.job.page_id:
+                self.job.get_ids_from_mediawiki_api()
             self.article_statistics = ArticleStatistics(
-                wari_id=self.wari_id,
+                wari_id=self.job.wari_id,
                 lang=self.job.lang,
                 reference_statistics={
                     "named": ae.number_of_empty_named_references,

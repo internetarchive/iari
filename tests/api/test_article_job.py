@@ -13,7 +13,7 @@ class TestArticleJob(TestCase):
 
     def test_get_page_id(self):
         job = ArticleJob(title="Test", site="wikipedia.org", lang="en")
-        job.get_page_id()
+        job.get_ids_from_mediawiki_api()
         assert job.page_id == 11089416
 
     def test_refresh(self):

@@ -139,7 +139,7 @@ class Article(StatisticsWriteView):
         article_io = ArticleFileIo(
             job=self.job,
             data=self.io.data,
-            wari_id=self.wikipedia_analyzer.wari_id,
+            wari_id=self.job.wari_id,
         )
         article_io.write_to_disk()
 
