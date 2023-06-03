@@ -1,5 +1,6 @@
 import logging
 import re
+from copy import deepcopy
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -8,11 +9,13 @@ import requests
 import validators  # type: ignore
 from fitz import (
     Document,  # type: ignore
-    FileDataError,  # type: ignore
+    FileDataError,
+    Rect,  # type: ignore
 )
 from requests import ReadTimeout
 
 from config import link_extraction_regex
+from src.helpers.console import console
 from src.models.api.handlers import BaseHandler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.link.pdf_link import PdfLink
@@ -152,7 +155,11 @@ class PdfHandler(BaseHandler):
             url_annotations = []
             for annotation in all_annotations:
                 if annotation["kind"] == fitz.LINK_URI:
-                    url_annotations.append(annotation)
+                    # We remove Rect() here because it is not understood by the json encoder
+                    cleaned_annotation = deepcopy(annotation)
+                    if cleaned_annotation["from"]:
+                        cleaned_annotation["from"] = str(cleaned_annotation["from"])
+                    url_annotations.append(cleaned_annotation)
             # print(type(annotations))
             # console.print(annotations)
             # exit()
