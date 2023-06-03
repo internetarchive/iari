@@ -1,4 +1,5 @@
 import hashlib
+from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -66,21 +67,31 @@ class Pdf(StatisticsWriteView):
                     raise TypeError()
                 return pdf.error_details[1], pdf.error_details[0]
             data = pdf.get_dict()
-            # console.print(data)
-            # exit()
             timestamp = datetime.timestamp(datetime.utcnow())
             data["timestamp"] = int(timestamp)
             isodate = datetime.isoformat(datetime.utcnow())
             data["isodate"] = str(isodate)
             url_hash_id = self.__url_hash_id__
             data["id"] = url_hash_id
+            # Remove debug information
+            data_without_debug_information = deepcopy(data)
+            del data_without_debug_information["debug_text_original"]
+            del data_without_debug_information["debug_text_cleaned"]
+            del data_without_debug_information["debug_url_annotations"]
+            # console.print(data)
+            # sys.exit()
             # We don't write during tests because it breaks the CI
             if not self.job.testing:
-                write = PdfFileIo(data=data, hash_based_id=url_hash_id)
+                write = PdfFileIo(
+                    data=data_without_debug_information, hash_based_id=url_hash_id
+                )
                 write.write_to_disk()
             if self.job.refresh:
                 self.__print_log_message_about_refresh__()
                 data["refreshed_now"] = True
             else:
                 data["refreshed_now"] = False
-            return data, 200
+            if self.job.debug:
+                return data, 200
+            else:
+                return data_without_debug_information, 200

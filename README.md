@@ -260,77 +260,164 @@ None
 ### PDF
 the statistics/pdf endpoint accepts the following parameters:
 * url (mandatory)
-* refresh (optional)
-* testing (optional)
-* timeout (optional)
+* refresh (bool, optional)
+* testing (bool, optional)
+* timeout (int, optional)
+* debug (bool, optional)
 
 On error it returns 404 or 415. The first is when we could not find/fetch the url 
 and the second is when it is not a valid PDF.
 
 The `urls_fixed` object has an array of fixed url fragments in case any were fixed. See [this output](https://archive.org/services/context/wari/v2/statistics/pdf?url=https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf&refresh=true).
 
-It will return json similar to:
+If not given debug=true it will return json similar to:
 ```
 {
-    "words_mean": 213,
-    "words_max": 842,
-    "words_min": 41,
-    "annotation_links": [
-        {
-            "url": "https://web.archive.org/web/20210501230502/cisa.gov/mdm",
-            "page": 0
-        },
-        {
-            "url": "https://web.archive.org/web/20210501230502/cisa.gov/mdm",
-            "page": 0
-        },
-        {
-            "url": "https://web.archive.org/web/20210501230502/cisa.gov/mdm",
-            "page": 0
-        },
-        {
-            "url": "https://web.archive.org/web/20210501230502/cisa.gov/mdm",
-            "page": 0
-        },
-        {
-            "url": "https://judiciary.house.gov/media/press-releases/chairman-jim-jordan-subpoenas-big-tech-executives",
-            "page": 0
-        },
-        {
-            "url": "https://rumble.com/v1gx8h7-dhss-foreign-to-domestic-disinformation-switcheroo.html",
-            "page": 1
-        },
-        {
-            "url": "https://web.archive.org/web/20230224163731/cisa.gov/mdm",
-            "page": 3
-        },
-        {
-            "url": "https://www.cisa.gov/topics/election-security/foreign-influence-operations-and-disinformation",
-            "page": 3
-        },
-        {
-            "url": "https://report.foundationforfreedomonline.com/8-29-22.html",
-            "page": 3
-        }
-    ],
+    "words_mean": 306,
+    "words_max": 462,
+    "words_min": 0,
+    "annotation_links": [],
     "text_links": [
         {
-            "url": "https://www.cisa.gov/topics/election-security/foreign-influence-operations-and-disinformationAll",
-            "page": 3
+            "url": "https://www.rfc-editor.org/info/rfc791.",
+            "page": 168
+        },
+        {
+            "url": "https://www.ccbe.eu/fileadmin/speciality_distribution/public/documents/SURVEILLANCE/SVL_Guides_recommendations/EN_SVL_20190329_CCBE-Recommendations-on-the-protection-of-fundamental-rights-in-the-context-of-national-security.pdf.",
+            "page": 182
+        },
+        {
+            "url": "https://www.undom.se",
+            "page": 204
+        },
+        {
+            "url": "https://bra.se/statistik/kriminalstatistik/anmalda-brott/om-statistiken.html.",
+            "page": 255
+        },
+        {
+            "url": "https://bra.se/statistik/publiceringsplan.html.",
+            "page": 259
+        },
+        {
+            "url": "https://www.ft.dk/ripdf/samling/20211/lovforslag/l93/20211_l93_som_fremsat.pdf.",
+            "page": 288
+        },
+        {
+            "url": "https://it-ord.idg.se/.",
+            "page": 325
+        },
+        {
+            "url": "http://www.ne.se/uppslagsverk/encyklopedi/l\u00e5ng/ott.",
+            "page": 325
+        },
+        {
+            "url": "https://svenskarnaochinternet.se/rapporter/svenskarna-och-internet-2021.",
+            "page": 329
+        },
+        {
+            "url": "https://www.rfc-editor.org/pdfrfc/rfc791.txt.pdf",
+            "page": 330
+        },
+        {
+            "url": "https://www.rfc-editor.org/pdfrfc/rfc1883.txt.pdf.",
+            "page": 330
+        },
+        {
+            "url": "https://www.ripe.net/publications/news/about-ripe-ncc-and-ripe/the-ripe-ncc-has-run-out-of-ipv4-addresses.",
+            "page": 330
+        },
+        {
+            "url": "https://itc.ktu.lt/index.php/ITC/article/view/14451.",
+            "page": 332
+        },
+        {
+            "url": "https://www.dn.se/debatt/eus-nya-massovervakning-far-inte-forstora-kallskyddet/,",
+            "page": 339
+        },
+        {
+            "url": "https://www.svd.se/a/oneeLR/eu-forslaget-innebar-en-orimlig-overvakning-skriver-paarup-petersen,",
+            "page": 339
+        },
+        {
+            "url": "https://www.svd.se/a/zEkO4r/helene-fritzon-s-sexuella-overgrepp-mot-barn-maste-upptackas,",
+            "page": 339
+        },
+        {
+            "url": "https://www.svt.se/nyheter/utrikes/eu-forslaget-chat-control-kritiseras.",
+            "page": 339
+        },
+        {
+            "url": "https://statistik.pts.se/svensk-telekommarknad/.",
+            "page": 342
+        },
+        {
+            "url": "https://polisen.se/siteassets/dokument/organiserad_brottslighet/rapport_org_brottslighet_2019_webb_200326.pdf.",
+            "page": 344
+        },
+        {
+            "url": "http://www.ne.se/uppslagsverk/encyklopedi/l\u00e5ng/rundradio.",
+            "page": 402
+        },
+        {
+            "url": "https://www.coe.int/en/web/conventions/full-list/-/conventions/treaty/185/signatures.",
+            "page": 439
+        },
+        {
+            "url": "https://rm.coe.int/16806f943e.",
+            "page": 441
+        },
+        {
+            "url": "https://rm.coe.int/16806a495e.",
+            "page": 443
+        },
+        {
+            "url": "https://rm.coe.int/terms-of-reference-for-the-preparation-of-a-draft-2nd-additional-proto/168072362b.",
+            "page": 444
+        },
+        {
+            "url": "https://rm.coe.int/1680a49dab.",
+            "page": 444
+        },
+        {
+            "url": "https://rm.coe.int/0900001680a49f74/.",
+            "page": 445
+        },
+        {
+            "url": "https://data.consilium.europa.eu/doc/document/ST-15072-2016-REV-1/en/pdf.",
+            "page": 446
+        },
+        {
+            "url": "https://www.congress.gov/bill/115th-congress/house-bill/4943/text.",
+            "page": 451
+        },
+        {
+            "url": "https://rm.coe.int/16806f943e.",
+            "page": 465
+        },
+        {
+            "url": "https://www.statista.com/statistics/272014/global-social-networks-ranked-by-number-of-users/.",
+            "page": 488
+        },
+        {
+            "url": "https://jamstalldhetsmyndigheten.se/mans-vald-mot-kvinnor/fakta-och-statistik/.",
+            "page": 496
         }
     ],
-    "text_links_total": 1,
-    "annotation_links_total": 9,
-    "url": "https://www.foundationforfreedomonline.com/wp-content/uploads/2023/03/FFO-FLASH-REPORT-REV.pdf",
-    "timeout": 2,
+    "text_links_total": 31,
+    "annotation_links_total": 0,
+    "url": "https://www.regeringen.se/contentassets/35276188514d40fb87785c81c0fbda93/datalagring-och-atkomst-till-elektronisk-information-sou-202322/",
+    "timeout": 10,
     "urls_fixed": [],
-    "pages_total": 6,
-    "timestamp": 1683621700,
-    "isodate": "2023-05-09T10:41:40.148210",
-    "id": "a07f3f88",
-    "refreshed_now": true
+    "pages_total": 624,
+    "detected_language": "sv",
+    "detected_language_error": false,
+    "detected_language_error_details": "",
+    "timestamp": 1685740492,
+    "isodate": "2023-06-02T23:14:52.566974",
+    "id": "b7f11051"
 }
 ```
+Using the debug parameter, all the text before and after cleaning is exposed as well as the link-annotations before url extraction.
 
 This output permits the data consumer to count number of links per page, which links or domains appear most, etc.
 
