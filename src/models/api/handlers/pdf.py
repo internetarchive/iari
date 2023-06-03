@@ -10,12 +10,12 @@ import validators  # type: ignore
 from fitz import (
     Document,  # type: ignore
     FileDataError,
-    Rect,  # type: ignore
 )
+
+# type: ignore
 from requests import ReadTimeout
 
 from config import link_extraction_regex
-from src.helpers.console import console
 from src.models.api.handlers import BaseHandler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.link.pdf_link import PdfLink
@@ -27,14 +27,17 @@ logger = logging.getLogger(__name__)
 class PdfHandler(BaseHandler):
     job: UrlJob
     content: bytes = b""
-    all_text_links: List[PdfLink] = []
+    links_from_original_text: List[PdfLink] = []
+    links_from_text_without_linebreaks: List[PdfLink] = []
+    links_from_text_without_spaces: List[PdfLink] = []
     annotation_links: List[PdfLink] = []
     error: bool = False
     text_pages: Dict[int, str] = {}
-    cleaned_text_pages: Dict[int, str] = {}
+    text_pages_without_linebreaks: Dict[int, str] = {}
+    text_pages_without_spaces: Dict[int, str] = {}
     url_annotations: Dict[int, List[Any]] = {}
     error_details: Tuple[int, str] = (0, "")
-    urls_fixed: List[str] = []
+    # urls_fixed: List[str] = []
     file_path: str = ""
     pdf_document: Optional[Document] = None
     word_counts: List[int] = []
@@ -46,11 +49,6 @@ class PdfHandler(BaseHandler):
     @property
     def number_of_total_text_characters(self) -> int:
         return len(self.text)
-
-    def __count_words__(self) -> None:
-        self.word_counts = [
-            len(page_text.split()) for page_text in self.text_pages.values()
-        ]
 
     @property
     def mean_number_of_words_per_page(self) -> int:
@@ -70,17 +68,30 @@ class PdfHandler(BaseHandler):
             self.__count_words__()
         return min(self.word_counts)
 
-    @property
-    def number_of_text_links(self):
-        return len(self.all_text_links)
+    # @property
+    # def number_of_links_from_original_text(self):
+    #     return len(self.links_from_original_text)
+    #
+    # @property
+    # def number_of_links_from_text_without_linebreaks(self):
+    #     return len(self.links_from_text_without_linebreaks)
+    #
+    # @property
+    # def number_of_links_from_text_without_spaces(self):
+    #     return len(self.links_from_text_without_spaces)
 
-    @property
-    def number_of_annotation_links(self):
-        return len(self.annotation_links)
+    # @property
+    # def number_of_annotation_links(self):
+    #     return len(self.annotation_links)
 
     @property
     def number_of_pages(self):
         return self.pdf_document.page_count
+
+    def __count_words__(self) -> None:
+        self.word_counts = [
+            len(page_text.split()) for page_text in self.text_pages.values()
+        ]
 
     def __download_pdf__(self):
         """Download PDF file from URL"""
@@ -111,11 +122,18 @@ class PdfHandler(BaseHandler):
                 )
                 logger.warning(self.error_details)
 
-    def __clean_page_text__(self):
+    def __clean_linebreaks_from_page_text__(self):
         """Clean the page strings and put them into a dictionary attribute"""
         for index, _ in enumerate(self.text_pages):
-            self.cleaned_text_pages[index] = self.__get_cleaned_page_string__(
-                number=index
+            self.text_pages_without_linebreaks[index] = self.__clean_linebreaks__(
+                string=self.text_pages[index]
+            )
+
+    def __clean_spaces_from_page_text__(self):
+        """Clean the page strings and put them into a dictionary attribute"""
+        for index, _ in enumerate(self.text_pages):
+            self.text_pages_without_spaces[index] = self.__clean_spaces__(
+                string=self.text_pages[index]
             )
 
     # def __extract_links_from_html__(self) -> None:
@@ -129,20 +147,54 @@ class PdfHandler(BaseHandler):
     #         #     if validators.url(url):
     #         #         self.all_text_links.append(PdfLink(url=url, page=index))
 
-    def __extract_links_from_all_text__(self) -> None:
+    def __extract_links_from_original_text__(self) -> None:
         """Extract all links from the text extract per page"""
         for index, _ in enumerate(self.text_pages):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
             urls = re.findall(
                 link_extraction_regex,
-                self.__get_cleaned_page_string__(number=index),
+                self.text_pages[index],
             )
             # cleaned_urls = self.__clean_urls__(urls=urls)
             # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
             for url in urls:
                 if validators.url(url):
-                    self.all_text_links.append(PdfLink(url=url, page=index))
+                    self.links_from_original_text.append(PdfLink(url=url, page=index))
+
+    def __extract_links_from_text_without_linebreaks__(self) -> None:
+        """Extract all links from the text extract per page"""
+        for index, _ in enumerate(self.text_pages):
+            # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
+            # provided by chatgpt:
+            urls = re.findall(
+                link_extraction_regex,
+                self.text_pages_without_linebreaks[index],
+            )
+            # cleaned_urls = self.__clean_urls__(urls=urls)
+            # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
+            for url in urls:
+                if validators.url(url):
+                    self.links_from_text_without_linebreaks.append(
+                        PdfLink(url=url, page=index)
+                    )
+
+    def __extract_links_from_text_without_spaces__(self) -> None:
+        """Extract all links from the text extract per page"""
+        for index, _ in enumerate(self.text_pages):
+            # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
+            # provided by chatgpt:
+            urls = re.findall(
+                link_extraction_regex,
+                self.text_pages_without_spaces[index],
+            )
+            # cleaned_urls = self.__clean_urls__(urls=urls)
+            # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
+            for url in urls:
+                if validators.url(url):
+                    self.links_from_text_without_spaces.append(
+                        PdfLink(url=url, page=index)
+                    )
 
     def __get_annotations__(self):
         """Extract the raw annotations into an attribute dictionary"""
@@ -223,25 +275,33 @@ class PdfHandler(BaseHandler):
 
     def get_dict(self):
         """Return data to the patron"""
-        text_links = [link.dict() for link in self.all_text_links]
+        links_from_original_text = [
+            link.dict() for link in self.links_from_original_text
+        ]
+        links_from_text_without_linebreaks = [
+            link.dict() for link in self.links_from_text_without_linebreaks
+        ]
+        links_from_text_without_spaces = [
+            link.dict() for link in self.links_from_text_without_spaces
+        ]
         annotation_links = [link.dict() for link in self.annotation_links]
         data = {
             "words_mean": self.mean_number_of_words_per_page,
             "words_max": self.max_number_of_words_per_page,
             "words_min": self.min_number_of_words_per_page,
             "annotation_links": annotation_links,
-            "text_links": text_links,
-            "text_links_total": self.number_of_text_links,
-            "annotation_links_total": self.number_of_annotation_links,
+            "links_from_original_text": links_from_original_text,
+            "links_from_text_without_linebreaks": links_from_text_without_linebreaks,
+            "links_from_text_without_spaces": links_from_text_without_spaces,
             "url": self.job.url,
             "timeout": self.job.timeout,
-            "urls_fixed": self.urls_fixed,
             "pages_total": self.number_of_pages,
             "detected_language": self.detected_language,
             "detected_language_error": self.detected_language_error,
             "detected_language_error_details": self.detected_language_error_details,
             "debug_text_original": self.text_pages,
-            "debug_text_cleaned": self.cleaned_text_pages,
+            "debug_text_without_linebreaks": self.text_pages_without_linebreaks,
+            "debug_text_without_spaces": self.text_pages_without_spaces,
             "debug_url_annotations": self.url_annotations,
             "characters": self.number_of_total_text_characters,
         }
@@ -249,11 +309,10 @@ class PdfHandler(BaseHandler):
         # exit()
         return data
 
-    def __get_cleaned_page_string__(self, number) -> str:
-        page_string = self.text_pages[number]
-        page_string = self.__clean_linebreaks__(string=page_string)
-        # page_string = self.__fix_doi_typing_errors__(string=page_string)
-        return page_string
+    # def __get_cleaned_page_string__(self, number) -> str:
+    #     page_string = self.text_pages[number]
+    #     page_string = self.__clean_linebreaks__(string=page_string)
+    #     return page_string
 
     # def __fix_doi_typing_errors__(self, string):
     #     """This fixes common typing errors that we found"""
@@ -281,16 +340,20 @@ class PdfHandler(BaseHandler):
         if not self.error:
             self.__get_annotations__()
             self.__extract_links_from_annotations__()
-            self.__extract_text_pages__()
         if not self.error:
-            self.__extract_links_from_all_text__()
-            self.__clean_page_text__()
+            self.__clean_and_extract_links_from_text__()
         self.__concatenate_text_from_all_pages__()
         self.__detect_language__()
 
     @staticmethod
-    def __clean_linebreaks__(string):
+    def __clean_linebreaks__(string: str):
         for char in ["\n", "\r", "\v", "\f", "\u2028", "\u2029"]:
+            string = string.replace(char, "")
+        return string
+
+    @staticmethod
+    def __clean_spaces__(string: str):
+        for char in [" "]:
             string = string.replace(char, "")
         return string
 
@@ -298,3 +361,12 @@ class PdfHandler(BaseHandler):
         """This is needed for language detection"""
         for index, _ in enumerate(self.text_pages):
             self.text += self.text_pages[index]
+
+    def __clean_and_extract_links_from_text__(self):
+        """Helper method"""
+        self.__extract_text_pages__()
+        self.__clean_linebreaks_from_page_text__()
+        self.__clean_spaces_from_page_text__()
+        self.__extract_links_from_original_text__()
+        self.__extract_links_from_text_without_linebreaks__()
+        self.__extract_links_from_text_without_spaces__()

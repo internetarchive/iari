@@ -41,10 +41,10 @@ class TestPdfHandler(unittest.TestCase):
         self.pdf_handler5.read_and_extract()
 
     def test_extract_links1(self):
-        assert self.pdf_handler1.number_of_text_links == 95
+        assert self.pdf_handler1.number_of_links_from_original_text == 95
 
     def test_extract_links2(self):
-        assert self.pdf_handler2.number_of_text_links == 0
+        assert self.pdf_handler2.number_of_links_from_original_text == 0
 
     def test_get_dict1(self):
         data = self.pdf_handler1.get_dict()
@@ -63,8 +63,8 @@ class TestPdfHandler(unittest.TestCase):
         assert self.pdf_handler4.content != b""
         assert self.pdf_handler4.number_of_pages == 1
         # print(pdf_handler.__get_cleaned_page_string__(number=0))
-        assert self.pdf_handler4.number_of_text_links == 14
-        links = self.pdf_handler4.all_text_links
+        assert self.pdf_handler4.number_of_links_from_original_text == 14
+        links = self.pdf_handler4.links_from_original_text
         # print(pdf_handler.links)
         assert (
             links[1].url
@@ -84,13 +84,13 @@ class TestPdfHandler(unittest.TestCase):
         # print(self.pdf_handler5.get_dict())
         assert self.pdf_handler5.number_of_total_text_characters == 2148
         assert self.pdf_handler5.number_of_pages == 1
-        assert self.pdf_handler5.number_of_text_links == 0
+        assert self.pdf_handler5.number_of_links_from_original_text == 0
         assert self.pdf_handler5.number_of_annotation_links == 0
 
     def test_extract_links_same_number_found(self):
         assert (
             self.pdf_handler4.number_of_annotation_links
-            == self.pdf_handler4.number_of_text_links
+            == self.pdf_handler4.number_of_links_from_original_text
             == 14
         )
 
