@@ -68,21 +68,25 @@ class PdfHandler(BaseHandler):
             self.__count_words__()
         return min(self.word_counts)
 
-    # @property
-    # def number_of_links_from_original_text(self):
-    #     return len(self.links_from_original_text)
-    #
-    # @property
-    # def number_of_links_from_text_without_linebreaks(self):
-    #     return len(self.links_from_text_without_linebreaks)
-    #
-    # @property
-    # def number_of_links_from_text_without_spaces(self):
-    #     return len(self.links_from_text_without_spaces)
+    @property
+    def number_of_links_from_original_text(self):  # dead: disable
+        """Convenience method used in tests"""
+        return len(self.links_from_original_text)
 
-    # @property
-    # def number_of_annotation_links(self):
-    #     return len(self.annotation_links)
+    @property
+    def number_of_links_from_text_without_linebreaks(self):  # dead: disable
+        """Convenience method used in tests"""
+        return len(self.links_from_text_without_linebreaks)
+
+    @property
+    def number_of_links_from_text_without_spaces(self):  # dead: disable
+        """Convenience method used in tests"""
+        return len(self.links_from_text_without_spaces)
+
+    @property
+    def number_of_links_from_annotations(self):  # dead: disable
+        """Convenience method used in tests"""
+        return len(self.annotation_links)
 
     @property
     def number_of_pages(self):

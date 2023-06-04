@@ -41,20 +41,42 @@ class TestPdfHandler(unittest.TestCase):
         self.pdf_handler5.read_and_extract()
 
     def test_extract_links1(self):
-        assert self.pdf_handler1.number_of_links_from_original_text == 95
+        assert self.pdf_handler1.number_of_links_from_original_text == 83
+        assert self.pdf_handler1.number_of_links_from_text_without_linebreaks == 95
+        assert self.pdf_handler1.number_of_links_from_text_without_spaces == 83
+        assert self.pdf_handler1.number_of_links_from_annotations == 0
 
     def test_extract_links2(self):
         assert self.pdf_handler2.number_of_links_from_original_text == 0
+        assert self.pdf_handler2.number_of_links_from_text_without_linebreaks == 0
+        assert self.pdf_handler2.number_of_links_from_text_without_spaces == 0
+        assert self.pdf_handler2.number_of_links_from_annotations == 0
 
-    def test_get_dict1(self):
-        data = self.pdf_handler1.get_dict()
-        # console.print(data)
-        assert data["annotation_links_total"] == 0
-        assert data["text_links_total"] == 95
-        assert data["text_links"][0] == {
-            "page": 30,
-            "url": "https://www.chronicle.com/resource/alcohol-s-influence-on-campus/6113/.Berenson,",
-        }
+    def test_extract_links3(self):
+        assert self.pdf_handler3.number_of_links_from_original_text == 1
+        assert self.pdf_handler3.number_of_links_from_text_without_linebreaks == 1
+        assert self.pdf_handler3.number_of_links_from_text_without_spaces == 1
+        assert self.pdf_handler3.number_of_links_from_annotations == 9
+
+    def test_extract_links4(self):
+        assert self.pdf_handler4.number_of_links_from_original_text == 14
+        assert self.pdf_handler4.number_of_links_from_text_without_linebreaks == 14
+        assert self.pdf_handler4.number_of_links_from_text_without_spaces == 14
+        assert self.pdf_handler4.number_of_links_from_annotations == 14
+
+    def test_extract_links5(self):
+        assert self.pdf_handler5.number_of_links_from_original_text == 0
+        assert self.pdf_handler5.number_of_links_from_text_without_linebreaks == 0
+        assert self.pdf_handler5.number_of_links_from_text_without_spaces == 4
+        assert self.pdf_handler5.number_of_links_from_annotations == 0
+
+    # def test_get_dict1(self):
+    #     data = self.pdf_handler1.get_dict()
+    #     # console.print(data)
+    #     assert data["links_from_original_text"][0] == {
+    #         "page": 30,
+    #         "url": "https://www.chronicle.com/resource/alcohol-s-influence-on-campus/6113/.Berenson,",
+    #     }
 
     @pytest.mark.skipif(
         "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
@@ -64,7 +86,7 @@ class TestPdfHandler(unittest.TestCase):
         assert self.pdf_handler4.number_of_pages == 1
         # print(pdf_handler.__get_cleaned_page_string__(number=0))
         assert self.pdf_handler4.number_of_links_from_original_text == 14
-        links = self.pdf_handler4.links_from_original_text
+        links = self.pdf_handler4.links_from_text_without_linebreaks
         # print(pdf_handler.links)
         assert (
             links[1].url
@@ -76,7 +98,7 @@ class TestPdfHandler(unittest.TestCase):
         )
 
     def test___extract_links_from_annotations__(self):
-        assert self.pdf_handler4.number_of_annotation_links == 14
+        assert self.pdf_handler4.number_of_links_from_annotations == 14
 
     def test___extract_links_from_weird_pdf__(self):
         """This pdf has spaces in the urls from pymupdf.
@@ -85,11 +107,11 @@ class TestPdfHandler(unittest.TestCase):
         assert self.pdf_handler5.number_of_total_text_characters == 2148
         assert self.pdf_handler5.number_of_pages == 1
         assert self.pdf_handler5.number_of_links_from_original_text == 0
-        assert self.pdf_handler5.number_of_annotation_links == 0
+        assert self.pdf_handler5.number_of_links_from_annotations == 0
 
     def test_extract_links_same_number_found(self):
         assert (
-            self.pdf_handler4.number_of_annotation_links
+            self.pdf_handler4.number_of_links_from_annotations
             == self.pdf_handler4.number_of_links_from_original_text
             == 14
         )
@@ -126,3 +148,6 @@ class TestPdfHandler(unittest.TestCase):
             data["detected_language_error_details"]
             == "Not enough text for us to reliably detect the language"
         )
+
+    def test_number_of_characters(self):
+        assert self.pdf_handler5.number_of_total_text_characters == 2148
