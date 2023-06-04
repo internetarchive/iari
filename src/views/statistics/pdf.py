@@ -76,8 +76,8 @@ class Pdf(StatisticsWriteView):
             # Remove debug information
             data_without_debug_information = deepcopy(data)
             del data_without_debug_information["debug_text_original"]
-            del data_without_debug_information["debug_text_cleaned"]
-            del data_without_debug_information["debug_url_annotations"]
+            del data_without_debug_information["debug_text_without_linebreaks"]
+            del data_without_debug_information["debug_text_without_spaces"]
             # console.print(data)
             # sys.exit()
             # We don't write during tests because it breaks the CI
