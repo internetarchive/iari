@@ -1,36 +1,51 @@
 # Internet Archive Reference Inventory [IARI](https://www.wikidata.org/wiki/Q117023013)
 
-This tool is capable of fetching, extracting, transforming and storing
+This API is capable of fetching, extracting, transforming and storing
 reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700).
 
-IARI is currently an API with a few endpoints which hopefully makes it easy for others
-to interact with.
+The endpoints make it possible to get structured data about the references 
+from any Wikipedia article in any language version.
 
-On the longer term we are planning on populating a [Wikibase.cloud](https://wikibase.cloud/) instance
-based on the data we extract.
-We call this resulting database Wikipedia Citations Database (WCD).
-
-IARI has been developed by [James Hare](https://www.wikidata.org/wiki/Q23041486)
-and [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) as part of the
-[Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by
-Mark Graham, head of The
-[Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the
-[Internet Archive](https://www.wikidata.org/wiki/Q461).
-
+# Background
 There are [at least 200 million references in at least 40 million articles](
 https://ieeexplore.ieee.org/abstract/document/9908858)
 and together with the article text in the Wikipedias
 one of the most valuable collections of knowledge ever made by humans,
 see [size comparison](https://en.wikipedia.org/wiki/Wikipedia:Size_comparisons).
 
-The endpoint providing a detailed analysis of a Wikipedia article and its references
-enable wikipedians to get an overview of the state of the references and
-build tools that help curate and improve the references.
+Wikimedia movement currently does not have good and effective tools 
+to help editors keep up the quality of references over time. 
+The references are stored in templates that differ between language versions of Wikipedia 
+which makes it hard for tool developers to develop good tools that work well 
+across different language versions.
+
+# Author
+IARI has been developed by [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) as part of the
+[Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by
+Mark Graham, head of The
+[Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the
+[Internet Archive](https://www.wikidata.org/wiki/Q461). 
+
+# Goals
+The endpoint providing a detailed analysis of a Wikipedia article and it's references
+enable wikipedians to get an overview of the state of the references and using the API it is
+possible for the Wikimedia tech-community to build tools that help make it easier to curate 
+and improve the references.
 
 This is part of a wider initiative help raise the quality of references in
 Wikipedia to enable everyone in the world to make decisions
 based on trustworthy knowledge
 that is derived from trustworthy sources.
+
+# Stepping stone for a (graph) database of all references 
+This project is a part of the [Wikicite initiative](http://wikicite.org/).
+
+On the longer term Turn All References Blue project is planning on populating a database
+based on the data we extract. 
+This part of the effort is led by [James Hare](https://www.wikidata.org/wiki/Q23041486).
+
+The end goal is a large database with all references from all Wikipedias. 
+We call it the Wikipedia Citations Database (WCD).
 
 # Features
 
