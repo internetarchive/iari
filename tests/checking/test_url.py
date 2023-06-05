@@ -64,7 +64,7 @@ class TestUrl(TestCase):
         # assert url.response_headers == {}
 
     def test_check_403(self):
-        url = Url(url=self.forbidden_url_if_not_spoofed_headers, timeout=2)
+        url = Url(url=self.forbidden_url_if_not_spoofed_headers, timeout=5)
         url.check()
         assert url.status_code == 200
         assert url.dns_error is False

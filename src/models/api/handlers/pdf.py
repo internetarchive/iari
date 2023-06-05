@@ -37,7 +37,6 @@ class PdfHandler(BaseHandler):
     text_pages_without_spaces: Dict[int, str] = {}
     url_annotations: Dict[int, List[Any]] = {}
     error_details: Tuple[int, str] = (0, "")
-    # urls_fixed: List[str] = []
     file_path: str = ""
     pdf_document: Optional[Document] = None
     word_counts: List[int] = []
@@ -312,23 +311,6 @@ class PdfHandler(BaseHandler):
         # console.print(data)
         # exit()
         return data
-
-    # def __get_cleaned_page_string__(self, number) -> str:
-    #     page_string = self.text_pages[number]
-    #     page_string = self.__clean_linebreaks__(string=page_string)
-    #     return page_string
-
-    # def __fix_doi_typing_errors__(self, string):
-    #     """This fixes common typing errors that we found"""
-    #     # From https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf page 298
-    #     if "https://doi.org:" in string:
-    #         self.urls_fixed.append("https://doi.org:")
-    #         string = string.replace("https://doi.org:", "https://doi.org/")
-    #     # From https://s3.documentcloud.org/documents/23782225/mwg-fdr-document-04-16-23-1.pdf page 298
-    #     if "https://doi.or/" in string:
-    #         self.urls_fixed.append("https://doi.or/")
-    #         string = string.replace("https://doi.or/", "https://doi.org/")
-    #     return string
 
     def __read_pdf_from_file__(self):
         """This is needed for fast testing on pdfs in test_data"""

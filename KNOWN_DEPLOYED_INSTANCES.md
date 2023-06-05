@@ -4,6 +4,10 @@
 * Production: (proxied to add https and domain): https://archive.org/services/context/wari/
 * Development: None
 
+### Statistics
+All non-debug output from the endpoints are stored in a cache on the backend. 
+As of 2023-06-05 the cache contains 431,381 json files using 3.3 GB of space.
+
 ### Endpoint example urls for the production endpoint
 The article/all/check-url/check-doi endpoints all return cached responses if you don’t add the refresh=true parameter.
 The references and reference endpoints always return cached data.
