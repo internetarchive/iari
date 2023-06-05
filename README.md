@@ -141,6 +141,7 @@ the statistics/article endpoint accepts the following parameters:
 * url (mandatory)
 * refresh (optional)
 * testing (optional)
+* revision (int, optional) defaults to the most recent 
 
 On error it returns 400. On timeout it returns 504 or 502
 (this is a bug and should be reported).
