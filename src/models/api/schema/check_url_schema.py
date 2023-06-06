@@ -15,6 +15,10 @@ class UrlSchema(BaseSchema):
     url = String(required=True)
     timeout = Int(required=False)
     debug = Bool(required=False)
+    blocks = Bool(required=False)
+    xml = Bool(required=False)
+    html = Bool(required=False)
+    json_ = Bool(required=False)
 
     # noinspection PyUnusedLocal
     @post_load

@@ -46,6 +46,53 @@ class PdfHandler(BaseHandler):
         arbitrary_types_allowed = True  # dead: disable
 
     @property
+    def __get_html_output__(self):
+        html_pages: Dict[int, str] = {}
+        for index, page in enumerate(self.pdf_document.pages()):
+            html = page.get_text("html")
+            html_pages[index] = html
+        return html_pages
+
+    @property
+    def __get_xml_output__(self):
+        xml_pages: Dict[int, str] = {}
+        for index, page in enumerate(self.pdf_document.pages()):
+            xml = page.get_text("xml")
+            xml_pages[index] = xml
+        return xml_pages
+
+    @property
+    def __get_json_output__(self):
+        json_pages: Dict[int, str] = {}
+        for index, page in enumerate(self.pdf_document.pages()):
+            json = page.get_text("json")
+            json_pages[index] = json
+        return json_pages
+
+    @property
+    def __get_blocks__(self):
+        """Extract blocks of text"""
+        block_pages: Dict[int, list] = {}
+        for index, page in enumerate(self.pdf_document.pages()):
+            raw_blocks = page.get_text("blocks")
+            blocks = []
+            for block in raw_blocks:
+                block_bbox = block[:4]  # Bounding box coordinates
+                block_text = block[4]  # Text content
+                block_no = block[5]  # Block number
+                block_type = block[6]  # Block type
+                blocks.append(
+                    {
+                        "bbox": block_bbox,
+                        "text": block_text,
+                        "block_no": block_no,
+                        "block_type": block_type,
+                    }
+                )
+            block_pages[index] = blocks
+        return block_pages
+
+    @property
     def number_of_total_text_characters(self) -> int:
         return len(self.text)
 
@@ -306,6 +353,10 @@ class PdfHandler(BaseHandler):
             "debug_text_without_linebreaks": self.text_pages_without_linebreaks,
             "debug_text_without_spaces": self.text_pages_without_spaces,
             "debug_url_annotations": self.url_annotations,
+            "debug_html": self.__get_html_output__,
+            "debug_xml": self.__get_xml_output__,
+            "debug_json": self.__get_json_output__,
+            "debug_blocks": self.__get_blocks__,
             "characters": self.number_of_total_text_characters,
         }
         # console.print(data)

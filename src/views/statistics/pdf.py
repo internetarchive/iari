@@ -49,6 +49,17 @@ class Pdf(StatisticsWriteView):
     def __setup_io__(self):
         self.io = PdfFileIo(hash_based_id=self.__url_hash_id__)
 
+    def __handle_debug_job__(self, data):
+        if not self.job.html:
+            del data["debug_html"]
+        if not self.job.xml:
+            del data["debug_xml"]
+        if not self.job.json_:
+            del data["debug_json"]
+        if not self.job.blocks:
+            del data["debug_blocks"]
+        return data, 200
+
     def __handle_valid_job__(self):
         from src import app
 
@@ -75,9 +86,14 @@ class Pdf(StatisticsWriteView):
             data["id"] = url_hash_id
             # Remove debug information
             data_without_debug_information = deepcopy(data)
+            del data_without_debug_information["debug_url_annotations"]
             del data_without_debug_information["debug_text_original"]
             del data_without_debug_information["debug_text_without_linebreaks"]
             del data_without_debug_information["debug_text_without_spaces"]
+            del data_without_debug_information["debug_html"]
+            del data_without_debug_information["debug_xml"]
+            del data_without_debug_information["debug_json"]
+            del data_without_debug_information["debug_blocks"]
             # console.print(data)
             # sys.exit()
             # We don't write during tests because it breaks the CI
@@ -92,6 +108,6 @@ class Pdf(StatisticsWriteView):
             else:
                 data["refreshed_now"] = False
             if self.job.debug:
-                return data, 200
+                return self.__handle_debug_job__(data=data)
             else:
                 return data_without_debug_information, 200
