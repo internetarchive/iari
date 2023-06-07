@@ -370,6 +370,16 @@ If not given debug=true it will return json similar this
 Using the debug and refresh parameter, all the text before and after cleaning is exposed as well as the link-annotations
 before url extraction. Using the 4 additional parameters you can get the corresponding output from PyMuPDF for further debugging.
 
+Example debug expressions:
+  
+To show block debug output:
+```
+https://archive.org/services/context/iari/v2/statistics/pdf?url=https://ia601600.us.archive.org/31/items/Book_URLs/DeSantis.pdf&refresh=true&debug=true&blocks=true
+```
+To show html debug output:
+```
+https://archive.org/services/context/iari/v2/statistics/pdf?url=https://ia601600.us.archive.org/31/items/Book_URLs/DeSantis.pdf&refresh=true&debug=true&html=true
+```
 *Note: Setting debug=true parameter without refresh=true will often not yield any debug output since we don't have it
 stored in the cache.*
 
