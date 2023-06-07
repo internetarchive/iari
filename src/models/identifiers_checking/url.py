@@ -1,4 +1,5 @@
 import logging
+import sys
 from typing import Any, Dict
 
 import requests
@@ -51,6 +52,7 @@ class Url(WikipediaUrl):
     dns_error: bool = False
     # soft404_probability: float = 0.0  # not implemented yet
     status_code: int = 0
+    testdeadlink_status_code: int = 0
     timeout: int = 2
     dns_error_details: str = ""
     response_headers: Dict = {}
@@ -68,6 +70,7 @@ class Url(WikipediaUrl):
             self.extract()
             if self.is_valid:
                 self.__check_url__()
+                self.__check_url_with_testdeadlink_api__()
                 self.__detect_language__()
 
     def __get_dns_record__(self) -> None:
@@ -233,3 +236,26 @@ class Url(WikipediaUrl):
         if self.malformed_url_details:
             url.update({"malformed_url_details": self.malformed_url_details.value})
         return url
+
+    def __check_url_with_testdeadlink_api__(self):
+        """This fetches the status code from the testdeadlink API provided by Max and Owen"""
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+
+        data = (
+            f"urls={self.url}&authcode=579331d2dc3f96739b7c622ed248a7d3&returncodes=1"
+        )
+
+        response = requests.post(
+            "https://iabot-api.archive.org/testdeadlink.php", headers=headers, data=data
+        )
+        # get the status code
+        if response.status_code == 200:
+            data = response.json()
+            # print(data)
+            if "results" in data:
+                results = data["results"]
+                for result in results:
+                    self.testdeadlink_status_code = results[result]
+                    break

@@ -71,8 +71,10 @@ class CheckUrl(StatisticsWriteView):
             data["isodate"] = str(isodate)
             url_hash_id = self.__url_hash_id__
             data["id"] = url_hash_id
-            write = UrlFileIo(data=data, hash_based_id=url_hash_id)
-            write.write_to_disk()
+            # We skip writes during testing
+            if not self.job.testing:
+                write = UrlFileIo(data=data, hash_based_id=url_hash_id)
+                write.write_to_disk()
             if self.job.refresh:
                 self.__print_log_message_about_refresh__()
                 data["refreshed_now"] = True
