@@ -231,8 +231,7 @@ class Url(WikipediaUrl):
 
     @property
     def get_dict(self) -> Dict[str, Any]:
-        # Don't export the page text by default
-        url = self.dict(exclude=set("text"))
+        url = self.dict()
         if self.malformed_url_details:
             url.update({"malformed_url_details": self.malformed_url_details.value})
         return url
