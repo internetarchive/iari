@@ -528,12 +528,13 @@ We use pip and poetry to set everything up.
 
 Lastly setup the directories for the json cache files
 
-`$ ./setup_json_directories.sh`
+`$ poetry run ./setup_json_directories.sh`
 
 ## Run
 
 Run these commands in different shells or in GNU screen.
 
+### GNU screen
 Start GNU screen (if you want to have a persisting session)
 
 `$ screen -D -RR`
@@ -541,7 +542,7 @@ Start GNU screen (if you want to have a persisting session)
 ### Development mode
 
 Run it with
-`$ ./run-debug-api.sh`
+`$ poetry run ./run-debug-api.sh`
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:5000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
@@ -549,7 +550,7 @@ Test it in another Screen window or local terminal with
 ### Production mode
 
 Run it with
-`$ ./run-api.sh`
+`$ poetry run ./run-api.sh`
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
