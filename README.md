@@ -572,6 +572,8 @@ Test it in another Screen window or local terminal with
 Make sure this setting is checked.
 https://www.google.com/search?client=firefox-b-d&q=make+pycharm+automatically+enter+the+venv
 
+Note for mac users: This might not work, so you have to manually enter the venv in all terminals.
+
 # Deployed instances
 
 See [KNOWN_DEPLOYED_INSTANCES.md](KNOWN_DEPLOYED_INSTANCES.md)
