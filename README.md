@@ -539,7 +539,7 @@ Start GNU screen (if you want to have a persisting session)
 
 `$ screen -D -RR`
 
-### Development mode
+### Debug mode
 
 Run it with
 `$ poetry run ./run-debug-api.sh`
