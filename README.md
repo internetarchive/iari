@@ -526,7 +526,7 @@ We use pip and poetry to set everything up.
 
 `$ pip install poetry gunicorn && poetry install`
 
-## Virtual environment
+### Virtual environment
 Setup:
 
 `$ python3 -m venv venv`
@@ -535,15 +535,16 @@ Enter in (in a Linux/Mac terminal):
 
 `$ source venv/bin/activate`
 
-
-## JSON directories
+### JSON directories
 Lastly setup the directories for the json cache files
 
 `$ ./setup_json_directories.sh`
 
 ## Run
 
-Run these commands in different shells or in GNU screen.
+Run these commands in different shells or in GNU screen. 
+
+Before running them please make sure you have activated the virtual environment first, see above.
 
 ### GNU screen
 Start GNU screen (if you want to have a persisting session)
