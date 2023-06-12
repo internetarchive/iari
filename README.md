@@ -526,9 +526,20 @@ We use pip and poetry to set everything up.
 
 `$ pip install poetry gunicorn && poetry install`
 
+## Virtual environment
+Setup:
+
+`$ python3 -m venv venv`
+
+Enter in (in a Linux/Mac terminal):
+
+`$ source venv/bin/activate`
+
+
+## JSON directories
 Lastly setup the directories for the json cache files
 
-`$ poetry run ./setup_json_directories.sh`
+`$ ./setup_json_directories.sh`
 
 ## Run
 
@@ -542,7 +553,7 @@ Start GNU screen (if you want to have a persisting session)
 ### Debug mode
 
 Run it with
-`$ poetry run ./run-debug-api.sh`
+`$ ./run-debug-api.sh`
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:5000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
@@ -550,7 +561,7 @@ Test it in another Screen window or local terminal with
 ### Production mode
 
 Run it with
-`$ poetry run ./run-api.sh`
+`$ ./run-api.sh`
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`

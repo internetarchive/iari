@@ -51,6 +51,9 @@ Github Actions so that does not work)
 
 ## Tests
 
+### Install requirements
+`$ poetry install --with dev`
+
 ### Run all tests stop at first failure
 `$ pytest -x`
 
