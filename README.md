@@ -567,6 +567,11 @@ Run it with
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
 
+# PyCharm specific recommendations
+## Venv activation
+Make sure this setting is checked.
+https://www.google.com/search?client=firefox-b-d&q=make+pycharm+automatically+enter+the+venv
+
 # Deployed instances
 
 See [KNOWN_DEPLOYED_INSTANCES.md](KNOWN_DEPLOYED_INSTANCES.md)
