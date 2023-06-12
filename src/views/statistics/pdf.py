@@ -65,7 +65,7 @@ class Pdf(StatisticsWriteView):
 
         app.logger.debug("__handle_valid_job__; running")
 
-        self.__read_from_cache__()
+        self.__setup_and_read_from_cache__()
         if self.io.data and not self.job.refresh:
             return self.io.data, 200
         else:

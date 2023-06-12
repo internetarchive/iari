@@ -54,10 +54,10 @@ class Article(StatisticsWriteView):
         from src import app
 
         app.logger.debug("got valid job")
-        self.__read_from_cache__()
+        self.__setup_and_read_from_cache__()
         if self.io.data and not self.job.refresh:
             app.logger.info("trying to read from cache")
-            self.__read_from_cache__()
+            self.__setup_and_read_from_cache__()
             if self.io.data:
                 # We got the statistics from json, return them as is
                 app.logger.info(

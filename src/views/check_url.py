@@ -1,4 +1,5 @@
 import hashlib
+from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -56,28 +57,46 @@ class CheckUrl(StatisticsWriteView):
 
         app.logger.debug("__handle_valid_job__; running")
 
-        self.__read_from_cache__()
-        if self.io.data and not self.job.refresh:
-            return self.io.data, 200
-        else:
-            url_string = self.job.unquoted_url
-            app.logger.info(f"Got {url_string}")
-            url = Url(url=url_string, timeout=self.job.timeout)
-            url.check()
-            data = url.get_dict
-            timestamp = datetime.timestamp(datetime.utcnow())
-            data["timestamp"] = int(timestamp)
-            isodate = datetime.isoformat(datetime.utcnow())
-            data["isodate"] = str(isodate)
-            url_hash_id = self.__url_hash_id__
-            data["id"] = url_hash_id
-            # We skip writes during testing
-            if not self.job.testing:
-                write = UrlFileIo(data=data, hash_based_id=url_hash_id)
-                write.write_to_disk()
-            if self.job.refresh:
-                self.__print_log_message_about_refresh__()
-                data["refreshed_now"] = True
+        if not self.job.refresh:
+            self.__setup_and_read_from_cache__()
+            if self.io.data:
+                return self.io.data, 200
             else:
-                data["refreshed_now"] = False
+                return self.__return_fresh_data__()
+        else:
+            return self.__return_fresh_data__()
+
+    def __return_fresh_data__(self):
+        from src import app
+
+        url_string = self.job.unquoted_url
+        app.logger.info(f"Got {url_string}")
+        url = Url(url=url_string, timeout=self.job.timeout)
+        url.check()
+        data = url.get_dict
+        timestamp = datetime.timestamp(datetime.utcnow())
+        data["timestamp"] = int(timestamp)
+        isodate = datetime.isoformat(datetime.utcnow())
+        data["isodate"] = str(isodate)
+        url_hash_id = self.__url_hash_id__
+        data["id"] = url_hash_id
+        data_without_text = deepcopy(data)
+        del data_without_text["text"]
+        self.__write_to_cache__(data_without_text=data_without_text)
+        if self.job.refresh:
+            self.__print_log_message_about_refresh__()
+            data["refreshed_now"] = True
+        else:
+            data["refreshed_now"] = False
+        if self.job.debug:
             return data, 200
+        else:
+            return data_without_text, 200
+
+    def __write_to_cache__(self, data_without_text):
+        # We skip writes during testing
+        if not self.job.testing:
+            write = UrlFileIo(
+                data=data_without_text, hash_based_id=data_without_text["id"]
+            )
+            write.write_to_disk()
