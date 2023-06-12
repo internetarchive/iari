@@ -50,10 +50,14 @@ Github Actions so that does not work)
 * An updated diagram of the workflow is desirable to get an overview
 
 ## Tests
+
+### Run all tests stop at first failure
+`$ pytest -x`
+
 ### Coverage
 We have a helper script which updates [TEST_COVERAGE.txt](TEST_COVERAGE.txt):
-`./run-test-coverage.sh`
+
+`$ ./run-test-coverage.sh`
 
 ### Find slow tests
-Run
-`python -m pytest --durations=10`
+`$ python -m pytest --durations=10`
