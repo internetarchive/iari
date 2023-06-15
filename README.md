@@ -540,21 +540,18 @@ Lastly setup the directories for the json cache files
 
 `$ ./setup_json_directories.sh`
 
+## Build the docker images
+### Debug image
+`$ sudo docker image build -t iaridebug .`
+
+### Production image
+TODO
+
 ## Run
-
-Run these commands in different shells or in GNU screen. 
-
-Before running them please make sure you have activated the virtual environment first, see above.
-
-### GNU screen
-Start GNU screen (if you want to have a persisting session)
-
-`$ screen -D -RR`
-
 ### Debug mode
 
-Run it with
-`$ ./run-debug-api.sh`
+Run it with (which expose it on port 5000 locally)
+`$ sudo docker container run --rm -it -p 5000:5000 iaridebug`
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:5000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
@@ -562,17 +559,10 @@ Test it in another Screen window or local terminal with
 ### Production mode
 
 Run it with
-`$ ./run-api.sh`
+TODO
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
-
-# PyCharm specific recommendations
-## Venv activation
-Make sure this setting is checked.
-https://www.google.com/search?client=firefox-b-d&q=make+pycharm+automatically+enter+the+venv
-
-Note for mac users: This might not work, so you have to manually enter the venv in all terminals.
 
 # Deployed instances
 
