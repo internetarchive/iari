@@ -2,16 +2,18 @@ FROM python:3.10-slim
 
 LABEL maintainer="Dennis Priskorn <priskorn@riseup.net>"
 
-ENV DOCKER=true
+# Setup all the needed directories
+RUN mkdir -p /tmp/wikicitations-api json/{articles,references,dois,urls,xhtmls,pdfs}
 
 WORKDIR /app
 
+RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
+
 COPY pyproject.toml .
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir poetry && \
-    poetry install
+RUN poetry install --no-interaction --no-ansi
 
-RUN mkdir /tmp/wikicitations-api
+COPY . ./
 
-CMD ["poetry run gunicorn -w 30 --bind unix:/tmp/wikicitations-api/ipc.sock wsgi:app --timeout 1000"]
+CMD ["./debug_app.py"]
+

@@ -1,3 +1,5 @@
-from src import app
+#!/usr/bin/env python3
 
-app.run(debug=True)
+from src.models.api import app
+
+app.run(debug=True, host="0.0.0.0")
