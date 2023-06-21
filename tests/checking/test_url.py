@@ -3,6 +3,7 @@ from unittest import TestCase
 
 import pytest
 
+import config
 from src.models.identifiers_checking.url import Url
 
 
@@ -116,13 +117,14 @@ class TestUrl(TestCase):
         data = url.get_dict
         assert data["detected_language"] == "en"
 
-    # Skip test in CI which needs the auth code
-    # TODO add auth code to CI secrets
-    @pytest.mark.skipif(
-        "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
-    )
+    # # Skip test in CI which needs the auth code
+    # # TODO add auth code to CI secrets
+    # @pytest.mark.skipif(
+    #     "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
+    # )
     def testdeadlink_error_test(self):
-        url = Url(url=self.space_url, timeout=20)
-        url.check()
-        assert url.testdeadlink_status_code == 404
-        assert url.testdeadlink_error_details == "RESPONSE CODE: 404"
+        if config.testdeadlink_key:
+            url = Url(url=self.space_url, timeout=20)
+            url.check()
+            assert url.testdeadlink_status_code == 404
+            assert url.testdeadlink_error_details == "RESPONSE CODE: 404"
