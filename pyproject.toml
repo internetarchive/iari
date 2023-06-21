@@ -115,6 +115,7 @@ ignore = [
   "PLW2901",
   "PTH110",
   "PTH123",
+  "RUF012", # Error: src/models/api/handlers/all.py:18:35: RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
   "RSE102",
   "S113",
   "S324",
