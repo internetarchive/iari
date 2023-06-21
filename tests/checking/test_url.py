@@ -1,4 +1,7 @@
+import os
 from unittest import TestCase
+
+import pytest
 
 from src.models.identifiers_checking.url import Url
 
@@ -113,6 +116,11 @@ class TestUrl(TestCase):
         data = url.get_dict
         assert data["detected_language"] == "en"
 
+    # Skip test in CI which needs the auth code
+    # TODO add auth code to CI secrets
+    @pytest.mark.skipif(
+        "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
+    )
     def testdeadlink_error_test(self):
         url = Url(url=self.space_url, timeout=20)
         url.check()
