@@ -7,7 +7,7 @@ from flask_restful import Api  # type: ignore
 from src import CheckUrl, Pdf
 
 
-class TestPdf(TestCase):
+class TestCheckUrl(TestCase):
     def setUp(self):
         app = Flask(__name__)
         api = Api(app)
