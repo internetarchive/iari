@@ -34,6 +34,6 @@ jobs:
       - run: mkdir --parents --verbose .mypy_cache
       - run: poetry run mypy --ignore-missing-imports --install-types --non-interactive --exclude test_data --exclude deprecated .
       - run: poetry run safety check
-      # - run: mkdir json
-      # This is needed for the tests to find the files in test_data/ correctly
+      # Copy the config
+      - run: cp config_sample.py config.py
       - run: poetry run pytest .

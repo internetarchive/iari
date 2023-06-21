@@ -25,6 +25,7 @@ from requests.exceptions import (
 )
 from requests.models import LocationParseError
 
+import config
 from src.models.api.handlers import BaseHandler
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
@@ -53,6 +54,7 @@ class Url(WikipediaUrl):
     # soft404_probability: float = 0.0  # not implemented yet
     status_code: int = 0
     testdeadlink_status_code: int = 0
+    testdeadlink_error_details: str = ""
     timeout: int = 2
     dns_error_details: str = ""
     response_headers: Dict = {}
@@ -189,6 +191,8 @@ class Url(WikipediaUrl):
             self.request_error_details = str(e)
 
     def __check_url__(self):
+        """IARI url checking"""
+        # TODO deprecate this
         print(f"Trying to check: {self.url}")
         self.__get_dns_record__()
         self.__check_with_https_verify__()
@@ -238,23 +242,41 @@ class Url(WikipediaUrl):
 
     def __check_url_with_testdeadlink_api__(self):
         """This fetches the status code from the testdeadlink API provided by Max and Owen"""
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
+        from src import app
 
-        data = (
-            f"urls={self.url}&authcode=579331d2dc3f96739b7c622ed248a7d3&returncodes=1"
-        )
+        if not config.testdeadlink_key:
+            app.logger.warning(
+                "__check_url_with_testdeadlink_api__: No testdeadlink key found, skipping check"
+            )
+        else:
+            headers = {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
 
-        response = requests.post(
-            "https://iabot-api.archive.org/testdeadlink.php", headers=headers, data=data
-        )
-        # get the status code
-        if response.status_code == 200:
-            data = response.json()
-            # print(data)
-            if "results" in data:
-                results = data["results"]
-                for result in results:
-                    self.testdeadlink_status_code = results[result]
-                    break
+            data = f"urls={self.url}&authcode={config.testdeadlink_key}&returncodes=1"
+
+            response = requests.post(
+                "https://iabot-api.archive.org/testdeadlink.php",
+                headers=headers,
+                data=data,
+            )
+            # get the status code
+            if response.status_code == 200:
+                data = response.json()
+                print(data)
+                # exit()
+                if "results" in data:
+                    # array of results
+                    results = data["results"]
+                    # Get the status code
+                    for result in results:
+                        # Skip if we get the errors first
+                        if result != "errors":
+                            # Get the status code
+                            self.testdeadlink_status_code = results[result]
+                            # Get any errors
+                            if "errors" in results:
+                                self.testdeadlink_error_details = results["errors"][
+                                    result
+                                ]
+                            break

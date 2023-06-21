@@ -18,7 +18,7 @@ class TestPdf(TestCase):
 
     def test_valid_request_304_200(self):
         response = self.test_client.get(
-            "/check-url?url=https://arxiv.org/pdf/2210.02667.pdf&testing=true"
+            "/check-url?url=https://arxiv.org/pdf/2210.02667.pdf&testing=true&timeout=10"
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)

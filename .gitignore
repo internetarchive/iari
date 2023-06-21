@@ -6,3 +6,5 @@ sources
 /pywikibot.lwp
 /isbn_exceptions.log
 /cache-content.log
+*.json
+/config.py

@@ -1,5 +1,9 @@
+import os
 from unittest import TestCase
 
+import pytest
+
+import config
 from src.models.identifiers_checking.url import Url
 
 
@@ -11,6 +15,7 @@ class TestUrl(TestCase):
     forbidden_url_if_not_spoofed_headers = (
         "https://www.sciencedaily.com/releases/2021/07/210713090153.htm"
     )
+    space_url = "http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf"
 
     def test_check_good(self):
         url = Url(url=self.good_url, timeout=2)
@@ -111,3 +116,10 @@ class TestUrl(TestCase):
         assert url.malformed_url is False
         data = url.get_dict
         assert data["detected_language"] == "en"
+
+    def testdeadlink_error_test(self):
+        if config.testdeadlink_key:
+            url = Url(url=self.space_url, timeout=20)
+            url.check()
+            assert url.testdeadlink_status_code == 404
+            assert url.testdeadlink_error_details == "RESPONSE CODE: 404"
