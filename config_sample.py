@@ -2,6 +2,8 @@ import logging
 import re
 
 # Settings:
+# this key is needed to access the testdeadlink endpoint
+testdeadlink_key = ""
 link_extraction_regex = re.compile(
     r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
 )
