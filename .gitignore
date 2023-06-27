@@ -8,3 +8,6 @@ sources
 /cache-content.log
 *.json
 /config.py
+__pycache__/
+.coverage
+.idea/
