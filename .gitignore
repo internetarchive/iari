@@ -11,3 +11,4 @@ sources
 __pycache__/
 .coverage
 .idea/
+venv/
