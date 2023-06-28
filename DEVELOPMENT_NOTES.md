@@ -16,9 +16,11 @@ Pre-commit is highly configurable, allowing developers to choose from a wide ran
 
 By incorporating pre-commit into the development workflow, teams can enforce consistent code quality, reduce manual effort, and catch potential problems early, leading to cleaner and more maintainable codebases.
 
-Run:
-
+## Run
 `$ pre-commit run --all`
+
+## Install pre-commit
+`$ pre-commit install`
 
 ## Extract single page from pdf
 Use browser -> print -> save to pdf
