@@ -1,5 +1,15 @@
 # Developer notes
 
+## Running IARI in AWS
+Open a screen
+`$ screen -RR`
+
+Run gunicorn
+`$ TESTDEADLINK_KEY={insert secret key here} /bin/bash -c 'source /srv/wcdimportbot/venv/bin/activate; gunicorn -w 30 --bind unix:/tmp/wikicitations-api/ipc.sock wsgi:app --timeout 1000' > output.log 2>&1`
+
+Open a new windown in screen to look at the log
+`$ tail -F output.log`
+
 ## Development workflow
 * Pick a story to work on
 * Create a new branch
