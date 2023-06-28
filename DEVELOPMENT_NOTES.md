@@ -1,5 +1,19 @@
 # Developer notes
 
+## Development workflow
+* Pick a story to work on
+* Create a new branch
+* Make some changes
+* Run `pre-commit run -all`
+* Run `pytest -x`
+* If everything looks good update the README.md accordingly
+* Commit the changes using a clear message
+* Open a new pull request
+* Add what story is fixed to the PR
+* Check if the CI finishes with all the tests green
+* Ask for review if any breaking changes
+* Merge the PR
+
 ## Pre-commit
 Pre-commit is a framework and tool that helps developers to set up and enforce code quality rules and best practices in their software development projects. It is commonly used in the context of version control systems like Git.
 
