@@ -1,6 +1,6 @@
 # Developer notes
 
-# Pre-commit
+## Pre-commit
 Pre-commit is a framework and tool that helps developers to set up and enforce code quality rules and best practices in their software development projects. It is commonly used in the context of version control systems like Git.
 
 The main purpose of pre-commit is to perform checks and validations on the codebase before allowing developers to commit their changes. It helps catch issues early on and ensures that the committed code meets certain standards. By integrating pre-commit into the development workflow, developers can automate various tasks such as code formatting, linting, running tests, and more.
@@ -16,10 +16,10 @@ Pre-commit is highly configurable, allowing developers to choose from a wide ran
 
 By incorporating pre-commit into the development workflow, teams can enforce consistent code quality, reduce manual effort, and catch potential problems early, leading to cleaner and more maintainable codebases.
 
-## Run
+### Run
 `$ pre-commit run --all`
 
-## Install pre-commit
+### Install pre-commit
 `$ pre-commit install`
 
 ## Extract single page from pdf
