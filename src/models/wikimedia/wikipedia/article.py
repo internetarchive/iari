@@ -6,7 +6,6 @@ import requests
 from dateutil.parser import isoparse
 from pydantic import validate_arguments
 
-import config
 from src.models.api.job.article_job import ArticleJob
 from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
@@ -515,7 +514,7 @@ class WikipediaArticle(WariBaseModel):
             f"w/rest.php/v1/revision/{self.job.revision}"
         )
         prop = "ids|timestamp|content"
-        headers = {"User-Agent": config.user_agent}
+        headers = {"User-Agent": self.user_agent}
         response = requests.get(
             url, params={"action": "query", "prop": prop}, headers=headers
         )
@@ -545,7 +544,7 @@ class WikipediaArticle(WariBaseModel):
             f"https://{self.job.lang}.{self.job.domain.value}/"
             f"w/rest.php/v1/page/{self.job.quoted_title}"
         )
-        headers = {"User-Agent": config.user_agent}
+        headers = {"User-Agent": self.user_agent}
         response = requests.get(url, headers=headers)
         # console.print(response.json())
         if response.status_code == 200:

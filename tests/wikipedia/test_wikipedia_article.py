@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
-import config
 from src.models.api.job.article_job import ArticleJob
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 from test_data.test_content import (  # type: ignore
@@ -11,7 +10,7 @@ from test_data.test_content import (  # type: ignore
     easter_island_tail_excerpt,
 )
 
-logging.basicConfig(level=config.loglevel)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 

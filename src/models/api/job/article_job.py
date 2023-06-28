@@ -3,7 +3,6 @@ from urllib.parse import quote, unquote
 
 import requests
 
-import config
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import WikimediaDomain
@@ -49,7 +48,7 @@ class ArticleJob(Job):
                 f"https://{self.lang}.{self.domain.value}/"
                 f"w/rest.php/v1/page/{self.quoted_title}"
             )
-            headers = {"User-Agent": config.user_agent}
+            headers = {"User-Agent": self.user_agent}
             response = requests.get(url, headers=headers)
             # console.print(response.json())
             if response.status_code == 200:

@@ -1,8 +1,9 @@
 from langdetect import LangDetectException, detect  # type: ignore
-from pydantic import BaseModel
+
+from src.models.base import WariBaseModel
 
 
-class BaseHandler(BaseModel):
+class BaseHandler(WariBaseModel):
     detected_language: str = ""
     detected_language_error: bool = False
     detected_language_error_details: str = ""
