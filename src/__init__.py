@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 The purpose of this API is
 * to analyze a Wikipedia article based on the title, wikimedia site and language code
@@ -8,11 +9,12 @@ https://medium.com/analytics-vidhya/how-to-test-flask-applications-aef12ae5181c 
 https://github.com/pallets/flask/blob/1.1.2/examples/tutorial/flaskr/__init__.py
 """
 import logging
+import os
 
 from flask import Flask  # type: ignore
 from flask_restful import Api, Resource  # type: ignore
 
-import config
+from src.models.identifiers_checking.url import TestdeadlinkKeyError
 from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
 from src.views.statistics.all import All
@@ -22,8 +24,13 @@ from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
 from src.views.statistics.xhtml import Xhtml
 
-logging.basicConfig(level=config.loglevel)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+
+if not os.getenv("TESTDEADLINK_KEY"):
+    raise TestdeadlinkKeyError(
+        "No testdeadlink key found, please put it in the environment"
+    )
 
 app = Flask(__name__)
 # We use a prefix here to enable us to stabilize the api over time
@@ -40,7 +47,3 @@ api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
 api.add_resource(Pdf, "/statistics/pdf")
 api.add_resource(Xhtml, "/statistics/xhtml")
-# return app_
-# api.add_resource(
-#     AddJobToQueue, "/add-job"
-# )  # ?lang=<string:language_code>&site=<string:wikimedia_site>&title=<string:title>")

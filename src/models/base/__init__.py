@@ -1,4 +1,5 @@
 import logging
+import re
 from os.path import exists
 from typing import Any, Optional
 
@@ -13,6 +14,11 @@ class WariBaseModel(BaseModel):
 
     # We set to Any here because of cyclic dependency or pydantic forward ref error
     cache: Optional[Any] = None
+    link_extraction_regex = re.compile(
+        r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
+    )
+    user_agent = "IARI, see https://github.com/internetarchive/iari"
+    subdirectory_for_json = "json/"  # create it manually before running the api
 
     class Config:  # dead: disable
         extra = "forbid"  # dead: disable

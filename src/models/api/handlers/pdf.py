@@ -11,11 +11,8 @@ from fitz import (
     Document,  # type: ignore
     FileDataError,
 )
-
-# type: ignore
 from requests import ReadTimeout
 
-from config import link_extraction_regex
 from src.models.api.handlers import BaseHandler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.link.pdf_link import PdfLink
@@ -41,6 +38,7 @@ class PdfHandler(BaseHandler):
     pdf_document: Optional[Document] = None
     word_counts: List[int] = []
     # html_pages: Dict[int, str] = {}
+    testing: bool = False
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -203,7 +201,7 @@ class PdfHandler(BaseHandler):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
             urls = re.findall(
-                link_extraction_regex,
+                self.link_extraction_regex,
                 self.text_pages[index],
             )
             # cleaned_urls = self.__clean_urls__(urls=urls)
@@ -218,7 +216,7 @@ class PdfHandler(BaseHandler):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
             urls = re.findall(
-                link_extraction_regex,
+                self.link_extraction_regex,
                 self.text_pages_without_linebreaks[index],
             )
             # cleaned_urls = self.__clean_urls__(urls=urls)
@@ -235,7 +233,7 @@ class PdfHandler(BaseHandler):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
             urls = re.findall(
-                link_extraction_regex,
+                self.link_extraction_regex,
                 self.text_pages_without_spaces[index],
             )
             # cleaned_urls = self.__clean_urls__(urls=urls)

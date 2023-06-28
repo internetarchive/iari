@@ -14,7 +14,7 @@ from wikibaseintegrator.wbi_helpers import fulltext_search  # type: ignore
 instance_of = "P31"
 retracted_item = "Q45182324"  # see https://www.wikidata.org/wiki/Q45182324
 pyalex.config.email = "info@archive.org"
-config["USER_AGENT"] = "wcdimportbot"
+config["USER_AGENT"] = "IARI"
 
 
 class Doi(BaseModel):

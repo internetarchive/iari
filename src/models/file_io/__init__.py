@@ -3,7 +3,6 @@ import logging
 from os.path import exists
 from typing import Any, Dict, Optional
 
-import config
 from src.models.api.job import Job
 from src.models.base import WariBaseModel
 
@@ -28,11 +27,11 @@ class FileIo(WariBaseModel):
         if self.testing:
             # go out to repo root first
             # print(os.getcwd())
-            # we hard code the json directory for now
-            path_filename = f"/home/dpriskorn/src/python/wcdimportbot/{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            # TODO avoid hard coding the json directory for now
+            path_filename = f"/home/dpriskorn/src/python/wcdimportbot/{self.subdirectory_for_json}{self.subfolder}{self.filename}"
         else:
             path_filename = (
-                f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+                f"{self.subdirectory_for_json}{self.subfolder}{self.filename}"
             )
         app.logger.debug(f"using path: {path_filename}")
         return path_filename

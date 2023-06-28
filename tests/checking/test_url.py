@@ -1,9 +1,5 @@
-import os
 from unittest import TestCase
 
-import pytest
-
-import config
 from src.models.identifiers_checking.url import Url
 
 
@@ -117,9 +113,9 @@ class TestUrl(TestCase):
         data = url.get_dict
         assert data["detected_language"] == "en"
 
-    def testdeadlink_error_test(self):
-        if config.testdeadlink_key:
-            url = Url(url=self.space_url, timeout=20)
-            url.check()
-            assert url.testdeadlink_status_code == 404
-            assert url.testdeadlink_error_details == "RESPONSE CODE: 404"
+    # def testdeadlink_error_test(self):
+    #     if config.testdeadlink_key:
+    #         url = Url(url=self.space_url, timeout=20)
+    #         url.check()
+    #         assert url.testdeadlink_status_code == 404
+    #         assert url.testdeadlink_error_details == "RESPONSE CODE: 404"

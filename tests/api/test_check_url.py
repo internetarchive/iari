@@ -4,7 +4,7 @@ from unittest import TestCase
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
-from src import CheckUrl, Pdf
+from src import CheckUrl
 
 
 class TestCheckUrl(TestCase):
