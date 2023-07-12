@@ -1,7 +1,7 @@
 import hashlib
 from copy import deepcopy
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, ClassVar
 
 from src.models.api.handlers.pdf import PdfHandler
 from src.models.api.job.check_url_job import UrlJob
@@ -23,7 +23,7 @@ class Pdf(StatisticsWriteView):
     job: Optional[UrlJob] = None
     schema: UrlSchema = UrlSchema()
     serving_from_json: bool = False
-    headers: Dict[str, Any] = {
+    headers: ClassVar[Dict[str, Any]] = {
         "Access-Control-Allow-Origin": "*",
     }
     data: Dict[str, Any] = {}

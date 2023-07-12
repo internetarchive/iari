@@ -1,7 +1,7 @@
 import hashlib
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, ClassVar
 
 from bs4 import BeautifulSoup, Comment
 from mwparserfromhell.nodes import Tag  # type: ignore
@@ -38,23 +38,23 @@ class WikipediaReference(JobBaseModel):
     """
 
     wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
-    templates: List[WikipediaTemplate] = []
+    templates: ClassVar[List[WikipediaTemplate]] = []
     multiple_templates_found: bool = False
     testing: bool = False
     extraction_done: bool = False
     is_empty_named_reference: bool = False
     is_general_reference: bool = False
-    wikicoded_links: List[WikipediaUrl] = []
-    bare_urls: List[WikipediaUrl] = []
-    template_urls: List[WikipediaUrl] = []
-    reference_urls: List[WikipediaUrl] = []
-    comment_urls: List[WikipediaUrl] = []
+    wikicoded_links: ClassVar[List[WikipediaUrl]] = []
+    bare_urls: ClassVar[List[WikipediaUrl]] = []
+    template_urls: ClassVar[List[WikipediaUrl]] = []
+    reference_urls: ClassVar[List[WikipediaUrl]] = []
+    comment_urls: ClassVar[List[WikipediaUrl]] = []
     unique_first_level_domains: List[str] = []
     language_code: str = ""
     reference_id: str = ""
     section: str
     soup: Optional[Any] = None
-    comments: List[Comment] = []
+    comments: ClassVar[List[Comment]] = []
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable

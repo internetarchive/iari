@@ -1,6 +1,6 @@
 import hashlib
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, ClassVar
 
 from src.models.api.job.check_doi_job import CheckDoiJob
 from src.models.api.schema.check_doi_schema import CheckDoiSchema
@@ -22,10 +22,10 @@ class CheckDoi(StatisticsWriteView):
     job: Optional[CheckDoiJob] = None
     schema: CheckDoiSchema = CheckDoiSchema()
     serving_from_json: bool = False
-    headers: Dict[str, Any] = {
+    headers: ClassVar[Dict[str, Any]] = {
         "Access-Control-Allow-Origin": "*",
     }
-    data: Dict[str, Any] = {}
+    data: ClassVar[Dict[str, Any]] = {}
 
     def get(self):
         """This is the main method and the entrypoint for flask
