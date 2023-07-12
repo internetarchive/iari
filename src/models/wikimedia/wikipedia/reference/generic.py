@@ -38,23 +38,23 @@ class WikipediaReference(JobBaseModel):
     """
 
     wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
-    templates: List[WikipediaTemplate] = None
+    templates: Optional[List[WikipediaTemplate]] = None
     multiple_templates_found: bool = False
     testing: bool = False
     extraction_done: bool = False
     is_empty_named_reference: bool = False
     is_general_reference: bool = False
-    wikicoded_links: List[WikipediaUrl] = None
-    bare_urls: List[WikipediaUrl] = None
-    template_urls: List[WikipediaUrl] = None
-    reference_urls: List[WikipediaUrl] = None
-    comment_urls: List[WikipediaUrl] = None
-    unique_first_level_domains: List[str] = None
+    wikicoded_links: Optional[List[WikipediaUrl]] = None
+    bare_urls: Optional[List[WikipediaUrl]] = None
+    template_urls: Optional[List[WikipediaUrl]] = None
+    reference_urls: Optional[List[WikipediaUrl]] = None
+    comment_urls: Optional[List[WikipediaUrl]] = None
+    unique_first_level_domains: Optional[List[str]] = None
     language_code: str = ""
     reference_id: str = ""
     section: str
     soup: Optional[Any] = None
-    comments: List[Comment] = None
+    comments: Optional[List[Comment]] = None
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -106,31 +106,35 @@ class WikipediaReference(JobBaseModel):
     @property
     def titles(self) -> List[str]:
         titles = []
-        for template in self.templates:
-            if template.parameters and "title" in template.parameters:
-                titles.append(template.parameters["title"])
+        if self.templates:
+            for template in self.templates:
+                if template.parameters and "title" in template.parameters:
+                    titles.append(template.parameters["title"])
         return titles
 
     @property
     def get_template_dicts(self) -> List[Dict[str, Any]]:
         template_dicts = []
-        for template in self.templates:
-            template_dicts.append(template.get_dict())
+        if self.templates:
+            for template in self.templates:
+                template_dicts.append(template.get_dict())
         return template_dicts
 
     @property
     def template_names(self) -> List[str]:
         template_names = []
-        for template in self.templates:
-            template_names.append(template.name)
+        if self.templates:
+            for template in self.templates:
+                template_names.append(template.name)
         return template_names
 
     @property
     def raw_urls(self) -> List[str]:
         """Get a list of the raw unique urls"""
         urls = []
-        for url in self.reference_urls:
-            urls.append(url.url)
+        if self.reference_urls:
+            for url in self.reference_urls:
+                urls.append(url.url)
         return urls
 
     @property
@@ -157,6 +161,8 @@ class WikipediaReference(JobBaseModel):
     @property
     def number_of_templates(self) -> int:  # dead: disable
         """Convenience method for tests"""
+        if not self.templates:
+            return 0
         return len(self.templates)
 
     def __parse_xhtml__(self):
@@ -165,10 +171,11 @@ class WikipediaReference(JobBaseModel):
     def __extract_template_urls__(self) -> None:
         self.template_urls = []
         urls = []
-        for template in self.templates:
-            if template.urls:
-                urls.extend(template.urls)
-        self.template_urls = list(urls)
+        if self.templates:
+            for template in self.templates:
+                if template.urls:
+                    urls.extend(template.urls)
+        self.template_urls = urls
 
     def __extract_bare_urls_outside_templates__(self) -> None:
         """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
@@ -214,13 +221,16 @@ class WikipediaReference(JobBaseModel):
         urls_list = []
         if not self.template_urls:
             self.__extract_template_urls__()
-        urls_list.extend(self.template_urls)
+        if self.template_urls:
+            urls_list.extend(self.template_urls)
         if not self.bare_urls:
             self.__extract_bare_urls_outside_templates__()
-        urls_list.extend(self.bare_urls)
+        if self.bare_urls:
+            urls_list.extend(self.bare_urls)
         if not self.wikicoded_links:
             self.__extract_external_wikicoded_links_from_the_reference__()
-        urls_list.extend(self.wikicoded_links)
+        if self.wikicoded_links:
+            urls_list.extend(self.wikicoded_links)
         # if not self.comment_urls:
         #     self.__extract_urls_from_comments__()
         # urls_list.extend(self.comment_urls)
@@ -347,10 +357,11 @@ class WikipediaReference(JobBaseModel):
         from src import app
 
         app.logger.debug("__extract_and_clean_template_parameters__: running")
-        [
-            template.extract_and_prepare_parameter_and_flds()
-            for template in self.templates
-        ]
+        if self.templates:
+            [
+                template.extract_and_prepare_parameter_and_flds()
+                for template in self.templates
+            ]
 
     def extract_and_check(self) -> None:
         """Helper method"""

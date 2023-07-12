@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import mwparserfromhell  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
@@ -28,11 +28,11 @@ class WikipediaReferenceExtractor(WariBaseModel):
     job: ArticleJob
     wikitext: str
     wikicode: Wikicode = None
-    references: List[WikipediaReference] = None
+    references: Optional[List[WikipediaReference]] = None
     # wikibase: Wikibase
     testing: bool = False
     language_code: str = ""
-    sections: List[MediawikiSection] = None
+    sections: Optional[List[MediawikiSection]] = None
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -41,10 +41,12 @@ class WikipediaReferenceExtractor(WariBaseModel):
     def urls(self) -> List[WikipediaUrl]:
         """List of non-unique and valid urls"""
         urls: List[WikipediaUrl] = []
-        for reference in self.references:
-            for url in reference.reference_urls:
-                if url.is_valid:
-                    urls.append(url)
+        if self.references:
+            for reference in self.references:
+                if reference.reference_urls:
+                    for url in reference.reference_urls:
+                        if url.is_valid:
+                            urls.append(url)
         return urls
 
     # @property
@@ -61,9 +63,11 @@ class WikipediaReferenceExtractor(WariBaseModel):
     def raw_urls(self) -> List[str]:
         """List of raw non-unique urls found in the reference"""
         urls: List[str] = []
-        for reference in self.references:
-            for url in reference.reference_urls:
-                urls.append(url.url)
+        if self.references:
+            for reference in self.references:
+                if reference.reference_urls:
+                    for url in reference.reference_urls:
+                        urls.append(url.url)
         return urls
 
     @property
@@ -90,16 +94,20 @@ class WikipediaReferenceExtractor(WariBaseModel):
         if not self.content_references:
             return []
         flds = []
-        for reference in self.references:
-            if reference.unique_first_level_domains:
-                flds.extend(reference.unique_first_level_domains)
+        if self.references:
+            for reference in self.references:
+                if reference.unique_first_level_domains:
+                    flds.extend(reference.unique_first_level_domains)
         return flds
 
     @property
     def number_of_sections(self) -> int:  # dead: disable
         if not self.sections:
             self.__extract_sections__()
-        return len(self.sections)
+        if self.sections:
+            return len(self.sections)
+        else:
+            return 0
 
     @property
     def general_references(self):
@@ -154,7 +162,10 @@ class WikipediaReferenceExtractor(WariBaseModel):
 
     @property
     def number_of_references(self) -> int:
-        return len(self.references)
+        if self.references:
+            return len(self.references)
+        else:
+            return 0
 
     # def number_of_content_references_with_a_url(
     #     self, list_: List[WikipediaReference]
@@ -237,9 +248,12 @@ class WikipediaReferenceExtractor(WariBaseModel):
     @property
     def reference_ids(self) -> List[str]:
         ids = []
-        for reference in self.references:
-            ids.append(reference.reference_id)
-        return ids
+        if self.references:
+            for reference in self.references:
+                ids.append(reference.reference_id)
+            return ids
+        else:
+            return []
 
     def __populate_references__(self):
         self.references = []

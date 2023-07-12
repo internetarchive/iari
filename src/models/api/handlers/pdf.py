@@ -27,19 +27,19 @@ logger = logging.getLogger(__name__)
 class PdfHandler(BaseHandler):
     job: UrlJob
     content: bytes = b""
-    links_from_original_text: List[PdfLink] = None
-    links_from_text_without_linebreaks: List[PdfLink] = None
-    links_from_text_without_spaces: List[PdfLink] = None
-    annotation_links: List[PdfLink] = None
+    links_from_original_text: Optional[List[PdfLink]] = None
+    links_from_text_without_linebreaks: Optional[List[PdfLink]] = None
+    links_from_text_without_spaces: Optional[List[PdfLink]] = None
+    annotation_links: Optional[List[PdfLink]] = None
     error: bool = False
-    text_pages: Dict[int, str] = None
-    text_pages_without_linebreaks: Dict[int, str] = None
-    text_pages_without_spaces: Dict[int, str] = None
-    url_annotations: Dict[int, List[Any]] = None
+    text_pages: Optional[Dict[int, str]] = None
+    text_pages_without_linebreaks: Optional[Dict[int, str]] = None
+    text_pages_without_spaces: Optional[Dict[int, str]] = None
+    url_annotations: Optional[Dict[int, List[Any]]] = None
     error_details: Tuple[int, str] = (0, "")
     file_path: str = ""
     pdf_document: Optional[Document] = None
-    word_counts: List[int] = None
+    word_counts: Optional[List[int]] = None
     # html_pages: Dict[int, str] = {}
 
     class Config:  # dead: disable
@@ -47,7 +47,7 @@ class PdfHandler(BaseHandler):
 
     @property
     def __get_html_output__(self):
-        html_pages: Dict[int, str] = {}
+        html_pages = {}
         for index, page in enumerate(self.pdf_document.pages()):
             html = page.get_text("html")
             html_pages[index] = html
@@ -55,7 +55,7 @@ class PdfHandler(BaseHandler):
 
     @property
     def __get_xml_output__(self):
-        xml_pages: Dict[int, str] = {}
+        xml_pages = {}
         for index, page in enumerate(self.pdf_document.pages()):
             xml = page.get_text("xml")
             xml_pages[index] = xml
@@ -63,7 +63,7 @@ class PdfHandler(BaseHandler):
 
     @property
     def __get_json_output__(self):
-        json_pages: Dict[int, str] = {}
+        json_pages = {}
         for index, page in enumerate(self.pdf_document.pages()):
             json = page.get_text("json")
             json_pages[index] = json
@@ -72,7 +72,7 @@ class PdfHandler(BaseHandler):
     @property
     def __get_blocks__(self):
         """Extract blocks of text"""
-        block_pages: Dict[int, list] = {}
+        block_pages = {}
         for index, page in enumerate(self.pdf_document.pages()):
             raw_blocks = page.get_text("blocks")
             blocks = []
@@ -100,18 +100,24 @@ class PdfHandler(BaseHandler):
     def mean_number_of_words_per_page(self) -> int:
         if not self.word_counts:
             self.__count_words__()
+        if not self.word_counts:
+            return 0
         return round(sum(self.word_counts) / len(self.word_counts))
 
     @property
     def max_number_of_words_per_page(self) -> int:
         if not self.word_counts:
             self.__count_words__()
+        if not self.word_counts:
+            return 0
         return max(self.word_counts)
 
     @property
     def min_number_of_words_per_page(self) -> int:
         if not self.word_counts:
             self.__count_words__()
+        if not self.word_counts:
+            return 0
         return min(self.word_counts)
 
     @property
@@ -139,9 +145,10 @@ class PdfHandler(BaseHandler):
         return self.pdf_document.page_count
 
     def __count_words__(self) -> None:
-        self.word_counts = [
-            len(page_text.split()) for page_text in self.text_pages.values()
-        ]
+        if self.text_pages:
+            self.word_counts = [
+                len(page_text.split()) for page_text in self.text_pages.values()
+            ]
 
     def __download_pdf__(self):
         """Download PDF file from URL"""
@@ -202,54 +209,60 @@ class PdfHandler(BaseHandler):
     def __extract_links_from_original_text__(self) -> None:
         """Extract all links from the text extract per page"""
         self.links_from_original_text = []
-        for index, _ in enumerate(self.text_pages):
-            # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
-            # provided by chatgpt:
-            urls = re.findall(
-                link_extraction_regex,
-                self.text_pages[index],
-            )
-            # cleaned_urls = self.__clean_urls__(urls=urls)
-            # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
-            for url in urls:
-                if validators.url(url):
-                    self.links_from_original_text.append(PdfLink(url=url, page=index))
+        if self.text_pages:
+            for index, _ in enumerate(self.text_pages):
+                # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
+                # provided by chatgpt:
+                urls = re.findall(
+                    link_extraction_regex,
+                    self.text_pages[index],
+                )
+                # cleaned_urls = self.__clean_urls__(urls=urls)
+                # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
+                for url in urls:
+                    if validators.url(url):
+                        self.links_from_original_text.append(
+                            PdfLink(url=url, page=index)
+                        )
 
     def __extract_links_from_text_without_linebreaks__(self) -> None:
         """Extract all links from the text extract per page"""
         self.links_from_text_without_linebreaks = []
-        for index, _ in enumerate(self.text_pages):
-            # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
-            # provided by chatgpt:
-            urls = re.findall(
-                link_extraction_regex,
-                self.text_pages_without_linebreaks[index],
-            )
-            # cleaned_urls = self.__clean_urls__(urls=urls)
-            # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
-            for url in urls:
-                if validators.url(url):
-                    self.links_from_text_without_linebreaks.append(
-                        PdfLink(url=url, page=index)
-                    )
+        if self.text_pages_without_linebreaks and self.text_pages:
+            for index, _ in enumerate(self.text_pages):
+                # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
+                # provided by chatgpt:
+                urls = re.findall(
+                    link_extraction_regex,
+                    self.text_pages_without_linebreaks[index],
+                )
+                # cleaned_urls = self.__clean_urls__(urls=urls)
+                # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
+                for url in urls:
+                    if validators.url(url):
+                        self.links_from_text_without_linebreaks.append(
+                            PdfLink(url=url, page=index)
+                        )
 
     def __extract_links_from_text_without_spaces__(self) -> None:
         """Extract all links from the text extract per page"""
         self.links_from_text_without_spaces = []
-        for index, _ in enumerate(self.text_pages):
-            # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
-            # provided by chatgpt:
-            urls = re.findall(
-                link_extraction_regex,
-                self.text_pages_without_spaces[index],
-            )
-            # cleaned_urls = self.__clean_urls__(urls=urls)
-            # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
-            for url in urls:
-                if validators.url(url):
-                    self.links_from_text_without_spaces.append(
-                        PdfLink(url=url, page=index)
+        if self.text_pages:
+            for index, _ in enumerate(self.text_pages):
+                # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
+                # provided by chatgpt:
+                if self.text_pages_without_spaces:
+                    urls = re.findall(
+                        link_extraction_regex,
+                        self.text_pages_without_spaces[index],
                     )
+                    # cleaned_urls = self.__clean_urls__(urls=urls)
+                    # valid_urls = self.__discard_invalid_urls__(urls=cleaned_urls)
+                    for url in urls:
+                        if validators.url(url):
+                            self.links_from_text_without_spaces.append(
+                                PdfLink(url=url, page=index)
+                            )
 
     def __get_annotations__(self):
         """Extract the raw annotations into an attribute dictionary"""

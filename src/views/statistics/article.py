@@ -44,9 +44,12 @@ class Article(StatisticsWriteView):
                 self.__write_to_disk__()
                 if not self.io:
                     raise MissingInformationError()
-                self.io.data["served_from_cache"] = False
-                # app.logger.debug("returning dictionary")
-                return self.io.data, 200
+                if self.io.data:
+                    self.io.data["served_from_cache"] = False
+                    # app.logger.debug("returning dictionary")
+                    return self.io.data, 200
+                else:
+                    raise MissingInformationError()
         else:
             return AnalyzerReturn.NOT_FOUND.value, 404
 

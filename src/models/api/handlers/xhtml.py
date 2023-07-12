@@ -18,7 +18,7 @@ class XhtmlHandler(BaseHandler):
 
     job: UrlJob
     content: bytes = b""
-    links: List[XhtmlLink] = None
+    links: Optional[List[XhtmlLink]] = None
     error: bool = False
     error_details: str = ""
     soup: Optional[Any]
@@ -75,7 +75,10 @@ class XhtmlHandler(BaseHandler):
 
     def __get_links_dicts__(self) -> List[Dict[str, str]]:
         """This is needed to please the json encoder"""
-        return [link.get_dict() for link in self.links]
+        if self.links:
+            return [link.get_dict() for link in self.links]
+        else:
+            return []
 
     def __parse_into_soup__(self):
         self.soup = BeautifulSoup(self.content, "lxml")

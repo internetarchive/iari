@@ -23,11 +23,11 @@ class Pdf(StatisticsWriteView):
     job: Optional[UrlJob] = None
     schema: UrlSchema = UrlSchema()
     serving_from_json: bool = False
-    headers: Dict[str, Any] = None
+    headers: Optional[Dict[str, Any]] = None
     #     {
     #     "Access-Control-Allow-Origin": "*",
     # }
-    data: Dict[str, Any] = None
+    data: Optional[Dict[str, Any]] = None
 
     @property
     def __url_hash_id__(self) -> str:

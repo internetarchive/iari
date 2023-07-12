@@ -39,7 +39,7 @@ class WikipediaArticle(WariBaseModel):
     testing: bool = False
     job: ArticleJob
     ores_quality_prediction: str = ""
-    ores_details: Dict = None
+    ores_details: Optional[Dict] = None
     revision_isodate: Optional[datetime] = None
     revision_timestamp: int = 0
 

@@ -24,8 +24,8 @@ class WikipediaAnalyzer(WariBaseModel):
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
-    reference_statistics: List[Dict[str, Any]] = None
-    dehydrated_references: List[Dict[str, Any]] = None
+    reference_statistics: Optional[List[Dict[str, Any]]] = None
+    dehydrated_references: Optional[List[Dict[str, Any]]] = None
 
     @property
     def testing(self):
@@ -143,7 +143,9 @@ class WikipediaAnalyzer(WariBaseModel):
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
                 data = ReferenceStatistic(
-                    flds=reference.unique_first_level_domains if reference.unique_first_level_domains else [],
+                    flds=reference.unique_first_level_domains
+                    if reference.unique_first_level_domains
+                    else [],
                     footnote_subtype=subtype,
                     id=reference.reference_id,
                     template_names=reference.template_names,

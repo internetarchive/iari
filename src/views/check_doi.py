@@ -22,11 +22,11 @@ class CheckDoi(StatisticsWriteView):
     job: Optional[CheckDoiJob] = None
     schema: CheckDoiSchema = CheckDoiSchema()
     serving_from_json: bool = False
-    headers: Dict[str, Any] = None
+    headers: Optional[Dict[str, Any]] = None
     # {
     #         "Access-Control-Allow-Origin": "*",
     #     }
-    data: Dict[str, Any] = None
+    data: Optional[Dict[str, Any]] = None
 
     def get(self):
         """This is the main method and the entrypoint for flask
