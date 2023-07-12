@@ -35,9 +35,9 @@ class CheckDoi(StatisticsWriteView):
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
         if self.job:
-            return self.__handle_valid_job__()
+            return self.__return_from_cache_or_analyze_and_return__()
 
-    def __handle_valid_job__(self):
+    def __return_from_cache_or_analyze_and_return__(self):
         from src import app
 
         app.logger.debug("__handle_valid_job__; running")

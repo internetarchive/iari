@@ -44,7 +44,7 @@ class Pdf(StatisticsWriteView):
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
         if self.job:
-            return self.__handle_valid_job__()
+            return self.__return_from_cache_or_analyze_and_return__()
 
     def __setup_io__(self):
         self.io = PdfFileIo(hash_based_id=self.__url_hash_id__)
@@ -60,7 +60,7 @@ class Pdf(StatisticsWriteView):
             del data["debug_blocks"]
         return data, 200
 
-    def __handle_valid_job__(self):
+    def __return_from_cache_or_analyze_and_return__(self):
         from src import app
 
         app.logger.debug("__handle_valid_job__; running")

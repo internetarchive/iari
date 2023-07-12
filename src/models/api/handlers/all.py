@@ -14,6 +14,7 @@ from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
 
 
+# noinspection PyClassVar
 class AllHandler(WariBaseModel):
     compilation: ClassVar[Dict[str, Any]] = {}
     data: Dict[str, Any] = {}

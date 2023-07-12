@@ -128,7 +128,7 @@ class Article(StatisticsWriteView):
             and self.job.title
             and self.job.domain == WikimediaDomain.wikipedia
         ) or self.job.url:
-            return self.__handle_valid_job__()
+            return self.__return_from_cache_or_analyze_and_return__()
         else:
             return self.__return_meaningful_error__()
 
