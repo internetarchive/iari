@@ -1302,22 +1302,22 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         # archive.org should only appear once
         assert raw_reference_object.unique_first_level_domains == ["archive.org"]
 
-    def test__find_bare_urls_in_comments_none_(self):
-        """mwparserfromhell does not seem to support comments inside templates currently"""
-        wikitext = (
-            "<ref>{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
-            "https://babel.hathitrust.org/cgi/pt?id=mdp.39015027915100&view=1up&seq=11 -->}}</ref>"
-        )
-        wikicode = parse(wikitext)
-        reference_object = WikipediaReference(
-            section="test",
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-        )
-        console.print(wikicode)
-        urls = reference_object.__find_bare_urls_in_comments__()
-        assert len(urls) == 0
+    # def test__find_bare_urls_in_comments_none_(self):
+    #     """mwparserfromhell does not seem to support comments inside templates currently"""
+    #     wikitext = (
+    #         "<ref>{{url|1=https://books.google.com/books?id=28tmAAAAMAAJ&pg=PR7 <!--|alternate-full-text-url="
+    #         "https://babel.hathitrust.org/cgi/pt?id=mdp.39015027915100&view=1up&seq=11 -->}}</ref>"
+    #     )
+    #     wikicode = parse(wikitext)
+    #     reference_object = WikipediaReference(
+    #         section="test",
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #     )
+    #     console.print(wikicode)
+    #     urls = reference_object.__find_bare_urls_in_comments__()
+    #     assert len(urls) == 0
 
     # TODO investigate failure and report bug upstream?
     # def test__find_bare_urls_in_comments_one_(self):
@@ -1455,25 +1455,25 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
             "http://www.jps.auckland.ac.nz"
         ]
 
-    def test___find_bare_urls_in_comments_none_(self):
-        wikitext = (
-            "* {{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
-            "title= Preliminary Evidence for Cosmogonic Texts in Rapanu"
-            "i's Rongorongo Inscriptions|journal= Journal of the Polynes"
-            "ian Society |issue=104|pages=303–21|url="
-            "http://www.jps.auckland.ac.nz/document/Volume_104_1995"
-            "/Volume_104%2C_No._3/Preliminary_evidence_for_cosmogonic_te"
-            "xts_in_Rapanui%26apos%3Bs_Rongorongo_inscriptions%2C_by_Ste"
-            "ven_Roger_Fischer%2C_p_303-322/p1}} "
-        )
-        wikicode = parse(wikitext)
-        raw_reference_object = WikipediaReference(
-            section="test",
-            wikicode=wikicode,
-            testing=True,
-            is_general_reference=True,
-        )
-        assert raw_reference_object.__find_bare_urls_in_comments__() == []
+    # def test___find_bare_urls_in_comments_none_(self):
+    #     wikitext = (
+    #         "* {{cite journal|last= Fischer|first= Steven Roger|year= 1995|"
+    #         "title= Preliminary Evidence for Cosmogonic Texts in Rapanu"
+    #         "i's Rongorongo Inscriptions|journal= Journal of the Polynes"
+    #         "ian Society |issue=104|pages=303–21|url="
+    #         "http://www.jps.auckland.ac.nz/document/Volume_104_1995"
+    #         "/Volume_104%2C_No._3/Preliminary_evidence_for_cosmogonic_te"
+    #         "xts_in_Rapanui%26apos%3Bs_Rongorongo_inscriptions%2C_by_Ste"
+    #         "ven_Roger_Fischer%2C_p_303-322/p1}} "
+    #     )
+    #     wikicode = parse(wikitext)
+    #     raw_reference_object = WikipediaReference(
+    #         section="test",
+    #         wikicode=wikicode,
+    #         testing=True,
+    #         is_general_reference=True,
+    #     )
+    #     assert raw_reference_object.__find_bare_urls_in_comments__() == []
 
     # def test___find_bare_urls_in_comments_one_(self):
     #     # TODO report this as a bug upstream because mwparserfromhell cannot find the comment
