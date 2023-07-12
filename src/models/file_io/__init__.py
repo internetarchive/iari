@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class FileIo(WariBaseModel):
     job: Optional[Job] = None
-    data: Dict[str, Any] = {}
+    data: Dict[str, Any] = None
     wari_id: str = ""
     subfolder: str = ""
     testing: bool = False

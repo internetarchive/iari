@@ -18,7 +18,7 @@ class AllHandler(WariBaseModel):
     compilation: Dict[str, Any] = None
     data: Dict[str, Any] = None
     # We use a set to avoid duplicates
-    dois: Set[str] = set()
+    dois: Set[str] = None
     doi_details: List[Dict[str, Any]] = None
     job: ArticleJob
     references: List[Dict[str, Any]] = None
@@ -169,7 +169,7 @@ class AllHandler(WariBaseModel):
 
     def __extract_dois__(self):
         """Extract the DOIs which are hiding in the templates"""
-
+        self.dois = set()
         if self.references and not self.extract_dois_done:
             for reference in self.references:
                 # app.logger.debug(f"working on this reference: {reference}")
@@ -181,6 +181,7 @@ class AllHandler(WariBaseModel):
         self.extract_dois_done = True
 
     def __extract_reference_ids__(self) -> None:
+        self.reference_ids = []
         if self.number_of_references:
             for reference in self.data["dehydrated_references"]:
                 if "id" not in reference:

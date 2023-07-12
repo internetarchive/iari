@@ -18,7 +18,7 @@ class XhtmlHandler(BaseHandler):
 
     job: UrlJob
     content: bytes = b""
-    links: List[XhtmlLink] = []
+    links: List[XhtmlLink] = None
     error: bool = False
     error_details: str = ""
     soup: Optional[Any]
@@ -59,6 +59,7 @@ class XhtmlHandler(BaseHandler):
     def __extract_links__(self) -> None:
         """Written by chatgpt and adjusted a little"""
         # extract all the links from the HTML content
+        self.links = []
         if not self.soup:
             raise MissingInformationError()
         for link in self.soup.find_all("a"):

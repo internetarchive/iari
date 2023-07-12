@@ -7,7 +7,7 @@ from src.models.file_io.reference_file_io import ReferenceFileIo
 
 
 class ReferencesFileIo(FileIo):
-    references: List[Dict[str, Any]] = []
+    references: List[Dict[str, Any]] = None
 
     def write_references_to_disk(self):
         from src import app
