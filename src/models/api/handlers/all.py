@@ -3,7 +3,7 @@ please write me some code in python that can fetch asynchronously a reference_id
 http://18.217.22.248/v2/statistics/reference/{reference_id}
 """
 import asyncio
-from typing import Any, ClassVar, Dict, List, Set
+from typing import Any, Dict, List, Set
 from urllib.parse import quote
 
 import aiohttp
@@ -14,19 +14,18 @@ from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
 
 
-# noinspection PyClassVar
 class AllHandler(WariBaseModel):
-    compilation: ClassVar[Dict[str, Any]] = {}
-    data: Dict[str, Any] = {}
+    compilation: Dict[str, Any] = None
+    data: Dict[str, Any] = None
     # We use a set to avoid duplicates
     dois: Set[str] = set()
-    doi_details: List[Dict[str, Any]] = []
+    doi_details: List[Dict[str, Any]] = None
     job: ArticleJob
-    references: List[Dict[str, Any]] = []
-    url_details: List[Dict[str, Any]] = []
+    references: List[Dict[str, Any]] = None
+    url_details: List[Dict[str, Any]] = None
     error: bool = False
     extract_dois_done = False
-    reference_ids: List[str] = []
+    reference_ids: List[str] = None
 
     @property
     def number_of_references(self) -> int:

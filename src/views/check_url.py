@@ -1,7 +1,7 @@
 import hashlib
 from copy import deepcopy
 from datetime import datetime
-from typing import Any, Dict, Optional, ClassVar
+from typing import Any, Dict, Optional
 
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
@@ -26,10 +26,11 @@ class CheckUrl(StatisticsWriteView):
     job: Optional[UrlJob] = None
     schema: Schema = UrlSchema()
     serving_from_json: bool = False
-    headers: ClassVar[Dict[str, Any]] = {
-        "Access-Control-Allow-Origin": "*",
-    }
-    data: ClassVar[Dict[str, Any]] = {}
+    headers: Dict[str, Any] = None
+    #     {
+    #     "Access-Control-Allow-Origin": "*",
+    # }
+    data: Dict[str, Any] = None
 
     @property
     def __url_hash_id__(self) -> str:

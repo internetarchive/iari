@@ -1,7 +1,7 @@
 import hashlib
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union, ClassVar
+from typing import Any, Dict, List, Optional, Union
 
 from bs4 import BeautifulSoup, Comment
 from mwparserfromhell.nodes import Tag  # type: ignore
@@ -38,23 +38,23 @@ class WikipediaReference(JobBaseModel):
     """
 
     wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
-    templates: ClassVar[List[WikipediaTemplate]] = []
+    templates: List[WikipediaTemplate] = None
     multiple_templates_found: bool = False
     testing: bool = False
     extraction_done: bool = False
     is_empty_named_reference: bool = False
     is_general_reference: bool = False
-    wikicoded_links: ClassVar[List[WikipediaUrl]] = []
-    bare_urls: ClassVar[List[WikipediaUrl]] = []
-    template_urls: ClassVar[List[WikipediaUrl]] = []
-    reference_urls: ClassVar[List[WikipediaUrl]] = []
-    comment_urls: ClassVar[List[WikipediaUrl]] = []
-    unique_first_level_domains: List[str] = []
+    wikicoded_links: List[WikipediaUrl] = None
+    bare_urls: List[WikipediaUrl] = None
+    template_urls: List[WikipediaUrl] = None
+    reference_urls: List[WikipediaUrl] = None
+    comment_urls: List[WikipediaUrl] = None
+    unique_first_level_domains: List[str] = None
     language_code: str = ""
     reference_id: str = ""
     section: str
     soup: Optional[Any] = None
-    comments: ClassVar[List[Comment]] = []
+    comments: List[Comment] = None
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -163,6 +163,7 @@ class WikipediaReference(JobBaseModel):
         self.soup = BeautifulSoup(str(self.wikicode), "lxml")
 
     def __extract_template_urls__(self) -> None:
+        self.template_urls = []
         urls = []
         for template in self.templates:
             if template.urls:
@@ -171,6 +172,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_bare_urls_outside_templates__(self) -> None:
         """This is a slightly more sophisticated and slower search for bare URLs using a regex"""
+        self.bare_urls = []
         urls = []
         for url in self.__find_bare_urls_outside_templates__():
             url_object = WikipediaUrl(url=url)
@@ -189,6 +191,7 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_external_wikicoded_links_from_the_reference__(self) -> None:
         """This relies on mwparserfromhell to find links like [google.com Google] in the wikitext"""
+        self.wikicoded_links = []
         urls = set()
         if isinstance(self.wikicode, Wikicode):
             for url in self.wikicode.ifilter_external_links():
@@ -302,6 +305,7 @@ class WikipediaReference(JobBaseModel):
         """Extract the templates from self.wikicode"""
         from src import app
 
+        self.templates = []
         app.logger.debug("__extract_raw_templates__: running")
         if not self.wikicode:
             raise MissingInformationError("self.wikicode was None")

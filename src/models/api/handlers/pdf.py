@@ -27,19 +27,19 @@ logger = logging.getLogger(__name__)
 class PdfHandler(BaseHandler):
     job: UrlJob
     content: bytes = b""
-    links_from_original_text: List[PdfLink] = []
-    links_from_text_without_linebreaks: List[PdfLink] = []
-    links_from_text_without_spaces: List[PdfLink] = []
-    annotation_links: List[PdfLink] = []
+    links_from_original_text: List[PdfLink] = None
+    links_from_text_without_linebreaks: List[PdfLink] = None
+    links_from_text_without_spaces: List[PdfLink] = None
+    annotation_links: List[PdfLink] = None
     error: bool = False
-    text_pages: Dict[int, str] = {}
-    text_pages_without_linebreaks: Dict[int, str] = {}
-    text_pages_without_spaces: Dict[int, str] = {}
-    url_annotations: Dict[int, List[Any]] = {}
+    text_pages: Dict[int, str] = None
+    text_pages_without_linebreaks: Dict[int, str] = None
+    text_pages_without_spaces: Dict[int, str] = None
+    url_annotations: Dict[int, List[Any]] = None
     error_details: Tuple[int, str] = (0, "")
     file_path: str = ""
     pdf_document: Optional[Document] = None
-    word_counts: List[int] = []
+    word_counts: List[int] = None
     # html_pages: Dict[int, str] = {}
 
     class Config:  # dead: disable
@@ -199,6 +199,7 @@ class PdfHandler(BaseHandler):
 
     def __extract_links_from_original_text__(self) -> None:
         """Extract all links from the text extract per page"""
+        self.links_from_original_text = []
         for index, _ in enumerate(self.text_pages):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
@@ -214,6 +215,7 @@ class PdfHandler(BaseHandler):
 
     def __extract_links_from_text_without_linebreaks__(self) -> None:
         """Extract all links from the text extract per page"""
+        self.links_from_text_without_linebreaks = []
         for index, _ in enumerate(self.text_pages):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
@@ -231,6 +233,7 @@ class PdfHandler(BaseHandler):
 
     def __extract_links_from_text_without_spaces__(self) -> None:
         """Extract all links from the text extract per page"""
+        self.links_from_text_without_spaces = []
         for index, _ in enumerate(self.text_pages):
             # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
             # provided by chatgpt:
@@ -248,6 +251,7 @@ class PdfHandler(BaseHandler):
 
     def __get_annotations__(self):
         """Extract the raw annotations into an attribute dictionary"""
+        self.url_annotations = {}
         if not self.pdf_document:
             raise MissingInformationError()
         for page_num in range(self.pdf_document.page_count):
@@ -269,6 +273,7 @@ class PdfHandler(BaseHandler):
                 self.url_annotations[page_num] = url_annotations
 
     def __extract_links_from_annotations__(self) -> None:
+        self.annotation_links = []
         if not self.pdf_document:
             raise MissingInformationError()
         for page_num in range(self.pdf_document.page_count):
@@ -283,6 +288,7 @@ class PdfHandler(BaseHandler):
 
     def __extract_text_pages__(self) -> None:
         """Extract all text from all pages"""
+        self.text_pages = {}
         if not self.pdf_document:
             self.__extract_pdf_document__()
         if not self.pdf_document:
