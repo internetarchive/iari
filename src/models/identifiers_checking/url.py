@@ -56,7 +56,7 @@ class Url(WikipediaUrl):
     testdeadlink_error_details: str = ""
     timeout: int = 2
     dns_error_details: str = ""
-    response_headers: Dict = {}
+    response_headers: Dict = None
     text: str = ""
     detected_language: str = ""
     detected_language_error: bool = False
