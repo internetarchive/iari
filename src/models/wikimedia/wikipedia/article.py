@@ -39,7 +39,7 @@ class WikipediaArticle(WariBaseModel):
     testing: bool = False
     job: ArticleJob
     ores_quality_prediction: str = ""
-    ores_details: Dict = {}
+    ores_details: Optional[Dict] = None
     revision_isodate: Optional[datetime] = None
     revision_timestamp: int = 0
 
@@ -467,6 +467,7 @@ class WikipediaArticle(WariBaseModel):
             raise MissingInformationError("self.job.title was empty string")
 
     def __get_ores_scores__(self):
+        self.ores_details = {}
         if not self.revision_id:
             if self.job.testing:
                 logger.warning(

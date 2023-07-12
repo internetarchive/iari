@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from src.helpers.console import console
 from src.models.exceptions import MissingInformationError
@@ -7,7 +7,7 @@ from src.models.file_io.reference_file_io import ReferenceFileIo
 
 
 class ReferencesFileIo(FileIo):
-    references: List[Dict[str, Any]] = []
+    references: Optional[List[Dict[str, Any]]] = None
 
     def write_references_to_disk(self):
         from src import app

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class FileIo(WariBaseModel):
     job: Optional[Job] = None
-    data: Dict[str, Any] = {}
+    data: Optional[Dict[str, Any]] = None
     wari_id: str = ""
     subfolder: str = ""
     testing: bool = False
@@ -71,8 +71,10 @@ class FileIo(WariBaseModel):
             with open(file=path_filename) as file:
                 # logger.debug("loading json into self.data")
                 app.logger.debug("loading json into self.data")
+                # self.data = {}
                 self.data = json.load(file)
-                self.data["served_from_cache"] = True
+                if self.data:
+                    self.data["served_from_cache"] = True
                 # app.logger.debug(f"loaded: {self.statistics_dictionary}")
         else:
             logger.debug("no json on disk")

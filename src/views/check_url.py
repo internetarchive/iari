@@ -26,10 +26,11 @@ class CheckUrl(StatisticsWriteView):
     job: Optional[UrlJob] = None
     schema: Schema = UrlSchema()
     serving_from_json: bool = False
-    headers: Dict[str, Any] = {
-        "Access-Control-Allow-Origin": "*",
-    }
-    data: Dict[str, Any] = {}
+    headers: Optional[Dict[str, Any]] = None
+    #     {
+    #     "Access-Control-Allow-Origin": "*",
+    # }
+    data: Optional[Dict[str, Any]] = None
 
     @property
     def __url_hash_id__(self) -> str:
@@ -47,12 +48,12 @@ class CheckUrl(StatisticsWriteView):
         app.logger.debug("get: running")
         self.__validate_and_get_job__()
         if self.job:
-            return self.__handle_valid_job__()
+            return self.__return_from_cache_or_analyze_and_return__()
 
     def __setup_io__(self):
         self.io = UrlFileIo(hash_based_id=self.__url_hash_id__)
 
-    def __handle_valid_job__(self):
+    def __return_from_cache_or_analyze_and_return__(self):
         from src import app
 
         app.logger.debug("__handle_valid_job__; running")

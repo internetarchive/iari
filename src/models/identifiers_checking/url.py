@@ -1,6 +1,5 @@
 import logging
-import sys
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import requests
 from dns.name import EmptyLabel
@@ -57,7 +56,7 @@ class Url(WikipediaUrl):
     testdeadlink_error_details: str = ""
     timeout: int = 2
     dns_error_details: str = ""
-    response_headers: Dict = {}
+    response_headers: Optional[Dict] = None
     text: str = ""
     detected_language: str = ""
     detected_language_error: bool = False

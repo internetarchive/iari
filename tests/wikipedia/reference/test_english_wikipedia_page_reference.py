@@ -5,7 +5,6 @@ from unittest import TestCase
 from mwparserfromhell import parse  # type: ignore
 
 import config
-from src.helpers.console import console
 from src.models.wikimedia.wikipedia.reference.generic import WikipediaReference
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 

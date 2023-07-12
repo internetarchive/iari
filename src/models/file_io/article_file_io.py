@@ -6,7 +6,7 @@ from src.models.file_io import FileIo
 
 
 class ArticleFileIo(FileIo):
-    data: Dict[str, Any] = {}
+    data: Optional[Dict[str, Any]] = None
     subfolder = "articles/"
     job: Optional[ArticleJob]
 

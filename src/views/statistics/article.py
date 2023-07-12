@@ -44,19 +44,22 @@ class Article(StatisticsWriteView):
                 self.__write_to_disk__()
                 if not self.io:
                     raise MissingInformationError()
-                self.io.data["served_from_cache"] = False
-                # app.logger.debug("returning dictionary")
-                return self.io.data, 200
+                if self.io.data:
+                    self.io.data["served_from_cache"] = False
+                    # app.logger.debug("returning dictionary")
+                    return self.io.data, 200
+                else:
+                    raise MissingInformationError()
         else:
             return AnalyzerReturn.NOT_FOUND.value, 404
 
-    def __handle_valid_job__(self):
+    def __return_from_cache_or_analyze_and_return__(self):
         from src import app
 
         app.logger.debug("got valid job")
         self.__setup_and_read_from_cache__()
         if self.io.data and not self.job.refresh:
-            app.logger.info("trying to read from cache")
+            app.logger.info("Returning data from the cache")
             self.__setup_and_read_from_cache__()
             if self.io.data:
                 # We got the statistics from json, return them as is
@@ -65,7 +68,7 @@ class Article(StatisticsWriteView):
                 )
                 return self.io.data, 200
         else:
-            app.logger.info("got refresh from patron")
+            app.logger.info("got refresh from patron or no data in cache")
             # This will run if we did not return an analysis from disk yet
             self.__print_log_message_about_refresh__()
             self.__setup_wikipedia_analyzer__()
@@ -114,7 +117,7 @@ class Article(StatisticsWriteView):
             from src import app
 
             app.logger.info(f"Analyzing {self.job.title}...")
-            self.wikipedia_analyzer = WikipediaAnalyzer(job=self.job, check_urls=True)
+            self.wikipedia_analyzer = WikipediaAnalyzer(job=self.job)
 
     def get(self):
         """This is the main method and the entrypoint for flask
@@ -128,7 +131,7 @@ class Article(StatisticsWriteView):
             and self.job.title
             and self.job.domain == WikimediaDomain.wikipedia
         ) or self.job.url:
-            return self.__handle_valid_job__()
+            return self.__return_from_cache_or_analyze_and_return__()
         else:
             return self.__return_meaningful_error__()
 

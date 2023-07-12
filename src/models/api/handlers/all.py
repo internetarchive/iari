@@ -3,7 +3,7 @@ please write me some code in python that can fetch asynchronously a reference_id
 http://18.217.22.248/v2/statistics/reference/{reference_id}
 """
 import asyncio
-from typing import Any, ClassVar, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set
 from urllib.parse import quote
 
 import aiohttp
@@ -15,21 +15,21 @@ from src.models.exceptions import MissingInformationError
 
 
 class AllHandler(WariBaseModel):
-    compilation: ClassVar[Dict[str, Any]] = {}
-    data: Dict[str, Any] = {}
+    compilation: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = None
     # We use a set to avoid duplicates
-    dois: Set[str] = set()
-    doi_details: List[Dict[str, Any]] = []
+    dois: Optional[Set[str]] = None
+    doi_details: Optional[List[Dict[str, Any]]] = None
     job: ArticleJob
-    references: List[Dict[str, Any]] = []
-    url_details: List[Dict[str, Any]] = []
+    references: Optional[List[Dict[str, Any]]] = None
+    url_details: Optional[List[Dict[str, Any]]] = None
     error: bool = False
     extract_dois_done = False
-    reference_ids: List[str] = []
+    reference_ids: Optional[List[str]] = None
 
     @property
     def number_of_references(self) -> int:
-        if "dehydrated_references" in self.data:
+        if self.data and "dehydrated_references" in self.data:
             return len(self.data["dehydrated_references"])
         else:
             return 0
@@ -37,7 +37,10 @@ class AllHandler(WariBaseModel):
     @property
     def number_of_dois(self) -> int:
         self.__extract_dois__()
-        return len(self.dois)
+        if self.dois:
+            return len(self.dois)
+        else:
+            return 0
 
     @staticmethod
     async def fetch_data(session, url):
@@ -169,7 +172,7 @@ class AllHandler(WariBaseModel):
 
     def __extract_dois__(self):
         """Extract the DOIs which are hiding in the templates"""
-
+        self.dois = set()
         if self.references and not self.extract_dois_done:
             for reference in self.references:
                 # app.logger.debug(f"working on this reference: {reference}")
@@ -181,7 +184,8 @@ class AllHandler(WariBaseModel):
         self.extract_dois_done = True
 
     def __extract_reference_ids__(self) -> None:
-        if self.number_of_references:
+        self.reference_ids = []
+        if self.number_of_references and self.data:
             for reference in self.data["dehydrated_references"]:
                 if "id" not in reference:
                     raise MissingInformationError()
