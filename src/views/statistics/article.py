@@ -56,7 +56,7 @@ class Article(StatisticsWriteView):
         app.logger.debug("got valid job")
         self.__setup_and_read_from_cache__()
         if self.io.data and not self.job.refresh:
-            app.logger.info("trying to read from cache")
+            app.logger.info("Returning data from the cache")
             self.__setup_and_read_from_cache__()
             if self.io.data:
                 # We got the statistics from json, return them as is
@@ -65,7 +65,7 @@ class Article(StatisticsWriteView):
                 )
                 return self.io.data, 200
         else:
-            app.logger.info("got refresh from patron")
+            app.logger.info("got refresh from patron or no data in cache")
             # This will run if we did not return an analysis from disk yet
             self.__print_log_message_about_refresh__()
             self.__setup_wikipedia_analyzer__()
@@ -114,7 +114,7 @@ class Article(StatisticsWriteView):
             from src import app
 
             app.logger.info(f"Analyzing {self.job.title}...")
-            self.wikipedia_analyzer = WikipediaAnalyzer(job=self.job, check_urls=True)
+            self.wikipedia_analyzer = WikipediaAnalyzer(job=self.job)
 
     def get(self):
         """This is the main method and the entrypoint for flask

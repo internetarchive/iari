@@ -24,7 +24,6 @@ class WikipediaAnalyzer(WariBaseModel):
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
-    check_urls: bool = False
     reference_statistics: List[Dict[str, Any]] = []
     dehydrated_references: List[Dict[str, Any]] = []
 
