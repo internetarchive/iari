@@ -143,7 +143,7 @@ class WikipediaAnalyzer(WariBaseModel):
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
                 data = ReferenceStatistic(
-                    flds=reference.unique_first_level_domains,
+                    flds=reference.unique_first_level_domains if reference.unique_first_level_domains else [],
                     footnote_subtype=subtype,
                     id=reference.reference_id,
                     template_names=reference.template_names,

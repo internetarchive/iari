@@ -50,7 +50,7 @@ class Article(StatisticsWriteView):
         else:
             return AnalyzerReturn.NOT_FOUND.value, 404
 
-    def __handle_valid_job__(self):
+    def __return_from_cache_or_analyze_and_return__(self):
         from src import app
 
         app.logger.debug("got valid job")

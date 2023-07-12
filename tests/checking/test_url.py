@@ -30,7 +30,7 @@ class TestUrl(TestCase):
         url.check()
         assert url.status_code == 0
         assert url.malformed_url is False
-        assert url.response_headers == {}
+        assert url.response_headers == None
         data = url.get_dict
         assert data["detected_language"] == ""
 

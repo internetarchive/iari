@@ -174,6 +174,7 @@ class PdfHandler(BaseHandler):
 
     def __clean_linebreaks_from_page_text__(self):
         """Clean the page strings and put them into a dictionary attribute"""
+        self.text_pages_without_linebreaks = {}
         for index, _ in enumerate(self.text_pages):
             self.text_pages_without_linebreaks[index] = self.__clean_linebreaks__(
                 string=self.text_pages[index]
@@ -181,6 +182,7 @@ class PdfHandler(BaseHandler):
 
     def __clean_spaces_from_page_text__(self):
         """Clean the page strings and put them into a dictionary attribute"""
+        self.text_pages_without_spaces = {}
         for index, _ in enumerate(self.text_pages):
             self.text_pages_without_spaces[index] = self.__clean_spaces__(
                 string=self.text_pages[index]

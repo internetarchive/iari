@@ -193,6 +193,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         We only consider level 2 sections beginning with =="""
         from src import app
 
+        self.sections = []
         app.logger.debug("__extract_sections__: running")
         if not self.wikicode:
             self.__parse_wikitext__()
