@@ -28,11 +28,11 @@ class WikipediaReferenceExtractor(WariBaseModel):
     job: ArticleJob
     wikitext: str
     wikicode: Wikicode = None
-    references: List[WikipediaReference] = []
+    references: List[WikipediaReference] = None
     # wikibase: Wikibase
     testing: bool = False
     language_code: str = ""
-    sections: List[MediawikiSection] = []
+    sections: List[MediawikiSection] = None
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -241,6 +241,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return ids
 
     def __populate_references__(self):
+        self.references = []
         for section in self.sections:
             for reference in section.references:
                 self.references.append(reference)
@@ -249,6 +250,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         """This extracts the root section from the beginning until the first level 2 heading"""
         if not self.wikitext:
             raise MissingInformationError()
+        self.sections = []
         first_level2_heading_line_number = 0
         for index, line in enumerate(self.wikitext.splitlines()):
             if "==" in line:

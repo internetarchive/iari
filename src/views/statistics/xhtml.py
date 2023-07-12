@@ -19,10 +19,11 @@ class Xhtml(StatisticsWriteView):
     job: Optional[UrlJob] = None
     schema: UrlSchema = UrlSchema()
     serving_from_json: bool = False
-    headers: Dict[str, Any] = {
-        "Access-Control-Allow-Origin": "*",
-    }
-    data: Dict[str, Any] = {}
+    headers: Dict[str, Any] = None
+    #     {
+    #     "Access-Control-Allow-Origin": "*",
+    # }
+    data: Dict[str, Any] = None
 
     @property
     def __url_hash_id__(self) -> str:

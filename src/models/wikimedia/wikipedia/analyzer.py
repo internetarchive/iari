@@ -24,8 +24,8 @@ class WikipediaAnalyzer(WariBaseModel):
     article: Optional[WikipediaArticle] = None
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
-    reference_statistics: List[Dict[str, Any]] = []
-    dehydrated_references: List[Dict[str, Any]] = []
+    reference_statistics: List[Dict[str, Any]] = None
+    dehydrated_references: List[Dict[str, Any]] = None
 
     @property
     def testing(self):
@@ -95,6 +95,8 @@ class WikipediaAnalyzer(WariBaseModel):
         if not self.article_statistics:
             self.__gather_article_statistics__()
             self.__gather_reference_statistics__()
+            # TODO insert logic to handle full references here
+            # new variable dehydrated_references: bool = True
             self.__extract_dehydrated_references__()
             self.__insert_dehydrated_references_into_the_article_statistics__()
         return self.__get_statistics_dict__()
@@ -119,6 +121,7 @@ class WikipediaAnalyzer(WariBaseModel):
     def __gather_reference_statistics__(self):
         from src import app
 
+        self.reference_statistics = []
         app.logger.debug("__gather_reference_statistics__: running")
         if (
             self.article
