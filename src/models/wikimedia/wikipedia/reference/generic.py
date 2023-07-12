@@ -178,13 +178,14 @@ class WikipediaReference(JobBaseModel):
             urls.append(url_object)
         self.bare_urls = urls
 
-    def __extract_urls_from_comments__(self):
-        urls = []
-        for url in self.__find_bare_urls_in_comments__():
-            url_object = WikipediaUrl(url=url)
-            url_object.extract()
-            urls.append(url_object)
-        self.comment_urls = urls
+    # Disabled because it does not work. See todo
+    # def __extract_urls_from_comments__(self):
+    #     urls = []
+    #     for url in self.__find_bare_urls_in_comments__():
+    #         url_object = WikipediaUrl(url=url)
+    #         url_object.extract()
+    #         urls.append(url_object)
+    #     self.comment_urls = urls
 
     def __extract_external_wikicoded_links_from_the_reference__(self) -> None:
         """This relies on mwparserfromhell to find links like [google.com Google] in the wikitext"""
@@ -217,9 +218,9 @@ class WikipediaReference(JobBaseModel):
         if not self.wikicoded_links:
             self.__extract_external_wikicoded_links_from_the_reference__()
         urls_list.extend(self.wikicoded_links)
-        if not self.comment_urls:
-            self.__extract_urls_from_comments__()
-        urls_list.extend(self.comment_urls)
+        # if not self.comment_urls:
+        #     self.__extract_urls_from_comments__()
+        # urls_list.extend(self.comment_urls)
         # We set it to avoid duplicates
         self.reference_urls = list(set(urls_list))
 
@@ -263,26 +264,28 @@ class WikipediaReference(JobBaseModel):
     def __find_bare_urls_outside_templates__(self) -> List[str]:
         """Return bare urls from the the stripped wikitext (templates are stripped away)"""
         if isinstance(self.wikicode, Wikicode):
-            wikicode = str(self.wikicode.strip_code)
-            # logger.debug(wikicode)
+            stripped_wikicode = str(self.wikicode.strip_code())
+            logger.debug(stripped_wikicode)
             return re.findall(
                 link_extraction_regex,
-                wikicode,
+                stripped_wikicode,
             )
         else:
             return []
 
-    def __find_bare_urls_in_comments__(self) -> List[str]:
-        """Return non-unique bare urls from the the stripped wikitext (templates are stripped away)"""
-        urls = []
-        for comment in self.comments:
-            urls_found = re.findall(
-                link_extraction_regex,
-                comment,
-            )
-            if urls_found:
-                urls.extend(urls_found)
-        return urls
+    # TODO this does not work, no comments are ever found, see tests
+    # def __find_bare_urls_in_comments__(self) -> List[str]:
+    #     """Return non-unique bare urls from the the stripped wikitext (templates are stripped away)"""
+    #     urls = []
+    #     logger.debug(f"Found {len(self.comments)} comments")
+    #     for comment in self.comments:
+    #         urls_found = re.findall(
+    #             link_extraction_regex,
+    #             comment,
+    #         )
+    #         if urls_found:
+    #             urls.extend(urls_found)
+    #     return urls
 
     def __extract_templates_and_parameters__(self) -> None:
         """Helper method"""

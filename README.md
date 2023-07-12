@@ -295,7 +295,7 @@ It will return json similar to:
     * a manually supplied list of sections to search using the 'regex' to the article and all endpoints. The list is
       case insensitive and should be delimited by the '|' character.
     * that every line with a general reference begins with a star character (*)
-
+* URLs in comments are not currently supported. Comments begin with <!-- and end with -->. 
 Any line that doesn't begin with a star is ignored.
 
 ### references
