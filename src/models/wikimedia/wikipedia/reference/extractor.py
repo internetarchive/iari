@@ -22,7 +22,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
     Design:
     * first we get the wikicode
     * we parse it with mwparser from hell
-    * we extract the raw references -> WikipediaReference
+    * we extract the references -> WikipediaReference
     """
 
     job: ArticleJob
