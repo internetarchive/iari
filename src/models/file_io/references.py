@@ -27,4 +27,7 @@ class ReferencesFileIo(FileIo):
                 job=self.job, hash_based_id=reference["id"], data=reference
             )
             reference_io.write_to_disk()
-        app.logger.debug(f"wrote {len(self.data)} references to disk")
+        if self.references:
+            app.logger.debug(f"wrote {len(self.references)} references to disk")
+        else:
+            app.logger.debug("wrote 0 references to disk")

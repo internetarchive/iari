@@ -132,3 +132,32 @@ class TestWikipediaAnalyzer(TestCase):
         for reference in data["dehydrated_references"]:
             # this tests whether the deepcopy worked correctly
             assert "wikitext" in reference
+
+    def test__gather_reference_statistics_sncaso_no_dehydrate(self):
+        job = ArticleJob(
+            url="https://en.wikipedia.org/wiki/SNCASO",
+            regex="bibliography|further reading|works cited|sources|external links",
+            dehydrate=False,
+        )
+        job.__extract_url__()
+        wa = WikipediaAnalyzer(job=job)
+        wa.__analyze__()
+        assert wa.article.wikitext != ""
+        assert wa.is_redirect is False
+        assert wa.found is True
+        data = wa.get_statistics()
+        assert len(wa.reference_statistics) == 31
+        for reference in wa.reference_statistics:
+            # this tests whether the deepcopy worked correctly
+            assert "wikitext" in reference
+            assert "templates" in reference
+            assert "section" in reference
+            assert "name" in reference
+        # this tests if the wikitext is retained in the output of article
+        # console.print(data)
+        assert len(data["references"]) == 31
+        for reference in data["references"]:
+            # this tests whether the deepcopy worked correctly
+            assert "wikitext" in reference
+            assert "url_objects" in reference
+            assert "templates" in reference

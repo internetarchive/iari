@@ -199,95 +199,30 @@ We need at least 200 characters to be able to reliably detect the language.
 the statistics/article endpoint accepts the following parameters:
 
 * url (mandatory)
-* refresh (optional)
-* testing (optional)
-* revision (int, optional) defaults to the most recent 
+* refresh (bool, optional)
+* testing (bool, optional)
+* revision (int, optional, defaults to the most recent) 
+* dehydrate (bool, optional, defaults to True) 
+* regex (string, mandatory) 
 
 On error it returns 400. On timeout it returns 504 or 502
 (this is a bug and should be reported).
 
-It will return json similar to:
+Regex is a string of section headers separated by "|" to analyze for general references. 
+For enwiki a string like 
+"bibliography|further%20reading|works%20cited|sources|external%20links"
+catches most references outside <ref>-tags.
 
-```
-{
-    "wari_id": "en.wikipedia.org.999263",
-    "lang": "en",
-    "page_id": 999263,
-    "dehydrated_references": [
-        {
-            "id": "cfa8b438",
-            "template_names": [],
-            "type": "footnote",
-            "footnote_subtype": "named",
-            "flds": [],
-            "urls": [],
-            "titles": [],
-            "section": "History"
-        },
-        {
-            "id": "1db10c83",
-            "template_names": [
-                "citation"
-            ],
-            "type": "footnote",
-            "footnote_subtype": "content",
-            "flds": [
-                "hydroretro.net"
-            ],
-            "urls": [
-                "http://www.hydroretro.net/etudegh/sncase.pdf"
-            ],
-            "titles": [
-                "Les r\u00e9alisations de la SNCASE"
-            ],
-            "section": "History"
-        }
-    ],
-    "reference_statistics": {
-        "named": 10,
-        "footnote": 20,
-        "content": 21,
-        "general": 1
-    },
-    "served_from_cache": false,
-    "site": "wikipedia.org",
-    "timestamp": 1684217693,
-    "isodate": "2023-05-16T08:14:53.932785",
-    "timing": 0,
-    "title": "SNCASO",
-    "fld_counts": {
-        "aviafrance.com": 3,
-        "flightglobal.com": 2,
-        "gouvernement.fr": 1,
-        "jewishvirtuallibrary.org": 1,
-        "hydroretro.net": 1,
-        "google.com": 1
-    },
-    "urls": [
-        "http://www.hydroretro.net/etudegh/sncase.pdf",
-        "http://www.aviafrance.com/aviafrance1.php?ID_CONSTRUCTEUR=1145&ANNEE=0&ID_MISSION=0&CLE=CONSTRUCTEUR&MOTCLEF=",
-        "https://www.gouvernement.fr/partage/9703-vol-historique-du-premier-avion-a-reaction-francais-le-so-6000-triton",
-        "https://books.google.com/books?id=3y0DAAAAMBAJ&pg=PA128",
-        "http://www.flightglobal.com/pdfarchive/view/1953/1953%20-%201657.html",
-        "https://www.flightglobal.com/pdfarchive/view/1959/1959%20-%201053.html",
-        "http://xplanes.free.fr/so4000/so4000-5.htm",
-        "http://www.jewishvirtuallibrary.org/sud-ouest-s-o-4050-vautour",
-        "http://www.aviafrance.com/constructeur.php?ID_CONSTRUCTEUR=1145",
-        "http://www.aviafrance.com"
-    ],
-    "ores_score": {
-        "prediction": "GA",
-        "probability": {
-            "B": 0.3001074961272599,
-            "C": 0.2989581851995906,
-            "FA": 0.03238239107761332,
-            "GA": 0.33793161511968084,
-            "Start": 0.0251506380008608,
-            "Stub": 0.005469674474994447
-        }
-    }
-}
-```
+Dehydrate means it returns a limited reference object. 
+Currently the keys "templates" and "url_objects" are 
+being removed to make sure we don't return a huge blob of json by default.
+
+If you set dehydrate to False the whole reference will be returned.
+For an article like https://en.wikipedia.org/wiki/United_States with >600 references
+1,3 MB of JSON is returned.
+
+It will return json [like this](https://gist.github.com/dpriskorn/aac368490f46016f8fb3bd3cf378e98b) (by default with dehydrated references) 
+and [like this](https://gist.github.com/dpriskorn/b0e4bf7b9b098c5d6f59664450d70cc2) with dehydrate set to false.
 
 #### Known limitations
 
@@ -296,7 +231,8 @@ It will return json similar to:
       case insensitive and should be delimited by the '|' character.
     * that every line with a general reference begins with a star character (*)
 * URLs in comments are not currently supported. Comments begin with <!-- and end with -->. 
-Any line that doesn't begin with a star is ignored.
+
+Any line that doesn't begin with a star is ignored when parsing lines in the sections specified by the regex.
 
 ### references
 

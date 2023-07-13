@@ -69,3 +69,11 @@ class TestArticleJob(TestCase):
         assert job2.__valid_regex__ is False
         job3 = ArticleJob(regex="teststring_")
         assert job3.__valid_regex__ is False
+
+    def test_dehydrate(self):
+        job = ArticleJob(title="Test", site="wikipedia", lang="en")
+        assert job.dehydrate is True
+        job = ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate=False)
+        assert job.dehydrate is False
+        with self.assertRaises(ValidationError):
+            ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate="123")
