@@ -137,7 +137,7 @@ class TestWikipediaAnalyzer(TestCase):
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/SNCASO",
             regex="bibliography|further reading|works cited|sources|external links",
-            dehydrate=False
+            dehydrate=False,
         )
         job.__extract_url__()
         wa = WikipediaAnalyzer(job=job)
@@ -155,7 +155,7 @@ class TestWikipediaAnalyzer(TestCase):
             assert "name" in reference
         # this tests if the wikitext is retained in the output of article
         # console.print(data)
-        assert len(data["references"])== 31
+        assert len(data["references"]) == 31
         for reference in data["references"]:
             # this tests whether the deepcopy worked correctly
             assert "wikitext" in reference

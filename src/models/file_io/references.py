@@ -30,4 +30,4 @@ class ReferencesFileIo(FileIo):
         if self.references:
             app.logger.debug(f"wrote {len(self.references)} references to disk")
         else:
-            app.logger.debug(f"wrote 0 references to disk")
+            app.logger.debug("wrote 0 references to disk")

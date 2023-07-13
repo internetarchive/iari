@@ -190,9 +190,11 @@ class WikipediaAnalyzer(WariBaseModel):
 
     def __insert_dehydrated_references_into_the_article_statistics__(self):
         if self.article_statistics:
-            self.article_statistics.dehydrated_references = self.dehydrated_reference_statistics
+            self.article_statistics.dehydrated_references = (
+                self.dehydrated_reference_statistics
+            )
 
     def __insert_full_references_into_the_article_statistics__(self):
-        """We return the full reference to accomodate IARE, see https://github.com/internetarchive/iari/issues/886"""
+        """We return the full reference to accommodate IARE, see https://github.com/internetarchive/iari/issues/886"""
         if self.article_statistics:
             self.article_statistics.references = self.reference_statistics
