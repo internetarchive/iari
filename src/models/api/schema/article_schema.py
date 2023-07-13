@@ -12,6 +12,7 @@ class ArticleSchema(BaseSchema):
     url = fields.Str(required=True)
     revision = fields.Int(required=False)
     regex = fields.Str(required=True)
+    dehydrate = fields.Bool(required=False)
 
     # noinspection PyUnusedLocal
     @post_load

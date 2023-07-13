@@ -20,6 +20,7 @@ class ArticleJob(Job):
     url: str = ""
     regex: str = ""
     revision: int = 0  # this is named just as in the MediaWiki API
+    dehydrate: bool = True
 
     @property
     def wari_id(self) -> str:

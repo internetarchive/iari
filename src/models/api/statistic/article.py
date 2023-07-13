@@ -15,6 +15,7 @@ class ArticleStatistics(BaseModel):
     lang: str = "en"  # language code according to Wikimedia
     page_id: int = 0  # page id of the Wikipedia in question
     dehydrated_references: List[str] = []
+    references: List[str] = []
     reference_statistics: Dict[str, int] = {}
     served_from_cache: bool = False
     site: str = WikimediaDomain.wikipedia.value  # wikimedia site in question

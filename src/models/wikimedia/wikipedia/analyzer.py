@@ -25,7 +25,7 @@ class WikipediaAnalyzer(WariBaseModel):
     article_statistics: Optional[ArticleStatistics] = None
     # wikibase: Wikibase = IASandboxWikibase()
     reference_statistics: Optional[List[Dict[str, Any]]] = None
-    dehydrated_references: Optional[List[Dict[str, Any]]] = None
+    dehydrated_reference_statistics: Optional[List[Dict[str, Any]]] = None
 
     @property
     def testing(self):
@@ -95,10 +95,11 @@ class WikipediaAnalyzer(WariBaseModel):
         if not self.article_statistics:
             self.__gather_article_statistics__()
             self.__gather_reference_statistics__()
-            # TODO insert logic to handle full references here
-            # new variable dehydrated_references: bool = True
-            self.__extract_dehydrated_references__()
-            self.__insert_dehydrated_references_into_the_article_statistics__()
+            if self.job.dehydrate:
+                self.__extract_dehydrated_references__()
+                self.__insert_dehydrated_references_into_the_article_statistics__()
+            else:
+                self.__insert_full_references_into_the_article_statistics__()
         return self.__get_statistics_dict__()
 
     def __get_statistics_dict__(self) -> Dict[str, Any]:
@@ -180,8 +181,8 @@ class WikipediaAnalyzer(WariBaseModel):
     def __extract_dehydrated_references__(self):
         # We use a local variable here to avoid this regression
         # https://github.com/internetarchive/wari/issues/700
-        self.dehydrated_references = deepcopy(self.reference_statistics)
-        for data in self.dehydrated_references:
+        self.dehydrated_reference_statistics = deepcopy(self.reference_statistics)
+        for data in self.dehydrated_reference_statistics:
             # We return most of the data including the wikitext to accommodate
             # see https://github.com/internetarchive/iari/issues/831
             del data["templates"]
@@ -189,4 +190,9 @@ class WikipediaAnalyzer(WariBaseModel):
 
     def __insert_dehydrated_references_into_the_article_statistics__(self):
         if self.article_statistics:
-            self.article_statistics.dehydrated_references = self.dehydrated_references
+            self.article_statistics.dehydrated_references = self.dehydrated_reference_statistics
+
+    def __insert_full_references_into_the_article_statistics__(self):
+        """We return the full reference to accomodate IARE, see https://github.com/internetarchive/iari/issues/886"""
+        if self.article_statistics:
+            self.article_statistics.references = self.reference_statistics
