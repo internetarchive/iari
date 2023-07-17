@@ -81,9 +81,7 @@ class CheckUrl(StatisticsWriteView):
         data["isodate"] = str(isodate)
         url_hash_id = self.__url_hash_id__
         data["id"] = url_hash_id
-        data_without_text = deepcopy(data)
-        del data_without_text["text"]
-        self.__write_to_cache__(data_without_text=data_without_text)
+        self.__write_to_cache__(data=data)
         if self.job.refresh:
             self.__print_log_message_about_refresh__()
             data["refreshed_now"] = True
@@ -94,10 +92,10 @@ class CheckUrl(StatisticsWriteView):
         else:
             return data_without_text, 200
 
-    def __write_to_cache__(self, data_without_text):
+    def __write_to_cache__(self, data):
         # We skip writes during testing
         if not self.job.testing:
             write = UrlFileIo(
-                data=data_without_text, hash_based_id=data_without_text["id"]
+                data=data, hash_based_id=data["id"]
             )
             write.write_to_disk()
