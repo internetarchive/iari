@@ -41,14 +41,14 @@ class TestUrl(TestCase):
     #     assert url.is_valid is False
     #     data = url.get_dict
     #     assert data["detected_language"] == ""
-        # assert url.status_code == 0
-        # # assert url.dns_error is True
-        # assert url.request_error is True
-        # assert (
-        #     url.request_error_details
-        #     == "Failed to parse: 'ht.test...', label empty or too long"
-        # )
-        # assert url.response_headers == {}
+    # assert url.status_code == 0
+    # # assert url.dns_error is True
+    # assert url.request_error is True
+    # assert (
+    #     url.request_error_details
+    #     == "Failed to parse: 'ht.test...', label empty or too long"
+    # )
+    # assert url.response_headers == {}
 
     # def test_check_bad_long_tld(self):
     #     url = Url(url=self.bad_url2, timeout=2)
@@ -56,15 +56,15 @@ class TestUrl(TestCase):
     #     assert url.is_valid is False
     #     data = url.get_dict
     #     assert data["detected_language"] == ""
-        # assert url.status_code == 0
-        # assert url.malformed_url is True
-        # assert url.dns_error is False
-        # assert url.request_error is True
-        # assert url.request_error_details[:100] == (
-        #     "HTTPConnectionPool(host='ht.testtretdrgd', port=80): "
-        #     "Max retries exceeded with url: / (Caused by New"
-        # )
-        # assert url.response_headers == {}
+    # assert url.status_code == 0
+    # assert url.malformed_url is True
+    # assert url.dns_error is False
+    # assert url.request_error is True
+    # assert url.request_error_details[:100] == (
+    #     "HTTPConnectionPool(host='ht.testtretdrgd', port=80): "
+    #     "Max retries exceeded with url: / (Caused by New"
+    # )
+    # assert url.response_headers == {}
 
     # def test_check_403(self):
     #     url = Url(url=self.forbidden_url_if_not_spoofed_headers, timeout=5)

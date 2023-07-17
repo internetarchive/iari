@@ -91,7 +91,5 @@ class CheckUrl(StatisticsWriteView):
     def __write_to_cache__(self, data):
         # We skip writes during testing
         if not self.job.testing:
-            write = UrlFileIo(
-                data=data, hash_based_id=data["id"]
-            )
+            write = UrlFileIo(data=data, hash_based_id=data["id"])
             write.write_to_disk()
