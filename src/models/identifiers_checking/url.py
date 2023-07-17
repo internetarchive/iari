@@ -3,11 +3,8 @@ from typing import Any, Dict, Optional
 from urllib.parse import quote
 
 import requests
-from dns.name import EmptyLabel
-from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer, NoNameservers, resolve
 
 import config
-from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
