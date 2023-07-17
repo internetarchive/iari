@@ -123,56 +123,31 @@ On error it returns 400.
 It returns json similar to 
 ```
 {
-    "first_level_domain": "github.com",
-    "fld_is_ip": false,
-    "url": "https://github.com/internetarchive/iari/issues",
-    "scheme": "https",
-    "netloc": "github.com",
-    "tld": "com",
-    "malformed_url": false,
-    "malformed_url_details": null,
-    "archived_url": "",
-    "wayback_machine_timestamp": "",
-    "is_valid": true,
-    "request_error": false,
-    "request_error_details": "",
-    "dns_record_found": true,
-    "dns_no_answer": false,
-    "dns_error": false,
-    "status_code": 200,
-    "testdeadlink_status_code": 200,
-    "timeout": 2,
-    "dns_error_details": "",
-    "response_headers": {
-        "Server": "GitHub.com",
-        "Date": "Mon, 12 Jun 2023 12:00:28 GMT",
-        "Content-Type": "text/html; charset=utf-8",
-        "Vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, Accept-Encoding, Accept, X-Requested-With",
-        "ETag": "W/\"03d14b06291209737bb700da5adf5968\"",
-        "Cache-Control": "max-age=0, private, must-revalidate",
-        "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
-        "X-Frame-Options": "deny",
-        "X-Content-Type-Options": "nosniff",
-        "X-XSS-Protection": "0",
-        "Referrer-Policy": "no-referrer-when-downgrade",
-        "Content-Security-Policy": "default-src 'none'; base-uri 'self'; block-all-mixed-content; child-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/; connect-src 'self' uploads.github.com objects-origin.githubusercontent.com www.githubstatus.com collector.github.com raw.githubusercontent.com api.github.com github-cloud.s3.amazonaws.com github-production-repository-file-5c1aeb.s3.amazonaws.com github-production-upload-manifest-file-7fdce7.s3.amazonaws.com github-production-user-asset-6210df.s3.amazonaws.com cdn.optimizely.com logx.optimizely.com/v1/events *.actions.githubusercontent.com productionresultssa0.blob.core.windows.net/ productionresultssa1.blob.core.windows.net/ productionresultssa2.blob.core.windows.net/ productionresultssa3.blob.core.windows.net/ productionresultssa4.blob.core.windows.net/ wss://*.actions.githubusercontent.com github-production-repository-image-32fea6.s3.amazonaws.com github-production-release-asset-2e65be.s3.amazonaws.com insights.github.com wss://alive.github.com; font-src github.githubassets.com; form-action 'self' github.com gist.github.com objects-origin.githubusercontent.com; frame-ancestors 'none'; frame-src viewscreen.githubusercontent.com notebooks.githubusercontent.com; img-src 'self' data: github.githubassets.com media.githubusercontent.com camo.githubusercontent.com identicons.github.com avatars.githubusercontent.com github-cloud.s3.amazonaws.com objects.githubusercontent.com objects-origin.githubusercontent.com secured-user-images.githubusercontent.com/ user-images.githubusercontent.com/ private-user-images.githubusercontent.com opengraph.githubassets.com github-production-user-asset-6210df.s3.amazonaws.com customer-stories-feed.github.com spotlights-feed.github.com *.githubusercontent.com; manifest-src 'self'; media-src github.com user-images.githubusercontent.com/ secured-user-images.githubusercontent.com/ private-user-images.githubusercontent.com; script-src github.githubassets.com; style-src 'unsafe-inline' github.githubassets.com; worker-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/",
-        "Content-Encoding": "gzip",
-        "Set-Cookie": "_gh_sess=Kt%2FbTAsPUlbQMLzfnhA6DaZ%2FrXJio0ITQdf7cs83MUTpiSwa0ALcco5FkiN3Gne6MBf%2Fzf001SNsFAAt1IXJVU9kFP5EOV1P1UZsps9JI2dyn9lAG0Zt%2FKocfikDwnYU03uuJAmDpI82mOt6L0ULDzxEm1hc0vCMRy72T8saF%2Ba8qoSFPJR296%2FjZVoqrg9cHzAnYr5uo0cj9dQL6pGfoDreWMMV41kG7S%2FbwvU5%2FTWkJnmYTK8XoioOtrVjnvQ%2Fw%2FNuMVh4dkEEeprnmfe8%2Bw%3D%3D--CpOcS3YATJ%2FQZh%2Fk--zuEd5QQlr0A8Pif7t41ywQ%3D%3D; Path=/; HttpOnly; Secure; SameSite=Lax, _octo=GH1.1.1345489649.1686571228; Path=/; Domain=github.com; Expires=Wed, 12 Jun 2024 12:00:28 GMT; Secure; SameSite=Lax, logged_in=no; Path=/; Domain=github.com; Expires=Wed, 12 Jun 2024 12:00:28 GMT; HttpOnly; Secure; SameSite=Lax",
-        "Accept-Ranges": "bytes",
-        "Transfer-Encoding": "chunked",
-        "X-GitHub-Request-Id": "4C01:6326:116FFBB:1199F4E:648708DB"
+  "first_level_domain": "minnesotastreetproject.com",
+  "fld_is_ip": false,
+  "url": "https://web.archive.org/web/20170726234423/https://minnesotastreetproject.com/exhibitions/1275-minnesota-st/internet-archive’s-2017-artist-residence-exhibition",
+  "scheme": "https",
+  "netloc": "minnesotastreetproject.com",
+  "tld": "com",
+  "malformed_url": false,
+  "malformed_url_details": null,
+  "archived_url": "https://minnesotastreetproject.com/exhibitions/1275-minnesota-st/internet-archive’s-2017-artist-residence-exhibition",
+  "wayback_machine_timestamp": "20170726234423",
+  "is_valid": true,
+  "testdeadlink_status_code": 200,
+  "testdeadlink_error_details": "",
+  "testdeadlink_response": {
+    "results": {
+      "https://web.archive.org/web/20170726234423/https://minnesotastreetproject.com/exhibitions/1275-minnesota-st/internet-archive’s-2017-artist-residence-exhibition": 200
     },
-    "detected_language": "en",
-    "detected_language_error": false,
-    "detected_language_error_details": "",
-    "timestamp": 1686564033,
-    "isodate": "2023-06-12T12:00:33.941494",
-    "id": "7e8230ce"
+    "servetime": 1.254
+  },
+  "timestamp": 1689616839,
+  "isodate": "2023-07-17T18:00:39.083112",
+  "id": "bbfeb6dd",
+  "refreshed_now": true
 }
 ```
-
-When the debug parameter is true the text from the resource is returned. 
-This text is the basis for the language detection. 
 
 #### Known limitations
 You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
