@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Dict, Optional
+from urllib.parse import quote
 
 import requests
 from dns.name import EmptyLabel
@@ -251,9 +252,8 @@ class Url(WikipediaUrl):
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
             }
-
-            data = f"urls={self.url}&authcode={config.testdeadlink_key}&returncodes=1"
-
+            # We quote the url here to avoid encoding bugs https://github.com/internetarchive/iari/issues/875
+            data = f"urls={quote(self.url)}&authcode={config.testdeadlink_key}&returncodes=1"
             response = requests.post(
                 "https://iabot-api.archive.org/testdeadlink.php",
                 headers=headers,
