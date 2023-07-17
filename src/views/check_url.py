@@ -87,10 +87,7 @@ class CheckUrl(StatisticsWriteView):
             data["refreshed_now"] = True
         else:
             data["refreshed_now"] = False
-        if self.job.debug:
-            return data, 200
-        else:
-            return data_without_text, 200
+        return data, 200
 
     def __write_to_cache__(self, data):
         # We skip writes during testing
