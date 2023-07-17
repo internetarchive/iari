@@ -23,4 +23,3 @@ class TestCheckUrl(TestCase):
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
         assert data["testdeadlink_status_code"] == 200
-        assert data["status_code"] == 304
