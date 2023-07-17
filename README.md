@@ -117,8 +117,6 @@ the check-url endpoint accepts the following parameters:
 * url (string, mandatory)
 * refresh (boolean, optional)
 * testing (boolean, optional)
-* timeout (int, optional)
-* debug (boolean, optional)
 
 On error it returns 400.
 
