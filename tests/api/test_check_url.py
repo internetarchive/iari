@@ -18,10 +18,10 @@ class TestCheckUrl(TestCase):
 
     def test_space_url(self):
         response = self.test_client.get(
-                "/check-url?url=http://www.uri.edu/artsci/"
-                "ecn/starkey/ECN398%20-Ecology,%20Economy,"
-                "%20Society/RAPANUI.pdf&refresh=true"
-            )
+            "/check-url?url=http://www.uri.edu/artsci/"
+            "ecn/starkey/ECN398%20-Ecology,%20Economy,"
+            "%20Society/RAPANUI.pdf&refresh=true"
+        )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
         assert data["is_valid"] == "false"
