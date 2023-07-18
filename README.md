@@ -112,7 +112,12 @@ This is a footnote reference -> content reference -> Short citation reference ak
 
 ### Check URL
 
-the check-url endpoint accepts the following parameters:
+This endpoint is a proxy for the internal testdeadlink endpoint 
+created by Maximillian Doer in the Internet Archive. 
+It requires a key to work that must be specified 
+in the config.py file before running IARI.
+
+It accepts the following parameters:
 
 * url (string, mandatory)
 * refresh (boolean, optional)
@@ -153,8 +158,6 @@ It returns json similar to
 You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
 
 #### Status codes
-The status_code attribute is not as reliable as the testdeadlink_status_code.
-
 Sometimes we get back a 403 because an intermediary like Cloudflare detected that we are not a person behind a browser
 doing the request. We don't have any ways to detect these soft200s.
 
