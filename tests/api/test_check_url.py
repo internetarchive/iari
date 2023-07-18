@@ -24,7 +24,8 @@ class TestCheckUrl(TestCase):
         )
         self.assertEqual(200, response.status_code)
         data = json.loads(response.data)
-        assert data["is_valid"] == "false"
+        print(data)
+        assert data["is_valid"] is False
         # assert data["testdeadlink_status_code"] == 404
 
     # Disabled because it fails with 0 in the CI for reasons we don't understand
