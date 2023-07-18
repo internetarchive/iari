@@ -16,7 +16,7 @@ class TestCheckUrl(TestCase):
         app.testing = True
         self.test_client = app.test_client()
 
-    # FAils in CI
+    # Disabled because it fails with 0 in the CI for reasons we don't understand
     # def test_valid_request_304_200(self):
     #     response = self.test_client.get(
     #         "/check-url?url=https://arxiv.org/pdf/2210.02667.pdf&testing=true&timeout=10"
@@ -24,4 +24,3 @@ class TestCheckUrl(TestCase):
     #     self.assertEqual(200, response.status_code)
     #     data = json.loads(response.data)
     #     assert data["testdeadlink_status_code"] == 200
-    #     assert data["status_code"] == 304
