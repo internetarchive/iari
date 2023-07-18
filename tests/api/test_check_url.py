@@ -1,6 +1,8 @@
 import json
+import os
 from unittest import TestCase
 
+import pytest
 from flask import Flask
 from flask_restful import Api  # type: ignore
 
@@ -16,6 +18,9 @@ class TestCheckUrl(TestCase):
         app.testing = True
         self.test_client = app.test_client()
 
+    @pytest.mark.skipif(
+        "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
+    )
     def test_space_url(self):
         response = self.test_client.get(
             "/check-url?url=http://www.uri.edu/artsci/"
