@@ -4,7 +4,3 @@ class MissingInformationError(BaseException):
 
 class WikipediaApiFetchError(BaseException):
     pass
-
-
-class ResolveError(BaseException):
-    pass
