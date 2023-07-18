@@ -16,6 +16,17 @@ class TestCheckUrl(TestCase):
         app.testing = True
         self.test_client = app.test_client()
 
+    def test_space_url(self):
+        response = self.test_client.get(
+                "/check-url?url=http://www.uri.edu/artsci/"
+                "ecn/starkey/ECN398%20-Ecology,%20Economy,"
+                "%20Society/RAPANUI.pdf&refresh=true"
+            )
+        self.assertEqual(200, response.status_code)
+        data = json.loads(response.data)
+        assert data["is_valid"] == "false"
+        # assert data["testdeadlink_status_code"] == 404
+
     # Disabled because it fails with 0 in the CI for reasons we don't understand
     # def test_valid_request_304_200(self):
     #     response = self.test_client.get(
