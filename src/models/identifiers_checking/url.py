@@ -52,6 +52,8 @@ class Url(WikipediaUrl):
                 self.__check_url_with_testdeadlink_api__()
                 # self.__check_url__()
                 # self.__detect_language__()
+            else:
+                logger.warning(f"Url {self.url} is not valid")
 
     # def __get_dns_record__(self) -> None:
     #     from src import app

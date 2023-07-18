@@ -168,3 +168,24 @@ class TestWikipediaUrl(TestCase):
         )
         url.extract()
         assert url.first_level_domain == "germanic-lexicon-project.org"
+
+    def test__parse_and_extract_url__(self):
+        url= WikipediaUrl(
+            url="http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf"
+        )
+        url.__parse_and_extract_url__()
+        assert url.malformed_url is False
+        assert url.netloc == 'www.uri.edu'
+        assert url.scheme == "http"
+
+    def test__parse_extract_and_validate__(self):
+        url= WikipediaUrl(
+            url="http://www.uri.edu/artsci/ecn/starkey/ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf"
+        )
+        url.__parse_and_extract_url__()
+        assert url.malformed_url is False
+        assert url.netloc == 'www.uri.edu'
+        assert url.scheme == "http"
+        assert url.is_valid is True
+        assert url.url == ("http://www.uri.edu/artsci/ecn/starkey/"
+                           "ECN398%20-Ecology,%20Economy,%20Society/RAPANUI.pdf")
