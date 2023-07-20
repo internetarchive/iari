@@ -243,16 +243,19 @@ class Url(WikipediaUrl):
         """This fetches the status code from the testdeadlink API provided by Max and Owen"""
         from src import app
 
-        if not config.testdeadlink_key:
+        # https://able.bio/rhett/how-to-set-and-get-environment-variables-in-python--274rgt5
+        testdeadlink_key = os.getenv("TESTDEADLINK_KEY") if os.getenv("TESTDEADLINK_KEY") else ""
+
+        if not testdeadlink_key:
             app.logger.warning(
-                "__check_url_with_testdeadlink_api__: No testdeadlink key found, skipping check"
+                "__check_url_with_testdeadlink_api__: Missing TESTDEADLINK environment variable, skipping check"
             )
         else:
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
             }
 
-            data = f"urls={self.url}&authcode={config.testdeadlink_key}&returncodes=1"
+            data = f"urls={self.url}&authcode={testdeadlink_key}&returncodes=1"
 
             response = requests.post(
                 "https://iabot-api.archive.org/testdeadlink.php",
