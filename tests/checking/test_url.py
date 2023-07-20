@@ -1,4 +1,7 @@
+import os
 from unittest import TestCase
+
+import pytest
 
 import config
 from src.models.identifiers_checking.url import Url
@@ -114,9 +117,14 @@ class TestUrl(TestCase):
         data = url.get_dict
         assert data["detected_language"] == "en"
 
+    # TODO tell gio to add the key to the environment in github
+    @pytest.mark.skipif(
+        "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
+    )
     def testdeadlink_error_test(self):
-        if config.testdeadlink_key:
-            url = Url(url=self.space_url, timeout=20)
-            url.check()
-            assert url.testdeadlink_status_code == 404
-            assert url.testdeadlink_error_details == "RESPONSE CODE: 404"
+        if not os.getenv("TESTDEADLINK_KEY"):
+            self.fail()
+        url = Url(url=self.space_url, timeout=20)
+        url.check()
+        assert url.testdeadlink_status_code == 404
+        assert url.testdeadlink_error_details == "RESPONSE CODE: 404"
