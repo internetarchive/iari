@@ -6,7 +6,7 @@
 [IARI] -- references
 [IARI] -- "reference/id"
 [IARI] -- "check-url"
-"check-url" --> url : lookup
+"check-url" --> "testdeadlink API" : lookup
 [IARI] -- "check-doi"
 [IARI] -- "article"
 "check-doi" --> OpenAlex : lookup
