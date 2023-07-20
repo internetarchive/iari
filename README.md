@@ -112,6 +112,9 @@ This is a footnote reference -> content reference -> Short citation reference ak
 
 ### Check URL
 
+This endpoint requires an authkey for the testdeadlink API from Internet Archive to work.
+It looks for the environment variable TESTDEADLINK_KEY.
+
 the check-url endpoint accepts the following parameters:
 
 * url (string, mandatory)
@@ -490,7 +493,7 @@ Start GNU screen (if you want to have a persisting session)
 ### Debug mode
 
 Run it with
-`$ ./run-debug-api.sh`
+`$ export TESTDEADLINK_KEY="your key here" && ./run-debug-api.sh`
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:5000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
@@ -498,7 +501,7 @@ Test it in another Screen window or local terminal with
 ### Production mode
 
 Run it with
-`$ ./run-api.sh`
+`$ export TESTDEADLINK_KEY="your key here" && ./run-api.sh`
 
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`

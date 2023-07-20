@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any, Dict, Optional
 
 import requests
@@ -244,7 +245,9 @@ class Url(WikipediaUrl):
         from src import app
 
         # https://able.bio/rhett/how-to-set-and-get-environment-variables-in-python--274rgt5
-        testdeadlink_key = os.getenv("TESTDEADLINK_KEY") if os.getenv("TESTDEADLINK_KEY") else ""
+        testdeadlink_key = (
+            os.getenv("TESTDEADLINK_KEY") if os.getenv("TESTDEADLINK_KEY") else ""
+        )
 
         if not testdeadlink_key:
             app.logger.warning(
