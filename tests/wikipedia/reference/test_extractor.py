@@ -250,7 +250,6 @@ class TestWikipediaReferenceExtractor(TestCase):
             "malformed_url_details": None,
             "archived_url": "",
             "wayback_machine_timestamp": "",
-            "is_valid": True,
         }
         assert len(wre.raw_urls) == 24
         assert wre.raw_urls == [

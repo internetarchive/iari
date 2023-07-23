@@ -40,7 +40,6 @@ class TestUrl(TestCase):
     def test_check_bad_dots(self):
         url = Url(url=self.bad_url, timeout=2)
         url.check()
-        assert url.is_valid is False
         data = url.get_dict
         assert data["detected_language"] == ""
         # assert url.status_code == 0
@@ -55,7 +54,6 @@ class TestUrl(TestCase):
     def test_check_bad_long_tld(self):
         url = Url(url=self.bad_url2, timeout=2)
         url.check()
-        assert url.is_valid is False
         data = url.get_dict
         assert data["detected_language"] == ""
         # assert url.status_code == 0
