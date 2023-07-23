@@ -25,7 +25,6 @@ from requests.exceptions import (
 )
 from requests.models import LocationParseError
 
-import config
 from src.models.api.handlers import BaseHandler
 from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
@@ -70,10 +69,9 @@ class Url(WikipediaUrl):
     def check(self):
         if self.url:
             self.extract()
-            if self.is_valid:
-                self.__check_url__()
-                self.__check_url_with_testdeadlink_api__()
-                self.__detect_language__()
+            self.__check_url__()
+            self.__check_url_with_testdeadlink_api__()
+            self.__detect_language__()
 
     def __get_dns_record__(self) -> None:
         from src import app
