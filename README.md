@@ -52,8 +52,7 @@ We call it the Wikipedia Citations Database (WCD).
 IARI features a number of endpoints that help patrons
 get structured data about references in a Wikipedia article:
 
-* an _article_ endpoint which analyzes a given article and returns basic statistics about it
-* a _references_ endpoint which gives back all ids of references found
+* an _article_ endpoint which analyzes a given article and returns statistics about it including all references
 * a _reference_ endpoint which gives back all details about a reference including templates and wikitext
 * a _check-url_ endpoint which looks up the URL and gives back
   standardized information about its status
@@ -236,44 +235,6 @@ and [like this](https://gist.github.com/dpriskorn/b0e4bf7b9b098c5d6f59664450d70c
 * URLs in comments are not currently supported. Comments begin with <!-- and end with -->. 
 
 Any line that doesn't begin with a star is ignored when parsing lines in the sections specified by the regex.
-
-### references
-
-the statistics/references endpoint accepts the following parameters:
-
-* wari_id (mandatory, str) (this is obtained from the article endpoint)
-* all (optional, boolean) (default: false)
-* offset (optional, int) (default: 0)
-* chunk_size (optional, int) (default: 10)
-
-On error it returns 400. If data is not found it returns 404.
-
-It will return json similar to:
-
-```
-{
-    "total": 31,
-    "references": [
-        {
-            "id": "cfa8b438",
-            "template_names": [],
-            "wikitext": "<ref name = \"Hartmann1\" />",
-            "type": "footnote",
-            "footnote_subtype": "named",
-            "flds": [],
-            "urls": [],
-            "templates": [],
-            "titles": [],
-            "section": "History",
-            "served_from_cache": true
-        },
-    ]
-}
-```
-
-#### Known limitations
-
-None
 
 ### reference
 
