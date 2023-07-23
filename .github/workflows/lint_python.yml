@@ -15,7 +15,9 @@ jobs:
   lint_python:
     needs: ruff
     runs-on: ubuntu-latest
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsenv
     env:
+      TESTDEADLINK_KEY: ${{ secrets.TESTDEADLINK_KEY }}
       ia_sandbox: ${{ secrets.ia_sandbox }}
     steps:
       - uses: actions/checkout@v3
