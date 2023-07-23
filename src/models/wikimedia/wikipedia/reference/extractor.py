@@ -45,8 +45,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
             for reference in self.references:
                 if reference.reference_urls:
                     for url in reference.reference_urls:
-                        if url.is_valid:
-                            urls.append(url)
+                        urls.append(url)
         return urls
 
     # @property

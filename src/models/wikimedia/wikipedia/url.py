@@ -33,7 +33,6 @@ class WikipediaUrl(BaseModel):
     malformed_url_details: Optional[MalformedUrlError] = None
     archived_url: str = ""
     wayback_machine_timestamp: str = ""
-    is_valid: bool = True
 
     @property
     def __is_wayback_machine_url__(self):
@@ -58,16 +57,12 @@ class WikipediaUrl(BaseModel):
 
     def __parse_extract_and_validate__(self) -> None:
         logger.debug("__parse_extract_and_validate__: running")
-        self.__check_if_valid__()
-        if self.is_valid:
-            if self.__is_wayback_machine_url__:
-                self.__parse_wayback_machine_url__()
-            self.__parse_and_extract_url__()
-            self.__extract_tld__()
-            # self.__check_tld__()
-            self.__check_scheme__()
-        else:
-            logger.warning(f"{self.url} not valid")
+        if self.__is_wayback_machine_url__:
+            self.__parse_wayback_machine_url__()
+        self.__parse_and_extract_url__()
+        self.__extract_tld__()
+        # self.__check_tld__()
+        self.__check_scheme__()
 
     def __extract_first_level_domain__(self) -> None:
         from src import app
@@ -156,13 +151,6 @@ class WikipediaUrl(BaseModel):
             fld = get_fld(self.url)
         logger.debug(f"Found FLD: {fld}")
         self.first_level_domain = fld
-
-    def __check_if_valid__(self):
-        """Validate using external package"""
-        logger.debug("__check_if_valid__: running")
-        # We don't validate WM urls because they are not supported by the library
-        if not self.__is_wayback_machine_url__ and not validators.url(self.url):
-            self.is_valid = False
 
     def extract(self):
         from src import app
