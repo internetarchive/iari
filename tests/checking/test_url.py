@@ -21,6 +21,7 @@ class TestUrl(TestCase):
         url = Url(url=self.good_url, timeout=2)
         url.check()
         assert url.status_code == 200
+        assert url.testdeadlink_status_code == 200
         assert url.malformed_url is False
         assert url.request_error is False
         assert url.response_headers != {}
@@ -32,6 +33,7 @@ class TestUrl(TestCase):
         url = Url(url=self.no_url, timeout=2)
         url.check()
         assert url.status_code == 0
+        assert url.testdeadlink_status_code == 0
         assert url.malformed_url is False
         assert url.response_headers is None
         data = url.get_dict
@@ -40,9 +42,8 @@ class TestUrl(TestCase):
     def test_check_bad_dots(self):
         url = Url(url=self.bad_url, timeout=2)
         url.check()
-        data = url.get_dict
-        assert data["detected_language"] == ""
-        # assert url.status_code == 0
+        assert url.testdeadlink_status_code == 0
+        assert url.status_code == 0
         # # assert url.dns_error is True
         # assert url.request_error is True
         # assert (
@@ -70,6 +71,7 @@ class TestUrl(TestCase):
         url = Url(url=self.forbidden_url_if_not_spoofed_headers, timeout=5)
         url.check()
         assert url.status_code == 200
+        assert url.testdeadlink_status_code == 200
         assert url.dns_error is False
         assert url.request_error is False
         assert url.malformed_url is False
@@ -81,6 +83,7 @@ class TestUrl(TestCase):
         url = Url(url=self.good_url, timeout=2)
         url.check()
         assert url.status_code == 200
+        assert url.testdeadlink_status_code == 200
         assert url.response_headers != {}
         assert url.malformed_url is False
         assert url.response_headers["Server"] == "Apache"
@@ -95,6 +98,7 @@ class TestUrl(TestCase):
         )
         url.check()
         assert url.status_code == 200
+        assert url.testdeadlink_status_code == 200
         assert url.dns_error is False
         assert url.request_error is False
         assert url.malformed_url is False
@@ -109,16 +113,13 @@ class TestUrl(TestCase):
         url.check()
         assert url.first_level_domain == "amazon.com"
         assert url.status_code == 200
+        assert url.testdeadlink_status_code == 200
         assert url.dns_error is False
         assert url.request_error is False
         assert url.malformed_url is False
         data = url.get_dict
         assert data["detected_language"] == "en"
 
-    # TODO tell gio to add the key to the environment in github
-    @pytest.mark.skipif(
-        "GITHUB_ACTIONS" in os.environ, reason="test is skipped in GitHub Actions"
-    )
     def testdeadlink_error_test(self):
         if not os.getenv("TESTDEADLINK_KEY"):
             self.fail()
