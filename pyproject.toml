@@ -5,8 +5,7 @@ description = "API capable of fetching, extracting, transforming and storing ref
 authors = ["Dennis Priskorn <68460690+dpriskorn@users.noreply.github.com>"]
 license = "GPLv3+"
 readme = "README.md"
-packages = [{include = "src"}]
-
+#packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 # fatcat-openapi-client = "^0.5.0"
