@@ -125,6 +125,7 @@ class Article(StatisticsWriteView):
         from src import app
 
         app.logger.debug("get: running")
+
         self.__validate_and_get_job__()
         if (
             self.job.lang == "en"
