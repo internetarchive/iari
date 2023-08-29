@@ -506,6 +506,9 @@ Run it with
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
 
+### Dockerized instance
+* Coming soon
+
 # PyCharm specific recommendations
 ## Venv activation
 Make sure this setting is checked.
