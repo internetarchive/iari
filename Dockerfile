@@ -5,6 +5,7 @@ LABEL maintainer="Dennis Priskorn <priskorn@riseup.net>"
 WORKDIR /app
 
 RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
+# --no-cache-dir saves space in docker image
 
 COPY pyproject.toml .
 

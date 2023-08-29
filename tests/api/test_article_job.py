@@ -21,7 +21,7 @@ class TestArticleJob(TestCase):
         assert job.refresh is False
         job = ArticleJob(title="Test", site="wikipedia", lang="en", refresh=True)
         assert job.refresh is True
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError): # TODO: use pytest.raises instead (ruff PT027 fix)
             ArticleJob(title="Test", site="wikipedia", lang="en", refresh="123")
 
     def test_extract_url_http(self):
@@ -75,5 +75,5 @@ class TestArticleJob(TestCase):
         assert job.dehydrate is True
         job = ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate=False)
         assert job.dehydrate is False
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError): # TODO: use pytest.raises instead (ruff PT027 fix)
             ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate="123")
