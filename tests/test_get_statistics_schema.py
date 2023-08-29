@@ -30,7 +30,8 @@ class TestArticleSchema(TestCase):
 
     def test_return_object_invalid(self):
         gss = ArticleSchema()
-        with self.assertRaises(ValidationError): # TODO: use pytest.raises instead (ruff PT027 fix)
+        # TODO: use pytest.raises instead (ruff PT027 fix)
+        with self.assertRaises(ValidationError):
             gss.load(
                 {
                     "url": "https://en.wikipedia.org/wiki/Easter_Island",

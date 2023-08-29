@@ -31,6 +31,7 @@ from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
 
+
 class Url(WikipediaUrl):
     """
     This handles checking a URL
@@ -259,10 +260,12 @@ class Url(WikipediaUrl):
             }
 
             # replace any ampersands with %26, so that IABot includes all "&"s in the url check
-            modified_url = self.url.replace('&', '%26')
+            modified_url = self.url.replace("&", "%26")
             data = f"urls={modified_url}&authcode={testdeadlink_api_key}&returncodes=1"
 
-            app.logger.info(f"__check_url_with_testdeadlink_api__: self.url is {self.url}")
+            app.logger.info(
+                f"__check_url_with_testdeadlink_api__: self.url is {self.url}"
+            )
 
             response = requests.post(
                 "https://iabot-api.archive.org/testdeadlink.php",
