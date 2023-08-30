@@ -35,7 +35,9 @@ jobs:
       - run: poetry run codespell src/ tests/ *.md *.py # --ignore-words-list="" --skip="*.css,*.js,*.lock"
       - run: mkdir --parents --verbose .mypy_cache
       - run: poetry run mypy --ignore-missing-imports --install-types --non-interactive --exclude test_data --exclude deprecated .
-      - run: poetry run safety check
+      # remove safety check, as it was requiring a commercial license to succeed!
+      # - run: poetry run safety check
+
       # Copy the config
       - run: cp config_sample.py config.py
       - run: poetry run pytest .
