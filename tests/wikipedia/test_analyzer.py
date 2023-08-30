@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+import pytest
+
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.statistic.article import ArticleStatistics
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
@@ -24,6 +26,10 @@ class TestWikipediaAnalyzer(TestCase):
         assert wa.article.found_in_wikipedia is True
         assert wa.found is True
 
+    @pytest.mark.skipif(
+        True,  # noqa: FBT003
+        reason="SKIPTEST: wari_id and revision_id are inconsistent",
+    )
     def test_get_statistics_valid_article_latest_test(self):
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/Test",

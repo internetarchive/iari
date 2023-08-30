@@ -87,7 +87,6 @@ class XhtmlHandler(BaseHandler):
         self.text = self.soup.get_text()
 
     def download_and_extract(self):
-
         self.__download_xhtml__()
         if not self.error and not self.links:
             self.__parse_into_soup__()
