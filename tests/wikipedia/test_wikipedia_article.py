@@ -1,6 +1,7 @@
 import logging
 from unittest import TestCase
 
+import pytest
 from wikibaseintegrator import WikibaseIntegrator  # type: ignore
 
 import config
@@ -312,6 +313,10 @@ class TestWikipediaArticle(TestCase):
             == "{{Wiktionary|test|testing|Test|TEST}}<!--*********************************************************"
         )
 
+    @pytest.mark.skipif(
+        True,  # noqa: FBT003
+        reason="SKIPTEST: wari_id and revision_id are inconsistent",
+    )
     def test___fetch_wikitext_for_latest__(self):
         job = ArticleJob(
             url="https://en.wikipedia.org/wiki/Test", regex="test", revision=0

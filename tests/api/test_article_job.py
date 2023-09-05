@@ -21,6 +21,7 @@ class TestArticleJob(TestCase):
         assert job.refresh is False
         job = ArticleJob(title="Test", site="wikipedia", lang="en", refresh=True)
         assert job.refresh is True
+        # TODO: use pytest.raises instead (ruff PT027 fix)
         with self.assertRaises(ValidationError):
             ArticleJob(title="Test", site="wikipedia", lang="en", refresh="123")
 
@@ -75,5 +76,6 @@ class TestArticleJob(TestCase):
         assert job.dehydrate is True
         job = ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate=False)
         assert job.dehydrate is False
+        # TODO: use pytest.raises instead (ruff PT027 fix)
         with self.assertRaises(ValidationError):
             ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate="123")

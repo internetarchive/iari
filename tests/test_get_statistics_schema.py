@@ -30,6 +30,7 @@ class TestArticleSchema(TestCase):
 
     def test_return_object_invalid(self):
         gss = ArticleSchema()
+        # TODO: use pytest.raises instead (ruff PT027 fix)
         with self.assertRaises(ValidationError):
             gss.load(
                 {

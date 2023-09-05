@@ -1,16 +1,20 @@
-FROM python:3.9
+FROM python:3.10-slim
 
 LABEL maintainer="Dennis Priskorn <priskorn@riseup.net>"
 
-ENV DOCKER=true
-
 WORKDIR /app
+
+RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
+# --no-cache-dir saves space in docker image
 
 COPY pyproject.toml .
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir poetry && \
-    poetry install
+RUN poetry install -v --no-interaction --no-ansi
+# maybe add -v?
 
-CMD ["poetry run gunicorn -w 30 --bind unix:/tmp/wikicitations-api/ipc.sock wsgi:app --timeout 200"]
+COPY . ./
 
+# Setup all the needed directories
+RUN mkdir -p /tmp/wikicitations-api json/articles json/references json/dois json/urls json/xhtmls json/pdfs
+
+CMD ["./debug_app.py"]

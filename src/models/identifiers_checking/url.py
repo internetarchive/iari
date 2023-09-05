@@ -77,6 +77,7 @@ class Url(WikipediaUrl):
         from src import app
 
         app.logger.debug("__get_dns_record__: running")
+
         # if domain name is available
         if self.netloc:
             logger.info(f"Trying to resolve {self.netloc}")
@@ -190,8 +191,9 @@ class Url(WikipediaUrl):
 
     def __check_url__(self):
         """IARI url checking"""
-        # TODO deprecate this
-        print(f"Trying to check: {self.url}")
+        # TODO deprecate __check_url__; use (future) __check_urls__ with single url arg instead
+        logger.debug(f"Checking url: {self.url}")
+
         self.__get_dns_record__()
         self.__check_with_https_verify__()
         if self.request_error:
@@ -239,24 +241,31 @@ class Url(WikipediaUrl):
         return url
 
     def __check_url_with_testdeadlink_api__(self):
-        """This fetches the status code from the testdeadlink API provided by Max and Owen"""
+        """This fetches the status code from the testdeadlink API of IABot"""
         from src import app
 
-        # https://able.bio/rhett/how-to-set-and-get-environment-variables-in-python--274rgt5
-        testdeadlink_key = (
+        testdeadlink_api_key = (
             os.getenv("TESTDEADLINK_KEY") if os.getenv("TESTDEADLINK_KEY") else ""
         )
 
-        if not testdeadlink_key:
+        if not testdeadlink_api_key:
+            # TODO: handle this better if api key missing
             app.logger.warning(
                 "__check_url_with_testdeadlink_api__: Missing TESTDEADLINK environment variable, skipping check"
             )
         else:
+            # call IABot's url status checker, testdeadlink
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
             }
 
-            data = f"urls={self.url}&authcode={testdeadlink_key}&returncodes=1"
+            # replace any ampersands with %26, so that IABot includes all "&"s in the url check
+            modified_url = self.url.replace("&", "%26")
+            data = f"urls={modified_url}&authcode={testdeadlink_api_key}&returncodes=1"
+
+            app.logger.info(
+                f"__check_url_with_testdeadlink_api__: self.url is {self.url}"
+            )
 
             response = requests.post(
                 "https://iabot-api.archive.org/testdeadlink.php",
