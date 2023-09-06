@@ -137,8 +137,8 @@ max-complexity = 11
 [tool.ruff.per-file-ignores]
 "src/models/api/job/article_job.py" = ["SIM103"]
 "src/models/wikimedia/wikipedia/reference/generic.py" = ["SIM103"]
-#"tests/*" = ["PT027", "PT009", "PT018", "RUF001", "RUF003", "S101"]
 "tests/*" = ["PT009", "PT018", "RUF001", "RUF003", "S101"]
+#"tests/*" = ["PT027", "PT009", "PT018", "RUF001", "RUF003", "S101"]
 # TODO: remove PT027 when those are fixed in test files (search for "TODO: use pytest.raises")
 
 [build-system]

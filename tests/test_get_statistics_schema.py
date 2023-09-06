@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+import pytest
 from marshmallow import ValidationError
 
 from src.models.api.job.article_job import ArticleJob
@@ -31,7 +32,9 @@ class TestArticleSchema(TestCase):
     def test_return_object_invalid(self):
         gss = ArticleSchema()
         # TODO: use pytest.raises instead (ruff PT027 fix)
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
+
+            ###with self.assertRaises(ValidationError):
             gss.load(
                 {
                     "url": "https://en.wikipedia.org/wiki/Easter_Island",

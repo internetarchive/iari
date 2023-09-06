@@ -13,7 +13,6 @@ from flask import Flask  # type: ignore
 from flask_restful import Api, Resource  # type: ignore
 
 import config
-from src.views.version import Version
 from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
 from src.views.statistics.all import All
@@ -22,6 +21,7 @@ from src.views.statistics.pdf import Pdf
 from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
 from src.views.statistics.xhtml import Xhtml
+from src.views.version import Version
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
