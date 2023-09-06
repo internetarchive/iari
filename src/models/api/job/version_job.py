@@ -2,4 +2,4 @@ from src.models.api.job import Job
 
 
 class VersionJob(Job):
-    version = "1.1.1"
+    version = "4.1.2"
