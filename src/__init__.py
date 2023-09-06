@@ -21,6 +21,7 @@ from src.views.statistics.pdf import Pdf
 from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
 from src.views.statistics.xhtml import Xhtml
+from src.views.version import Version
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ api = Api(app, prefix="/v2")
 
 # Here we link together the API views and endpoint urls
 # api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
+api.add_resource(Version, "/version")
 api.add_resource(CheckUrl, "/check-url")
 api.add_resource(CheckDoi, "/check-doi")
 api.add_resource(Article, "/statistics/article")

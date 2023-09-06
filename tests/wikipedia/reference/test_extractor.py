@@ -1,6 +1,8 @@
 import sys
 from unittest import TestCase
 
+import pytest
+
 from src.helpers.console import console
 from src.models.api.job.article_job import ArticleJob
 from src.models.exceptions import MissingInformationError
@@ -31,7 +33,8 @@ class TestWikipediaReferenceExtractor(TestCase):
     def test_number_of_references_zero(self):
         wre0 = WikipediaReferenceExtractor(testing=True, wikitext="", job=self.job)
         # TODO: use pytest.raises instead (ruff PT027 fix)
-        with self.assertRaises(MissingInformationError):
+        with pytest.raises(MissingInformationError):
+            ###        with self.assertRaises(MissingInformationError):
             wre0.extract_all_references()
 
     def test_number_of_references_two(self):

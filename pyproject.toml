@@ -1,5 +1,6 @@
 [tool.poetry]
 name = "Internet Archive Reference Inventory (IARI)"
+#name = "IARI"
 version = "4.1.2"
 description = "API capable of fetching, extracting, transforming and storing reference information from Wikipedia articles, websites and PDFs as structured data."
 authors = ["Dennis Priskorn <68460690+dpriskorn@users.noreply.github.com>"]
@@ -40,7 +41,7 @@ dead = "^1.5.0"
 mypy = "^1.1.1"
 pre-commit = "^2.20.0"
 pytest = "^7.1.3"
-ruff = "^0.0.263"
+ruff = "^0.0.278"
 safety = "^2.2.0"
 tomli = "^2.0.1"
 types-python-dateutil = "^2.8.19.2"
@@ -136,7 +137,8 @@ max-complexity = 11
 [tool.ruff.per-file-ignores]
 "src/models/api/job/article_job.py" = ["SIM103"]
 "src/models/wikimedia/wikipedia/reference/generic.py" = ["SIM103"]
-"tests/*" = ["PT027", "PT009", "PT018", "RUF001", "RUF003", "S101"]
+"tests/*" = ["PT009", "PT018", "RUF001", "RUF003", "S101"]
+#"tests/*" = ["PT027", "PT009", "PT018", "RUF001", "RUF003", "S101"]
 # TODO: remove PT027 when those are fixed in test files (search for "TODO: use pytest.raises")
 
 [build-system]

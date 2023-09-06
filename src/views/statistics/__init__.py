@@ -38,6 +38,7 @@ class StatisticsView(Resource):
         from src import app
 
         app.logger.debug("__validate__: running")
+
         errors = self.schema.validate(request.args)
         if errors:
             app.logger.debug(f"Found errors: {errors}")
@@ -50,7 +51,11 @@ class StatisticsView(Resource):
         # app.logger.debug(request.args)
         if not self.schema:
             raise MissingInformationError()
+
         self.job = self.schema.load(request.args)
+        if not self.job:
+            console.print("self.job is null")
+
         console.print(self.job)
 
     def __print_log_message_about_refresh__(self):

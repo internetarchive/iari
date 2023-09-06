@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+import pytest
 from pydantic import ValidationError
 
 from src.models.api.job.article_job import ArticleJob
@@ -22,7 +23,8 @@ class TestArticleJob(TestCase):
         job = ArticleJob(title="Test", site="wikipedia", lang="en", refresh=True)
         assert job.refresh is True
         # TODO: use pytest.raises instead (ruff PT027 fix)
-        with self.assertRaises(ValidationError):
+        ###with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             ArticleJob(title="Test", site="wikipedia", lang="en", refresh="123")
 
     def test_extract_url_http(self):
@@ -77,5 +79,6 @@ class TestArticleJob(TestCase):
         job = ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate=False)
         assert job.dehydrate is False
         # TODO: use pytest.raises instead (ruff PT027 fix)
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
+            #        with self.assertRaises(ValidationError):
             ArticleJob(title="Test", site="wikipedia", lang="en", dehydrate="123")
