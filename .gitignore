@@ -12,3 +12,4 @@ __pycache__/
 .coverage
 .idea/
 venv/
+_notes/
