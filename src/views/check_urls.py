@@ -64,7 +64,7 @@ class CheckUrls(StatisticsWriteView):
         data = {"contents": "iari/v2/check-urls"}
 
         self.urls_list = self.job.url_list
-        self.urls_dict = {self.urls_list[i]: {} for i in range(0, len(self.urls_list))}
+        self.urls_dict = {self.urls_list[i]: {} for i in range(len(self.urls_list))}
 
         results = self.__check_urls__()  # return dict of urls and their status/errors
 
@@ -146,12 +146,12 @@ class CheckUrls(StatisticsWriteView):
 
             # add any error info to urls in url_result_dict
             if "errors" in urls_response["results"]:
-                for urlKey, value in urls_response["results"]["errors"].items():
+                for urlkey, value in urls_response["results"]["errors"].items():
                     # add error details to url entry
-                    if urlKey not in url_result_dict:
-                        url_result_dict[urlKey] = {}  # TODO: better syntax here?
-                    url_result_dict[urlKey]["error"] = True
-                    url_result_dict[urlKey]["error_details"] = value
+                    if urlkey not in url_result_dict:
+                        url_result_dict[urlkey] = {}  # TODO: better syntax here?
+                    url_result_dict[urlkey]["error"] = True
+                    url_result_dict[urlkey]["error_details"] = value
 
             # and return dict, with status codes and errors, keyed by urls
             return {"results": url_result_dict}

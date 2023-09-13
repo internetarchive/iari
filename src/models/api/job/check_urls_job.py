@@ -25,6 +25,6 @@ class UrlsJob(Job):
         from flask import request
 
         url_list = request.args.getlist("url")
-        url_dict = {url_list[i]: {} for i in range(0, len(url_list))}
+        url_dict = {url_list[i]: {} for i in range(len(url_list))}
 
         return url_dict
