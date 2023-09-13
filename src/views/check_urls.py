@@ -1,6 +1,9 @@
 import asyncio
+import logging
+
 # import hashlib
 import os
+
 # import re
 # from copy import deepcopy
 from datetime import datetime
@@ -13,12 +16,11 @@ from marshmallow import Schema
 
 from src.models.api.job.check_urls_job import UrlsJob
 from src.models.api.schema.check_urls_schema import UrlsSchema
+
 # from src.models.exceptions import MissingInformationError
 # from src.models.file_io.url_file_io import UrlFileIo
 # from src.models.identifiers_checking.url import Url
 from src.views.statistics.write_view import StatisticsWriteView
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +61,7 @@ class CheckUrls(StatisticsWriteView):
 
         app.logger.debug("__check_urls::__return_results__; running")
 
-        data = {'contents': 'iari/v2/check-urls'}
+        data = {"contents": "iari/v2/check-urls"}
 
         self.urls_list = self.job.url_list
         self.urls_dict = {self.urls_list[i]: {} for i in range(0, len(self.urls_list))}
@@ -76,7 +78,9 @@ class CheckUrls(StatisticsWriteView):
                     # transfer value (which is status_code) to urls_dict entry
                     self.urls_dict[key] = value
                 else:
-                    app.logger.warning(f"__check_urls__ results key \"{key}\" not found in source urls list")
+                    app.logger.warning(
+                        f'__check_urls__ results key "{key}" not found in source urls list'
+                    )
                     # self.urls_dict[key] = value
                     # TODO add troublesome url to "trouble" list/dict data[] return property
 
@@ -107,8 +111,6 @@ class CheckUrls(StatisticsWriteView):
 
         # process urls_list into skipped, cached, and search categories
         url_result_dict = {}
-        cached_urls = []  # urls that have cache data
-        archive_today_urls = []
         search_urls = []
 
         for url in self.urls_list:  # basically, the "sorting hat" for urls
@@ -120,10 +122,7 @@ class CheckUrls(StatisticsWriteView):
             #             - add url to "cached_urls" list (useless?)
             #             - url_resultss_dict[url] = <cached data>
 
-
             search_urls.append(url)
-
-
 
         # urls_response = self.__check_urls_with_iabot_async__(search_urls)
         urls_response = self.__check_urls_with_iabot__(search_urls)
@@ -140,7 +139,7 @@ class CheckUrls(StatisticsWriteView):
             # process iabot_response: move url status codes from results into url_result_dict
             for key, value in urls_response["results"].items():
                 # save status of url in result_dict
-                if not key == "errors":
+                if key != "errors":
                     url_result_dict[key] = {
                         "status_code": value,
                     }
@@ -157,20 +156,19 @@ class CheckUrls(StatisticsWriteView):
             # and return dict, with status codes and errors, keyed by urls
             return {"results": url_result_dict}
 
-
     def __check_urls_with_iabot__(self, search_urls):
         """
         Example iabot response:
         {
             "results": {
-                "http:\/\/www.estrellavalpo.cl\/site\/edic\/20020611093623\/pags\/20020611124031.html": 302,
-                "http:\/\/www.ethnologue.com\/language\/rap": 200,
-                "https:\/\/orb.binghamton.edu\/cgi\/viewcontent.cgi?article=1041": 400,
+                "http:\\/\\/www.estrellavalpo.cl\\/site\\/edic\\/20020611093623\\/pags\\/20020611124031.html": 302,
+                "http:\\/\\/www.ethnologue.com\\/language\\/rap": 200,
+                "https:\\/\\/orb.binghamton.edu\\/cgi\\/viewcontent.cgi?article=1041": 400,
                 "errors": {
-                    "https:\/\/orb.binghamton.edu\/cgi\/viewcontent.cgi?article=1041": "RESPONSE CODE: 400",
-                    "https:\/\/www.britishmuseum.org\/explore\/highlights\/highlight_objects\/aoa\/w\/wooden_gorget_rei_miro.aspx": "RESPONSE CODE: 404"
+                    "https:\\/\\/orb.binghamton.edu\\/cgi\\/viewcontent.cgi?article=1041": "RESPONSE CODE: 400",
+                    "https:\\/\\/www.britishmuseum.org\\/explore\\/highlights\\/highlight_objects\\/aoa\\/w\\/wooden_gorget_rei_miro.aspx": "RESPONSE CODE: 404"
                 },
-                "https:\/\/www.britishmuseum.org\/explore\/highlights\/highlight_objects\/aoa\/w\/wooden_gorget_rei_miro.aspx": 404
+                "https:\\/\\/www.britishmuseum.org\\/explore\\/highlights\\/highlight_objects\\/aoa\\/w\\/wooden_gorget_rei_miro.aspx": 404
             },
             "servetime": 1.5802
         }
@@ -183,19 +181,23 @@ class CheckUrls(StatisticsWriteView):
         }
         """
 
-
         # TODO TODO chunk urls into 100 unit chinks, and process each chink till done.
         # error if no authcode available
         testdeadlink_api_key = self.__get_testdeadlink_api_key__()
         if not testdeadlink_api_key:
             # ### raise MissingInformationError("missing TESTDEADLINK_KEY")
-            logger.warning("Missing TESTDEADLINK environment variable, skipping IABot check")
+            logger.warning(
+                "Missing TESTDEADLINK environment variable, skipping IABot check"
+            )
             return {
-                "errors": [{"message": f"Missing TESTDEADLINK_KEY environment variable"}]
+                "errors": [
+                    {"message": "Missing TESTDEADLINK_KEY environment variable"}
+                ]
             }
 
         # url_encode urls parameter - parmas cannot have any url-specific characters like "&", etc.
         import urllib.parse
+
         search_urls_param = urllib.parse.quote("\n".join(search_urls))
 
         # make the iabot call and respond accordingly
@@ -259,7 +261,9 @@ class CheckUrls(StatisticsWriteView):
                 "Missing TESTDEADLINK environment variable, skipping IABot check"
             )
             return {
-                "errors": [{"message": f"Missing TESTDEADLINK_KEY environment variable"}]
+                "errors": [
+                    {"message": "Missing TESTDEADLINK_KEY environment variable"}
+                ]
             }
 
         # ??    loop = asyncio.get_event_loop()
@@ -288,6 +292,7 @@ class CheckUrls(StatisticsWriteView):
     def __get_testdeadlink_api_key__(self):
         return os.getenv("TESTDEADLINK_KEY") if os.getenv("TESTDEADLINK_KEY") else ""
         # TODO raise error here if not valid?
+
 
 # @property
 # def __url_hash_id__(self) -> str:

@@ -16,8 +16,8 @@ class UrlsJob(Job):
     def url_list(self):
         """Decoded urls"""
         from flask import request
-        return request.args.getlist("url")
 
+        return request.args.getlist("url")
 
     @property
     def url_dict(self):
