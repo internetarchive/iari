@@ -1,0 +1,21 @@
+https://www.learnbestcoding.com/post/139/how-to-fix-react-js-typeerror-failed-to-fetch
+
+Here's an example of how to enable CORS for all origins in a Flask API:
+
+===   ===   ===
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.route('/api/data')
+def get_data():
+    data = {'key': 'value'}
+    response = jsonify(data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+if __name__ == '__main__':
+    app.run()

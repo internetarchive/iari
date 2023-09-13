@@ -51,8 +51,8 @@ class Version(StatisticsWriteView):
         # s = inspect.stack()
         # module_name = inspect.getmodule(s[1][0]).__name__
         # my_version = importlib.metadata.version("src")
-        my_version = '4.1.2'  # for now
-        data['version'] = my_version
+        my_version = "4.1.2"  # for now
+        data["version"] = my_version
 
         timestamp = datetime.timestamp(datetime.utcnow())
         data["timestamp"] = int(timestamp)
