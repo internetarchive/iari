@@ -190,9 +190,7 @@ class CheckUrls(StatisticsWriteView):
                 "Missing TESTDEADLINK environment variable, skipping IABot check"
             )
             return {
-                "errors": [
-                    {"message": "Missing TESTDEADLINK_KEY environment variable"}
-                ]
+                "errors": [{"message": "Missing TESTDEADLINK_KEY environment variable"}]
             }
 
         # url_encode urls parameter - parmas cannot have any url-specific characters like "&", etc.
@@ -261,9 +259,7 @@ class CheckUrls(StatisticsWriteView):
                 "Missing TESTDEADLINK environment variable, skipping IABot check"
             )
             return {
-                "errors": [
-                    {"message": "Missing TESTDEADLINK_KEY environment variable"}
-                ]
+                "errors": [{"message": "Missing TESTDEADLINK_KEY environment variable"}]
             }
 
         # ??    loop = asyncio.get_event_loop()
@@ -278,7 +274,7 @@ class CheckUrls(StatisticsWriteView):
         for status in url_statuses:
             print(status)
 
-        # place the info fo each url in urls_duct
+        # place the info of each url in urls_duct
         urls_dict = {}
         for status in url_statuses:
             urls_dict.update(status)  # status is a tiny dict: { <url> : { ... } }
