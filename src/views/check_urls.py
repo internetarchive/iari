@@ -96,6 +96,7 @@ class CheckUrls(StatisticsWriteView):
         data["isodate"] = str(isodate)
 
         logger.debug(f"returning url data for {len(self.urls_dict)} links")
+        logger.debug(f"{data}")
 
         return data, 200
 
@@ -120,7 +121,7 @@ class CheckUrls(StatisticsWriteView):
             # self.__read_from_cache__()
             #         if self.io.data:
             #             - add url to "cached_urls" list (useless?)
-            #             - url_resultss_dict[url] = <cached data>
+            #             - url_results_dict[url] = <cached data>
 
             search_urls.append(url)
 
@@ -146,12 +147,12 @@ class CheckUrls(StatisticsWriteView):
 
             # add any error info to urls in url_result_dict
             if "errors" in urls_response["results"]:
-                for urlkey, value in urls_response["results"]["errors"].items():
+                for urlKey, value in urls_response["results"]["errors"].items():
                     # add error details to url entry
-                    if urlkey not in url_result_dict:
-                        url_result_dict[urlkey] = {}  # TODO: better syntax here?
-                    url_result_dict[urlkey]["error"] = True
-                    url_result_dict[urlkey]["error_details"] = value
+                    if urlKey not in url_result_dict:
+                        url_result_dict[urlKey] = {}  # TODO: better syntax here?
+                    url_result_dict[urlKey]["error"] = True
+                    url_result_dict[urlKey]["error_details"] = value
 
             # and return dict, with status codes and errors, keyed by urls
             return {"results": url_result_dict}
@@ -193,7 +194,7 @@ class CheckUrls(StatisticsWriteView):
                 "errors": [{"message": "Missing TESTDEADLINK_KEY environment variable"}]
             }
 
-        # url_encode urls parameter - parmas cannot have any url-specific characters like "&", etc.
+        # url_encode urls parameter - params cannot have any url-specific characters like "&", etc.
         import urllib.parse
 
         search_urls_param = urllib.parse.quote("\n".join(search_urls))

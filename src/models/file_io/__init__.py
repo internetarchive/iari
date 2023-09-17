@@ -63,9 +63,8 @@ class FileIo(WariBaseModel):
     def read_from_disk(self) -> None:
         from src import app
 
-        message = "read_from_disk: running"
-        app.logger.debug(message)
-        app.logger.debug(message)
+        app.logger.debug("read_from_disk: running")
+
         path_filename = self.path_filename
         if exists(path_filename):
             with open(file=path_filename) as file:
