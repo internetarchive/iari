@@ -147,12 +147,12 @@ class CheckUrls(StatisticsWriteView):
 
             # add any error info to urls in url_result_dict
             if "errors" in urls_response["results"]:
-                for urlKey, value in urls_response["results"]["errors"].items():
+                for url_key, value in urls_response["results"]["errors"].items():
                     # add error details to url entry
-                    if urlKey not in url_result_dict:
-                        url_result_dict[urlKey] = {}  # TODO: better syntax here?
-                    url_result_dict[urlKey]["error"] = True
-                    url_result_dict[urlKey]["error_details"] = value
+                    if url_key not in url_result_dict:
+                        url_result_dict[url_key] = {}  # TODO: better syntax here?
+                    url_result_dict[url_key]["error"] = True
+                    url_result_dict[url_key]["error_details"] = value
 
             # and return dict, with status codes and errors, keyed by urls
             return {"results": url_result_dict}

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "Internet Archive Reference Inventory (IARI)"
 #name = "IARI"
-version = "4.1.3"
+version = "4.1.4"
 description = "API capable of fetching, extracting, transforming and storing reference information from Wikipedia articles, websites and PDFs as structured data."
 authors = ["Dennis Priskorn <68460690+dpriskorn@users.noreply.github.com>"]
 license = "GPLv3+"
