@@ -51,7 +51,7 @@ class Version(StatisticsWriteView):
         # s = inspect.stack()
         # module_name = inspect.getmodule(s[1][0]).__name__
         # my_version = importlib.metadata.version("src")
-        my_version = "4.1.3"  # for now
+        my_version = "4.1.4"  # TODO: for now, must change manually. eventually we want to get from pyproject.toml
         data["version"] = my_version
 
         timestamp = datetime.timestamp(datetime.utcnow())

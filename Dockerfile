@@ -17,4 +17,5 @@ COPY . ./
 # Setup all the needed directories
 RUN mkdir -p /tmp/wikicitations-api json/articles json/references json/dois json/urls json/xhtmls json/pdfs
 
-CMD ["./debug_app.py"]
+#CMD ["./debug_app.py"]
+CMD ["gunicorn","-w", "4", "--bind", ":5000", "--timeout", "1500", "wsgi:app"]
