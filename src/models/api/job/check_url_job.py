@@ -6,6 +6,7 @@ from src.models.api.job import Job
 class UrlJob(Job):
     url: str
     timeout: int = 2  # We default to 2 seconds
+    method: str = "iabot"  # default to iabot check method, although searchurldata will always be run
     debug: bool = False
     blocks: bool = False
     html: bool = False

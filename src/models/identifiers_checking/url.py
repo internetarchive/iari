@@ -1,5 +1,6 @@
 import logging
 import os
+import urllib.parse
 from typing import Any, Dict, Optional
 
 import requests
@@ -45,22 +46,27 @@ class Url(WikipediaUrl):
     and do not offer turning them off for now.
     """
 
-    request_error: bool = False
-    request_error_details: str = ""
-    dns_record_found: bool = False
-    dns_no_answer: bool = False
-    dns_error: bool = False
-    # soft404_probability: float = 0.0  # not implemented yet
     status_code: int = 0
     testdeadlink_status_code: int = 0
     testdeadlink_error_details: str = ""
-    timeout: int = 2
-    dns_error_details: str = ""
-    response_headers: Optional[Dict] = None
+    searchurldata_results: Optional[Dict] = None
     text: str = ""
+    response_headers: Optional[Dict] = None
+
     detected_language: str = ""
     detected_language_error: bool = False
     detected_language_error_details: str = ""
+
+    request_error: bool = False
+    request_error_details: str = ""
+    timeout: int = 2
+
+    dns_record_found: bool = False
+    dns_no_answer: bool = False
+    dns_error: bool = False
+    dns_error_details: str = ""
+
+    # soft404_probability: float = 0.0  # not implemented yet
 
     # @property
     # def __check_soft404__(self):
@@ -69,8 +75,9 @@ class Url(WikipediaUrl):
     def check(self):
         if self.url:
             self.extract()
-            self.__check_url__()
+            # self.__check_url__()  # omit native IARI checking for now - just ise IABot's
             self.__check_url_with_testdeadlink_api__()
+            self.__check_url_with_searchurldata_api__()
             self.__detect_language__()
 
     def __get_dns_record__(self) -> None:
@@ -292,3 +299,26 @@ class Url(WikipediaUrl):
                                     result
                                 ]
                             break
+
+    def __check_url_with_searchurldata_api__(self):
+        """This fetches the status code and other oinformation from the searchurldata API of IABot"""
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "http://en.wikipedia.org/wiki/User:GreenC via iabget.awk",
+        }
+
+        modified_url = urllib.parse.quote(self.url)  # url encode the url
+        data = f"&action=searchurldata&urls={modified_url}"
+
+        response = requests.post(
+            "https://iabot.wmcloud.org/api.php?wiki=enwiki",
+            headers=headers,
+            data=data,
+        )
+        # get the status code
+        if response.status_code == 200:
+            data = response.json()
+            print(data)
+            # TODO handle return data or errors
+            self.searchurldata_results = data

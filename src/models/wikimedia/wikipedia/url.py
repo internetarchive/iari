@@ -23,11 +23,11 @@ class WikipediaUrl(BaseModel):
     We only check based on the URL itself.
     """
 
-    first_level_domain: str = ""
-    fld_is_ip: bool = False  # first level domain is an IP address
     url: str
     scheme: str = ""  # url scheme e.g. http
+    first_level_domain: str = ""
     netloc: str = ""  # network location e.g. google.com
+    fld_is_ip: bool = False  # first level domain is an IP address
     tld: str = ""  # top level domain
     malformed_url: bool = False
     malformed_url_details: Optional[MalformedUrlError] = None

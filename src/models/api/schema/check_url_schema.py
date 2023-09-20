@@ -14,6 +14,7 @@ class UrlSchema(BaseSchema):
 
     url = String(required=True)
     timeout = Int(required=False)
+    method = String(required=False)  # dead: disable
     debug = Bool(required=False)
     blocks = Bool(required=False)
     xml = Bool(required=False)
