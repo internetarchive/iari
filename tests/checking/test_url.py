@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import pytest
 
-import config
 from src.models.identifiers_checking.url import Url
 
 

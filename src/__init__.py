@@ -20,7 +20,6 @@ from src.views.statistics.all import All
 from src.views.statistics.article import Article
 from src.views.statistics.pdf import Pdf
 from src.views.statistics.reference import Reference
-from src.views.statistics.references import References
 from src.views.statistics.xhtml import Xhtml
 from src.views.version import Version
 
@@ -40,7 +39,6 @@ api.add_resource(CheckUrl, "/check-url")
 api.add_resource(CheckDoi, "/check-doi")
 api.add_resource(Article, "/statistics/article")
 api.add_resource(All, "/statistics/all")
-api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
 api.add_resource(Pdf, "/statistics/pdf")
 api.add_resource(Xhtml, "/statistics/xhtml")
