@@ -26,9 +26,12 @@ class Article(StatisticsWriteView):
         from src import app
 
         app.logger.info("__analyze_and_write_and_return__: running")
+
         if not self.wikipedia_analyzer:
             raise MissingInformationError("self.wikipedia_analyzer was None")
+
         self.__get_statistics__()
+
         if self.wikipedia_analyzer.found:
             app.logger.debug("found article")
             if self.wikipedia_analyzer.is_redirect:
@@ -57,9 +60,14 @@ class Article(StatisticsWriteView):
         from src import app
 
         app.logger.debug("got valid job")
+
         self.__setup_and_read_from_cache__()
+
         if self.io.data and not self.job.refresh:
+            # we have cached data - return it, if not force refresh
+
             app.logger.info("Returning data from the cache")
+
             self.__setup_and_read_from_cache__()
             if self.io.data:
                 # We got the statistics from json, return them as is
@@ -68,8 +76,8 @@ class Article(StatisticsWriteView):
                 )
                 return self.io.data, 200
         else:
+            # we have to regenerate cache from scratch
             app.logger.info("got refresh from patron or no data in cache")
-            # This will run if we did not return an analysis from disk yet
             self.__print_log_message_about_refresh__()
             self.__setup_wikipedia_analyzer__()
             return self.__analyze_and_write_and_return__()
@@ -124,9 +132,9 @@ class Article(StatisticsWriteView):
         Every branch in this method has to return a tuple (Any,response_code)"""
         from src import app
 
-        app.logger.debug("get: running")
+        app.logger.debug("statistics/article/get: running")
 
-        self.__validate_and_get_job__()
+        self.__validate_and_get_job__()  # generic for all endpoints
         if (
             self.job.lang == "en"
             and self.job.title

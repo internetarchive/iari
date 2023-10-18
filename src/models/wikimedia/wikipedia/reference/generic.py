@@ -56,6 +56,8 @@ class WikipediaReference(JobBaseModel):
     soup: Optional[Any] = None
     comments: Optional[List[Comment]] = None
 
+    # TODO REMOVE ref_counter_index: int = 0
+
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 

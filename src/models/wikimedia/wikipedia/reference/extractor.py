@@ -3,6 +3,7 @@ from copy import deepcopy
 from typing import Dict, List, Optional
 
 import mwparserfromhell  # type: ignore
+from bs4 import BeautifulSoup
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
 from src.models.api.job.article_job import ArticleJob
@@ -26,13 +27,18 @@ class WikipediaReferenceExtractor(WariBaseModel):
     """
 
     job: ArticleJob
-    wikitext: str
-    wikicode: Wikicode = None
-    references: Optional[List[WikipediaReference]] = None
-    # wikibase: Wikibase
-    testing: bool = False
     language_code: str = ""
     sections: Optional[List[MediawikiSection]] = None
+
+    wikitext: str
+    wikicode: Wikicode = None  # wiki object tree parsed from wikitext
+    html_source: str = ""  # used to extract citeref reference data
+
+    references: Optional[List[WikipediaReference]] = None
+    # wikibase: Wikibase
+    cite_page_refs: Optional[List] = []
+
+    testing: bool = False
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
@@ -68,6 +74,11 @@ class WikipediaReferenceExtractor(WariBaseModel):
                     for url in reference.reference_urls:
                         urls.append(url.url)
         return urls
+
+    @property
+    def cite_refs(self) -> Optional[List]:
+        return self.cite_page_refs
+        # return ["hello", "there"]
 
     @property
     def first_level_domain_counts(self) -> Dict[str, int]:
@@ -192,6 +203,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         if not self.job:
             raise MissingInformationError("no job")
         self.__parse_wikitext__()
+        self.__parse_html_source__()  # fetches html and extracts reference citations
         self.__extract_sections__()
         self.__populate_references__()
         app.logger.info("Done extracting all references")
@@ -243,6 +255,55 @@ class WikipediaReferenceExtractor(WariBaseModel):
         app.logger.debug("__parse_wikitext__: running")
         if not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)
+
+    def __parse_html_source__(self):
+        """
+        Parses html to extract cite reference data from references section
+        """
+        from src import app
+
+        app.logger.debug("__parse_html_source__: running")
+        # app.logger.debug(self.html_source)
+
+        # def is_citeref_link(css_class):
+        #     return css_class is None  # and len(css_class) == 6
+
+        if self.html_source:
+            app.logger.debug("html_source found, parsing: running")
+
+            soup = BeautifulSoup(self.html_source, "html.parser")
+            # for link in soup.find_all("a"):
+            #     print(link.get("href"))
+
+            references_wrapper = soup.find("div", class_="mw-references-wrap")
+            if references_wrapper:
+                # app.logger.debug("references_wrapper: YES")
+                references_list = references_wrapper.find("ol", class_="references")
+                refs = []
+                ref_counter = 0
+                for ref in references_list.find_all("li"):
+                    ref_counter += 1
+                    # app.logger.debug("references_list.find: YES")
+                    my_ref = {
+                        "id": ref.get("id"),
+                        "ref_index": ref_counter,
+                        "about": ref.get("about"),
+                        "raw": "",
+                        "page_refs": [],
+                    }
+                    for link in ref.find_all("a"):
+
+                        # if link has child span.mw-linkback-text, then this is a citeref link
+                        if link.find("span", class_="mw-linkback-text"):
+                            my_ref["page_refs"].append(
+                                {"href": link.get("href"), "id": link.get("id")}
+                            )
+
+                    # app.logger.debug(f"#####myref: {my_ref}")
+
+                    refs.append(my_ref)
+
+                self.cite_page_refs = refs
 
     @property
     def reference_ids(self) -> List[str]:

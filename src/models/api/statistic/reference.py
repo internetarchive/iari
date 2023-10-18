@@ -8,6 +8,7 @@ class ReferenceStatistic(BaseModel):
     the patron wants from the reference endpoint"""
 
     id: str = ""
+    ref_index: int = 0
     template_names: List[str]
     wikitext: str
     type: str  # # [general|footnote]

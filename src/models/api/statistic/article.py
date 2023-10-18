@@ -17,6 +17,8 @@ class ArticleStatistics(BaseModel):
     dehydrated_references: List[str] = []
     references: List[str] = []
     reference_statistics: Dict[str, int] = {}
+    cite_refs: List = []
+
     served_from_cache: bool = False
     site: str = WikimediaDomain.wikipedia.value  # wikimedia site in question
     timestamp: int = 0  # timestamp at beginning of analysis
