@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import mwparserfromhell  # type: ignore
 from bs4 import BeautifulSoup
@@ -35,8 +35,10 @@ class WikipediaReferenceExtractor(WariBaseModel):
     html_source: str = ""  # used to extract citeref reference data
 
     references: Optional[List[WikipediaReference]] = None
-    # wikibase: Wikibase
-    cite_page_refs: Optional[List] = []
+    # cite_page_refs: Optional[List] = []
+    cite_page_refs: List = []
+
+    # wikibase: Wikibase # ??? What is this? TODO
 
     testing: bool = False
 
@@ -47,6 +49,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
     def urls(self) -> List[WikipediaUrl]:
         """List of non-unique and valid urls"""
         urls: List[WikipediaUrl] = []
+
         if self.references:
             for reference in self.references:
                 if reference.reference_urls:
@@ -78,7 +81,10 @@ class WikipediaReferenceExtractor(WariBaseModel):
     @property
     def cite_refs(self) -> Optional[List]:
         return self.cite_page_refs
-        # return ["hello", "there"]
+
+    @property
+    def cite_refs_count(self) -> int:
+        return len(self.cite_page_refs)
 
     @property
     def first_level_domain_counts(self) -> Dict[str, int]:
@@ -256,6 +262,52 @@ class WikipediaReferenceExtractor(WariBaseModel):
         if not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)
 
+    def __extract_cite_refs__(self):
+
+        soup = BeautifulSoup(self.html_source, "html.parser")
+        # for link in soup.find_all("a"):
+        #     print(link.get("href"))
+
+        references_wrapper = soup.find("div", class_="mw-references-wrap")
+
+        refs = []
+
+        if references_wrapper:
+            references_list = references_wrapper.find("ol", class_="references")
+            ref_counter = 0
+            for ref in references_list.find_all("li"):
+
+                ref_counter += 1
+
+                page_refs = []
+                for link in ref.find_all("a"):
+                    # span.mw-linkback-text children should have a citeref link
+                    if link.find("span", class_="mw-linkback-text"):
+                        page_refs.append(
+                            {
+                                "href": link.get("href"),
+                                "id": link.get("id"),
+                            }
+                        )
+
+                span_link = ref.find("span", class_="mw-reference-text")
+                raw_data = None
+                if span_link:
+                    link_data = span_link.find("link")
+                    if link_data:
+                        raw_data = link_data.get("data-mw")
+
+                refs.append(
+                    {
+                        "id": ref.get("id"),
+                        "ref_index": ref_counter,
+                        "raw_data": raw_data,
+                        "page_refs": page_refs,
+                    }
+                )
+
+        self.cite_page_refs = refs
+
     def __parse_html_source__(self):
         """
         Parses html to extract cite reference data from references section
@@ -263,47 +315,12 @@ class WikipediaReferenceExtractor(WariBaseModel):
         from src import app
 
         app.logger.debug("__parse_html_source__: running")
-        # app.logger.debug(self.html_source)
 
         # def is_citeref_link(css_class):
         #     return css_class is None  # and len(css_class) == 6
 
         if self.html_source:
-            app.logger.debug("html_source found, parsing: running")
-
-            soup = BeautifulSoup(self.html_source, "html.parser")
-            # for link in soup.find_all("a"):
-            #     print(link.get("href"))
-
-            references_wrapper = soup.find("div", class_="mw-references-wrap")
-            if references_wrapper:
-                # app.logger.debug("references_wrapper: YES")
-                references_list = references_wrapper.find("ol", class_="references")
-                refs = []
-                ref_counter = 0
-                for ref in references_list.find_all("li"):
-                    ref_counter += 1
-                    # app.logger.debug("references_list.find: YES")
-                    my_ref = {
-                        "id": ref.get("id"),
-                        "ref_index": ref_counter,
-                        "about": ref.get("about"),
-                        "raw": "",
-                        "page_refs": [],
-                    }
-                    for link in ref.find_all("a"):
-
-                        # if link has child span.mw-linkback-text, then this is a citeref link
-                        if link.find("span", class_="mw-linkback-text"):
-                            my_ref["page_refs"].append(
-                                {"href": link.get("href"), "id": link.get("id")}
-                            )
-
-                    # app.logger.debug(f"#####myref: {my_ref}")
-
-                    refs.append(my_ref)
-
-                self.cite_page_refs = refs
+            self.__extract_cite_refs__()
 
     @property
     def reference_ids(self) -> List[str]:

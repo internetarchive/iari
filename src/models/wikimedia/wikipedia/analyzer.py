@@ -26,7 +26,9 @@ class WikipediaAnalyzer(WariBaseModel):
 
     job: Optional[ArticleJob] = None
     article: Optional[WikipediaArticle] = None
-    article_statistics: Optional[ArticleStatistics] = None
+    article_statistics: Optional[
+        ArticleStatistics
+    ] = None  # includes cite_refs property
 
     # wikibase: Wikibase = IASandboxWikibase()
 
@@ -52,6 +54,7 @@ class WikipediaAnalyzer(WariBaseModel):
         return self.article.found_in_wikipedia
 
     def __gather_article_statistics__(self) -> None:
+
         if (
             self.job
             and self.article
@@ -69,6 +72,7 @@ class WikipediaAnalyzer(WariBaseModel):
                     "self.article.revision_timestamp was None"
                 )
             ae = self.article.extractor
+
             if not self.job.page_id:
                 self.job.get_ids_from_mediawiki_api()
 
@@ -85,6 +89,7 @@ class WikipediaAnalyzer(WariBaseModel):
                 title=self.job.title,
                 urls=ae.raw_urls,
                 cite_refs=ae.cite_refs,
+                cite_refs_count=ae.cite_refs_count,
                 fld_counts=ae.first_level_domain_counts,
                 served_from_cache=False,
                 site=self.job.domain.value,
@@ -240,4 +245,5 @@ class WikipediaAnalyzer(WariBaseModel):
     def __insert_full_references_into_the_article_statistics__(self):
         """We return the full reference to accommodate IARE, see https://github.com/internetarchive/iari/issues/886"""
         if self.article_statistics:
+
             self.article_statistics.references = self.reference_statistics
