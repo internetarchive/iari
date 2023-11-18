@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
+from src.helpers.get_version import get_poetry_version
 from src.models.api.job.version_job import VersionJob
 from src.models.api.schema.version_schema import VersionSchema
 from src.views.statistics.write_view import StatisticsWriteView
@@ -44,19 +45,15 @@ class Version(StatisticsWriteView):
             return self.__return_version__()
 
     def __return_version__(self):
-        data = {}
 
-        # trying to get version from metadata but not successful
-        # https://stackoverflow.com/questions/11705055/get-full-package-module-name
-        # s = inspect.stack()
-        # module_name = inspect.getmodule(s[1][0]).__name__
-        # my_version = importlib.metadata.version("src")
-        my_version = "4.1.4"  # TODO: for now, must change manually. eventually we want to get from pyproject.toml
-        data["version"] = my_version
-
+        version = get_poetry_version("pyproject.toml")
         timestamp = datetime.timestamp(datetime.utcnow())
-        data["timestamp"] = int(timestamp)
         isodate = datetime.isoformat(datetime.utcnow())
-        data["isodate"] = str(isodate)
+
+        data = {
+            "version": version,
+            "timestamp": int(timestamp),
+            "isodate": str(isodate),
+        }
 
         return data, 200
