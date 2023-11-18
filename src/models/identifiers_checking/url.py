@@ -53,8 +53,8 @@ class Url(WikipediaUrl):
     testdeadlink_status_code: int = 0
     testdeadlink_error_details: str = ""
 
-    # IABot WBM status
-    searchurldata_results: Optional[Dict] = None
+    # IABot Archive information (from internal iabot database)
+    iabot_results: Optional[Dict] = None
 
     text: str = ""
     response_headers: Optional[Dict] = None
@@ -83,7 +83,7 @@ class Url(WikipediaUrl):
             self.extract()
             # self.__check_url__()  # omit native IARI checking for now - just ise IABot's
             self.__check_url_with_testdeadlink_api__()
-            self.__check_url_with_searchurldata_api__()
+            self.__check_url_with_iabot_api__()
             self.__detect_language__()
 
     def __get_dns_record__(self) -> None:
@@ -126,6 +126,7 @@ class Url(WikipediaUrl):
                 allow_redirects=True,
             )
             self.status_code = r.status_code
+
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
             if r.status_code == 200:
@@ -306,15 +307,18 @@ class Url(WikipediaUrl):
                                 ]
                             break
 
-    def __check_url_with_searchurldata_api__(self):
-        """This fetches the status code and other oinformation from the searchurldata API of IABot"""
+    def __check_url_with_iabot_api__(self):
+        """
+        This fetches the status code, archive, and other information from the
+        searchurldata API of IABot
+        """
+
+        modified_url = urllib.parse.quote(self.url)  # url encode the url
 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "http://en.wikipedia.org/wiki/User:GreenC via iabget.awk",
         }
-
-        modified_url = urllib.parse.quote(self.url)  # url encode the url
         data = f"&action=searchurldata&urls={modified_url}"
 
         response = requests.post(
@@ -322,9 +326,10 @@ class Url(WikipediaUrl):
             headers=headers,
             data=data,
         )
-        # get the status code
+
+        # if status code is 200, the request was successful
         if response.status_code == 200:
             data = response.json()
             print(data)
             # TODO handle return data or errors
-            self.searchurldata_results = data
+            self.iabot_results = data
