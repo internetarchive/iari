@@ -9,18 +9,20 @@ class ReferenceStatistic(BaseModel):
 
     id: str = ""
     ref_index: int = 0
-    template_names: List[str]
-    wikitext: str
-    type: str  # # [general|footnote]
-    footnote_subtype: str  # [named|content]
-    # identifiers: Dict[str, Any]  # {dois: [1234,12345], isbns: [1234]}
-    flds: List[str] = []  # non-unique first level domain strings
-    urls: List[str] = []  # non-unique url strings
-    templates: List[Dict[str, Any]]
-    titles: List[str] = []
-    section: str = ""
-    url_objects: List[Dict[str, Any]]
     name: str = ""
+    type: str  # [general|footnote]
+    footnote_subtype: str  # [named|content]
+    section: str = ""
+
+    titles: List[str] = []
+    template_names: List[str]
+    templates: List[Dict[str, Any]]
+    urls: List[str] = []  # non-unique url strings
+    url_objects: List[Dict[str, Any]]
+    flds: List[str] = []  # non-unique first level domain strings
+
+    wikitext: str
+    # identifiers: Dict[str, Any]  # {dois: [1234,12345], isbns: [1234]}
 
     class Config:  # dead: disable
         extra = "forbid"  # dead: disable

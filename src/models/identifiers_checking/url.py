@@ -46,10 +46,16 @@ class Url(WikipediaUrl):
     and do not offer turning them off for now.
     """
 
+    # iari test - deprecated, for now (2023.11.08)
     status_code: int = 0
+
+    # iabot status
     testdeadlink_status_code: int = 0
     testdeadlink_error_details: str = ""
+
+    # IABot WBM status
     searchurldata_results: Optional[Dict] = None
+
     text: str = ""
     response_headers: Optional[Dict] = None
 
