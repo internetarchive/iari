@@ -21,7 +21,7 @@ class UrlArchive(WikipediaUrlArchive):
     """
 
     # IABot Archive information (from internal iabot database)
-    iabot_results: Optional[Dict] = None
+    iabot_archive_results: Optional[Dict] = None
 
     def check(self):
         if self.url:
@@ -59,4 +59,4 @@ class UrlArchive(WikipediaUrlArchive):
             data = response.json()
             print(data)
             # TODO handle return data or errors
-            self.iabot_results = data
+            self.iabot_archive_results = data
