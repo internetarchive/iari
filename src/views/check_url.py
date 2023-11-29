@@ -38,6 +38,11 @@ class CheckUrl(StatisticsWriteView):
         the raw upper cased URL supplied by the user"""
         if not self.job:
             raise MissingInformationError()
+
+        from src import app
+
+        # app.logger.debug(f"check_url::__url_hash_id: method variable is: {method}")
+
         return hashlib.md5(f"{self.job.unquoted_url.upper()}".encode()).hexdigest()[:8]
 
     def get(self):
@@ -51,12 +56,14 @@ class CheckUrl(StatisticsWriteView):
             return self.__return_from_cache_or_analyze_and_return__()
 
     def __setup_io__(self):
-        self.io = UrlFileIo(hash_based_id=self.__url_hash_id__)
+        self.io = UrlFileIo(hash_based_id=self.__url_hash_id__, flavor=self.job.method)
 
     def __return_from_cache_or_analyze_and_return__(self):
         from src import app
 
-        app.logger.debug("__handle_valid_job__; running")
+        app.logger.debug(
+            f"check_url::__return_from_cache_or_analyze_and_return__: method is {self.job.method}"
+        )
 
         if not self.job.refresh:
             self.__setup_and_read_from_cache__()
@@ -71,21 +78,24 @@ class CheckUrl(StatisticsWriteView):
         from src import app
 
         url_string = self.job.unquoted_url
-        app.logger.info(f"Got {url_string}")
+        app.logger.info(f"__return_fresh_data__: Got {url_string}")
         url = Url(url=url_string, timeout=self.job.timeout)
 
-        url.check()
+        url.check(self.job.method)
 
         data = url.get_dict
 
         timestamp = datetime.timestamp(datetime.utcnow())
-        data["timestamp"] = int(timestamp)
         isodate = datetime.isoformat(datetime.utcnow())
-        data["isodate"] = str(isodate)
         url_hash_id = self.__url_hash_id__
+
+        data["timestamp"] = int(timestamp)
+        data["isodate"] = str(isodate)
         data["id"] = url_hash_id
+
         data_without_text = deepcopy(data)
         del data_without_text["text"]
+
         self.__write_to_cache__(data_without_text=data_without_text)
         if self.job.refresh:
             self.__print_log_message_about_refresh__()
@@ -101,6 +111,8 @@ class CheckUrl(StatisticsWriteView):
         # We skip writes during testing
         if not self.job.testing:
             write = UrlFileIo(
-                data=data_without_text, hash_based_id=data_without_text["id"]
+                data=data_without_text,
+                hash_based_id=data_without_text["id"],
+                flavor=self.job.method,
             )
             write.write_to_disk()

@@ -229,6 +229,9 @@ class WikipediaReferenceExtractor(WariBaseModel):
             levels=[2],
             include_headings=True,
         )
+
+        # TODO: make this code better by special casing no section and making faux section, and putting through same loop
+
         if not sections:
             app.logger.debug("No level 2 sections detected, creating root section")
             # console.print(self.wikicode)

@@ -8,7 +8,7 @@ from marshmallow import Schema
 from src.models.api.job.check_url_archive_job import UrlArchiveJob
 from src.models.api.schema.check_url_archive_schema import UrlArchiveSchema
 from src.models.exceptions import MissingInformationError
-from src.models.file_io.url_file_io import UrlFileIo
+from src.models.file_io.url_archive_file_io import UrlArchiveFileIo
 from src.models.identifiers_checking.url_archive import UrlArchive
 from src.views.statistics.write_view import StatisticsWriteView
 
@@ -51,7 +51,7 @@ class CheckUrlArchive(StatisticsWriteView):
             return self.__return_from_cache_or_analyze_and_return__()
 
     def __setup_io__(self):
-        self.io = UrlFileIo(hash_based_id=self.__url_hash_id__)
+        self.io = UrlArchiveFileIo(hash_based_id=self.__url_hash_id__)
 
     def __return_from_cache_or_analyze_and_return__(self):
         from src import app
@@ -60,7 +60,16 @@ class CheckUrlArchive(StatisticsWriteView):
 
         # always return fresh data for url_archive, for now...
         # in essence, the iabot database really IS the cache...
-        return self.__return_fresh_data__()
+        ### return self.__return_fresh_data__()
+
+        if not self.job.refresh:
+            self.__setup_and_read_from_cache__()
+            if self.io.data:
+                return self.io.data, 200
+            else:  # no cached data found - pull from live data (and save)
+                return self.__return_fresh_data__()
+        else:
+            return self.__return_fresh_data__()
 
     def __return_fresh_data__(self):
         from src import app
@@ -80,4 +89,18 @@ class CheckUrlArchive(StatisticsWriteView):
         data["isodate"] = str(isodate)
         data["id"] = url_hash_id
 
+        self.__write_to_cache__(data=data)
+
+        if self.job.refresh:
+            self.__print_log_message_about_refresh__()
+            data["refreshed_now"] = True
+        else:
+            data["refreshed_now"] = False
+
         return data, 200
+
+    def __write_to_cache__(self, data):
+        # We skip writes during testing
+        if not self.job.testing:
+            write = UrlArchiveFileIo(data=data, hash_based_id=data["id"])
+            write.write_to_disk()

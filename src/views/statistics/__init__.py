@@ -62,7 +62,7 @@ class StatisticsView(Resource):
         from src import app
 
         if self.job.refresh:
-            app.logger.info("got force refresh from patron")
+            app.logger.info("force refresh from patron request")
 
     # def __write_to_disk__(self):
     #     raise NotImplementedError()

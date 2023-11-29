@@ -46,6 +46,7 @@ class Url(WikipediaUrl):
 
     # iari test - deprecated, for now (2023.11.08)
     status_code: int = 0
+    status_code_method: str = ""
 
     # iabot status
     testdeadlink_status_code: int = 0
@@ -76,10 +77,17 @@ class Url(WikipediaUrl):
     # def __check_soft404__(self):
     #     raise NotImplementedError()
 
-    def check(self):
+    def check(self, method):
+        from src import app
+
         if self.url:
             self.extract()
-            # self.__check_url__()  # omit native IARI checking for now - just ise IABot's
+            # self.__check_url__()  # deprecated - omit native IARI checking - just using IABot's testdeadlink for now
+
+            self.status_code_method = method
+            app.logger.debug(f"checking url with method {method}")
+
+            # TODO me must respect "method" parameter here to check URL status
             self.__check_url_with_testdeadlink_api__()
             # self.__check_url_archive_with_iabot_api__()
             self.__detect_language__()
