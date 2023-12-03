@@ -6,6 +6,8 @@ from src.models.api.job import Job
 class UrlJob(Job):
     url: str
     timeout: int = 2  # We default to 2 seconds
+    method: str = "iabot"  # default to iabot check method # TODO get methods from global structure
+
     debug: bool = False
     blocks: bool = False
     html: bool = False

@@ -56,6 +56,8 @@ class WikipediaReference(JobBaseModel):
     soup: Optional[Any] = None
     comments: Optional[List[Comment]] = None
 
+    # TODO REMOVE ref_counter_index: int = 0
+
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
@@ -219,22 +221,27 @@ class WikipediaReference(JobBaseModel):
     def __extract_reference_urls__(self) -> None:
         """We support both URLs in templates and outside aka bare URLs"""
         urls_list = []
+
         if not self.template_urls:
             self.__extract_template_urls__()
         if self.template_urls:
             urls_list.extend(self.template_urls)
+
         if not self.bare_urls:
             self.__extract_bare_urls_outside_templates__()
         if self.bare_urls:
             urls_list.extend(self.bare_urls)
+
         if not self.wikicoded_links:
             self.__extract_external_wikicoded_links_from_the_reference__()
         if self.wikicoded_links:
             urls_list.extend(self.wikicoded_links)
+
         # if not self.comment_urls:
         #     self.__extract_urls_from_comments__()
         # urls_list.extend(self.comment_urls)
         # We set it to avoid duplicates
+
         self.reference_urls = list(set(urls_list))
 
     def __extract_unique_first_level_domains__(self) -> None:

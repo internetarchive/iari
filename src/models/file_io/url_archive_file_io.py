@@ -6,7 +6,6 @@ from src.models.file_io.hash_based import HashBasedFileIo
 logger = logging.getLogger(__name__)
 
 
-class UrlFileIo(HashBasedFileIo):
+class UrlArchiveFileIo(HashBasedFileIo):
     data: Optional[Dict[str, Any]] = None
-    flavor: str = ""
-    subfolder = "urls/"
+    subfolder = "urls/archives/"

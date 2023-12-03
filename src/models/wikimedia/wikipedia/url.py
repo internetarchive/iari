@@ -17,17 +17,17 @@ logger = logging.getLogger(__name__)
 class WikipediaUrl(BaseModel):
     """This models a URL in Wikipedia
     It uses BaseModel to avoid the cache
-    attribute so we can output it via the API easily
+    attribute, so we can output it via the API easily
 
     We do not perform any checking or lookup here that requires HTTP requests.
     We only check based on the URL itself.
     """
 
-    first_level_domain: str = ""
-    fld_is_ip: bool = False  # first level domain is an IP address
     url: str
     scheme: str = ""  # url scheme e.g. http
+    first_level_domain: str = ""
     netloc: str = ""  # network location e.g. google.com
+    fld_is_ip: bool = False  # first level domain is an IP address
     tld: str = ""  # top level domain
     malformed_url: bool = False
     malformed_url_details: Optional[MalformedUrlError] = None
@@ -61,7 +61,6 @@ class WikipediaUrl(BaseModel):
             self.__parse_wayback_machine_url__()
         self.__parse_and_extract_url__()
         self.__extract_tld__()
-        # self.__check_tld__()
         self.__check_scheme__()
 
     def __extract_first_level_domain__(self) -> None:
@@ -106,11 +105,15 @@ class WikipediaUrl(BaseModel):
             logger.debug(f"tld found: {self.tld}")
 
     def __parse_and_extract_url__(self):
-        """Parse and extract netloc and scheme"""
+        """
+        Parse and extract netloc and scheme
+
+        self.archived_url is set if url has been determined to be a wayback machine archive
+        """
         parsed_url = (
             urlparse(self.archived_url) if self.archived_url else urlparse(self.url)
         )
-        # console.print(parsed_url)
+        logger.debug(f"parsed_url: {parsed_url}")
         self.netloc = parsed_url.netloc
         if not self.netloc:
             logger.warning(

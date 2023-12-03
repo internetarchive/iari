@@ -74,7 +74,7 @@ class ArticleJob(Job):
 
     def __extract_url__(self):
         """This was generated with help of chatgpt using this prompt:
-        I want a python re regex that extracts "en" "wikipedia.or"
+        I want a python re regex that extracts "en" "wikipedia.org"
         and "Test" from http://en.wikipedia.org/wiki/Test
         """
         from src import app
@@ -82,9 +82,9 @@ class ArticleJob(Job):
         app.logger.debug("extract_url: running")
         if self.url:
             self.__urldecode_url__()
-            pattern = r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
+            wiki_url_pattern = r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
 
-            matches = re.match(pattern, self.url)
+            matches = re.match(wiki_url_pattern, self.url)
             if matches:
                 groups = matches.groups()
                 self.lang = groups[0]
@@ -104,14 +104,14 @@ class ArticleJob(Job):
         Words separated by spaces are allowed.
         _ is not allowed anywhere"""
         underscore_pattern = re.compile(r"^[^_]*$")
-        horizontal_line_regex = r"^(\s*[^\s]+\s*)+(\s*\|\s*[^\s]+\s*)*$"
+        pipe_delimiter_pattern = r"^(\s*[^\s]+\s*)+(\s*\|\s*[^\s]+\s*)*$"
         if " | " in self.regex:
             return False
         if "||" in self.regex:
             return False
         if not re.fullmatch(underscore_pattern, self.regex):
             return False
-        if re.fullmatch(horizontal_line_regex, self.regex):
+        if re.fullmatch(pipe_delimiter_pattern, self.regex):
             # print('The string is formatted correctly.')
             return True
         else:

@@ -100,19 +100,30 @@ class MediawikiSection(BaseModel):
                     self.references.append(reference)
 
     def __extract_all_footnote_references__(self):
-        """This extracts everything inside <ref></ref> tags and needs self.wikicode"""
+        """This extracts all <ref>...</ref> from self.wikicode"""
         from src import app
 
         app.logger.debug("__extract_all_footnote_references__: running")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
+
         if not self.wikicode:
             raise MissingInformationError(
                 f"The section {self} did not have any wikicode"
             )
         refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
-        app.logger.debug(f"Number of refs found: {len(refs)}")
+
+        app.logger.debug(f"Number of footnote refs found: {len(refs)}")
+        base_ref_counter = 0
         for ref in refs:
+
+            # only increment base_ref_counter if not a "named" or "reference ref"
+            base_ref_counter += 1
+
+            # app.logger.debug(f"### ### ###")
+            app.logger.debug(f"extracting ref# {base_ref_counter}")
+            # app.logger.debug(f"### ### ###")
+
             reference = WikipediaReference(
                 wikicode=ref,
                 # wikibase=self.wikibase,
@@ -120,6 +131,7 @@ class MediawikiSection(BaseModel):
                 language_code=self.language_code,
                 section=self.name,
             )
+
             reference.extract_and_check()
             self.references.append(reference)
 

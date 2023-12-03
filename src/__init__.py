@@ -15,6 +15,7 @@ from flask_restful import Api, Resource  # type: ignore
 import config
 from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
+from src.views.check_url_archive import CheckUrlArchive
 from src.views.check_urls import CheckUrls
 from src.views.statistics.all import All
 from src.views.statistics.article import Article
@@ -37,6 +38,7 @@ api = Api(app, prefix="/v2")
 api.add_resource(Version, "/version")
 api.add_resource(CheckUrls, "/check-urls")
 api.add_resource(CheckUrl, "/check-url")
+api.add_resource(CheckUrlArchive, "/check-url-archive")
 api.add_resource(CheckDoi, "/check-doi")
 api.add_resource(Article, "/statistics/article")
 api.add_resource(All, "/statistics/all")

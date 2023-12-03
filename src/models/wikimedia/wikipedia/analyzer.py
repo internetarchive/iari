@@ -9,6 +9,10 @@ from src.models.api.statistic.reference import ReferenceStatistic
 from src.models.base import WariBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
+from src.models.wikimedia.wikipedia.reference.enums import (
+    FootnoteSubtype,
+    ReferenceType,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +26,12 @@ class WikipediaAnalyzer(WariBaseModel):
 
     job: Optional[ArticleJob] = None
     article: Optional[WikipediaArticle] = None
-    article_statistics: Optional[ArticleStatistics] = None
+    article_statistics: Optional[
+        ArticleStatistics
+    ] = None  # includes cite_refs property
+
     # wikibase: Wikibase = IASandboxWikibase()
+
     reference_statistics: Optional[List[Dict[str, Any]]] = None
     dehydrated_reference_statistics: Optional[List[Dict[str, Any]]] = None
 
@@ -46,6 +54,7 @@ class WikipediaAnalyzer(WariBaseModel):
         return self.article.found_in_wikipedia
 
     def __gather_article_statistics__(self) -> None:
+
         if (
             self.job
             and self.article
@@ -63,8 +72,10 @@ class WikipediaAnalyzer(WariBaseModel):
                     "self.article.revision_timestamp was None"
                 )
             ae = self.article.extractor
+
             if not self.job.page_id:
                 self.job.get_ids_from_mediawiki_api()
+
             self.article_statistics = ArticleStatistics(
                 wari_id=self.job.wari_id,
                 lang=self.job.lang,
@@ -77,6 +88,8 @@ class WikipediaAnalyzer(WariBaseModel):
                 page_id=self.article.page_id,
                 title=self.job.title,
                 urls=ae.raw_urls,
+                cite_refs=ae.cite_refs,
+                cite_refs_count=ae.cite_refs_count,
                 fld_counts=ae.first_level_domain_counts,
                 served_from_cache=False,
                 site=self.job.domain.value,
@@ -90,8 +103,10 @@ class WikipediaAnalyzer(WariBaseModel):
     def get_statistics(self) -> Dict[str, Any]:
         if not self.job:
             raise MissingInformationError()
+
         if not self.article:
             self.__analyze__()
+
         if not self.article_statistics:
             self.__gather_article_statistics__()
             self.__gather_reference_statistics__()
@@ -100,6 +115,7 @@ class WikipediaAnalyzer(WariBaseModel):
                 self.__insert_dehydrated_references_into_the_article_statistics__()
             else:
                 self.__insert_full_references_into_the_article_statistics__()
+
         return self.__get_statistics_dict__()
 
     def __get_statistics_dict__(self) -> Dict[str, Any]:
@@ -133,6 +149,15 @@ class WikipediaAnalyzer(WariBaseModel):
                 f"Gathering reference statistics for "
                 f"{self.article.extractor.number_of_references} references"
             )
+
+            # app.logger.debug(f"### ### ###")
+            # app.logger.debug(f"### START ###")
+            # app.logger.debug(f"__gather_reference_statistics__")
+            # app.logger.debug(f"### ### ###")
+            # app.logger.debug(f"### ### ###")
+
+            ref_counter = 0
+
             for reference in self.article.extractor.references:
                 if not reference:
                     raise MissingInformationError("raw_reference was None")
@@ -141,25 +166,48 @@ class WikipediaAnalyzer(WariBaseModel):
                     if reference.footnote_subtype
                     else ""
                 )
+
+                # TODO REMOVE
+                app.logger.debug(
+                    f"type, subtype: {reference.reference_type.value}:{subtype}"
+                )
+
+                # an attempt to get positional index of citation to match those of returned HTML
+                # only add ref_index if we are a CONTENT footnote and not NAMED
+                ref_index = 0
+                if (
+                    reference.reference_type.value == ReferenceType.FOOTNOTE.value
+                    and subtype == FootnoteSubtype.CONTENT.value
+                ):
+                    ref_counter += 1
+                    ref_index = ref_counter
+
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
+
                 data = ReferenceStatistic(
+                    id=reference.reference_id,
+                    name=reference.get_name,
+                    type=reference.reference_type.value,
+                    footnote_subtype=subtype,
+                    ref_index=ref_index,
+                    titles=reference.titles,
                     flds=reference.unique_first_level_domains
                     if reference.unique_first_level_domains
                     else [],
-                    footnote_subtype=subtype,
-                    id=reference.reference_id,
-                    template_names=reference.template_names,
-                    templates=reference.get_template_dicts,
-                    titles=reference.titles,
-                    type=reference.reference_type.value,
-                    urls=reference.raw_urls,
                     wikitext=reference.get_wikicode_as_string,
                     section=reference.section,
+                    template_names=reference.template_names,
+                    templates=reference.get_template_dicts,
+                    urls=reference.raw_urls,
                     url_objects=reference.get_reference_url_dicts,
-                    name=reference.get_name,
                 ).dict()
                 self.reference_statistics.append(data)
+
+            # app.logger.debug(f"### ### ###")
+            # app.logger.debug(f"### END ###")
+            # app.logger.debug(f"### ### ###")
+
         if not self.article_statistics:
             app.logger.debug(
                 "self.article_statistics was None "
@@ -197,4 +245,5 @@ class WikipediaAnalyzer(WariBaseModel):
     def __insert_full_references_into_the_article_statistics__(self):
         """We return the full reference to accommodate IARE, see https://github.com/internetarchive/iari/issues/886"""
         if self.article_statistics:
+
             self.article_statistics.references = self.reference_statistics

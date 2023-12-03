@@ -1,5 +1,6 @@
 import logging
 import os
+import urllib.parse
 from typing import Any, Dict, Optional
 
 import requests
@@ -34,9 +35,7 @@ logger = logging.getLogger(__name__)
 
 class Url(WikipediaUrl):
     """
-    This handles checking a URL
-
-    Our patrons want to know if this URL is likely to lead to the content that is referenced.
+    This handles checking a URL for it's http status
 
     We define a malformed URL as any URL that the reader cannot easily
     click and successfully get the contents of in a normal web browser session
@@ -45,32 +44,52 @@ class Url(WikipediaUrl):
     and do not offer turning them off for now.
     """
 
-    request_error: bool = False
-    request_error_details: str = ""
-    dns_record_found: bool = False
-    dns_no_answer: bool = False
-    dns_error: bool = False
-    # soft404_probability: float = 0.0  # not implemented yet
+    # iari test - deprecated, for now (2023.11.08)
     status_code: int = 0
+    status_code_method: str = ""
+
+    # iabot status
     testdeadlink_status_code: int = 0
     testdeadlink_error_details: str = ""
-    timeout: int = 2
-    dns_error_details: str = ""
-    response_headers: Optional[Dict] = None
+
+    # IABot Archive information (from internal iabot database)
+    # iabot_results: Optional[Dict] = None
+
     text: str = ""
+    response_headers: Optional[Dict] = None
+
     detected_language: str = ""
     detected_language_error: bool = False
     detected_language_error_details: str = ""
+
+    request_error: bool = False
+    request_error_details: str = ""
+    timeout: int = 2
+
+    dns_record_found: bool = False
+    dns_no_answer: bool = False
+    dns_error: bool = False
+    dns_error_details: str = ""
+
+    # soft404_probability: float = 0.0  # not implemented yet
 
     # @property
     # def __check_soft404__(self):
     #     raise NotImplementedError()
 
-    def check(self):
+    def check(self, method):
+        from src import app
+
         if self.url:
             self.extract()
-            self.__check_url__()
+            # self.__check_url__()  # deprecated - omit native IARI checking - just using IABot's testdeadlink for now
+
+            self.status_code_method = method
+            app.logger.debug(f"checking url with method {method}")
+
+            # TODO me must respect "method" parameter here to check URL status
             self.__check_url_with_testdeadlink_api__()
+            # self.__check_url_archive_with_iabot_api__()
             self.__detect_language__()
 
     def __get_dns_record__(self) -> None:
@@ -113,6 +132,7 @@ class Url(WikipediaUrl):
                 allow_redirects=True,
             )
             self.status_code = r.status_code
+
             logger.debug(self.url + "\tStatus: " + str(r.status_code))
             self.response_headers = dict(r.headers)
             if r.status_code == 200:
@@ -292,3 +312,30 @@ class Url(WikipediaUrl):
                                     result
                                 ]
                             break
+
+    # def __check_url_archive_with_iabot_api__(self):
+    #     """
+    #     This fetches the status code, archive, and other information from the
+    #     searchurldata API of IABot
+    #     """
+    #
+    #     modified_url = urllib.parse.quote(self.url)  # url encode the url
+    #
+    #     headers = {
+    #         "Content-Type": "application/x-www-form-urlencoded",
+    #         "User-Agent": "http://en.wikipedia.org/wiki/User:GreenC via iabget.awk",
+    #     }
+    #     data = f"&action=searchurldata&urls={modified_url}"
+    #
+    #     response = requests.post(
+    #         "https://iabot.wmcloud.org/api.php?wiki=enwiki",
+    #         headers=headers,
+    #         data=data,
+    #     )
+    #
+    #     # if status code is 200, the request was successful
+    #     if response.status_code == 200:
+    #         data = response.json()
+    #         print(data)
+    #         # TODO handle return data or errors
+    #         self.iabot_results = data

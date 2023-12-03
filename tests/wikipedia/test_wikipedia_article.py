@@ -302,7 +302,7 @@ class TestWikipediaArticle(TestCase):
         )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
-        wp.__fetch_data_for_a_specific_revision__()
+        wp.__fetch_data_for_specific_revision__()
         # print(wp.page_id)
         assert wp.page_id == 11089416
         assert wp.revision_id == 1143480404
@@ -323,7 +323,7 @@ class TestWikipediaArticle(TestCase):
         )
         job.__extract_url__()
         wp = WikipediaArticle(job=job)
-        wp.__fetch_data_for_the_latest_revision__()
+        wp.__fetch_data_for_latest_revision__()
         print(wp.page_id)
         assert wp.page_id == 11089416
         # print(wp.latest_revision_id)

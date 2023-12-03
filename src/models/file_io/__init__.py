@@ -34,7 +34,7 @@ class FileIo(WariBaseModel):
             path_filename = (
                 f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
             )
-        app.logger.debug(f"using path: {path_filename}")
+        app.logger.debug(f"using path: {path_filename} (subfolder: {self.subfolder})")
         return path_filename
 
     def write_to_disk(
@@ -77,4 +77,3 @@ class FileIo(WariBaseModel):
                 # app.logger.debug(f"loaded: {self.statistics_dictionary}")
         else:
             logger.debug("no json on disk")
-            app.logger.debug("no json on disk")
