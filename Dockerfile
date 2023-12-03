@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-LABEL maintainer="Dennis Priskorn <priskorn@riseup.net>"
+LABEL maintainer="Chris Lombardi <mojomonger@yahoo.com>"
 
 WORKDIR /app
 

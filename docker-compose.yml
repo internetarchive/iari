@@ -1,9 +1,12 @@
 version: "3"
 
 services:
-  wari:
+  iari:
     build: .
+    image: iari
     ports:
-      - "8000:8000"
+      - "${PORT}:5000"
     volumes:
-      - /tmp/wikicitations-api:/tmp/wikicitations-api
+      - ./:/app  # maps local working directory to ./app
+    env_file: .env
+    command: poetry run gunicorn -w 9 --bind :5000 wsgi:app --timeout 1500
