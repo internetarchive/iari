@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, Optional
@@ -12,6 +13,8 @@ from src.models.exceptions import MissingInformationError
 from src.models.file_io.url_file_io import UrlFileIo
 from src.models.identifiers_checking.url import Url
 from src.views.statistics.write_view import StatisticsWriteView
+
+logger = logging.getLogger(__name__)
 
 
 class CheckUrl(StatisticsWriteView):
@@ -56,7 +59,14 @@ class CheckUrl(StatisticsWriteView):
             return self.__return_from_cache_or_analyze_and_return__()
 
     def __setup_io__(self):
-        self.io = UrlFileIo(hash_based_id=self.__url_hash_id__, flavor=self.job.method)
+        logger.debug(
+            f"CheckUrl:__setup_io__: self._url_hash_id = {self.__url_hash_id__}"
+        )
+        self.io = UrlFileIo(
+            hash_based_id=self.__url_hash_id__,
+            flavor=self.job.method,
+            prefix="ppprrreeefffiiixxx",
+        )
 
     def __return_from_cache_or_analyze_and_return__(self):
         from src import app
@@ -78,7 +88,7 @@ class CheckUrl(StatisticsWriteView):
         from src import app
 
         url_string = self.job.unquoted_url
-        app.logger.info(f"__return_fresh_data__: Got {url_string}")
+        app.logger.info(f"CheckUrl::__return_fresh_data__: url is {url_string}")
         url = Url(url=url_string, timeout=self.job.timeout)
 
         url.check(self.job.method)
@@ -114,5 +124,7 @@ class CheckUrl(StatisticsWriteView):
                 data=data_without_text,
                 hash_based_id=data_without_text["id"],
                 flavor=self.job.method,
+                iari_prefix="ARFARFARF.",
+                iari_prefix_for_hash="IARIPREFIX",
             )
             write.write_to_disk()

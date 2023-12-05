@@ -15,10 +15,18 @@ class FileIo(WariBaseModel):
     data: Optional[Dict[str, Any]] = None
     wari_id: str = ""
     subfolder: str = ""
+    iari_prefix: str = ""
     testing: bool = False
 
     @property
     def filename(self):
+        from src import app
+
+        app.logger.debug(f"FileIo: filename: iari_prefix = {self.iari_prefix}")
+        app.logger.debug(
+            f"FileIo: filename: filename could be {self.iari_prefix}{self.wari_id}"
+        )
+
         return f"{self.wari_id}.json"
 
     @property
@@ -34,18 +42,25 @@ class FileIo(WariBaseModel):
             path_filename = (
                 f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
             )
-        app.logger.debug(f"using path: {path_filename} (subfolder: {self.subfolder})")
+
+        # app.logger.debug(f"FileIo:: using path: {path_filename} (subfolder: {self.subfolder})")
+        app.logger.debug(f"FileIo: [path_filename] iari_prefix = {self.iari_prefix}")
         return path_filename
 
     def write_to_disk(
         self,
     ) -> None:
+
         from src import app
 
-        app.logger.debug("write_to_disk: running")
         # app.logger.debug(os.getcwd())
+
         if self.data:
             path_filename = self.path_filename
+
+            app.logger.debug(f"FileIo::write_to_disk: path_filename: {path_filename}")
+            app.logger.debug(f"FileIo::write_to_disk: iari_prefix: {self.iari_prefix}")
+
             if exists(path_filename):
                 with open(file=path_filename, mode="w") as file:
                     app.logger.debug("overwriting existing file")
@@ -63,9 +78,11 @@ class FileIo(WariBaseModel):
     def read_from_disk(self) -> None:
         from src import app
 
-        app.logger.debug("read_from_disk: running")
-
         path_filename = self.path_filename
+
+        app.logger.debug(f"FileIo::read_from_disk: path_filename: {path_filename}")
+        app.logger.debug(f"FileIo::read_from_disk: iari_prefix: {self.iari_prefix}")
+
         if exists(path_filename):
             with open(file=path_filename) as file:
                 # logger.debug("loading json into self.data")
