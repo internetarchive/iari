@@ -506,8 +506,37 @@ Run it with
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
 
-### Dockerized instance
-* Coming soon
+# Dockerized instance
+## Prerequisites
+### JSON directories
+
+Make sure the following directories are created at the root of the iari install (they are not in the git repo)
+```
+json/articles/
+json/references/
+json/dois/
+json/urls/
+json/urls/archives
+json/xhtmls/
+json/pdfs/
+```
+
+### Environment variables
+Make an ".env" file at same level as docker-compose.yml file with the contents:
+
+```
+PORT=<port you'd like the IARI Server to run on>
+#    some suggested values:
+#    5042: for iari-test
+#    5088: for iari-stage
+#    5000: for iari-prod
+TESTDEADLINK_KEY=<api key for iabot's testdeadlink method>
+```
+
+## Dockerfile
+## docker-compose.yml
+## Running
+docker compose up
 
 # PyCharm specific recommendations
 ## Venv activation
