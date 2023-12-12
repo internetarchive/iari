@@ -15,36 +15,25 @@ class FileIo(WariBaseModel):
     data: Optional[Dict[str, Any]] = None
     wari_id: str = ""
     subfolder: str = ""
-    iari_prefix: str = ""
+    # file_prefix: str = ""
     testing: bool = False
 
     @property
     def filename(self):
-        from src import app
-
-        app.logger.debug(f"FileIo: filename: iari_prefix = {self.iari_prefix}")
-        app.logger.debug(
-            f"FileIo: filename: filename could be {self.iari_prefix}{self.wari_id}"
-        )
-
         return f"{self.wari_id}.json"
 
     @property
     def path_filename(self) -> str:
-        from src import app
-
         if self.testing:
-            # go out to repo root first
-            # print(os.getcwd())
-            # we hard code the json directory for now
-            path_filename = f"/home/dpriskorn/src/python/wcdimportbot/{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            # TODO simplify this!
+            testing_dir = "/home/dpriskorn/src/python/wcdimportbot/"  # we hard code the test json directory for now
+            # TODO: if testing, try to go out to repo root first
+            path_filename = f"{testing_dir}{config.subdirectory_for_json}{self.subfolder}{self.filename}"
         else:
             path_filename = (
                 f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
             )
 
-        # app.logger.debug(f"FileIo:: using path: {path_filename} (subfolder: {self.subfolder})")
-        app.logger.debug(f"FileIo: [path_filename] iari_prefix = {self.iari_prefix}")
         return path_filename
 
     def write_to_disk(
@@ -53,13 +42,11 @@ class FileIo(WariBaseModel):
 
         from src import app
 
-        # app.logger.debug(os.getcwd())
-
         if self.data:
             path_filename = self.path_filename
 
             app.logger.debug(f"FileIo::write_to_disk: path_filename: {path_filename}")
-            app.logger.debug(f"FileIo::write_to_disk: iari_prefix: {self.iari_prefix}")
+            # app.logger.debug(f"FileIo::write_to_disk: file_prefix: {self.file_prefix}")
 
             if exists(path_filename):
                 with open(file=path_filename, mode="w") as file:
@@ -81,16 +68,13 @@ class FileIo(WariBaseModel):
         path_filename = self.path_filename
 
         app.logger.debug(f"FileIo::read_from_disk: path_filename: {path_filename}")
-        app.logger.debug(f"FileIo::read_from_disk: iari_prefix: {self.iari_prefix}")
+        # app.logger.debug(f"FileIo::read_from_disk: file_prefix: {self.file_prefix}")
 
         if exists(path_filename):
             with open(file=path_filename) as file:
-                # logger.debug("loading json into self.data")
-                app.logger.debug("loading json into self.data")
-                # self.data = {}
+                logger.debug("loading json into self.data")
                 self.data = json.load(file)
                 if self.data:
                     self.data["served_from_cache"] = True
-                # app.logger.debug(f"loaded: {self.statistics_dictionary}")
         else:
             logger.debug("no json on disk")

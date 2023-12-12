@@ -25,10 +25,11 @@ class WikipediaUrl(BaseModel):
 
     url: str
     scheme: str = ""  # url scheme e.g. http
+    tld: str = ""  # top level domain
     first_level_domain: str = ""
     netloc: str = ""  # network location e.g. google.com
     fld_is_ip: bool = False  # first level domain is an IP address
-    tld: str = ""  # top level domain
+
     malformed_url: bool = False
     malformed_url_details: Optional[MalformedUrlError] = None
     archived_url: str = ""

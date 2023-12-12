@@ -42,10 +42,6 @@ class CheckUrl(StatisticsWriteView):
         if not self.job:
             raise MissingInformationError()
 
-        from src import app
-
-        # app.logger.debug(f"check_url::__url_hash_id: method variable is: {method}")
-
         return hashlib.md5(f"{self.job.unquoted_url.upper()}".encode()).hexdigest()[:8]
 
     def get(self):
@@ -64,17 +60,10 @@ class CheckUrl(StatisticsWriteView):
         )
         self.io = UrlFileIo(
             hash_based_id=self.__url_hash_id__,
-            flavor=self.job.method,
-            prefix="ppprrreeefffiiixxx",
+            file_prefix=self.job.method,
         )
 
     def __return_from_cache_or_analyze_and_return__(self):
-        from src import app
-
-        app.logger.debug(
-            f"check_url::__return_from_cache_or_analyze_and_return__: method is {self.job.method}"
-        )
-
         if not self.job.refresh:
             self.__setup_and_read_from_cache__()
             if self.io.data:
@@ -112,6 +101,7 @@ class CheckUrl(StatisticsWriteView):
             data["refreshed_now"] = True
         else:
             data["refreshed_now"] = False
+
         if self.job.debug:
             return data, 200
         else:
@@ -123,8 +113,6 @@ class CheckUrl(StatisticsWriteView):
             write = UrlFileIo(
                 data=data_without_text,
                 hash_based_id=data_without_text["id"],
-                flavor=self.job.method,
-                iari_prefix="ARFARFARF.",
-                iari_prefix_for_hash="IARIPREFIX",
+                file_prefix=self.job.method,
             )
             write.write_to_disk()

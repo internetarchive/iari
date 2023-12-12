@@ -4,30 +4,8 @@ import urllib.parse
 from typing import Any, Dict, Optional
 
 import requests
-from dns.name import EmptyLabel
-from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer, NoNameservers, resolve
-from requests import (
-    ConnectionError,
-    ConnectTimeout,
-    HTTPError,
-    ReadTimeout,
-    RequestException,
-    Timeout,
-)
-from requests.exceptions import (
-    InvalidHeader,
-    InvalidProxyURL,
-    InvalidSchema,
-    InvalidURL,
-    MissingSchema,
-    ProxyError,
-    RetryError,
-    SSLError,
-)
-from requests.models import LocationParseError
 
 from src.models.api.handlers import BaseHandler
-from src.models.exceptions import ResolveError
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
 logger = logging.getLogger(__name__)
@@ -47,29 +25,18 @@ class Url(WikipediaUrl):
     # iari test - deprecated, for now (2023.11.08)
     status_code: int = 0
     status_code_method: str = ""
+    status_code_error_details: str = ""
 
-    # iabot status
-    testdeadlink_status_code: int = 0
-    testdeadlink_error_details: str = ""
-
-    # IABot Archive information (from internal iabot database)
-    # iabot_results: Optional[Dict] = None
-
-    text: str = ""
-    response_headers: Optional[Dict] = None
+    archive_status: Optional[Dict] = None
+    archive_status_method: str = ""
 
     detected_language: str = ""
     detected_language_error: bool = False
     detected_language_error_details: str = ""
 
-    request_error: bool = False
-    request_error_details: str = ""
     timeout: int = 2
 
-    dns_record_found: bool = False
-    dns_no_answer: bool = False
-    dns_error: bool = False
-    dns_error_details: str = ""
+    text: str = ""
 
     # soft404_probability: float = 0.0  # not implemented yet
 
@@ -81,169 +48,32 @@ class Url(WikipediaUrl):
         from src import app
 
         if self.url:
-            self.extract()
-            # self.__check_url__()  # deprecated - omit native IARI checking - just using IABot's testdeadlink for now
-
-            self.status_code_method = method
             app.logger.debug(f"checking url with method {method}")
 
-            # TODO me must respect "method" parameter here to check URL status
-            self.__check_url_with_testdeadlink_api__()
-            # self.__check_url_archive_with_iabot_api__()
+            self.extract()  # simple parsing extractions from url (tld, etc.)
+
+            self.status_code_method = method
+
+            # each checking method sets
+            #   status_code and
+            #   status_code_error_details
+
+            if method.upper() == "IABOT":
+                self.__check_url_with_iabot_testdeadlink__()
+
+            elif method.upper() == "WAYBACK":
+                self.__check_url_with_wayback_api__()
+
+            elif method.upper() == "CORENTIN":
+                self.__check_url_with_corentin_api__()
+            else:
+                # self.__error_with_method
+                self.status_code_error_details = f"Unrecognized method: {method}"
+                logger.info(f"Unrecognized method: {method}")
+
+            self.archive_status_method = "iabot_searchurldata"
+            self.__get_archive_status_with_iabot_api__()  # sets archive_status if successful
             self.__detect_language__()
-
-    def __get_dns_record__(self) -> None:
-        from src import app
-
-        app.logger.debug("__get_dns_record__: running")
-
-        # if domain name is available
-        if self.netloc:
-            logger.info(f"Trying to resolve {self.netloc}")
-            try:
-                answers = resolve(self.netloc)
-                if answers:
-                    self.dns_record_found = True
-                else:
-                    raise ResolveError("no answers")
-            except NXDOMAIN:
-                pass
-            except (LifetimeTimeout, NoNameservers, EmptyLabel) as e:
-                self.dns_error = True
-                self.dns_error_details = str(e)
-            except NoAnswer:
-                self.dns_no_answer = True
-        else:
-            logger.warning("Could not get DNS because netloc was empty")
-
-    def __check_with_https_verify__(self):
-        from src import app
-
-        app.logger.debug("__check_with_https_verify__: running")
-
-        try:
-            # https://stackoverflow.com/questions/66710047/
-            # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.get(
-                self.url,
-                timeout=self.timeout,
-                verify=True,
-                headers=self.__spoofing_headers__,
-                allow_redirects=True,
-            )
-            self.status_code = r.status_code
-
-            logger.debug(self.url + "\tStatus: " + str(r.status_code))
-            self.response_headers = dict(r.headers)
-            if r.status_code == 200:
-                self.text = r.text
-            # if r.status_code == 200:
-            #     self.check_soft404
-        # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (
-            ReadTimeout,
-            ConnectTimeout,
-            RetryError,
-            InvalidHeader,
-            Timeout,
-            ConnectionError,
-            RequestException,
-            HTTPError,
-            ProxyError,
-            LocationParseError,
-        ) as e:
-            logger.debug(f"got exception: {e}")
-            self.request_error = True
-            self.request_error_details = str(e)
-        except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
-            logger.debug(f"got exception: {e}")
-            self.malformed_url = True
-            self.request_error = True
-            self.request_error_details = str(e)
-        except SSLError:
-            self.request_error = True
-            self.ssl_error = True
-
-    def __check_without_https_verify__(self):
-        from src import app
-
-        # https://jcutrer.com/python/requests-ignore-invalid-ssl-certificates
-        app.logger.debug("__check_without_https_verify__: running")
-
-        try:
-            # https://stackoverflow.com/questions/66710047/
-            # python-requests-library-get-the-status-code-without-downloading-the-target
-            r = requests.get(
-                self.url,
-                timeout=self.timeout,
-                verify=False,
-                headers=self.__spoofing_headers__,
-                allow_redirects=True,
-            )
-            self.status_code = r.status_code
-            logger.debug(self.url + "\tStatus: " + str(r.status_code))
-            self.response_headers = dict(r.headers)
-            if r.status_code == 200:
-                self.text = r.text
-            # if r.status_code == 200:
-            #     self.check_soft404
-        # https://stackoverflow.com/questions/6470428/catch-multiple-exceptions-in-one-line-except-block
-        except (
-            ReadTimeout,
-            ConnectTimeout,
-            RetryError,
-            InvalidHeader,
-            Timeout,
-            ConnectionError,
-            RequestException,
-            HTTPError,
-            ProxyError,
-            LocationParseError,
-        ) as e:
-            logger.debug(f"got exception: {e}")
-            self.request_error = True
-            self.request_error_details = str(e)
-        except (MissingSchema, InvalidSchema, InvalidURL, InvalidProxyURL) as e:
-            logger.debug(f"got exception: {e}")
-            self.malformed_url = True
-            self.request_error = True
-            self.request_error_details = str(e)
-
-    def __check_url__(self):
-        """IARI url checking"""
-        # TODO deprecate __check_url__; use (future) __check_urls__ with single url arg instead
-        logger.debug(f"Checking url: {self.url}")
-
-        self.__get_dns_record__()
-        self.__check_with_https_verify__()
-        if self.request_error:
-            self.__check_without_https_verify__()
-
-    @property
-    def __spoofing_headers__(self) -> Dict[str, str]:
-        """We decided to use these headers because of https://github.com/internetarchive/wari/issues/698"""
-        # From sawood at https://internetarchive.slack.com/archives/
-        # C04PLJVSPAP/p1679596686133449?thread_ts=1679594636.835119&cid=C04PLJVSPAP
-        return {
-            "authority": "www.sciencedaily.com",
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language": "en-US,en;q=0.9",
-            "cache-control": "max-age=0",
-            # 'cookie': 'usprivacy=1YYN; usprivacy=1YYN; _ga_GT6V1PPT8H=GS1.1.1679596300.1.0.1679596300.60.0.0; _ga=GA1.1.787963363.1679596301',
-            "dnt": "1",
-            "if-modified-since": "Thu, 23 Mar 2023 14:24:45 GMT",
-            "if-none-match": 'W/"329ecfdc8f2ee5caed98ffc465000dc9"',
-            "referer": "https://github.com/internetarchive/ware/issues/6",
-            "sec-ch-ua": '"Chromium";v="110", "Not A(Brand";v="24", "Google Chrome";v="110"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Linux"',
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "cross-site",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1",
-            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
-        }
 
     def __detect_language__(self):
         handler = BaseHandler(text=self.text)
@@ -260,7 +90,7 @@ class Url(WikipediaUrl):
             url.update({"malformed_url_details": self.malformed_url_details.value})
         return url
 
-    def __check_url_with_testdeadlink_api__(self):
+    def __check_url_with_iabot_testdeadlink__(self):
         """This fetches the status code from the testdeadlink API of IABot"""
         from src import app
 
@@ -295,7 +125,7 @@ class Url(WikipediaUrl):
             # get the status code
             if response.status_code == 200:
                 data = response.json()
-                print(data)
+                logger.debug(data)
                 # exit()
                 if "results" in data:
                     # array of results
@@ -305,37 +135,88 @@ class Url(WikipediaUrl):
                         # Skip if we get the errors first
                         if result != "errors":
                             # Get the status code
-                            self.testdeadlink_status_code = results[result]
+                            # self.testdeadlink_status_code = results[result]
+                            self.status_code = results[result]
                             # Get any errors
                             if "errors" in results:
-                                self.testdeadlink_error_details = results["errors"][
+                                self.status_code_error_details = results["errors"][
                                     result
                                 ]
                             break
 
-    # def __check_url_archive_with_iabot_api__(self):
-    #     """
-    #     This fetches the status code, archive, and other information from the
-    #     searchurldata API of IABot
-    #     """
-    #
-    #     modified_url = urllib.parse.quote(self.url)  # url encode the url
-    #
-    #     headers = {
-    #         "Content-Type": "application/x-www-form-urlencoded",
-    #         "User-Agent": "http://en.wikipedia.org/wiki/User:GreenC via iabget.awk",
-    #     }
-    #     data = f"&action=searchurldata&urls={modified_url}"
-    #
-    #     response = requests.post(
-    #         "https://iabot.wmcloud.org/api.php?wiki=enwiki",
-    #         headers=headers,
-    #         data=data,
-    #     )
-    #
-    #     # if status code is 200, the request was successful
-    #     if response.status_code == 200:
-    #         data = response.json()
-    #         print(data)
-    #         # TODO handle return data or errors
-    #         self.iabot_results = data
+    def __check_url_with_wayback_api__(self):
+        """
+        This use wayback machine's Live Web Checker
+        response looks like:
+        {
+            "ctype": "text/html; charset=utf-8",
+            "location": "https://mojomonger.com/",
+            "status": 200,
+            (optional) "status_ext" : "<error reason>  if error
+            (optional) "message" : "<human readable error message>  if error
+        }
+        """
+
+        endpoint = "https://iabot-api.archive.org/livewebcheck"
+        modified_url = self.url.replace("&", "%26")  # TODO do appropriate encode
+        headers = {}
+        params = {
+            "impersonate": 1,
+            "skip-adblocker": 1,
+            "url": modified_url,
+        }
+
+        response = requests.get(
+            endpoint,
+            headers=headers,
+            params=params,
+        )
+
+        # get the status code
+        if response.status_code == 200:
+            data = response.json()
+            logger.debug(data)
+            if "status" in data:
+                self.status_code = data["status"]
+            if "status_ext" in data:
+                self.status_code_error_details = data["status_ext"]
+
+    def __check_url_with_corentin_api__(self):
+        """
+        This use corentin's link checker:
+
+                endpoint: 'https://iabot-api.archive.org/undertaker/'
+
+                const requestOptions = {
+                    method: 'POST',
+                    body: JSON.stringify({ urls: urlList })
+
+        """
+        self.status_code = 0
+        self.status_code_error_details = "CORENTIN method not implemented in IARI"
+
+    def __get_archive_status_with_iabot_api__(self):
+        """
+        This fetches the archive information using IABot's searchurldata
+        """
+
+        modified_url = urllib.parse.quote(self.url)  # url encode the url
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "http://en.wikipedia.org/wiki/User:GreenC via iabget.awk",
+        }
+        data = f"&action=searchurldata&urls={modified_url}"
+
+        response = requests.post(
+            "https://iabot.wmcloud.org/api.php?wiki=enwiki",
+            headers=headers,
+            data=data,
+        )
+
+        # if status code is 200, the request was successful
+        if response.status_code == 200:
+            data = response.json()
+            # logger.debug(f"data for archive url:" + data)
+            # TODO handle return data or errors
+            self.archive_status = data

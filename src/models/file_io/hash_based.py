@@ -4,20 +4,17 @@ from src.models.file_io import FileIo
 
 class HashBasedFileIo(FileIo):
     hash_based_id: str
-    prefix = ""
-    iari_prefix_for_hash = "IPFH"
+    file_prefix = ""
 
     @property
     def filename(self) -> str:
-        """Returns the filename of the"""
-        from src import app
+        """Returns the filename consisting of hash based id and optional prefix"""
 
-        app.logger.debug(f"HashBasedFileIo:[filename] prefix = {self.prefix}")
-        app.logger.debug(
-            f"HashBasedFileIo:[filename] iari_prefix_for_hash = {self.iari_prefix_for_hash}"
-        )
+        file_prefix = self.file_prefix
+        if file_prefix != "":
+            file_prefix = file_prefix + "-"
 
         if not self.hash_based_id:
             raise MissingInformationError("no hash based id")
         else:
-            return f"{self.hash_based_id}.json"
+            return f"{file_prefix}{self.hash_based_id}.json"

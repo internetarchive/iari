@@ -8,5 +8,4 @@ logger = logging.getLogger(__name__)
 
 class UrlFileIo(HashBasedFileIo):
     data: Optional[Dict[str, Any]] = None
-    flavor: str = ""
     subfolder = "urls/"
