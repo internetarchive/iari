@@ -12,6 +12,7 @@ import logging
 from flask import Flask  # type: ignore
 from flask_restful import Api, Resource  # type: ignore
 
+# from flask_cors import CORS
 import config
 from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
@@ -29,6 +30,19 @@ logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+
+def add_cors_headers(response):
+    # Replace "*" with the specific origin(s) you want to allow
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
+
+
+# Register the function as a after_request handler
+app.after_request(add_cors_headers)
+
 # We use a prefix here to enable us to stabilize the api over time
 # and bump the version when making breaking changes
 api = Api(app, prefix="/v2")
