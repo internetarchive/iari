@@ -1,22 +1,10 @@
 # Internet Archive Reference Inventory [IARI](https://www.wikidata.org/wiki/Q117023013)
 
-_This document is under development_
-
 This API is capable of fetching, extracting, transforming and storing
 reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700).
 
 The endpoints make it possible to get structured data about the references 
 from any Wikipedia article in any language version.
-
-IARI was developed as part of the [Turn All References Blue](https://www.wikidata.org/wiki/Q115136754)
-project of the [Wayback Machine](https://www.wikidata.org/wiki/Q648266), an integral part of the
-[Internet Archive](https://www.wikidata.org/wiki/Q461). 
-
-# Author
-Mark Graham is the director of the project.
-The primary developer is currently [Chris Lombardi](https://en.wikipedia.org/wiki/User:Iamojo) (under the 
-nom de silico "mojomonger").
-Initial development was done by [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131).
 
 # Background
 There are [at least 200 million references in at least 40 million articles](
@@ -30,6 +18,13 @@ to help editors keep up the quality of references over time.
 The references are stored in templates that differ between language versions of Wikipedia 
 which makes it hard for tool developers to develop good tools that work well 
 across different language versions.
+
+# Author
+IARI has been developed by [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) as part of the
+[Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by
+Mark Graham, head of The
+[Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the
+[Internet Archive](https://www.wikidata.org/wiki/Q461). 
 
 # Goals
 The endpoint providing a detailed analysis of a Wikipedia article and it's references
