@@ -49,6 +49,8 @@ api = Api(app, prefix="/v2")
 
 # Here we link together the API views and endpoint urls
 # api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
+api.add_resource(Article, "/article")
+# api.add_resource(Article, "/url")
 api.add_resource(Version, "/version")
 api.add_resource(CheckUrls, "/check-urls")
 api.add_resource(CheckUrl, "/check-url")

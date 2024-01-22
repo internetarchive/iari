@@ -1,57 +1,139 @@
 # Internet Archive Reference Inventory [IARI](https://www.wikidata.org/wiki/Q117023013)
 
-This API is capable of fetching, extracting, transforming and storing
-reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700).
-
-The endpoints make it possible to get structured data about the references 
-from any Wikipedia article in any language version.
-
-# Background
-There are [at least 200 million references in at least 40 million articles](
-https://ieeexplore.ieee.org/abstract/document/9908858)
-and together with the article text in the Wikipedias
-one of the most valuable collections of knowledge ever made by humans,
-see [size comparison](https://en.wikipedia.org/wiki/Wikipedia:Size_comparisons).
-
-Wikimedia movement currently does not have good and effective tools 
-to help editors keep up the quality of references over time. 
-The references are stored in templates that differ between language versions of Wikipedia 
-which makes it hard for tool developers to develop good tools that work well 
-across different language versions.
-
-# Author
+# Authors
 IARI has been developed by [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131) as part of the
 [Turn All References Blue project](https://www.wikidata.org/wiki/Q115136754) which is led by
 Mark Graham, head of The
 [Wayback Machine](https://www.wikidata.org/wiki/Q648266) department of the
 [Internet Archive](https://www.wikidata.org/wiki/Q461). 
 
-# Goals
-The endpoint providing a detailed analysis of a Wikipedia article and it's references
-enable wikipedians to get an overview of the state of the references and using the API it is
-possible for the Wikimedia tech-community to build tools that help make it easier to curate 
-and improve the references.
 
-This is part of a wider initiative help raise the quality of references in
-Wikipedia to enable everyone in the world to make decisions
-based on trustworthy knowledge
-that is derived from trustworthy sources.
-
-# Stepping stone for a (graph) database of all references 
-This project is a part of the [Wikicite initiative](http://wikicite.org/).
-
-On the longer term Turn All References Blue project is planning on populating a database
-based on the data we extract. 
-This part of the effort is led by [James Hare](https://www.wikidata.org/wiki/Q23041486).
-
-The end goal is a large database with all references from all Wikipedias. 
-We call it the Wikipedia Citations Database (WCD).
-
-# Features
+# Endpoints
 
 IARI features a number of endpoints that help patrons
 get structured data about references in a Wikipedia article:
 
+[___describe endpoints here briefly with links to further descriptions below___]
+
+new endpoints:
+
+/article
+
+
+# Setup & Deployment
+
+Docker  
+* IARI utilizes Docker
+  * src/Dockerfile
+  * src/docker-compose
+    * uses {PORT} environment variable to determine port to serve app at 
+
+Git
+* Clone
+* pull latest
+* `$ git clone https://github.com/internetarchive/iari.git && cd iari`
+
+Environment variables
+* .env file
+  * location is at top src directory
+  * defines PORT
+  * defines TESTDEADLINKKEY
+
+Python Requirements
+* python pip
+* python gunicorn
+* python poetry
+
+JSON directories
+* directories to hold cache files must be in /json directory
+setup the directories for the json cache files
+* `$ ./setup_json_directories.sh` can be run to do this
+
+Version control
+* `pyproject.toml` holds the current version
+* 
+
+AWS deployment
+* Currently deployed instances are on the AWS machines
+  * (_TODO insert more information here; get from owenl?_)
+  * We have:
+    * iari-prod &nbsp;&nbsp;`/home/mojomonger/iari_prod`
+    * iari-stage &nbsp;`/home/mojomonger/iari_stage`
+    * iari-test &nbsp;&nbsp;&nbsp;&nbsp;`/home/mojomonger/iari_test`
+  * defined. Each can run a separate version of the repo.
+
+## Docker
+### Prerequisites
+
+Ensure the following directories are created at the root of the iari install (they are not in the git repo)
+```
+json/articles/
+json/references/
+json/dois/
+json/urls/
+json/urls/archives
+json/xhtmls/
+json/pdfs/
+```
+
+An ".env" file at same level as docker-compose.yml file must contain the contents:
+
+```
+PORT=<port you'd like the IARI Server to run on>
+#    some suggested values:
+#    5042: for iari-test
+#    5088: for iari-stage
+#    5000: for iari-prod
+TESTDEADLINK_KEY=<api key for iabot's testdeadlink method>
+```
+
+### Running
+docker compose up -d  # -d for detached mode, in which the docker
+can run and the prcoess that invoked it can be exited and destroyed.
+
+Use `docker container ls` to see running docker version
+
+Use `docker compose down` to stop docker instance. Make sure you are
+in the appropriate directory when running this command so the desired
+docker instance is taken down.
+
+Note: When on the AWS machine, you must use `docker-compose` rather
+than `docker compose' on account of the AWS machine not having the latest
+version of the docker command line tools.
+
+# Development 
+
+IARI is a flask app. The main entry point is in `src/__init__.py`
+
+`*` This may change to a different API framework
+
+## Definitions of endpoints
+`src/__init__.py` defines the toplevel endpoints.
+
+# Caveats
+* upgrade docker version on AWS server
+* fix poetry install (versions, etc.)
+
+##
+##
+##
+## Setup
+
+_talk about having venv setup_
+* `$ python3 -m venv venv`
+* for Mac: `$ source venv/bin/activate`
+
+_especially useful when compiling for integrity checking tools_
+
+pip and poetry are used to set things up in python land.
+
+`$ pip install poetry gunicorn && poetry install`
+
+
+
+
+
+[OLD ENPOINTS]
 * an _article_ endpoint which analyzes a given article and returns basic statistics about it
 * a _references_ endpoint which gives back all ids of references found
 * a _reference_ endpoint which gives back all details about a reference including templates and wikitext
@@ -63,25 +145,8 @@ get structured data about references in a Wikipedia article:
 * a _pdf_ endpoint which extracts links both from annotations and free text from PDFs.
 * a _xhtml_ endpoint which extracts links both from any XHTML-page.
 
-# Limitations
 
-See known limitations under each endpoint below.
 
-# Supported Wikipedias
-
-Currently we support a handful of the 200+ language versions of Wikipedia
-but we plan on extending the support to all Wikipedia language versions
-and you can help us by submitting sections to search for references in issues and
-pull requests.
-
-We also would like to support non-Wikimedia wikis using MediaWiki in the future
-and perhaps also any webpage on the internet with outlinks (e.g. news articles).
-
-## Wikipedia templates
-
-English Wikipedia for example has hundreds of special reference templates in use
-and a handful of widely used generic templates.
-WARI exposes them all when found in a reference.
 
 ## Reference types detected by the ArticleAnalyzer
 
@@ -445,13 +510,16 @@ It will return json similar to:
 
 None
 
-# Installation
+# Deployment
+
+IARI utilizes Docker, using Dockerfile and docker-compse.yml files to define the build and deploy process
+
 
 Clone the git repo:
 
 `$ git clone https://github.com/internetarchive/iari.git && cd iari`
 
-We recommend checking out the latest release before proceeding.
+It is recommended to check out the latest release before proceeding.
 
 ## Requirements
 
@@ -461,7 +529,7 @@ We recommend checking out the latest release before proceeding.
 
 ## Setup
 
-We use pip and poetry to set everything up.
+pip and poetry are used to set things up in python land.
 
 `$ pip install poetry gunicorn && poetry install`
 
@@ -506,37 +574,6 @@ Run it with
 Test it in another Screen window or local terminal with
 `$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
 
-# Dockerized instance
-## Prerequisites
-### JSON directories
-
-Make sure the following directories are created at the root of the iari install (they are not in the git repo)
-```
-json/articles/
-json/references/
-json/dois/
-json/urls/
-json/urls/archives
-json/xhtmls/
-json/pdfs/
-```
-
-### Environment variables
-Make an ".env" file at same level as docker-compose.yml file with the contents:
-
-```
-PORT=<port you'd like the IARI Server to run on>
-#    some suggested values:
-#    5042: for iari-test
-#    5088: for iari-stage
-#    5000: for iari-prod
-TESTDEADLINK_KEY=<api key for iabot's testdeadlink method>
-```
-
-## Dockerfile
-## docker-compose.yml
-## Running
-docker compose up
 
 # PyCharm specific recommendations
 ## Venv activation

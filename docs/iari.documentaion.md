@@ -1,3 +1,0 @@
-# IARI documentation
-
-## Endpoints
