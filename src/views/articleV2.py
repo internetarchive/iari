@@ -3,8 +3,8 @@
 
 from src.models.job.articleV2_job import ArticleV2Job
 from src.models.schema.articleV2_schema import ArticleV2Schema
-from src.views.statistics.write_view import StatisticsWriteView
 from src.models.wikimedia.enums import AnalyzerReturn, WikimediaDomain
+from src.views.statistics.write_view import StatisticsWriteView
 
 
 # NB using ArticleV2 as object name to avoid conflict with legacy Article object
@@ -24,6 +24,7 @@ class ArticleV2(StatisticsWriteView):
 
     def __return_article_data__(self):
         from src import app
+
         app.logger.debug("got valid job")
 
         self.__setup_and_read_from_cache__()  # from inherited StatisticsWriteView
@@ -53,6 +54,7 @@ class ArticleV2(StatisticsWriteView):
         must return a tuple (Any,response_code)
         """
         from src import app
+
         app.logger.debug("statistics/article/get: running")
 
         self.__validate_and_get_job__()  # generic for all endpoints
@@ -67,13 +69,13 @@ class ArticleV2(StatisticsWriteView):
 
     def __return_article_error__(self):
         from src import app
+
         if self.job.title == "":
             app.logger.error("ArticleV2: ERROR: Title is missing")
             return "Title is missing", 400
         if self.job.domain != "wikipedia":
             app.logger.error("ArticleV2: ERROR: Only 'wikipedia' site is supported")
             return "Only 'wikipedia' site is supported", 400
-
 
     # def __write_article_to_disk__(self):
     #     article_io = ArticleV2FileIo(

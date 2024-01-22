@@ -1,8 +1,8 @@
 from typing import Any, Dict, Optional
 
-from src.models.job.articleV2_job import ArticleV2Job
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
+from src.models.job.articleV2_job import ArticleV2Job
 
 
 class ArticleV2FileIo(FileIo):

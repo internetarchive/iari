@@ -14,13 +14,13 @@ class ArticleV2Schema(BaseSchema):
     url_details = fields.Bool(required=False)
     url_method = fields.Str(required=False)
 
-
     # noinspection PyUnusedLocal
     @post_load
     # **kwargs is needed here despite what the validator claims
     def return_object(self, data, **kwargs) -> ArticleJob:  # type: ignore # dead: disable
         """Return job object"""
         from src import app
+
         app.logger.debug("ArticleV2Schema: running")
 
         job = ArticleV2Job(**data)
