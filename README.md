@@ -524,6 +524,9 @@ json/urls/
 json/urls/archives
 json/xhtmls/
 json/pdfs/
+# (for new V2 development)
+json/articlesV2/
+json/referencesV2/
 ```
 
 ### Environment variables

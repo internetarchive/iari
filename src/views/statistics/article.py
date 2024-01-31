@@ -8,7 +8,7 @@ from src.models.api.schema.article_schema import ArticleSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.references import ReferencesFileIo
-from src.models.wikimedia.enums import AnalyzerReturn, WikimediaDomain
+from src.models.wikimedia.enums import AnalyzerReturnValues, WikimediaDomain
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.views.statistics.write_view import StatisticsWriteView
 
@@ -27,16 +27,16 @@ class Article(StatisticsWriteView):
 
         app.logger.info("__analyze_and_write_and_return__: running")
 
-        if not self.wikipedia_analyzer:
-            raise MissingInformationError("self.wikipedia_analyzer was None")
+        if not self.wikipedia_page_analyzer:
+            raise MissingInformationError("self.wikipedia_page_analyzer was None")
 
         self.__get_statistics__()
 
-        if self.wikipedia_analyzer.found:
+        if self.wikipedia_page_analyzer.found:
             app.logger.debug("found article")
-            if self.wikipedia_analyzer.is_redirect:
+            if self.wikipedia_page_analyzer.is_redirect:
                 app.logger.debug("found redirect")
-                return AnalyzerReturn.IS_REDIRECT.value, 400
+                return AnalyzerReturnValues.IS_REDIRECT.value, 400
             else:
                 app.logger.debug("adding time information and returning the statistics")
                 self.__update_statistics_with_time_information__()
@@ -54,7 +54,7 @@ class Article(StatisticsWriteView):
                 else:
                     raise MissingInformationError()
         else:
-            return AnalyzerReturn.NOT_FOUND.value, 404
+            return AnalyzerReturnValues.NOT_FOUND.value, 404
 
     def __return_from_cache_or_analyze_and_return__(self):
         from src import app
@@ -78,7 +78,6 @@ class Article(StatisticsWriteView):
         else:
             # we have to regenerate cache from scratch
             app.logger.info("got refresh from patron or no data in cache")
-            self.__print_log_message_about_refresh__()
             self.__setup_wikipedia_analyzer__()
             return self.__analyze_and_write_and_return__()
 
@@ -86,11 +85,11 @@ class Article(StatisticsWriteView):
         from src import app
 
         app.logger.debug("__get_statistics__: running")
-        if not self.wikipedia_analyzer:
-            raise MissingInformationError("self.wikipedia_analyzer was None")
+        if not self.wikipedia_page_analyzer:
+            raise MissingInformationError("self.wikipedia_page_analyzer was None")
         # https://realpython.com/python-timer/
         self.__setup_io__()
-        self.io.data = self.wikipedia_analyzer.get_statistics()
+        self.io.data = self.wikipedia_page_analyzer.get_statistics()
 
     def __update_statistics_with_time_information__(self):
         """Update the dictionary before returning it"""
@@ -121,11 +120,17 @@ class Article(StatisticsWriteView):
             return "Only 'wikipedia' site is supported", 400
 
     def __setup_wikipedia_analyzer__(self):
-        if not self.wikipedia_analyzer:
+        if not self.wikipedia_page_analyzer:
             from src import app
 
             app.logger.info(f"Analyzing {self.job.title}...")
-            self.wikipedia_analyzer = WikipediaAnalyzer(job=self.job)
+
+            # wikipedia_page_analyzer is declared in the StatisticsView class (views/statistics/__init.py)
+            # NB This wrong! It should be declared here in the Article class.
+            #   we fix this in the v2/ArticleV2 code, but not here, since it "works".
+            #   this is the only place it is called, so it makes no sense to declare it
+            #   in a base class that other objects that do not use the analysis feature...!
+            self.wikipedia_page_analyzer = WikipediaAnalyzer(job=self.job)
 
     def get(self):
         """This is the main method and the entrypoint for flask
@@ -157,6 +162,6 @@ class Article(StatisticsWriteView):
 
     def __write_references_to_disk__(self):
         references_file_io = ReferencesFileIo(
-            references=self.wikipedia_analyzer.reference_statistics
+            references=self.wikipedia_page_analyzer.reference_statistics
         )
         references_file_io.write_references_to_disk()

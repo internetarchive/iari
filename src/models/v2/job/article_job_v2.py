@@ -4,20 +4,24 @@ from urllib.parse import quote, unquote
 import requests
 
 import config
-from src.models.api.job import Job  # TODO: mobe to src/models/job base
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+from src.models.v2.job import JobV2
 from src.models.wikimedia.enums import WikimediaDomain
 
 
-class ArticleV2Job(Job):
+class ArticleJobV2(JobV2):
     """A generic job that can be submitted via the API"""
 
+    # inherited from JobV2
+    refresh: bool = False
+
+    # primary definition in this class
     url: str = ""
     lang: str = "en"
     domain: WikimediaDomain = WikimediaDomain.wikipedia
     title: str = ""
     page_id: int = 0
-    refresh: bool = False
+
     sections: str = ""
     revision: int = 0  # this is named just as in the MediaWiki API
     dehydrate: bool = True
@@ -39,13 +43,20 @@ class ArticleV2Job(Job):
             raise MissingInformationError("self.title was empty")
         return quote(self.title, safe="")
 
-    def get_ids_from_mediawiki_api(self) -> None:
+    def get_mediawiki_ids(self) -> None:
         from src import app
 
-        app.logger.debug("get_page_id: running")
+        app.logger.debug(
+            f"ArticleJobV2::get_mediawiki_ids: self.page_id={self.page_id}"
+        )
+
         if not self.page_id:
+            app.logger.debug(
+                f"ArticleJobV2::get_mediawiki_ids: lang={self.lang}, title={self.title}, lang={self.domain}"
+            )
             if not self.lang or not self.title or not self.domain:
-                raise MissingInformationError()
+                raise MissingInformationError("url lang, title or domain not found")
+
             # https://stackoverflow.com/questions/31683508/wikipedia-mediawiki-api-get-pageid-from-url
             wiki_fetch_url = (
                 f"https://{self.lang}.{self.domain.value}/"
@@ -121,5 +132,6 @@ class ArticleV2Job(Job):
             return False
 
     def validate_sections_and_extract_url(self):
-        if self.__valid_sections__:
-            self.__extract_url__()
+        # if self.__valid_sections__:
+        #     self.__extract_url__()
+        self.__extract_url__()

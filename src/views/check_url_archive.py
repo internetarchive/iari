@@ -92,7 +92,6 @@ class CheckUrlArchive(StatisticsWriteView):
         self.__write_to_cache__(data=data)
 
         if self.job.refresh:
-            self.__print_log_message_about_refresh__()
             data["refreshed_now"] = True
         else:
             data["refreshed_now"] = False

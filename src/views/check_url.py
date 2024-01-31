@@ -97,7 +97,6 @@ class CheckUrl(StatisticsWriteView):
 
         self.__write_to_cache__(data_without_text=data_without_text)
         if self.job.refresh:
-            self.__print_log_message_about_refresh__()
             data["refreshed_now"] = True
         else:
             data["refreshed_now"] = False

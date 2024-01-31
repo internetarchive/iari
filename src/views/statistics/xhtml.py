@@ -75,7 +75,6 @@ class Xhtml(StatisticsWriteView):
                 write = XhtmlFileIo(data=data, hash_based_id=url_hash_id)
                 write.write_to_disk()
             if self.job.refresh:
-                self.__print_log_message_about_refresh__()
                 data["refreshed_now"] = True
             else:
                 data["refreshed_now"] = False

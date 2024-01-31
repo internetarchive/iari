@@ -14,6 +14,9 @@ from flask_restful import Api, Resource  # type: ignore
 
 # from flask_cors import CORS
 import config
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+
+# old stuff...
 from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
 from src.views.check_url_archive import CheckUrlArchive
@@ -24,6 +27,9 @@ from src.views.statistics.pdf import Pdf
 from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
 from src.views.statistics.xhtml import Xhtml
+
+# new stuff jan 2024
+from src.views.v2.article_view_v2 import ArticleV2
 from src.views.version import Version
 
 logging.basicConfig(level=config.loglevel)
@@ -49,8 +55,8 @@ api = Api(app, prefix="/v2")
 
 # Here we link together the API views and endpoint urls
 # api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
-api.add_resource(Article, "/article")
-# api.add_resource(Article, "/url")
+api.add_resource(ArticleV2, "/article")
+
 api.add_resource(Version, "/version")
 api.add_resource(CheckUrls, "/check-urls")
 api.add_resource(CheckUrl, "/check-url")
@@ -66,3 +72,8 @@ api.add_resource(Xhtml, "/statistics/xhtml")
 # api.add_resource(
 #     AddJobToQueue, "/add-job"
 # )  # ?lang=<string:language_code>&site=<string:wikimedia_site>&title=<string:title>")
+
+#
+# @app.errorhandler(Exception)
+# def handle_missing_information_error(error):
+#     return str(error), 500

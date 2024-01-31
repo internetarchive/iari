@@ -56,6 +56,6 @@ class WikimediaDomain(Enum):
 #     PLAIN_TEXT_REFERENCE_WITH_A_SUPPORTED_IDENTIFIER = auto() # URL is a supported identifier
 
 
-class AnalyzerReturn(Enum):
+class AnalyzerReturnValues(Enum):
     IS_REDIRECT = "No statistic available because this is a redirect."
     NOT_FOUND = "Article title not found."
