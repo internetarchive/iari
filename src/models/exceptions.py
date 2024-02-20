@@ -1,4 +1,4 @@
-class MissingInformationError(BaseException):
+class  MissingInformationError(BaseException):
     pass
 
 

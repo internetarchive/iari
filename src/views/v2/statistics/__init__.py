@@ -45,6 +45,10 @@ class StatisticsViewV2(Resource):
         self.__setup_io__()  # sets up "io" property as FileIo instance
         self.io.read_from_disk()
 
+    def __read_from_cache__(self):
+        if self.io:
+            self.io.read_from_disk()
+
     def __validate_and_get_job__(self):
         """Helper method"""
         self.__validate__()

@@ -2,14 +2,17 @@
 # from marshmallow import Schema
 from datetime import datetime
 from typing import Any, Optional, Tuple
+import traceback
 
-from src.models.exceptions import MissingInformationError
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.v2.file_io.article_file_io_v2 import ArticleFileIoV2
 from src.models.v2.job.article_job_v2 import ArticleJobV2
 from src.models.v2.schema.article_schema_v2 import ArticleSchemaV2
 from src.models.v2.wikimedia.wikipedia.analyzer_v2 import WikipediaAnalyzerV2
 from src.models.wikimedia.enums import AnalyzerReturnValues, WikimediaDomain
 from src.views.v2.statistics import StatisticsViewV2
+
+from src.helpers.get_version import get_poetry_version
 
 
 class ArticleV2(StatisticsViewV2):
@@ -33,17 +36,20 @@ class ArticleV2(StatisticsViewV2):
 
         app.logger.debug("ArticleV2::__return_article_data__")
 
-        self.__setup_and_read_from_cache__()  # inherited method from StatisticsWriteView
+        self.__setup_io__()
 
-        if self.io.data and not self.job.refresh:
-            # cached data has been successfully retrieved - return it, if not force refresh
-            # NB there is a flaw in logic here, in that if job.refresh is true, the cahced
-            #   data has been unnecessarily retrieved (because we need to regenerate anyway)
+        if not self.job.refresh:
+            self.__read_from_cache__()  # inherited from StatisticsWriteView; fills io.data if successful
+
+        # if self.io.data and not self.job.refresh:
+        if self.io.data:
+            # cached data has been successfully retrieved - return it
             app.logger.info(
                 f"Returning cached articleV2 json data, date: {self.time_of_analysis}"
             )
             return self.io.data, 200
 
+        # no cached data, either cause it doesnt exist or force refresh = true
         app.logger.info("generating articleV2 data (force refresh or no cache)")
         return self.__analyze_and_write_and_return__()
 
@@ -53,23 +59,29 @@ class ArticleV2(StatisticsViewV2):
         must return a tuple (Any,response_code)
         """
         from src import app
-
         app.logger.debug("ArticleV2::get")
 
-        self.__validate_and_get_job__()  # inherited from StatisticsWriteView -> StatisticsView
-        # sets up job parameters, possibly with some massaging from the @post_load function
-        # (@postload is courtesy of the marshmallow module addition)
+        try:
+            self.__validate_and_get_job__()  # inherited from StatisticsWriteView -> StatisticsView
+            # sets up job parameters, possibly with some massaging from the @post_load function
+            # (@postload is courtesy of the marshmallow module addition)
 
-        # for articles, make sure the lang, title and domain are set
-        if (
-            self.job.lang == "en"
-            and self.job.title
-            and self.job.domain == WikimediaDomain.wikipedia
-        ) or self.job.url:
-            return self.__return_article_data__()
+            # for articles, make sure the lang, title and domain are set
+            if (
+                self.job.lang == "en"
+                and self.job.title
+                and self.job.domain == WikimediaDomain.wikipedia
+            ) or self.job.url:
+                return self.__return_article_data__()
 
-        else:
-            return self.__return_article_error__()
+            else:
+                return self.__return_article_error__()
+        except WikipediaApiFetchError as e:
+            return {"error": f"API Error: {str(e)}"}, 500
+
+        except Exception as e:
+            traceback.print_exc()
+            return {"error": f"General Error: {str(e)}"}, 500
 
     def __return_article_error__(self):
         from src import app

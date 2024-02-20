@@ -189,7 +189,7 @@ class WikipediaReferenceV2(JobBaseModel):
         self.bare_urls = []
         urls = []
         for url in self.__find_bare_urls_outside_templates__():
-            url_object = WikipediaUrl(url=url)
+            url_object = WikipediaUrlV2(url=url)
             url_object.extract()
             urls.append(url_object)
         self.bare_urls = urls
@@ -211,14 +211,14 @@ class WikipediaReferenceV2(JobBaseModel):
             for url in self.wikicode.ifilter_external_links():
                 # url: ExternalLink
                 # we throw away the title here
-                url = WikipediaUrl(url=str(url.url))
+                url = WikipediaUrlV2(url=str(url.url))
                 url.extract()
                 urls.add(url)
         else:
             for url in self.wikicode.contents.ifilter_external_links():
                 # url: ExternalLink
                 # we throw away the title here
-                url = WikipediaUrl(url=str(url.url))
+                url = WikipediaUrlV2(url=str(url.url))
                 url.extract()
                 urls.add(url)
         self.wikicoded_links = list(urls)

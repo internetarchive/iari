@@ -11,11 +11,10 @@ class ArticleStatisticsV2(BaseModel):
 
     We use BaseModel to avoid the cache attribute"""
 
-    new_iari_article_data: bool = True
-    new_data: Dict[str, Any] = {}
-    new_references: List[Dict[str, Any]] = []
+    iari_version: str = ""
 
     iari_id: str = ""
+    page_errors: List[Any] = []
 
     lang: str = "en"  # language code according to Wikimedia
     site: str = WikimediaDomain.wikipedia.value  # wikimedia site in question
@@ -31,6 +30,15 @@ class ArticleStatisticsV2(BaseModel):
 
     timestamp: int = 0  # timestamp at beginning of analysis
     timing: int = 0  # time to analyze in seconds
+
+    ores_score: Any = {}
+
+    reference_count: int = 0,
+    reference_stats: Dict[str, int] = {},
+    references: List[Dict[str, Any]] = [],
+    url_count: int = 0,
+    url_stats: Dict[str, Any] = {},
+    urls: List[str] = [],
 
     # ores_score: Any = {}
     #

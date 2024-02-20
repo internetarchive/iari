@@ -9,12 +9,13 @@ from src.models.exceptions import MissingInformationError
 from src.models.v2.base import IariBaseModel
 from src.models.v2.job.article_job_v2 import ArticleJobV2
 from src.models.v2.statistics.article_stats_v2 import ArticleStatisticsV2
-from src.models.v2.statistics.reference_stats_v2 import ReferenceStatisticsV2
+# from src.models.v2.statistics.reference_stats_v2 import ReferenceStatisticsV2
 from src.models.v2.wikimedia.wikipedia.article_v2 import WikipediaArticleV2
-from src.models.wikimedia.wikipedia.reference.enums import (
-    FootnoteSubtype,
-    ReferenceType,
-)
+# from src.models.wikimedia.wikipedia.reference.enums import (
+#     FootnoteSubtype,
+#     ReferenceType,
+# )
+from src.helpers.get_version import get_poetry_version
 
 logger = logging.getLogger(__name__)
 
@@ -59,31 +60,12 @@ class WikipediaAnalyzerV2(IariBaseModel):
 
         if self.article:
             self.article.fetch_and_parse()
-            # WikipediaArticleV2 (article_v2):
-            # fetches wikitext (we need to fetch html)
-            # skips if redirect
-            # errors if page not found
-            # sets self.extractor
-            # self.extractor.extract_all_references  # WikipediaReferenceExtractorV2
-            #   this is what does the wikitext and html parsing (we willbe doing html parsing)
-            #   so, what we need is:
-            #       1. get html contents of file (see __fetch_wikitext__ in article_v2)
-            #       2. parse into properties of self
 
-            # what this did was set extract.references, i think...
-
-        if not self.article_statistics:  # which is probably not yet true
-            # because we haven't extracted yet...
-
-            # populate self.article_statistics (if successful)
-            self.__gather_article_statistics__()  # local class function
+        if not self.article_statistics:
+            self.__gather_article_statistics__()  # sets self.article_statistics
 
             # # populate self.reference_statistics
             # self.__gather_reference_statistics__()
-
-            # # insert references into article stats
-            # if self.article_statistics:
-            #     self.article_statistics.references = self.reference_statistics
 
         # return dict of data
         if self.article_statistics:
@@ -148,14 +130,16 @@ class WikipediaAnalyzerV2(IariBaseModel):
 
         # ae = self.article.extractor
 
+        # WTF? shouldn't this have already been done, extracting the wiki id data from the article meta info?
         if not self.job.page_id:
             self.job.get_mediawiki_ids()
 
         self.article_statistics = ArticleStatisticsV2(
-            new_iari_article_data=True,
-            new_data={"new_data": "new data here"},
-            new_references=self.article.references,
+
+            iari_version=get_poetry_version("pyproject.toml"),
+
             iari_id=self.job.iari_id,
+
             lang=self.job.lang,
             site=self.job.domain.value,
             title=self.job.title,
@@ -165,6 +149,18 @@ class WikipediaAnalyzerV2(IariBaseModel):
             revision_timestamp=self.article.revision_timestamp,
             served_from_cache=False,
             isodate=datetime.utcnow().isoformat(),
+
+            page_errors=self.article.error_items,
+
+            ores_score=self.article.ores_details,
+
+            reference_count=self.article.reference_count,
+            reference_stats=self.article.reference_stats,
+            references=self.article.references,
+            url_count=self.article.url_count,
+            urls=self.article.urls,
+            url_stats=self.article.url_stats,
+
             # ores_score=self.article.ores_details,
             # reference_statistics={
             #     "named": ae.number_of_empty_named_references,
