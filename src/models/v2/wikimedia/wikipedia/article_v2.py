@@ -89,13 +89,13 @@ class WikipediaArticleV2(IariBaseModel):
     def reference_stats(self) -> Dict[str, Any]:
         counts = {}
         for ref in self.references:
-            if "source_id" in ref:
-                source_id = ref["source_id"]
-                if source_id not in counts:
-                    counts[source_id] = 0
-                counts[source_id] += 1
+            if "source_section" in ref:
+                source_section = ref["source_section"]
+                if source_section not in counts:
+                    counts[source_section] = 0
+                counts[source_section] += 1
 
-        return counts
+        return {"sections": counts}
 
     @property
     def url_count(self) -> int:
@@ -320,7 +320,7 @@ class WikipediaArticleV2(IariBaseModel):
                     {
                         "wiki_ref_id": ref.get("id"),
                         "ref_id": self.ref_counter,
-                        "source_id": "References",  # which section these refs are from
+                        "source_section": "References",  # which section these refs are from
                         "cite_def_link": ref.get("about"),
                         "cite_ref_links": page_refs,
                         "template_names": template_names,
@@ -415,7 +415,7 @@ class WikipediaArticleV2(IariBaseModel):
                     {
                         "wiki_ref_id": ref.get("id"),  # TODO this should come from cite
                         "ref_id": self.ref_counter,
-                        "source_id": section_id,  # which section these refs are from
+                        "source_section": section_id,  # which section these refs are from
                         "cite_ref_link": "",  # ref.get("about"),
                         "cite_def_links": [],  # page_refs,
                         "template_names": template_names,

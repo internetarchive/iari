@@ -303,7 +303,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
                 refs.append(
                     {
                         "id": ref.get("id"),
-                        "ref_index": ref_counter,
+                        # "ref_index": ref_counter,
                         "raw_data": raw_data,
                         "page_refs": page_refs,
                     }

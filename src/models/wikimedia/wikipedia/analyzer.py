@@ -14,6 +14,10 @@ from src.models.wikimedia.wikipedia.reference.enums import (
     ReferenceType,
 )
 
+# from src.models.v2.job.article_job_v2 import ArticleJobV2
+# from src.models.v2.job.article_job_v2 import ArticleJobV2
+from src.models.v2.wikimedia.wikipedia.article_v2 import WikipediaArticleV2
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,6 +30,9 @@ class WikipediaAnalyzer(WariBaseModel):
 
     job: Optional[ArticleJob] = None
     article: Optional[WikipediaArticle] = None
+
+    articleV2: Optional[WikipediaArticleV2]  # html parsed article, for merging data
+
     article_statistics: Optional[
         ArticleStatistics
     ] = None  # includes cite_refs property
@@ -174,13 +181,11 @@ class WikipediaAnalyzer(WariBaseModel):
 
                 # an attempt to get positional index of citation to match those of returned HTML
                 # only add ref_index if we are a CONTENT footnote and not NAMED
-                ref_index = 0
                 if (
                     reference.reference_type.value == ReferenceType.FOOTNOTE.value
                     and subtype == FootnoteSubtype.CONTENT.value
                 ):
                     ref_counter += 1
-                    ref_index = ref_counter
 
                 # if not rr.get_wikicode_as_string:
                 #     raise MissingInformationError()
@@ -190,7 +195,7 @@ class WikipediaAnalyzer(WariBaseModel):
                     name=reference.get_name,
                     type=reference.reference_type.value,
                     footnote_subtype=subtype,
-                    ref_index=ref_index,
+                    # ref_index=ref_index,
                     titles=reference.titles,
                     flds=reference.unique_first_level_domains
                     if reference.unique_first_level_domains

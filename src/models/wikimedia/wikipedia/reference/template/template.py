@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class WikipediaTemplate(BaseModel):
+
     parameters: OrderedDict = OrderedDict()
     # We allow union here to enable easier testing
     raw_template: Template  # Union[Template, str]

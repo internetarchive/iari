@@ -34,7 +34,7 @@ class ArticleStatisticsV2(BaseModel):
     ores_score: Any = {}
 
     reference_count: int = 0,
-    reference_stats: Dict[str, int] = {},
+    reference_stats: Dict[str, Any] = {},
     references: List[Dict[str, Any]] = [],
     url_count: int = 0,
     url_stats: Dict[str, Any] = {},

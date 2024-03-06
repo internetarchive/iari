@@ -9,7 +9,6 @@ class ReferenceStatisticsV2(BaseModel):
     """
 
     id: str = ""
-    ref_index: int = 0
     name: str = ""
     type: str  # [general|footnote]
     footnote_subtype: str  # [named|content]
