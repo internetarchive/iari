@@ -62,7 +62,8 @@ class ArticleV2(StatisticsViewV2):
         app.logger.debug("ArticleV2::get")
 
         try:
-            self.__validate_and_get_job__()  # inherited from StatisticsWriteView -> StatisticsView
+            self.__validate_and_get_job__()
+            # inherited from StatisticsWriteView -> StatisticsViewV2
             # sets up job parameters, possibly with some massaging from the @post_load function
             # (@postload is courtesy of the marshmallow module addition)
 

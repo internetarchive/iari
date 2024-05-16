@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+import json
 
 from flask import request
 from flask_restful import Resource, abort  # type: ignore
@@ -39,7 +40,7 @@ class StatisticsViewV2(Resource):
 
     # derived ("child") class must implement __setup_io__ from this base ("parent") class
     def __setup_io__(self):
-        raise NotImplementedError()
+        raise NotImplementedError()  # must be defined in parent class
 
     def __setup_and_read_from_cache__(self):
         self.__setup_io__()  # sets up "io" property as FileIo instance
