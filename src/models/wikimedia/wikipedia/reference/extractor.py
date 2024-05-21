@@ -3,8 +3,9 @@ from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 import mwparserfromhell  # type: ignore
-from bs4 import BeautifulSoup
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
+# from bs4 import BeautifulSoup
+from iarilib.parse_utils import extract_cite_refs
 
 from src.models.api.job.article_job import ArticleJob
 from src.models.base import WariBaseModel
@@ -265,51 +266,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         if not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)
 
-    def __extract_cite_refs__(self):
 
-        soup = BeautifulSoup(self.html_source, "html.parser")
-        # for link in soup.find_all("a"):
-        #     print(link.get("href"))
-
-        references_wrapper = soup.find("div", class_="mw-references-wrap")
-
-        refs = []
-
-        if references_wrapper:
-            references_list = references_wrapper.find("ol", class_="references")
-            ref_counter = 0
-            for ref in references_list.find_all("li"):
-
-                ref_counter += 1
-
-                page_refs = []
-                for link in ref.find_all("a"):
-                    # span.mw-linkback-text children should have a citeref link
-                    if link.find("span", class_="mw-linkback-text"):
-                        page_refs.append(
-                            {
-                                "href": link.get("href"),
-                                "id": link.get("id"),
-                            }
-                        )
-
-                span_link = ref.find("span", class_="mw-reference-text")
-                raw_data = None
-                if span_link:
-                    link_data = span_link.find("link")
-                    if link_data:
-                        raw_data = link_data.get("data-mw")
-
-                refs.append(
-                    {
-                        "id": ref.get("id"),
-                        # "ref_index": ref_counter,
-                        "raw_data": raw_data,
-                        "page_refs": page_refs,
-                    }
-                )
-
-        self.cite_page_refs = refs
 
     def __parse_html_source__(self):
         """
@@ -319,11 +276,8 @@ class WikipediaReferenceExtractor(WariBaseModel):
 
         app.logger.debug("__parse_html_source__: running")
 
-        # def is_citeref_link(css_class):
-        #     return css_class is None  # and len(css_class) == 6
-
         if self.html_source:
-            self.__extract_cite_refs__()
+            self.cite_page_refs = extract_cite_refs(self.html_source)
 
     @property
     def reference_ids(self) -> List[str]:
