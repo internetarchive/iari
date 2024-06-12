@@ -3,6 +3,10 @@ import re
 
 from bs4 import BeautifulSoup
 
+# logging.basicConfig(level=config.loglevel)
+import logging
+logger = logging.getLogger(__name__)
+
 
 def extract_cite_refs(html):
 
@@ -44,6 +48,9 @@ def extract_cite_refs(html):
             raw_data = None
 
             if span_link:
+
+                # logger.info("yes span_link")
+
                 link_data = span_link.find("link")
                 if link_data:
                     raw_data = link_data.get("data-mw")

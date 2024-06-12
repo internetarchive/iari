@@ -6,7 +6,7 @@ class TestAllHandler:
     #         url="https://en.wikipedia.org/wiki/SNCASO",
     #         regex="bibliography|further reading|works cited|sources|external links",
     #     )
-    #     job.validate_regex_and_extract_url()
+    #     job.validate_sections_and_extract_url()
     #     handler = AllHandler(job=job)
     #     handler.fetch_and_compile()
     #     assert handler.error is False
@@ -32,7 +32,7 @@ class TestAllHandler:
     #         url="https://en.wikipedia.org/wiki/Bicycle",
     #         regex="bibliography|further reading|works cited|sources|external links",
     #     )
-    #     job.validate_regex_and_extract_url()
+    #     job.validate_sections_and_extract_url()
     #     handler = AllHandler(job=job)
     #     handler.__fetch_article__()
     #     assert handler.error is False
@@ -49,7 +49,7 @@ class TestAllHandler:
     #         url="https://en.wikipedia.org/wiki/Bicycle",
     #         regex="bibliography|further reading|works cited|sources|external links",
     #     )
-    #     job.validate_regex_and_extract_url()
+    #     job.validate_sections_and_extract_url()
     #     handler = AllHandler(job=job)
     #     handler.__fetch_article__()
     #     handler.__fetch_references__()

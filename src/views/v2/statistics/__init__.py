@@ -23,14 +23,15 @@ class StatisticsViewV2(Resource):
     the StatisticsWriteView inherits this class.
     """
 
-    schema: Optional[Schema] = None
-    job: Optional[Job]
-    # derived class sets this
+    # derived class sets these
+    schema: Optional[Schema] = None  # uses schema.validate to validate
+    job: Optional[Job]  # loads parameters via schema.load
+    io: Optional[FileIo] = None  # derived class must implement __setup_io__
+
 
     time_of_analysis: Optional[datetime] = None
     serving_from_json: bool = False
 
-    io: Optional[FileIo] = None
 
     # wikipedia_page_analyzer: Optional[WikipediaAnalyzer] = None
     # # TODO this should not be defined in this class - it should live in wiki article class
@@ -75,7 +76,7 @@ class StatisticsViewV2(Resource):
             raise MissingInformationError()
 
         app.logger.debug("before self.schema.load")
-        self.job = self.schema.load(request.args)
+        self.job = self.schema.load(request.args)  # request.args is a flask property
         app.logger.debug("after self.schema.load")
         if not self.job:
             console.print("self.job is null")

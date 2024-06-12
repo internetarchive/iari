@@ -16,21 +16,28 @@ logger = logging.getLogger(__name__)
 class MediawikiSection(BaseModel):
     """This accepts both wikicode directly from mwparserfromhell and wikitext"""
 
+    wikitext: str = ""
+    wikicode: Optional[Wikicode] = None
+    references: List[WikipediaReference] = []
+    section_id: int = 0
+
+    job: ArticleJob
+
     testing: bool = False
     language_code: str = ""
-    wikicode: Optional[Wikicode] = None
-    wikitext: str = ""
-    references: List[WikipediaReference] = []
-    job: ArticleJob
 
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
 
     @property
     def is_general_reference_section(self):
-        if not self.job.regex:
-            raise MissingInformationError("No regex in job")
-        return bool(re.findall(pattern=self.job.regex, flags=re.I, string=self.name))
+        # TODO NB DELETE ME!
+        # if not self.job.regex:
+        #     raise MissingInformationError("No regex in job")
+        # return bool(re.findall(pattern=self.job.regex, flags=re.I, string=self.name))
+        if not self.job.sections:
+            raise MissingInformationError("\"sections\" property not defined in job")
+        return bool(re.findall(pattern=self.job.sections, flags=re.I, string=self.name))
 
     @property
     def __get_lines__(self):
@@ -47,7 +54,8 @@ class MediawikiSection(BaseModel):
             logger.info(f"== not found in line {line}")
             return "root"
         else:
-            return str(self.__extract_name_from_line__(line=line))
+            # return str(self.__extract_name_from_line__(line=line))
+            return str(line.replace("=", ""))
 
     @property
     def number_of_references(self):
@@ -58,12 +66,12 @@ class MediawikiSection(BaseModel):
         """This determines if the line in the current section has a star"""
         return bool("*" in line[:1])
 
-    @staticmethod
-    def __extract_name_from_line__(line):
-        from src import app
-
-        app.logger.debug("extract_name_from_line: running")
-        return line.replace("=", "")
+    # @staticmethod
+    # def __extract_name_from_line__(line):
+    #     from src import app
+    #
+    #     app.logger.debug("extract_name_from_line: running")
+    #     return line.replace("=", "")
 
     def __extract_all_general_references__(self):
         from src import app
@@ -78,7 +86,7 @@ class MediawikiSection(BaseModel):
                 f"Extracting {len(lines_without_heading)} lines form section {lines[0]}"
             )
             for line in lines_without_heading:
-                logger.info(f"Working on line: {line}")
+                logger.info(f"Extracting line: {line} from section {self.name}")
                 # Guard against empty line
                 # logger.debug("Parsing line")
                 # We discard all lines not starting with a star to avoid all
@@ -95,6 +103,7 @@ class MediawikiSection(BaseModel):
                         language_code=self.language_code,
                         is_general_reference=True,
                         section=self.name,
+                        section_id=self.section_id,
                     )
                     reference.extract_and_check()
                     self.references.append(reference)
@@ -130,6 +139,7 @@ class MediawikiSection(BaseModel):
                 testing=self.testing,
                 language_code=self.language_code,
                 section=self.name,
+                section_id=self.section_id,
             )
 
             reference.extract_and_check()

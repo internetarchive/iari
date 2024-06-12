@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+
 def add_cors_headers(response):
     # Replace "*" with the specific origin(s) you want to allow
     response.headers["Access-Control-Allow-Origin"] = "*"

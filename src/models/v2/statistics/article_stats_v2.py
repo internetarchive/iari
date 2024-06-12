@@ -29,7 +29,7 @@ class ArticleStatisticsV2(BaseModel):
     isodate: str = ""  # isodate (human readable) at beginning of analysis
 
     timestamp: int = 0  # timestamp at beginning of analysis
-    timing: int = 0  # time to analyze in seconds
+    execution_time: int = 0  # time to analyze in seconds
 
     ores_score: Any = {}
 

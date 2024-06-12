@@ -37,22 +37,28 @@ class WikipediaReference(JobBaseModel):
     Support date ranges like "May-June 2011"? See https://stackoverflow.com/questions/10340029/
     """
 
+    testing: bool = False
+
     wikicode: Union[Tag, Wikicode]  # output from mwparserfromhell
     templates: Optional[List[WikipediaTemplate]] = None
     multiple_templates_found: bool = False
-    testing: bool = False
     extraction_done: bool = False
-    is_empty_named_reference: bool = False
-    is_general_reference: bool = False
     wikicoded_links: Optional[List[WikipediaUrl]] = None
+
     bare_urls: Optional[List[WikipediaUrl]] = None
     template_urls: Optional[List[WikipediaUrl]] = None
     reference_urls: Optional[List[WikipediaUrl]] = None
     comment_urls: Optional[List[WikipediaUrl]] = None
+
+    is_empty_named_reference: bool = False
+    is_general_reference: bool = False
     unique_first_level_domains: Optional[List[str]] = None
     language_code: str = ""
+
     reference_id: str = ""
     section: str
+    section_id: str
+
     soup: Optional[Any] = None
     comments: Optional[List[Comment]] = None
 

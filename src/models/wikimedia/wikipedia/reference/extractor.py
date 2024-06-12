@@ -30,13 +30,14 @@ class WikipediaReferenceExtractor(WariBaseModel):
     job: ArticleJob
     language_code: str = ""
     sections: Optional[List[MediawikiSection]] = None
+    section_list: List = []  # array of { section dict } : { id: ###, name: xxx }
 
+    html_source: str = ""  # rendered html - used to extract citeref reference data
     wikitext: str
     wikicode: Wikicode = None  # wiki object tree parsed from wikitext
-    html_source: str = ""  # used to extract citeref reference data
 
     references: Optional[List[WikipediaReference]] = None
-    # cite_page_refs: Optional[List] = []
+    new_references: Optional[List[WikipediaReference]] = None
     cite_page_refs: List = []
 
     # wikibase: Wikibase # ??? What is this? TODO
@@ -206,18 +207,21 @@ class WikipediaReferenceExtractor(WariBaseModel):
         """Extract all references from self.wikitext"""
         from src import app
 
-        app.logger.debug("extract_all_references: running")
+        app.logger.debug("==> extract_all_references")
         if not self.job:
             raise MissingInformationError("no job")
-        self.__parse_wikitext__()
+
+        self.__parse_wikitext__()  # populates self.wikicode
         self.__parse_html_source__()  # fetches html and extracts reference citations
-        self.__extract_sections__()
-        self.__populate_references__()
+
+        self.__extract_sections__()  # pulls refs from sections within wikicode
+        self.__populate_references__()  # copies references from each section into top-level references object
+
         app.logger.info("Done extracting all references")
 
     def __extract_sections__(self) -> None:
-        """This uses the regex supplied by the patron via the API
-        and populate the reference_sections attribute with a list of MediawikiSection objects
+        """This uses the sections regex supplied by the patron via the API
+        and populates the sections attribute with a list of MediawikiSection objects
 
         We only consider level 2 sections beginning with =="""
         from src import app
@@ -226,12 +230,41 @@ class WikipediaReferenceExtractor(WariBaseModel):
         app.logger.debug("__extract_sections__: running")
         if not self.wikicode:
             self.__parse_wikitext__()
+
+                            # all_sections: List[Wikicode] = self.wikicode.get_sections(
+                            #     # levels=[2],
+                            #     include_headings=True,
+                            # )
+
+                            # section_counter = 0
+                            # for section in all_sections:
+                            #     section_counter += 1
+                            #     app.logger.info(f"All Section #{section_counter}")
+                            #
+                            #     self.section_list.append({"id": section_counter, "name": "???"})
+                            #
+                            #     for node in section.filter_headings():
+                            #         header_text = node.title.strip()
+                            #         header_level = node.level
+                            #         # app.logger.info(f"Section id: {section_counter}, Header: {header_text}, Level: {header_level}")
+                            #         app.logger.info(f"Section #: {section_counter} header: {node}")
+
         sections: List[Wikicode] = self.wikicode.get_sections(
             levels=[2],
             include_headings=True,
         )
 
+        '''
+        loop thru all sections
+        keeping counter
+        when level 2 hit, 
+            create a mw_section object
+            set counter as section_id
+        '''
+
         # TODO: make this code better by special casing no section and making faux section, and putting through same loop
+
+        section_counter = 0
 
         if not sections:
             app.logger.debug("No level 2 sections detected, creating root section")
@@ -240,23 +273,38 @@ class WikipediaReferenceExtractor(WariBaseModel):
             mw_section = MediawikiSection(
                 # We add the whole article to the root section
                 wikicode=self.wikicode,
+                section_id=section_counter,
+
+                job=self.job,
+
                 testing=self.testing,
                 language_code=self.language_code,
-                job=self.job,
             )
             mw_section.extract()
             self.sections.append(mw_section)
+
         else:
+            section_counter += 1
+            app.logger.info(f"Processing section number {section_counter}")
+
+            # append root section as first section in section list
             self.__extract_root_section__()
+            # append each section to section list
             for section in sections:
+                app.logger.info(f"Section: {section}")
                 mw_section = MediawikiSection(
                     wikicode=section,
+                    section_id=section_counter,
+
+                    job=self.job,
+
                     testing=self.testing,
                     language_code=self.language_code,
-                    job=self.job,
                 )
-                mw_section.extract()
+
+                mw_section.extract()  # pull all refs from section
                 self.sections.append(mw_section)
+
         app.logger.debug(f"Number of sections found: {len(self.sections)}")
 
     def __parse_wikitext__(self):
@@ -267,14 +315,13 @@ class WikipediaReferenceExtractor(WariBaseModel):
             self.wikicode = mwparserfromhell.parse(self.wikitext)
 
 
-
     def __parse_html_source__(self):
         """
         Parses html to extract cite reference data from references section
         """
         from src import app
 
-        app.logger.debug("__parse_html_source__: running")
+        app.logger.debug("==> __parse_html_source__")
 
         if self.html_source:
             self.cite_page_refs = extract_cite_refs(self.html_source)
@@ -307,6 +354,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
                 first_level2_heading_line_number = index
                 # We break at first hit
                 break
+
         if first_level2_heading_line_number:
             root_section_wikitext = self.extract_lines(
                 end=first_level2_heading_line_number
@@ -315,9 +363,11 @@ class WikipediaReferenceExtractor(WariBaseModel):
             # exit()
             mw_section = MediawikiSection(
                 wikitext=root_section_wikitext,
+                section_id=0,
+                job=self.job,
+
                 testing=self.testing,
                 language_code=self.language_code,
-                job=self.job,
             )
             mw_section.extract()
             self.sections.append(mw_section)

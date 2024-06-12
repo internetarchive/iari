@@ -27,7 +27,7 @@ class TestWikipediaReferenceExtractor(TestCase):
         job = ArticleJob(
             regex="bibliography|further reading|works cited|sources|Test section"
         )
-        job.validate_regex_and_extract_url()
+        job.validate_sections_and_extract_url()
         self.job = job
 
     def test_number_of_references_zero(self):

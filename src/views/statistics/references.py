@@ -18,21 +18,22 @@ class References(StatisticsView):
     def get(self):
         self.__validate_and_get_job__()
         # load the article json
-        articlefileio = ArticleFileIo(wari_id=self.job.wari_id)
-        articlefileio.read_from_disk()
-        if not articlefileio.data:
+        article_file_io = ArticleFileIo(wari_id=self.job.wari_id)
+        article_file_io.read_from_disk()
+        if not article_file_io.data:
             return "No json in cache", 404
-        # console.print(articlefileio.data)
-        references = articlefileio.data["dehydrated_references"]
+        # console.print(article_file_io.data)
+        # references = article_file_io.data["dehydrated_references"]
+        references = article_file_io.data["references"]
         # get the references details
         details = []
         if self.job.all:
             for reference in references:
                 if "id" not in reference or not reference["id"]:
                     raise MissingInformationError()
-                referencefileio = ReferenceFileIo(hash_based_id=reference["id"])
-                referencefileio.read_from_disk()
-                data = referencefileio.data
+                reference_file_io = ReferenceFileIo(hash_based_id=reference["id"])
+                reference_file_io.read_from_disk()
+                data = reference_file_io.data
                 if not data:
                     return "No json in cache", 404
                 # convert to dehydrated reference:
@@ -46,9 +47,9 @@ class References(StatisticsView):
                     raise MissingInformationError("reference was empty")
                 if not isinstance(reference, dict):
                     raise TypeError(f"has was: {reference}")
-                referencefileio = ReferenceFileIo(hash_based_id=reference["id"])
-                referencefileio.read_from_disk()
-                data = referencefileio.data
+                reference_file_io = ReferenceFileIo(hash_based_id=reference["id"])
+                reference_file_io.read_from_disk()
+                data = reference_file_io.data
                 if not data:
                     return "No json in cache", 404
                 # convert to dehydrated reference:

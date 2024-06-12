@@ -135,7 +135,7 @@ class TestWikipediaAnalyzer(TestCase):
             assert "name" in reference
         # this tests if the wikitext is retained in the output of article
         # console.print(data)
-        for reference in data["dehydrated_references"]:
+        for reference in data["references"]:
             # this tests whether the deepcopy worked correctly
             assert "wikitext" in reference
 

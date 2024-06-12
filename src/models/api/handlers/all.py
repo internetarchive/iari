@@ -29,8 +29,8 @@ class AllHandler(WariBaseModel):
 
     @property
     def number_of_references(self) -> int:
-        if self.data and "dehydrated_references" in self.data:
-            return len(self.data["dehydrated_references"])
+        if self.data and "references" in self.data:
+            return len(self.data["references"])
         else:
             return 0
 

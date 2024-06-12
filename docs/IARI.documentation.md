@@ -10,3 +10,12 @@
 
 /statistics/article
 
+## structure
+
+views
+- endpoints defined:
+
+schema
+
+
+

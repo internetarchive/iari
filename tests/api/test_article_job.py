@@ -55,23 +55,23 @@ class TestArticleJob(TestCase):
 
     def test_valid_regex_valid_input(self):
         job = ArticleJob(regex="test string | another string | a third string")
-        assert job.__valid_regex__ is False
+        assert job.__valid_sections__ is False
         job2 = ArticleJob(regex="test|string|another|string")
-        assert job2.__valid_regex__ is True
+        assert job2.__valid_sections__ is True
         job3 = ArticleJob(regex="teststring")
-        assert job3.__valid_regex__ is True
+        assert job3.__valid_sections__ is True
         job4 = ArticleJob(
             regex="bibliography|further reading|works cited|sources|external links"
         )
-        assert job4.__valid_regex__ is True
+        assert job4.__valid_sections__ is True
 
     def test_valid_regex_invalid_input(self):
         job = ArticleJob(regex="test string | another string | a third string")
-        assert job.__valid_regex__ is False
+        assert job.__valid_sections__ is False
         job2 = ArticleJob(regex="test||string")
-        assert job2.__valid_regex__ is False
+        assert job2.__valid_sections__ is False
         job3 = ArticleJob(regex="teststring_")
-        assert job3.__valid_regex__ is False
+        assert job3.__valid_sections__ is False
 
     def test_dehydrate(self):
         job = ArticleJob(title="Test", site="wikipedia", lang="en")

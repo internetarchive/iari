@@ -18,7 +18,7 @@ class ArticleJob(Job):
     page_id: int = 0
     refresh: bool = False
     url: str = ""
-    regex: str = ""
+    sections: str = ""  # string describing which sections to parse
     revision: int = 0  # this is named just as in the MediaWiki API
     dehydrate: bool = True
 
@@ -94,7 +94,7 @@ class ArticleJob(Job):
                 app.logger.error("Not a supported Wikimedia URL")
 
     @property
-    def __valid_regex__(self) -> bool:
+    def __valid_sections__(self) -> bool:
         """Validate the regex, it should look like this:
         bibliography|further reading|works cited|sources|external links
 
@@ -105,19 +105,19 @@ class ArticleJob(Job):
         _ is not allowed anywhere"""
         underscore_pattern = re.compile(r"^[^_]*$")
         pipe_delimiter_pattern = r"^(\s*[^\s]+\s*)+(\s*\|\s*[^\s]+\s*)*$"
-        if " | " in self.regex:
+        if " | " in self.sections:
             return False
-        if "||" in self.regex:
+        if "||" in self.sections:
             return False
-        if not re.fullmatch(underscore_pattern, self.regex):
+        if not re.fullmatch(underscore_pattern, self.sections):
             return False
-        if re.fullmatch(pipe_delimiter_pattern, self.regex):
+        if re.fullmatch(pipe_delimiter_pattern, self.sections):
             # print('The string is formatted correctly.')
             return True
         else:
             # print('The string is not formatted correctly.')
             return False
 
-    def validate_regex_and_extract_url(self):
-        if self.__valid_regex__:
+    def validate_sections_and_extract_url(self):
+        if self.__valid_sections__:
             self.__extract_url__()

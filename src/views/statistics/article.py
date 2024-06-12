@@ -1,15 +1,19 @@
 from datetime import datetime
 from typing import Any, Tuple
+import traceback
 
 from flask_restful import Resource, abort  # type: ignore
 
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.schema.article_schema import ArticleSchema
 from src.models.exceptions import MissingInformationError
+
 from src.models.file_io.article_file_io import ArticleFileIo
 from src.models.file_io.references import ReferencesFileIo
+
 from src.models.wikimedia.enums import AnalyzerReturnValues, WikimediaDomain
 from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
+
 from src.views.statistics.write_view import StatisticsWriteView
 
 
@@ -82,6 +86,9 @@ class Article(StatisticsWriteView):
             return self.__analyze_and_write_and_return__()
 
     def __get_statistics__(self):
+        """
+        get the results from wikipedia_page_analyzer.get_statistics and save to self.io.data
+        """
         from src import app
 
         app.logger.debug("__get_statistics__: running")
@@ -145,7 +152,13 @@ class Article(StatisticsWriteView):
             and self.job.title
             and self.job.domain == WikimediaDomain.wikipedia
         ) or self.job.url:
-            return self.__return_from_cache_or_analyze_and_return__()
+            try:
+                return self.__return_from_cache_or_analyze_and_return__()
+            except Exception as e:
+                traceback.print_exc()
+                return {"error": f"General Error: {str(e)}"}, 500
+
+
         else:
             return self.__return_meaningful_error__()
 

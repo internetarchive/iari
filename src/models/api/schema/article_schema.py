@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 class ArticleSchema(BaseSchema):
     url = fields.Str(required=True)
     revision = fields.Int(required=False)
-    regex = fields.Str(required=True)
+    # regex = fields.Str(required=True)
+    sections = fields.Str(required=False)
     dehydrate = fields.Bool(required=False)
 
     # noinspection PyUnusedLocal
@@ -24,5 +25,5 @@ class ArticleSchema(BaseSchema):
 
         app.logger.debug("return_object: running")
         job = ArticleJob(**data)
-        job.validate_regex_and_extract_url()
+        job.validate_sections_and_extract_url()
         return job

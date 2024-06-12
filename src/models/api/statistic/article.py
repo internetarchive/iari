@@ -11,6 +11,8 @@ class ArticleStatistics(BaseModel):
 
     We use BaseModel to avoid the cache attribute"""
 
+    iari_version: str = ""
+
     wari_id: str = ""
     lang: str = "en"  # language code according to Wikimedia
     page_id: int = 0  # page id of the Wikipedia in question
@@ -19,16 +21,22 @@ class ArticleStatistics(BaseModel):
     revision_timestamp: int = 0
     site: str = WikimediaDomain.wikipedia.value  # wikimedia site in question
     title: str = ""
-    ores_score: Any = {}
 
     served_from_cache: bool = False
     timestamp: int = 0  # timestamp at beginning of analysis
     isodate: str = ""  # isodate (human readable) at beginning of analysis
-    timing: int = 0  # time to analyze in seconds
+    execution_time: int = 0  # time to analyze in seconds
 
-    references: List[str] = []
+    statistics: Dict[str, Any] = {}
+
+    section_info: Dict[str, Any] = []
+    sections: List[Any] = []
+
+    reference_count: int = 0
     reference_statistics: Dict[str, int] = {}
-    dehydrated_references: List[str] = []
+    references: List[str] = []
+    # dehydrated_references: List[str] = []
+    dehydrated_references: bool = False
 
     cite_refs_count: int = 0
     cite_refs: Optional[List] = []

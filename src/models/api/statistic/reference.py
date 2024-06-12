@@ -13,6 +13,7 @@ class ReferenceStatistic(BaseModel):
     type: str  # [general|footnote]
     footnote_subtype: str  # [named|content]
     section: str = ""
+    section_id: str = ""
 
     titles: List[str] = []
     template_names: List[str]

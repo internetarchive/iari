@@ -3,6 +3,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from src.helpers.get_version import get_poetry_version
 from src.models.api.job.article_job import ArticleJob
 from src.models.api.statistic.article import ArticleStatistics
 from src.models.api.statistic.reference import ReferenceStatistic
@@ -16,7 +17,7 @@ from src.models.wikimedia.wikipedia.reference.enums import (
 
 # from src.models.v2.job.article_job_v2 import ArticleJobV2
 # from src.models.v2.job.article_job_v2 import ArticleJobV2
-from src.models.v2.wikimedia.wikipedia.article_v2 import WikipediaArticleV2
+###from src.models.v2.wikimedia.wikipedia.article_v2 import WikipediaArticleV2
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class WikipediaAnalyzer(WariBaseModel):
     job: Optional[ArticleJob] = None
     article: Optional[WikipediaArticle] = None
 
-    articleV2: Optional[WikipediaArticleV2]  # html parsed article, for merging data
+###    articleV2: Optional[WikipediaArticleV2]  # html parsed article, for merging data
 
     article_statistics: Optional[
         ArticleStatistics
@@ -40,7 +41,7 @@ class WikipediaAnalyzer(WariBaseModel):
     # wikibase: Wikibase = IASandboxWikibase()
 
     reference_statistics: Optional[List[Dict[str, Any]]] = None
-    dehydrated_reference_statistics: Optional[List[Dict[str, Any]]] = None
+#    dehydrated_reference_statistics: Optional[List[Dict[str, Any]]] = None
 
     @property
     def testing(self):
@@ -84,16 +85,19 @@ class WikipediaAnalyzer(WariBaseModel):
                 self.job.get_ids_from_mediawiki_api()
 
             self.article_statistics = ArticleStatistics(
+                iari_version=get_poetry_version("pyproject.toml"),
+
                 wari_id=self.job.wari_id,
                 lang=self.job.lang,
+                page_id=self.article.page_id,
+                title=self.job.title,
+                reference_count=ae.number_of_references,
                 reference_statistics={
                     "named": ae.number_of_empty_named_references,
                     "footnote": ae.number_of_footnote_references,
                     "content": ae.number_of_content_references,
                     "general": ae.number_of_general_references,
                 },
-                page_id=self.article.page_id,
-                title=self.job.title,
                 urls=ae.raw_urls,
                 cite_refs=ae.cite_refs,
                 cite_refs_count=ae.cite_refs_count,
@@ -101,7 +105,9 @@ class WikipediaAnalyzer(WariBaseModel):
                 served_from_cache=False,
                 site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
-                ores_score=self.article.ores_details,
+                statistics={
+                    "ores_score": self.article.ores_details,
+                },
                 revision_isodate=self.article.revision_isodate.isoformat(),
                 revision_timestamp=self.article.revision_timestamp,
                 revision_id=self.article.revision_id,
@@ -117,11 +123,14 @@ class WikipediaAnalyzer(WariBaseModel):
         if not self.article_statistics:
             self.__gather_article_statistics__()
             self.__gather_reference_statistics__()
-            if self.job.dehydrate:
-                self.__extract_dehydrated_references__()
-                self.__insert_dehydrated_references_into_the_article_statistics__()
-            else:
-                self.__insert_full_references_into_the_article_statistics__()
+            self.__insert_references_into_article_statistics__(self.job.dehydrate)
+
+            # if self.job.dehydrate:
+            #     self.__extract_dehydrated_references__()
+            #     self.__insert_dehydrated_references_into_the_article_statistics__()
+            # else:
+            #     self.__insert_references_article_statistics__(self.job.dehydrate)
+
 
         return self.__get_statistics_dict__()
 
@@ -157,11 +166,13 @@ class WikipediaAnalyzer(WariBaseModel):
                 f"{self.article.extractor.number_of_references} references"
             )
 
+
             # app.logger.debug(f"### ### ###")
             # app.logger.debug(f"### START ###")
             # app.logger.debug(f"__gather_reference_statistics__")
             # app.logger.debug(f"### ### ###")
             # app.logger.debug(f"### ### ###")
+
 
             ref_counter = 0
 
@@ -202,11 +213,13 @@ class WikipediaAnalyzer(WariBaseModel):
                     else [],
                     wikitext=reference.get_wikicode_as_string,
                     section=reference.section,
+                    section_id=reference.section_id,
                     template_names=reference.template_names,
                     templates=reference.get_template_dicts,
                     urls=reference.raw_urls,
                     url_objects=reference.get_reference_url_dicts,
                 ).dict()
+
                 self.reference_statistics.append(data)
 
             # app.logger.debug(f"### ### ###")
@@ -231,23 +244,23 @@ class WikipediaAnalyzer(WariBaseModel):
         else:
             raise MissingInformationError("Got no title")
 
-    def __extract_dehydrated_references__(self):
-        # We use a local variable here to avoid this regression
-        # https://github.com/internetarchive/wari/issues/700
-        self.dehydrated_reference_statistics = deepcopy(self.reference_statistics)
-        for data in self.dehydrated_reference_statistics:
-            # We return most of the data including the wikitext to accommodate
-            # see https://github.com/internetarchive/iari/issues/831
-            del data["templates"]
-            del data["url_objects"]
+    # def __extract_dehydrated_references__(self):
+    #     # We use a local variable here to avoid this regression
+    #     # https://github.com/internetarchive/wari/issues/700
+    #     self.dehydrated_reference_statistics = deepcopy(self.reference_statistics)
+    #     for data in self.dehydrated_reference_statistics:
+    #         # We return most of the data including the wikitext to accommodate
+    #         # see https://github.com/internetarchive/iari/issues/831
+    #         del data["templates"]
+    #         del data["url_objects"]
 
-    def __insert_dehydrated_references_into_the_article_statistics__(self):
-        if self.article_statistics:
-            self.article_statistics.dehydrated_references = (
-                self.dehydrated_reference_statistics
-            )
+    # def __insert_dehydrated_references_into_the_article_statistics__(self):
+    #     if self.article_statistics:
+    #         self.article_statistics.dehydrated_references = (
+    #             self.dehydrated_reference_statistics
+    #         )
 
-    def __insert_full_references_into_the_article_statistics__(self):
+    def __insert_references_into_article_statistics__(self, dehydrated):
         """We return the full reference to accommodate IARE, see https://github.com/internetarchive/iari/issues/886"""
         if self.article_statistics:
 
