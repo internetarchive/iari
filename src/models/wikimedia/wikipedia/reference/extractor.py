@@ -29,18 +29,20 @@ class WikipediaReferenceExtractor(WariBaseModel):
 
     job: ArticleJob
     language_code: str = ""
+
     sections: Optional[List[MediawikiSection]] = None
-    section_list: List = []  # array of { section dict } : { id: ###, name: xxx }
+    # sections: str = ""
+    section_info: Dict[str, Any] = {}
+    # section_list: List = [Any]  # array of { section dict } : { id: ###, name: xxx }
 
     html_source: str = ""  # rendered html - used to extract citeref reference data
     wikitext: str
     wikicode: Wikicode = None  # wiki object tree parsed from wikitext
 
     references: Optional[List[WikipediaReference]] = None
-    new_references: Optional[List[WikipediaReference]] = None
     cite_page_refs: List = []
 
-    # wikibase: Wikibase # ??? What is this? TODO
+    new_references: Optional[List[WikipediaReference]] = None  # experimental as of june 2024
 
     testing: bool = False
 
@@ -158,7 +160,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return [
             reference
             for reference in self.references
-            if reference.is_empty_named_reference
+            if reference.is_named_reused_reference
         ]
 
     @property
@@ -171,7 +173,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         return [
             reference
             for reference in self.references
-            if not reference.is_empty_named_reference
+            if not reference.is_named_reused_reference
         ]
 
     @property
@@ -265,6 +267,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
         # TODO: make this code better by special casing no section and making faux section, and putting through same loop
 
         section_counter = 0
+        section_list = []
 
         if not sections:
             app.logger.debug("No level 2 sections detected, creating root section")
@@ -284,14 +287,18 @@ class WikipediaReferenceExtractor(WariBaseModel):
             self.sections.append(mw_section)
 
         else:
-            section_counter += 1
             app.logger.info(f"Processing section number {section_counter}")
 
             # append root section as first section in section list
             self.__extract_root_section__()
+
             # append each section to section list
             for section in sections:
+
+                section_counter += 1
+
                 app.logger.info(f"Section: {section}")
+
                 mw_section = MediawikiSection(
                     wikicode=section,
                     section_id=section_counter,
@@ -305,7 +312,14 @@ class WikipediaReferenceExtractor(WariBaseModel):
                 mw_section.extract()  # pull all refs from section
                 self.sections.append(mw_section)
 
+                section_list.append({"name": "section name", "counter": section_counter})
+
+
         app.logger.debug(f"Number of sections found: {len(self.sections)}")
+
+        self.section_info.update({"count": len(self.sections), "list": section_list})
+        # self.section_info["count"] = len(self.sections)
+        # self.section_info["list"] = section_list
 
     def __parse_wikitext__(self):
         from src import app

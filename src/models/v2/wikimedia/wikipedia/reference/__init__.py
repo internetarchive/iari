@@ -44,7 +44,7 @@ class WikipediaReferenceV2(JobBaseModel):
 
     multiple_templates_found: bool = False
     extraction_done: bool = False
-    is_empty_named_reference: bool = False
+    is_named_reused_reference: bool = False
     is_general_reference: bool = False
 
     wikicoded_links: Optional[List[WikipediaUrlV2]] = None
@@ -105,7 +105,7 @@ class WikipediaReferenceV2(JobBaseModel):
         if self.is_footnote_reference:
             type_ = (
                 FootnoteSubtype.NAMED
-                if self.is_empty_named_reference
+                if self.is_named_reused_reference
                 else FootnoteSubtype.CONTENT
             )
         return type_
@@ -339,7 +339,7 @@ class WikipediaReferenceV2(JobBaseModel):
             "</ref>" not in wikicode_string or "></ref>" in wikicode_string
         ):
             logger.info(f"Skipping named reference with no content {wikicode_string}")
-            self.is_empty_named_reference = True
+            self.is_named_reused_reference = True
         else:
             logger.debug(f"Extracting templates from: {self.wikicode}")
             if isinstance(self.wikicode, Tag):

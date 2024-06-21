@@ -8,3 +8,7 @@ class StatisticsWriteView(StatisticsView):
     def __setup_and_read_from_cache__(self):
         self.__setup_io__()
         self.io.read_from_disk()
+
+    def __read_from_cache__(self):
+        if self.io:
+            self.io.read_from_disk()

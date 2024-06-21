@@ -12,6 +12,7 @@ class ArticleStatistics(BaseModel):
     We use BaseModel to avoid the cache attribute"""
 
     iari_version: str = ""
+    fake: str = "fake"
 
     wari_id: str = ""
     lang: str = "en"  # language code according to Wikimedia
@@ -29,8 +30,10 @@ class ArticleStatistics(BaseModel):
 
     statistics: Dict[str, Any] = {}
 
+    article_info: Dict[str, Any] = []
     section_info: Dict[str, Any] = []
-    sections: List[Any] = []
+    # sections: List[Any] = []
+    # sections: str = ""
 
     reference_count: int = 0
     reference_statistics: Dict[str, int] = {}

@@ -148,7 +148,7 @@ class WikipediaReferenceExtractorV2(WariBaseModel):
         return [
             reference
             for reference in self.references
-            if reference.is_empty_named_reference
+            if reference.is_named_reused_reference
         ]
 
     @property
@@ -161,7 +161,7 @@ class WikipediaReferenceExtractorV2(WariBaseModel):
         return [
             reference
             for reference in self.references
-            if not reference.is_empty_named_reference
+            if not reference.is_named_reused_reference
         ]
 
     @property

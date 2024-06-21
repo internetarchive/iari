@@ -50,8 +50,9 @@ class WikipediaReference(JobBaseModel):
     reference_urls: Optional[List[WikipediaUrl]] = None
     comment_urls: Optional[List[WikipediaUrl]] = None
 
-    is_empty_named_reference: bool = False
-    is_general_reference: bool = False
+    is_general_reference: bool = False  # gets set to True upon initialization
+    is_named_reused_reference: bool = False
+
     unique_first_level_domains: Optional[List[str]] = None
     language_code: str = ""
 
@@ -106,7 +107,7 @@ class WikipediaReference(JobBaseModel):
         if self.is_footnote_reference:
             type_ = (
                 FootnoteSubtype.NAMED
-                if self.is_empty_named_reference
+                if self.is_named_reused_reference
                 else FootnoteSubtype.CONTENT
             )
         return type_
@@ -155,12 +156,16 @@ class WikipediaReference(JobBaseModel):
 
     @property
     def is_footnote_reference(self):
+        # """This could also be implemented based on the class type of the wikicode attribute.
+        # I choose not to because it could perhaps be brittle."""
+        # if self.is_general_reference:
+        #     return False
+        # else:
+        #     return True
+
         """This could also be implemented based on the class type of the wikicode attribute.
-        I choose not to because it could perhaps be brittle."""
-        if self.is_general_reference:
-            return False
-        else:
-            return True
+                I choose not to because it could perhaps be brittle."""
+        return not self.is_general_reference
 
     @property
     def get_wikicode_as_string(self):
@@ -325,45 +330,71 @@ class WikipediaReference(JobBaseModel):
         self.extraction_done = True
 
     def __extract_raw_templates__(self) -> None:
-        """Extract the templates from self.wikicode"""
+        """populate self.templates with templates from self.wikicode """
         from src import app
 
         self.templates = []
-        app.logger.debug("__extract_raw_templates__: running")
+
+        app.logger.debug("==> __extract_raw_templates__")
+
         if not self.wikicode:
-            raise MissingInformationError("self.wikicode was None")
+            raise MissingInformationError("__extract_raw_templates__: self.wikicode is None")
         if isinstance(self.wikicode, str):
-            raise MissingInformationError("self.wikicode was str")
-        # Skip named references like "<ref name="INE"/>"
-        wikicode_string = str(self.wikicode)
-        if self.is_footnote_reference and (
-            "</ref>" not in wikicode_string or "></ref>" in wikicode_string
-        ):
-            logger.info(f"Skipping named reference with no content {wikicode_string}")
-            self.is_empty_named_reference = True
+            raise MissingInformationError("__extract_raw_templates__: self.wikicode is str")
+
+        app.logger.debug(f"Extracting templates from: {self.wikicode}")
+        if isinstance(self.wikicode, Tag):
+            # contents is needed here to get a Wikicode object
+            raw_templates = self.wikicode.contents.ifilter_templates(
+                matches=lambda x: not x.name.lstrip().startswith("#"),
+                recursive=True,
+            )
         else:
-            logger.debug(f"Extracting templates from: {self.wikicode}")
-            if isinstance(self.wikicode, Tag):
-                # contents is needed here to get a Wikicode object
-                raw_templates = self.wikicode.contents.ifilter_templates(
-                    matches=lambda x: not x.name.lstrip().startswith("#"),
-                    recursive=True,
+            raw_templates = self.wikicode.ifilter_templates(
+                matches=lambda x: not x.name.lstrip().startswith("#"),
+                recursive=True,
+            )
+        count = 0
+        for raw_template in raw_templates:
+            count += 1
+            self.templates.append(
+                WikipediaTemplate(
+                    raw_template=raw_template, language_code=self.language_code
                 )
-            else:
-                raw_templates = self.wikicode.ifilter_templates(
-                    matches=lambda x: not x.name.lstrip().startswith("#"),
-                    recursive=True,
-                )
-            count = 0
-            for raw_template in raw_templates:
-                count += 1
-                self.templates.append(
-                    WikipediaTemplate(
-                        raw_template=raw_template, language_code=self.language_code
-                    )
-                )
-            if count == 0:
-                logger.debug("Found no templates")
+            )
+        if count == 0:
+            app.logger.debug("Found no templates")
+
+        #
+        # # Skip template extraction if reference is a named references like "<ref name="INE"/>"
+        # if not self.is_reused_reference:
+        #     return
+        #     app.logger.info(f"Named reused reference in {wikicode_string}")
+        #     self.is_named_reused_reference = True
+        #
+        # else:
+        #     logger.debug(f"Extracting templates from: {self.wikicode}")
+        #     if isinstance(self.wikicode, Tag):
+        #         # contents is needed here to get a Wikicode object
+        #         raw_templates = self.wikicode.contents.ifilter_templates(
+        #             matches=lambda x: not x.name.lstrip().startswith("#"),
+        #             recursive=True,
+        #         )
+        #     else:
+        #         raw_templates = self.wikicode.ifilter_templates(
+        #             matches=lambda x: not x.name.lstrip().startswith("#"),
+        #             recursive=True,
+        #         )
+        #     count = 0
+        #     for raw_template in raw_templates:
+        #         count += 1
+        #         self.templates.append(
+        #             WikipediaTemplate(
+        #                 raw_template=raw_template, language_code=self.language_code
+        #             )
+        #         )
+        #     if count == 0:
+        #         logger.debug("Found no templates")
 
     def __extract_and_clean_template_parameters__(self) -> None:
         """We extract all templates"""
@@ -380,9 +411,13 @@ class WikipediaReference(JobBaseModel):
         """Helper method"""
         from src import app
 
-        app.logger.debug("extract_and_check: running")
-        self.__parse_xhtml__()
-        self.__extract_xhtml_comments__()
+        app.logger.debug("==> extract_and_check")
+
+        self.__parse_xhtml__()  # sets local self.soup to parsed xml of ref element
+        self.__extract_xhtml_comments__()  # TODO ?? what does this do with results??? is this useless?
+
+        self.__identify_reference_type__()  # set attributes for reference
+
         self.__extract_templates_and_parameters__()
         self.__extract_reference_urls__()
         self.__extract_unique_first_level_domains__()
@@ -395,6 +430,15 @@ class WikipediaReference(JobBaseModel):
 
     def __extract_xhtml_comments__(self):
         if not self.soup:
-            raise MissingInformationError()
+            raise MissingInformationError("soup not defined for generic reference.")
         # Find all comment tags in the HTML
         return self.soup.find_all(text=lambda text: isinstance(text, Comment))
+
+    def __identify_reference_type__(self):
+        """set is_named_reused_reference"""
+        if self.is_footnote_reference:
+            wikicode_string = str(self.wikicode)
+            if "</ref>" not in wikicode_string or "></ref>" in wikicode_string:
+                self.is_named_reused_reference = True
+
+

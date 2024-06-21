@@ -191,7 +191,7 @@ class WikipediaTemplate(BaseModel):
     def extract_and_prepare_parameter_and_flds(self) -> Any:
         from src import app
 
-        app.logger.debug("extract_and_prepare_parameter_and_flds: running")
+        app.logger.debug("==> extract_and_prepare_parameter_and_flds")
         self.__extract_and_clean_template_parameters__()
         self.__fix_key_names_in_template_parameters__()
         self.__add_template_name_to_parameters__()

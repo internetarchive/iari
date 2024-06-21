@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Any, Tuple
 import traceback
 
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+
 from flask_restful import Resource, abort  # type: ignore
 
 from src.models.api.job.article_job import ArticleJob
@@ -24,66 +26,120 @@ class Article(StatisticsWriteView):
     schema = ArticleSchema()
     job: ArticleJob
 
-    def __analyze_and_write_and_return__(self) -> Tuple[Any, int]:
-        """Analyze, calculate the time, write statistics to disk and return it
-        If we did not get statistics, return a meaningful error to the patron"""
+    def get(self):
+        """This is the main method and the entrypoint for flask
+        Every branch in this method has to return a tuple (Any,response_code)"""
         from src import app
 
-        app.logger.info("__analyze_and_write_and_return__: running")
+        app.logger.debug("statistics/article/get: running")
 
-        if not self.wikipedia_page_analyzer:
-            raise MissingInformationError("self.wikipedia_page_analyzer was None")
+        try:
+            self.__validate_and_get_job__()  # generic for all endpoints
+            if (
+                    self.job.lang == "en"
+                    and self.job.title
+                    and self.job.domain == WikimediaDomain.wikipedia
+            ) or self.job.url:
+                try:
+                    return self.__handle_article_request__()
+                except Exception as e:
+                    traceback.print_exc()
+                    return {"error": f"Unhandled Error: {str(e)}"}, 500
 
-        self.__get_statistics__()
-
-        if self.wikipedia_page_analyzer.found:
-            app.logger.debug("found article")
-            if self.wikipedia_page_analyzer.is_redirect:
-                app.logger.debug("found redirect")
-                return AnalyzerReturnValues.IS_REDIRECT.value, 400
             else:
-                app.logger.debug("adding time information and returning the statistics")
-                self.__update_statistics_with_time_information__()
-                # app.logger.debug(f"dictionary from analyzer: {self.statistics_dictionary}")
-                # we got a json response
-                # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
-                # flask calls jsonify automatically
-                self.__write_to_disk__()
-                if not self.io:
-                    raise MissingInformationError()
-                if self.io.data:
-                    self.io.data["served_from_cache"] = False
-                    # app.logger.debug("returning dictionary")
-                    return self.io.data, 200
-                else:
-                    raise MissingInformationError()
-        else:
-            return AnalyzerReturnValues.NOT_FOUND.value, 404
+                return self.__return_meaningful_error__()
 
-    def __return_from_cache_or_analyze_and_return__(self):
+        except WikipediaApiFetchError as e:
+            return {"error": f"API Error: {str(e)}"}, 500
+
+        except MissingInformationError as e:
+            return {"error": f"Missing Information Error: {str(e)}"}, 500
+
+        except Exception as e:
+            traceback.print_exc()
+            return {"error": f"General Error: {str(e)}"}, 500
+
+    def __handle_article_request__(self):
         from src import app
 
-        app.logger.debug("got valid job")
+        # # self.__setup_and_read_from_cache__()
+        # self.__setup_io__()
+        # self.__read_from_cache__()
 
-        self.__setup_and_read_from_cache__()
+        self.__setup_io__()
 
-        if self.io.data and not self.job.refresh:
-            # we have cached data - return it, if not force refresh
-
-            app.logger.info("Returning data from the cache")
-
-            self.__setup_and_read_from_cache__()
+        if not self.job.refresh:
+            # if cache exists, return it (else flows thru to fresh fetch)
+            self.__read_from_cache__()
             if self.io.data:
                 # We got the statistics from json, return them as is
                 app.logger.info(
                     f"Returning existing json from disk with date: {self.time_of_analysis}"
                 )
                 return self.io.data, 200
+
+        app.logger.info("fetching article data and saving to cache")
+        self.__setup_wikipedia_analyzer__()
+        return self.__analyze_and_write_and_return__()
+
+        #
+        # if self.io.data and not self.job.refresh:
+        #     # we have cached data - return it, if not force refresh
+        #
+        #     app.logger.info("Returning data from the cache")
+        #
+        #     # self.__setup_and_read_from_cache__()
+        #     self.__read_from_cache__()
+        #     if self.io.data:
+        #         # We got the statistics from json, return them as is
+        #         app.logger.info(
+        #             f"Returning existing json from disk with date: {self.time_of_analysis}"
+        #         )
+        #         return self.io.data, 200
+        #
+        # else:
+        #     # we have to regenerate cache from scratch
+        #     app.logger.info("got refresh from patron or no data in cache")
+        #     self.__setup_wikipedia_analyzer__()
+        #     return self.__analyze_and_write_and_return__()
+
+    def __analyze_and_write_and_return__(self) -> Tuple[Any, int]:
+        """Analyze, calculate the time, write statistics to disk and return it
+        If we did not get statistics, return a meaningful error to the patron"""
+        from src import app
+
+        app.logger.info("==> __analyze_and_write_and_return__")
+
+        if not self.wikipedia_page_analyzer:
+            raise MissingInformationError("self.wikipedia_page_analyzer was None")
+
+        self.__get_statistics__()  # populate self.io.data with analysis results
+        self.__setup_io__()
+        self.io.data = self.wikipedia_page_analyzer.get_statistics()
+
+        if self.wikipedia_page_analyzer.found:  # found === True means article was successfully processed
+            app.logger.debug("valid article found and processed")
+
+            if self.wikipedia_page_analyzer.is_redirect:
+                app.logger.debug("found redirect")
+                return AnalyzerReturnValues.IS_REDIRECT.value, 400
+
+            else:
+                app.logger.debug("adding time information and returning the statistics")
+                self.__update_statistics_with_time_information__()
+                # we got a json response
+                # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
+                # flask calls jsonify automatically
+                self.__write_to_disk__()  # writes self.io.dtata to disk
+                if not self.io:
+                    raise MissingInformationError()
+                if self.io.data:
+                    self.io.data["served_from_cache"] = False  # append return data
+                    return self.io.data, 200
+                else:
+                    raise MissingInformationError()
         else:
-            # we have to regenerate cache from scratch
-            app.logger.info("got refresh from patron or no data in cache")
-            self.__setup_wikipedia_analyzer__()
-            return self.__analyze_and_write_and_return__()
+            return AnalyzerReturnValues.NOT_FOUND.value, 404
 
     def __get_statistics__(self):
         """
@@ -91,9 +147,11 @@ class Article(StatisticsWriteView):
         """
         from src import app
 
-        app.logger.debug("__get_statistics__: running")
+        app.logger.debug("==> __get_statistics__")
+
         if not self.wikipedia_page_analyzer:
             raise MissingInformationError("self.wikipedia_page_analyzer was None")
+
         # https://realpython.com/python-timer/
         self.__setup_io__()
         self.io.data = self.wikipedia_page_analyzer.get_statistics()
@@ -108,19 +166,10 @@ class Article(StatisticsWriteView):
         else:
             raise ValueError("not a dict")
 
-    def __write_to_disk__(self):
-        """Write both article json and all reference json files"""
-        from src import app
-
-        app.logger.debug("__write_to_disk__: running")
-        if not self.job.testing:
-            self.__write_article_to_disk__()
-            self.__write_references_to_disk__()
-
     def __return_meaningful_error__(self):
         from src import app
 
-        app.logger.error("__return_meaningful_error__: running")
+        app.logger.error("==> __return_meaningful_error__")
         if self.job.title == "":
             return "Title was missing", 400
         if self.job.domain != "wikipedia":
@@ -130,40 +179,27 @@ class Article(StatisticsWriteView):
         if not self.wikipedia_page_analyzer:
             from src import app
 
-            app.logger.info(f"Analyzing {self.job.title}...")
+            app.logger.info(f"Setup analyzer for {self.job.title}...")
 
             # wikipedia_page_analyzer is declared in the StatisticsView class (views/statistics/__init.py)
             # NB This wrong! It should be declared here in the Article class.
             #   we fix this in the v2/ArticleV2 code, but not here, since it "works".
-            #   this is the only place it is called, so it makes no sense to declare it
-            #   in a base class that other objects that do not use the analysis feature...!
+            #   this is the only place it is called, so it makes no sense to
+            #   declare it in a base class that other objects that do not use
+            #   the analysis feature...!
             self.wikipedia_page_analyzer = WikipediaAnalyzer(job=self.job)
-
-    def get(self):
-        """This is the main method and the entrypoint for flask
-        Every branch in this method has to return a tuple (Any,response_code)"""
-        from src import app
-
-        app.logger.debug("statistics/article/get: running")
-
-        self.__validate_and_get_job__()  # generic for all endpoints
-        if (
-            self.job.lang == "en"
-            and self.job.title
-            and self.job.domain == WikimediaDomain.wikipedia
-        ) or self.job.url:
-            try:
-                return self.__return_from_cache_or_analyze_and_return__()
-            except Exception as e:
-                traceback.print_exc()
-                return {"error": f"General Error: {str(e)}"}, 500
-
-
-        else:
-            return self.__return_meaningful_error__()
 
     def __setup_io__(self):
         self.io = ArticleFileIo(job=self.job)
+
+    def __write_to_disk__(self):
+        """Write both article json and all reference json files"""
+        from src import app
+
+        app.logger.debug("__write_to_disk__: running")
+        if not self.job.testing:
+            self.__write_article_to_disk__()
+            self.__write_references_to_disk__()
 
     def __write_article_to_disk__(self):
         article_io = ArticleFileIo(

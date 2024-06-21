@@ -873,7 +873,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         for ref in refs:
             raw_reference_object = WikipediaReference(tag=ref, testing=True)
             raw_reference_object.extract_and_check()
-            assert raw_reference_object.is_empty_named_reference is True
+            assert raw_reference_object.is_named_reused_reference is True
 
     def test_get_wikicode_as_string_empty(self):
         ref = '<ref name="INE"/>'

@@ -31,16 +31,11 @@ class WikipediaAnalyzer(WariBaseModel):
 
     job: Optional[ArticleJob] = None
     article: Optional[WikipediaArticle] = None
-
-###    articleV2: Optional[WikipediaArticleV2]  # html parsed article, for merging data
-
-    article_statistics: Optional[
-        ArticleStatistics
-    ] = None  # includes cite_refs property
+    article_statistics: Optional[ArticleStatistics] = None  # includes cite_refs property
+    reference_statistics: Optional[List[Dict[str, Any]]] = None
 
     # wikibase: Wikibase = IASandboxWikibase()
 
-    reference_statistics: Optional[List[Dict[str, Any]]] = None
 #    dehydrated_reference_statistics: Optional[List[Dict[str, Any]]] = None
 
     @property
@@ -85,7 +80,10 @@ class WikipediaAnalyzer(WariBaseModel):
                 self.job.get_ids_from_mediawiki_api()
 
             self.article_statistics = ArticleStatistics(
+                # properties here must also be added in ArticleStatistics [models/api/statistic/article.py]
+
                 iari_version=get_poetry_version("pyproject.toml"),
+                fake="fake 2 from analyzer",
 
                 wari_id=self.job.wari_id,
                 lang=self.job.lang,
@@ -93,15 +91,26 @@ class WikipediaAnalyzer(WariBaseModel):
                 title=self.job.title,
                 reference_count=ae.number_of_references,
                 reference_statistics={
+                    "content": ae.number_of_content_references,
                     "named": ae.number_of_empty_named_references,
                     "footnote": ae.number_of_footnote_references,
-                    "content": ae.number_of_content_references,
                     "general": ae.number_of_general_references,
                 },
-                urls=ae.raw_urls,
                 cite_refs=ae.cite_refs,
                 cite_refs_count=ae.cite_refs_count,
+
+                # sections=ae.sections,
+                # sections=["sections go here"],
+                # sections=new_sections,
+                # sections=self.__get_sections_for_response__(),
+                section_info=ae.section_info,
+                # sections="sections go here",
+                # section_info={"param": "value"},
+                article_info=self.__get_article_data_for_response__(),  # this will change (at least the function nake)
+
+                urls=ae.raw_urls,
                 fld_counts=ae.first_level_domain_counts,
+
                 served_from_cache=False,
                 site=self.job.domain.value,
                 isodate=datetime.utcnow().isoformat(),
@@ -144,10 +153,11 @@ class WikipediaAnalyzer(WariBaseModel):
         """Helper method"""
         from src import app
 
-        app.logger.debug("__analyze__: running")
+        app.logger.debug("==> __analyze__")
         if self.job:
             if not self.article:
                 self.__populate_article__()
+
             if self.article:
                 self.article.fetch_and_extract_and_parse()
 
@@ -235,7 +245,7 @@ class WikipediaAnalyzer(WariBaseModel):
     def __populate_article__(self):
         from src import app
 
-        app.logger.debug("__populate_article__: running")
+        app.logger.debug("==> __populate_article__")
         if self.job and self.job.title:
             # Todo consider propagating job further here
             self.article = WikipediaArticle(
@@ -263,5 +273,29 @@ class WikipediaAnalyzer(WariBaseModel):
     def __insert_references_into_article_statistics__(self, dehydrated):
         """We return the full reference to accommodate IARE, see https://github.com/internetarchive/iari/issues/886"""
         if self.article_statistics:
-
             self.article_statistics.references = self.reference_statistics
+
+    def __get_article_data_for_response__(self):
+        """returns any new data, which includes array of section data, massaged for appropriate output"""
+        # create modified sections from extractor
+        article_data = {}
+
+        sections = []
+        new_refs = []
+        for section in self.article.extractor.sections:
+            new_section = {"name": section.name}
+
+            # let's add the refs from the sections now...
+            # refs = section.extract_refs()
+            # refs = section.references
+
+            for ref in section.references:
+                new_ref ={"wikitext": ref.get_wikicode_as_string}
+                new_refs.append(new_ref)
+            sections.append(new_section)
+
+        article_data["sections"] = sections
+        article_data["refs"] = new_refs
+
+        return article_data
+

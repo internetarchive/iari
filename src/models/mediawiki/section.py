@@ -47,15 +47,15 @@ class MediawikiSection(BaseModel):
 
     @property
     def name(self) -> str:
-        """Extracts a section name from the first line of the output from mwparserfromhell"""
+        """Extracts a section name from the first line of wikitext for this section"""
         line = self.__get_lines__[0]
         # Handle special case where no level 2 heading is at the beginning of the section
         if "==" not in line:
-            logger.info(f"== not found in line {line}")
+            logger.debug(f"== not found in line {line}")
             return "root"
         else:
             # return str(self.__extract_name_from_line__(line=line))
-            return str(line.replace("=", ""))
+            return str(line.replace("=", "")).strip()
 
     @property
     def number_of_references(self):
@@ -73,10 +73,10 @@ class MediawikiSection(BaseModel):
     #     app.logger.debug("extract_name_from_line: running")
     #     return line.replace("=", "")
 
-    def __extract_all_general_references__(self):
+    def __extract_general_references__(self):
         from src import app
 
-        app.logger.debug("__extract_all_general_references__: running")
+        app.logger.debug("==> section:: __extract_all_general_references__")
         if self.is_general_reference_section:
             app.logger.info("Regex match on section name")
             # Discard the header line
@@ -86,7 +86,9 @@ class MediawikiSection(BaseModel):
                 f"Extracting {len(lines_without_heading)} lines form section {lines[0]}"
             )
             for line in lines_without_heading:
-                logger.info(f"Extracting line: {line} from section {self.name}")
+
+                # logger.info(f"Extracting line: {line} from section {self.name}")
+
                 # Guard against empty line
                 # logger.debug("Parsing line")
                 # We discard all lines not starting with a star to avoid all
@@ -108,11 +110,11 @@ class MediawikiSection(BaseModel):
                     reference.extract_and_check()
                     self.references.append(reference)
 
-    def __extract_all_footnote_references__(self):
+    def __extract_footnote_references__(self):
         """This extracts all <ref>...</ref> from self.wikicode"""
         from src import app
 
-        app.logger.debug("__extract_all_footnote_references__: running")
+        app.logger.debug("==> __extract_all_footnote_references__")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
 
@@ -120,6 +122,7 @@ class MediawikiSection(BaseModel):
             raise MissingInformationError(
                 f"The section {self} did not have any wikicode"
             )
+
         refs = self.wikicode.filter_tags(matches=lambda tag: tag.tag.lower() == "ref")
 
         app.logger.debug(f"Number of footnote refs found: {len(refs)}")
@@ -129,17 +132,16 @@ class MediawikiSection(BaseModel):
             # only increment base_ref_counter if not a "named" or "reference ref"
             base_ref_counter += 1
 
-            # app.logger.debug(f"### ### ###")
             app.logger.debug(f"extracting ref# {base_ref_counter}")
-            # app.logger.debug(f"### ### ###")
 
             reference = WikipediaReference(
                 wikicode=ref,
-                # wikibase=self.wikibase,
-                testing=self.testing,
                 language_code=self.language_code,
+
                 section=self.name,
                 section_id=self.section_id,
+
+                testing=self.testing,
             )
 
             reference.extract_and_check()
@@ -152,8 +154,8 @@ class MediawikiSection(BaseModel):
             )
         self.__populate_wikitext__()
         self.__parse_wikitext__()
-        self.__extract_all_general_references__()
-        self.__extract_all_footnote_references__()
+        self.__extract_general_references__()
+        self.__extract_footnote_references__()
 
     def __populate_wikitext__(self):
         from src import app

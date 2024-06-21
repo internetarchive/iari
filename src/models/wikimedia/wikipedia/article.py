@@ -95,7 +95,7 @@ class WikipediaArticle(WariBaseModel):
     def fetch_and_extract_and_parse(self):
         from src import app
 
-        app.logger.debug("fetch_and_extract_and_parse: running")
+        app.logger.debug("==> fetch_and_extract_and_parse")
         app.logger.info("Extracting templates and parsing references")
 
         if not self.wikitext:
@@ -113,6 +113,7 @@ class WikipediaArticle(WariBaseModel):
         elif not self.is_redirect and self.found_in_wikipedia:
             if not self.wikitext:
                 raise MissingInformationError("self.wikitext was empty")
+
             # We got what we need now to make the extraction and parsing
             # print(self.wikitext)
             # from src.models.wikimedia.wikipedia.reference.extractor import (
@@ -128,6 +129,9 @@ class WikipediaArticle(WariBaseModel):
                 # wikibase=self.wikibase,
                 job=self.job,
             )
+
+            # raise MissingInformationError("HoHum!")
+
             self.extractor.extract_all_references()
             self.__get_ores_scores__()
             # self.__generate_hash__()
