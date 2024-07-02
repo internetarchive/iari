@@ -23,7 +23,7 @@ class Version(StatisticsWriteView):
 
     job: Optional[VersionJob] = None
     schema: Schema = VersionSchema()
-    serving_from_json: bool = False
+    # ### serving_from_json: bool = False
     headers: Optional[Dict[str, Any]] = None
     #     {
     #     "Access-Control-Allow-Origin": "*",

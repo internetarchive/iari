@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-import json
 
 from flask import request
 from flask_restful import Resource, abort  # type: ignore
@@ -8,19 +7,20 @@ from marshmallow import Schema
 
 from src.helpers.console import console
 
-# from src.models.wikimedia.wikipedia.analyzer import WikipediaAnalyzer
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
 
 
 class StatisticsViewV2(Resource):
-    """Abstract class for endpoints writing to disk
+    """
+    Shared abstract class for endpoints writing to disk and/or processing request args
 
-    current classes that inherit this:
+    classes that inherit this:
     - ArticleV2
+    - ArticleCacheV2
+    - EditRefV2
 
-    the StatisticsWriteView inherits this class.
     """
 
     # derived class sets these
@@ -28,19 +28,10 @@ class StatisticsViewV2(Resource):
     job: Optional[Job]  # loads parameters via schema.load
     io: Optional[FileIo] = None  # derived class must implement __setup_io__
 
-
     time_of_analysis: Optional[datetime] = None
-    serving_from_json: bool = False
 
-
-    # wikipedia_page_analyzer: Optional[WikipediaAnalyzer] = None
-    # # TODO this should not be defined in this class - it should live in wiki article class
-    # # FIXME get rid of this here (must fix/change in view/statistics/article.py)
-
-    # these are placed here experimentaly...seeif it works!
-
-    # derived ("child") class must implement __setup_io__ from this base ("parent") class
     def __setup_io__(self):
+        # derived ("child") class must implement __setup_io__ from this base ("parent") class
         raise NotImplementedError()  # must be defined in parent class
 
     def __setup_and_read_from_cache__(self):
@@ -51,34 +42,42 @@ class StatisticsViewV2(Resource):
         if self.io:
             self.io.read_from_disk()
 
-    def __validate_and_get_job__(self):
-        """Helper method"""
-        self.__validate__()
-        self.__parse_into_job__()
-
-    def __validate__(self):
+    def __validate_and_get_job__(self, method="get"):
+        """
+        Validates request params, whether from GET or POST, and,
+        if successful, pulls those param values into job object
+        """
         from src import app
+        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__({method})")
 
-        app.logger.debug("StatisticsView::__validate__")
+        request_args = request.args if (method == "get") else request.form
 
-        errors = self.schema.validate(request.args)
+        self.__validate__(request_args)
+        self.__parse_into_job__(request_args)
+
+    def __validate__(self, request_args):
+
+        from src import app
+        app.logger.debug(f"==> StatisticsViewV2::__validate__({request_args})")
+
+        errors = self.schema.validate(request_args)
         if errors:
-            app.logger.debug(f"Found errors: {errors}")
-            abort(400, error=str(errors))
-            # TODO check the content of errors here to maybe give a better error return to client
+            app.logger.debug(f"Validation errors: {errors}")
+            raise MissingInformationError(errors)
 
-    def __parse_into_job__(self):
+    def __parse_into_job__(self, request_args):
+
         from src import app
+        app.logger.debug(f"==> StatisticsViewV2::__parse_into_job__({request_args})")
 
-        app.logger.debug("__parse_into_job__: running")
-        # app.logger.debug(request.args)
         if not self.schema:
-            raise MissingInformationError()
+            raise MissingInformationError("No schema set for StatisticsViewV2")
 
-        app.logger.debug("before self.schema.load")
-        self.job = self.schema.load(request.args)  # request.args is a flask property
-        app.logger.debug("after self.schema.load")
+        self.job = self.schema.load(request_args)
+        # returns a job object, populated with field values mapped from request_args
+
         if not self.job:
-            console.print("self.job is null")
+            console.print("__parse_into_job__: job is null")  # TODO raise exception here if no job
 
+        console.print("=== JOB ===")
         console.print(self.job)

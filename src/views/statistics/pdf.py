@@ -22,7 +22,7 @@ class Pdf(StatisticsWriteView):
 
     job: Optional[UrlJob] = None
     schema: UrlSchema = UrlSchema()
-    serving_from_json: bool = False
+    # ### serving_from_json: bool = False
     headers: Optional[Dict[str, Any]] = None
     #     {
     #     "Access-Control-Allow-Origin": "*",

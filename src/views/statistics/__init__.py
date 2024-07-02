@@ -25,7 +25,7 @@ class StatisticsView(Resource):
     job: Optional[Job]
 
     time_of_analysis: Optional[datetime] = None
-    serving_from_json: bool = False
+    # ### serving_from_json: bool = False
 
     io: Optional[FileIo] = None
 

@@ -39,7 +39,7 @@ class CheckUrls(StatisticsWriteView):
     """
     job: Optional[UrlsJob] = None
     schema: Schema = UrlsSchema()
-    serving_from_json: bool = False
+    # ### serving_from_json: bool = False
     headers: Optional[Dict[str, Any]] = None
     #     {
     #     "Access-Control-Allow-Origin": "*",

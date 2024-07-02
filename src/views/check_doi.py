@@ -21,7 +21,7 @@ class CheckDoi(StatisticsWriteView):
 
     job: Optional[CheckDoiJob] = None
     schema: CheckDoiSchema = CheckDoiSchema()
-    serving_from_json: bool = False
+    # ### serving_from_json: bool = False
     headers: Optional[Dict[str, Any]] = None
     # {
     #         "Access-Control-Allow-Origin": "*",

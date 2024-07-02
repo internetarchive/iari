@@ -34,6 +34,8 @@ from src.views.v2.article_cache_view_v2 import ArticleCacheV2
 # new stuff jan 2024
 from src.views.v2.article_view_v2 import ArticleV2
 from src.views.version import Version
+# new stuff jun 2024
+from src.views.v2.editref_v2 import EditRefV2
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -52,15 +54,16 @@ def add_cors_headers(response):
 # let's see if we can distinguish which server we are on
 server_name = os.getenv('FLASK_SERVER_NAME', 'Unknown Server')
 
-# Register the function as a after_request handler
+# Register the function as an after_request handler
 app.after_request(add_cors_headers)
 
 # We use a prefix here to enable us to stabilize the api over time
 # and bump the version when making breaking changes
 api = Api(app, prefix="/v2")
 
-# Here we link together the API views and endpoint urls
-# api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
+# link the API views to respective endpoint urls
+api.add_resource(EditRefV2, "/editref")
+
 api.add_resource(ArticleV2, "/article")
 api.add_resource(ArticleCacheV2, "/article_cache")
 
@@ -75,6 +78,9 @@ api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
 api.add_resource(Pdf, "/statistics/pdf")
 api.add_resource(Xhtml, "/statistics/xhtml")
+
+# api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
+
 # return app_
 # api.add_resource(
 #     AddJobToQueue, "/add-job"

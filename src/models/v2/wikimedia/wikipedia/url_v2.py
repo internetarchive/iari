@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class WikipediaUrlV2(BaseModel):
     """models a Wikipedia URL
 
-    It uses BaseModel to avoid the cache attribute (vsIariBaseModel),
+    It uses BaseModel to avoid the cache attribute (vs IariBaseModel),
     so we can output it via the API easily WTF?
 
     We do not perform any checking or lookup here that requires HTTP requests.

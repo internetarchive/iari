@@ -21,7 +21,7 @@ class CheckUrlArchive(StatisticsWriteView):
 
     job: Optional[UrlArchiveJob] = None
     schema: Schema = UrlArchiveSchema()
-    serving_from_json: bool = False
+    # ### serving_from_json: bool = False
     headers: Optional[Dict[str, Any]] = None
     #     {
     #     "Access-Control-Allow-Origin": "*",
