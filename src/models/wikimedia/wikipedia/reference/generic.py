@@ -420,6 +420,7 @@ class WikipediaReference(JobBaseModel):
 
         self.__extract_templates_and_parameters__()
         self.__extract_reference_urls__()
+
         self.__extract_unique_first_level_domains__()
         self.__generate_reference_id__()
 

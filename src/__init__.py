@@ -29,11 +29,11 @@ from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
 from src.views.statistics.xhtml import Xhtml
 
-# new stuff apr 2024
-from src.views.v2.article_cache_view_v2 import ArticleCacheV2
 # new stuff jan 2024
 from src.views.v2.article_view_v2 import ArticleV2
 from src.views.version import Version
+# new stuff apr 2024
+from src.views.v2.article_cache_view_v2 import ArticleCacheV2
 # new stuff jun 2024
 from src.views.v2.editref_v2 import EditRefV2
 

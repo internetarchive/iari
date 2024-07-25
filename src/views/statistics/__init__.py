@@ -41,7 +41,7 @@ class StatisticsView(Resource):
     def __validate__(self):
         from src import app
 
-        app.logger.debug("StatisticsView::__validate__")
+        app.logger.debug("==> StatisticsView::__validate__")
 
         errors = self.schema.validate(request.args)
         if errors:
@@ -52,7 +52,7 @@ class StatisticsView(Resource):
     def __parse_into_job__(self):
         from src import app
 
-        app.logger.debug("__parse_into_job__: running")
+        app.logger.debug("==> StatisticsView::__parse_into_job__")
         # app.logger.debug(request.args)
         if not self.schema:
             raise MissingInformationError()
@@ -61,6 +61,6 @@ class StatisticsView(Resource):
         if not self.job:
             # this seems to be the case when there are no arguments, as in the
             # /version endpoint. Seems to be harmless not having a valid job property
-            console.print("self.job is null")
+            app.logger.info("StatisticsView: self.job is null")
 
         console.print(self.job)

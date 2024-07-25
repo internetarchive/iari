@@ -8,9 +8,10 @@ class EditRefSchemaV2(BaseSchemaV2):
     # Defines expected parameters for EditRefV2 endpoint
     #   - default parameters are defined in BaseSchemaV2
 
-    target = fields.Str(required=True)
-    replace = fields.Str(required=True)
-    source = fields.Str(required=True)
+    old_ref = fields.Str(required=True)
+    new_ref = fields.Str(required=True)
+    source = fields.Str(required=False)
+    wiki_page_url = fields.Str(required=False)
 
     # noinspection PyUnusedLocal
     @post_load

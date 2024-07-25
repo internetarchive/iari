@@ -1,29 +1,40 @@
-# import re
-# from urllib.parse import quote, unquote
+import re
+from urllib.parse import quote, unquote
 #
 # import requests
 #
 # import config
 # from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-# from src.models.wikimedia.enums import WikimediaDomain
+from src.models.wikimedia.enums import WikimediaDomain
+from src import MissingInformationError
 from src.models.v2.job import JobV2
 
 
 class EditRefJobV2(JobV2):
     """job that supports EditRefV2 endpoint"""
 
-    target: str = ""
-    replace: str = ""
+    old_ref: str = ""
+    new_ref: str = ""
+
     source: str = ""
+    wiki_page_url: str = ""
+
+    wiki_lang: str = ""
+    wiki_domain: WikimediaDomain = WikimediaDomain.wikipedia
+    wiki_page_title: str = ""
+    wiki_revision: str = ""
+
+    regex_wiki_url = r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
+    # NB this should be elevated to a globalish constant
+
+    @property
+    def quoted_title(self):
+        if not self.wiki_page_title:
+            raise MissingInformationError("self.wiki_page_title is empty")
+        return quote(self.wiki_page_title, safe="")
 
     # these following (commented) functions might be useful when we
     # have a wikipage id rather than a string to describe source
-
-    # @property
-    # def quoted_title(self):
-    #     if not self.title:
-    #         raise MissingInformationError("self.title was empty")
-    #     return quote(self.title, safe="")
 
     # def get_mediawiki_ids(self) -> None:
     #     from src import app
@@ -88,11 +99,35 @@ class EditRefJobV2(JobV2):
     #         if not matches:
     #             app.logger.error("Not a supported Wikimedia URL")
 
-
     def validate_fields(self):
         """
         any parameter checking done here...
+
+        must have at least "source" or "wiki_page_url" defined
         """
 
-        # self.__extract_url__()  # may want to do something to parse wikipage id in the future
-        pass
+        from src import app
+
+        if not self.source:
+            if not self.wiki_page_url:
+                app.logger.error('Parameters must contain a valid "source" or valid "wiki_page_url" value. '
+                                 f"source: {self.source}, wiki_page_url: {self.wiki_page_url}")
+                raise MissingInformationError(
+                    f'Parameters must contain a valid "source" or valid "wiki_page_url" value.'
+                )
+
+            # extract wiki parts from wiki_page_url?
+            my_url = unquote(self.wiki_page_url)
+
+            matches = re.match(self.regex_wiki_url, my_url)
+            if matches:
+                groups = matches.groups()
+                self.wiki_lang = groups[0]
+                self.wiki_domain = WikimediaDomain(groups[1])
+                self.wiki_page_title = groups[2]
+            else:
+                app.logger.error(f"{self.wiki_page_url} is not a supported Wikimedia URL")
+                raise MissingInformationError(
+                    f"wiki_page_url parameter value ({self.wiki_page_url}) is invalid."
+                )
+
