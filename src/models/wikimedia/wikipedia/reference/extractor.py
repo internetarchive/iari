@@ -297,7 +297,7 @@ class WikipediaReferenceExtractor(WariBaseModel):
 
                 section_counter += 1
 
-                app.logger.info(f"Section: {section}")
+                # app.logger.info(f"Section: {section}")
 
                 mw_section = MediawikiSection(
                     wikicode=section,
