@@ -19,7 +19,7 @@ class FetchRefsSchemaV2(BaseSchemaV2):
         """
         mutable_data = dict(data)  # Convert ImmutableMultiDict to a mutable dict
         if 'pages' in mutable_data and isinstance(mutable_data['pages'], str):
-            mutable_data['pages'] = mutable_data['pages'].split(',')
+            mutable_data['pages'] = mutable_data['pages'].split('|')
         return mutable_data
 
     # noinspection PyUnusedLocal
