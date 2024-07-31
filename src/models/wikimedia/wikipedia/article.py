@@ -31,6 +31,8 @@ class WikipediaArticle(WariBaseModel):
     because of
     https://github.com/internetarchive/wcdimportbot/issues/261"""
 
+    job: ArticleJob
+
     md5hash: Optional[str]
     page_id: int = 0
     wdqid: str = ""
@@ -45,8 +47,6 @@ class WikipediaArticle(WariBaseModel):
     extractor: Optional[WikipediaReferenceExtractor] = None
     # extractor: Optional[Any] = None
     # TODO: FIXFIX
-
-    job: ArticleJob
 
     ores_quality_prediction: str = ""
     ores_details: Optional[Dict] = None
@@ -95,8 +95,7 @@ class WikipediaArticle(WariBaseModel):
     def fetch_and_extract_and_parse(self):
         from src import app
 
-        app.logger.debug("==> fetch_and_extract_and_parse")
-        app.logger.info("Extracting templates and parsing references")
+        app.logger.debug("==> WikipediaArticle::fetch_and_extract_and_parse")
 
         if not self.wikitext:
             # fetch page data from Wikipedia if we don't already have wikitext
@@ -143,7 +142,8 @@ class WikipediaArticle(WariBaseModel):
         and date from the MediaWiki REST v1 API if needed"""
         from src import app
 
-        app.logger.debug("__fetch_page_data__: Running")
+        app.logger.debug("==> __fetch_page_data__: Running")
+
         self.__check_if_title_is_empty__()
         if not self.wikitext:
             if self.revision_id:
@@ -173,7 +173,7 @@ class WikipediaArticle(WariBaseModel):
 
     def __check_if_title_is_empty__(self):
         if not self.job.title:
-            raise MissingInformationError("self.job.title was empty string")
+            raise MissingInformationError("WikipediaArticle: self.job.title is empty")
 
     def __get_ores_scores__(self):
         self.ores_details = {}

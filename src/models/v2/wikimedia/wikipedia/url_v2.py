@@ -38,7 +38,6 @@ class WikipediaUrlV2(BaseModel):
 
     @property
     def __is_wayback_machine_url__(self):
-        logger.debug("is_wayback_machine_url: running")
         return bool("//web.archive.org" in self.url)
 
     @property
@@ -58,7 +57,7 @@ class WikipediaUrlV2(BaseModel):
         return self.url < other.url
 
     def __parse_extract_and_validate__(self) -> None:
-        logger.debug("__parse_extract_and_validate__: running")
+        logger.debug("==> __parse_extract_and_validate__")
         if self.__is_wayback_machine_url__:
             self.__parse_wayback_machine_url__()
         self.__parse_and_extract_url__()

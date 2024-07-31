@@ -68,36 +68,42 @@ class WikipediaSectionV2(BaseModel):
     def __extract_all_general_references__(self):
         from src import app
 
-        app.logger.debug("__extract_all_general_references__: running")
-        if self.is_general_reference_section:
-            app.logger.info("Regex match on section name")
-            # Discard the header line
-            lines = self.wikitext.split("\n")
-            lines_without_heading = lines[1:]
-            logger.debug(
-                f"Extracting {len(lines_without_heading)} lines form section {lines[0]}"
-            )
-            for line in lines_without_heading:
-                logger.info(f"Working on line: {line}")
-                # Guard against empty line
-                # logger.debug("Parsing line")
-                # We discard all lines not starting with a star to avoid all
-                # categories and other templates not containing any references
-                if line and self.star_found_at_line_start(line=line):
-                    parsed_line = mwparserfromhell.parse(line)
-                    logger.debug("Appending line with star to references")
-                    # We don't know what the line contains besides a start
-                    # but we assume it is a reference
-                    reference = WikipediaReference(
-                        wikicode=parsed_line,
-                        # wikibase=self.wikibase,
-                        testing=self.testing,
-                        language_code=self.language_code,
-                        is_general_reference=True,
-                        section=self.name,
-                    )
-                    reference.extract_and_check()
-                    self.references.append(reference)
+        app.logger.debug("==> WikipediaSectionV2::__extract_all_general_references__")
+
+        # bail if this section is not a "general reference" section
+        # i'm not sure we need to filter this here, as we want to do all sections, i believe
+        # so, i'm deleting this for now
+        ### if not self.is_general_reference_section:
+        ###     return
+
+        app.logger.info(f"processing section {self.name}")
+
+        # Discard the header line
+        lines = self.wikitext.split("\n")
+        lines_without_heading = lines[1:]
+        logger.debug(
+            f"Extracting {len(lines_without_heading)} lines form section {lines[0]}"
+        )
+        for line in lines_without_heading:
+            logger.info(f"Working on line: {line}")
+            # Guard against empty line
+            # logger.debug("Parsing line")
+            # We discard all lines not starting with a star to avoid all
+            # categories and other templates not containing any references
+            if line and self.star_found_at_line_start(line=line):
+                parsed_line = mwparserfromhell.parse(line)
+                logger.debug("Appending line with star to references")
+                # We don't know what the line contains besides a start
+                # but we assume it is a reference
+                reference = WikipediaReferenceV2(
+                    wikicode=parsed_line,
+                    testing=self.testing,
+                    language_code=self.language_code,
+                    is_general_reference=True,
+                    section=self.name,
+                )
+                reference.extract_and_check()
+                self.references.append(reference)
 
     def __extract_all_footnote_references__(self):
         """This extracts all <ref>...</ref> from self.wikicode"""
@@ -124,7 +130,7 @@ class WikipediaSectionV2(BaseModel):
             app.logger.debug(f"extracting ref# {base_ref_counter}")
             # app.logger.debug(f"### ### ###")
 
-            reference = WikipediaReference(
+            reference = WikipediaReferenceV2(
                 wikicode=ref,
                 # wikibase=self.wikibase,
                 testing=self.testing,

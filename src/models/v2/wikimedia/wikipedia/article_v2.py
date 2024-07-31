@@ -129,7 +129,7 @@ class WikipediaArticleV2(IariBaseModel):
         """
         from src import app
 
-        app.logger.debug("ArticleV2::fetch_and_parse")
+        app.logger.debug("==> ArticleV2::fetch_and_parse")
         app.logger.info("Fetching article data and parsing")
 
         if not self.wikitext:
@@ -152,6 +152,38 @@ class WikipediaArticleV2(IariBaseModel):
         if not self.wikitext:
             raise WikipediaApiFetchError("wikitext is empty")
 
+
+        # wikitext extraction
+
+        app.logger.debug("==> ArticleV2::fetch_and_parse: extracting from wikitext")
+
+        # elif not self.is_redirect and self.found_in_wikipedia:
+        if not self.is_redirect and self.found_in_wikipedia:
+
+            if not self.wikitext:
+                raise MissingInformationError("WikipediaReferenceExtractorV2::fetch_and_parse: self.wikitext is empty")
+
+            app.logger.debug("==> ArticleV2::fetch_and_parse: setting extractor")
+
+            self.extractor = WikipediaReferenceExtractorV2(
+                wikitext=self.wikitext,
+                html_source=self.html_markup,
+                job=self.job,
+            )
+
+            # raise MissingInformationError("HoHum!")
+
+            app.logger.debug("==> ArticleV2::fetch_and_parse: extracting all refs")
+            self.extractor.extract_all_references()
+
+            app.logger.debug("==> ArticleV2::fetch_and_parse: fetching ores scores")
+            self.__get_ores_scores__()
+            # self.__generate_hash__()
+
+
+        app.logger.debug("==> ArticleV2::fetch_and_parse: extracting from html")
+
+        # html extraction
         if not self.html_markup:
             self.__fetch_html__()
 

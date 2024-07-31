@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup, Comment
 from mwparserfromhell.nodes import Tag  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
-from config import link_extraction_regex
+from config import regex_url_link_extraction
 from src.models.base.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.wikipedia.reference.enums import (
@@ -168,7 +168,7 @@ class WikipediaReference(JobBaseModel):
         return not self.is_general_reference
 
     @property
-    def get_wikicode_as_string(self):
+    def wikicode_as_string(self):
         return str(self.wikicode)
 
     @property
@@ -298,7 +298,7 @@ class WikipediaReference(JobBaseModel):
             stripped_wikicode = str(self.wikicode.strip_code())
             logger.debug(stripped_wikicode)
             return re.findall(
-                link_extraction_regex,
+                regex_url_link_extraction,
                 stripped_wikicode,
             )
         else:

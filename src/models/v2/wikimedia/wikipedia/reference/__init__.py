@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup, Comment
 from mwparserfromhell.nodes import Tag  # type: ignore
 from mwparserfromhell.wikicode import Wikicode  # type: ignore
 
-from config import link_extraction_regex
+from config import regex_url_link_extraction
 from src.models.base.job import JobBaseModel
 from src.models.exceptions import MissingInformationError
 from src.models.v2.wikimedia.wikipedia.reference.template import WikipediaTemplateV2
@@ -162,7 +162,7 @@ class WikipediaReferenceV2(JobBaseModel):
             return True
 
     @property
-    def get_wikicode_as_string(self):
+    def wikicode_as_string(self):
         return str(self.wikicode)
 
     @property
@@ -292,7 +292,7 @@ class WikipediaReferenceV2(JobBaseModel):
             stripped_wikicode = str(self.wikicode.strip_code())
             logger.debug(stripped_wikicode)
             return re.findall(
-                link_extraction_regex,
+                regex_url_link_extraction,
                 stripped_wikicode,
             )
         else:
@@ -326,9 +326,10 @@ class WikipediaReferenceV2(JobBaseModel):
     def __extract_raw_templates__(self) -> None:
         """Extract the templates from self.wikicode"""
         from src import app
+        app.logger.debug("==> __extract_raw_templates__")
 
         self.templates = []
-        app.logger.debug("__extract_raw_templates__: running")
+
         if not self.wikicode:
             raise MissingInformationError("self.wikicode was None")
         if isinstance(self.wikicode, str):
@@ -357,7 +358,7 @@ class WikipediaReferenceV2(JobBaseModel):
             for raw_template in raw_templates:
                 count += 1
                 self.templates.append(
-                    WikipediaTemplate(
+                    WikipediaTemplateV2(
                         raw_template=raw_template, language_code=self.language_code
                     )
                 )

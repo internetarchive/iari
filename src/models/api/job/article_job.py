@@ -15,12 +15,16 @@ class ArticleJob(Job):
     lang: str = "en"
     domain: WikimediaDomain = WikimediaDomain.wikipedia
     title: str = ""
-    page_id: int = 0
-    refresh: bool = False
-    url: str = ""
-    sections: str = ""  # string describing which sections to parse
     revision: int = 0  # this is named just as in the MediaWiki API
+
+    page_id: int = 0
+    url: str = ""
+
+    sections: str = ""  # string describing which sections to parse
+
+    refresh: bool = False
     dehydrate: bool = True
+
 
     @property
     def wari_id(self) -> str:

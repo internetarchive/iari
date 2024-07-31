@@ -53,6 +53,8 @@ class StatisticsViewV2(Resource):
         # use args if GET, form if POST
         request_args = request.args if (method == "get") else request.form
 
+        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request_args: {request.args}")
+
         self.__validate__(request_args)
         self.__parse_into_job__(request_args)
 

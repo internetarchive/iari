@@ -17,7 +17,7 @@ from flask_restful import Api, Resource  # type: ignore
 import config
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 
-# old stuff...
+# legacy endpoints stuff...
 from src.views.check_doi import CheckDoi
 from src.views.check_url import CheckUrl
 from src.views.check_url_archive import CheckUrlArchive
@@ -36,6 +36,8 @@ from src.views.version import Version
 from src.views.v2.article_cache_view_v2 import ArticleCacheV2
 # new stuff jun 2024
 from src.views.v2.editref_v2 import EditRefV2
+# new stuff jul 2024
+from src.views.v2.fetchrefs_v2 import FetchRefsV2
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -50,18 +52,19 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
 
+# Register CORS function as an after_request handler
+app.after_request(add_cors_headers)
+
 
 # let's see if we can distinguish which server we are on
 server_name = os.getenv('FLASK_SERVER_NAME', 'Unknown Server')
 
-# Register the function as an after_request handler
-app.after_request(add_cors_headers)
-
 # We use a prefix here to enable us to stabilize the api over time
 # and bump the version when making breaking changes
-api = Api(app, prefix="/v2")
+api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning should be addressed
 
 # link the API views to respective endpoint urls
+api.add_resource(FetchRefsV2, "/fetchrefs")
 api.add_resource(EditRefV2, "/editref")
 
 api.add_resource(ArticleV2, "/article")
