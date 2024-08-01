@@ -105,6 +105,7 @@ class WikipediaArticle(WariBaseModel):
             logger.debug(
                 "Skipped extraction and parsing because the article is a redirect"
             )
+
         elif not self.found_in_wikipedia:
             logger.debug(
                 "Skipped extraction and parsing because the article was not found"

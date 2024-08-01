@@ -69,6 +69,7 @@ class WikipediaArticleV2(IariBaseModel):
 
     error_items: List[Any] = []
 
+    # required pydantic class
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
         extra = "forbid"  # dead: disable
@@ -138,16 +139,19 @@ class WikipediaArticleV2(IariBaseModel):
             self.__fetch_wikitext__()
 
         if self.is_redirect:
-            logger.debug(
+            logger.error(
                 "Skipped extraction and parsing because the article is a redirect"
             )
-            raise WikipediaApiFetchError("wiki article is a redirect")
+            raise WikipediaApiFetchError("Wiki article is a redirect")
+            # TODO Might want to change this from raising exception,
+            #   but we do want to stop further processing,
+            #   so need to have some way of indicating that to caller
 
         if not self.found_in_wikipedia:
-            logger.debug(
-                "Skipped extraction and parsing because the article was not found"
+            logger.error(
+                "Skipped extraction and parsing because the article was not found in wiki"
             )
-            raise WikipediaApiFetchError("wiki article not found in wiki")
+            raise WikipediaApiFetchError(f"Article {self.job.quoted_title} not found in wiki")
 
         if not self.wikitext:
             raise WikipediaApiFetchError("wikitext is empty")

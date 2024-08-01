@@ -38,15 +38,18 @@ class FetchRefsV2(StatisticsViewV2):
     pages: List[Dict[str, Any]] = []
     arf: str = "arf"
 
-    # def get(self):
-    #     """
-    #     flask GET entrypoint for returning fetchrefs results
-    #     must return a tuple: (Any,response_code)
-    #     """
-    #     from src import app
-    #     app.logger.debug(f"==> {self.__class_.__name__}::get")
-    #
-    #     return self.__process_data__(method="get")
+    def get(self):
+        """
+        flask GET entrypoint for returning fetchrefs results
+        must return a tuple: (Any,response_code)
+        """
+        from src import app
+        app.logger.debug(f"==> {self.__class__.__name__}::get")
+
+        # return self.__process_data__(method="get")
+        return {"errors": [
+            {"error": "GET method not supported for this endpoint"}
+        ]}
 
     def post(self):
         """
@@ -68,21 +71,19 @@ class FetchRefsV2(StatisticsViewV2):
 
             # process pages, get refs, sets self.pages data
             for page in self.job.pages:
-                page_result = self.__get_page_data__(page)
+                page_results = self.__get_page_data__(page)
                 # append page ref data to pages result
-                self.pages.append(page_result)
+                self.pages.append(page_results)
 
             # and return results
             return {"pages": self.pages}
 
 
         except MissingInformationError as e:
-            ###app.logger.debug("after EditRefV2::self.__validate_and_get_job__ MissingInformationError exception")
             traceback.print_exc()
             return {"error": f"Missing Information Error: {str(e)}"}, 500
 
         except Exception as e:
-            ###app.logger.debug("after EditRefV2::self.__validate_and_get_job__ exception")
             traceback.print_exc()
             return {"error": f"General Error: {str(e)}"}, 500
 
@@ -91,15 +92,11 @@ class FetchRefsV2(StatisticsViewV2):
         Assume page is a fully resolved url, such as: https://en.wikipedia.org/wiki/Easter_Island
 
         """
-        from src import app
-
-        full_page_name = page_title  # we may be fancy with this in the future: get resolved name from page title, e.g.
 
         try:
             # process page
 
-            url_template = "https://{lang}.{wiki_domain}/wiki/{page_title}"
-                           # ""http://example.com/files/{filename}"
+            url_template = "https://{lang}.{wiki_domain}/wiki/{page_title}"  # TODO make this a global
             page_url = url_template.format(page_title=page_title, lang="en", wiki_domain="wikipedia.org")
 
             article_job = ArticleJobV2(url=page_url)
@@ -116,18 +113,27 @@ class FetchRefsV2(StatisticsViewV2):
             for ref in page.extractor.references:
                 page_refs.append(ref.wikicode_as_string)
 
-
+        except WikipediaApiFetchError as e:
             return {
                 "page_title": page_title,
-                "full_page_name": full_page_name,
                 "which_wiki": self.job.which_wiki,
-
-                "refs": page_refs,
+                "error": f"Error fetching page: {str(e)}"
             }
 
         except Exception as e:
             traceback.print_exc()
-            return {"error": f"General Error: {str(e)}"}, 500
+            return {
+                "page_title": page_title,
+                "which_wiki": self.job.which_wiki,
+                "error": f"General Error: {str(e)}"
+            }
+
+        return {
+            "page_title": page_title,
+            "which_wiki": self.job.which_wiki,
+
+            "refs": page_refs,
+        }
 
 
 
