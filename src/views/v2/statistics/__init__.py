@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 
 from flask import request
 from flask_restful import Resource, abort  # type: ignore
@@ -10,6 +10,7 @@ from src.helpers.console import console
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
+from src.models.wikimedia.enums import RequestMethods
 
 
 class StatisticsViewV2(Resource):
@@ -28,6 +29,7 @@ class StatisticsViewV2(Resource):
     job: Optional[Job]  # loads parameters via schema.load
     io: Optional[FileIo] = None  # derived class must implement __setup_io__
 
+    request_args: Any = {}
     time_of_analysis: Optional[datetime] = None
 
     def __setup_io__(self):
@@ -42,41 +44,51 @@ class StatisticsViewV2(Resource):
         if self.io:
             self.io.read_from_disk()
 
-    def __validate_and_get_job__(self, method="get"):
+    def __validate_and_get_job__(self, method=RequestMethods.get):
         """
         Validates request params, whether from GET or POST, and,
         if successful, pulls param values into job's properties
         """
         from src import app
-        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__({method})")
+        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__(method = {method})")
 
-        # use args if GET, form if POST
-        request_args = request.args if (method == "get") else request.form
+        self.schema.context['request_method'] = request.method
+        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request.method = {request.method})")
 
-        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request_args: {request.args}")
+        # self.request_method = method
+        # use request.args if GET, request.form if POST
+        # self.request_args = request.args if (method == RequestMethods.get) else request.form
+        self.request_args = request.args if (request.method == "GET") else request.form
 
-        self.__validate__(request_args)
-        self.__parse_into_job__(request_args)
+        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request_args: {self.request_args}")
 
-    def __validate__(self, request_args):
+        # self.__validate__(request_args)
+        # self.__parse_into_job__(request_args)
+        self.__validate__()
+        self.__parse_into_job__()
+
+    def __validate__(self):
 
         from src import app
-        app.logger.debug(f"==> StatisticsViewV2::__validate__({request_args})")
+        app.logger.debug(f"==> StatisticsViewV2::__validate__({self.request_args})")
 
-        errors = self.schema.validate(request_args)
+        errors = self.schema.validate(self.request_args)
         if errors:
             app.logger.debug(f"Validation errors: {errors}")
             raise MissingInformationError(errors)
 
-    def __parse_into_job__(self, request_args):
+    # def __parse_into_job__(self, request_args):
+    def __parse_into_job__(self):
 
         from src import app
-        app.logger.debug(f"==> StatisticsViewV2::__parse_into_job__({request_args})")
+        app.logger.debug(f"==> StatisticsViewV2::__parse_into_job__({self.request_args})")
 
         if not self.schema:
             raise MissingInformationError("No schema set for StatisticsViewV2")
 
-        self.job = self.schema.load(request_args)
+        self.schema.context['request_method'] = request.method
+
+        self.job = self.schema.load(self.request_args)
         # returns a job object, populated with field values mapped from request_args
 
         if not self.job:

@@ -35,8 +35,7 @@ class FetchRefsV2(StatisticsViewV2):
     schema = FetchRefsSchemaV2()  # Defines expected parameters; Overrides StatisticsViewV2's "schema" property
     job: FetchRefsJobV2           # Holds usable variables, seeded from schema. Overrides StatisticsViewV2's "job"
 
-    pages: List[Dict[str, Any]] = []
-    arf: str = "arf"
+    pages: List[Dict[str, Any]] = []  # contents parsed from pipe-delimited "pages" URL parameter
 
     def get(self):
         """
@@ -44,12 +43,12 @@ class FetchRefsV2(StatisticsViewV2):
         must return a tuple: (Any,response_code)
         """
         from src import app
-        app.logger.debug(f"==> {self.__class__.__name__}::get")
+        app.logger.debug(f"==> FetchRefsV2::get")
 
-        # return self.__process_data__(method="get")
-        return {"errors": [
-            {"error": "GET method not supported for this endpoint"}
-        ]}
+        return self.__process_request__(method=RequestMethods.get)
+        # return {"errors": [
+        #     {"error": "GET method not supported for this endpoint"}
+        # ]}
 
     def post(self):
         """
@@ -60,15 +59,18 @@ class FetchRefsV2(StatisticsViewV2):
         app.logger.debug(f"==> FetchRefsV2::post")
 
         # return self.__process_data__(method="post")
-        return self.__process_data__()  # assume post method
+        return self.__process_request__(method=RequestMethods.post)
 
 
-    def __process_data__(self):
+    def __process_request__(self, method=RequestMethods.post):  # default to POST
         from src import app
-        try:
-            app.logger.debug("==> FetchRefsV2(fetchrefs_v2.py)::__process_data__")
-            self.__validate_and_get_job__(RequestMethods.post)  # inherited from StatisticsViewV2
+        app.logger.debug(f"==> FetchRefsV2::__process_request__, method = {method}")
 
+        try:
+            self.__validate_and_get_job__(method)  # inherited from StatisticsViewV2
+
+            self.pages = []
+            
             # process pages, get refs, sets self.pages data
             for page in self.job.pages:
                 page_results = self.__get_page_data__(page)
@@ -90,7 +92,6 @@ class FetchRefsV2(StatisticsViewV2):
     def __get_page_data__(self, page_title):
         """
         Assume page is a fully resolved url, such as: https://en.wikipedia.org/wiki/Easter_Island
-
         """
 
         try:
@@ -110,14 +111,18 @@ class FetchRefsV2(StatisticsViewV2):
 
             # loop thru references
             page_refs = []
-            for ref in page.extractor.references:
-                page_refs.append(ref.wikicode_as_string)
+            if page.extractor:
+                for ref in page.extractor.references:
+                    page_refs.append({
+                        "name": ref.get_name,
+                        "wikitext": ref.wikicode_as_string
+                    })
 
         except WikipediaApiFetchError as e:
             return {
                 "page_title": page_title,
                 "which_wiki": self.job.which_wiki,
-                "error": f"Error fetching page: {str(e)}"
+                "error": f"Page data error: {str(e)}"
             }
 
         except Exception as e:
@@ -125,7 +130,7 @@ class FetchRefsV2(StatisticsViewV2):
             return {
                 "page_title": page_title,
                 "which_wiki": self.job.which_wiki,
-                "error": f"General Error: {str(e)}"
+                "error": f"General error: {str(e)}"
             }
 
         return {

@@ -67,7 +67,7 @@ class WikipediaUrl(BaseModel):
     def __extract_first_level_domain__(self) -> None:
         from src import app
 
-        app.logger.debug("__extract_first_level_domain__: Running")
+        app.logger.debug("==> __extract_first_level_domain__")
         try:
             self.__get_fld__()
         except (TldBadUrl, TldDomainNotFound):

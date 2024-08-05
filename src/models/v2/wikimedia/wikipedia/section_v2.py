@@ -85,11 +85,11 @@ class WikipediaSectionV2(BaseModel):
             f"Extracting {len(lines_without_heading)} lines form section {lines[0]}"
         )
         for line in lines_without_heading:
-            logger.info(f"Working on line: {line}")
             # Guard against empty line
-            # logger.debug("Parsing line")
-            # We discard all lines not starting with a star to avoid all
-            # categories and other templates not containing any references
+
+            # logger.info(f"Working on line: {line}")
+            # Discard all lines not starting with a star to avoid categories and other templates
+            # not containing any references
             if line and self.star_found_at_line_start(line=line):
                 parsed_line = mwparserfromhell.parse(line)
                 logger.debug("Appending line with star to references")
@@ -109,7 +109,7 @@ class WikipediaSectionV2(BaseModel):
         """This extracts all <ref>...</ref> from self.wikicode"""
         from src import app
 
-        app.logger.debug("__extract_all_footnote_references__: running")
+        app.logger.debug("==> __extract_all_footnote_references__")
         # Thanks to https://github.com/JJMC89,
         # see https://github.com/earwig/mwparserfromhell/discussions/295#discussioncomment-4392452
 

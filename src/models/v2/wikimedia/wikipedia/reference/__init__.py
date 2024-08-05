@@ -253,23 +253,26 @@ class WikipediaReferenceV2(JobBaseModel):
         """This aggregates all first level domains from the urls found in the urls"""
         from src import app
 
-        app.logger.debug("__extract_first_level_domains__: running")
+        app.logger.debug("==> __extract_unique_first_level_domains__")
+
         if not self.reference_urls:
-            app.logger.info("no reference_urls found so we skip extraction")
+            app.logger.debug("no reference_urls found so we skip extraction")
+
         else:
-            logger.debug("found at least one url")
+            app.logger.debug("found at least one url")
             first_level_domains = set()
             for url in self.reference_urls:
-                logger.debug("working on url")
                 if url.first_level_domain:
-                    app.logger.debug(f"found fld: {url.first_level_domain}")
+                    # app.logger.debug(f"found fld: {url.first_level_domain}")
                     first_level_domains.add(url.first_level_domain)
                 else:
-                    app.logger.warning(f"no fld found for: {url.url}")
+                    # app.logger.warning(f"no fld found for: {url.url}")
+                    pass
+
             # Return unique domains to avoid confusion
             # https://github.com/internetarchive/iari/issues/834
             self.unique_first_level_domains = list(first_level_domains)
-            app.logger.debug(f"found unique flds: {self.unique_first_level_domains}")
+            # app.logger.debug(f"found unique flds: {self.unique_first_level_domains}")
 
     # @property
     # def plain_text_in_reference(self) -> bool:
@@ -317,7 +320,7 @@ class WikipediaReferenceV2(JobBaseModel):
         from src import app
 
         app.logger.debug(
-            "__extract_templates_and_parameters_from_raw_reference__: running"
+            "==> __extract_templates_and_parameters_from_raw_reference__"
         )
         self.__extract_raw_templates__()
         self.__extract_and_clean_template_parameters__()
@@ -339,7 +342,7 @@ class WikipediaReferenceV2(JobBaseModel):
         if self.is_footnote_reference and (
             "</ref>" not in wikicode_string or "></ref>" in wikicode_string
         ):
-            logger.info(f"Skipping named reference with no content {wikicode_string}")
+            logger.info(f"Skipping empty named reference {wikicode_string}")
             self.is_named_reused_reference = True
         else:
             logger.debug(f"Extracting templates from: {self.wikicode}")
@@ -369,7 +372,7 @@ class WikipediaReferenceV2(JobBaseModel):
         """We extract all templates"""
         from src import app
 
-        app.logger.debug("__extract_and_clean_template_parameters__: running")
+        app.logger.debug("==> __extract_and_clean_template_parameters__")
         if self.templates:
             [
                 template.extract_and_prepare_parameter_and_flds()
@@ -380,7 +383,7 @@ class WikipediaReferenceV2(JobBaseModel):
         """Helper method"""
         from src import app
 
-        app.logger.debug("extract_and_check: running")
+        app.logger.debug("==> extract_and_check")
         self.__parse_xhtml__()
         self.__extract_xhtml_comments__()
         self.__extract_templates_and_parameters__()

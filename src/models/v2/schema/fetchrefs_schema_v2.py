@@ -13,10 +13,20 @@ class FetchRefsSchemaV2(BaseSchemaV2):
     wikitext = fields.Str(required=False)  # if provided, overrides pages array
 
     @pre_load
+    # NB: pre_load is a marshmallow directive;
     def process_input(self, data, **kwargs):
         """
         transform comma separated pages into a List
         """
+        from src import app
+        app.logger.debug(f"==> FetchRefsSchemaV2::(@pre_load)process_input: data:{data}")
+
+        request_method = self.context.get('request_method', None)
+        # if request_method:
+        #     print(f"Request method received: {request_method}")
+
+        app.logger.debug(f"==> FetchRefsSchemaV2::(@pre_load)process_input: request_method:{request_method}")
+
         mutable_data = dict(data)  # Convert ImmutableMultiDict to a mutable dict
         if 'pages' in mutable_data and isinstance(mutable_data['pages'], str):
             mutable_data['pages'] = mutable_data['pages'].split('|')
@@ -26,7 +36,7 @@ class FetchRefsSchemaV2(BaseSchemaV2):
     @post_load
     # NB: post_load is a marshmallow directive;
     #   this function is run after loading request args
-    #   it basically pulls the values from the request object into a Job object
+    #   it basically pulls the request object value into a Job object
     #
     #  **kwargs is needed here despite what the validator claims
     def return_job_object(self, data, **kwargs) -> FetchRefsJobV2:  # type: ignore # dead: disable

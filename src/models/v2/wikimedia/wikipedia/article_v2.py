@@ -167,7 +167,7 @@ class WikipediaArticleV2(IariBaseModel):
             if not self.wikitext:
                 raise MissingInformationError("WikipediaReferenceExtractorV2::fetch_and_parse: self.wikitext is empty")
 
-            app.logger.debug("==> ArticleV2::fetch_and_parse: setting extractor")
+            # ### app.logger.debug("==> ArticleV2::fetch_and_parse: setting extractor")
 
             self.extractor = WikipediaReferenceExtractorV2(
                 wikitext=self.wikitext,
@@ -175,14 +175,13 @@ class WikipediaArticleV2(IariBaseModel):
                 job=self.job,
             )
 
-            # raise MissingInformationError("HoHum!")
-
             app.logger.debug("==> ArticleV2::fetch_and_parse: extracting all refs")
             self.extractor.extract_all_references()
 
-            app.logger.debug("==> ArticleV2::fetch_and_parse: fetching ores scores")
-            self.__get_ores_scores__()
-            # self.__generate_hash__()
+
+        app.logger.debug("==> ArticleV2::fetch_and_parse: fetching ores scores")
+        self.__get_ores_scores__()
+        # self.__generate_hash__()
 
 
         app.logger.debug("==> ArticleV2::fetch_and_parse: extracting from html")
@@ -195,7 +194,7 @@ class WikipediaArticleV2(IariBaseModel):
         self.__extract_section_references__()
         self.__extract_urls_from_references__()
 
-        self.__get_ores_scores__()  # fills ores_quality_prediction and ores_details
+        # self.__get_ores_scores__()  # fills ores_quality_prediction and ores_details
 
     def __extract_urls_from_references__(self):
         # traverse references, adding urls to self.urlDict,
@@ -283,7 +282,7 @@ class WikipediaArticleV2(IariBaseModel):
                 if span_ref:
                     # span_ref contains citation markup and possible template data
 
-                    app.logger.debug(f"Checking <link> data...")
+                    # ### app.logger.debug(f"Checking <link> data...")
 
                     # fetch "template" data from link[data-mw] attribute
                     link_refs = span_ref.find_all("link")
@@ -329,7 +328,9 @@ class WikipediaArticleV2(IariBaseModel):
                     # TODO What is held in these elements, specifically? is it books?
                     span_refs = span_ref.find_all("span", class_="Z3988")
                     for span_ref in span_refs:
-                        app.logger.debug(f"found span.Z3988...")
+
+                        # app.logger.debug(f"found span.Z3988...")
+
                         span_data = span_ref.get("title")
                         if span_data:
                             span_template = self.__parse_span_template__(span_data)
@@ -525,7 +526,7 @@ class WikipediaArticleV2(IariBaseModel):
 
         span_list = span_data.split("&")
 
-        app.logger.debug(f"SPAN DATA (parsed):")
+        # app.logger.debug(f"SPAN DATA (parsed):")
 
         span_template = []
         # print this string out

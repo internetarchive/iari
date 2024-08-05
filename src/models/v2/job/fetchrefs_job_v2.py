@@ -43,4 +43,11 @@ class FetchRefsJobV2(JobV2):
         #     f'fetchrefs validate_fields: Fake Error'
         # )
 
+        if not self.wikitext:
+            if not self.pages:
+                raise MissingInformationError(
+                    f"pages or wikitext parameter must be specified"
+                )
+
+
 
