@@ -153,14 +153,14 @@ class WikipediaSectionV2(BaseModel):
 
     def __populate_wikitext__(self):
         from src import app
-
         app.logger.debug("__populate_wikitext__: running")
+
         if self.wikicode and not self.wikitext:
             self.wikitext = str(self.wikicode)
 
     def __parse_wikitext__(self):
         from src import app
-
         app.logger.debug("__parse_wikitext__: running")
+
         if self.wikitext and not self.wikicode:
             self.wikicode = mwparserfromhell.parse(self.wikitext)

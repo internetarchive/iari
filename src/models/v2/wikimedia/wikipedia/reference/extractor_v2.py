@@ -197,7 +197,7 @@ class WikipediaReferenceExtractorV2(WariBaseModel):
         """Extract all references from self.wikitext"""
         from src import app
 
-        app.logger.debug("extract_all_references: running")
+        app.logger.debug("==> WikipediaReferenceExtractorV2:: extract_all_references")
         if not self.job:
             raise MissingInformationError("no job")
         self.__parse_wikitext__()

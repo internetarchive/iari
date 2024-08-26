@@ -27,6 +27,7 @@ class FetchRefsSchemaV2(BaseSchemaV2):
 
         app.logger.debug(f"==> FetchRefsSchemaV2::(@pre_load)process_input: request_method:{request_method}")
 
+
         mutable_data = dict(data)  # Convert ImmutableMultiDict to a mutable dict
         if 'pages' in mutable_data and isinstance(mutable_data['pages'], str):
             mutable_data['pages'] = mutable_data['pages'].split('|')
@@ -43,11 +44,7 @@ class FetchRefsSchemaV2(BaseSchemaV2):
         """Return Job object"""
         from src import app
         app.logger.debug("==> FetchRefsSchemaV2::@post_load:return_job_object")
-
         app.logger.debug(f"return_job_object data: {data}")
-
-        # app.logger.debug(f"return_job_object **data: {**data}")
-
 
         job = FetchRefsJobV2(**data)
         job.validate_fields()

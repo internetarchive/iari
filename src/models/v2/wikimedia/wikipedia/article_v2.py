@@ -1,8 +1,6 @@
 import logging
 import re
-import pprint
-# import urllib
-from urllib.parse import quote, unquote
+from urllib.parse import unquote
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -167,8 +165,6 @@ class WikipediaArticleV2(IariBaseModel):
             if not self.wikitext:
                 raise MissingInformationError("WikipediaReferenceExtractorV2::fetch_and_parse: self.wikitext is empty")
 
-            # ### app.logger.debug("==> ArticleV2::fetch_and_parse: setting extractor")
-
             self.extractor = WikipediaReferenceExtractorV2(
                 wikitext=self.wikitext,
                 html_source=self.html_markup,
@@ -177,7 +173,6 @@ class WikipediaArticleV2(IariBaseModel):
 
             app.logger.debug("==> ArticleV2::fetch_and_parse: extracting all refs")
             self.extractor.extract_all_references()
-
 
         app.logger.debug("==> ArticleV2::fetch_and_parse: fetching ores scores")
         self.__get_ores_scores__()
@@ -190,6 +185,7 @@ class WikipediaArticleV2(IariBaseModel):
         if not self.html_markup:
             self.__fetch_html__()
 
+        # extract references from html point-of-view
         self.__extract_footnote_references__()
         self.__extract_section_references__()
         self.__extract_urls_from_references__()
@@ -231,8 +227,8 @@ class WikipediaArticleV2(IariBaseModel):
         regex_extract_ref_name = r"#cite_note-(.*?)-\d+$"
 
         soup = BeautifulSoup(self.html_markup, "html.parser")
-            # for link in soup.find_all("a"):
-            #     print(link.get("href"))
+        # for link in soup.find_all("a"):
+        #     print(link.get("href"))
 
 
         references_wrapper = soup.find("div", class_="mw-references-wrap")

@@ -70,7 +70,7 @@ class FetchRefsV2(StatisticsViewV2):
             self.__validate_and_get_job__(method)  # inherited from StatisticsViewV2
 
             self.pages = []
-            
+
             # process pages, get refs, sets self.pages data
             for page in self.job.pages:
                 page_results = self.__get_page_data__(page)
