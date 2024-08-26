@@ -31,6 +31,7 @@ class WikipediaAnalyzer(WariBaseModel):
 
     job: Optional[ArticleJob] = None
     article: Optional[WikipediaArticle] = None
+
     article_statistics: Optional[ArticleStatistics] = None  # includes cite_refs property
     reference_statistics: Optional[List[Dict[str, Any]]] = None
 
@@ -221,7 +222,7 @@ class WikipediaAnalyzer(WariBaseModel):
                     flds=reference.unique_first_level_domains
                     if reference.unique_first_level_domains
                     else [],
-                    wikitext=reference.get_wikicode_as_string,
+                    wikitext=reference.wikicode_as_string,
                     section=reference.section,
                     section_id=reference.section_id,
                     template_names=reference.template_names,
@@ -290,7 +291,7 @@ class WikipediaAnalyzer(WariBaseModel):
             # refs = section.references
 
             for ref in section.references:
-                new_ref ={"wikitext": ref.get_wikicode_as_string}
+                new_ref ={"wikitext": ref.wikicode_as_string}
                 new_refs.append(new_ref)
             sections.append(new_section)
 

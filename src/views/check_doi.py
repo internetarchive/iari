@@ -33,7 +33,7 @@ class CheckDoi(StatisticsWriteView):
         Every branch in this method has to return a tuple (Any,response_code)"""
         from src import app
 
-        app.logger.debug("get: running")
+        app.logger.debug("==> CheckDoi::get")
         self.__validate_and_get_job__()
         if self.job:
             return self.__return_from_cache_or_analyze_and_return__()

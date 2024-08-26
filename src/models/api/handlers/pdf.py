@@ -15,7 +15,7 @@ from fitz import (
 # type: ignore
 from requests import ReadTimeout
 
-from config import link_extraction_regex
+from config import regex_url_link_extraction
 from src.models.api.handlers import BaseHandler
 from src.models.api.job.check_url_job import UrlJob
 from src.models.api.link.pdf_link import PdfLink
@@ -214,7 +214,7 @@ class PdfHandler(BaseHandler):
                 # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
                 # provided by chatgpt:
                 urls = re.findall(
-                    link_extraction_regex,
+                    regex_url_link_extraction,
                     self.text_pages[index],
                 )
                 # cleaned_urls = self.__clean_urls__(urls=urls)
@@ -233,7 +233,7 @@ class PdfHandler(BaseHandler):
                 # We remove the linebreaks to avoid clipping of URLs, see https://github.com/internetarchive/iari/issues/766
                 # provided by chatgpt:
                 urls = re.findall(
-                    link_extraction_regex,
+                    regex_url_link_extraction,
                     self.text_pages_without_linebreaks[index],
                 )
                 # cleaned_urls = self.__clean_urls__(urls=urls)
@@ -253,7 +253,7 @@ class PdfHandler(BaseHandler):
                 # provided by chatgpt:
                 if self.text_pages_without_spaces:
                     urls = re.findall(
-                        link_extraction_regex,
+                        regex_url_link_extraction,
                         self.text_pages_without_spaces[index],
                     )
                     # cleaned_urls = self.__clean_urls__(urls=urls)

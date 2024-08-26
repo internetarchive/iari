@@ -882,7 +882,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         for ref in refs:
             print(ref)
             raw_reference_object = WikipediaReference(tag=ref, testing=True)
-            assert raw_reference_object.get_wikicode_as_string == ref
+            assert raw_reference_object.wikicode_as_string == ref
 
     def test_get_wikicode_as_string_nonempty(self):
         wikitext = (
@@ -894,7 +894,7 @@ class TestEnglishWikipediaReferenceSchema(TestCase):
         refs = wikicode.filter_tags(matches=lambda tag: tag.lower() == "ref")
         for ref in refs:
             raw_reference_object = WikipediaReference(tag=ref, testing=True)
-            assert raw_reference_object.get_wikicode_as_string == ref
+            assert raw_reference_object.wikicode_as_string == ref
 
     def test_is_footnote_reference(self):
         ref = "{{citeq|Q1}}"

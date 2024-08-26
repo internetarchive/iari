@@ -34,7 +34,7 @@ class WikipediaReferenceExtractorV2(WariBaseModel):
 
     wikitext: str
     wikicode: Wikicode = None  # wiki object tree parsed from wikitext
-    html_source: str = ""  # used to extract citeref reference data
+    html_source: Optional[str] = ""  # used to extract citeref reference data
 
     references: Optional[List[WikipediaReferenceV2]] = None
     # cite_page_refs: Optional[List] = []
@@ -197,7 +197,7 @@ class WikipediaReferenceExtractorV2(WariBaseModel):
         """Extract all references from self.wikitext"""
         from src import app
 
-        app.logger.debug("extract_all_references: running")
+        app.logger.debug("==> WikipediaReferenceExtractorV2:: extract_all_references")
         if not self.job:
             raise MissingInformationError("no job")
         self.__parse_wikitext__()

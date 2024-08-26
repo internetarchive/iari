@@ -59,3 +59,10 @@ class WikimediaDomain(Enum):
 class AnalyzerReturnValues(Enum):
     IS_REDIRECT = "No statistic available because this is a redirect."
     NOT_FOUND = "Article title not found."
+
+
+class RequestMethods(Enum):
+    # Http request types
+    get = "get"
+    post = "post"
+

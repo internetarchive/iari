@@ -38,7 +38,6 @@ class WikipediaUrlV2(BaseModel):
 
     @property
     def __is_wayback_machine_url__(self):
-        logger.debug("is_wayback_machine_url: running")
         return bool("//web.archive.org" in self.url)
 
     @property
@@ -58,7 +57,7 @@ class WikipediaUrlV2(BaseModel):
         return self.url < other.url
 
     def __parse_extract_and_validate__(self) -> None:
-        logger.debug("__parse_extract_and_validate__: running")
+        logger.debug("==> __parse_extract_and_validate__")
         if self.__is_wayback_machine_url__:
             self.__parse_wayback_machine_url__()
         self.__parse_and_extract_url__()
@@ -68,7 +67,7 @@ class WikipediaUrlV2(BaseModel):
     def __extract_first_level_domain__(self) -> None:
         from src import app
 
-        app.logger.debug("__extract_first_level_domain__: Running")
+        app.logger.debug("==> __extract_first_level_domain__")
         try:
             self.__get_fld__()
         except (TldBadUrl, TldDomainNotFound):
@@ -97,7 +96,8 @@ class WikipediaUrlV2(BaseModel):
                 self.malformed_url = True
                 self.malformed_url_details = MalformedUrlError.UNRECOGNIZED_SCHEME
             else:
-                logger.debug(f"Found valid urlscheme: {self.scheme}")
+                # logger.debug(f"Found valid urlscheme: {self.scheme}")
+                pass
 
     def __extract_tld__(self):
         if not self.netloc:
@@ -147,19 +147,19 @@ class WikipediaUrlV2(BaseModel):
             # )
 
     def __get_fld__(self):
-        logger.debug("__get_fld__: running")
+        # logger.debug("==> __get_fld__")
         if self.archived_url:
-            logger.debug(f"Trying to get FLD from {self.archived_url}")
+            # logger.debug(f"Trying to get FLD from {self.archived_url}")
             fld = get_fld(self.archived_url)
         else:
-            logger.debug(f"Trying to get FLD from {self.url}")
+            # logger.debug(f"Trying to get FLD from {self.url}")
             fld = get_fld(self.url)
-        logger.debug(f"Found FLD: {fld}")
+        # logger.debug(f"Found FLD: {fld}")
         self.first_level_domain = fld
 
     def extract(self):
         from src import app
 
-        app.logger.debug("extract: running")
+        # app.logger.debug("==>  extract")
         self.__parse_extract_and_validate__()
         self.__extract_first_level_domain__()

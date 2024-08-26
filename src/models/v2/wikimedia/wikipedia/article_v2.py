@@ -1,8 +1,6 @@
 import logging
 import re
-import pprint
-# import urllib
-from urllib.parse import quote, unquote
+from urllib.parse import unquote
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -69,6 +67,7 @@ class WikipediaArticleV2(IariBaseModel):
 
     error_items: List[Any] = []
 
+    # required pydantic class
     class Config:  # dead: disable
         arbitrary_types_allowed = True  # dead: disable
         extra = "forbid"  # dead: disable
@@ -129,7 +128,7 @@ class WikipediaArticleV2(IariBaseModel):
         """
         from src import app
 
-        app.logger.debug("ArticleV2::fetch_and_parse")
+        app.logger.debug("==> ArticleV2::fetch_and_parse")
         app.logger.info("Fetching article data and parsing")
 
         if not self.wikitext:
@@ -138,28 +137,60 @@ class WikipediaArticleV2(IariBaseModel):
             self.__fetch_wikitext__()
 
         if self.is_redirect:
-            logger.debug(
+            logger.error(
                 "Skipped extraction and parsing because the article is a redirect"
             )
-            raise WikipediaApiFetchError("wiki article is a redirect")
+            raise WikipediaApiFetchError("Wiki article is a redirect")
+            # TODO Might want to change this from raising exception,
+            #   but we do want to stop further processing,
+            #   so need to have some way of indicating that to caller
 
         if not self.found_in_wikipedia:
-            logger.debug(
-                "Skipped extraction and parsing because the article was not found"
+            logger.error(
+                "Skipped extraction and parsing because the article was not found in wiki"
             )
-            raise WikipediaApiFetchError("wiki article not found in wiki")
+            raise WikipediaApiFetchError(f"Article {self.job.quoted_title} not found in wiki")
 
         if not self.wikitext:
             raise WikipediaApiFetchError("wikitext is empty")
 
+
+        # wikitext extraction
+
+        app.logger.debug("==> ArticleV2::fetch_and_parse: extracting from wikitext")
+
+        # elif not self.is_redirect and self.found_in_wikipedia:
+        if not self.is_redirect and self.found_in_wikipedia:
+
+            if not self.wikitext:
+                raise MissingInformationError("WikipediaReferenceExtractorV2::fetch_and_parse: self.wikitext is empty")
+
+            self.extractor = WikipediaReferenceExtractorV2(
+                wikitext=self.wikitext,
+                html_source=self.html_markup,
+                job=self.job,
+            )
+
+            app.logger.debug("==> ArticleV2::fetch_and_parse: extracting all refs")
+            self.extractor.extract_all_references()
+
+        app.logger.debug("==> ArticleV2::fetch_and_parse: fetching ores scores")
+        self.__get_ores_scores__()
+        # self.__generate_hash__()
+
+
+        app.logger.debug("==> ArticleV2::fetch_and_parse: extracting from html")
+
+        # html extraction
         if not self.html_markup:
             self.__fetch_html__()
 
+        # extract references from html point-of-view
         self.__extract_footnote_references__()
         self.__extract_section_references__()
         self.__extract_urls_from_references__()
 
-        self.__get_ores_scores__()  # fills ores_quality_prediction and ores_details
+        # self.__get_ores_scores__()  # fills ores_quality_prediction and ores_details
 
     def __extract_urls_from_references__(self):
         # traverse references, adding urls to self.urlDict,
@@ -196,8 +227,8 @@ class WikipediaArticleV2(IariBaseModel):
         regex_extract_ref_name = r"#cite_note-(.*?)-\d+$"
 
         soup = BeautifulSoup(self.html_markup, "html.parser")
-            # for link in soup.find_all("a"):
-            #     print(link.get("href"))
+        # for link in soup.find_all("a"):
+        #     print(link.get("href"))
 
 
         references_wrapper = soup.find("div", class_="mw-references-wrap")
@@ -247,7 +278,7 @@ class WikipediaArticleV2(IariBaseModel):
                 if span_ref:
                     # span_ref contains citation markup and possible template data
 
-                    app.logger.debug(f"Checking <link> data...")
+                    # ### app.logger.debug(f"Checking <link> data...")
 
                     # fetch "template" data from link[data-mw] attribute
                     link_refs = span_ref.find_all("link")
@@ -293,7 +324,9 @@ class WikipediaArticleV2(IariBaseModel):
                     # TODO What is held in these elements, specifically? is it books?
                     span_refs = span_ref.find_all("span", class_="Z3988")
                     for span_ref in span_refs:
-                        app.logger.debug(f"found span.Z3988...")
+
+                        # app.logger.debug(f"found span.Z3988...")
+
                         span_data = span_ref.get("title")
                         if span_data:
                             span_template = self.__parse_span_template__(span_data)
@@ -489,7 +522,7 @@ class WikipediaArticleV2(IariBaseModel):
 
         span_list = span_data.split("&")
 
-        app.logger.debug(f"SPAN DATA (parsed):")
+        # app.logger.debug(f"SPAN DATA (parsed):")
 
         span_template = []
         # print this string out
