@@ -130,7 +130,7 @@ class Article(StatisticsWriteView):
                 # we got a json response
                 # according to https://stackoverflow.com/questions/13081532/return-json-response-from-flask-view
                 # flask calls jsonify automatically
-                self.__write_to_disk__()  # writes self.io.dtata to disk
+                self.__write_to_disk__()  # writes self.io.data to disk
                 if not self.io:
                     raise MissingInformationError()
                 if self.io.data:

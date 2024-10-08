@@ -155,7 +155,7 @@ class ArticleV2(StatisticsViewV2):
             return
 
         self.__write_article_to_disk__()
-        # NB not writung references to disk now...
+        # NB _not_ writing references to disk now...
         # self.__write_references_to_disk__()
 
     def __write_article_to_disk__(self):

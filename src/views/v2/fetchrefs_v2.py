@@ -63,6 +63,7 @@ class FetchRefsV2(StatisticsViewV2):
 
 
     def __process_request__(self, method=RequestMethods.post):  # default to POST
+        # populate local "pages" property
         from src import app
         app.logger.debug(f"==> FetchRefsV2::__process_request__, method = {method}")
 

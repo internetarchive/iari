@@ -38,6 +38,8 @@ from src.views.v2.article_cache_view_v2 import ArticleCacheV2
 from src.views.v2.editref_v2 import EditRefV2
 # new stuff jul 2024
 from src.views.v2.fetchrefs_v2 import FetchRefsV2
+# new stuff oct 2024
+from src.views.v2.extract_refs_v2 import ExtractRefsV2
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -63,7 +65,14 @@ server_name = os.getenv('FLASK_SERVER_NAME', 'Unknown Server')
 # and bump the version when making breaking changes
 api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning should be addressed
 
+
+@app.errorhandler(404)
+def not_found(e):
+    return {"error": "Endpoint not found"}
+
+
 # link the API views to respective endpoint urls
+api.add_resource(ExtractRefsV2, "/extract_refs")
 api.add_resource(FetchRefsV2, "/fetchrefs")
 api.add_resource(EditRefV2, "/editref")
 
