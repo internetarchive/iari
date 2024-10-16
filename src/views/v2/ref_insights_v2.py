@@ -68,18 +68,8 @@ class RefInsightsV2(StatisticsViewV2):
                 "execution_time": f"{execution_time:.4f} seconds"
             }
 
-
-            # # request_props for debug to see what is returned
-            # request_properties = dir(request)
-            # filtered_properties = [prop for prop in request_properties if not prop.startswith('__')]
-            # # self.return_data["request props"] = '<br>'.join(filtered_properties)
-            # # self.return_data["request props"] = str(filtered_properties)
-            # self.return_data["request props"] = filtered_properties
-
-
             self.return_data.update(insight_data)
 
-            # and return results
             return self.return_data, 200
 
 
@@ -197,11 +187,12 @@ class RefInsightsV2(StatisticsViewV2):
 
         # fetch totals array from each table and append to output array
         for table in tables:
+
             totals_by_row.append(
                 {
                     "name": table["name"],
                     "cols": table["column_totals"],
-
+                    "total": sum(table["column_totals"])
                 }
             )
 
