@@ -40,6 +40,7 @@ from src.views.v2.editref_v2 import EditRefV2
 from src.views.v2.fetchrefs_v2 import FetchRefsV2
 # new stuff oct 2024
 from src.views.v2.extract_refs_v2 import ExtractRefsV2
+from src.views.v2.ref_insights_v2 import RefInsightsV2
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -72,6 +73,7 @@ def not_found(e):
 
 
 # link the API views to respective endpoint urls
+api.add_resource(RefInsightsV2, "/insights")
 api.add_resource(ExtractRefsV2, "/extract_refs")
 api.add_resource(FetchRefsV2, "/fetchrefs")
 api.add_resource(EditRefV2, "/editref")

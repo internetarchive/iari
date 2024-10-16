@@ -50,10 +50,10 @@ class StatisticsViewV2(Resource):
         if successful, pulls param values into job's properties
         """
         from src import app
-        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__(method = {method})")
+        # app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__(method = {method})")
 
         self.schema.context['request_method'] = request.method
-        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request.method = {request.method})")
+        # app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request.method = {request.method})")
 
         # self.request_method = method
         # use request.args if GET, request.form if POST
