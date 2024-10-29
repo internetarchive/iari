@@ -68,7 +68,8 @@ class ExtractRefsV2(StatisticsViewV2):
             # TODO get cached data here if possible
             # TODO somehow update page_errors if encountered
             #   maybe have __get_page_data__ access self.page_error?
-            page_data = self.__get_page_data__()
+            page_data_old = self.__get_page_data__()
+            page_data = self.__get_page_data_enhanced__()
 
             # Stop the timer and calculate execution time
             end_time = time.time()
@@ -91,10 +92,12 @@ class ExtractRefsV2(StatisticsViewV2):
                     "as_of": page_data["as_of"],
                     "page_id": page_data["page_id"],
                     "revision_id": page_data["revision_id"],
+                    "section_names": page_data["section_names"],
                     "reference_count": page_data["reference_count"],
                     "references": page_data["references"],
-                }
-            )
+                    "references_old_count": len(page_data["references_old"]),
+                    "references_old": page_data["references_old"],
+            })
 
             # and return results
             return self.page_data, 200
@@ -106,7 +109,7 @@ class ExtractRefsV2(StatisticsViewV2):
 
         except Exception as e:
             traceback.print_exc()
-            return {"error": f"General Error: {str(e)}"}, 500
+            return {"error": f"{type(e).__name__}: {str(e)}"}, 500
 
     def __get_page_data__(self):
         """
@@ -130,3 +133,73 @@ class ExtractRefsV2(StatisticsViewV2):
         self.analyzer = WikiAnalyzerV2()
 
         return self.analyzer.get_page_data(page_spec)
+
+
+    def __get_page_data_enhanced__(self):
+        """
+        parses page specified by self.job and sets self.page_data to object of parsed values
+        """
+
+        page_spec = {
+            "page_title": self.job.page_title,
+            "domain": self.job.domain,
+            "as_of": self.job.as_of,
+        }
+
+        # TODO added fields needed:
+        # timestamp of this information
+        # maybe served from cache? what does cache mean now that we have databases?
+
+        # for now, assumes page_spec is a wiki page.
+        # In the future, we will be able to determine which analyzer to use based on media type
+        # NB: each analyzer should "implement" a base to handle get_page_data(page_spec
+        #   page_spec should, then, also be a formal object class, to allow polymorphisms of analyzers
+        self.analyzer = WikiAnalyzerV2()
+
+        return self.analyzer.get_page_data(page_spec)
+
+
+    def __get_page_sections__(self):
+        """
+        parses page specified by self.job and sets self.page_data to object of parsed values
+        """
+
+        from src import app
+
+        self.sections = []
+        app.logger.debug("__extract_sections__: running")
+        if not self.wikicode:
+            self.__parse_wikitext__()
+        sections: List[Wikicode] = self.wikicode.get_sections(
+            levels=[2],
+            include_headings=True,
+        )
+
+        # TODO: make this code better by special casing no section and making faux section, and putting through same loop
+
+        if not sections:
+            app.logger.debug("No level 2 sections detected, creating root section")
+            # console.print(self.wikicode)
+            # exit()
+            mw_section = WikipediaSectionV2(
+                # We add the whole article to the root section
+                wikicode=self.wikicode,
+                testing=self.testing,
+                language_code=self.language_code,
+                job=self.job,
+            )
+            mw_section.extract()
+            self.sections.append(mw_section)
+
+        else:
+            self.__extract_root_section__()
+            for section in sections:
+                mw_section = WikipediaSectionV2(
+                    wikicode=section,
+                    testing=self.testing,
+                    language_code=self.language_code,
+                    job=self.job,
+                )
+                mw_section.extract()
+                self.sections.append(mw_section)
+        app.logger.debug(f"Number of sections found: {len(self.sections)}")
