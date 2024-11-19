@@ -2,8 +2,9 @@ from typing import Any, Optional, Tuple, List, Dict
 import traceback
 import time
 
-from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.enums import RequestMethods
+
 from src.models.v2.schema.extract_refs_schema_v2 import ExtractRefsSchemaV2
 from src.models.v2.job.extract_refs_job_v2 import ExtractRefsJobV2
 
@@ -14,16 +15,14 @@ from src.helpers.get_version import get_poetry_version
 
 
 class ExtractRefsV2(StatisticsViewV2):
-
     """
-    takes an array of page specifiers, and
-    returns data for all citations for each page.
+    returns citation data for page specified by parameters in job.
     """
 
     schema = ExtractRefsSchemaV2()  # Defines expected parameters; Overrides StatisticsViewV2's "schema" property
     job: ExtractRefsJobV2           # Holds usable variables, seeded from schema. Overrides StatisticsViewV2's "job"
 
-    # analyzer: IariAnalyzer  # TODO make analyzer variable
+    # analyzer: IariAnalyzer  # TODO make analyzer instance variable
 
     page_data: Dict[str, Any] = {}  # holds parsed data from page processing
     # NB TODO page_data should be explicit type, returned by analyzer
@@ -32,24 +31,17 @@ class ExtractRefsV2(StatisticsViewV2):
 
     def get(self):
         """
-        flask GET entrypoint for returning extract_refs results
+        entrypoint for GET extract_refs endpoint
         must return a tuple: (Any, response_code)
         """
-        from src import app
-        app.logger.debug(f"==> ExtractRefsV2::get")
-
         return self.__process_request__(method=RequestMethods.get)
 
     def post(self):
         """
-        flask POST entrypoint for returning fetchrefs results
+        entrypoint for POST extract_refs endpoint
         must return a tuple: (Any,response_code)
         """
-        from src import app
-        app.logger.debug(f"==> ExtractRefsV2::post")
-
         return self.__process_request__(method=RequestMethods.post)
-
 
     def __process_request__(self, method=RequestMethods.post):  # default to POST
 
@@ -66,16 +58,13 @@ class ExtractRefsV2(StatisticsViewV2):
 
             # process page specified by job data and save in returned page_data
             # TODO get cached data here if possible
+            page_data = self.__get_page_data__()
             # TODO somehow update page_errors if encountered
             #   maybe have __get_page_data__ access self.page_error?
-            page_data_old = self.__get_page_data__()
-            page_data = self.__get_page_data_enhanced__()
 
             # Stop the timer and calculate execution time
             end_time = time.time()
             execution_time = end_time - start_time
-            #         timestamp = datetime.timestamp(datetime.utcnow())
-            #         isodate = datetime.isoformat(datetime.utcnow())
 
             self.page_data = {
                 "iari_version": get_poetry_version("pyproject.toml"),
@@ -92,11 +81,16 @@ class ExtractRefsV2(StatisticsViewV2):
                     "as_of": page_data["as_of"],
                     "page_id": page_data["page_id"],
                     "revision_id": page_data["revision_id"],
+
                     "section_names": page_data["section_names"],
+                    "url_count": page_data["url_count"],
+                    "urls": page_data["urls"],
                     "reference_count": page_data["reference_count"],
                     "references": page_data["references"],
-                    "references_old_count": len(page_data["references_old"]),
-                    "references_old": page_data["references_old"],
+                    "cite_refs_count": page_data["cite_refs_count"],
+                    "cite_refs": page_data["cite_refs"],
+                    # "references_old_count": len(page_data["references_old"]),
+                    # "references_old": page_data["references_old"],
             })
 
             # and return results
@@ -111,9 +105,10 @@ class ExtractRefsV2(StatisticsViewV2):
             traceback.print_exc()
             return {"error": f"{type(e).__name__}: {str(e)}"}, 500
 
+
     def __get_page_data__(self):
         """
-        parses page specified by self.job and sets self.page_data to object of parsed values
+        parses page specified by self.job and sets self.page_data to parsed values
         """
 
         page_spec = {
@@ -122,84 +117,14 @@ class ExtractRefsV2(StatisticsViewV2):
             "as_of": self.job.as_of,
         }
 
-        # TODO added fields needed:
-        # timestamp of this information
-        # maybe served from cache? what does cache mean now that we have databases?
+        # TODO additional fields needed?:
+        #   - timestamp of this information
+        #   - maybe served from cache? what does cache mean now that we have databases?
 
         # for now, assumes page_spec is a wiki page.
         # In the future, we will be able to determine which analyzer to use based on media type
-        # NB: each analyzer should "implement" a base to handle get_page_data(page_spec
-        #   page_spec should, then, also be a formal object class, to allow polymorphisms of analyzers
+        # NB: each analyzer should "implement" a "base analyzer" "interface" to handle get_page_data(page_spec)
+        #   page_spec should then also be a formal object class, to allow polymorphic analyzers
         self.analyzer = WikiAnalyzerV2()
 
         return self.analyzer.get_page_data(page_spec)
-
-
-    def __get_page_data_enhanced__(self):
-        """
-        parses page specified by self.job and sets self.page_data to object of parsed values
-        """
-
-        page_spec = {
-            "page_title": self.job.page_title,
-            "domain": self.job.domain,
-            "as_of": self.job.as_of,
-        }
-
-        # TODO added fields needed:
-        # timestamp of this information
-        # maybe served from cache? what does cache mean now that we have databases?
-
-        # for now, assumes page_spec is a wiki page.
-        # In the future, we will be able to determine which analyzer to use based on media type
-        # NB: each analyzer should "implement" a base to handle get_page_data(page_spec
-        #   page_spec should, then, also be a formal object class, to allow polymorphisms of analyzers
-        self.analyzer = WikiAnalyzerV2()
-
-        return self.analyzer.get_page_data(page_spec)
-
-
-    def __get_page_sections__(self):
-        """
-        parses page specified by self.job and sets self.page_data to object of parsed values
-        """
-
-        from src import app
-
-        self.sections = []
-        app.logger.debug("__extract_sections__: running")
-        if not self.wikicode:
-            self.__parse_wikitext__()
-        sections: List[Wikicode] = self.wikicode.get_sections(
-            levels=[2],
-            include_headings=True,
-        )
-
-        # TODO: make this code better by special casing no section and making faux section, and putting through same loop
-
-        if not sections:
-            app.logger.debug("No level 2 sections detected, creating root section")
-            # console.print(self.wikicode)
-            # exit()
-            mw_section = WikipediaSectionV2(
-                # We add the whole article to the root section
-                wikicode=self.wikicode,
-                testing=self.testing,
-                language_code=self.language_code,
-                job=self.job,
-            )
-            mw_section.extract()
-            self.sections.append(mw_section)
-
-        else:
-            self.__extract_root_section__()
-            for section in sections:
-                mw_section = WikipediaSectionV2(
-                    wikicode=section,
-                    testing=self.testing,
-                    language_code=self.language_code,
-                    job=self.job,
-                )
-                mw_section.extract()
-                self.sections.append(mw_section)
-        app.logger.debug(f"Number of sections found: {len(self.sections)}")

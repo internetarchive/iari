@@ -400,7 +400,7 @@ class WikipediaReference(JobBaseModel):
         """We extract all templates"""
         from src import app
 
-        app.logger.debug("__extract_and_clean_template_parameters__: running")
+        app.logger.debug("==> __extract_and_clean_template_parameters__")
         if self.templates:
             [
                 template.extract_and_prepare_parameter_and_flds()
