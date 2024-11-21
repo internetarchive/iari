@@ -163,6 +163,7 @@ def get_refs_from_section(section: Wikicode) -> List[object]:
                 "name": get_ref_attribute(node, "name"),  # fetch the name of the ref, if any
                 "urls": [],
                 "claim": "",
+                "claim_array": [],
                 "section": section_name,
                 "templates": get_templates_from_ref(node),
             }
@@ -182,7 +183,7 @@ def get_refs_from_section(section: Wikicode) -> List[object]:
 
         # check for sfn template
         if isinstance(node, mwparserfromhell.nodes.template.Template) and node.name.strip().lower() == "sfn":
-            app.logger.debug("Found sfn template:", node)
+            app.logger.debug(f"Found sfn template: {str(node)}")
             # what to do?
             # we can save as reference, with SFN type, and parameters
             # ref is a "pointer" to another ref
@@ -216,7 +217,7 @@ def get_templates_from_ref(ref):
 
     # assume node is a <ref> Tag node
     raw_templates = ref.contents.ifilter_templates(
-        matches=lambda t: not t.name.lstrip().startswith("#"),  # #-started templates not processed
+        matches=lambda x: not x.name.lstrip().startswith("#"),  # #-started templates not processed
         recursive=True,
     )
 
@@ -235,23 +236,8 @@ def get_templates_from_ref(ref):
 
 
 def get_claim(node_number, nodes):
-    # # try to get the claim text referring to this citation, which is usually the previous node
-    # if i > 0 and isinstance(nodes[i - 1], mwparserfromhell.nodes.text.Text):
-    #
-    #     # get the last 5 nodes before ref to try claims
-    #     claim_array = []
-    #     for offset in range(1, 5):
-    #         if (i - offset) < 0:
-    #             break
-    #         claim_array.append(nodes[i - 1].value.strip())
-    #
-    #     referring_text = nodes[i - 1].value.strip()
-    #
-    #     my_ref["claim"] = referring_text
-    #     my_ref["claim_array"] = claim_array
-    #
-    #     # print(f"Referring text: {referring_text}")
-    #     # print(f"Citation: {node.contents}")
+    # piece together the claim text referring to the citation at node_number.
+    # The citation can be all the previous nodes before the last full stop.
 
     claim_array = []
     claim_text = ""
@@ -262,7 +248,7 @@ def get_claim(node_number, nodes):
     while (offset < max_back_nodes) and not terminal_found:
         offset += 1
 
-        # stop if we past start of node list
+        # stop if at start of node list
         if (node_number - offset) < 0:
             break
 
@@ -270,12 +256,44 @@ def get_claim(node_number, nodes):
         node = nodes[nindex]
         node_text = ""
 
+        """
+        things to check:
+        if immediate left tag is a reftag, "skip over" reftag and try to get claim text
+        - could get claim text of that to-the-left claim tag
+        
+        The left boundary of a claim text could be another ref itself, 
+        as the preceeding ref comes AFTER the preceedingref's claim text's terminbating period
+        
+        many refs in a row, as in [85][86][87][88][89] K Rosa, e.g.
+        
+        This:
+        In the first half of the 20th century, steam reportedly came out of the
+         Rano Kau crater wall. This was photographed by the island's manager, Mr. Edmunds.
+        (Mr. stops it!)
+        (If terminating period's preceeding text is one of accepted abbreviations, continue on)
+        
+        """
+
+        """
+        If you want to handle tags more robustly (e.g., extract attributes or process nested contents), here are some useful properties and methods:
+        
+        node.tag: Returns the name of the tag (e.g., "b" for <b>).
+        node.attributes: Returns the tag's attributes as a dictionary-like object.
+        str(node): Returns the entire tag as a string, including its opening and closing tags.
+        
+        """
         if isinstance(node, mwparserfromhell.nodes.text.Text):
             node_text = str(node.value)
+        elif isinstance(node, mwparserfromhell.nodes.tag.Tag):
+            node_text = str(node.contents)
         elif isinstance(node, mwparserfromhell.nodes.wikilink.Wikilink):
             node_text = str(node.title) if not node.text else str(node.text)
+        elif isinstance(node, mwparserfromhell.nodes.html_entity.HTMLEntity):
+            node_text = str(node)
         else:
             node_text = str(node.value) if hasattr(node, 'value') else ""
+
+
 
         """
         terminate if period followed by whitespace is found in display_val snippet.
@@ -283,7 +301,8 @@ def get_claim(node_number, nodes):
             - Matches a period followed by whitespace OR
             - a period at the end of the string
         """
-        end_of_sentence_pattern = r"\.\s"
+        # end_of_sentence_pattern = r"\.\s"
+        end_of_sentence_pattern = r"^\s*\n|\.\s"
         terminal_found = re.search(end_of_sentence_pattern, node_text)
 
         # claim_array is for debugging

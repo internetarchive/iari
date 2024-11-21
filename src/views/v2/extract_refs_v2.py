@@ -89,8 +89,6 @@ class ExtractRefsV2(StatisticsViewV2):
                     "references": page_data["references"],
                     "cite_refs_count": page_data["cite_refs_count"],
                     "cite_refs": page_data["cite_refs"],
-                    # "references_old_count": len(page_data["references_old"]),
-                    # "references_old": page_data["references_old"],
             })
 
             # and return results
