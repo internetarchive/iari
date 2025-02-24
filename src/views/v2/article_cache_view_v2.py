@@ -19,7 +19,8 @@ from src.helpers.get_version import get_poetry_version
 
 class ArticleCacheV2(StatisticsViewV2):
     """
-    returns data associated with article specified by the schema
+    returns data associated with parsed article data specified by iari_id.
+    assumes article data has been cached and is referenced bu iari_id
     """
 
     schema = ArticleCacheSchemaV2()  # overrides StatisticsViewV2's schema property

@@ -42,7 +42,7 @@ class ExtractRefsSchemaV2(BaseSchemaV2):
     @post_load
     # NB: post_load is a marshmallow directive;
     #   this function is run after loading request args
-    #   it basically pulls the request object value into a Job object
+    #   it basically pulls the request object data into a Job object
     #
     #  **kwargs is needed here despite what the validator claims
     def return_job_object(self, data, **kwargs) -> ExtractRefsJobV2:  # type: ignore # dead: disable

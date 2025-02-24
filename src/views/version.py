@@ -54,6 +54,8 @@ class Version(StatisticsWriteView):
             "version": version,
             "timestamp": int(timestamp),
             "isodate": str(isodate),
+            "trash": "trouble",
+
         }
 
         return data, 200

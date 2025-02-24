@@ -15,7 +15,7 @@ from src.models.wikimedia.enums import RequestMethods
 
 class StatisticsViewV2(Resource):
     """
-    Shared abstract class for endpoints writing to disk and/or processing request args
+    Abstract class for endpoints writing to disk and/or processing request args
 
     classes that inherit this:
     - ArticleV2

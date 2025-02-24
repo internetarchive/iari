@@ -7,12 +7,15 @@ from typing import Any, Dict, Optional
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
-from src.models.api.job.check_url_job import UrlJob
-from src.models.api.schema.check_url_schema import UrlSchema
 from src.models.exceptions import MissingInformationError
 from src.models.file_io.url_file_io import UrlFileIo
+
+from src.models.api.job.check_url_job import UrlJob
+from src.models.api.schema.check_url_schema import UrlSchema
 from src.models.identifiers_checking.url import Url
+
 from src.views.statistics.write_view import StatisticsWriteView
+
 
 logger = logging.getLogger(__name__)
 

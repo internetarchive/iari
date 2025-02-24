@@ -9,6 +9,8 @@ from src.models.v2.schema.extract_refs_schema_v2 import ExtractRefsSchemaV2
 from src.models.v2.job.extract_refs_job_v2 import ExtractRefsJobV2
 
 from src.views.v2.statistics import StatisticsViewV2
+
+# the analyzer object that
 from src.models.v2.analyzers.wiki_analyzer import WikiAnalyzerV2
 
 from src.helpers.get_version import get_poetry_version

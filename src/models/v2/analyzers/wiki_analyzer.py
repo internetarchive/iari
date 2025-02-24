@@ -39,21 +39,25 @@ class WikiAnalyzerV2(IariAnalyzer):
         return_data = {
             "media_type": "wiki_article"
         }
-        return_data.update(page_spec)  # append page_spec fields to return data
+        return_data.update(page_spec)  # append page_spec fields to return_data
 
         # extract reference data
         # ref_data is array of references, each one like:
         # { wikitext, name, [etc], templates, urls, section_name, claim, ...other? }
+
+        # this uses James' extract code
         ref_data = extract_references_from_page(page_spec["page_title"],
                                                 page_spec["domain"],
                                                 page_spec["as_of"])
 
+        # this uses local iarilib/parse_utils/extract_cite_refs
         cite_refs = extract_citerefs_from_page(page_spec["page_title"],
                                                page_spec["domain"],
                                                page_spec["as_of"])
 
         # process the reference data
         # TODO here is where templates, urls, et al., are extracted into aggregate properties...???
+        # Note: this is what is currently done on the client side, IARE
 
         # fill fields in return data and return
         return_data["page_id"] = str(ref_data["page_id"])
@@ -82,11 +86,15 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     """
     if as_of is None:
         as_of = get_current_timestamp()
+
     title = title.replace(" ", "_")
 
     page_id, revision_id, revision_timestamp, wikitext = get_wikipedia_article(domain, title, as_of)
 
-    sections = extract_sections(wikitext)  # sections are Wikicode objects
+    sections = mw_extract_sections(wikitext)  # sections are Wikicode objects
+    # TODO make sections a collection of section objects that are passed the mwpfh section object,
+    #   has active methods as well
+    #   like: extract_refs, et al.
 
     """
     my_ref = {
@@ -97,8 +105,10 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     }
     """
     refs = []
+
     for section in sections:
         section_refs = get_refs_from_section(section)
+        # TODO replace with "section.get_refs" when section becomes an object
         refs.extend(section_refs)
 
     [found_urls] = post_process_refs(refs)
@@ -114,7 +124,7 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     }
 
 
-def extract_sections(wikitext):
+def mw_extract_sections(wikitext):
     wikicode = mwparserfromhell.parse(wikitext)
     wiki_sections = wikicode.get_sections(
         levels=[2],
@@ -151,7 +161,8 @@ def get_refs_from_section(section: Wikicode) -> List[object]:
     refs = []
     section_name = get_section_title(section)
 
-    # Iterate through all the nodes
+    # Iterate through all the nodes, special casing on "ref" nodes and "sfn nodes
+
     for i, node in enumerate(nodes):
 
         if isinstance(node, mwparserfromhell.nodes.tag.Tag) and node.tag == "ref":
@@ -286,6 +297,8 @@ def get_claim(node_number, nodes):
             node_text = str(node.value)
         elif isinstance(node, mwparserfromhell.nodes.tag.Tag):
             node_text = str(node.contents)
+            # node_text = str(node)
+            # NB  the node may contain other nodes that need to be processed
         elif isinstance(node, mwparserfromhell.nodes.wikilink.Wikilink):
             node_text = str(node.title) if not node.text else str(node.text)
         elif isinstance(node, mwparserfromhell.nodes.html_entity.HTMLEntity):
@@ -329,6 +342,8 @@ def post_process_refs(refs):
     may do in the future:
     - top-level list for template_names in ref
     - top-level list for titles in ref
+    - isBook?
+    - isDoi?
     """
 
     found_urls = set()
@@ -344,8 +359,6 @@ def post_process_refs(refs):
         ref["titles"] = [
             template["parameters"].get("title") for template in ref["templates"] if "title" in template["parameters"]
         ]
-        # if
-        #                          "templates" in ref and "template_name" in template["parameters"]]
 
     return [found_urls]
 

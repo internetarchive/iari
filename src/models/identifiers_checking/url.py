@@ -27,8 +27,8 @@ class Url(WikipediaUrl):
     status_code_method: str = ""
     status_code_error_details: str = ""
 
-    archive_status: Optional[Dict] = None
     archive_status_method: str = ""
+    archive_status: Optional[Dict] = None
 
     detected_language: str = ""
     detected_language_error: bool = False
@@ -50,7 +50,7 @@ class Url(WikipediaUrl):
         if self.url:
             app.logger.debug(f"checking url with method {method}")
 
-            self.extract()  # simple parsing extractions from url (tld, etc.)
+            self.extract()  # simple extractions from url (tld, etc.)
 
             self.status_code_method = method
 
@@ -61,16 +61,20 @@ class Url(WikipediaUrl):
             if method.upper() == "IABOT":
                 self.__check_url_with_iabot_testdeadlink__()
 
-            elif method.upper() == "WAYBACK":
-                self.__check_url_with_wayback_api__()
+            elif (method.upper() == "LIVEWEBCHECK" or
+            method.upper() == "LWC" or
+            method.upper() == "WAYBACK"):
+                self.__check_url_with_livewebcheck_api__()
 
             elif method.upper() == "CORENTIN":
                 self.__check_url_with_corentin_api__()
+
             else:
                 # self.__error_with_method
                 self.status_code_error_details = f"Unrecognized method: {method}"
                 logger.info(f"Unrecognized method: {method}")
 
+            # TODO provide for other archive methods here...
             self.archive_status_method = "iabot_searchurldata"
             self.__get_archive_status_with_iabot_api__()  # sets archive_status if successful
             self.__detect_language__()
@@ -144,7 +148,7 @@ class Url(WikipediaUrl):
                                 ]
                             break
 
-    def __check_url_with_wayback_api__(self):
+    def __check_url_with_livewebcheck_api__(self):
         """
         This use wayback machine's Live Web Checker
         response looks like:

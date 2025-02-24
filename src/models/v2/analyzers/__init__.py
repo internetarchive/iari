@@ -5,4 +5,9 @@ from src.models.v2.base import IariBaseModel
 class IariAnalyzer(IariBaseModel):
     # iari_version: str = ""
     # iari_version: str = get_poetry_version("pyproject.toml")
+
+    # * * *
+    # this should be implemented in calling object
+    # * * *
+
     pass
