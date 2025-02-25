@@ -5,6 +5,8 @@ from typing import Any, Dict, Optional
 
 import requests
 
+from src.constants.constants import CheckMethod
+
 from src.models.api.handlers import BaseHandler
 from src.models.wikimedia.wikipedia.url import WikipediaUrl
 
@@ -58,21 +60,19 @@ class Url(WikipediaUrl):
             #   status_code and
             #   status_code_error_details
 
-            if method.upper() == "IABOT":
+            if method.upper() == CheckMethod.IABOT.value:
                 self.__check_url_with_iabot_testdeadlink__()
 
-            elif (method.upper() == "LIVEWEBCHECK" or
-            method.upper() == "LWC" or
-            method.upper() == "WAYBACK"):
+            elif method.upper() == CheckMethod.LIVEWEBCHECK.value:
                 self.__check_url_with_livewebcheck_api__()
 
-            elif method.upper() == "CORENTIN":
+            elif method.upper() == CheckMethod.CORENTIN.value:
                 self.__check_url_with_corentin_api__()
 
             else:
                 # self.__error_with_method
-                self.status_code_error_details = f"Unrecognized method: {method}"
-                logger.info(f"Unrecognized method: {method}")
+                self.status_code_error_details = f"Unrecognized url check method: {method}"
+                logger.info(f"Unrecognized url check method: {method}")
 
             # TODO provide for other archive methods here...
             self.archive_status_method = "iabot_searchurldata"

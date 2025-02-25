@@ -19,7 +19,7 @@ from src.models.exceptions import MissingInformationError, WikipediaApiFetchErro
 
 # legacy endpoints stuff...
 from src.views.check_doi import CheckDoi
-from src.views.check_url import CheckUrl
+# from src.views.check_url import CheckUrl
 from src.views.check_url_archive import CheckUrlArchive
 from src.views.check_urls import CheckUrls
 from src.views.statistics.all import All
@@ -42,6 +42,8 @@ from src.views.v2.fetchrefs_v2 import FetchRefsV2
 # new stuff oct 2024
 from src.views.v2.extract_refs_v2 import ExtractRefsV2
 from src.views.v2.ref_insights_v2 import RefInsightsV2
+# new stuff jan 2025
+from src.views.v2.check_url_v2 import CheckUrlV2
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -85,7 +87,7 @@ api.add_resource(ArticleCacheV2, "/article_cache")
 
 api.add_resource(Version, "/version")
 api.add_resource(CheckUrls, "/check-urls")
-api.add_resource(CheckUrl, "/check-url")
+api.add_resource(CheckUrlV2, "/check-url")
 api.add_resource(CheckUrlArchive, "/check-url-archive")
 api.add_resource(CheckDoi, "/check-doi")
 api.add_resource(Article, "/statistics/article")
