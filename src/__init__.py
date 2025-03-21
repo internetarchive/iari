@@ -9,6 +9,7 @@ https://github.com/pallets/flask/blob/1.1.2/examples/tutorial/flaskr/__init__.py
 """
 import logging
 import os
+import traceback
 
 from flask import Flask  # type: ignore
 from flask_restful import Api, Resource  # type: ignore
@@ -44,6 +45,8 @@ from src.views.v2.extract_refs_v2 import ExtractRefsV2
 from src.views.v2.ref_insights_v2 import RefInsightsV2
 # new stuff jan 2025
 from src.views.v2.check_url_v2 import CheckUrlV2
+# new stuff mar 2025
+from src.views.v2.probe_v2 import ProbeV2
 
 logging.basicConfig(level=config.loglevel)
 logger = logging.getLogger(__name__)
@@ -58,9 +61,9 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
 
+
 # Register CORS function as an after_request handler
 app.after_request(add_cors_headers)
-
 
 # let's see if we can distinguish which server we are on
 server_name = os.getenv('FLASK_SERVER_NAME', 'Unknown Server')
@@ -75,7 +78,20 @@ def not_found(e):
     return {"error": "Endpoint not found"}
 
 
+# @app.errorhandler(Exception)
+# def handle_exception(e):
+#     traceback.print_exc()
+#     return {"error": "A generic exception occurred", "details": str(e)}
+#
+#
+# @app.errorhandler(500)
+# def handle_exception(e):
+#     traceback.print_exc()
+#     return {"error": "A 500 exception occurred", "details": str(e)}, 500
+#
+
 # link respective endpoints to API views
+api.add_resource(ProbeV2, "/probe")
 api.add_resource(GetBookReferenceV2, "/get_book_reference")
 api.add_resource(RefInsightsV2, "/insights")
 api.add_resource(ExtractRefsV2, "/extract_refs")

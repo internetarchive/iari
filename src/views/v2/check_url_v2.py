@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import traceback
 
 from copy import deepcopy
 from datetime import datetime
@@ -15,8 +16,6 @@ from src.views.v2.statistics import StatisticsViewV2
 
 from src.constants.constants import CheckMethod
 
-# from src.models.api.job.check_url_job import UrlJob
-# from src.models.api.schema.check_url_schema import UrlSchema
 from src.models.v2.job.check_url_job_v2 import CheckUrlJobV2
 from src.models.v2.schema.check_url_schema_v2 import CheckUrlSchemaV2
 
@@ -63,9 +62,19 @@ class CheckUrlV2(StatisticsViewV2):
         from src import app
 
         app.logger.debug("CheckUrlV2: running")
-        self.__validate_and_get_job__()
-        if self.job:
-            return self.__return_from_cache_or_analyze_and_return__()
+        try:
+            self.__validate_and_get_job__()
+            if self.job:
+                return self.__return_from_cache_or_analyze_and_return__()
+
+        except MissingInformationError as e:
+            traceback.print_exc()
+            return {"error": f"Missing Information Error: {str(e)}"}, 500
+
+        except Exception as e:
+            traceback.print_exc()
+            return {"error": f"General Error: {str(e)}"}, 500
+
 
     def __setup_io__(self):
         logger.debug(

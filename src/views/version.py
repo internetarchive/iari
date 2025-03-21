@@ -44,6 +44,7 @@ class Version(StatisticsWriteView):
             app.logger.debug("Version::get: job validated")
             return self.__return_version__()
 
+
     def __return_version__(self):
 
         version = get_poetry_version("pyproject.toml")
@@ -55,7 +56,6 @@ class Version(StatisticsWriteView):
             "timestamp": int(timestamp),
             "isodate": str(isodate),
             "trash": "trouble",
-
         }
 
         return data, 200

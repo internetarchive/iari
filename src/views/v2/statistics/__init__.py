@@ -49,21 +49,14 @@ class StatisticsViewV2(Resource):
         Validates request params, whether from GET or POST, and,
         if successful, pulls param values into job's properties
         """
-        from src import app
-        # app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__(method = {method})")
 
+        # get request args via GET or POST
         self.schema.context['request_method'] = request.method
-        # app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request.method = {request.method})")
-
-        # self.request_method = method
-        # use request.args if GET, request.form if POST
-        # self.request_args = request.args if (method == RequestMethods.get) else request.form
         self.request_args = request.args if (request.method == "GET") else request.form
 
-        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request_args: {self.request_args}")
+        from src import app
+        app.logger.debug(f"==> StatisticsViewV2::__validate_and_get_job__: request.method = {request.method}; request_args: {self.request_args}")
 
-        # self.__validate__(request_args)
-        # self.__parse_into_job__(request_args)
         self.__validate__()
         self.__parse_into_job__()
 

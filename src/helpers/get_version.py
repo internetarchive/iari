@@ -1,5 +1,7 @@
 # get_version.py
 
+from datetime import datetime
+
 
 def get_poetry_version(file_path):
     with open(file_path) as toml_file:
@@ -20,3 +22,12 @@ def get_poetry_version(file_path):
         version = version_line.split("=")[1].strip().strip('"')
 
         return version
+
+
+def get_version_stamp():
+    now = datetime.utcnow()
+    return {
+        "iari_version": get_poetry_version("pyproject.toml"),
+        "timestamp": int(datetime.timestamp(now)),
+        "isodate": str(datetime.isoformat(now)),
+    }
