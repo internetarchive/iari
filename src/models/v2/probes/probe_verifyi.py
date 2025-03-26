@@ -12,6 +12,8 @@ from src.models.v2.probes.iari_probe import IariProbe
 class ProbeVerifyi(IariProbe):
     """
     "Implements" IariProbe base class
+    - probe_name property
+    - probe method
 
     logic for obtaining probe results from specific probe
 
@@ -22,32 +24,40 @@ class ProbeVerifyi(IariProbe):
     json formatted probe results
 
     """
-    probe_name: str = ProbeMethod.VERIFYI.value
-    url: str
 
+    @property
+    def probe_name(self):
+        return ProbeMethod.VERIFYI.value
+    # probe_name = ProbeMethod.VERIFYI.value
 
-    def probe(self):
+    @staticmethod
+    def probe(url):
         """
         returns results of verifyi probe for url
         """
 
         user_agent = "IARI, see https://github.com/internetarchive/iari"
-        probe_api_url = (
-            f"https://verifyi.cc/"
-            f"?url={self.url}"
-        )
-        headers = {"User-Agent": user_agent}
-        response = requests.get(probe_api_url, headers=headers)
+        headers = {
+            # "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": user_agent
+        }
+        # TODO do we need to clean url here?
+        probe_api_url = 'https://veri-fyi.toolforge.org/assess'
+
+        response = requests.post(
+            probe_api_url,
+            headers=headers,
+            json={'url': url})
 
         results = {}
 
         if response.status_code == 200:
             data = response.json()
-            # TODO may have to transform data before adding as results
+            # TODO do some data transform here before adding results
             results.update(data)
 
         else:
-            msg = f"Error probing {self.url} with {self.probe_name}. Got {response.status_code} from {probe_api_url}"
+            msg = f"Error probing {url} with {ProbeVerifyi().probe_name} probe. Got {response.status_code} from {probe_api_url}"
             # raise Exception(
             #     f"Could not probe {self.url}. Got {response.status_code} from {url}"
             # )

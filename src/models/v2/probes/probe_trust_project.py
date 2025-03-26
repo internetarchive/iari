@@ -22,33 +22,38 @@ class ProbeTrustProject(IariProbe):
     json formatted probe results
 
     """
-    probe_name: str = ProbeMethod.TRUST_PROJECT.value
-    url: str
 
+    @property
+    def name(self):
+        return ProbeMethod.VERIFYI.value
 
-    def probe(self):
+    @staticmethod
+    def probe(url):
         """
-        returns results of trust_project probe for url
+        returns results of verifyi probe for url
         """
-
 
         user_agent = "IARI, see https://github.com/internetarchive/iari"
-        probe_api_url = (
-            f"https://trustproject.com/"
-            f"?url={self.url}"
-        )
-        headers = {"User-Agent": user_agent}
-        response = requests.get(probe_api_url, headers=headers)
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": user_agent
+        }
+        # TODO do we need to cleanse url here?
+
+        response = requests.post(
+            'https://trustproject.org/',
+            headers=headers,
+            json={'url': url})
 
         results = {}
 
         if response.status_code == 200:
             data = response.json()
-            # TODO may have to transform data before adding as results
+            # TODO do some data transform here before adding results
             results.update(data)
 
         else:
-            msg = f"Error probing {self.url} with {self.probe_name} . Got {response.status_code} from {probe_api_url}"
+            msg = f"Error probing {self.url} with {self.name}. Got {response.status_code} from {url}"
             # raise Exception(
             #     f"Could not probe {self.url}. Got {response.status_code} from {url}"
             # )

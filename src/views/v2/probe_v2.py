@@ -12,6 +12,7 @@ from src.models.exceptions import MissingInformationError
 from src.helpers.get_version import get_version_stamp
 
 from src.models.v2.job.probe_job_v2 import ProbeJobV2
+from src.models.v2.probes.probe_test import ProbeTest
 from src.models.v2.probes.probe_trust_project import ProbeTrustProject
 from src.models.v2.probes.probe_verifyi import ProbeVerifyi
 from src.models.v2.schema.probe_schema_v2 import ProbeSchemaV2
@@ -53,8 +54,6 @@ class ProbeV2(StatisticsViewV2):
             if self.job:  # TODO what happens if self.job is not valid? why would it not be valid?
                 self.url_link = self.job.unquoted_url
                 self.probe_list = self.job.probe_list
-                app.logger.info(
-                    f"ProbeV2:: url is {self.url_link}, probe_list is {self.probe_list}")
                 return self.__return_results__(self.url_link, self.probe_list)
 
         except MissingInformationError as e:
@@ -70,7 +69,7 @@ class ProbeV2(StatisticsViewV2):
         results = get_version_stamp()
         results.update({
             "url": url_link,
-            "probe_list": probe_list,
+            "probes": probe_list,
             "probe_results": self.__get_probe_results__(url_link, probe_list)
         })
         return results, 200
@@ -89,12 +88,14 @@ class ProbeV2(StatisticsViewV2):
             p_name = probe.upper()
 
             try:
+                if p_name == ProbeMethod.TEST.value:
+                    results = ProbeTest.probe(url=url_link)
 
-                if p_name == ProbeMethod.VERIFYI.value:
-                    results = ProbeVerifyi(url=url_link).probe()
+                elif p_name == ProbeMethod.VERIFYI.value:
+                    results = ProbeVerifyi.probe(url=url_link)
 
                 elif p_name == ProbeMethod.TRUST_PROJECT.value:
-                    results = ProbeTrustProject(url=url_link).probe()
+                    results = ProbeTrustProject.probe(url=url_link)
 
                 else:  # probe not found
                     results = {"error": f"Unknown probe: {p_name}"}

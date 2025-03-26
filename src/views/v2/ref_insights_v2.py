@@ -6,14 +6,14 @@ import requests
 from bs4 import BeautifulSoup, NavigableString
 from flask import request
 
-from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-from src.models.v2.job.ref_insights_job_v2 import RefInsightsJobV2
-from src.models.v2.schema.ref_insights_schema_v2 import RefInsightsSchemaV2
-from src.models.wikimedia.enums import RequestMethods
+from src.helpers.get_version import get_poetry_version
 
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+from src.models.wikimedia.enums import RequestMethods
 from src.views.v2.statistics import StatisticsViewV2
 
-from src.helpers.get_version import get_poetry_version
+from src.models.v2.job.ref_insights_job_v2 import RefInsightsJobV2
+from src.models.v2.schema.ref_insights_schema_v2 import RefInsightsSchemaV2
 
 
 class RefInsightsV2(StatisticsViewV2):
@@ -24,6 +24,7 @@ class RefInsightsV2(StatisticsViewV2):
 
     schema = RefInsightsSchemaV2()  # Defines expected parameters; Overrides StatisticsViewV2's "schema" property
     job: RefInsightsJobV2           # Holds usable variables, seeded from schema. Overrides StatisticsViewV2's "job"
+
     return_data: Dict[str, Any] = {}  # holds parsed data from page processing
     execution_errors: List[Dict[str, Any]] = None
 
@@ -46,10 +47,11 @@ class RefInsightsV2(StatisticsViewV2):
         # Start the timer
         start_time = time.time()
 
+        # get the insight data
         try:
 
             # validate and setup params
-            self.__validate_and_get_job__(method)  # inherited from StatisticsViewV2
+            self.__validate_and_get_job__(method)  # inherited/subclassed from StatisticsViewV2
 
             # fetch the data, parse and return summary
             insight_data = self.__get_insight_data__()
@@ -64,8 +66,8 @@ class RefInsightsV2(StatisticsViewV2):
                 "iari_version": get_poetry_version("pyproject.toml"),
                 "iari_command": "insights",
                 "endpoint": request.endpoint,
+                "execution_time": f"{execution_time:.4f} seconds",
                 "execution_errors": self.execution_errors,
-                "execution_time": f"{execution_time:.4f} seconds"
             }
 
             self.return_data.update(insight_data)

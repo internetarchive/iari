@@ -1,8 +1,8 @@
 from src.models.v2.base import IariBaseModel
-# from src.helpers.get_version import get_poetry_version
+from abc import ABC, abstractmethod
 
 
-class IariProbe(IariBaseModel):
+class IariProbe(IariBaseModel, ABC):
     # iari_version: str = ""
     # iari_version: str = get_poetry_version("pyproject.toml")
 
@@ -10,4 +10,14 @@ class IariProbe(IariBaseModel):
     # this should be implemented in calling object
     # * * *
 
-    pass
+    @property
+    @abstractmethod
+    def probe_name(self):
+        """Abstract class property that must be implemented by subclasses"""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def probe(url):
+        pass
+

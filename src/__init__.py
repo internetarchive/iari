@@ -11,7 +11,7 @@ import logging
 import os
 import traceback
 
-from flask import Flask  # type: ignore
+from flask import Flask, request  # type: ignore
 from flask_restful import Api, Resource  # type: ignore
 
 # from flask_cors import CORS
@@ -75,7 +75,10 @@ api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning should be address
 
 @app.errorhandler(404)
 def not_found(e):
-    return {"error": "Endpoint not found"}
+
+    return {
+        "error": f"Endpoint '{request.path}' not found",
+    }
 
 
 # @app.errorhandler(Exception)
