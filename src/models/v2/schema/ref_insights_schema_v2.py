@@ -1,10 +1,10 @@
 from marshmallow import fields, pre_load, post_load
 
-from src.models.v2.job.ref_insights_job_v2 import RefInsightsJobV2
+from src.models.v2.job.ref_insights_job_v2 import InsightsWebRxJobV2
 from src.models.v2.schema import BaseSchemaV2
 
 
-class RefInsightsSchemaV2(BaseSchemaV2):
+class InsightsWebRxSchemaV2(BaseSchemaV2):
     # Defines expected parameters for endpoint "insights"
     #   - default parameters are defined in BaseSchemaV2
 
@@ -39,13 +39,13 @@ class RefInsightsSchemaV2(BaseSchemaV2):
     #   it basically pulls the request object value into a Job object
     #
     #  **kwargs is needed here despite what the validator claims
-    def return_job_object(self, data, **kwargs) -> RefInsightsJobV2:  # type: ignore # dead: disable
+    def return_job_object(self, data, **kwargs) -> InsightsWebRxJobV2:  # type: ignore # dead: disable
         """Return Job object"""
         from src import app
-        app.logger.debug("==> RefInsightsJobV2::@post_load:return_job_object")
+        app.logger.debug("==> InsightsWebRxJobV2::@post_load:return_job_object")
         app.logger.debug(f"return_job_object data: {data}")
 
-        job = RefInsightsJobV2(**data)
+        job = InsightsWebRxJobV2(**data)
         job.validate_fields()
 
         # NB here is where we can modify job field values before returning if we want

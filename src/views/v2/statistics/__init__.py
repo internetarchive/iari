@@ -67,10 +67,10 @@ class StatisticsViewV2(Resource):
 
         errors = self.schema.validate(self.request_args)
         if errors:
-            app.logger.debug(f"Validation errors: {errors}")
+            app.logger.debug(f"StatisticsViewV2 Validation errors: {errors}")
             raise MissingInformationError(errors)
 
-    # def __parse_into_job__(self, request_args):
+
     def __parse_into_job__(self):
 
         from src import app
@@ -82,10 +82,14 @@ class StatisticsViewV2(Resource):
         self.schema.context['request_method'] = request.method
 
         self.job = self.schema.load(self.request_args)
-        # returns a job object, populated with field values mapped from request_args
+        # returns a job object populated with mapped values from request_args
 
         if not self.job:
-            console.print("__parse_into_job__: job is null")  # TODO raise exception here if no job
+            app.logger.info("__parse_into_job__: job is undefined")
+            # TODO raise exception here if no job
+            raise MissingInformationError(
+                f"Could not parse schema params into valid Job"
+            )
 
         console.print("=== JOB ===")
         console.print(self.job)

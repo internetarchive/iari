@@ -12,42 +12,42 @@ from src.models.exceptions import MissingInformationError, WikipediaApiFetchErro
 from src.models.wikimedia.enums import RequestMethods
 from src.views.v2.statistics import StatisticsViewV2
 
-from src.models.v2.job.ref_insights_job_v2 import RefInsightsJobV2
-from src.models.v2.schema.ref_insights_schema_v2 import RefInsightsSchemaV2
+from src.models.v2.job.ref_insights_job_v2 import InsightsWebRxJobV2
+from src.models.v2.schema.ref_insights_schema_v2 import InsightsWebRxSchemaV2
 
 
-class RefInsightsV2(StatisticsViewV2):
+class InsightsWebRxV2(StatisticsViewV2):
 
     """
     returns Wayback Medic/IABot statistical data
     """
 
-    schema = RefInsightsSchemaV2()  # Defines expected parameters; Overrides StatisticsViewV2's "schema" property
-    job: RefInsightsJobV2           # Holds usable variables, seeded from schema. Overrides StatisticsViewV2's "job"
+    schema = InsightsWebRxSchemaV2()  # Defines expected parameters; Overrides StatisticsViewV2's "schema" property
+    job: InsightsWebRxJobV2           # Holds usable variables, seeded from schema. Overrides StatisticsViewV2's "job"
 
     return_data: Dict[str, Any] = {}  # holds parsed data from page processing
     execution_errors: List[Dict[str, Any]] = None
 
     def get(self):
         """
-        flask GET entrypoint for returning ref_insights results
+        flask entrypoint for GET
         must return a tuple: (Any, response_code)
         """
         from src import app
-        app.logger.debug(f"==> RefInsightsV2::get")
+        app.logger.debug(f"==> InsightsWebRxV2::get")
 
         return self.__process_request__(method=RequestMethods.get)
 
 
-    def __process_request__(self, method=RequestMethods.post):  # default to POST
+    def __process_request__(self, method=RequestMethods.post):  # default to POST method
 
         from src import app
-        app.logger.debug(f"==> RefInsightsV2::__process_request__, method = {method}")
+        app.logger.debug(f"==> InsightsWebRxV2::__process_request__, method = {method}")
 
         # Start the timer
         start_time = time.time()
 
-        # get the insight data
+        # fetch the insight data
         try:
 
             # validate and setup params
@@ -134,8 +134,9 @@ class RefInsightsV2(StatisticsViewV2):
         table_list = []
         for table in tables:
             table_data = self.__parse_table_data__(table, table_names[table_index])
-            table_index += 1
             table_list.append(table_data)
+
+            table_index += 1
 
         return table_list
 

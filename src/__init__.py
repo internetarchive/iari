@@ -42,7 +42,7 @@ from src.views.v2.editref_v2 import EditRefV2
 from src.views.v2.fetchrefs_v2 import FetchRefsV2
 # new stuff oct 2024
 from src.views.v2.extract_refs_v2 import ExtractRefsV2
-from src.views.v2.ref_insights_v2 import RefInsightsV2
+from src.views.v2.ref_insights_v2 import InsightsWebRxV2
 # new stuff jan 2025
 from src.views.v2.check_url_v2 import CheckUrlV2
 # new stuff mar 2025
@@ -75,7 +75,7 @@ api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning should be address
 
 @app.errorhandler(404)
 def not_found(e):
-
+    app.logger.error(f"Endpoint '{request.path}' not found")
     return {
         "error": f"Endpoint '{request.path}' not found",
     }
@@ -93,10 +93,16 @@ def not_found(e):
 #     return {"error": "A 500 exception occurred", "details": str(e)}, 500
 #
 
+@app.route('/favicon.ico')
+def favicon():
+    # app.logger.info("No favicon serve")
+    return '', 204  # No Content
+
+
 # link respective endpoints to API views
 api.add_resource(ProbeV2, "/probe")
 api.add_resource(GetBookReferenceV2, "/get_book_reference")
-api.add_resource(RefInsightsV2, "/insights")
+api.add_resource(InsightsWebRxV2, "/insights")
 api.add_resource(ExtractRefsV2, "/extract_refs")
 api.add_resource(FetchRefsV2, "/fetchrefs")
 api.add_resource(EditRefV2, "/editref")
