@@ -44,6 +44,8 @@ class ProbeVerifyi(IariProbe):
         """
         from src import app
 
+        results = {}
+
         try:
 
             user_agent = "IARI, see https://github.com/internetarchive/iari"
@@ -61,12 +63,10 @@ class ProbeVerifyi(IariProbe):
                 headers=headers,
                 json={'url': url})
 
-            results = {}
-
             if response.status_code == 200:
                 data = response.json()
-                # TODO do some data transform here before adding to results
-                results.update(data)
+                results['raw'] = data
+                # TODO do some data transform here to add to results, maybe results['processed']?
 
             else:
                 # append error to errors array
@@ -76,16 +76,15 @@ class ProbeVerifyi(IariProbe):
                     f" Text: {response.text}"
                 )
 
-                app.logger.info(msg)
+                app.logger.debug(msg)
 
-                results.setdefault('errors', []).append(msg)
+                results.setdefault('errors', []).append(msg)  # add or create errors entry
 
         except Exception as e:
             raise Exception(f"Unknown error while probing {url} with {ProbeVerifyi().probe_name}. args: {e.args}")
 
 
         # now do blocklist_check
-
         results.setdefault('errors', []).append("blocklist_check not yet implemented.")
 
         return results

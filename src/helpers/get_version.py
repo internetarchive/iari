@@ -1,6 +1,7 @@
 # get_version.py
 
 from datetime import datetime
+from typing import Any, Optional
 
 
 def get_poetry_version(file_path):
@@ -24,10 +25,12 @@ def get_poetry_version(file_path):
         return version
 
 
-def get_version_stamp():
+def get_version_stamp(command_name: Optional[Any] = None, endpoint: Optional[Any] = None):
     now = datetime.utcnow()
     return {
         "iari_version": get_poetry_version("pyproject.toml"),
+        "iari_command": command_name or "__unspecified__",
+        "endpoint": endpoint or "__unspecified__",
         "timestamp": int(datetime.timestamp(now)),
-        "isodate": str(datetime.isoformat(now)),
+        "isodate": now.isoformat(),
     }

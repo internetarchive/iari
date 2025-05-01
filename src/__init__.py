@@ -81,17 +81,18 @@ def not_found(e):
     }
 
 
-# @app.errorhandler(Exception)
-# def handle_exception(e):
-#     traceback.print_exc()
-#     return {"error": "A generic exception occurred", "details": str(e)}
-#
+@app.errorhandler(Exception)
+def handle_exception(e):
+    traceback.print_exc()
+    return {"error": "A generic exception occurred", "details": str(e)}
+
 #
 # @app.errorhandler(500)
 # def handle_exception(e):
 #     traceback.print_exc()
 #     return {"error": "A 500 exception occurred", "details": str(e)}, 500
 #
+
 
 @app.route('/favicon.ico')
 def favicon():
