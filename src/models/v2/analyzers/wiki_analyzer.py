@@ -24,11 +24,11 @@ class WikiAnalyzerV2(IariAnalyzer):
     logic for obtaining statistics from wiki page
 
     what we need:
-    page spec or wikitext
+        page spec or wikitext
 
     what we return:
-    json formatted data of refs
-    later: more stat data from refs
+        json formatted data of refs
+        later: more stat data from refs
 
     """
 
@@ -36,41 +36,47 @@ class WikiAnalyzerV2(IariAnalyzer):
     def get_page_data(page_spec) -> Dict[str, Any]:
 
         # seed return data with page specs
-        return_data = {
+        results = {
             "media_type": "wiki_article"
         }
-        return_data.update(page_spec)  # append page_spec fields to return_data
+        results.update(page_spec)  # append page_spec fields to return_data
 
         # extract reference data
         # ref_data is array of references, each one like:
         # { wikitext, name, [etc], templates, urls, section_name, claim, ...other? }
 
-        # this uses James' extract code
+        # ref_data uses James Hare's reference extraction code
         ref_data = extract_references_from_page(page_spec["page_title"],
                                                 page_spec["domain"],
                                                 page_spec["as_of"])
 
-        # this uses local iarilib/parse_utils/extract_cite_refs
+        # cite_refs uses local iarilib's extract_cite_refs
         cite_refs = extract_citerefs_from_page(page_spec["page_title"],
                                                page_spec["domain"],
                                                page_spec["as_of"])
 
         # process the reference data
         # TODO here is where templates, urls, et al., are extracted into aggregate properties...???
-        # Note: this is what is currently done on the client side, IARE
+        # NB: this is what is currently done on the IARE client side
+        #   this needs to be brought into here...
+        #   generate alist of tasks that must be done here
 
         # fill fields in return data and return
-        return_data["page_id"] = str(ref_data["page_id"])
-        return_data["revision_id"] = str(ref_data["revision_id"])
-        return_data["section_names"] = ref_data["section_names"]
-        return_data["reference_count"] = len(ref_data["references"])
-        return_data["references"] = ref_data["references"]
-        return_data["url_count"] = len(ref_data["urls"])
-        return_data["urls"] = ref_data["urls"]
-        return_data["cite_refs_count"] = len(cite_refs)
-        return_data["cite_refs"] = cite_refs
+        results["page_id"] = str(ref_data["page_id"])
+        results["revision_id"] = str(ref_data["revision_id"])
 
-        return return_data
+        results["section_names"] = ref_data["section_names"]
+
+        results["reference_count"] = len(ref_data["references"])
+        results["references"] = ref_data["references"]
+
+        results["url_count"] = len(ref_data["urls"])
+        results["urls"] = ref_data["urls"]
+
+        results["cite_refs_count"] = len(cite_refs)
+        results["cite_refs"] = cite_refs
+
+        return results
 
 
 def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
@@ -92,13 +98,12 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     page_id, revision_id, revision_timestamp, wikitext = get_wikipedia_article(domain, title, as_of)
 
     sections = mw_extract_sections(wikitext)  # sections are Wikicode objects
-    # TODO make sections a collection of section objects that are passed the mwpfh section object,
-    #   has active methods as well
-    #   like: extract_refs, et al.
+    # TODO make sections a collection of section objects that are passed the mwPFH section object,
+    #   these section objects should have active methods as well, like extract_refs, et al.
 
     """
     my_ref = {
-        "wikitext": wt,
+        "wikitext": <wikitext goes here>,
         "urls": [],
         "claim": "",
         "section": "",

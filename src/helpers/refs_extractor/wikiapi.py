@@ -1,9 +1,11 @@
 import requests
 from datetime import datetime
 
+
 def get_current_timestamp():
     now = datetime.utcnow()
     return now.strftime('%Y-%m-%dT%H:%M:%SZ')
+
 
 def get_wikipedia_article(domain, title, timestamp):
     url = f"https://{domain}/w/api.php"
@@ -58,6 +60,7 @@ def get_wikipedia_article(domain, title, timestamp):
             break
     # Return None if no suitable revision was found
     return None, None, None, None
+
 
 if __name__ == "__main__":
     print(get_wikipedia_article("en.wikipedia.org", "Easter_Island", "2003-01-01T00:00:00Z"))

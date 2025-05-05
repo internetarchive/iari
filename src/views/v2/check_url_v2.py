@@ -116,6 +116,8 @@ class CheckUrlV2(StatisticsViewV2):
 
         data_without_text = deepcopy(data)
         del data_without_text["text"]
+        # TODO re-do this include text logic - send flag to include text or not
+        #   maybe make an "options" to url.check() so that only extras we want are calculated
 
         self.__write_to_cache__(data_without_text=data_without_text)
         if self.job.refresh:

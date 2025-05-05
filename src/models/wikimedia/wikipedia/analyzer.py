@@ -291,7 +291,7 @@ class WikipediaAnalyzer(WariBaseModel):
             # refs = section.references
 
             for ref in section.references:
-                new_ref ={"wikitext": ref.wikicode_as_string}
+                new_ref = {"wikitext": ref.wikicode_as_string}
                 new_refs.append(new_ref)
             sections.append(new_section)
 
