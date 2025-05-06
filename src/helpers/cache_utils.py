@@ -14,7 +14,7 @@ from enum import Enum
 
 class CacheType(Enum):
     probes = "probes"
-    urls = "urls"
+    status = "status"
 
 
 def get_cache_file_path(url, cache_type: CacheType, variety):

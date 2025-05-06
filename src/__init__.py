@@ -33,6 +33,7 @@ from src.views.statistics.xhtml import Xhtml
 # new stuff jan 2024
 from src.views.v2.article_view_v2 import ArticleV2
 from src.views.v2.get_book_reference_v2 import GetBookReferenceV2
+from src.views.v2.get_url_info_v2 import GetUrlInfoV2
 from src.views.version import Version
 # new stuff apr 2024
 from src.views.v2.article_cache_view_v2 import ArticleCacheV2
@@ -101,9 +102,10 @@ def favicon():
 
 
 # link respective endpoints to API views
+api.add_resource(GetUrlInfoV2, "/get_url_info")
 api.add_resource(ProbeV2, "/probe")
 api.add_resource(GetBookReferenceV2, "/get_book_reference")
-api.add_resource(InsightsWebRxV2, "/insights")
+api.add_resource(InsightsWebRxV2, "/insights")      # Stephen's and Sawood's numbers
 api.add_resource(ExtractRefsV2, "/extract_refs")
 api.add_resource(FetchRefsV2, "/fetchrefs")
 api.add_resource(EditRefV2, "/editref")
