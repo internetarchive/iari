@@ -4,10 +4,14 @@ from typing import Any, Dict, Optional
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
-from src.helpers.get_version import get_poetry_version
+from src.views.statistics.write_view import StatisticsWriteView
+
 from src.models.api.job.version_job import VersionJob
 from src.models.api.schema.version_schema import VersionSchema
-from src.views.statistics.write_view import StatisticsWriteView
+
+from src.helpers.get_version import get_poetry_version
+
+from src.helpers.cache_utils import get_cache_hash
 
 # import importlib.metadata
 
@@ -55,7 +59,10 @@ class Version(StatisticsWriteView):
             "version": version,
             "timestamp": int(timestamp),
             "isodate": str(isodate),
-            "trash": "trouble",
+            "hash_test": {
+                "key": "mister_bungle.com",
+                "hash": get_cache_hash("mister_bungle.com"),
+            }
         }
 
         return data, 200

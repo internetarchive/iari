@@ -17,6 +17,11 @@ class CacheType(Enum):
     status = "status"
 
 
+def get_cache_hash(string: str):
+    # 16 characters should give us enough uniqueness...
+    return hashlib.md5(string.encode()).hexdigest()[:16]
+
+
 def get_cache_file_path(url, cache_type: CacheType, variety):
     json_path = f"{config.subdirectory_for_json}{cache_type.value}"
 
@@ -25,7 +30,8 @@ def get_cache_file_path(url, cache_type: CacheType, variety):
         raise UnknownValueError(f"Unsupported cache type \"{cache_type.value}\" (json path \"{json_path}\" does not exist).")
 
     # get md5hash
-    url_hash = hashlib.md5(f"{url.upper()}".encode()).hexdigest()[:8]
+    # url_hash = hashlib.md5(f"{url.upper()}".encode()).hexdigest()[:8]
+    url_hash = get_cache_hash(url.upper())
 
     # prefix: uppercase of variety
     prefix = variety.upper()

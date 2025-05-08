@@ -24,7 +24,7 @@ class ProbeTrustProject(IariProbe):
     """
 
     @property
-    def name(self):
+    def probe_name(self):
         return ProbeMethod.VERIFYI.value
 
     @staticmethod
@@ -32,6 +32,10 @@ class ProbeTrustProject(IariProbe):
         """
         returns results of verifyi probe for url
         """
+
+        results = {
+            "url": url
+        }
 
         user_agent = "IARI, see https://github.com/internetarchive/iari"
         headers = {
@@ -45,15 +49,13 @@ class ProbeTrustProject(IariProbe):
             headers=headers,
             json={'url': url})
 
-        results = {}
-
         if response.status_code == 200:
             data = response.json()
             # TODO do some data transform here before adding results
             results.update(data)
 
         else:
-            msg = f"Error probing {self.url} with {self.name}. Got {response.status_code} from {url}"
+            msg = f"Error probing {url} with {ProbeTrustProject().probe_name}. Got {response.status_code} from {url}"
             # raise Exception(
             #     f"Could not probe {self.url}. Got {response.status_code} from {url}"
             # )

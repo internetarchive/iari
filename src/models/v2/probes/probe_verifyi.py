@@ -1,4 +1,5 @@
 import pprint
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 import re
 import logging
@@ -33,6 +34,7 @@ class ProbeVerifyi(IariProbe):
         """
         return ProbeMethod.VERIFYI.value
 
+
     @staticmethod
     def probe(url):
         """
@@ -44,7 +46,12 @@ class ProbeVerifyi(IariProbe):
         """
         from src import app
 
-        results = {}
+        now = datetime.utcnow()
+        results = {
+            "url": url,
+            "timestamp": datetime.timestamp(now),
+            "isodate": now.isoformat(),
+        }
 
         try:
 

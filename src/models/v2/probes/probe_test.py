@@ -29,9 +29,14 @@ class ProbeTest(IariProbe):
         returns results of verifyi probe for url
         """
 
+
         results = {
-            'message': f"TEST: Probing {url} with {ProbeTest().probe_name} probe"
+            "url": url
         }
+
+        results.update({
+            'message': f"TEST: Probing {url} with {ProbeTest().probe_name} probe"
+        })
 
 
         return results

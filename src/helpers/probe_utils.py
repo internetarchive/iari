@@ -34,18 +34,19 @@ class ProbeUtils:
 
         if refresh:
             """
-            if refresh:
-                (fetch all probes anew, and save new data in cache for url and probe)
-                for p in probe_list
-                    fetch p(url)
-                    save in cache p-url
+            - fetch all probes anew, and save new data in cache for probe-url pair)
+            - for probe in probe_list
+                fetch probe(url)
+                save in cache probe-url
             """
+            app.logger.debug(f"==> get_probe_results: refresh is true")
 
             # fetch all probes anew, and save new data in cache for url/probe combo
-            for p in probe_list:
-                new_data = ProbeUtils.get_probe_data(url_link, p)
-                probe_results[p] = new_data
+            for probe in probe_list:
+                new_data = ProbeUtils.get_probe_data(url_link, probe)
 
+                # save in response results
+                probe_results[probe] = new_data
                 # TODO NB what to do if new_data is error?
                 #   may want to keep cache as is if already there,
                 #   and "send back" error as response
@@ -53,7 +54,8 @@ class ProbeUtils:
 
                 # TODO have some way of tagging probe data with a timestamp of access date
 
-                set_cache(url_link, CacheType.probes, p, new_data)
+                # TODO NB only save to cache if not error
+                set_cache(url_link, CacheType.probes, probe, new_data)
 
         else:
             """
@@ -64,10 +66,14 @@ class ProbeUtils:
                         fetch p(url)
                         set_cache p-url
             """
-            for p in probe_list:
-                if not is_cached(url_link, CacheType.probes, p):
-                    new_data = ProbeUtils.get_probe_data(url_link, p)
-                    probe_results[p] = new_data
+            app.logger.debug(f"==> get_probe_results: refresh is false")
+            for probe in probe_list:
+                if not is_cached(url_link, CacheType.probes, probe):
+
+                    app.logger.debug(f"==> get_probe_results: refresh is false, probe {probe} is not cached; fetching new...")
+
+                    new_data = ProbeUtils.get_probe_data(url_link, probe)
+                    probe_results[probe] = new_data
 
                     # TODO NB what to do if new_data is error?
                     #
@@ -78,11 +84,15 @@ class ProbeUtils:
                     #   we probably should have a comparison so we dont resave same data, but should
                     #   at least save a "snapshot" date if multiple fetches produce same results
 
-                    set_cache(url_link, CacheType.probes, p, new_data)
+                    # TODO NB only save to cache if not error
+                    set_cache(url_link, CacheType.probes, probe, new_data)
 
                 else:  # data for probe p is cached, so use it
-                    new_data = get_cache(url_link, CacheType.probes, p)
-                    probe_results[p] = new_data
+                    app.logger.debug(f"==> get_probe_results: refresh is false, probe {probe} is cached; retrieving from cache...")
+
+                    new_data = get_cache(url_link, CacheType.probes, probe)
+
+                    probe_results[probe] = new_data
 
         # # gather all cached probe results into probe_results, regardless of refresh status
         # """
@@ -104,28 +114,27 @@ class ProbeUtils:
 
 
     @staticmethod
-    def get_probe_data(url, probe_name):
+    def get_probe_data(url_link, probe_name):
         """
-        fetch data from probe for specified url
-
-        TODO may want to always save to cache here
+        fetch probe data for probe "probe_name" for specified url_link
         """
 
         results = {}
 
         # try all the probes we have
+        # NB We could modularize this so that the set of probes is more dynamically defined
         try:
             # TEST method
             if probe_name.upper() == ProbeMethod.TEST.value:
-                results = ProbeTest.probe(url=url)
+                results = ProbeTest.probe(url=url_link)
 
             # VERIFYI method
             elif probe_name.upper() == ProbeMethod.VERIFYI.value:
-                results = ProbeVerifyi.probe(url=url)
+                results = ProbeVerifyi.probe(url=url_link)
 
             # TRUST_PROJECT method
             elif probe_name.upper() == ProbeMethod.TRUST_PROJECT.value:
-                results = ProbeTrustProject.probe(url=url)
+                results = ProbeTrustProject.probe(url=url_link)
 
             # probe method not supported
             else:
