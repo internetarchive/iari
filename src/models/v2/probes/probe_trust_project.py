@@ -59,7 +59,11 @@ class ProbeTrustProject(IariProbe):
             # raise Exception(
             #     f"Could not probe {self.url}. Got {response.status_code} from {url}"
             # )
-            results.update({"message": msg})
+            results.update({
+                "errors": [
+                    msg
+                ]
+            })
 
         return results
 

@@ -2,15 +2,15 @@ import logging
 
 from marshmallow import post_load
 from marshmallow.fields import Bool, Int, String
-from src.models.api.schema.refresh import BaseSchema
 
-from src.models.v2.job.check_url_job_v2 import CheckUrlJobV2
+from src.models.v2.schema import BaseSchemaV2
+
 from src.models.v2.job.probe_job_v2 import ProbeJobV2
 
 logger = logging.getLogger(__name__)
 
 
-class ProbeSchemaV2(BaseSchema):
+class ProbeSchemaV2(BaseSchemaV2):
     """
     Schema for probe endpoint
     """

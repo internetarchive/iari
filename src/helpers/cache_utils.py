@@ -84,6 +84,9 @@ def set_cache(url: str, cache_type: CacheType, variety: str, payload: Any):
 
     cache_file_path = get_cache_file_path(url, cache_type, variety)
 
+    from src import app
+    app.logger.debug(f"cache id for url {url} is {cache_file_path}")
+
     # overwrite if already exists
     if exists(cache_file_path):
         with open(file=cache_file_path, mode="w") as file:

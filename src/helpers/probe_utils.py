@@ -24,7 +24,6 @@ class ProbeUtils:
         returns { score: <xxx>, probe_results{ a: <xxx>, b: <xxx>, c: <xxx> }
 
         TODO: error if probe list empty? or not...
-
         """
 
         from src import app
@@ -39,14 +38,17 @@ class ProbeUtils:
                 fetch probe(url)
                 save in cache probe-url
             """
-            app.logger.debug(f"==> get_probe_results: refresh is true")
 
             # fetch all probes anew, and save new data in cache for url/probe combo
             for probe in probe_list:
+                app.logger.debug(f"==> get_probe_results: probe: {probe}, refresh is true")
+
                 new_data = ProbeUtils.get_probe_data(url_link, probe)
+                app.logger.debug(new_data)
 
                 # save in response results
                 probe_results[probe] = new_data
+
                 # TODO NB what to do if new_data is error?
                 #   may want to keep cache as is if already there,
                 #   and "send back" error as response
@@ -54,8 +56,10 @@ class ProbeUtils:
 
                 # TODO have some way of tagging probe data with a timestamp of access date
 
-                # TODO NB only save to cache if not error
-                set_cache(url_link, CacheType.probes, probe, new_data)
+                # only save to cache if not error
+                if "errors" not in new_data:
+                    set_cache(url_link, CacheType.probes, probe, new_data)
+
 
         else:
             """
@@ -69,23 +73,19 @@ class ProbeUtils:
             app.logger.debug(f"==> get_probe_results: refresh is false")
             for probe in probe_list:
                 if not is_cached(url_link, CacheType.probes, probe):
-
                     app.logger.debug(f"==> get_probe_results: refresh is false, probe {probe} is not cached; fetching new...")
 
                     new_data = ProbeUtils.get_probe_data(url_link, probe)
                     probe_results[probe] = new_data
 
-                    # TODO NB what to do if new_data is error?
-                    #
-                    # do not save errors in cache!
-                    #
                     # IDEA: set_cache can behave like a "store another snapshot". This will give us a way
-                    #   to have a sort of database of cached fetches, to have a hotory
-                    #   we probably should have a comparison so we dont resave same data, but should
+                    #   to have a sort of database of cached fetches, to have a history
+                    #   we probably should have a comparison so we dont re-save same data, but should
                     #   at least save a "snapshot" date if multiple fetches produce same results
 
-                    # TODO NB only save to cache if not error
-                    set_cache(url_link, CacheType.probes, probe, new_data)
+                    # only save to cache if not error
+                    if "errors" not in new_data:
+                        set_cache(url_link, CacheType.probes, probe, new_data)
 
                 else:  # data for probe p is cached, so use it
                     app.logger.debug(f"==> get_probe_results: refresh is false, probe {probe} is cached; retrieving from cache...")
@@ -94,17 +94,7 @@ class ProbeUtils:
 
                     probe_results[probe] = new_data
 
-        # # gather all cached probe results into probe_results, regardless of refresh status
-        # """
-        # in either case of refresh:
-        #     gather all probes from cache
-        #     calc score
-        #     return: { score:<xxx>, probe_results{ a: <xxx>, b: <xxx>, c: <xxx> }
-        # """
-        # for p in probe_list:
-        #     data = get_cache(url_link, CacheType.probes, p)
-        #     probe_results[p] = data
-
+        # whether refresh or not, calc score anew
         score = ProbeUtils.get_probe_score(probe_results)
 
         return {

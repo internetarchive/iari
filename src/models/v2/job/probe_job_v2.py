@@ -12,6 +12,7 @@ class ProbeJobV2(JobV2):
     probe: Optional[str] = None  # specify just one probe
     probes: Optional[str] = None  # specify pipe delimited list of probes
     timeout: int = 2  # We default to 2 seconds
+    tag: Optional[str] = None
 
     probe_list: list = []
 

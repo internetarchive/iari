@@ -44,7 +44,7 @@ class ProbeVerifyi(IariProbe):
         currently, verifyi has two endpoints: assess and blocklist_check
         we collect info from both and put them all in the probe results
         """
-        from src import app
+
 
         now = datetime.utcnow()
         results = {
@@ -55,43 +55,128 @@ class ProbeVerifyi(IariProbe):
 
         try:
 
-            user_agent = "IARI, see https://github.com/internetarchive/iari"
-            headers = {
-                # "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": user_agent
-            }
+            # user_agent = "IARI, see https://github.com/internetarchive/iari"
+            # headers = {
+            #     # "Content-Type": "application/x-www-form-urlencoded",
+            #     "User-Agent": user_agent
+            # }
+            #
+            # # do "assess" endpoint
+            # probe_api_url = 'https://veri-fyi.toolforge.org/assess'
+            #
+            # # TODO do we need to clean url param here?
+            # response = requests.post(
+            #     probe_api_url,
+            #     headers=headers,
+            #     json={'url': url})
+            #
+            # if response.status_code == 200:
+            #     data = response.json()
+            #     results['raw'] = data
+            #     # TODO do some data transform here to add to results, maybe results['processed']?
+            #
+            # else:
+            #     # append error to errors array
+            #     msg = (
+            #         f"Error probing {url} with {ProbeVerifyi().probe_name} assess endpoint. "
+            #         f" Got {response.status_code} from {probe_api_url}"
+            #         f" Text: {response.text}"
+            #     )
+            #
+            #     app.logger.debug(msg)
+            #
+            #     results.setdefault('errors', []).append(msg)  # add or create errors entry
 
-            # do "assess" endpoint
-            probe_api_url = 'https://veri-fyi.toolforge.org/assess'
-
-            # TODO do we need to clean url param here?
-            response = requests.post(
-                probe_api_url,
-                headers=headers,
-                json={'url': url})
-
-            if response.status_code == 200:
-                data = response.json()
-                results['raw'] = data
-                # TODO do some data transform here to add to results, maybe results['processed']?
-
-            else:
-                # append error to errors array
-                msg = (
-                    f"Error probing {url} with {ProbeVerifyi().probe_name} assess endpoint. "
-                    f" Got {response.status_code} from {probe_api_url}"
-                    f" Text: {response.text}"
-                )
-
-                app.logger.debug(msg)
-
-                results.setdefault('errors', []).append(msg)  # add or create errors entry
+            results.update(ProbeVerifyi().probe_assess(url))
 
         except Exception as e:
             raise Exception(f"Unknown error while probing {url} with {ProbeVerifyi().probe_name}. args: {e.args}")
 
 
+
+
+
         # now do blocklist_check
-        results.setdefault('errors', []).append("blocklist_check not yet implemented.")
+        results.setdefault('warnings', []).append("blocklist_check not yet implemented.")
 
         return results
+
+    @staticmethod
+    def probe_assess(url):
+
+        results = {}
+
+        user_agent = "IARI, see https://github.com/internetarchive/iari"
+        headers = {
+            # "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": user_agent
+        }
+
+        # do "assess" endpoint
+        probe_api_url = 'https://veri-fyi.toolforge.org/assess'
+
+        # TODO do we need to clean url param here?
+        response = requests.post(
+            probe_api_url,
+            headers=headers,
+            json={'url': url})
+
+        if response.status_code == 200:
+            data = response.json()
+            results['raw'] = data
+            # TODO do some data transform here to add to results, maybe results['processed']?
+
+        else:
+            # append error to errors array
+            msg = (
+                f"Error probing {url} with {ProbeVerifyi().probe_name} assess endpoint. "
+                f" Got {response.status_code} from {probe_api_url}"
+                f" Text: {response.text}"
+            )
+
+            from src import app
+            app.logger.debug(msg)
+
+            results.setdefault('errors', []).append(msg)  # add or create errors entry
+
+        return results
+
+    @staticmethod
+    def probe_blocklist(url):
+
+        results = {}
+
+        user_agent = "IARI, see https://github.com/internetarchive/iari"
+        headers = {
+            # "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": user_agent
+        }
+
+        # do "assess" endpoint
+        probe_api_url = 'https://veri-fyi.toolforge.org/blocklist'
+
+        # TODO do we need to clean url param here?
+        response = requests.post(
+            probe_api_url,
+            headers=headers,
+            json={'url': url})
+
+        if response.status_code == 200:
+            data = response.json()
+            results['raw_blocklist'] = data
+
+        else:
+            # append error to errors array
+            msg = (
+                f"Error probing {url} with {ProbeVerifyi().probe_name} assess endpoint. "
+                f" Got {response.status_code} from {probe_api_url}"
+                f" Text: {response.text}"
+            )
+
+            from src import app
+            app.logger.debug(msg)
+
+            results.setdefault('errors', []).append(msg)  # add or create errors entry
+
+        return results
+

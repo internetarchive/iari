@@ -85,6 +85,8 @@ class ProbeV2(StatisticsViewV2):
                 "probe_list": self.probe_list,
                 "probe_results": probe_results
         })
+        if self.job.tag:
+            results.update({"tag": self.job.tag})
 
         return results, 200
 
