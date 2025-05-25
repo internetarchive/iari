@@ -6,12 +6,12 @@ import requests
 from src.constants.constants import ProbeMethod
 from src.models.exceptions import MissingInformationError
 
-from src.models.v2.probes.iari_probe import IariProbe
+from src.models.v2.probes.iari_probe import IariProbeBase
 
 
-class ProbeTrustProject(IariProbe):
+class ProbeTrustProject(IariProbeBase):
     """
-    "Implements" IariProbe base class
+    "Implements" IariProbeBase class
 
     logic for obtaining probe results from specific probe
 

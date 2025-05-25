@@ -4,6 +4,7 @@ from typing import Optional, Union
 from src.helpers.cache_utils import get_cache, set_cache, is_cached, CacheType
 
 from src.constants.constants import ProbeMethod
+from src.models.v2.probes.probe_iffy import ProbeIffy
 from src.models.v2.probes.probe_test import ProbeTest
 from src.models.v2.probes.probe_trust_project import ProbeTrustProject
 from src.models.v2.probes.probe_verifyi import ProbeVerifyi
@@ -41,6 +42,7 @@ class ProbeUtils:
 
             # fetch all probes anew, and save new data in cache for url/probe combo
             for probe in probe_list:
+
                 app.logger.debug(f"==> get_probe_results: probe: {probe}, refresh is true")
 
                 new_data = ProbeUtils.get_probe_data(url_link, probe)
@@ -72,6 +74,11 @@ class ProbeUtils:
             """
             app.logger.debug(f"==> get_probe_results: refresh is false")
             for probe in probe_list:
+
+                # TODO Do we want to test just the top domain name here, rather than the full url ink?
+                #   This implies that the cahced value is by top-domain, not the full url
+                #   We have to make the choice whether this is for ALL probe types or on a probe-by-probe basis
+
                 if not is_cached(url_link, CacheType.probes, probe):
                     app.logger.debug(f"==> get_probe_results: refresh is false, probe {probe} is not cached; fetching new...")
 
@@ -125,6 +132,10 @@ class ProbeUtils:
             # TRUST_PROJECT method
             elif probe_name.upper() == ProbeMethod.TRUST_PROJECT.value:
                 results = ProbeTrustProject.probe(url=url_link)
+
+            # IFFY method
+            elif probe_name.upper() == ProbeMethod.IFFY.value:
+                results = ProbeIffy.probe(url=url_link)
 
             # probe method not supported
             else:

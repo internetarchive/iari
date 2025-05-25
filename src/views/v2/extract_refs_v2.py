@@ -10,7 +10,7 @@ from src.models.v2.job.extract_refs_job_v2 import ExtractRefsJobV2
 
 from src.views.v2.statistics import StatisticsViewV2
 
-# the analyzer object that
+# the analyzer object that extracts refs from a wiki page
 from src.models.v2.analyzers.wiki_analyzer import WikiAnalyzerV2
 
 from src.helpers.get_version import get_poetry_version

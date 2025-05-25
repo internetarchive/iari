@@ -68,11 +68,11 @@ class CheckUrl(StatisticsWriteView):
 
     def __return_from_cache_or_analyze_and_return__(self):
         if not self.job.refresh:
-            self.__setup_and_read_from_cache__()
+            self.__setup_and_read_from_cache__()  # fills self.io.data with cache if found
             if self.io.data:
                 return self.io.data, 200
             else:
-                return self.__return_fresh_data__()
+                return self.__return_fresh_data__()  # self.io.data empty - fetch and cache new value
         else:
             return self.__return_fresh_data__()
 

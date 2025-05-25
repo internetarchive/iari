@@ -1,19 +1,14 @@
-import pprint
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-import re
-import logging
 import requests
 
 from src.constants.constants import ProbeMethod
-from src.models.exceptions import MissingInformationError
 
-from src.models.v2.probes.iari_probe import IariProbe
+from src.models.v2.probes.iari_probe import IariProbeBase
 
 
-class ProbeVerifyi(IariProbe):
+class ProbeVerifyi(IariProbeBase):
     """
-    "Implements" IariProbe base class
+    "Implements" IariProbeBase class
     - probe_name property
     - probe method
 
@@ -30,7 +25,7 @@ class ProbeVerifyi(IariProbe):
     @property
     def probe_name(self):
         """
-        from IariProbe base class
+        from IariProbeBase class
         """
         return ProbeMethod.VERIFYI.value
 
@@ -38,7 +33,7 @@ class ProbeVerifyi(IariProbe):
     @staticmethod
     def probe(url):
         """
-        from IariProbe base class
+        from IariProbeBase class
 
         returns results of verifyi probe for url
         currently, verifyi has two endpoints: assess and blocklist_check
@@ -54,47 +49,11 @@ class ProbeVerifyi(IariProbe):
         }
 
         try:
-
-            # user_agent = "IARI, see https://github.com/internetarchive/iari"
-            # headers = {
-            #     # "Content-Type": "application/x-www-form-urlencoded",
-            #     "User-Agent": user_agent
-            # }
-            #
-            # # do "assess" endpoint
-            # probe_api_url = 'https://veri-fyi.toolforge.org/assess'
-            #
-            # # TODO do we need to clean url param here?
-            # response = requests.post(
-            #     probe_api_url,
-            #     headers=headers,
-            #     json={'url': url})
-            #
-            # if response.status_code == 200:
-            #     data = response.json()
-            #     results['raw'] = data
-            #     # TODO do some data transform here to add to results, maybe results['processed']?
-            #
-            # else:
-            #     # append error to errors array
-            #     msg = (
-            #         f"Error probing {url} with {ProbeVerifyi().probe_name} assess endpoint. "
-            #         f" Got {response.status_code} from {probe_api_url}"
-            #         f" Text: {response.text}"
-            #     )
-            #
-            #     app.logger.debug(msg)
-            #
-            #     results.setdefault('errors', []).append(msg)  # add or create errors entry
-
             results.update(ProbeVerifyi().probe_assess(url))
 
         except Exception as e:
-            raise Exception(f"Unknown error while probing {url} with {ProbeVerifyi().probe_name}. args: {e.args}")
-
-
-
-
+            # raise Exception(f"Unknown error while probing {url} with {ProbeVerifyi().probe_name}:  args: {e.args}")
+            raise Exception(f"Unknown error while probing {url} with {ProbeVerifyi().probe_name}: {str(e)}")
 
         # now do blocklist_check
         results.setdefault('warnings', []).append("blocklist_check not yet implemented.")

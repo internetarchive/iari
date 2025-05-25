@@ -27,3 +27,4 @@ class ProbeMethod(Enum):
     VERIFYI = "VERIFYI"
     TRUST_PROJECT = "TRUST_PROJECT"
     TEST = "TEST"
+    IFFY = "IFFY"

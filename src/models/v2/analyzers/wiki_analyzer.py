@@ -83,12 +83,13 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     """
     returns a dict for each reference:
     {
-        wikitext: str
-        urls: []
-        claim: str (if any)
-        <others>
-        NB TODO should we make a ref class to contain these fields?
+        "wikitext": <wikitext goes here>,
+        "urls": [],
+        "claim": "",
+        "section": "",
+        others??
     }
+    NB TODO should we make a ref class that contains these fields?
     """
     if as_of is None:
         as_of = get_current_timestamp()
@@ -98,21 +99,24 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     page_id, revision_id, revision_timestamp, wikitext = get_wikipedia_article(domain, title, as_of)
 
     sections = mw_extract_sections(wikitext)  # sections are Wikicode objects
-    # TODO make sections a collection of section objects that are passed the mwPFH section object,
-    #   these section objects should have active methods as well, like extract_refs, et al.
+    # TODO make sections a collection of section objects containing:
+    #   - mwParserFromHell section object,
+    #   - active methods, like extract_refs, et al.
 
-    """
-    my_ref = {
-        "wikitext": <wikitext goes here>,
-        "urls": [],
-        "claim": "",
-        "section": "",
-    }
-    """
     refs = []
 
     for section in sections:
         section_refs = get_refs_from_section(section)
+        """
+        each ref returned should be a dict like this:
+            {
+                "wikitext": <wikitext goes here>,
+                "urls": [],
+                "claim": "",
+                "section": "",
+                <others??>
+            }
+        """
         # TODO replace with "section.get_refs" when section becomes an object
         refs.extend(section_refs)
 
@@ -357,7 +361,7 @@ def post_process_refs(refs):
         for url in ref["urls"]:
             found_urls.add(url)
 
-        # any other processing for ref
+        # make any other in-place changes for ref
 
         ref["template_names"] = [template["name"] for template in ref["templates"] ]
         # ref["titles"] = [parameters["title"] for param in ref["templates"]["parameters"] ]

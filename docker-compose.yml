@@ -8,5 +8,7 @@ services:
       - "${PORT}:5000"
     volumes:
       - ./:/app  # maps local working directory to ./app
+#      - ./external_data:/app/external_data
+
     env_file: .env
     command: poetry run gunicorn -w 9 --bind :5000 wsgi:app --timeout 1500

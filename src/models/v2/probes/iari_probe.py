@@ -2,7 +2,7 @@ from src.models.v2.base import IariBaseModel
 from abc import ABC, abstractmethod
 
 
-class IariProbe(IariBaseModel, ABC):
+class IariProbeBase(IariBaseModel, ABC):
     # iari_version: str = ""
     # iari_version: str = get_poetry_version("pyproject.toml")
 
