@@ -113,7 +113,7 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
 
     for section in sections:
         section_refs = get_refs_from_section(section)
-        # TODO replace with "section.get_refs" when section becomes an object
+        # TODO replace with "section.get_refs" when section becomes an object with a "get_refs" method
         refs.extend(section_refs)
 
     [found_urls] = post_process_refs(refs)
@@ -252,6 +252,33 @@ def get_templates_from_ref(ref):
 
 
 def get_claim(node_number, nodes):
+    """
+    things to check:
+    if immediate left tag is a reftag, "skip over" reftag and try to get claim text
+    - could get claim text of that to-the-left claim tag
+
+    The left boundary of a claim text could be another ref itself,
+    as the preceeding ref comes AFTER the preceedingref's claim text's terminbating period
+
+    many refs in a row, as in [85][86][87][88][89] K Rosa, e.g.
+
+    This:
+    In the first half of the 20th century, steam reportedly came out of the
+     Rano Kau crater wall. This was photographed by the island's manager, Mr. Edmunds.
+    (Mr. stops it!)
+    (If terminating period's preceeding text is one of accepted abbreviations, continue on)
+
+    """
+
+    """
+    If you want to handle tags more robustly (e.g., extract attributes or process nested contents), here are some useful properties and methods:
+
+    node.tag: Returns the name of the tag (e.g., "b" for <b>).
+    node.attributes: Returns the tag's attributes as a dictionary-like object.
+    str(node): Returns the entire tag as a string, including its opening and closing tags.
+
+    """
+
     # piece together the claim text referring to the citation at node_number.
     # The citation can be all the previous nodes before the last full stop.
 
@@ -264,50 +291,29 @@ def get_claim(node_number, nodes):
     while (offset < max_back_nodes) and not terminal_found:
         offset += 1
 
-        # stop if at start of node list
-        if (node_number - offset) < 0:
+        n_index = node_number - offset
+
+        # stop if at beginning of node list
+        if n_index < 0:
             break
 
-        nindex = node_number - offset
-        node = nodes[nindex]
+        node = nodes[n_index]
         node_text = ""
 
-        """
-        things to check:
-        if immediate left tag is a reftag, "skip over" reftag and try to get claim text
-        - could get claim text of that to-the-left claim tag
-        
-        The left boundary of a claim text could be another ref itself, 
-        as the preceeding ref comes AFTER the preceedingref's claim text's terminbating period
-        
-        many refs in a row, as in [85][86][87][88][89] K Rosa, e.g.
-        
-        This:
-        In the first half of the 20th century, steam reportedly came out of the
-         Rano Kau crater wall. This was photographed by the island's manager, Mr. Edmunds.
-        (Mr. stops it!)
-        (If terminating period's preceeding text is one of accepted abbreviations, continue on)
-        
-        """
-
-        """
-        If you want to handle tags more robustly (e.g., extract attributes or process nested contents), here are some useful properties and methods:
-        
-        node.tag: Returns the name of the tag (e.g., "b" for <b>).
-        node.attributes: Returns the tag's attributes as a dictionary-like object.
-        str(node): Returns the entire tag as a string, including its opening and closing tags.
-        
-        """
         if isinstance(node, mwparserfromhell.nodes.text.Text):
             node_text = str(node.value)
+
         elif isinstance(node, mwparserfromhell.nodes.tag.Tag):
             node_text = str(node.contents)
             # node_text = str(node)
             # NB  the node may contain other nodes that need to be processed
+
         elif isinstance(node, mwparserfromhell.nodes.wikilink.Wikilink):
             node_text = str(node.title) if not node.text else str(node.text)
+
         elif isinstance(node, mwparserfromhell.nodes.html_entity.HTMLEntity):
             node_text = str(node)
+
         else:
             node_text = str(node.value) if hasattr(node, 'value') else ""
 
@@ -318,13 +324,14 @@ def get_claim(node_number, nodes):
         end_of_sentence_pattern regex: r"\.\s|\.$"
             - Matches a period followed by whitespace OR
             - a period at the end of the string
-        """
+
         # end_of_sentence_pattern = r"\.\s"
+        """
         end_of_sentence_pattern = r"^\s*\n|\.\s"
         terminal_found = re.search(end_of_sentence_pattern, node_text)
 
         # claim_array is for debugging
-        claim_array.append(f"[{type(nodes[nindex])}] {node_text}")
+        claim_array.append(f"[{type(nodes[n_index])}] {node_text}")
 
         # append current node_text to beginning of claim_text,
         # because we are searching backwards from the <ref> node
@@ -359,8 +366,8 @@ def post_process_refs(refs):
 
         # any other processing for ref
 
-        ref["template_names"] = [template["name"] for template in ref["templates"] ]
-        # ref["titles"] = [parameters["title"] for param in ref["templates"]["parameters"] ]
+        ref["template_names"] = list({template["name"] for template in ref["templates"]})  # only list unique
+
         ref["titles"] = [
             template["parameters"].get("title") for template in ref["templates"] if "title" in template["parameters"]
         ]

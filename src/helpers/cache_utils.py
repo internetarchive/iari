@@ -29,8 +29,6 @@ def get_cache_file_path(url, cache_type: CacheType, variety):
     if not os.path.isdir(json_path):
         raise UnknownValueError(f"Unsupported cache type \"{cache_type.value}\" (json path \"{json_path}\" does not exist).")
 
-    # get md5hash
-    # url_hash = hashlib.md5(f"{url.upper()}".encode()).hexdigest()[:8]
     url_hash = get_cache_hash(url.upper())
 
     # prefix: uppercase of variety
@@ -50,22 +48,10 @@ def get_cache(url, cache_type: CacheType, variety):
         (or something else in the future if deemed necessary)
 
     """
-    #
-    # json_path = f"{config.subdirectory_for_json}{cache_type}"
-    #
-    # # error if type not found as a subdir
-    # if not os.path.isdir(json_path):
-    #     raise UnknownValueError(f"Unsupported cache type \"{cache_type}\" (json path does not exist).")
-    #
-    # # get md5hash
-    # url_hash = hashlib.md5(f"{url.upper()}".encode()).hexdigest()[:8]
-    #
-    # # prefix: uppercase of variety
-    # prefix = variety.upper()
 
     cache_file_path = get_cache_file_path(url, cache_type, variety)
 
-    # return None if not yet exists
+    # return None if file does not yet exist
     if not exists(cache_file_path):
         return None
 

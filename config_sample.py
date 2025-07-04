@@ -2,9 +2,18 @@ import logging
 import re
 
 # Settings:
-link_extraction_regex = re.compile(
+
+regex_url_link_extraction = re.compile(
     r"https?://(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:/[^\s]*)?"
 )
-subdirectory_for_json = "json/"  # create it manually before running the api
-loglevel = logging.ERROR
+regex_url_wiki = re.compile(
+    r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
+)
+
+subdirectory_for_json = "json/"  # relative to top of tree; create it manually before running api
+
+# loglevel = logging.ERROR
+loglevel = logging.DEBUG
+# loglevel = logging.INFO
+
 user_agent = "IARI, see https://github.com/internetarchive/iari"

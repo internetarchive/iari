@@ -70,7 +70,7 @@ def extract_cite_refs(html):
 
 #
             if not cite_html:
-                span_html = span_link.prettify()
+                span_html = span_link.prettify() if span_link else ''
 
             refs.append(
                 {
