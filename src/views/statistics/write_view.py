@@ -2,6 +2,7 @@ from src.views.statistics import StatisticsView
 
 
 class StatisticsWriteView(StatisticsView):
+
     def __setup_io__(self):
         raise NotImplementedError()
 

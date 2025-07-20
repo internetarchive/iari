@@ -27,3 +27,26 @@ class ProbeMethod(Enum):
     VERIFYI = "VERIFYI"
     TRUST_PROJECT = "TRUST_PROJECT"
     TEST = "TEST"
+
+#
+# # Enums for output formats
+# class OutputFormat(Enum):
+#     HTML = "HTML"
+#     JSON = "JSON"
+#     TSV = "TSV"
+
+# Enums for output formats
+OutputFormats = {
+    'HTML' : {
+        'key' : 'HTML',
+        'value' : 'html'
+    },
+    'JSON': {
+        'key': 'JSON',
+        'value': 'json'
+    },
+    'TSV': {
+        'key': 'TSV',
+        'value': 'tsv'
+    },
+}

@@ -137,7 +137,7 @@ class ProbeVerifyi(IariProbe):
             from src import app
             app.logger.debug(msg)
 
-            results.setdefault('errors', []).append(msg)  # add or create errors entry
+            results.setdefault('errors', []).append(msg)  # create errors entry if not there and append msg
 
         return results
 
