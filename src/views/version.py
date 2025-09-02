@@ -10,6 +10,7 @@ from src.models.api.schema.version_schema import VersionSchema
 
 from src.helpers.get_version import get_poetry_version
 from src.helpers.cache_utils import get_cache_hash
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 
 # import importlib.metadata
 
@@ -62,5 +63,7 @@ class Version(StatisticsWriteView):
                 "hash": get_cache_hash("mister_bungle.wungle.com"),
             }
         }
+
+        # raise WikipediaApiFetchError(f"Fake error 123")
 
         return data, 200

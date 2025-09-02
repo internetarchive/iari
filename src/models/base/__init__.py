@@ -18,7 +18,7 @@ class WariBaseModel(BaseModel):
         extra = "forbid"  # dead: disable
 
     @validate_arguments
-    # WTF: this is a pydantic thing.
+    # nb WTF: this is a pydantic thing.
     #   from what i understand, it validates the parameters to __log_to_file,
     #   which, as far as i can tell, is not used and commented out everywhere.
     def __log_to_file__(self, message: str, file_name: str) -> None:

@@ -1,7 +1,11 @@
 """
 The purpose of this API is
-* to analyze a Wikipedia article based on the title, wikimedia site and language code
-* to easily link between a Wikipedia article and the corresponding Wikipedia Citations Database item
+* to analyze a Wikipedia article based on the title and domain (the domain is
+typically the wikimedia site and language code).
+
+* to easily link between
+    - a Wikipedia article and
+    - the corresponding Wikipedia Citations Database item
 
 Inspired by: https://rapidapi.com/blog/how-to-build-an-api-in-python/ and
 https://medium.com/analytics-vidhya/how-to-test-flask-applications-aef12ae5181c and
@@ -17,6 +21,9 @@ from flask_restful import Api, Resource  # type: ignore
 # from flask_cors import CORS
 import config
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+
+# # new stuff aug 2025
+# from src.views.v2.refs_lookup_v2 import GetArchiveV2
 
 # new stuff jun 2025
 from src.views.v2.refs_lookup_v2 import RefsLookupV2
@@ -39,7 +46,7 @@ from src.views.v2.get_book_reference_v2 import GetBookReferenceV2
 from src.views.v2.get_url_info_v2 import GetUrlInfoV2
 from src.views.version import Version
 
-# legacy endpoints stuff...
+# legacy endpoints...
 from src.views.check_doi import CheckDoi
 # from src.views.check_url import CheckUrl
 from src.views.check_url_archive import CheckUrlArchive
@@ -74,7 +81,7 @@ server_name = os.getenv('FLASK_SERVER_NAME', 'Unknown Server')
 
 # We use a prefix here to enable us to stabilize the api over time
 # and bump the version when making breaking changes
-api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning should be addressed
+api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning should be addressed, i.e. removed
 
 
 @app.errorhandler(404)
@@ -87,8 +94,20 @@ def not_found(e):
 
 @app.errorhandler(Exception)
 def handle_exception(e):
+    from src import app
+    app.logger.debug("#####")
+    app.logger.debug(f"#### Handling exception all the way up top")
+    app.logger.debug(f"#### e: {e}")
+    app.logger.debug("#####")
     traceback.print_exc()
-    return {"error": "A generic exception occurred", "details": str(e)}
+
+    return jsonify(errors=[{
+        "error": type(e).__name__,
+        "foo": "bar",
+        "details": str(e)
+    }]), 500
+
+    # return {"error": "A generic exception occurred", "xdetails": str(e)}
 
 #
 # @app.errorhandler(500)
@@ -103,32 +122,45 @@ def favicon():
     # app.logger.info("No favicon serve")
     return '', 204  # No Content
 
+# API endpoints
 
-# link respective endpoints to API views
+# gets IARI version
 api.add_resource(Version, "/version")
 
+# article refs extraction
+api.add_resource(ExtractRefsV2, "/extract_refs")    # based on James' extraction code * this is preferred
+api.add_resource(ArticleV2, "/article")             # like /statistics/article, but adds HTML information
+
+# url status checks
 api.add_resource(GetUrlInfoV2, "/get_url_info")
-api.add_resource(ProbeV2, "/probe")
-api.add_resource(GetBookReferenceV2, "/get_book_reference")
-api.add_resource(FetchRefsV2, "/fetchrefs")
-api.add_resource(EditRefV2, "/editref")
-api.add_resource(ExtractRefsV2, "/extract_refs")
-api.add_resource(RefsLookupV2, "/refs_lookup")      # James' Wiki Citations Database"
-api.add_resource(InsightsWebRxV2, "/insights")      # Stephen's and Sawood's numbers
-
-api.add_resource(ArticleV2, "/article")
-api.add_resource(ArticleCacheV2, "/article_cache")
-
-api.add_resource(CheckUrls, "/check-urls")
 api.add_resource(CheckUrlV2, "/check-url")
 api.add_resource(CheckUrlArchive, "/check-url-archive")
+
+# specialized
+api.add_resource(ProbeV2, "/probe")
+api.add_resource(GetBookReferenceV2, "/get_book_reference")
+
+# bigger picture
+api.add_resource(RefsLookupV2, "/refs_lookup")      # James' Wiki Citations Database
+api.add_resource(InsightsWebRxV2, "/insights")      # Stephen's and Sawood's numbers
+
+# Other
+api.add_resource(ArticleCacheV2, "/article_cache")  # for offline article fetching
+api.add_resource(EditRefV2, "/editref")             # edit wiki article in place
+
+api.add_resource(CheckUrls, "/check-urls")          # multi-url check
 api.add_resource(CheckDoi, "/check-doi")
-api.add_resource(Article, "/statistics/article")
+
 api.add_resource(All, "/statistics/all")
 api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
 api.add_resource(Pdf, "/statistics/pdf")
 api.add_resource(Xhtml, "/statistics/xhtml")
+
+# SHOULD BE DEPRECATED
+api.add_resource(FetchRefsV2, "/fetchrefs")         # multi-page reference fetch
+api.add_resource(Article, "/statistics/article")    # old, original referencefetch
+
 
 # api.add_resource(LookupByWikidataQid, "/wikidata-qid/<string:qid>")
 

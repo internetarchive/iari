@@ -1,11 +1,22 @@
-class MissingInformationError(BaseException):
+# class MissingInformationError(BaseException):
+#     pass
+#
+#
+# class UnknownValueError(BaseException):
+#     pass
+#
+#
+# class WikipediaApiFetchError(BaseException):
+#     pass
+#
+class MissingInformationError(Exception):
     pass
 
 
-class UnknownValueError(BaseException):
+class UnknownValueError(Exception):
     pass
 
 
-class WikipediaApiFetchError(BaseException):
+class WikipediaApiFetchError(Exception):
     pass
 

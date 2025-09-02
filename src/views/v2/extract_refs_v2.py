@@ -1,7 +1,9 @@
 from typing import Any, Optional, Tuple, List, Dict
 import traceback
 import time
+from flask import jsonify
 
+from src import WikipediaApiFetchError
 from src.models.exceptions import MissingInformationError
 from src.models.wikimedia.enums import RequestMethods
 
@@ -35,19 +37,19 @@ class ExtractRefsV2(StatisticsViewV2):
 
     def get(self):
         """
-        entrypoint for GET extract_refs endpoint
+        the GET entrypoint for extract_refs
         must return a tuple: (Any, response_code)
         """
         return self.__process_request__(method=RequestMethods.get)
 
     def post(self):
         """
-        entrypoint for POST extract_refs endpoint
-        must return a tuple: (Any,response_code)
+        the POST entrypoint for extract_refs
+        must return a tuple: (Any, response_code)
         """
         return self.__process_request__(method=RequestMethods.post)
 
-    def __process_request__(self, method=RequestMethods.post):  # default to POST
+    def __process_request__(self, method=RequestMethods.post):
 
         from src import app
         app.logger.debug(f"==> ExtractRefsV2::__process_request__({method})")
@@ -105,11 +107,37 @@ class ExtractRefsV2(StatisticsViewV2):
 
         except MissingInformationError as e:
             traceback.print_exc()
-            return {"error": f"Missing Information Error: {str(e)}"}, 500
+            return jsonify(errors=[
+                {
+                    "error": type(e).__name__,
+                    "details": str(e)
+                },
+            ]), 500
+
+        except WikipediaApiFetchError as e:
+            traceback.print_exc()
+            return jsonify(errors=[
+                {
+                    "error": type(e).__name__,
+                    "details": str(e)
+                },
+            ]), 500
+
+        # except WikipediaApiFetchError as e:
+        #     traceback.print_exc()
+        #     return {
+        #     "error": f"Wikipedia Api Fetch Error: {str(e)}"}, 500
 
         except Exception as e:
             traceback.print_exc()
-            return {"error": f"{type(e).__name__}: {str(e)}"}, 500
+            return jsonify(errors=[
+                {
+                    "error": type(e).__name__,
+                    "details": str(e)
+                },
+            ]), 500
+
+            # return {"error": f"{type(e)}: {str(e)}"}, 500
 
 
     def __get_page_data__(self):
@@ -136,4 +164,22 @@ class ExtractRefsV2(StatisticsViewV2):
         #  get_page_data(page_spec)
         #  page_spec should also be a formal object class, to allow polymorphic analyzers
 
-        return self.analyzer.get_page_data(page_spec)
+        from src import app
+        app.logger.debug(f"####")
+        app.logger.debug(f"#### extract_refs_v2::__get_page_data__: right before returning results from analyzer.get_page_data")
+        app.logger.debug(f"####")
+
+
+        try:
+            return self.analyzer.get_page_data(page_spec)
+
+        except Exception as e:
+            app.logger.error(f"analyzer.get_page_data: failed (got exception): {e}")
+            return {
+                "errors": [
+                    {
+                        "error": type(e).__name__,
+                        "details": f"analyzer.get_page_data: failed (got exception): {e}",
+                    }
+                ]
+            }

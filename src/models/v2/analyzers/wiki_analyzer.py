@@ -6,12 +6,14 @@ import requests
 import mwparserfromhell
 from mwparserfromhell.wikicode import Wikicode
 
-from src.models.exceptions import MissingInformationError
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.v2.analyzers import IariAnalyzer
 
 from iarilib.parse_utils import extract_cite_refs
 
-from src.helpers.refs_extractor.wikiapi import get_current_timestamp, get_wikipedia_article
+from src.helpers.refs_extractor.wikiapi import \
+    get_current_timestamp, \
+    get_wikipedia_article
 from src.helpers.refs_extractor.article import \
     extract_references_from_page as extract_references_from_page_old, \
     extract_urls_from_text
@@ -55,6 +57,14 @@ class WikiAnalyzerV2(IariAnalyzer):
                                                page_spec["domain"],
                                                page_spec["as_of"])
 
+
+
+        # handle error from ref_data here
+        # if ref_data.errors then
+        # return error stuff (check iare calling)
+
+
+
         # process the reference data
         # TODO here is where templates, urls, et al., are extracted into aggregate properties...???
         # NB: this is what is currently done on the IARE client side
@@ -81,25 +91,88 @@ class WikiAnalyzerV2(IariAnalyzer):
 
 def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     """
-    returns a dict for each reference:
+    raises Exception if error anywhere along way
+
+    returns a dict describing page and references
     {
-        wikitext: str
-        urls: []
-        claim: str (if any)
-        <others>
-        NB TODO should we make a ref class to contain these fields?
+        "page_id": page_id,
+        "revision_id": revision_id,
+        "revision_timestamp": revision_timestamp,
+
+        "section_names": [get_section_title(section) for section in sections],
+        "urls": list(found_urls),
+        "references": array of refs:
+            [
+                {
+                    wikitext: str
+                    urls: []
+                    claim: str (if any)
+                    <others>
+                    NB TODO should we make a ref class to contain these fields?
+                }, ....
+            ]
+
     }
+
+    if errors, returns a dict:
+    {
+        "errors": errors,
+    }
+
     """
+    from src import app
+
     if as_of is None:
         as_of = get_current_timestamp()
 
     title = title.replace(" ", "_")
 
-    page_id, revision_id, revision_timestamp, wikitext = get_wikipedia_article(domain, title, as_of)
+    # page_id, revision_id, revision_timestamp, wikitext = (
+    #     get_wikipedia_article(domain, title, as_of)
+    # )
+    try:
+        results = get_wikipedia_article(domain, title, as_of)
 
-    sections = mw_extract_sections(wikitext)  # sections are Wikicode objects
-    # TODO make sections a collection of section objects that are passed the mwPFH section object,
-    #   these section objects should have active methods as well, like extract_refs, et al.
+    except Exception as e:
+        app.logger.debug("Results from get_wikipedia_article:")
+        app.logger.debug(f"page_id: {results.get('page_id')}")
+        app.logger.debug(f"rev_id: {results.get('rev_id')}")
+        app.logger.debug(f"rev_timestamp: {results.get('rev_timestamp')}")
+        app.logger.debug(
+            f"wikitext: {results.get('wikitext')[:100] if results.get('wikitext') else ''}")  # First 100 chars
+        app.logger.debug(f"errors: {results.get('errors')}")
+
+        raise WikipediaApiFetchError(f"Error while get_wikipedia_article {e}")
+
+        # TODO ERR
+        #   if page_id None, check another field for errors...
+        #   if errors here, return appropriate field values indicating such
+        # otherwise continue...
+
+    if results["errors"]:
+        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: results['errors'] is true!")
+
+        err = results["errors"][0]
+        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: err = {err}")
+        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: err.details = {err['details']}")
+
+        app.logger.debug(f"####")
+        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: right before raise Error")
+        app.logger.debug(f"####")
+
+        raise WikipediaApiFetchError(err["details"])
+        # raise WikipediaApiFetchError(err["details"])
+
+    # no errors, so expect the following fields:
+    # page_id,
+    # rev_id,
+    # rev_timestamp and
+    # wikitext fields
+
+    # ...and parse the sections out of the received wikitext
+    sections = mw_extract_sections(results.wikitext)  # sections are Wikicode objects
+    # TODO make sections a collection of Section objects that are passed the mwPFH section object,
+    #   these Section objects should have active methods as well, like extract_refs, et al.
 
     """
     my_ref = {
@@ -119,9 +192,9 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     [found_urls] = post_process_refs(refs)
 
     return {
-        "page_id": page_id,
-        "revision_id": revision_id,
-        "revision_timestamp": revision_timestamp,
+        "page_id": results.page_id,
+        "revision_id": results.rev_id,
+        "revision_timestamp": results.rev_timestamp,
 
         "section_names": [get_section_title(section) for section in sections],
         "urls": list(found_urls),
