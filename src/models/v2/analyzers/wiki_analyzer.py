@@ -11,31 +11,32 @@ from src.models.v2.analyzers import IariAnalyzer
 
 from iarilib.parse_utils import extract_cite_refs
 
-from src.helpers.refs_extractor.wikiapi import \
-    get_current_timestamp, \
-    get_wikipedia_article
-from src.helpers.refs_extractor.article import \
-    extract_references_from_page as extract_references_from_page_old, \
-    extract_urls_from_text
+from src.helpers.refs_extractor.wikiapi import get_current_timestamp, get_wikipedia_article
+from src.helpers.refs_extractor.article import extract_urls_from_text
+    # extract_references_from_page as extract_references_from_page_old, \
+
 
 
 class WikiAnalyzerV2(IariAnalyzer):
     """
     "Implements" IariAnalyzer base class
 
-    logic for obtaining statistics from wiki page
+    logic for getting statistics from wiki page
 
     what we need:
         page spec or wikitext
 
     what we return:
         json formatted data of refs
-        later: more stat data from refs
+        NB: later: more statistical data from refs
 
     """
 
     @staticmethod
     def get_page_data(page_spec) -> Dict[str, Any]:
+        """
+        NB: Does not do any exception handling
+        """
 
         # seed return data with page specs
         results = {
@@ -43,11 +44,7 @@ class WikiAnalyzerV2(IariAnalyzer):
         }
         results.update(page_spec)  # append page_spec fields to return_data
 
-        # extract reference data
-        # ref_data is array of references, each one like:
-        # { wikitext, name, [etc], templates, urls, section_name, claim, ...other? }
-
-        # ref_data uses James Hare's reference extraction code
+        # ref_data uses modification of James Hare's reference extraction code
         ref_data = extract_references_from_page(page_spec["page_title"],
                                                 page_spec["domain"],
                                                 page_spec["as_of"])
@@ -59,17 +56,11 @@ class WikiAnalyzerV2(IariAnalyzer):
 
 
 
-        # handle error from ref_data here
-        # if ref_data.errors then
-        # return error stuff (check iare calling)
-
-
-
         # process the reference data
-        # TODO here is where templates, urls, et al., are extracted into aggregate properties...???
-        # NB: this is what is currently done on the IARE client side
-        #   this needs to be brought into here...
-        #   generate alist of tasks that must be done here
+        # TODO extract templates, urls, et al. into aggregate properties...???
+        # NB: this is what is currently done on the IARE client side.
+        #   Those processing methods should be implemented here...
+        #   TODO: generate a list of tasks that need to be done here
 
         # fill fields in return data and return
         results["page_id"] = str(ref_data["page_id"])
@@ -91,7 +82,7 @@ class WikiAnalyzerV2(IariAnalyzer):
 
 def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     """
-    raises Exception if error anywhere along way
+    raises Exception if errors anywhere along the way
 
     returns a dict describing page and references
     {
@@ -120,69 +111,35 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     }
 
     """
-    from src import app
 
     if as_of is None:
         as_of = get_current_timestamp()
-
     title = title.replace(" ", "_")
 
-    # page_id, revision_id, revision_timestamp, wikitext = (
-    #     get_wikipedia_article(domain, title, as_of)
-    # )
-    try:
-        results = get_wikipedia_article(domain, title, as_of)
+    # fetch article data, which returns a dict containing article fetch results, or { errors: [] }
+    results = get_wikipedia_article(domain, title, as_of)
 
-    except Exception as e:
-        app.logger.debug("Results from get_wikipedia_article:")
-        app.logger.debug(f"page_id: {results.get('page_id')}")
-        app.logger.debug(f"rev_id: {results.get('rev_id')}")
-        app.logger.debug(f"rev_timestamp: {results.get('rev_timestamp')}")
-        app.logger.debug(
-            f"wikitext: {results.get('wikitext')[:100] if results.get('wikitext') else ''}")  # First 100 chars
-        app.logger.debug(f"errors: {results.get('errors')}")
+    if results.get("errors", []):
+        raise WikipediaApiFetchError(results.get("errors", [{}])[0].get("details", "Unknown Wikipedia API error"))
 
-        raise WikipediaApiFetchError(f"Error while get_wikipedia_article {e}")
+    if "wikitext" not in results:
+        raise WikipediaApiFetchError("wikitext not found in wikiapi results")
 
-        # TODO ERR
-        #   if page_id None, check another field for errors...
-        #   if errors here, return appropriate field values indicating such
-        # otherwise continue...
-
-    if results["errors"]:
-        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: results['errors'] is true!")
-
-        err = results["errors"][0]
-        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: err = {err}")
-        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: err.details = {err['details']}")
-
-        app.logger.debug(f"####")
-        app.logger.debug(f"#### wiki_analyzer::extract_references_from_page: right before raise Error")
-        app.logger.debug(f"####")
-
-        raise WikipediaApiFetchError(err["details"])
-        # raise WikipediaApiFetchError(err["details"])
-
-    # no errors, so expect the following fields:
-    # page_id,
-    # rev_id,
-    # rev_timestamp and
-    # wikitext fields
-
-    # ...and parse the sections out of the received wikitext
-    sections = mw_extract_sections(results.wikitext)  # sections are Wikicode objects
+    # extract Wikicode objects "sections" from the wikitext
+    sections = mw_extract_sections(results["wikitext"])
     # TODO make sections a collection of Section objects that are passed the mwPFH section object,
     #   these Section objects should have active methods as well, like extract_refs, et al.
 
+    refs = []
     """
-    my_ref = {
+    references look like:
+    {
         "wikitext": <wikitext goes here>,
         "urls": [],
         "claim": "",
         "section": "",
     }
     """
-    refs = []
 
     for section in sections:
         section_refs = get_refs_from_section(section)
@@ -192,10 +149,9 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     [found_urls] = post_process_refs(refs)
 
     return {
-        "page_id": results.page_id,
-        "revision_id": results.rev_id,
-        "revision_timestamp": results.rev_timestamp,
-
+        "page_id": results.get("page_id", ""),
+        "revision_id": results.get("rev_id", ""),
+        "revision_timestamp": results.get("rev_timestamp", ""),
         "section_names": [get_section_title(section) for section in sections],
         "urls": list(found_urls),
         "references": refs
@@ -221,7 +177,7 @@ def get_section_title(section):
             # Strip '==' to get the title
             return first_line.strip("=").strip()
         else:
-            # Handle case for lead section or untitled section
+            # Handle case for Lead section or untitled section
             return "Lead Section"
 
     except IndexError:
@@ -239,7 +195,7 @@ def get_refs_from_section(section: Wikicode) -> List[object]:
     refs = []
     section_name = get_section_title(section)
 
-    # Iterate through all the nodes, special casing on "ref" nodes and "sfn nodes
+    # Iterate through all the nodes, special casing on "ref" nodes and "sfn" nodes
 
     for i, node in enumerate(nodes):
 
@@ -273,13 +229,14 @@ def get_refs_from_section(section: Wikicode) -> List[object]:
         # check for sfn template
         if isinstance(node, mwparserfromhell.nodes.template.Template) and node.name.strip().lower() == "sfn":
             app.logger.debug(f"Found sfn template: {str(node)}")
-            # what to do?
-            # we can save as reference, with SFN type, and parameters
-            # ref is a "pointer" to another ref
-            # in my lingo, a "citation" to a reference
-            # citation: place in article
-            # reference: source to link to
-            # references can have a cite_array - where in the article it is referenced
+            """
+            what to do? Ideas:
+                we can save as a reference, with SFN type, and parameters
+                ref is a "pointer" to another ref, a "citation" to a reference
+                citation: place in article
+                reference: source to link to
+                references can have a cite_array, describing where in the article it is referenced
+            """
 
     return refs
 
@@ -326,25 +283,26 @@ def get_templates_from_ref(ref):
 
 def get_claim(node_number, nodes):
     """
-    things to check:
-    if immediate left tag is a reftag, "skip over" reftag and try to get claim text
+    Returns [claim_text, claim_array], where claim_array is for debugging
+
+    Things to check:
+    If the immediate left tag is a reftag, "skip over" reftag and try to get claim text
     - could get claim text of that to-the-left claim tag
 
     The left boundary of a claim text could be another ref itself,
-    as the preceeding ref comes AFTER the preceedingref's claim text's terminbating period
+    as the preceding ref comes AFTER the preceding ref's claim text's terminating period
 
-    many refs in a row, as in [85][86][87][88][89] K Rosa, e.g.
+    Many refs in a row, as in [85][86][87][88][89] K Rosa, e.g.
 
     This:
     In the first half of the 20th century, steam reportedly came out of the
      Rano Kau crater wall. This was photographed by the island's manager, Mr. Edmunds.
     (Mr. stops it!)
-    (If terminating period's preceeding text is one of accepted abbreviations, continue on)
+    (If terminating period's preceding text is one of accepted abbreviations, continue on)
 
-    """
 
-    """
-    If you want to handle tags more robustly (e.g., extract attributes or process nested contents), here are some useful properties and methods:
+    If you want to handle tags more robustly (e.g., extract attributes or process nested contents),
+    here are some useful properties and methods:
 
     node.tag: Returns the name of the tag (e.g., "b" for <b>).
     node.attributes: Returns the tag's attributes as a dictionary-like object.
@@ -352,7 +310,7 @@ def get_claim(node_number, nodes):
 
     """
 
-    # piece together the claim text referring to the citation at node_number.
+    # Piece together the claim text referring to the citation at node_number.
     # The citation can be all the previous nodes before the last full stop.
 
     claim_array = []
@@ -406,12 +364,12 @@ def get_claim(node_number, nodes):
         # claim_array is for debugging
         claim_array.append(f"[{type(nodes[n_index])}] {node_text}")
 
-        # append current node_text to beginning of claim_text,
+        # append current node_text to the beginning of claim_text,
         # because we are searching backwards from the <ref> node
         claim_text = node_text + claim_text
 
 
-    # just use LAST sentence of claim text
+    # Use LAST sentence of claim text
     claim_sentences = re.split(r'\.\s+', claim_text)
     claim_text = claim_sentences[-1] if claim_sentences else claim_text
 
@@ -467,6 +425,13 @@ def fetch_page_html(title, domain="en.wikipedia.org", as_of=None):
         f"https://{domain}/"
         f"w/rest.php/v1/page/{title}/with_html"
     )
+    # TODO see: https://wikitech.wikimedia.org/wiki/Robot_policy
+    #   preferred request endpoint:
+    #   use either
+    #       /wiki/Article_name
+    #   or
+    #   corresponding Wikimedia REST API:
+    #       /api/rest_v1/page/html/Article_name endpoint.
 
     html_markup = ""
 
@@ -479,7 +444,7 @@ def fetch_page_html(title, domain="en.wikipedia.org", as_of=None):
         html_markup = data["html"]
 
     elif response.status_code == 404:
-        # self.found_in_wikipedia = False
+        # TODO raise exception here?
         app.logger.error(
             f"Could not fetch page html from {title} because of 404. See {url}"
         )

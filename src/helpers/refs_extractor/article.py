@@ -1,8 +1,12 @@
+"""
+This module provides utility functions for extracting references from Wikipedia articles.
+
+This is originally from James Hare's code
+"""
+
 import mwparserfromhell
 import re
 import sys
-# from .wikilist import extract_list_items
-# from .wikiapi import get_current_timestamp, get_wikipedia_article
 
 from .testmodule import get_test
 from .wikilist import extract_list_items

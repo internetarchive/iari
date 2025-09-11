@@ -1,33 +1,51 @@
 import requests
 from datetime import datetime
 
+import config
+
+wiki_user_agent = (f"IariBot/0.0"
+                   f" (https://iabot-api.archive.org/services/context/iari-stage/v2/version; mojomonger@archive.org)"
+                   f" iari/0.0")
+# wiki_user_agent_2 = "TestBot/0.1 (https://example.com/; test@example.com)"
 
 def get_current_timestamp():
     now = datetime.utcnow()
     return now.strftime('%Y-%m-%dT%H:%M:%SZ')
 
+def make_errors_array(error_name, details):
+    return {
+        "errors": [
+            {
+                "error": error_name,
+                "details": details,
+            }
+        ]
+    }
 
 def get_wikipedia_article(domain, title, timestamp):
     """
-    returns {
+    returns a dict containing article fetch results, or { errors: [] }
+
+    {
         page_id: ,
         rev_id: ,
         rev_timestamp: ,
         wikitext:
     }
-    or
-    {
-        errors: [
-            <string>, ...
-        ]
-    }
+
+        OR
+
+    { errors: [<string>, ...] }
 
     """
 
-    from src import app
+    # TODO make sure domain, title and timestamp are valid,
+    #   returning error if not
 
     endpoint_url = f"https://{domain}/w/api.php"
     continue_token = None
+
+    from src import app
 
     # Query for revisions, then stop once the target revision is found
     while True:
@@ -36,6 +54,7 @@ def get_wikipedia_article(domain, title, timestamp):
             "format": "json",
             "prop": "revisions",
             "titles": title,
+
             "rvlimit": "max",
             "rvprop": "ids|timestamp",
             "rvdir": "older"
@@ -44,8 +63,7 @@ def get_wikipedia_article(domain, title, timestamp):
             params["rvcontinue"] = continue_token
 
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "http://en.wikipedia.org/wiki/User:Iamojo via iabget.awk",
+            "User-Agent": wiki_user_agent
         }
 
         try:
@@ -58,51 +76,31 @@ def get_wikipedia_article(domain, title, timestamp):
             response.raise_for_status()
 
         except requests.RequestException as e:
-            app.logger.error(f"#### get_wikipedia_article request failed: {e}")
-
-            return {
-                "errors": [
-                    {
-                        "error": "Request error",
-                        "details": f"get_wikipedia_article request failed: {e}"
-                    }
-                ]
-            }
+            return make_errors_array("Wiki requests error", f"Request failed: {e}")
 
         try:
             data = response.json()
 
-        except requests.RequestException as e:
-            app.logger.error(f"wikiapi::get_wikipedia_article: Bad JSON received for revisions: {e}.")
-            return {
-                "errors": [
-                    {
-                        "error": "Page parsing error",
-                        "details": f"get_wikipedia_article: Bad JSON received for revisions: {e}"
-                    }
-                ]
-            }
+        except Exception as e:
+            app.logger.error(f"wikiapi::get_wikipedia_article: JSON parse error for revisions: {e}.")
+            return make_errors_array("Page parsing error", f"JSON parse error for revisions: {e}")
 
-        # TODO error if pages does not exist in query
         pages = data.get("query", {}).get("pages", {})
+        # TODO error if "pages" does not exist in query
         for page_id, page_info in pages.items():
 
+            # Abort if no page info
             if "missing" in page_info:
-                return {
-                    "errors": [
-                        {
-                            "error": "Missing page info",
-                            "details": "Article did not exist at the given time"
-                        }
-                    ]
-                }
+                return make_errors_array("Missing page info", f"Article did not exist at the given time")
+                # NB TODO Not sure what this means exactly...
 
-            revisions = page_info.get("revisions", [])
             # Check each revision to find the target one
+            revisions = page_info.get("revisions", [])
             for rev in revisions:
                 try:
                     rev_timestamp = rev["timestamp"]
                     if rev_timestamp <= timestamp:
+
                         # Fetch the content of the identified revision
                         revision_id = rev["revid"]
                         content_params = {
@@ -112,51 +110,32 @@ def get_wikipedia_article(domain, title, timestamp):
                             "revids": revision_id,
                             "rvprop": "content"
                         }
-                        content_response = requests.get(endpoint_url, params=content_params)
-                        app.logger.debug(f"Content response status code: {content_response.status_code}")
-                        app.logger.debug(f"Content response headers: {content_response.headers}")
-                        app.logger.debug(f"Content response encoding: {content_response.encoding}")
-                        app.logger.debug(f"Content response URL: {content_response.url}")
-                        app.logger.debug(f"Content response text: {content_response.text}")
+                        content_response = requests.get(
+                            endpoint_url,
+                            params=content_params,
+                            headers=headers,
+                        )
 
                         if content_response.status_code != 200:
-                            # except WikipediaApiFetchError as e:
-                            #     traceback.print_exc()
-                            #     return {"error": f"Wikipedia Api Fetch Error: {str(e)}"}, 500
-                            app.logger.debug(f"XXXX XXXX requests failed; returning errors dict")
+                            return make_errors_array("Page fetching error",
+                                          f"Error fetching data from revision id {revision_id} ({content_response.text})")
 
-                            return {
-                                "errors": [
-                                    {
-                                        "error": f"Error fetching response from {endpoint_url}",
-                                        "details": content_response.text
-                                    }
-                                ]
-                            }
-
-                        # NB this might fail, but shouldn't, as we requested json format
+                        # NB this should not fail, as we specifically requested JSON format
                         content_data = content_response.json()
 
-                        # Extract content
+                        # Extract content from results
                         for page_id, page_info in content_data.get("query", {}).get("pages", {}).items():
                             content_revisions = page_info.get("revisions", [])
                             if content_revisions:
                                 return {
-                                    page_id: page_id,
-                                    rev_id: revision_id,
-                                    rev_timestamp: rev_timestamp,
-                                    wikitext: content_revisions[0]["*"],
+                                    "page_id": page_id,
+                                    "rev_id": revision_id,
+                                    "rev_timestamp": rev_timestamp,
+                                    "wikitext": content_revisions[0]["*"],
                                 }
-                                # return page_id, revision_id, rev_timestamp, content_revisions[0]["*"]
 
-                        return {
-                            "errors": [
-                                {
-                                    "error": "Page content error",
-                                    "details": f"No content found."
-                                }
-                            ]
-                        }
+                        # If no content_revisions found, error
+                        return make_errors_array("Page content error", f"No content found.")
 
                 except KeyError:  # Caused by deleted revision
                     continue
@@ -166,14 +145,8 @@ def get_wikipedia_article(domain, title, timestamp):
             break
 
     # Error if no suitable revision found
-    return {
-        "errors": [
-            {
-                "error": "Page content error",
-                "details": f"No suitable revision found"
-            }
-        ]
-    }
+    return make_errors_array("Page content error", f"No suitable revision found")
+
 
 if __name__ == "__main__":
     print(get_wikipedia_article("en.wikipedia.org", "Easter_Island", "2003-01-01T00:00:00Z"))

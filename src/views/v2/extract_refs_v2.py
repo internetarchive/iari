@@ -16,6 +16,7 @@ from src.views.v2.statistics import StatisticsViewV2
 from src.models.v2.analyzers.wiki_analyzer import WikiAnalyzerV2
 
 from src.helpers.get_version import get_poetry_version
+from src.helpers.iari_utils import iari_errors
 
 
 class ExtractRefsV2(StatisticsViewV2):
@@ -65,13 +66,16 @@ class ExtractRefsV2(StatisticsViewV2):
             # get page_data, either from cache or newly calculated
             page_data = self.__get_page_data__()
                 # TODO get cached data here if possible
-                # TODO somehow update page_errors if encountered
-                #   maybe have __get_page_data__ access self.page_error?
+                # TODO somehow access self.page_errors here
+                #   self.page_errors should collect errors encountered while processing the page,
+                #       but not erroneous enough to fail processing
+                #   maybe have __get_page_data__ access/append self.page_errors?
 
             # Stop the timer and calculate execution time
             end_time = time.time()
             execution_time = end_time - start_time
 
+            # initialize page_data fields
             self.page_data = {
                 "iari_version": get_poetry_version("pyproject.toml"),
                 "iari_command": "extract_refs",
@@ -89,6 +93,8 @@ class ExtractRefsV2(StatisticsViewV2):
                     "page_id": page_data["page_id"],
                     "revision_id": page_data["revision_id"],
 
+                    # here is all the specific statistical data fetched from article...
+
                     "section_names": page_data["section_names"],
 
                     "url_count": page_data["url_count"],
@@ -101,50 +107,44 @@ class ExtractRefsV2(StatisticsViewV2):
                     "cite_refs": page_data["cite_refs"],
             })
 
-            # and return results
+            # return results
             return self.page_data, 200
 
 
         except MissingInformationError as e:
+            app.logger.debug(f"ExtractRefsV2::__process_request__ MissingInformationError {e}")
             traceback.print_exc()
-            return jsonify(errors=[
-                {
-                    "error": type(e).__name__,
-                    "details": str(e)
-                },
-            ]), 500
+            return iari_errors(e), 500
 
         except WikipediaApiFetchError as e:
+            app.logger.debug(f"ExtractRefsV2::__process_request__ WikipediaApiFetchError {e}")
             traceback.print_exc()
-            return jsonify(errors=[
-                {
-                    "error": type(e).__name__,
-                    "details": str(e)
-                },
-            ]), 500
-
-        # except WikipediaApiFetchError as e:
-        #     traceback.print_exc()
-        #     return {
-        #     "error": f"Wikipedia Api Fetch Error: {str(e)}"}, 500
+            return iari_errors(e), 500
 
         except Exception as e:
+            app.logger.debug(f"ExtractRefsV2::__process_request__ Exception {e}")
             traceback.print_exc()
-            return jsonify(errors=[
-                {
-                    "error": type(e).__name__,
-                    "details": str(e)
-                },
-            ]), 500
-
-            # return {"error": f"{type(e)}: {str(e)}"}, 500
+            return iari_errors(e), 500
 
 
     def __get_page_data__(self):
         """
+        returns the page data or
+        errors structure:
+        {
+            "errors": [
+                {
+                    "error": type(e).__name__,
+                    "details": f"analyzer.get_page_data: Error: {e}",
+                }
+            ]
+        }
+
         set self.page_data:
-            - if use_cache, retrieve from cache if possible, or
-            - parse from self.job specs
+            - if self.use_cache,
+                - retrieve from cache if exists
+            - if not self.use_cache or cache not exist
+                - parse from self.job specs
         """
 
         page_spec = {
@@ -156,30 +156,15 @@ class ExtractRefsV2(StatisticsViewV2):
             #   - maybe served from cache? what does cache mean now that we have databases?
         }
 
-
         self.analyzer = WikiAnalyzerV2()
-        # for now, assumes page_spec is a wiki page.
-        # In the future, we will be able to determine which analyzer to use based on media type
-        # NB: each analyzer should "implement" a "base analyzer interface" to handle
+        # For now, assume page_spec refers to a wiki page.
+        # TODO In the future, determine which analyzer to use based on media type.
+        #   - or, have a generic analyzer that delegates a specific analyzer based on page_spec
+        # NB: each analyzer should implement a "base analyzer" interface that should include:
         #  get_page_data(page_spec)
-        #  page_spec should also be a formal object class, to allow polymorphic analyzers
+        #   - page_spec should also be a formal object class, with default required fields.
+        #   - page_spec should be a property of the analyzer class object instance
+        #   - This will allow analyzers to be polymorphic, wherein they could process amy type of page/media
 
-        from src import app
-        app.logger.debug(f"####")
-        app.logger.debug(f"#### extract_refs_v2::__get_page_data__: right before returning results from analyzer.get_page_data")
-        app.logger.debug(f"####")
+        return self.analyzer.get_page_data(page_spec)
 
-
-        try:
-            return self.analyzer.get_page_data(page_spec)
-
-        except Exception as e:
-            app.logger.error(f"analyzer.get_page_data: failed (got exception): {e}")
-            return {
-                "errors": [
-                    {
-                        "error": type(e).__name__,
-                        "details": f"analyzer.get_page_data: failed (got exception): {e}",
-                    }
-                ]
-            }

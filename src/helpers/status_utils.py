@@ -1,9 +1,8 @@
 # status_utils.py
 import requests
 
-from src.helpers.cache_utils import get_cache, set_cache, is_cached, CacheType
-
 from src.constants.constants import UrlStatusMethod
+from src.helpers.cache_utils import get_cache, set_cache, is_cached, CacheType
 
 
 class StatusUtils:
