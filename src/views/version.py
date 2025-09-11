@@ -59,8 +59,8 @@ class Version(StatisticsWriteView):
             "timestamp": int(timestamp),
             "isodate": str(isodate),
             "hash_test": {
-                "key": "mister_bungle.wungle.com",
-                "hash": get_cache_hash("mister_bungle.wungle.com"),
+                "key": "here.comes.the.sun",
+                "hash": get_cache_hash("here.comes.the.sun"),
             }
         }
 
