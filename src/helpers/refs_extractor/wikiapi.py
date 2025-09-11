@@ -67,11 +67,16 @@ def get_wikipedia_article(domain, title, timestamp):
         }
 
         try:
+            # response = requests.get(
+            #     endpoint_url,
+            #     headers=headers,
+            #     params=params,
+            #     timeout=6,
+            # )
             response = requests.get(
                 endpoint_url,
                 headers=headers,
                 params=params,
-                timeout=6,
             )
             response.raise_for_status()
 
