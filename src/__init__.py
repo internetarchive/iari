@@ -44,7 +44,7 @@ from src.views.v2.article_cache_view_v2 import ArticleCacheV2
 from src.views.v2.article_view_v2 import ArticleV2
 from src.views.v2.get_book_reference_v2 import GetBookReferenceV2
 from src.views.v2.get_url_info_v2 import GetUrlInfoV2
-from src.views.version import Version
+from src.views.v2.version_v2 import VersionV2
 
 # legacy endpoints...
 from src.views.check_doi import CheckDoi
@@ -81,7 +81,7 @@ server_name = os.getenv('FLASK_SERVER_NAME', 'Unknown Server')
 
 # We use a prefix here to enable us to stabilize the api over time
 # and bump the version when making breaking changes
-api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning should be addressed, i.e. removed
+api = Api(app, prefix="/v2")  # NB TODO This pseudo-versioning of v2 should be addressed, i.e. removed
 
 
 @app.errorhandler(404)
@@ -125,7 +125,7 @@ def favicon():
 # API endpoints
 
 # gets IARI version
-api.add_resource(Version, "/version")
+api.add_resource(VersionV2, "/version")
 
 # article refs extraction
 api.add_resource(ExtractRefsV2, "/extract_refs")    # based on James' extraction code * this is preferred

@@ -33,7 +33,7 @@ class StatisticsViewV2(Resource):
     time_of_analysis: Optional[datetime] = None
 
     def __setup_io__(self):
-        # derived ("child") class must implement __setup_io__ from this base ("parent") class
+        # Derived child class must implement __setup_io__ from this base parent class
         raise NotImplementedError()  # must be defined in parent class
 
     def __setup_and_read_from_cache__(self):
@@ -82,14 +82,12 @@ class StatisticsViewV2(Resource):
         self.schema.context['request_method'] = request.method
 
         self.job = self.schema.load(self.request_args)
-        # returns a job object populated with mapped values from request_args
+        # set job to job object populated with mapped values from request_args
 
         if not self.job:
-            app.logger.info("__parse_into_job__: job is undefined")
-            # TODO raise exception here if no job
-            raise MissingInformationError(
-                f"Could not parse schema params into valid Job"
-            )
+            # This seems to be the case when there are no arguments, as in the
+            # /version endpoint. Seems to be harmless not having a valid job property
+            app.logger.info("StatisticsViewV2: self.job is null")
 
         console.print("=== JOB ===")
         console.print(self.job)

@@ -4,9 +4,9 @@ from typing import Any, Dict, Optional
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
-from src.views.statistics.write_view import StatisticsWriteView
-from src.models.api.job.version_job import VersionJob
-from src.models.api.schema.version_schema import VersionSchema
+from src.views.v2.statistics import StatisticsViewV2
+from src.models.v2.job.version_job_v2 import VersionJobV2
+from src.models.v2.schema.version_schema_v2 import VersionSchemaV2
 
 from src.helpers.get_version import get_poetry_version
 from src.helpers.cache_utils import get_cache_hash
@@ -15,7 +15,7 @@ from src.models.exceptions import MissingInformationError, WikipediaApiFetchErro
 # import importlib.metadata
 
 
-class Version(StatisticsWriteView):
+class VersionV2(StatisticsViewV2):
     """
     This models all action based on requests from the frontend/patron
     It is instantiated at every request
@@ -24,8 +24,8 @@ class Version(StatisticsWriteView):
     See src/models/checking
     """
 
-    job: Optional[VersionJob] = None
-    schema: Schema = VersionSchema()
+    job: Optional[VersionJobV2] = None
+    schema: Schema = VersionSchemaV2()
     # ### serving_from_json: bool = False
     headers: Optional[Dict[str, Any]] = None
     #     {
@@ -38,7 +38,7 @@ class Version(StatisticsWriteView):
         Every branch in this method has to return a tuple (Any,response_code)"""
         from src import app
 
-        app.logger.debug("Version::get: running")
+        app.logger.debug("VersionV2::get: running")
 
         self.__validate_and_get_job__()
 
@@ -59,8 +59,8 @@ class Version(StatisticsWriteView):
             "timestamp": int(timestamp),
             "isodate": str(isodate),
             "hash_test": {
-                "key": "here.comes.the.sun",
-                "hash": get_cache_hash("here.comes.the.sun"),
+                "key": "free.speech.forever",
+                "hash": get_cache_hash("free.speech.forever"),
             }
         }
 

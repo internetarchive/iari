@@ -80,7 +80,8 @@ class ExtractRefsV2(StatisticsViewV2):
                 "iari_version": get_poetry_version("pyproject.toml"),
                 "iari_command": "extract_refs",
                 "page_errors": self.page_errors,
-                "execution_time": f"{execution_time:.4f} seconds"
+                "execution_time": f"{execution_time:.4f} seconds",
+                "hydrate": self.job.hydrate,
             }
 
             # pick and choose which fields from page_data we want to pass on to response
@@ -151,6 +152,7 @@ class ExtractRefsV2(StatisticsViewV2):
             "page_title": self.job.page_title,
             "domain": self.job.domain,
             "as_of": self.job.as_of,
+            "hydrate": self.job.hydrate,
             # TODO additional fields needed?:
             #   - timestamp of this information
             #   - maybe served from cache? what does cache mean now that we have databases?

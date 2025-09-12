@@ -47,7 +47,9 @@ class WikiAnalyzerV2(IariAnalyzer):
         # ref_data uses modification of James Hare's reference extraction code
         ref_data = extract_references_from_page(page_spec["page_title"],
                                                 page_spec["domain"],
-                                                page_spec["as_of"])
+                                                page_spec["as_of"],
+                                                page_spec["hydrate"]
+                                                )
 
         # cite_refs uses local iarilib's extract_cite_refs
         cite_refs = extract_citerefs_from_page(page_spec["page_title"],
@@ -80,7 +82,7 @@ class WikiAnalyzerV2(IariAnalyzer):
         return results
 
 
-def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
+def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None, hydrate=False):
     """
     raises Exception if errors anywhere along the way
 
@@ -142,7 +144,7 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None):
     """
 
     for section in sections:
-        section_refs = get_refs_from_section(section)
+        section_refs = get_refs_from_section(section, hydrate=hydrate)
         # TODO replace with "section.get_refs" when section becomes an object with a "get_refs" method
         refs.extend(section_refs)
 
@@ -185,7 +187,7 @@ def get_section_title(section):
         return "Section is empty or malformed."
 
 
-def get_refs_from_section(section: Wikicode) -> List[object]:
+def get_refs_from_section(section: Wikicode, hydrate=False) -> List[object]:
     """
     generic.py::__extract_templates_and_parameters__ - gets templates
     """
@@ -203,26 +205,31 @@ def get_refs_from_section(section: Wikicode) -> List[object]:
 
             wt = str(node)
 
-            my_ref = {
+            my_ref = {}
+
+            if hydrate is True:  # only add if hydrate is True
+                my_ref["hydrate"] = True
+
+            my_ref.update({
                 "wikitext": wt,
                 "name": get_ref_attribute(node, "name"),  # fetch the name of the ref, if any
                 "urls": [],
-                "claim": "",
-                "claim_array": [],
                 "section": section_name,
                 "templates": get_templates_from_ref(node),
-            }
+            })
 
             # process the url links in this ref
             # NB may want to process templates iteratively here...
             #   e.g.: process_templates_in_node(my_node)
-            #   can recurse template within template, etc.
+            #       then can recurse template within template, etc.
             for url in extract_urls_from_text(wt):
                 my_ref["urls"].append(url)
 
             [claim_text, claim_array] = get_claim(i, nodes)
-            my_ref["claim_array"] = claim_array
+
             my_ref["claim"] = claim_text
+            if hydrate:  # only add if hydrate is True
+                my_ref["claim_array"] = claim_array
 
             refs.append(my_ref)
 

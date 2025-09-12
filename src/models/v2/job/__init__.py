@@ -6,3 +6,4 @@ This ensures each and every job (i.e. each endpoint) can handle a "refresh" and 
 class JobV2(BaseModel):
     refresh: bool = False
     testing: bool = False
+    hydrate: bool = False

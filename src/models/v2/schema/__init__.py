@@ -13,4 +13,5 @@ class BaseSchemaV2(Schema):
     refresh = fields.Bool(required=False)
     showall = fields.Bool(required=False)
     testing = fields.Bool(required=False)
+    hydrate = fields.Bool(required=False)
     tag = fields.Str(required=False)
