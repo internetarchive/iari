@@ -14,4 +14,5 @@ class BaseSchemaV2(Schema):
     showall = fields.Bool(required=False)
     testing = fields.Bool(required=False)
     hydrate = fields.Bool(required=False)
+    uselocal = fields.Bool(required=False)
     tag = fields.Str(required=False)
