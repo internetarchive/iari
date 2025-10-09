@@ -77,4 +77,4 @@ class FileIo(WariBaseModel):
                 if self.data:
                     self.data["served_from_cache"] = True
         else:
-            logger.debug("no json on disk")
+            logger.debug(f"no json on disk ({path_filename})")
