@@ -1,6 +1,6 @@
 from marshmallow import fields, pre_load, post_load
 
-from src.models.v2.job.ref_insights_job_v2 import InsightsWebRxJobV2
+from src.models.v2.job.insights_webrx_job_v2 import InsightsWebRxJobV2
 from src.models.v2.schema import BaseSchemaV2
 
 

@@ -12,8 +12,8 @@ from src.models.exceptions import MissingInformationError, WikipediaApiFetchErro
 from src.models.wikimedia.enums import RequestMethods
 from src.views.v2.statistics import StatisticsViewV2
 
-from src.models.v2.job.ref_insights_job_v2 import InsightsWebRxJobV2
-from src.models.v2.schema.ref_insights_schema_v2 import InsightsWebRxSchemaV2
+from src.models.v2.job.insights_webrx_job_v2 import InsightsWebRxJobV2
+from src.models.v2.schema.insights_webrx_schema_v2 import InsightsWebRxSchemaV2
 
 
 class InsightsWebRxV2(StatisticsViewV2):
