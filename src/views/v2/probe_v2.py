@@ -18,8 +18,6 @@ from src.models.v2.job.probe_job_v2 import ProbeJobV2
 from src.models.v2.schema.probe_schema_v2 import ProbeSchemaV2
 
 
-
-
 logger = logging.getLogger(__name__)
 
 

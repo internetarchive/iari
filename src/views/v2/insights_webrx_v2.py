@@ -11,6 +11,7 @@ from src.helpers.get_version import get_poetry_version
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 from src.models.wikimedia.enums import RequestMethods
 from src.views.v2.statistics import StatisticsViewV2
+from src.helpers.wiki_utils import WikiUtils
 
 from src.models.v2.job.insights_webrx_job_v2 import InsightsWebRxJobV2
 from src.models.v2.schema.insights_webrx_schema_v2 import InsightsWebRxSchemaV2
@@ -55,6 +56,7 @@ class InsightsWebRxV2(StatisticsViewV2):
 
             # fetch the data, parse and return summary
             insight_data = self.__get_insight_data__()
+            exturl_data = WikiUtils.get_exturls()
 
             # Stop the timer and calculate execution time
             end_time = time.time()
@@ -71,6 +73,7 @@ class InsightsWebRxV2(StatisticsViewV2):
             }
 
             self.return_data.update(insight_data)
+            self.return_data.update(exturl_data)
 
             return self.return_data, 200
 
@@ -96,9 +99,11 @@ class InsightsWebRxV2(StatisticsViewV2):
         table_totals = self.__get_table_totals__(table_list)
 
         return {
-            "table_names": table_names,
-            "table_totals": table_totals,
-            "tables": table_list
+            "webrx" : {
+                "table_names": table_names,
+                "table_totals": table_totals,
+                "tables": table_list
+            }
         }
 
 

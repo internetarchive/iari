@@ -25,8 +25,9 @@ from src.models.exceptions import MissingInformationError, WikipediaApiFetchErro
 # # new stuff aug 2025
 # from src.views.v2.refs_lookup_v2 import GetArchiveV2
 
-# # new stuff oct 2025
-# from src.views.v2.insights_tarb_v2 import InsightsTarbV2
+# new stuff oct 2025
+from src.views.v2.insights_wiki_v2 import InsightsWikiV2
+from src.views.v2.insights_tarb_v2 import InsightsTarbV2
 # new stuff jun 2025
 from src.views.v2.refs_lookup_v2 import RefsLookupV2
 # new stuff mar 2025
@@ -145,7 +146,8 @@ api.add_resource(GetBookReferenceV2, "/get_book_reference")
 # bigger picture
 api.add_resource(RefsLookupV2, "/refs_lookup")      # James' Wiki Citations Database
 api.add_resource(InsightsWebRxV2, "/insights")      # Stephen's numbers
-# api.add_resource(InsightsTarbV2, "/tarb_insights")  # Sawood's numbers
+api.add_resource(InsightsTarbV2, "/tarb_insights")  # Sawood's numbers
+api.add_resource(InsightsWikiV2, "/wiki_insights")  # Wiki numbers (from stephen's wiki endpoint)
 
 # Other
 api.add_resource(ArticleCacheV2, "/article_cache")  # for offline article fetching
