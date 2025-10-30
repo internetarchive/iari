@@ -56,7 +56,7 @@ class InsightsWebRxV2(StatisticsViewV2):
 
             # fetch the data, parse and return summary
             insight_data = self.__get_insight_data__()
-            exturl_data = WikiUtils.get_exturls()
+            # exturl_data = WikiUtils.get_exturls()
 
             # Stop the timer and calculate execution time
             end_time = time.time()
@@ -73,7 +73,7 @@ class InsightsWebRxV2(StatisticsViewV2):
             }
 
             self.return_data.update(insight_data)
-            self.return_data.update(exturl_data)
+            # self.return_data.update(exturl_data)
 
             return self.return_data, 200
 
