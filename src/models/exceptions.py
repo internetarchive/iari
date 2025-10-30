@@ -20,3 +20,7 @@ class UnknownValueError(Exception):
 class WikipediaApiFetchError(Exception):
     pass
 
+
+class TarbFetchError(Exception):
+    pass
+
