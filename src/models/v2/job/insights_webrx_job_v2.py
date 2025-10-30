@@ -10,13 +10,9 @@ class InsightsWebRxJobV2(JobV2):
     date_start: str = ""
     date_end: str = ""
 
-
     def validate_fields(self):
         """
         parameter checking here, if any
         """
 
         pass
-
-
-
