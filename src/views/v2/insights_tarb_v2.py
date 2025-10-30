@@ -1,6 +1,8 @@
 from typing import Any, Optional, Tuple, List, Dict
 import traceback
 import time
+import datetime
+# import pandas as pd
 
 import requests
 from bs4 import BeautifulSoup, NavigableString
@@ -8,7 +10,7 @@ from flask import request
 
 from src.helpers.get_version import get_poetry_version
 
-from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
+from src.models.exceptions import MissingInformationError, WikipediaApiFetchError, TarbFetchError
 from src.models.wikimedia.enums import RequestMethods
 from src.views.v2.statistics import StatisticsViewV2
 
@@ -27,6 +29,11 @@ class InsightsTarbV2(StatisticsViewV2):
 
     return_data: Dict[str, Any] = {}  # holds parsed data from data processing
     execution_errors: List[Dict[str, Any]] = None
+
+    STATSAPI = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat&only-year={}"
+    # STRYEAR = 2016
+    STRYEAR = 2023
+    ENDYEAR = datetime.date.today().year
 
     def get(self):
         """
@@ -60,6 +67,7 @@ class InsightsTarbV2(StatisticsViewV2):
             end_time = time.time()
             execution_time = end_time - start_time
 
+            # seed the return data with the job params
             self.return_data = {
                 "iari_version": get_poetry_version("pyproject.toml"),
                 "iari_command": "tarb_insights",
@@ -68,6 +76,7 @@ class InsightsTarbV2(StatisticsViewV2):
                 "execution_errors": self.execution_errors,
             }
 
+            # and append the insight data we really want!
             self.return_data.update(insight_data)
 
             return self.return_data, 200
@@ -77,32 +86,37 @@ class InsightsTarbV2(StatisticsViewV2):
             traceback.print_exc()
             return {"error": f"Missing Information Error: {str(e)}"}, 500
 
+        except TarbFetchError as e:
+            traceback.print_exc()
+            return {"error": f"Error fetching TARB info: {str(e)}"}, 500
+
         except Exception as e:
             traceback.print_exc()
             return {"error": f"General Error: {str(e)}"}, 500
 
 
     def __get_insight_data__(self):
-        """
-        grabs appropriate data regarding media updates
-        """
+        try:
+            raw_data = self.__get_raw_insight_data__()
+        except Exception as e:
+            raise TarbFetchError(f"Problem getting raw TARB stats ({str(e)})")
 
-        # soup = self.__get_stats_soup__()
-        #
-        # table_names = self.__get_table_names__(soup)
-        # table_list = self.__get_all_tables__(soup, table_names)
-        # table_totals = self.__get_table_totals__(table_list)
-        #
-        # return {
-        #     "table_names": table_names,
-        #     "table_totals": table_totals,
-        #     "tables": table_list
-        # }
+        try:
+            summary_data = self.__get_summary_insight_data__(raw_data)
+        except Exception as e:
+            raise TarbFetchError(f"Problem summarizing TARB stats ({str(e)})")
 
 
+        return {
+            "raw_data": raw_data,
+            "summary_data": summary_data,
+        }
+    
+    
+    def __get_raw_insight_data__(self):
         """
+        grabs edit data from IABot
         format of each returned record:
-        
         {
             "Wiki": "afwiki",
             "Timestamp": "2021-08-14 00:00:00",
@@ -119,13 +133,59 @@ class InsightsTarbV2(StatisticsViewV2):
         },
         """
 
-        tarb_api_url = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat"
+        return self.__get_raw_data__()
 
-        r = requests.get(url_stats_yearly)
-        # TODO use a try/catch here
+        #
+        # def load_yearly_data(year):
+        #     df = pd.DataFrame(requests.get(STATSAPI.format(year)).json()["statistics"])
+        #     # TODO may want to decorate api url with filtering to reduce file size over the wire
+        #
+        #     df["DateTime"] = df["Timestamp"].str[:10] + "T12:00:00Z"
+        #     df["YearMonth"] = df["Timestamp"].str[:8] + "15"
+        #     df["Timestamp"] = pd.to_datetime(df["Timestamp"])
+        #     return df
+        #
+        # # tarb_api_url = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat"
+        # # tarb_api_url = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat"
+        # # https: // iabot.wmcloud.org / api.php?action = statistics & format = flat & only - year = 2025 & only - key = DeadEdits
+        # def load_data():
+        #     return pd.concat([load_yearly_data(y) for y in range(STRYEAR, ENDYEAR)] + [load_yearly_data(ENDYEAR)])
+        #
+        # try:
+        #     df_all_data = load_data()
+        #
+        # except Exception as e:
+        #     raise TarbFetchError(f"X2 Problem fetching raw TARB stats: ({str(e)})")
+        #
+        # return df_all_data.to_dict("records")
+        #
 
-        if r.status_code != 200:
-            return None
+    def __get_summary_insight_data__(self, all_data):
+        """
+        returns summarized data from dataset
+        """
+
+                    # def load_yearly_data(year):
+                    #     df = pd.DataFrame(requests.get(STATSAPI.format(year)).json()["statistics"])
+                    #     df["DateTime"] = df["Timestamp"].str[:10] + "T12:00:00Z"
+                    #     df["YearMonth"] = df["Timestamp"].str[:8] + "15"
+                    #     df["Timestamp"] = pd.to_datetime(df["Timestamp"])
+                    #     return df
+                    #
+                    # # tarb_api_url = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat"
+                    # # tarb_api_url = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat"
+                    # # https: // iabot.wmcloud.org / api.php?action = statistics & format = flat & only - year = 2025 & only - key = DeadEdits
+                    #
+                    # tarb_api_url = (
+                    #     "https://iabot.wmcloud.org/api.php?"
+                    #     f"action=statistics&format=flat"
+                    # )
+                    #
+                    # r = requests.get(tarb_api_url)
+                    # # TODO use a try/catch here
+                    #
+                    # if r.status_code != 200:
+                    #     return None
 
         return {
             "test_value_1": 1,
@@ -133,4 +193,26 @@ class InsightsTarbV2(StatisticsViewV2):
             "test_value_3": 3,
         }
 
+
+
+
+    def __get_raw_data_old(self):
+        tarb_api_url = (
+            "https://iabot.wmcloud.org/api.php?"
+            f"action=statistics&format=flat"
+        )
+
+        try:
+            r = requests.get(tarb_api_url)
+
+            # do loop to get all years and concat
+
+        except Exception as e:
+            traceback.print_exc()
+            return {"error": f"Problem accessing TARB stats ({str(e)})"}, 500
+
+        if r.status_code != 200:
+            raise TarbFetchError(f"Problem fetching raw TARB stats: Bad Request ({r.status_code})")
+
+        return r.json()
 
