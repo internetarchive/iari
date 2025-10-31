@@ -56,7 +56,7 @@ from src.views.check_url_archive import CheckUrlArchive
 from src.views.check_urls import CheckUrls
 from src.views.statistics.all import All
 from src.views.statistics.article import Article
-from src.views.statistics.pdf import Pdf
+# from src.views.statistics.pdf import Pdf
 from src.views.statistics.reference import Reference
 from src.views.statistics.references import References
 from src.views.statistics.xhtml import Xhtml
@@ -159,7 +159,7 @@ api.add_resource(CheckDoi, "/check-doi")
 api.add_resource(All, "/statistics/all")
 api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
-api.add_resource(Pdf, "/statistics/pdf")
+# api.add_resource(Pdf, "/statistics/pdf")
 api.add_resource(Xhtml, "/statistics/xhtml")
 
 # SHOULD BE DEPRECATED
