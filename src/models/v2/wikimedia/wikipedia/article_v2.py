@@ -43,7 +43,7 @@ class WikipediaArticleV2(IariBaseModel):
     new_article_data: Dict[str, Any] = {}
 
     references: List[Dict[str, Any]] = []
-    ref_counter = 0
+    ref_counter: int = 0
 
     url_dict: Dict[str, Any] = {}
 

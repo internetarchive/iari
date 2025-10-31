@@ -4,7 +4,7 @@ from src.models.file_io import FileIo
 
 class HashBasedFileIo(FileIo):
     hash_based_id: str
-    file_prefix = ""
+    file_prefix: str = ""
 
     @property
     def filename(self) -> str:

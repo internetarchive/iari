@@ -1,4 +1,5 @@
-FROM python:3.10-slim
+FROM python:3.13
+#FROM python:3.13-slim
 
 LABEL maintainer="Chris Lombardi <mojomonger@yahoo.com>"
 
@@ -7,7 +8,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
 # --no-cache-dir saves space in docker image
 
-COPY pyproject.toml .
+COPY pyproject.toml poetry.lock .
 
 RUN poetry install -v --no-interaction --no-ansi --no-root
 # maybe add -v?

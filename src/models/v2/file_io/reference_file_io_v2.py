@@ -8,4 +8,4 @@ logger = logging.getLogger(__name__)
 
 class ReferenceFileIoV2(HashBasedFileIo):
     data: Optional[Dict[str, Any]] = None
-    subfolder = "referencesV2/"
+    subfolder: str = "referencesV2/"

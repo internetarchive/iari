@@ -24,7 +24,7 @@ class EditRefJobV2(JobV2):
     wiki_page_title: str = ""
     wiki_revision: str = ""
 
-    regex_wiki_url = r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
+    regex_wiki_url: str = r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
     # NB this should be elevated to a globalish constant
 
     @property

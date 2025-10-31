@@ -8,7 +8,7 @@ class FetchRefsSchemaV2(BaseSchemaV2):
     # Defines expected parameters for endpoint
     #   - default parameters are defined in BaseSchemaV2
 
-    which_wiki = fields.Str(default="enwiki")
+    which_wiki = fields.Str(load_default="enwiki")
     pages = fields.List(fields.String(), required=False)  # either pages or wikitext must be defined
     wikitext = fields.Str(required=False)  # if provided, overrides pages array
 

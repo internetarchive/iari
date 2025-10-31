@@ -8,8 +8,8 @@ class InsightsWikiSchemaV2(BaseSchemaV2):
     # Defines expected parameters for endpoint "insights"
     #   - default parameters are defined in BaseSchemaV2
 
-    date_start = fields.Str(default=None, required=False)
-    date_end = fields.Str(default=None, required=False)
+    date_start = fields.Str(required=False, allow_none=True, load_default=None)
+    date_end = fields.Str(required=False, allow_none=True, load_default=None)
 
     # noinspection PyUnusedLocal
     @post_load

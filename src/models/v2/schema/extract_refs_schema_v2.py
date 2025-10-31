@@ -8,14 +8,14 @@ class ExtractRefsSchemaV2(BaseSchemaV2):
     # Defines expected parameters for endpoint
     #   - default parameters are defined in BaseSchemaV2
 
-    # which_wiki = fields.Str(default="enwiki")
+    # which_wiki = fields.Str(load_default="enwiki")
     # pages = fields.List(fields.String(), required=False)  # either pages or wikitext must be defined
     # wikitext = fields.Str(required=False)  # if provided, overrides pages array
 
-    page_title = fields.Str(default="", required=False)
-    domain = fields.Str(default="en.wikipedia.org", required=False)
-    as_of = fields.Str(default=None, required=False)
-    wikitext = fields.Str(default="", required=False)
+    page_title = fields.Str(load_default="", required=False)
+    domain = fields.Str(load_default="en.wikipedia.org", required=False)
+    as_of = fields.Str(required=False, allow_none=True, load_default=None)
+    wikitext = fields.Str(load_default="", required=False)
 
     @pre_load
     # NB: pre_load is a marshmallow directive;

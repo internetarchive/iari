@@ -32,7 +32,7 @@ class Doi(BaseModel):
     marked_as_retracted_in_openalex: bool = False
     wikidata_entity_qid: str = ""
     openalex_work_uri: str = ""
-    wbi = WikibaseIntegrator()
+    wbi: WikibaseIntegrator = WikibaseIntegrator()
     timeout: int = 2
     internet_archive_scholar: Dict[str, Any] = {}
 

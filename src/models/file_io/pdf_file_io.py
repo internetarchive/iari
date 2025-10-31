@@ -8,4 +8,4 @@ logger = logging.getLogger(__name__)
 
 class PdfFileIo(HashBasedFileIo):
     data: Optional[Dict[str, Any]] = None
-    subfolder = "pdfs/"
+    subfolder: str = "pdfs/"

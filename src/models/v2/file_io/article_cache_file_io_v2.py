@@ -10,7 +10,7 @@ class ArticleCacheFileIoV2(FileIo):
 
     job: Optional[ArticleCacheJobV2]
 
-    subfolder = "articles/"
+    subfolder: str = "articles/"
 
     # we override FileIo::filename property to provide custom one for cached article
     @property

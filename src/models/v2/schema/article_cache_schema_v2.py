@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ArticleCacheSchemaV2(BaseSchemaV2):
     # marshmallow style declarations
     iari_id = fields.Str(required=True)
-    article_version = fields.Int(default=1)  # version 1 is original, 2 is V2
+    article_version = fields.Int(load_default=1)  # version 1 is original, 2 is V2
 
     # noinspection PyUnusedLocal
     @post_load

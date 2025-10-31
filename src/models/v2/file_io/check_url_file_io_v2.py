@@ -9,7 +9,7 @@
 # class CheckUrlFileIoV2(FileIo):
 #
 #     data: Optional[Dict[str, Any]] = None
-#     subfolder = "articlesV2/"
+#     subfolder: str = "articlesV2/"
 #     job: Optional[ArticleJobV2]
 #
 #     # we override FileIo::filename property to provide custom one for article
@@ -34,4 +34,4 @@ logger = logging.getLogger(__name__)
 
 class CheckUrlFileIoV2(HashBasedFileIo):
     data: Optional[Dict[str, Any]] = None
-    subfolder = "urls/"
+    subfolder: str = "urls/"

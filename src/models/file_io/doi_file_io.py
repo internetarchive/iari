@@ -8,4 +8,4 @@ logger = logging.getLogger(__name__)
 
 class DoiFileIo(HashBasedFileIo):
     data: Optional[Dict[str, Any]] = None
-    subfolder = "dois/"
+    subfolder: str = "dois/"

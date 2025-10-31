@@ -8,7 +8,7 @@ class RefsLookupSchemaV2(BaseSchemaV2):
     # Defines endpoint parameters for refs_lookup
     #   - default parameters are defined in BaseSchemaV2
 
-    url = fields.Str(default="", required=True, validate=validate.Length(min=1))  # could add regex validation
+    url = fields.Str(required=True, validate=validate.Length(min=1))  # could add regex validation
     raw = fields.Bool(required=False)
     output= fields.String(required=False)
 

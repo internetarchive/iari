@@ -8,4 +8,4 @@ logger = logging.getLogger(__name__)
 
 class XhtmlFileIo(HashBasedFileIo):
     data: Optional[Dict[str, Any]] = None
-    subfolder = "xhtmls/"
+    subfolder: str = "xhtmls/"

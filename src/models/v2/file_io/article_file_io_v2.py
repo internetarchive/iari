@@ -8,7 +8,7 @@ from src.models.v2.job.article_job_v2 import ArticleJobV2
 class ArticleFileIoV2(FileIo):
 
     data: Optional[Dict[str, Any]] = None
-    subfolder = "articlesV2/"
+    subfolder: str = "articlesV2/"
     job: Optional[ArticleJobV2]
 
     # we override FileIo::filename property to provide custom one for article
