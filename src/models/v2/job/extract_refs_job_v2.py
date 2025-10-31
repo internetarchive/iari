@@ -1,15 +1,15 @@
 from src import MissingInformationError
 from src.models.v2.job import JobV2
 
+from typing import Optional
+from pydantic import BaseModel
 
 class ExtractRefsJobV2(JobV2):
     """job that supports ExtractRefsV2 endpoint"""
 
-    # using marshmallow to describe parameters
-
     page_title: str = ""
     domain: str = "en.wikipedia.org"
-    as_of: str = None
+    as_of: Optional[str] = None
     wikitext: str = ""
 
     wiki_id: str = ""

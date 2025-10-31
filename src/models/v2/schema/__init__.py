@@ -16,3 +16,14 @@ class BaseSchemaV2(Schema):
     hydrate = fields.Bool(required=False)
     uselocal = fields.Bool(required=False)
     tag = fields.Str(required=False)
+
+    # def __init__(self, *args, request_method=None, **kwargs):
+    #     # Extract or initialize context dict
+    #     context = kwargs.pop("context", {}) or {}
+    #
+    #     # Add request_method if provided
+    #     if request_method:
+    #         context["request_method"] = request_method
+    #
+    #     # Pass merged context to Schema
+    #     super().__init__(*args, context=context, **kwargs)

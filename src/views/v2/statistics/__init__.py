@@ -51,7 +51,6 @@ class StatisticsViewV2(Resource):
         """
 
         # get request args via GET or POST
-        self.schema.context['request_method'] = request.method
         self.request_args = request.args if (request.method == "GET") else request.form
 
         from src import app
@@ -79,10 +78,8 @@ class StatisticsViewV2(Resource):
         if not self.schema:
             raise MissingInformationError("No schema set for StatisticsViewV2")
 
-        self.schema.context['request_method'] = request.method
-
+        # populate job object with mapped values from request_args
         self.job = self.schema.load(self.request_args)
-        # set job to job object populated with mapped values from request_args
 
         if not self.job:
             # This seems to be the case when there are no arguments, as in the

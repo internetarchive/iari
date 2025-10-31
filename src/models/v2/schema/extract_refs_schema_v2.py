@@ -5,17 +5,14 @@ from src.models.v2.schema import BaseSchemaV2
 
 
 class ExtractRefsSchemaV2(BaseSchemaV2):
-    # Defines expected parameters for endpoint
+    # Defines expected parameters for /extract_refs endpoint
     #   - default parameters are defined in BaseSchemaV2
 
-    # which_wiki = fields.Str(load_default="enwiki")
-    # pages = fields.List(fields.String(), required=False)  # either pages or wikitext must be defined
-    # wikitext = fields.Str(required=False)  # if provided, overrides pages array
-
     page_title = fields.Str(load_default="", required=False)
+    # pages = fields.List(fields.String(), required=False)  # either pages, page_title or wikitext must be defined
     domain = fields.Str(load_default="en.wikipedia.org", required=False)
     as_of = fields.Str(required=False, allow_none=True, load_default=None)
-    wikitext = fields.Str(load_default="", required=False)
+    wikitext = fields.Str(load_default="", required=False)  # if wikitext orovided then process directly without any fetching
 
     @pre_load
     # NB: pre_load is a marshmallow directive;
@@ -25,13 +22,6 @@ class ExtractRefsSchemaV2(BaseSchemaV2):
         """
         from src import app
         app.logger.debug(f"==> FetchRefsSchemaV2::(@pre_load)process_input: data:{data}")
-
-        request_method = self.context.get('request_method', None)
-        # if request_method:
-        #     print(f"Request method received: {request_method}")
-
-        app.logger.debug(f"==> ExtractRefsSchemaV2::(@pre_load)process_input: request_method:{request_method}")
-
 
         mutable_data = dict(data)  # Convert ImmutableMultiDict to a mutable dict
         if 'pages' in mutable_data and isinstance(mutable_data['pages'], str):

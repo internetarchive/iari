@@ -21,13 +21,6 @@ class FetchRefsSchemaV2(BaseSchemaV2):
         from src import app
         app.logger.debug(f"==> FetchRefsSchemaV2::(@pre_load)process_input: data:{data}")
 
-        request_method = self.context.get('request_method', None)
-        # if request_method:
-        #     print(f"Request method received: {request_method}")
-
-        app.logger.debug(f"==> FetchRefsSchemaV2::(@pre_load)process_input: request_method:{request_method}")
-
-
         mutable_data = dict(data)  # Convert ImmutableMultiDict to a mutable dict
         if 'pages' in mutable_data and isinstance(mutable_data['pages'], str):
             mutable_data['pages'] = mutable_data['pages'].split('|')

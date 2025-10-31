@@ -11,27 +11,6 @@ class InsightsWebRxSchemaV2(BaseSchemaV2):
     date_start = fields.Str(required=False, allow_none=True, load_default=None)
     date_end = fields.Str(required=False, allow_none=True, load_default=None)
 
-    # @pre_load
-    # # NB: pre_load is a marshmallow directive;
-    # def process_input(self, data, **kwargs):
-    #     """
-    #     transform comma separated pages into a List
-    #     """
-    #     from src import app
-    #     app.logger.debug(f"==> FetchRefsSchemaV2::(@pre_load)process_input: data:{data}")
-    #
-    #     request_method = self.context.get('request_method', None)
-    #     # if request_method:
-    #     #     print(f"Request method received: {request_method}")
-    #
-    #     app.logger.debug(f"==> ExtractRefsSchemaV2::(@pre_load)process_input: request_method:{request_method}")
-    #
-    #
-    #     mutable_data = dict(data)  # Convert ImmutableMultiDict to a mutable dict
-    #     if 'pages' in mutable_data and isinstance(mutable_data['pages'], str):
-    #         mutable_data['pages'] = mutable_data['pages'].split('|')
-    #     return mutable_data
-
     # noinspection PyUnusedLocal
     @post_load
     # NB: post_load is a marshmallow directive;
