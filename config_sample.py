@@ -10,7 +10,7 @@ regex_url_wiki = re.compile(
     r"https?://(\w+)\.(\w+\.\w+)/wiki/(.+)"
 )
 
-subdirectory_for_json = "json/"  # relative to top of tree; create it manually before running api
+iari_cache_dir = "json/"  # relative to top of tree; create it manually before running api
 
 # loglevel = logging.ERROR
 loglevel = logging.DEBUG

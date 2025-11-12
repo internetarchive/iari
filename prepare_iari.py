@@ -2,7 +2,7 @@ import os
 import config
 
 def create_json_folders():
-    base_path = config.subdirectory_for_json
+    base_path = config.iari_cache_dir
     subfolders = [
         "articles",
         "articlesV2",

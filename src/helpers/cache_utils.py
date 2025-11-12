@@ -23,7 +23,7 @@ def get_cache_hash(string: str):
 
 
 def get_cache_file_path(url, cache_type: CacheType, variety):
-    json_path = f"{config.subdirectory_for_json}{cache_type.value}"
+    json_path = f"{config.iari_cache_dir}{cache_type.value}"
 
     # error if type not found as a subdir
     if not os.path.isdir(json_path):

@@ -6,7 +6,7 @@ sources
 /pywikibot.lwp
 /isbn_exceptions.log
 /cache-content.log
-*.json
+json/
 /config.py
 __pycache__/
 .coverage

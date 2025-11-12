@@ -43,6 +43,13 @@ Python Requirements
 * python pip
 * python gunicorn
 * python poetry
+* some key modukes added:
+  * marshmallow
+  * pandas
+  * pyarrow
+  * to add a python module:
+    * poetry add <module_name>
+    * pip install <module_name>
 
 JSON directories
 * directories to hold cache files must be in /json directory

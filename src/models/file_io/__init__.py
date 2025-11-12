@@ -28,10 +28,10 @@ class FileIo(WariBaseModel):
             # TODO simplify this!
             testing_dir = "/home/dpriskorn/src/python/wcdimportbot/"  # we hard code the test json directory for now
             # TODO: if testing, try to go out to repo root first
-            path_filename = f"{testing_dir}{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+            path_filename = f"{testing_dir}{config.iari_cache_dir}{self.subfolder}{self.filename}"
         else:
             path_filename = (
-                f"{config.subdirectory_for_json}{self.subfolder}{self.filename}"
+                f"{config.iari_cache_dir}{self.subfolder}{self.filename}"
             )
 
         return path_filename
