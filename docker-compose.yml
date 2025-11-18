@@ -1,5 +1,6 @@
-#version: "3"
-#
+version: "3"
+# old docker-compose on aws server still needs version
+
 services:
   iari:
     build: .

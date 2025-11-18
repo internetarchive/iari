@@ -555,7 +555,7 @@ Note for mac users: This might not work, so you have to manually enter the venv 
 
 # Deployed instances
 
-See [KNOWN_DEPLOYED_INSTANCES.md](KNOWN_DEPLOYED_INSTANCES.md)
+See [KNOWN_DEPLOYED_INSTANCES.md](docs/KNOWN_DEPLOYED_INSTANCES.md)
 
 # Diagrams
 
@@ -581,4 +581,4 @@ The diagram PNG files are CC0.
 
 # Further reading and installation/setup
 
-See the [development notes](DEVELOPMENT_NOTES.md)
+See the [development notes](docs/DEVELOPMENT_NOTES.md)

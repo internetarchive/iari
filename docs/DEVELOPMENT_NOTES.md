@@ -104,7 +104,7 @@ Github Actions so that does not work)
 `$ pytest -x`
 
 ### Coverage
-We have a helper script which updates [TEST_COVERAGE.txt](TEST_COVERAGE.txt):
+We have a helper script which updates [TEST_COVERAGE.txt](../TEST_COVERAGE.txt):
 
 `$ ./run-test-coverage.sh`
 
