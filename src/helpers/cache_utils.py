@@ -40,7 +40,7 @@ def get_cache_file_path(url, cache_type: CacheType, variety):
 
 def get_cache(url, cache_type: CacheType, variety):
     """
-    return json format of cached value found or None if not found
+    return JSON of cached value found or None if not found
 
     cache_type determines the json subdirectory cache value is located
     variety is the prefix

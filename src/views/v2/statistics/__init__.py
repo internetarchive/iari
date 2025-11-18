@@ -10,7 +10,7 @@ from src.helpers.console import console
 from src.models.api.job import Job
 from src.models.exceptions import MissingInformationError
 from src.models.file_io import FileIo
-from src.models.wikimedia.enums import RequestMethods
+from src.constants.constants import RequestMethods
 
 
 class StatisticsViewV2(Resource):

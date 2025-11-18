@@ -21,7 +21,7 @@ from src.models.v2.wikimedia.wikipedia.article_v2 import WikipediaArticleV2
 from src.models.wikimedia.wikipedia.article import WikipediaArticle
 
 from src.views.v2.statistics import StatisticsViewV2
-from src.models.wikimedia.enums import RequestMethods
+from src.constants.constants import RequestMethods
 
 
 class FetchRefsV2(StatisticsViewV2):

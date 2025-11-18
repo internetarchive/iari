@@ -31,14 +31,12 @@ class ProbeJobV2(JobV2):
         """
 
         # cannot have both probe and probes defined
-
-        # cannot have both probe and probes defined
         if self.probe and self.probes:
             raise MissingInformationError(
                 f"Either 'probe' or 'probes' param can be specified, but not both"
             )
 
-        # we will use self.probes (pipe delimited version) going forward
+        # either probe or probes must be specified
         if not self.probes:
             if not self.probe:
                 raise MissingInformationError(
@@ -46,7 +44,7 @@ class ProbeJobV2(JobV2):
                 )
             self.probes = self.probe
 
-        # either probe or probes must be specified
+        # we will use self.probes (pipe delimited version) going forward
         self.probe_list = self.probes.split('|')
         if len(self.probe_list) == 0:
             raise MissingInformationError(

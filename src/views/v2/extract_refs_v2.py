@@ -5,7 +5,7 @@ from flask import jsonify
 
 from src import WikipediaApiFetchError
 from src.models.exceptions import MissingInformationError
-from src.models.wikimedia.enums import RequestMethods
+from src.constants.constants import RequestMethods
 
 from src.models.v2.schema.extract_refs_schema_v2 import ExtractRefsSchemaV2
 from src.models.v2.job.extract_refs_job_v2 import ExtractRefsJobV2

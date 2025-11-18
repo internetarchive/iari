@@ -9,7 +9,7 @@ from flask import request
 from src.helpers.get_version import get_poetry_version
 
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
-from src.models.wikimedia.enums import RequestMethods
+from src.constants.constants import RequestMethods
 from src.views.v2.statistics import StatisticsViewV2
 from src.helpers.wiki_utils import WikiUtils
 

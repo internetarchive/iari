@@ -25,6 +25,9 @@ from src.models.exceptions import MissingInformationError, WikipediaApiFetchErro
 # # new stuff aug 2025
 # from src.views.v2.refs_lookup_v2 import GetArchiveV2
 
+# new stuff nov 2025
+from src.views.v2.extract_grok_v2 import ExtractGrokV2
+## from src.views.v2.wiki_signals_v2 import WikiSignalsV2
 # new stuff oct 2025
 from src.views.v2.insights_wiki_v2 import InsightsWikiV2
 from src.views.v2.insights_tarb_v2 import InsightsTarbV2
@@ -132,6 +135,7 @@ api.add_resource(VersionV2, "/version")
 
 # article refs extraction
 api.add_resource(ExtractRefsV2, "/extract_refs")    # based on James' extraction code * this is preferred
+api.add_resource(ExtractGrokV2, "/extract_grok")    # extracts refs from grokipedia article
 api.add_resource(ArticleV2, "/article")             # like /statistics/article, but adds HTML information
 
 # url status checks
@@ -140,6 +144,7 @@ api.add_resource(CheckUrlV2, "/check-url")
 api.add_resource(CheckUrlArchive, "/check-url-archive")
 
 # specialized
+# api.add_resource(WikiSignalsV2, "/wiki_signals")
 api.add_resource(ProbeV2, "/probe")
 api.add_resource(GetBookReferenceV2, "/get_book_reference")
 

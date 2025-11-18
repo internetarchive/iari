@@ -2,6 +2,7 @@ import logging
 import time
 import traceback
 
+from datetime import datetime
 from typing import Any, Dict, Optional, List
 
 from flask import request
@@ -10,7 +11,7 @@ from marshmallow import Schema
 
 from src.models.exceptions import MissingInformationError, UnknownValueError
 
-from src.helpers.get_version import get_version_stamp
+from src.helpers.get_version import get_poetry_version, get_version_stamp
 from src.helpers.probe_utils import ProbeUtils
 
 from src.views.v2.statistics import StatisticsViewV2
@@ -57,11 +58,9 @@ class ProbeV2(StatisticsViewV2):
             traceback.print_exc()
             return {"error": f"Missing Information Error: {str(e)}"}, 500
 
-
         except UnknownValueError as e:
             traceback.print_exc()
             return {"error": f"Unknown Value Error: {str(e)}"}, 500
-
 
         except Exception as e:
             traceback.print_exc()
@@ -70,21 +69,28 @@ class ProbeV2(StatisticsViewV2):
 
     def __return_results__(self):
 
+        now = datetime.utcnow()
         start_time = time.time()
 
-        probe_results = ProbeUtils.get_probe_results(self.url_link, self.probe_list, self.refresh)
-
-        execution_time = time.time() - start_time  # elapsed = now - then
-
-        results = get_version_stamp("probe", request.endpoint)
-        results.update({
-                "execution_time": f"{execution_time:.4f} seconds",
-                "url": self.url_link,
-                "probe_list": self.probe_list,
-                "probe_results": probe_results
-        })
+        results = {
+            "iari_version": get_poetry_version("pyproject.toml"),
+            "iari_command": "probe",
+            "endpoint": request.endpoint,
+            "timestamp": int(datetime.timestamp(now)),
+            "isodate": now.isoformat(),
+        }
         if self.job.tag:
             results.update({"tag": self.job.tag})
+
+        probe_results = ProbeUtils.get_probe_results(self.url_link, self.probe_list, self.refresh)
+        execution_time = time.time() - start_time  # elapsed = now - then
+
+        results.update({
+            "execution_time": f"{execution_time:.4f} seconds",
+            "url": self.url_link,
+            "probe_list": self.probe_list,
+            "probe_results": probe_results
+        })
 
         return results, 200
 

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def extract_cite_refs(html):
 
-    # NB TODO we could do a citod here, and see what we get backfrom the raw html...
+    # NB TODO we could do a citod here, and see what we get back from the raw html...
 
     soup = BeautifulSoup(html, "html.parser")
     # for link in soup.find_all("a"):

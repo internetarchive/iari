@@ -63,4 +63,5 @@ class StatisticsView(Resource):
             # /version endpoint. Seems to be harmless not having a valid job property
             app.logger.info("StatisticsView: self.job is null")
 
+        # prints job out on the console (NB: this is not using app.logger)
         console.print(self.job)

@@ -19,24 +19,16 @@ from src.views.v2.statistics import StatisticsViewV2
 from src.models.v2.job.insights_tarb_job_v2 import InsightsTarbJobV2
 from src.models.v2.schema.insights_tarb_schema_v2 import InsightsTarbSchemaV2
 
-TARB_CACHE_DIR = f"{config.iari_cache_dir}cache"
-STATSAPI_ONLYYEAR = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat&only-year={}"
-# TODO may want to decorate api url with filtering  out fields to reduce file size over the wire
-# STRYEAR = 2016
-STRYEAR = 2022
-ENDYEAR = datetime.date.today().year
 
-
-class InsightsTarbV2(StatisticsViewV2):
+class WikiSignalsV2(StatisticsViewV2):
     """
-    returns IABot statistical data
+    returns wiki signakldata
     """
 
     schema = InsightsTarbSchemaV2()  # Defines expected parameters; Overrides StatisticsViewV2's "schema" property
-    job: InsightsTarbJobV2           # Holds usable variables, seeded from schema. Overrides StatisticsViewV2's "job"
+    job: InsightsTarbJobV2  # Holds usable variables, seeded from schema. Overrides StatisticsViewV2's "job"
 
     return_data: Dict[str, Any] = {}  # holds parsed data from data processing
-    execution_errors: List[Dict[str, Any]] = None
 
     def get(self):
         """
@@ -47,7 +39,6 @@ class InsightsTarbV2(StatisticsViewV2):
         app.logger.debug(f"==> InsightsTarbV2::get")
 
         return self.__process_request__(method=RequestMethods.get)
-
 
     def __process_request__(self, method=RequestMethods.post):  # default to POST method
 
@@ -63,7 +54,7 @@ class InsightsTarbV2(StatisticsViewV2):
             # validate and setup params
             self.__validate_and_get_job__(method)  # inherited/subclassed from StatisticsViewV2
 
-            # fetch the data, parse and return summary 
+            # fetch the data, parse and return summary
             insight_data = self.__get_insight_data__()
 
             # Stop the timer and calculate execution time
@@ -76,7 +67,6 @@ class InsightsTarbV2(StatisticsViewV2):
                 "iari_command": "tarb_insights",
                 "endpoint": request.endpoint,
                 "execution_time": f"{execution_time:.4f} seconds",
-                "execution_errors": self.execution_errors,
             }
 
             # and append the insight data we really want!
@@ -84,8 +74,6 @@ class InsightsTarbV2(StatisticsViewV2):
 
             return self.return_data, 200
 
-
-        # TODO ??? should we set self.execution_errors here?
 
         except MissingInformationError as e:
             traceback.print_exc()
@@ -103,9 +91,6 @@ class InsightsTarbV2(StatisticsViewV2):
         """
         retrieve raw data and summarize it
         returns: dict of summary data
-
-        TODO Shall we set self.execution_errors here rather than raise error?
-            or, we could set self.execution_errors when exception caught
         """
         try:
             raw_data = self.__get_raw_insight_data__()
@@ -124,8 +109,7 @@ class InsightsTarbV2(StatisticsViewV2):
             # "raw_data": raw_data,
             "summary_data": summary_data,
         }
-    
-    
+
     def __get_raw_insight_data__(self):
         """
         grabs edit data from IABot
@@ -179,7 +163,8 @@ class InsightsTarbV2(StatisticsViewV2):
             return df
 
         def load_data():
-            return pd.concat([load_yearly_data(y, force_refresh=False) for y in range(STRYEAR, ENDYEAR)] + [load_yearly_data(ENDYEAR, force_refresh=True)])
+            return pd.concat([load_yearly_data(y, force_refresh=False) for y in range(STRYEAR, ENDYEAR)] + [
+                load_yearly_data(ENDYEAR, force_refresh=True)])
 
         try:
             df_all_data = load_data()
@@ -190,7 +175,6 @@ class InsightsTarbV2(StatisticsViewV2):
         # return df_all_data.to_dict("records")
         return df_all_data
 
-
     def __get_summary_insight_data__(self, df_all_data):
         """
         returns summarized data from dataset
@@ -200,12 +184,11 @@ class InsightsTarbV2(StatisticsViewV2):
 
         return {
             "first_day": fday.isoformat(),  # JSON safe
-            "last_day": lday.isoformat(),   # JSON safe
+            "last_day": lday.isoformat(),  # JSON safe
             "test_value_1": 1,
             "test_value_2": 2,
             "test_value_3": 3,
         }
-
 
     def __get_raw_data_old(self):
         tarb_api_url = (
