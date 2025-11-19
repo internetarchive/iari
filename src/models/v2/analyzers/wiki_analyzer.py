@@ -242,7 +242,7 @@ def get_refs_from_section(section: Wikicode, hydrate=False) -> List[object]:
                 ref is a "pointer" to another ref, a "citation" to a reference
                 citation: place in article
                 reference: source to link to
-                references can have a cite_array, describing where in the article it is referenced
+                references can have a cite_location array, describing where in the article it is referenced
             """
 
     return refs

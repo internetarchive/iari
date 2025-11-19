@@ -8,7 +8,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
 # --no-cache-dir saves space in docker image
 
-COPY pyproject.toml poetry.lock .
+COPY pyproject.toml poetry.lock ./
 
 RUN poetry install -v --no-interaction --no-ansi --no-root
 # maybe add -v?

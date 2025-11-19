@@ -22,10 +22,23 @@ new endpoints:
 
 # Setup & Deployment
 
+Config
+* iari_cache_dir 
+  - directory, relative to top of tree, where "cached" files are stored
+  - default is "/json"
+* loglevel = logging.DEBUG
+  * set as per deployment environment;
+  * production should be set to ERROR
+* these config variables should probably not be in the global config, but rather in a top level constants context
+  * regex_url_link_extraction
+  * regex_url_wiki 
+  * user_agent
+  
+
 Docker  
 * IARI utilizes Docker
   * src/Dockerfile
-  * src/docker-compose
+  * src/docker-compose.yml
     * uses {PORT} environment variable to determine port to serve app at 
 
 Git
