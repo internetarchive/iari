@@ -357,13 +357,13 @@ def get_claim(node_number, nodes):
 
 
 
+        # end_of_sentence_pattern regex: r"\.\s|\.$"
+
         """
         terminate if period followed by whitespace is found in display_val snippet.
-        end_of_sentence_pattern regex: r"\.\s|\.$"
             - Matches a period followed by whitespace OR
             - a period at the end of the string
 
-        # end_of_sentence_pattern = r"\.\s"
         """
         end_of_sentence_pattern = r"^\s*\n|\.\s"
         terminal_found = re.search(end_of_sentence_pattern, node_text)

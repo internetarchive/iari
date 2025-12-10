@@ -5,11 +5,11 @@ from src.models.v2.schema import BaseSchemaV2
 
 
 class ExtractGrokSchemaV2(BaseSchemaV2):
-    # either pages or page_title
 
-    # page_title = fields.Str(load_default="", required=False)
     page_title = fields.Str(required=True)
-    # pages = fields.List(fields.String(), required=False)
+    # eventually we want to allow either pages or page_title to be required
+    # # page_title = fields.Str(load_default="", required=False)
+    # # pages = fields.List(fields.String(), required=False)
     use_local_cache = fields.Bool(required=False)
 
     @pre_load

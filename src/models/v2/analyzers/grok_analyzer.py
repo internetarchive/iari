@@ -7,6 +7,9 @@ from bs4 import BeautifulSoup
 
 from src.models.v2.analyzers import IariAnalyzer
 
+from src.helpers.iari_utils import iari_extract_root_domain
+from src.helpers.signal_utils import get_signal_data_for_domain
+
 class GrokAnalyzerV2(IariAnalyzer):
     """
     "Implements" IariAnalyzer base class
@@ -33,10 +36,10 @@ class GrokAnalyzerV2(IariAnalyzer):
         from src import app
 
         # seed return data
-        return_data = {
+        payload = {
             "media_type": "grokipedia_article"
         }
-        return_data.update(page_spec)
+        payload.update(page_spec)
 
         title = page_spec["page_title"].replace(" ", "_")
         use_local_cache = page_spec["use_local_cache"]
@@ -45,10 +48,11 @@ class GrokAnalyzerV2(IariAnalyzer):
         page_html = fetch_page_html(title, use_local_cache)
         page_data = extract_grok_data(page_html)
 
-        return_data["url_count"] = len(page_data["urls"])
-        return_data["urls"] = page_data["urls"]
+        payload["url_count"] = len(page_data["urls"])
+        payload["urls"] = page_data["urls"]
+        payload["url_dict"] = page_data["url_dict"]
 
-        return return_data
+        return payload
 
 
 def fetch_page_html(title, use_local_cache : bool = False):
@@ -119,9 +123,20 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
         if href.startswith(("http://", "https://")):
             urls.append(href)
 
-    # send em back!
+    final_urls = list(set(urls))  # deduplicate with set
+
+    # Create dictionary with wiki signal data for each URL
+    def create_url_dict_entry(url: str) -> Dict[str, Any]:
+        domain = iari_extract_root_domain(url)
+        signals = get_signal_data_for_domain(domain=domain, force_refresh=False)
+
+        compact_signal_data = signals  # shall remove nullish entries
+        return compact_signal_data
+
+    url_dict = {url: create_url_dict_entry(url) for url in final_urls}
+
+# send em back!
     return {
-        "urls": list(set(urls))  # deduplicate with set
+        "urls": final_urls,
+        "url_dict": url_dict
     }
-
-

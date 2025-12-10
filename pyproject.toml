@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Internet Archive Reference Inventory (IARI)"
-version = "4.4.14"
+version = "4.4.15"
 description = "API capable of fetching, extracting, transforming and storing reference information from Wikipedia articles, websites and PDFs as structured data."
 authors = [
   "Chris Lombardi <mojomonger@archive.org>",
@@ -34,6 +34,7 @@ pytest = "^8.4.2"
 validators = "^0.35.0"
 pandas = "^2.3.3"
 pyarrow = "^22.0.0"
+tldextract = "^5.3.0"
 
 
 [tool.poetry.group.dev.dependencies]

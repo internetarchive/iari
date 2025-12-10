@@ -21,7 +21,7 @@ from src.models.v2.schema.insights_tarb_schema_v2 import InsightsTarbSchemaV2
 
 TARB_CACHE_DIR = f"{config.iari_cache_dir}cache"
 STATSAPI_ONLYYEAR = "https://iabot.wmcloud.org/api.php?action=statistics&format=flat&only-year={}"
-# TODO may want to decorate api url with filtering  out fields to reduce file size over the wire
+# TODO may want to decorate api url with filtering out fields to reduce file size over the wire
 # STRYEAR = 2016
 STRYEAR = 2022
 ENDYEAR = datetime.date.today().year

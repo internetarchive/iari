@@ -24,3 +24,7 @@ class WikipediaApiFetchError(Exception):
 class TarbFetchError(Exception):
     pass
 
+
+class IariFetchError(Exception):
+    pass
+

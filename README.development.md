@@ -13,11 +13,21 @@ Mark Graham, head of The
 IARI features a number of endpoints that help patrons
 get structured data about references in a Wikipedia article:
 
+### Endpoints
 [___describe endpoints here briefly with links to further descriptions below___]
 
 new endpoints:
 
 /article
+
+### Code Layout
+
+*Note: the suffix "V2" is added to all the currently active and supported endpoints and their supporting classes. This is to distinguish them from the older endpoints that no longer use relevant code - essentially deprecated.
+Someday the V2 extension will be removed when only the newer endpoints remain.*
+
+All endpoint classes defined in: `src/views/v2`\
+All Schema classes defined in: `src/models/v2/schema`\
+All Job classes defined in: `src/models/v2/job`
 
 
 # Setup & Deployment
@@ -60,9 +70,19 @@ Python Requirements
   * marshmallow
   * pandas
   * pyarrow
-  * to add a python module:
-    * poetry add <module_name>
-    * pip install <module_name>
+* to add a python module:
+  * poetry add <module_name>
+  * pip install <module_name>
+* to install modules within docker instance:
+  * pip install --no-cache-dir poetry && poetry config virtualenvs.create false
+  * cp pyproject.toml poetry.lock ./
+  * poetry install -v --no-interaction --no-ansi --no-root
+  * then do above for adding modules
+* creating new docker image before loading up again
+  * docker compose down
+  * docker compose build --no-cache
+  * docker compose up
+
 
 JSON directories
 * directories to hold cache files must be in /json directory
@@ -130,6 +150,8 @@ IARI is a flask app. The main entry point is in `src/__init__.py`
 
 ## Definitions of endpoints
 `src/__init__.py` defines the toplevel endpoints.
+
+Every endpoint has a supporting class to fulfill its purpose. Additionally, each endpoint has a Schema class and a Job class. The Schema class describes the parameters of the endpoint, providing information for validation. The Job class describes the values that the endpoint needs to do its job. It is essential set up during the Schema validation process.
 
 # Caveats
 * upgrade docker version on AWS server

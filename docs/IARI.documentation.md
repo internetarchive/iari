@@ -2,6 +2,13 @@
 
 ## Endpoints
 
+### /wiki_signals
+
+Query Parameters:
+
+- page_title (required): String - The title of the Wikipedia page to analyze
+- use_local_cache (optional): Boolean - Whether to use cached data if available
+
 /article
 
 /end
@@ -10,12 +17,16 @@
 
 /statistics/article
 
-## structure
+## Structure
 
-views
-- endpoints defined:
+Views:
 
-schema
+- endpoints defined in the sections above
+
+Schema:
+
+- Request validation using marshmallow schemas
+- Response formatting using standard JSON
 
 
 

@@ -49,7 +49,7 @@ class ExtractGrokV2(StatisticsViewV2):
     def __process_request__(self, method=RequestMethods.post):
 
         from src import app
-        app.logger.debug(f"==> ExtractGroksV2::__process_request__({method})")
+        app.logger.debug(f"==> ExtractGrokV2::__process_request__({method})")
 
         # Start the timer
         start_time = time.time()
@@ -78,6 +78,7 @@ class ExtractGrokV2(StatisticsViewV2):
                 "iari_version": get_poetry_version("pyproject.toml"),
                 "iari_command": "extract_grok",
                 "page_errors": self.page_errors,
+                "timestamp": time.strftime('%Y-%m-%d %H:%M:%S'),
                 "execution_time": f"{execution_time:.4f} seconds",
             }
 
@@ -97,7 +98,8 @@ class ExtractGrokV2(StatisticsViewV2):
                     # here are all the statistical data extracted from the page...
                     "url_count": page_data.get("url_count"),
                     "urls": page_data.get("urls"),
-            })
+                    "url_dict": page_data.get("url_dict"),
+                })
 
             # return results
             return self.return_data, 200
