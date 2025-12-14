@@ -79,9 +79,12 @@ def get_signal_data_for_domain(domain, force_refresh=False):
     domain_record = df_signal_data[df_signal_data['domain'] == domain]
 
     if len(domain_record) == 0:
-        return {
-            "error": f"No signal data found for domain: {domain}"
+        return { "signal_data" :
+            {
+                "error": f"No signal data found for domain: {domain}"
+            }
         }
+
 
     # Extract first matching record
     record = domain_record.iloc[0]
@@ -110,4 +113,8 @@ def get_signal_data_for_domain(domain, force_refresh=False):
                 }
             })
 
-    return { "signals" : signals }
+    return { "signal_data" :
+        {
+            "signals" : signals
+        }
+    }
