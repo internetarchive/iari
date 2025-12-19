@@ -2,6 +2,8 @@ import pandas as pd
 import pickle
 import config
 
+from src.models.exceptions import IariFetchError
+
 SIGNALS_CACHE_DIR = f"{config.iari_cache_dir}cache"
 SIGNALS_CSV = config.iari_cache_dir
 
