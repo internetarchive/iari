@@ -60,7 +60,7 @@ class ExtractGrokV2(StatisticsViewV2):
             self.__validate_and_get_job__(method)  # inherited from StatisticsViewV2
 
             # get page_data, either from cache or newly calculated
-            app.logger.debug(f"==> ExtractGroksV2::start page_data")
+            app.logger.debug(f"==> ExtractGrokV2::start page_data")
 
             page_data = self.__get_page_data__()
 
@@ -141,6 +141,8 @@ class ExtractGrokV2(StatisticsViewV2):
 
         from src import app
         app.logger.debug(f"==> ExtractGrokV2::__get_page_data__: start analyzer.extract_page_data")
+        app.logger.debug(f"==> ExtractGrokV2: ***** :__get_page_data__: self.job.use_local_cache: {self.job.use_local_cache}")
+
 
         try:
             return self.analyzer.extract_page_data(page_spec)

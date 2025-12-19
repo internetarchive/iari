@@ -44,6 +44,8 @@ class GrokAnalyzerV2(IariAnalyzer):
         title = page_spec["page_title"].replace(" ", "_")
         use_local_cache = page_spec["use_local_cache"]
 
+        app.logger.debug(f"GrokAnalyzer: ***** extract_page_data: use_local_cache: {use_local_cache}")
+
         # fetch html from grokipedia file
         page_html = fetch_page_html(title, use_local_cache)
         page_data = extract_grok_data(page_html)
@@ -61,6 +63,8 @@ def fetch_page_html(title, use_local_cache : bool = False):
     if use_local_cache is true, content is fetched from cache
     """
     from src import app
+
+    app.logger.debug(f"GrokAnalyzer: ***** fetch_page_html: use_local_cache: {use_local_cache}")
 
     if use_local_cache:
         target_file_name = f"grokipedia.page.{title.replace(' ', '-')}.html"
