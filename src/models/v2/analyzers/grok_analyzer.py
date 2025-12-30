@@ -9,6 +9,7 @@ from src.models.v2.analyzers import IariAnalyzer
 
 from src.helpers.iari_utils import iari_extract_root_domain
 from src.helpers.signal_utils import get_signal_data_for_domain
+from src.helpers.archive_utils import get_archive_status
 
 class GrokAnalyzerV2(IariAnalyzer):
     """
@@ -130,16 +131,22 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
     final_urls = list(set(urls))  # deduplicate with set
 
     # Create dictionary with wiki signal data for each URL
-    def create_url_dict_entry(url: str) -> Dict[str, Any]:
+    def create_dict_for_url(url: str) -> Dict[str, Any]:
         domain = iari_extract_root_domain(url)
         signals = get_signal_data_for_domain(domain=domain, force_refresh=False)
-
         compact_signal_data = signals  # shall remove nullish entries
-        return compact_signal_data
 
-    url_dict = {url: create_url_dict_entry(url) for url in final_urls}
+        # archive_status = {"archive_status": True}
+        archive_status = get_archive_status(url)
 
-# send em back!
+        return {
+            "signal_data": compact_signal_data,
+            "archive_data": archive_status
+        }
+
+    url_dict = {url: create_dict_for_url(url) for url in final_urls}
+
+    # send em back!
     return {
         "urls": final_urls,
         "url_dict": url_dict

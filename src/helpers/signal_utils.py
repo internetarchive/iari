@@ -115,8 +115,6 @@ def get_signal_data_for_domain(domain, force_refresh=False):
                 }
             })
 
-    return { "signal_data" :
-        {
-            "signals" : signals
-        }
+    return {
+        "signals" : signals
     }

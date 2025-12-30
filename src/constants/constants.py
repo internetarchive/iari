@@ -28,6 +28,12 @@ class UrlStatusMethod(Enum):
     CORENTIN = "CORENTIN"
 
 
+# Enums for check-url method
+class UrlArchiveMethod(Enum):
+    IABOT = "IABOT"
+    WAYBACK = "WAYBACK"
+
+
 # Enums for probe methods
 class ProbeMethod(Enum):
     WIKI_SIGNALS = "WIKI_SIGNALS"

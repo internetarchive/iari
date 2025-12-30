@@ -6,6 +6,7 @@ def create_json_folders():
     subfolders = [
         "articles",
         "articlesV2",
+        "cache",
         "dois",
         "pdfs",
         "probes",
