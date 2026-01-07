@@ -6,9 +6,10 @@ import config
 from bs4 import BeautifulSoup
 
 from src.models.v2.analyzers import IariAnalyzer
+from src.constants.constants import UrlArchiveMethod
 
 from src.helpers.iari_utils import iari_extract_root_domain
-from src.helpers.signal_utils import get_signal_data_for_domain
+from src.helpers.signal_utils import get_signal_data_for_domain, filter_signal_data
 from src.helpers.archive_utils import get_archive_status
 
 class GrokAnalyzerV2(IariAnalyzer):
@@ -69,15 +70,16 @@ def fetch_page_html(title, use_local_cache : bool = False):
 
     if use_local_cache:
         target_file_name = f"grokipedia.page.{title.replace(' ', '-')}.html"
-        path = Path(f"{config.iari_cache_dir}/cache/{target_file_name}")
-        app.logger.debug(f"GrokAnalyzer: fetch_page_html: use_local_cache: {path}")
+        path = Path(f"{config.iari_cache_dir}{target_file_name}")
+        app.logger.debug(f"GrokAnalyzer: ***** fetch_page_html: using local cache of: {path}")
 
         # if not there, return None ???
         if not path.exists():
             raise FileNotFoundError(
-                f"GrokAnalyzer: fetch_page_html: Cache for file {target_file_name} not found ({path})."
+                f"GrokAnalyzer: fetch_page_html: Cache for file {target_file_name} not found (file path: {path})."
             )
 
+        app.logger.debug(f"GrokAnalyzer: ***** returning local cache for: {path}")
         return path.read_text(encoding="utf-8")  # return contents of file (hopefully html!)
 
     # if not cached, capture from live web
@@ -108,6 +110,7 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
     for now, just returns urls from refs
     {
         "urls": list of urls in references section
+        "url_dict": dictionary of data for each url, including signal data and archive status
     }
 
     TODO:
@@ -119,32 +122,36 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
         }
     """
 
+    def create_dict_for_url(url: str) -> Dict[str, Any]:
+        domain = iari_extract_root_domain(url)
+        signal_data = get_signal_data_for_domain(domain=domain, force_refresh=False)
+
+        if 'signals' in signal_data:
+            filtered_signals = filter_signal_data(signal_data["signals"], "remove_nulls")
+            signal_data["signals"] = filtered_signals
+
+        # archive_status = {"archive_status": True}
+        archive_status = get_archive_status(url, UrlArchiveMethod.WAYBACK.value)
+
+        return {
+            "signal_data": signal_data,
+            "archive_data": archive_status
+        }
+
+    # extract list of reference links from References section of article
     soup = BeautifulSoup(page_html, "html.parser")
-
     urls = []
-
     for a in soup.select("div#references > ol > li > div > span > a[href]"):
         href = a["href"]
         if href.startswith(("http://", "https://")):
             urls.append(href)
-
     final_urls = list(set(urls))  # deduplicate with set
 
-    # Create dictionary with wiki signal data for each URL
-    def create_dict_for_url(url: str) -> Dict[str, Any]:
-        domain = iari_extract_root_domain(url)
-        signals = get_signal_data_for_domain(domain=domain, force_refresh=False)
-        compact_signal_data = signals  # shall remove nullish entries
-
-        # archive_status = {"archive_status": True}
-        archive_status = get_archive_status(url)
-
-        return {
-            "signal_data": compact_signal_data,
-            "archive_data": archive_status
-        }
-
+    # Create a wiki signal dictionary for each URL in final_urls
     url_dict = {url: create_dict_for_url(url) for url in final_urls}
+
+    from src import app
+    app.logger.debug(f"==> extract_grok_data:: processed {len(url_dict)} urls")
 
     # send em back!
     return {

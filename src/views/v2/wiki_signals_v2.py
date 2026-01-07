@@ -22,9 +22,9 @@ from src.models.v2.schema.wiki_signals_schema_v2 import WikiSignalsSchemaV2
 
 from src.helpers.signal_utils import get_signal_data_for_domain
 
-SIGNALS_CACHE_DIR = f"{config.iari_cache_dir}cache"
+SIGNALS_CACHE_DIR = f"{config.iari_cache_dir}"
 # SIGNALS_CSV = f"data/CredibilityIndicators_PerennialSources_MBFC_20250919.csv"
-SIGNALS_CSV = config.iari_cache_dir
+SIGNALS_CSV = config.iari_signals_csv
 
 class WikiSignalsV2(StatisticsViewV2):
     """

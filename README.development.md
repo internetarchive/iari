@@ -32,9 +32,17 @@ All Job classes defined in: `src/models/v2/job`
 
 # Setup & Deployment
 
-Config
+Config 
+
+Stored in config.py for each environment, and is not tracked with git.
+
 * iari_cache_dir 
   - directory, relative to top of tree, where "cached" files are stored
+  - default is "/json/cache/"
+  - will eventually be deprecated when true caching is implemented
+* iari_json_dir 
+  - directory, relative to top of tree, where files for
+    old-style IARI objects are stored
   - default is "/json"
 * loglevel = logging.DEBUG
   * set as per deployment environment;

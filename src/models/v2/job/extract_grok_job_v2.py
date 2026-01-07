@@ -14,6 +14,5 @@ class ExtractGrokJobV2(JobV2):
         """
         parameter checking here...
         """
-        pass
-
-
+        if not self.page_title:
+            raise MissingInformationError("page_title is required")

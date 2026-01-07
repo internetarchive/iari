@@ -86,16 +86,19 @@ class ExtractGrokV2(StatisticsViewV2):
             if self.job.hydrate:
                 self.return_data["hydrate"] = self.job.hydrate
 
-            # only include use_local_hash if provided
+            # only include use_local_cache if provided
             if self.job.use_local_cache is not None :
-                self.return_data["use_local_cache"] = True
+                self.return_data["use_local_cache"] = self.job.use_local_cache
+                # pass
 
             # pick and choose which fields from page_data we want to pass on to response
             self.return_data.update(
                 {
+                    # here are the identification data for the page...
                     "media_type": page_data.get("media_type"),
                     "page_title": page_data.get("page_title"),
-                    # here are all the statistical data extracted from the page...
+
+                    # here are the statistical data extracted from the page...
                     "url_count": page_data.get("url_count"),
                     "urls": page_data.get("urls"),
                     "url_dict": page_data.get("url_dict"),

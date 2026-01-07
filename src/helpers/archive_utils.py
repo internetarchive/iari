@@ -109,10 +109,10 @@ def get_archive_status_wayback(url):
         "Content-Type": "application/x-www-form-urlencoded",
         "User-Agent": "http://en.wikipedia.org/wiki/User:GreenC via iabget.awk",
     }
-    data = f"&action=searchurldata&urls={modified_url}"
+    data = f"&url={modified_url}"
 
     response = requests.post(
-        "https://iabot.wmcloud.org/api.php?wiki=enwiki",
+        "https://archive.org/wayback/available",
         headers=headers,
         data=data,
     )
@@ -130,9 +130,11 @@ def get_archive_status_wayback(url):
 def get_archive_status(url, archive_method=UrlArchiveMethod.IABOT.value):
     """
     """
-    if archive_method == UrlArchiveMethod.IABOT.value:
-        return get_archive_status_iabot(url)
-    elif archive_method == UrlArchiveMethod.WAYBACK.value:
-        return get_archive_status_wayback(url)
-    else:
-        return None
+    return None
+
+    # if archive_method == UrlArchiveMethod.IABOT.value:
+    #     return get_archive_status_iabot(url)
+    # elif archive_method == UrlArchiveMethod.WAYBACK.value:
+    #     return get_archive_status_wayback(url)
+    # else:
+    #     return None

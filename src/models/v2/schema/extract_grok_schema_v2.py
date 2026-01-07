@@ -43,7 +43,13 @@ class ExtractGrokSchemaV2(BaseSchemaV2):
     #  **kwargs is needed here despite what the validator claims
     @post_load
     def return_job_object(self, data, **kwargs) -> ExtractGrokJobV2:  # type: ignore # dead: disable
-        """Return Job object"""
+        """
+        Returns Job object
+
+        The **data syntax is Python's dictionary unpacking operator that converts
+        a dictionary's key-value pairs into keyword arguments for the constructor.
+        For example, {'a': 1, 'b': 2} becomes a=1, b=2 when used as **data.
+        """
         from src import app
         app.logger.debug("==> ExtractGrokJobV2::@post_load:return_job_object")
         app.logger.debug(f"return_job_object data: {data}")
@@ -60,7 +66,7 @@ class ExtractGrokSchemaV2(BaseSchemaV2):
         for k, v in data.items():
             app.logger.debug(f"  {k} = {v!r} ({type(v).__name__})")
 
-
+        # Use ** to unpack the dictionary data into keyword arguments for the constructor
         job = ExtractGrokJobV2(**data)
         job.validate_fields()
 
