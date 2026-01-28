@@ -173,7 +173,8 @@ def filter_signal_data(signals, filters="remove_nulls"):
             # Check various null/empty conditions
             if (value is not None  # Skip None values (includes null)
                     and value is not False  # Skip boolean False
-                    and value != []  # Skip empty lists
+                    and not (isinstance(value, list) and len(value) == 0)  # Skip empty lists
+                    # and value != []  # Skip empty lists
                     and value != "False"  # Skip string "False"
                     and value != "[]"  # Skip string "[]"
             ):
