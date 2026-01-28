@@ -162,7 +162,7 @@ def filter_signal_data(signals, filters="remove_nulls"):
         filters (str): Filter type to apply, currently only supports "remove_nulls"
 
     Returns:
-        dict: Dictionary containing filtered signals array where signal_data.value is not null,
+        dict: Dictionary containing filtered signals where signal_data.value is not null,
               False or empty array
     """
 
@@ -178,11 +178,15 @@ def filter_signal_data(signals, filters="remove_nulls"):
                     and value != "[]"  # Skip string "[]"
             ):
                 filtered_signals.append(signal)
-        return {
-            "signals": filtered_signals
-        }
+        
+    else:
+        filtered_signals = signals
+
+    # turn filtered signals array into dict
+    signals_dict = {
+        signal["signal_name"]: signal["signal_data"]["value"]
+        for signal in filtered_signals
+    }
 
     # If no valid filter specified, return original signals
-    return {
-        "signals": signals
-    }
+    return signals_dict

@@ -131,7 +131,7 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
             signal_data["signals"] = filtered_signals
 
         # archive_status = {"archive_status": True}
-        archive_status = get_archive_status(url, UrlArchiveMethod.WAYBACK.value)
+        archive_status = get_archive_status(url, "wayback")
 
         return {
             "signal_data": signal_data,

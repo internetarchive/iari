@@ -13,12 +13,14 @@ from enum import Enum
 
 
 class CacheType(Enum):
-    probes = "probes"
+    default = "default"
     status = "status"
     signals = "signals"
+    archive = "archive"
+    probes = "probes"  # deprecated
 
 
-def get_cache_hash(cache_title: str, cache_type: CacheType):
+def get_cache_hash(cache_title: str, cache_type: CacheType = CacheType.default):
     """
     returns "hash" value based on cacheType
     if cacheType is probes or status, the hash is md5 encosion of string (assumed a url)
