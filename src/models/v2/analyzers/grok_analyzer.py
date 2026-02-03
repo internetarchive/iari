@@ -11,6 +11,7 @@ from src.constants.constants import UrlArchiveMethod
 from src.helpers.iari_utils import iari_extract_root_domain
 from src.helpers.signal_utils import get_signal_data_for_domain, filter_signal_data
 from src.helpers.archive_utils import get_archive_status
+from src.helpers.status_utils import get_live_status
 
 class GrokAnalyzerV2(IariAnalyzer):
     """
@@ -122,7 +123,7 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
         }
     """
 
-    def create_dict_for_url(url: str) -> Dict[str, Any]:
+    def create_dict_for_url(url: str, idx: int) -> Dict[str, Any]:
         domain = iari_extract_root_domain(url)
         signal_data = get_signal_data_for_domain(domain=domain, force_refresh=False)
 
@@ -132,10 +133,13 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
 
         # archive_status = {"archive_status": True}
         archive_status = get_archive_status(url, "wayback")
+        live_status = get_live_status(url, "wayback")
 
         return {
             "signal_data": signal_data,
-            "archive_data": archive_status
+            "archive_data": archive_status,
+            "live_status": 999,
+            "idx": idx
         }
 
     # extract list of reference links from References section of article
@@ -148,7 +152,8 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
     final_urls = list(set(urls))  # deduplicate with set
 
     # Create a wiki signal dictionary for each URL in final_urls
-    url_dict = {url: create_dict_for_url(url) for url in final_urls}
+    # url_dict = {url: create_dict_for_url(url) for url in final_urls}
+    url_dict = {url: create_dict_for_url(url, idx + 1) for idx, url in enumerate(final_urls)}
 
     from src import app
     app.logger.debug(f"==> extract_grok_data:: processed {len(url_dict)} urls")

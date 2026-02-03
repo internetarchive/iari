@@ -121,7 +121,7 @@ def get_archive_status_wayback(url, force_refresh=False):
     from src import app
     app.logger.debug(f"==> get_archive_status_wayback for {modified_url}")
 
-# else fetch status from WAYBACK
+# else fetch status from WAYBACK machine
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "User-Agent": "http://en.wikipedia.org/wiki/User:GreenC via iabget.awk",
