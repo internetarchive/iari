@@ -11,7 +11,9 @@ from src.constants.constants import UrlArchiveMethod
 from src.helpers.iari_utils import iari_extract_root_domain
 from src.helpers.signal_utils import get_signal_data_for_domain, filter_signal_data
 from src.helpers.archive_utils import get_archive_status
-from src.helpers.status_utils import get_live_status
+# from src.helpers.status_utils import get_live_status, get_live_status_for_url
+from src.helpers.status_utils import get_live_status_for_url
+
 
 class GrokAnalyzerV2(IariAnalyzer):
     """
@@ -81,7 +83,9 @@ def fetch_page_html(title, use_local_cache : bool = False):
             )
 
         app.logger.debug(f"GrokAnalyzer: ***** returning local cache for: {path}")
-        return path.read_text(encoding="utf-8")  # return contents of file (hopefully html!)
+        # app.logger.debug(f"GrokAnalyzer: path.read_text {path.read_text()}")
+        # return path.read_text(encoding="utf-8")  # return contents of file (hopefully html!)
+        return path.read_text()  # return contents of file (hopefully html!)
 
     # if not cached, capture from live web
     user_agent = "IARI, see https://github.com/internetarchive/iari"
@@ -93,6 +97,8 @@ def fetch_page_html(title, use_local_cache : bool = False):
     response = requests.get(target_url, headers=headers)
 
     app.logger.debug(f"GrokAnalyzer: fetch_page_html: returned with status code: {response.status_code}")
+    app.logger.debug(f"response.encoding: {response.encoding}")
+    app.logger.debug(f"response.apparent_encoding: {response.apparent_encoding}")
 
     if response.status_code == 200:
         response.raise_for_status()
@@ -133,12 +139,16 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
 
         # archive_status = {"archive_status": True}
         archive_status = get_archive_status(url, "wayback")
-        live_status = get_live_status(url, "wayback")
+
+        # from src import app
+        # app.logger.debug(f"==> create_dict_for_url:: {url}, archive_status: {archive_status}")
+        live_status_data = get_live_status_for_url(url, force_refresh=False)  # add refresh=True if refresh set
+        live_status = live_status_data.get("live_status", None)  # Use .get() with default None if key missing
 
         return {
             "signal_data": signal_data,
             "archive_data": archive_status,
-            "live_status": 999,
+            "live_status": live_status,
             "idx": idx
         }
 
@@ -152,7 +162,6 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
     final_urls = list(set(urls))  # deduplicate with set
 
     # Create a wiki signal dictionary for each URL in final_urls
-    # url_dict = {url: create_dict_for_url(url) for url in final_urls}
     url_dict = {url: create_dict_for_url(url, idx + 1) for idx, url in enumerate(final_urls)}
 
     from src import app
