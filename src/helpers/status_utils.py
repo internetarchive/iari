@@ -71,7 +71,7 @@ def get_live_status_for_url(url, force_refresh=False):
 def __get_live_status_with_livewebcheck__(url):
     """
     This use wayback machine's Live Web Checker
-    response looks like:
+    wayback response looks like:
     {
         "ctype": "text/html; charset=utf-8",
         "location": "https://mojomonger.com/",
@@ -84,7 +84,7 @@ def __get_live_status_with_livewebcheck__(url):
     TODO pass back a status data dict so we can oass back errors and other details as well
 
     {
-        status_code: 999.
+        status_code: 200
     }
     """
 

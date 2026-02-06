@@ -60,6 +60,7 @@ class Url(WikipediaUrl):
             #   status_code and
             #   status_code_error_details
 
+
             if method.upper() == CheckMethod.IABOT.value:
                 self.__check_url_with_iabot_testdeadlink__()
 
