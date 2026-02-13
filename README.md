@@ -113,6 +113,14 @@ This is a footnote reference -> content reference -> Short citation reference ak
 
 # Endpoints
 
+## All endpoints
+
+/statistics/article *-extract ref tags and "free" citations*\
+/article *- context links, tries to match html to wikitext*\
+/extract_refs *- james's - best NB: should be changed to extract_wiki*
+/extract_grok *- extract refs from grokipedia article*
+/wiki_signals *- return signals for passed in domain (or extracted domain from url)*/
+
 ## Checking endpoints
 
 ### Check URL

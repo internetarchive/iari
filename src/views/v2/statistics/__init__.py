@@ -79,12 +79,14 @@ class StatisticsViewV2(Resource):
             raise MissingInformationError("No schema set for StatisticsViewV2")
 
         # populate job object with mapped values from request_args
+        app.logger.debug(f"==> StatisticsViewV2::__parse_into_job__: calling self.schema.load")
         self.job = self.schema.load(self.request_args)
 
         if not self.job:
             # This seems to be the case when there are no arguments, as in the
-            # /version endpoint. Seems to be harmless not having a valid job property
+            # /version endpoint. Seems harmless not having a valid job property
             app.logger.info("StatisticsViewV2: self.job is null")
 
+        # NB: this prints directly to console output; i.e., no logger used
         console.print("=== JOB ===")
         console.print(self.job)

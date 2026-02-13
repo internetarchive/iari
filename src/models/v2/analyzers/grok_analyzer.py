@@ -9,7 +9,7 @@ from src.models.v2.analyzers import IariAnalyzer
 from src.constants.constants import UrlArchiveMethod
 
 from src.helpers.iari_utils import iari_extract_root_domain
-from src.helpers.signal_utils import get_signal_data_for_domain, filter_signal_data
+from src.helpers.signal_utils import get_signal_data_for_domain_old, filter_signal_data_old
 from src.helpers.archive_utils import get_archive_status
 # from src.helpers.status_utils import get_live_status, get_live_status_for_url
 from src.helpers.status_utils import get_live_status_for_url
@@ -130,11 +130,12 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
     """
 
     def create_dict_for_url(url: str, idx: int) -> Dict[str, Any]:
-        domain = iari_extract_root_domain(url)
-        signal_data = get_signal_data_for_domain(domain=domain, force_refresh=False)
 
+        # signal data based on domain of url link
+        domain = iari_extract_root_domain(url)
+        signal_data = get_signal_data_for_domain_old(domain=domain, force_refresh=False)
         if 'signals' in signal_data:
-            filtered_signals = filter_signal_data(signal_data["signals"], "remove_nulls")
+            filtered_signals = filter_signal_data_old(signal_data["signals"], "remove_nulls")
             signal_data["signals"] = filtered_signals
 
         # archive_status = {"archive_status": True}

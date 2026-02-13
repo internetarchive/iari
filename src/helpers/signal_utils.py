@@ -4,13 +4,91 @@ import config
 
 from src.models.exceptions import IariFetchError
 from src.helpers.cache_utils import get_cache, set_cache, is_cached, CacheType
+from src.helpers.iari_utils import iari_extract_root_domain
 
+import requests
 
 SIGNALS_CACHE_DIR = f"{config.iari_cache_dir}"
 SIGNALS_CSV = config.iari_signals_csv
 
 
-def load_signal_data(force_refresh=False):
+
+def get_signal_data_for_url(url, force_refresh=False):
+    """
+    returns signal data from Wiki Signal data for domain extracted from url
+    """
+    return get_signal_data_for_domain(iari_extract_root_domain(url), force_refresh=force_refresh)
+
+
+def get_signal_data_for_domain(domain, force_refresh=False):
+    """
+    grabs signal data for domain from WikiSignals.org API
+
+    format of return data:
+    {
+        "domain": "example.com",
+        "signals": [
+            {
+                "signal_name": "foo",
+                "signal_data": {
+                    "value": 123,
+                }
+            },
+            {
+                "signal_name": "bar",
+                "signal_data": {
+                    "value": 456,
+                }
+            }
+            . . .
+        ]
+    },
+    """
+
+    # if cache exists for this domain, return that value
+    if force_refresh == False and is_cached(domain, CacheType.signals):
+        signals = get_cache(domain, CacheType.signals)
+        return {
+            "retrieved_from_cache": True,
+            "signals": signals
+        }
+
+    # else fetch signal data from WikiSignals API and save to cache
+
+    api_wiki_signals = "https://wikisignals.org/wp-json/publications/v1/domain/"
+    endpoint = f"{api_wiki_signals}?name={domain}"
+
+    headers = {}
+
+    response = requests.get(
+        endpoint,
+        headers=headers,
+        # params=params,
+    )
+
+    # get the status code
+    if response.status_code == 200:
+        data = response.json()
+
+        from src import app
+        app.logger.debug(data)
+
+        signals = data
+
+        # save signals in cache for this domain
+        set_cache(domain, CacheType.signals, payload=signals)
+
+        # return signal data for this domain
+        return {
+            "signals" : signals
+        }
+    else:
+        return {
+            "signals": {}
+        }
+
+
+def load_signal_data_old(force_refresh=False):
     """
     Loads signal data either from a cache file or from a CSV file if the cache is not available or
     if cache refresh is forced.
@@ -58,7 +136,14 @@ def load_signal_data(force_refresh=False):
     return df_from_csv
 
 
-def get_signal_data_for_domain(domain, force_refresh=False):
+def get_signal_data_for_url_old(url, force_refresh=False):
+    """
+    returns signal data from Wiki Signal data for domain extracted from url
+    """
+    return get_signal_data_for_domain_old(iari_extract_root_domain(url), force_refresh=force_refresh)
+
+
+def get_signal_data_for_domain_old(domain, force_refresh=False):
     """
     grabs signal data for domain from Wiki Signal data
 
@@ -93,8 +178,8 @@ def get_signal_data_for_domain(domain, force_refresh=False):
     """
 
     # if cache exists for this domain, return that value
-    if force_refresh == False and is_cached(domain, CacheType.signals):
-        signals = get_cache(domain, CacheType.signals)
+    if force_refresh == False and is_cached(domain, CacheType.signals_old):
+        signals = get_cache(domain, CacheType.signals_old)
         return {
             "retrieved_from_cache": True,
             "signals": signals
@@ -104,7 +189,7 @@ def get_signal_data_for_domain(domain, force_refresh=False):
 
     # ensure Wiki Signal data is available
     try:
-        df_signal_data = load_signal_data()
+        df_signal_data = load_signal_data_old()
 
     except Exception as e:
         raise IariFetchError(f"Problem fetching raw wiki signal data ({str(e)})")
@@ -145,7 +230,7 @@ def get_signal_data_for_domain(domain, force_refresh=False):
             })
 
     # save signals in cache for this domain
-    set_cache(domain, CacheType.signals, payload=signals)
+    set_cache(domain, CacheType.signals_old, payload=signals)
 
     # return signal data for this domain
     return {
@@ -153,9 +238,9 @@ def get_signal_data_for_domain(domain, force_refresh=False):
     }
 
 
-def filter_signal_data(signals, filters="remove_nulls"):
+def filter_signal_data_old(signals, filters="remove_nulls"):
     """
-    Filters signal records to remove entries with null, False or empty array values.
+    returns filtered signal records, removing entries with null, False or empty array values
 
     Parameters:
         signals (list): List of signal dictionaries containing signal_name and signal_data

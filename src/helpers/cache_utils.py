@@ -16,6 +16,7 @@ class CacheType(Enum):
     default = "default"
     status = "status"
     signals = "signals"
+    signals_old = "signals_old"
     archive = "archive"
     probes = "probes"  # deprecated
 

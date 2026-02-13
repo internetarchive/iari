@@ -20,6 +20,7 @@ from src.views.v2.statistics import StatisticsViewV2
 from src.models.v2.job.wiki_signals_job_v2 import WikiSignalsJobV2
 from src.models.v2.schema.wiki_signals_schema_v2 import WikiSignalsSchemaV2
 
+# from src.helpers.signal_utils import get_signal_data_for_domain_old
 from src.helpers.signal_utils import get_signal_data_for_domain
 
 SIGNALS_CACHE_DIR = f"{config.iari_cache_dir}"
@@ -115,8 +116,8 @@ class WikiSignalsV2(StatisticsViewV2):
         except Exception as e:
             raise TarbFetchError(f"Problem getting Wiki Signal data ({str(e)})")
 
-        from src import app
-        app.logger.debug(f"==> signal_data: {signal_data}")
+        # from src import app
+        # app.logger.debug(f"==> signal_data: {signal_data}")
 
         return {
             # "raw_data": raw_data,
@@ -127,6 +128,7 @@ class WikiSignalsV2(StatisticsViewV2):
 
     def __get_domain_signal_data__(self):
 
+        # signals = get_signal_data_for_domain_old(domain=self.job.domain, force_refresh=False)
         signals = get_signal_data_for_domain(domain=self.job.domain, force_refresh=False)
 
         return {
