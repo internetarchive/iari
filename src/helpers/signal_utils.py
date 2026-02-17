@@ -70,8 +70,8 @@ def get_signal_data_for_domain(domain, force_refresh=False):
     if response.status_code == 200:
         data = response.json()
 
-        from src import app
-        app.logger.debug(data)
+        # from src import app
+        # app.logger.debug(data)
 
         signals = data
 

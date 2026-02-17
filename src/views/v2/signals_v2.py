@@ -87,7 +87,7 @@ class SignalsV2(StatisticsViewV2):
             "execution_time": f"{execution_time:.4f} seconds",
             "url": self.url_link,
             "domain": self.job.domain,
-            "signals_results": signals_results
+            "signal_data": signals_results
         })
 
         return results, 200

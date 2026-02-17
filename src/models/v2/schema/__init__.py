@@ -11,6 +11,8 @@ class BaseSchemaV2(Schema):
     """
 
     refresh = fields.Bool(required=False)
+    timeout = fields.Integer(required=False, validate=lambda x: x >= 0,
+                             error_messages={"validator_failed": "Timeout must be greater than or equal to 0"})
     showall = fields.Bool(required=False)
     testing = fields.Bool(required=False)
     hydrate = fields.Bool(required=False)
