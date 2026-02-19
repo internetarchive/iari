@@ -13,9 +13,9 @@ project of the [Wayback Machine](https://www.wikidata.org/wiki/Q648266), an inte
 [Internet Archive](https://www.wikidata.org/wiki/Q461). 
 
 # Author
-Mark Graham is the director of the project.
+Mark Graham is the director of the project.\
 The primary developer is currently [Chris Lombardi](https://en.wikipedia.org/wiki/User:Iamojo) (under the 
-nom de silico "mojomonger").
+nom de silico "mojomonger").\
 Initial development was done by [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131).
 
 # Background

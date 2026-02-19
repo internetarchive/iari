@@ -9,7 +9,8 @@ from src.models.v2.analyzers import IariAnalyzer
 from src.constants.constants import UrlArchiveMethod
 
 from src.helpers.iari_utils import iari_extract_root_domain
-from src.helpers.signal_utils import get_signal_data_for_domain_old, filter_signal_data_old
+# from src.helpers.signal_utils import get_signal_data_for_domain_old, filter_signal_data_old
+from src.helpers.signal_utils import get_signal_data_for_domain
 from src.helpers.archive_utils import get_archive_status
 # from src.helpers.status_utils import get_live_status, get_live_status_for_url
 from src.helpers.status_utils import get_live_status_for_url
@@ -133,12 +134,14 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
 
         # signal data based on domain of url link
         domain = iari_extract_root_domain(url)
-        signal_data = get_signal_data_for_domain_old(domain=domain, force_refresh=False)
-        if 'signals' in signal_data:
-            filtered_signals = filter_signal_data_old(signal_data["signals"], "remove_nulls")
-            signal_data["signals"] = filtered_signals
+        # signal_data = get_signal_data_for_domain_old(domain=domain, force_refresh=False)
+        signal_data = get_signal_data_for_domain(domain=domain, force_refresh=False)
 
-        # archive_status = {"archive_status": True}
+        # # filter signal_data["signals"] to lighten the load for response
+        # if 'signals' in signal_data:
+        #     filtered_signals = filter_signal_data_old(signal_data["signals"], "remove_nulls")
+        #     signal_data["signals"] = filtered_signals
+
         archive_status = get_archive_status(url, "wayback")
 
         # from src import app
@@ -162,6 +165,11 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
             urls.append(href)
     final_urls = list(set(urls))  # deduplicate with set
 
+    # # let's put a temporary limit on the list for debugging purposes
+    # # Limit to first 10 URLs to reduce processing load while debugging
+    # final_urls = final_urls[:10]
+    # TODO put this as an option - to limit while testing; e.g. endpoint param "item_limit=10"
+    
     # Create a wiki signal dictionary for each URL in final_urls
     url_dict = {url: create_dict_for_url(url, idx + 1) for idx, url in enumerate(final_urls)}
 
