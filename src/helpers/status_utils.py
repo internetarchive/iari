@@ -91,6 +91,7 @@ def __get_live_status_with_livewebcheck__(url):
     status_code = None
 
     endpoint = "https://iabot-api.archive.org/livewebcheck"
+
     modified_url = url.replace("&", "%26")  # TODO do appropriate encode
     # modified_url = urllib.parse.quote(url)  # url encode the url
 

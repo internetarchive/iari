@@ -42,7 +42,10 @@ def get_cache_file_path(cache_title: str, cache_type: CacheType, variety: str = 
     cache path is determined by cache_type
     variety is the prefix for the final file name
     """
-    cache_path = f"{config.iari_cache_dir}{cache_type.value}"
+    if cache_type == CacheType.default:
+        cache_path = f"{config.iari_cache_dir}"
+    else:
+        cache_path = f"{config.iari_cache_dir}{cache_type.value}"
 
     # error if type not found as a subdir
     if not os.path.isdir(cache_path):

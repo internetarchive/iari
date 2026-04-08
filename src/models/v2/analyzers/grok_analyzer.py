@@ -74,7 +74,7 @@ def fetch_page_html(title, use_local_cache : bool = False):
 
     if use_local_cache:
         target_file_name = f"grokipedia.page.{title.replace(' ', '-')}.html"
-        path = Path(f"{config.iari_cache_dir}{target_file_name}")
+        path = Path(f"{config.iari_cache_local_dir}{target_file_name}")
         app.logger.debug(f"GrokAnalyzer: ***** fetch_page_html: using local cache of: {path}")
 
         # if not there, return None ???
@@ -169,7 +169,7 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
     # # Limit to first 10 URLs to reduce processing load while debugging
     # final_urls = final_urls[:10]
     # TODO put this as an option - to limit while testing; e.g. endpoint param "item_limit=10"
-    
+
     # Create a wiki signal dictionary for each URL in final_urls
     url_dict = {url: create_dict_for_url(url, idx + 1) for idx, url in enumerate(final_urls)}
 

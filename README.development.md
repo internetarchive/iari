@@ -29,6 +29,15 @@ All endpoint classes defined in: `src/views/v2`\
 All Schema classes defined in: `src/models/v2/schema`\
 All Job classes defined in: `src/models/v2/job`
 
+### Creating a new endpoint
+
+* create new view file in src/views/v2
+* create job file in src/models/v2/job
+* create schema file in src/models/v2/schema
+* add endpoint entry in src/\_\_init\_\_.py
+
+
+
 
 # Setup & Deployment
 

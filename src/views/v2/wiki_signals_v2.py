@@ -35,6 +35,8 @@ class WikiSignalsV2(StatisticsViewV2):
     (example inputs: https://en.wikipedia.org/wiki/Main_Page, en.wikipedia.org, wikipedia.org, wikimediafoundation.org)
     (??? do we want url or domain? one or the other?)
     (domain will be extracted from domain if it looks a url)
+
+    TODO: whats the diff between this and signals endpoint?!?
     """
 
     schema = WikiSignalsSchemaV2()  # Defines expected parameters; Overrides StatisticsViewV2's "schema" property
