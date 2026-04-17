@@ -54,7 +54,7 @@ class GetArchiveInfoV2(StatisticsViewV2):
             # inherited from StatisticsViewV2
 
             # get archive info from wayback API
-            results = self.__get_archive_info__()
+            results = self.__get_archive_data__()
 
             # Stop the timer and calculate execution time
             end_time = time.time()
@@ -83,10 +83,9 @@ class GetArchiveInfoV2(StatisticsViewV2):
 
     def __get_archive_data__(self):
         """
-        fetch all archie info for reference/link/citation/claim?
+        fetch all archive info for reference/link/citation/claim?
         from citations database matching criteria
         """
-
 
         #
         ##
@@ -117,7 +116,7 @@ class GetArchiveInfoV2(StatisticsViewV2):
                 "status": row[2],
             })
 
-        if response.status_code == 200:
+        if   response.status_code == 200:
             data = response.json()
             # we can process the data here
         else:

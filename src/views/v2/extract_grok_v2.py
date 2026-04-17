@@ -49,7 +49,7 @@ class ExtractGrokV2(StatisticsViewV2):
     def __process_request__(self, method=RequestMethods.post):
 
         from src import app
-        app.logger.debug(f"==> ExtractGroksV2::__process_request__({method})")
+        app.logger.debug(f"==> ExtractGrokV2::__process_request__({method})")
 
         # Start the timer
         start_time = time.time()
@@ -60,7 +60,7 @@ class ExtractGrokV2(StatisticsViewV2):
             self.__validate_and_get_job__(method)  # inherited from StatisticsViewV2
 
             # get page_data, either from cache or newly calculated
-            app.logger.debug(f"==> ExtractGroksV2::start page_data")
+            app.logger.debug(f"==> ExtractGrokV2::start page_data")
 
             page_data = self.__get_page_data__()
 
@@ -78,6 +78,7 @@ class ExtractGrokV2(StatisticsViewV2):
                 "iari_version": get_poetry_version("pyproject.toml"),
                 "iari_command": "extract_grok",
                 "page_errors": self.page_errors,
+                "timestamp": time.strftime('%Y-%m-%d %H:%M:%S'),
                 "execution_time": f"{execution_time:.4f} seconds",
             }
 
@@ -85,19 +86,23 @@ class ExtractGrokV2(StatisticsViewV2):
             if self.job.hydrate:
                 self.return_data["hydrate"] = self.job.hydrate
 
-            # only include use_local_hash if provided
+            # only include use_local_cache if provided
             if self.job.use_local_cache is not None :
-                self.return_data["use_local_cache"] = True
+                self.return_data["use_local_cache"] = self.job.use_local_cache
+                # pass
 
             # pick and choose which fields from page_data we want to pass on to response
             self.return_data.update(
                 {
+                    # here are the identification data for the page...
                     "media_type": page_data.get("media_type"),
                     "page_title": page_data.get("page_title"),
-                    # here are all the statistical data extracted from the page...
+
+                    # here are the statistical data extracted from the page...
                     "url_count": page_data.get("url_count"),
                     "urls": page_data.get("urls"),
-            })
+                    "url_dict": page_data.get("url_dict"),
+                })
 
             # return results
             return self.return_data, 200
@@ -139,6 +144,8 @@ class ExtractGrokV2(StatisticsViewV2):
 
         from src import app
         app.logger.debug(f"==> ExtractGrokV2::__get_page_data__: start analyzer.extract_page_data")
+        app.logger.debug(f"==> ExtractGrokV2: ***** :__get_page_data__: self.job.use_local_cache: {self.job.use_local_cache}")
+
 
         try:
             return self.analyzer.extract_page_data(page_spec)

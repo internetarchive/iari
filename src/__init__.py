@@ -22,8 +22,12 @@ from flask_restful import Api, Resource  # type: ignore
 import config
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 
+# # new stuff apr 2026
+from src.views.v2.signals_docs_v2 import SignalsDocsV2
+# # new stuff feb 2026
+from src.views.v2.signals_v2 import SignalsV2
 # # new stuff aug 2025
-# from src.views.v2.refs_lookup_v2 import GetArchiveV2
+from src.views.v2.wiki_signals_v2 import WikiSignalsV2
 
 # new stuff nov 2025
 from src.views.v2.extract_grok_v2 import ExtractGrokV2
@@ -144,7 +148,9 @@ api.add_resource(CheckUrlV2, "/check-url")
 api.add_resource(CheckUrlArchive, "/check-url-archive")
 
 # specialized
-# api.add_resource(WikiSignalsV2, "/wiki_signals")
+api.add_resource(SignalsDocsV2, "/signals_docs")
+api.add_resource(SignalsV2, "/signals")
+api.add_resource(WikiSignalsV2, "/wiki_signals")
 api.add_resource(ProbeV2, "/probe")
 api.add_resource(GetBookReferenceV2, "/get_book_reference")
 

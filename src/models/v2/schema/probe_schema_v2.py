@@ -1,4 +1,4 @@
-import logging
+# import logging
 
 from marshmallow import post_load
 from marshmallow.fields import Bool, Int, String
@@ -7,7 +7,7 @@ from src.models.v2.schema import BaseSchemaV2
 
 from src.models.v2.job.probe_job_v2 import ProbeJobV2
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 
 class ProbeSchemaV2(BaseSchemaV2):

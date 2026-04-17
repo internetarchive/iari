@@ -2,9 +2,9 @@ from typing import Optional
 from urllib.parse import unquote
 
 from src import MissingInformationError
-from src.constants.constants import ProbeMethod
-
 from src.models.v2.job import JobV2
+
+from src.constants.constants import ProbeMethod
 
 
 class ProbeJobV2(JobV2):

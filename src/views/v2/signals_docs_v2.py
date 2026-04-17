@@ -1,4 +1,3 @@
-import logging
 import time
 import traceback
 
@@ -10,49 +9,37 @@ from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
 from src.models.exceptions import MissingInformationError, UnknownValueError
-
-from src.helpers.get_version import get_poetry_version, get_version_stamp
-from src.helpers.probe_utils import ProbeUtils
-
 from src.views.v2.statistics import StatisticsViewV2
-from src.models.v2.job.probe_job_v2 import ProbeJobV2
-from src.models.v2.schema.probe_schema_v2 import ProbeSchemaV2
+from src.helpers.get_version import get_poetry_version, get_version_stamp
 
+from src.models.v2.job.signals_docs_job_v2 import SignalsDocsJobV2
+from src.models.v2.schema.signals_docs_schema_v2 import SignalsDocsSchemaV2
 
-logger = logging.getLogger(__name__)
+from src.helpers.signal_utils import get_signal_data_for_url, get_signal_data_for_domain, get_signal_docs
 
-
-class ProbeV2(StatisticsViewV2):
+class SignalsDocsV2(StatisticsViewV2):
     """
-    Probes with various probing methods for a URL and returns results from probe
+    return signals docs for WikiSignals
     """
 
-    job: Optional[ProbeJobV2] = None
-    schema: Schema = ProbeSchemaV2()
+    job: Optional[SignalsDocsJobV2] = None
+    schema: Schema = SignalsDocsSchemaV2()
 
-    url_link: str = ""
-    probe_list: List[str] = []
     refresh: Optional[bool] = False
-
-    # data: Optional[Dict[str, Any]] = None
-
 
     def get(self):
         """
-        main method of probe flask endpoint for flask.
         must return a tuple (Any,response_code)
         """
         from src import app
-        app.logger.debug("==> ProbeV2")
+        app.logger.debug("==> SignalsDocsV2")
 
         try:
             self.__validate_and_get_job__()
             if self.job:  # TODO what happens if self.job is not valid? why would it not be valid?
-                app.logger.debug(f"==> ProbeV2: type of job object:{type(self.job)}")
-                self.url_link = self.job.unquoted_url
-                self.probe_list = self.job.probe_list
+
                 self.refresh = self.job.refresh
-                # self.refresh = False
+
                 return self.__return_results__()
 
         except MissingInformationError as e:
@@ -75,7 +62,7 @@ class ProbeV2(StatisticsViewV2):
 
         results = {
             "iari_version": get_poetry_version("pyproject.toml"),
-            "iari_command": "probe",
+            "iari_command": "signals_docs",
             "endpoint": request.endpoint,
             "timestamp": int(datetime.timestamp(now)),
             "isodate": now.isoformat(),
@@ -83,14 +70,12 @@ class ProbeV2(StatisticsViewV2):
         if self.job.tag:
             results.update({"tag": self.job.tag})
 
-        probe_results = ProbeUtils.get_probe_results(self.url_link, self.probe_list, self.refresh)
+        signals_docs_results = get_signal_docs(self.refresh)
         execution_time = time.time() - start_time  # elapsed = now - then
 
         results.update({
             "execution_time": f"{execution_time:.4f} seconds",
-            "url": self.url_link,
-            "probe_list": self.probe_list,
-            "probe_results": probe_results
+            "data": signals_docs_results
         })
 
         return results, 200

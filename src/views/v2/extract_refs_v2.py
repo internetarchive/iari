@@ -157,7 +157,7 @@ class ExtractRefsV2(StatisticsViewV2):
             #   - maybe served from cache? what does cache mean now that we have databases?
         }
 
-        self.analyzer = WikiAnalyzerV2()
+        self.wiki_analyzer = WikiAnalyzerV2()
         # For now, assume page_spec refers to a wiki page.
         # TODO In the future, determine which analyzer to use based on media type.
         #   - or, have a generic analyzer that delegates a specific analyzer based on page_spec
@@ -167,5 +167,5 @@ class ExtractRefsV2(StatisticsViewV2):
         #   - page_spec should be a property of the analyzer class object instance
         #   - This will allow analyzers to be polymorphic, wherein they could process amy type of page/media
 
-        return self.analyzer.get_page_data(page_spec)
+        return self.wiki_analyzer.get_page_data(page_spec)
 

@@ -6,6 +6,15 @@ import config
 from bs4 import BeautifulSoup
 
 from src.models.v2.analyzers import IariAnalyzer
+from src.constants.constants import UrlArchiveMethod
+
+from src.helpers.iari_utils import iari_extract_root_domain
+# from src.helpers.signal_utils import get_signal_data_for_domain_old, filter_signal_data_old
+from src.helpers.signal_utils import get_signal_data_for_domain
+from src.helpers.archive_utils import get_archive_status
+# from src.helpers.status_utils import get_live_status, get_live_status_for_url
+from src.helpers.status_utils import get_live_status_for_url
+
 
 class GrokAnalyzerV2(IariAnalyzer):
     """
@@ -33,22 +42,25 @@ class GrokAnalyzerV2(IariAnalyzer):
         from src import app
 
         # seed return data
-        return_data = {
+        payload = {
             "media_type": "grokipedia_article"
         }
-        return_data.update(page_spec)
+        payload.update(page_spec)
 
         title = page_spec["page_title"].replace(" ", "_")
         use_local_cache = page_spec["use_local_cache"]
+
+        app.logger.debug(f"GrokAnalyzer: ***** extract_page_data: use_local_cache: {use_local_cache}")
 
         # fetch html from grokipedia file
         page_html = fetch_page_html(title, use_local_cache)
         page_data = extract_grok_data(page_html)
 
-        return_data["url_count"] = len(page_data["urls"])
-        return_data["urls"] = page_data["urls"]
+        payload["url_count"] = len(page_data["urls"])
+        payload["urls"] = page_data["urls"]
+        payload["url_dict"] = page_data["url_dict"]
 
-        return return_data
+        return payload
 
 
 def fetch_page_html(title, use_local_cache : bool = False):
@@ -58,18 +70,23 @@ def fetch_page_html(title, use_local_cache : bool = False):
     """
     from src import app
 
+    app.logger.debug(f"GrokAnalyzer: ***** fetch_page_html: use_local_cache: {use_local_cache}")
+
     if use_local_cache:
         target_file_name = f"grokipedia.page.{title.replace(' ', '-')}.html"
-        path = Path(f"{config.iari_cache_dir}/cache/{target_file_name}")
-        app.logger.debug(f"GrokAnalyzer: fetch_page_html: use_local_cache: {path}")
+        path = Path(f"{config.iari_cache_local_dir}{target_file_name}")
+        app.logger.debug(f"GrokAnalyzer: ***** fetch_page_html: using local cache of: {path}")
 
         # if not there, return None ???
         if not path.exists():
             raise FileNotFoundError(
-                f"GrokAnalyzer: fetch_page_html: Cache for file {target_file_name} not found ({path})."
+                f"GrokAnalyzer: fetch_page_html: Cache for file {target_file_name} not found (file path: {path})."
             )
 
-        return path.read_text(encoding="utf-8")  # return contents of file (hopefully html!)
+        app.logger.debug(f"GrokAnalyzer: ***** returning local cache for: {path}")
+        # app.logger.debug(f"GrokAnalyzer: path.read_text {path.read_text()}")
+        # return path.read_text(encoding="utf-8")  # return contents of file (hopefully html!)
+        return path.read_text()  # return contents of file (hopefully html!)
 
     # if not cached, capture from live web
     user_agent = "IARI, see https://github.com/internetarchive/iari"
@@ -81,6 +98,8 @@ def fetch_page_html(title, use_local_cache : bool = False):
     response = requests.get(target_url, headers=headers)
 
     app.logger.debug(f"GrokAnalyzer: fetch_page_html: returned with status code: {response.status_code}")
+    app.logger.debug(f"response.encoding: {response.encoding}")
+    app.logger.debug(f"response.apparent_encoding: {response.apparent_encoding}")
 
     if response.status_code == 200:
         response.raise_for_status()
@@ -99,6 +118,7 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
     for now, just returns urls from refs
     {
         "urls": list of urls in references section
+        "url_dict": dictionary of data for each url, including signal data and archive status
     }
 
     TODO:
@@ -110,18 +130,54 @@ def extract_grok_data(page_html) -> Dict[str, Any]:
         }
     """
 
+    def create_dict_for_url(url: str, idx: int) -> Dict[str, Any]:
+
+        # signal data based on domain of url link
+        domain = iari_extract_root_domain(url)
+        # signal_data = get_signal_data_for_domain_old(domain=domain, force_refresh=False)
+        signal_data = get_signal_data_for_domain(domain=domain, force_refresh=False)
+
+        # # filter signal_data["signals"] to lighten the load for response
+        # if 'signals' in signal_data:
+        #     filtered_signals = filter_signal_data_old(signal_data["signals"], "remove_nulls")
+        #     signal_data["signals"] = filtered_signals
+
+        archive_status = get_archive_status(url, "wayback")
+
+        # from src import app
+        # app.logger.debug(f"==> create_dict_for_url:: {url}, archive_status: {archive_status}")
+        live_status_data = get_live_status_for_url(url, force_refresh=False)  # add refresh=True if refresh set
+        live_status = live_status_data.get("live_status", None)  # Use .get() with default None if key missing
+
+        return {
+            "signal_data": signal_data,
+            "archive_data": archive_status,
+            "live_status": live_status,
+            "idx": idx
+        }
+
+    # extract list of reference links from References section of article
     soup = BeautifulSoup(page_html, "html.parser")
-
     urls = []
-
     for a in soup.select("div#references > ol > li > div > span > a[href]"):
         href = a["href"]
         if href.startswith(("http://", "https://")):
             urls.append(href)
+    final_urls = list(set(urls))  # deduplicate with set
+
+    # # let's put a temporary limit on the list for debugging purposes
+    # # Limit to first 10 URLs to reduce processing load while debugging
+    # final_urls = final_urls[:10]
+    # TODO put this as an option - to limit while testing; e.g. endpoint param "item_limit=10"
+
+    # Create a wiki signal dictionary for each URL in final_urls
+    url_dict = {url: create_dict_for_url(url, idx + 1) for idx, url in enumerate(final_urls)}
+
+    from src import app
+    app.logger.debug(f"==> extract_grok_data:: processed {len(url_dict)} urls")
 
     # send em back!
     return {
-        "urls": list(set(urls))  # deduplicate with set
+        "urls": final_urls,
+        "url_dict": url_dict
     }
-
-

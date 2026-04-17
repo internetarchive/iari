@@ -7,3 +7,4 @@ class JobV2(BaseModel):
     refresh: bool = False
     testing: bool = False
     hydrate: bool = False
+    tag: str = ""
