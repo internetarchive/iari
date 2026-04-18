@@ -9,7 +9,7 @@ ENV PIP_DEFAULT_TIMEOUT=100
 ENV POETRY_VIRTUALENVS_CREATE=false
 
 #RUN pip install --no-cache-dir poetry && poetry config virtualenvs.create false
-RUN pip install --no-cache-dir poetry \
+RUN pip install --no-cache-dir poetry
 # --no-cache-dir saves space in docker image
 
 COPY pyproject.toml poetry.lock ./
