@@ -15,3 +15,5 @@ venv/
 _notes/
 .env
 .DS_Store
+*.swp
+*.swo
