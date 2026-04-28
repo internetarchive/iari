@@ -26,6 +26,7 @@ COPY . ./
 RUN mkdir -p /tmp/wikicitations-api \
     json/articles \
     json/cache \
+    json/cache/signals \
     json/dois \
     json/pdfs \
     json/references \
