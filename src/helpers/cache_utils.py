@@ -49,7 +49,11 @@ def get_cache_file_path(cache_title: str, cache_type: CacheType, variety: str = 
 
     # error if type not found as a subdir
     if not os.path.isdir(cache_path):
-        raise UnknownValueError(f"Unsupported cache type \"{cache_type.value}\" (json path \"{cache_path}\" does not exist).")
+        try:
+            os.makedirs(cache_path, exist_ok=True)
+        except Exception as e:
+            raise UnknownValueError(
+                f"Unable to create cache directory \"{cache_path}\" for cache type \"{cache_type.value}\": {e}")
 
     cache_hash = get_cache_hash(cache_title.upper(), cache_type=cache_type)
 
