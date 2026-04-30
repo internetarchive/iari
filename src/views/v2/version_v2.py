@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
 
+from flask import request
+
 from flask_restful import Resource, abort  # type: ignore
 from marshmallow import Schema
 
@@ -58,10 +60,11 @@ class VersionV2(StatisticsViewV2):
             "version": version,
             "timestamp": int(timestamp),
             "isodate": str(isodate),
+            "host": request.host,
             "hash_test": {
                 "key": "free.speech.forever",
                 "hash": get_cache_hash("free.speech.forever"),
-            }
+            },
         }
 
         # raise WikipediaApiFetchError(f"Fake error 123")
