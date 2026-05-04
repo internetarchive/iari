@@ -201,9 +201,9 @@ class InsightsTarbV2(StatisticsViewV2):
         return {
             "first_day": fday.isoformat(),  # JSON safe
             "last_day": lday.isoformat(),   # JSON safe
-            "test_value_1": 1,
-            "test_value_2": 2,
-            "test_value_3": 3,
+            # "test_value_1": 1,
+            # "test_value_2": 2,
+            # "test_value_3": 3,
         }
 
 
