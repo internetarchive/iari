@@ -156,7 +156,7 @@ api.add_resource(GetBookReferenceV2, "/get_book_reference")
 
 # bigger picture
 api.add_resource(RefsLookupV2, "/refs_lookup")      # James' Wiki Citations Database
-api.add_resource(InsightsWebRxV2, "/insights")      # Stephen's numbers
+api.add_resource(InsightsWebRxV2, "/insights", "/webrx_insights")      # Stephen's numbers
 api.add_resource(InsightsTarbV2, "/tarb_insights")  # Sawood's numbers
 api.add_resource(InsightsWikiV2, "/wiki_insights")  # Wiki numbers (from stephen's wiki endpoint)
 
@@ -167,6 +167,7 @@ api.add_resource(EditRefV2, "/editref")             # edit wiki article in place
 api.add_resource(CheckUrls, "/check-urls")          # multi-url check
 api.add_resource(CheckDoi, "/check-doi")
 
+# deprecated???
 api.add_resource(All, "/statistics/all")
 api.add_resource(References, "/statistics/references")
 api.add_resource(Reference, "/statistics/reference/<string:reference_id>")
