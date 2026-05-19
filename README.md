@@ -115,11 +115,20 @@ This is a footnote reference -> content reference -> Short citation reference ak
 
 ## All endpoints
 
-/statistics/article *-extract ref tags and "free" citations*\
-/article *- context links, tries to match html to wikitext*\
-/extract_refs *- james's - best NB: should be changed to extract_wiki*
-/extract_grok *- extract refs from grokipedia article*
-/wiki_signals *- return signals for passed in domain (or extracted domain from url)*/
+| Endpoint            | Description                                                        | Notes |
+|---------------------|--------------------------------------------------------------------|-------|
+| /extract_refs       | james's - best NB: should be changed to extract_wiki               |current |
+| /statistics/article | extract ref tags and "free" citations                              | deprecated |
+| /article            | context links, tries to match html to wikitext                     | deprecated |
+| /extract_grok       | extract refs from grokipedia article                               |
+| /wiki_signals       | return signals for passed in domain (or extracted domain from url) |
+| /tarb_insights      | returns TARB insoght data akin to sawood's TARB insights           |
+| /wiki_insights      | Wiki numbers (from stephen's wiki endpoint)                        |
+| /webrx_insights     | Stephen's big table of numbers                                     |
+| /insights           | same as webrx_insights endpoint                                    |
+| /refs_lookup        | James' Wiki Citations Database                                     |
+| /check-urls         | Live status and opther information about a URL                     |
+
 
 ## Checking endpoints
 
