@@ -11,7 +11,6 @@ from marshmallow import Schema
 from src.models.exceptions import MissingInformationError, UnknownValueError
 
 from src.helpers.get_version import get_poetry_version, get_version_stamp
-# from src.helpers.signal_utils import get_signal_data_for_url, filter_signal_data_old, get_signal_data_for_domain
 from src.helpers.signal_utils import get_signal_data_for_url, get_signal_data_for_domain
 
 from src.views.v2.statistics import StatisticsViewV2

@@ -33,7 +33,7 @@ class TestArticle(TestCase):
     #     assert len(data["dehydrated_references"]) > 1
     #     assert len(data["urls"]) > 1
 
-    # todo use a specific revision instead when we support it
+    # TODO use a specific revision instead when we support it
     def test_valid_request_svwiki1(self):
         response = self.test_client.get(
             "/get-statistics?url=https://sv.wikipedia.org/wiki/Boy_Rozendal&testing=true&regex=Externa%20länkar&refresh=true"
@@ -58,10 +58,10 @@ class TestArticle(TestCase):
         assert len(data["dehydrated_references"]) == 4
         # print(data["urls"])
         assert len(data["urls"]) == 4
-        # fixme this fails because of https://github.com/internetarchive/iari/issues/836
+        # FIXME this fails because of https://github.com/internetarchive/iari/issues/836
         # assert len(data["fld_counts"]) == 4
 
-    # todo use a specific revision instead when we support it
+    # TODO use a specific revision instead when we support it
     # def test_valid_request_dawiki1(self):
     #     response = self.test_client.get(
     #         "/get-statistics?url=https://da.wikipedia.org/wiki/Kleptoparasitisme&testing=true&regex=test"

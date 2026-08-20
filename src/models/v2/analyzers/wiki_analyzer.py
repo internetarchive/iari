@@ -84,7 +84,7 @@ class WikiAnalyzerV2(IariAnalyzer):
 
 def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None, hydrate=False):
     """
-    raises Exception if errors anywhere along the way
+    raises Exception if errors
 
     returns a dict describing page and references
     {
@@ -130,7 +130,7 @@ def extract_references_from_page(title, domain="en.wikipedia.org", as_of=None, h
     # extract Wikicode objects "sections" from the wikitext
     sections = mw_extract_sections(results["wikitext"])
     # TODO make sections a collection of Section objects that are passed the mwPFH section object,
-    #   these Section objects should have active methods as well, like extract_refs, et al.
+    #   these Section objects should have active methods as well, like extract_refs, etc.
 
     refs = []
     """
@@ -219,7 +219,7 @@ def get_refs_from_section(section: Wikicode, hydrate=False) -> List[object]:
             })
 
             # process the url links in this ref
-            # NB may want to process templates iteratively here...
+            # NB may want to process templates recursively here...
             #   e.g.: process_templates_in_node(my_node)
             #       then can recurse template within template, etc.
             for url in extract_urls_from_text(wt):
@@ -243,6 +243,41 @@ def get_refs_from_section(section: Wikicode, hydrate=False) -> List[object]:
                 citation: place in article
                 reference: source to link to
                 references can have a cite_location array, describing where in the article it is referenced
+
+
+            if hydrate is True:  # only add if hydrate is True
+                my_ref["hydrate"] = True
+
+            my_ref.update({
+                "wikitext": wt,
+                "name": get_ref_attribute(node, "name"),  # fetch the name of the ref, if any
+                "urls": [],
+                "section": section_name,
+                "templates": get_templates_from_ref(node),
+            })
+
+            // ##     ##     ##     ##     ##     ##
+            // ##
+            // ##  THIS IS WHAT BECOMES DIFFERENT
+            // ##
+            // ##     ##     ##     ##     ##     ##
+                
+                    # process the url links in this ref
+                    for url in extract_urls_from_text(wt):
+                        my_ref["urls"].append(url)
+        
+                    [claim_text, claim_array] = get_claim(i, nodes)
+        
+                    my_ref["claim"] = claim_text
+
+            if hydrate:
+              # there is no claim. so hydrate can put something else extara in. if it makes sense
+                      # only add if hydrate is True
+                        my_ref["claim_array"] = claim_array
+
+            # and, yes, append refs with newly found and populated ref from sfn template
+            refs.append(my_ref)
+
             """
 
     return refs

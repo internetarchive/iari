@@ -32,7 +32,12 @@ class WikiSignalsV2(StatisticsViewV2):
     returns wiki signal data
 
     inputs: domain
-    (example inputs: https://en.wikipedia.org/wiki/Main_Page, en.wikipedia.org, wikipedia.org, wikimediafoundation.org)
+    (example inputs:
+        https://en.wikipedia.org/wiki/Main_Page,
+        en.wikipedia.org,
+        wikipedia.org,
+        wikimediafoundation.org
+        )
     (??? do we want url or domain? one or the other?)
     (domain will be extracted from domain if it looks a url)
 
