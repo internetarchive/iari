@@ -8,7 +8,8 @@ class RequestMethods(Enum):
 
 
 # Enums for check-url method
-class CheckMethod(Enum):  # TODO this should eventually be eliminated when check_url is deprecated
+class CheckMethod(Enum):
+    # TODO this should eventually be eliminated when check_url is deprecated
     IABOT = "IABOT"
     LIVEWEBCHECK = "LIVEWEBCHECK"
     CORENTIN = "CORENTIN"
