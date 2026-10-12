@@ -2,14 +2,15 @@ import logging
 
 from marshmallow import post_load
 from marshmallow.fields import Bool, Int, String
-from src.models.api.schema.refresh import BaseSchema
+# from src.models.api.schema.refresh import BaseSchema
+from src.models.v2.schema import BaseSchemaV2
 
 from src.models.v2.job.check_url_job_v2 import CheckUrlJobV2
 
 logger = logging.getLogger(__name__)
 
 
-class CheckUrlSchemaV2(BaseSchema):
+class CheckUrlSchemaV2(BaseSchemaV2):
     """This validates the patron input in the get request"""
 
     url = String(required=True)

@@ -62,8 +62,8 @@ class VersionV2(StatisticsViewV2):
             "isodate": str(isodate),
             "host": request.host,
             "hash_test": {
-                "key": "free.speech.forever",
-                "hash": get_cache_hash("free.speech.forever"),
+                "key": "speak.truth.forever",
+                "hash": get_cache_hash("speak.truth.forever"),
             },
         }
 
