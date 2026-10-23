@@ -56,14 +56,16 @@ class VersionV2(StatisticsViewV2):
         timestamp = datetime.timestamp(datetime.utcnow())
         isodate = datetime.isoformat(datetime.utcnow())
 
+        hash_test_key = "democracy.truth.forever"
+
         data = {
             "version": version,
             "timestamp": int(timestamp),
             "isodate": str(isodate),
             "host": request.host,
             "hash_test": {
-                "key": "speak.truth.forever",
-                "hash": get_cache_hash("speak.truth.forever"),
+                "key": hash_test_key,
+                "hash": get_cache_hash(hash_test_key),
             },
         }
 
