@@ -22,6 +22,8 @@ from flask_restful import Api, Resource  # type: ignore
 import config
 from src.models.exceptions import MissingInformationError, WikipediaApiFetchError
 
+# # new stuff oct 2026
+from src.views.v2.tapestry_zip_v2 import TapestryZipV2
 # # new stuff jun 2026
 from src.views.v2.help_v2 import HelpV2
 # # new stuff apr 2026
@@ -169,6 +171,7 @@ api.add_resource(InsightsWikiV2, "/wiki_insights")  # Wiki numbers (from stephen
 # Other
 api.add_resource(ArticleCacheV2, "/article_cache")  # for offline article fetching
 api.add_resource(EditRefV2, "/editref")             # edit wiki article in place
+api.add_resource(TapestryZipV2, "/tapestry_zip")    # build Tapestry import .zip from JSON spec
 
 api.add_resource(CheckUrls, "/check-urls")          # multi-url check
 api.add_resource(CheckDoi, "/check-doi")

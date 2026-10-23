@@ -37,6 +37,8 @@ Current version: **4.5.5** (from `pyproject.toml`).
   - [/insights, /webrx_insights](#insights--webrx_insights)
   - [/tarb_insights](#tarb_insights)
   - [/wiki_insights](#wiki_insights)
+- Tapestry
+  - [/tapestry_zip](#tapestry_zip)
 - [Code structure (v2)](#code-structure-v2)
 - [Known issues and caveats](#known-issues-and-caveats)
 
@@ -137,6 +139,7 @@ Many endpoints include some of the following metadata:
 | [`/insights`, `/webrx_insights`](#insights--webrx_insights) | GET | Wayback link statistics (WebRx / botwikiawk dashboard). |
 | [`/tarb_insights`](#tarb_insights) | GET | IABot (TARB) statistics summary. |
 | [`/wiki_insights`](#wiki_insights) | GET | Wikipedia external-URL statistics. |
+| [`/tapestry_zip`](#tapestry_zip) | POST | Build a Tapestry-importable .zip from a JSON spec. |
 
 ---
 
@@ -882,6 +885,38 @@ Wikipedia external-link statistics from the Wikimedia Commons dataset
   "external_urls": [ "..." ]
 }
 ```
+
+---
+
+## Tapestry
+
+### /tapestry_zip
+
+`POST /v2/tapestry_zip`
+
+Builds a Tapestry-importable `.zip` from a JSON spec sent as the request body
+(`Content-Type: application/json`). The spec is the shape of a Tapestry export's
+`root.json`; `version` is forced to 7, and `id`, `createdAt`, `updatedAt` and the other
+top-level defaults are filled in when omitted. The builder does structural validation
+(item types, required item fields, `webpageType` / `actionType` values, `groupId`
+references) but is not a substitute for Tapestry's own import validation.
+
+**View:** `tapestry_zip_v2.py` (`TapestryZipV2`) · **Builder:** `iarilib/tapestry_zip.py`
+(shared with the `iarilib/build-tapestry-zip.py` CLI)
+
+Unlike the CLI, `{"bundle": "<path>"}` file references are rejected: all media
+(`thumbnail`, item `source`s, thumbnail rendition `source`s) must be external URLs.
+
+**Example:**
+
+```
+curl -X POST -H "Content-Type: application/json" \
+  -d @spec.json -o tapestry.zip https://<host>/v2/tapestry_zip
+```
+
+**Response:** `200` with `application/zip`, as an attachment named after the spec's
+`title`. A missing or invalid JSON body, or a spec that fails validation, returns `400`
+with `{"error": "..."}`.
 
 ---
 
