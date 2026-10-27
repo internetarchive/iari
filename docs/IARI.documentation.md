@@ -5,7 +5,7 @@ their request schemas (`src/models/v2/schema`) and job models (`src/models/v2/jo
 Legacy endpoints (`/statistics/*`, `/check-urls`, `/check-doi`, `/check-url-archive`)
 are intentionally excluded.
 
-Current version: **4.5.5** (from `pyproject.toml`).
+Current version: **4.5.7** (from `pyproject.toml`).
 
 ---
 
@@ -81,8 +81,6 @@ and therefore accept these optional parameters in addition to their own:
 | `showall`  | bool    | Accepted, currently unused. |
 | `uselocal` | bool    | Accepted, currently unused. |
 
-Exceptions: `/check-url` and `/get_url_info` use the older `BaseSchema`, which only
-provides `refresh` and `testing` (plus their own parameters). `/help` takes no parameters.
 
 ### Errors
 
@@ -212,6 +210,9 @@ hashing behaves the same across deployments.
 Extracts all references (`<ref>` tags), URLs, section names and cite-ref anchors from
 a Wikipedia article, optionally as of a given point in time. Based on James Hare's
 extraction code. This is the preferred reference extraction endpoint.
+
+**NB**: This should be a mirror of James Hare's extract refs routine, or call
+his routine directly.
 
 **View:** `extract_refs_v2.py` (`ExtractRefsV2`) · **Schema:** `ExtractRefsSchemaV2` ·
 **Job:** `ExtractRefsJobV2` · **Analyzer:** `src/models/v2/analyzers/wiki_analyzer.py`
@@ -937,16 +938,16 @@ request ──► View (src/views/v2/*_v2.py)
             View logic ──► analyzers / helpers / file_io cache ──► JSON response
 ```
 
-| Directory | Contents |
-|-----------|----------|
-| `src/views/v2/` | Flask-RESTful resources, one per endpoint. Most subclass `StatisticsViewV2` (`src/views/v2/statistics/__init__.py`), which reads GET args or POST form data, validates it against `schema`, and loads it into `job`. |
-| `src/models/v2/schema/` | Marshmallow request schemas. `BaseSchemaV2` defines the common parameters. |
-| `src/models/v2/job/` | Pydantic job models. `JobV2` provides `refresh`, `testing`, `hydrate`, `tag`. `validate_fields()` handles cross-field rules and normalization. |
-| `src/models/v2/analyzers/` | `WikiAnalyzerV2` (Wikipedia reference extraction for `/extract_refs`) and `GrokAnalyzerV2` (Grokipedia, for `/extract_grok`). |
-| `src/models/v2/wikimedia/wikipedia/` | Article, section, reference and URL models used by `/article` and `/fetchrefs`. |
-| `src/models/v2/statistics/` | Pydantic models for article and reference statistics output. |
-| `src/models/v2/file_io/` | Disk cache readers/writers (`articlesV2/`, `articles/`, `urls/`, …). |
-| `src/models/v2/probes/` | Probe implementations used by `/probe`. |
+| Directory | Contents                                                                                                                                                                                                          |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `src/views/v2/` | Flask-RESTful resources, one per endpoint. Subclasses `StatisticsViewV2` (`src/views/v2/statistics/__init__.py`), which reads GET args or POST form data, validates it against `schema`, and loads it into `job`. |
+| `src/models/v2/schema/` | Marshmallow request schemas. `BaseSchemaV2` defines the common parameters.                                                                                                                                        |
+| `src/models/v2/job/` | Pydantic job models. `JobV2` provides `refresh`, `testing`, `hydrate`, `tag`. `validate_fields()` handles cross-field rules and normalization.                                                                    |
+| `src/models/v2/analyzers/` | `WikiAnalyzerV2` (Wikipedia reference extraction for `/extract_refs`) and `GrokAnalyzerV2` (Grokipedia, for `/extract_grok`).                                                                                     |
+| `src/models/v2/wikimedia/wikipedia/` | Article, section, reference and URL models used by `/article` and `/fetchrefs`.                                                                                                                                   |
+| `src/models/v2/statistics/` | Pydantic models for article and reference statistics output.                                                                                                                                                      |
+| `src/models/v2/file_io/` | Disk cache readers/writers (`articlesV2/`, `articles/`, `urls/`, …).                                                                                                                                              |
+| `src/models/v2/probes/` | Probe implementations used by `/probe`.                                                                                                                                                                           |
 
 ### Adding an endpoint
 
