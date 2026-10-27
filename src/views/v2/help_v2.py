@@ -136,6 +136,10 @@ class HelpV2(Resource):
                         "domain": "required - domain name",
                     },
                 },
+                "/tapestry_zip": {
+                    "method": "POST",
+                    "description": "Builds a Tapestry-importable .zip from a JSON spec sent as the request body (Content-Type: application/json). Media must be external URLs; bundled files are not supported.",
+                },
                 "/signals_docs": {
                     "method": "GET",
                     "description": "Returns WikiSignals signal definitions."
