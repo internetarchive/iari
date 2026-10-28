@@ -12,6 +12,7 @@ Current version: **4.5.7** (from `pyproject.toml`).
 ## Contents
 
 - [General conventions](#general-conventions)
+- [Deployment](#deployment)
 - [Endpoint summary](#endpoint-summary)
 - Service
   - [/help](#help)
@@ -158,8 +159,13 @@ to point to the server/port at:
 
 so that other applications can easily reference the IARI services with a url like: `https://iabot-api.archive.org/services/context/iari-stage/v2/version`
 
+### Production deployment
 
+Follow the same steps as to deploy Staging, but use `PORT=5000` in the .env file instead.
 
+IARI services will resolve to the production version of IARI server with the following url:
+
+ `https://iabot-api.archive.org/services/context/iari-prod/`
 
 
 
