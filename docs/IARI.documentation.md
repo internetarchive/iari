@@ -37,7 +37,7 @@ Current version: **4.5.7** (from `pyproject.toml`).
   - [/insights, /webrx_insights](#insights--webrx_insights)
   - [/tarb_insights](#tarb_insights)
   - [/wiki_insights](#wiki_insights)
-- Tapestry
+- Tapestry Support
   - [/tapestry_zip](#tapestry_zip)
 - [Code structure (v2)](#code-structure-v2)
 - [Known issues and caveats](#known-issues-and-caveats)
@@ -68,7 +68,7 @@ https://<host>/v2/<endpoint>
 
 ### Common parameters
 
-Most v2 endpoints inherit from `BaseSchemaV2` (`src/models/v2/schema/__init__.py`)
+All v2 endpoints inherit from `BaseSchemaV2` (`src/models/v2/schema/__init__.py`)
 and therefore accept these optional parameters in addition to their own:
 
 | Parameter  | Type    | Description |
@@ -113,6 +113,55 @@ Many endpoints include some of the following metadata:
 | `isodate`        | ISO 8601 date/time of the response. |
 
 ---
+
+## Deployment
+
+Docker containers are used to deploy the IARI api utilizing the top-level files `docker-compose.yml` and 
+`Dockerfile`. 
+
+Two environment variables must also be set in the top-level `.env` file:
+
+| Environment Variable | Description                               |
+|---------------------------|-------------------------------------------|
+| TESTDEADLINK_KEY=XXXXXXXXXXXXXXXXXXXXXXXXX            | Auth key for IABot's testdeadlink api     |
+| PORT=5001            | port IARI is served on (5088 for staging) |
+
+### Local deployment
+
+To start a local IARI api deployment, go to the top of the iare directory and run: 
+
+```docker compose up```
+
+### Staging deployment
+
+The IARI repo lives on the machine `researcher6.fnf.archive.org`, in the directory `/home/mojomonger/iari_stage`. 
+
+The `PORT` environment variable in the `.env` file must be set to 5088, to ensure correct proxy mapping (see below).
+
+At the top of the repo directory, run:
+
+```docker compose up -d```
+
+Using "-d" runs docker in detached mode so the terminal can continue to be used, or closed completely, allowing the api server to run  even after the terminal is closed.
+
+To stop the IARI server, run 
+
+```docker compose down```
+
+Owen, at the Internet Archive, has conveniently mapped 
+
+https://iabot-api.archive.org/services/context/iari-stage
+
+to point to the server/port at:
+
+```researcher6.fnf.archive.org:5088```
+
+so that other applications can easily reference the IARI services with a url like: `https://iabot-api.archive.org/services/context/iari-stage/v2/version`
+
+
+
+
+
 
 ## Endpoint summary
 
@@ -889,7 +938,7 @@ Wikipedia external-link statistics from the Wikimedia Commons dataset
 
 ---
 
-## Tapestry
+## Tapestry Support
 
 ### /tapestry_zip
 
