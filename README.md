@@ -1,601 +1,1033 @@
-# Internet Archive Reference Inventory [IARI](https://www.wikidata.org/wiki/Q117023013)
+# IARI API Documentation
 
-_This document is under development_
+This document covers the IARI endpoints implemented in `src/views/v2`, along with
+their request schemas (`src/models/v2/schema`) and job models (`src/models/v2/job`).
 
-This API is capable of fetching, extracting, transforming and storing
-reference information from Wikipedia articles as [structured data](https://www.wikidata.org/wiki/Q26813700).
+Legacy endpoints (`/statistics/*`, `/check-urls`, `/check-doi`, `/check-url-archive`)
+are intentionally excluded.
 
-The endpoints make it possible to get structured data about the references 
-from any Wikipedia article in any language version.
+Current version: **4.5.9** (from `pyproject.toml`).
 
-IARI was developed as part of the [Turn All References Blue](https://www.wikidata.org/wiki/Q115136754)
-project of the [Wayback Machine](https://www.wikidata.org/wiki/Q648266), an integral part of the
-[Internet Archive](https://www.wikidata.org/wiki/Q461). 
+---
 
-# Author
-Mark Graham is the director of the project.\
-The primary developer is currently [Chris Lombardi](https://en.wikipedia.org/wiki/User:Iamojo) (under the 
-nom de silico "mojomonger").\
-Initial development was done by [Dennis Priskorn](https://www.wikidata.org/wiki/Q111016131).
+## Contents
 
-# Background
-There are [at least 200 million references in at least 40 million articles](
-https://ieeexplore.ieee.org/abstract/document/9908858)
-and together with the article text in the Wikipedias
-one of the most valuable collections of knowledge ever made by humans,
-see [size comparison](https://en.wikipedia.org/wiki/Wikipedia:Size_comparisons).
+- [General conventions](#general-conventions)
+- [Deployment](#deployment)
+- [Endpoint summary](#endpoint-summary)
+- Service
+  - [/help](#help)
+  - [/version](#version)
+- Reference extraction
+  - [/extract_refs](#extract_refs)
+  - [/extract_grok](#extract_grok)
+  - [/fetchrefs](#fetchrefs)
+  - [/refs_lookup](#refs_lookup)
+  - [/editref](#editref)
+  - [/get_book_reference](#get_book_reference)
+- Articles
+  - [/article](#article)
+  - [/article_cache](#article_cache)
+- URLs and sources
+  - [/check-url](#check-url)
+  - [/get_url_info](#get_url_info)
+  - [/probe](#probe)
+  - [/signals](#signals)
+  - [/wiki_signals](#wiki_signals)
+  - [/signals_docs](#signals_docs)
+- Insights
+  - [/insights, /webrx_insights](#insights--webrx_insights)
+  - [/tarb_insights](#tarb_insights)
+  - [/wiki_insights](#wiki_insights)
+- Tapestry Support
+  - [/tapestry_zip](#tapestry_zip)
+- [Code structure (v2)](#code-structure-v2)
+- [Known issues and caveats](#known-issues-and-caveats)
 
-Wikimedia movement currently does not have good and effective tools 
-to help editors keep up the quality of references over time. 
-The references are stored in templates that differ between language versions of Wikipedia 
-which makes it hard for tool developers to develop good tools that work well 
-across different language versions.
+---
 
-# Goals
-The endpoint providing a detailed analysis of a Wikipedia article and it's references
-enable wikipedians to get an overview of the state of the references and using the API it is
-possible for the Wikimedia tech-community to build tools that help make it easier to curate 
-and improve the references.
+## General conventions
 
-This is part of a wider initiative help raise the quality of references in
-Wikipedia to enable everyone in the world to make decisions
-based on trustworthy knowledge
-that is derived from trustworthy sources.
+### Base URL
 
-# Stepping stone for a (graph) database of all references 
-This project is a part of the [Wikicite initiative](http://wikicite.org/).
+All routes are registered under the `/v2` prefix (`src/__init__.py`):
 
-On the longer term Turn All References Blue project is planning on populating a database
-based on the data we extract. 
-This part of the effort is led by [James Hare](https://www.wikidata.org/wiki/Q23041486).
-
-The end goal is a large database with all references from all Wikipedias. 
-We call it the Wikipedia Citations Database (WCD).
-
-# Features
-
-IARI features a number of endpoints that help patrons
-get structured data about references in a Wikipedia article:
-
-* an _article_ endpoint which analyzes a given article and returns basic statistics about it
-* a _references_ endpoint which gives back all ids of references found
-* a _reference_ endpoint which gives back all details about a reference including templates and wikitext
-* a _check-url_ endpoint which looks up the URL and gives back
-  standardized information about its status
-* a _check-doi_ endpoint which looks up the DOI and gives back
-  standardized information about it from [FatCat](https://fatcat.wiki/), OpenAlex and Wikidata
-  including abstract, retracted status, and more.
-* a _pdf_ endpoint which extracts links both from annotations and free text from PDFs.
-* a _xhtml_ endpoint which extracts links both from any XHTML-page.
-
-# Limitations
-
-See known limitations under each endpoint below.
-
-# Supported Wikipedias
-
-Currently we support a handful of the 200+ language versions of Wikipedia
-but we plan on extending the support to all Wikipedia language versions
-and you can help us by submitting sections to search for references in issues and
-pull requests.
-
-We also would like to support non-Wikimedia wikis using MediaWiki in the future
-and perhaps also any webpage on the internet with outlinks (e.g. news articles).
-
-## Wikipedia templates
-
-English Wikipedia for example has hundreds of special reference templates in use
-and a handful of widely used generic templates.
-WARI exposes them all when found in a reference.
-
-## Reference types detected by the ArticleAnalyzer
-
-We support detecting the following types. A reference cannot have multiple types.
-We distinguish between two main types of references:
-
-1) **named reference** - type of reference with only a name and no content e.g. '<ref name="INE"/>' (Unsupported
-   beyond counting because we have not decided if they contain any value)
-2) **content reference** - reference with any type of content
-    1) **general reference** - subtype of content reference which is outside a <ref></ref> and usually found in
-       sections called "Further reading" or "Bibliography"
-       (unsupported but we want to support it, see
-       https://github.com/internetarchive/wcdimportbot/labels/general%20reference)
-       ![image](https://user-images.githubusercontent.com/68460690/208092363-ba4b5346-cad7-495e-8aff-1aa4f2f0161e.png)
-    2) **footnote reference** - subtype of content reference which is inside a <ref> (supported partially, see below)
-
-Example of a URL-template reference:
-`<ref>Mueller Report, p12 {{url|http://example.com}} {{bare url inline}}</ref>`
-This is a content reference -> a footnote reference -> a mixed reference with a URL template.
-
-Example of an plain text reference:
-`<ref>Muller Report, p12</ref>`
-This is a footnote reference -> content reference -> Short citation reference aka naked named footnote.
-
-# Endpoints
-
-## All endpoints
-
-| Endpoint            | Description                                                       | Notes |
-|---------------------|-------------------------------------------------------------------|-------|
-| /extract_refs       | james's - best NB: should be changed to extract_wiki              |current |
-| /statistics/article | extract ref tags and "free" citations                             | deprecated |
-| /article            | context links, tries to match html to wikitext                    | deprecated |
-| /extract_grok       | extract refs from grokipedia article                              |
-| /wiki_signals       | return signals for passed in domain (or extracted domain from url) |
-| /tarb_insights      | returns TARB insoght data akin to sawood's TARB insights          |
-| /wiki_insights      | Wiki numbers (from stephen's wiki endpoint)                       |
-| /webrx_insights     | Stephen's big table of numbers                                    |
-| /insights           | same as webrx_insights endpoint                                   |
-| /refs_lookup        | James' Wiki Citations Database                                    |
-| /check-urls         | Live status and other information about a URL                     |
-
-
-## Checking endpoints
-
-### Check URL
-
-This endpoint requires an authkey for the testdeadlink API from Internet Archive to work.
-It looks for the environment variable TESTDEADLINK_KEY.
-
-the check-url endpoint accepts the following parameters:
-
-* url (string, mandatory)
-* refresh (boolean, optional)
-* testing (boolean, optional)
-* timeout (int, optional)
-* debug (boolean, optional)
-
-On error it returns 400.
-
-It returns json similar to 
 ```
+https://<host>/v2/<endpoint>
+```
+
+### Request parameters
+
+- **GET** requests take parameters from the query string.
+- **POST** requests take parameters from **form data** (`application/x-www-form-urlencoded`
+  or `multipart/form-data`). JSON request bodies are **not** read.
+- Parameters are validated with marshmallow. **Unknown parameters are rejected**:
+  passing a parameter the endpoint's schema does not define returns a validation error.
+- Boolean parameters accept marshmallow's truthy/falsy strings, e.g. `true`/`false`, `1`/`0`,
+  `yes`/`no`, `on`/`off`.
+- Pipe-delimited list parameters (`pages`, `probes`, `parts`) use `|` as the separator,
+  e.g. `probes=verifyi|trust_project`.
+
+### Common parameters
+
+All v2 endpoints inherit from `BaseSchemaV2` (`src/models/v2/schema/__init__.py`)
+and therefore accept these optional parameters in addition to their own:
+
+| Parameter  | Type    | Description |
+|------------|---------|-------------|
+| `refresh`  | bool    | Ignore any cached result, fetch fresh data, and re-cache it. |
+| `testing`  | bool    | Testing mode. For some endpoints, skips writing results to the cache. |
+| `hydrate`  | bool    | Return extra/expanded detail where an endpoint supports it. |
+| `tag`      | string  | Pass-through value echoed back in some responses to help identify the request. |
+| `timeout`  | int ≥ 0 | Timeout in seconds for outbound requests, where used. |
+| `showall`  | bool    | Accepted, currently unused. |
+| `uselocal` | bool    | Accepted, currently unused. |
+
+
+### Errors
+
+Validation failures and runtime errors return HTTP **500** with one of these bodies,
+depending on the endpoint:
+
+```json
+{ "error": "Missing Information Error: {'page_title': ['Missing data for required field.']}" }
+```
+
+```json
+{ "errors": [ { "error": "MissingInformationError", "details": "page_title or wikitext must be specified" } ] }
+```
+
+The second (`errors` array) form is used by `/extract_refs` and `/extract_grok`.
+Unhandled exceptions are caught by the app-level handler and return 500 with an
+`errors` array. Unknown routes return `{"error": "Endpoint '<path>' not found"}`.
+
+### Common response fields
+
+Many endpoints include some of the following metadata:
+
+| Field            | Description |
+|------------------|-------------|
+| `iari_version`   | IARI version string from `pyproject.toml`. |
+| `iari_command`   | Name of the command that produced the response. |
+| `endpoint`       | Flask endpoint name that handled the request. |
+| `execution_time` | Processing time, formatted like `"1.2345 seconds"`. |
+| `timestamp`      | Unix timestamp (int) or `YYYY-MM-DD HH:MM:SS` string, depending on endpoint. |
+| `isodate`        | ISO 8601 date/time of the response. |
+
+---
+
+## Deployment
+
+Docker containers are used to deploy the IARI api utilizing the top-level files `docker-compose.yml` and 
+`Dockerfile`. 
+
+Two environment variables must also be set in the top-level `.env` file:
+
+| Environment Variable | Description                               |
+|---------------------------|-------------------------------------------|
+| TESTDEADLINK_KEY=XXXXXXXXXXXXXXXXXXXXXXXXX            | Auth key for IABot's testdeadlink api     |
+| PORT=5001            | port IARI is served on (5088 for staging) |
+
+### Local deployment
+
+To start a local IARI api deployment, go to the top of the iare directory and run: 
+
+```docker compose up```
+
+### Staging deployment
+
+The IARI repo lives on the machine `researcher6.fnf.archive.org`, in the directory `/home/mojomonger/iari_stage`. 
+
+The `PORT` environment variable in the `.env` file must be set to 5088, to ensure correct proxy mapping (see below).
+
+At the top of the repo directory, run:
+
+```docker compose up -d```
+
+Using "-d" runs docker in detached mode so the terminal can continue to be used, or closed completely, allowing the api server to run  even after the terminal is closed.
+
+To stop the IARI server, run 
+
+```docker compose down```
+
+Owen, at the Internet Archive, has conveniently mapped 
+
+https://iabot-api.archive.org/services/context/iari-stage
+
+to point to the server/port at:
+
+```researcher6.fnf.archive.org:5088```
+
+so that other applications can easily reference the IARI services with a url like: `https://iabot-api.archive.org/services/context/iari-stage/v2/version`
+
+### Production deployment
+
+Follow the same steps as to deploy Staging, but use `PORT=5000` in the .env file instead.
+
+IARI services will resolve to the production version of IARI server with the following url:
+
+ `https://iabot-api.archive.org/services/context/iari-prod/`
+
+
+
+## Endpoint summary
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
+| [`/help`](#help) | GET | Basic API help. |
+| [`/version`](#version) | GET | IARI version and host info. |
+| [`/extract_refs`](#extract_refs) | GET, POST | Extract references, URLs and cite-refs from a Wikipedia article. **Preferred extraction endpoint.** |
+| [`/extract_grok`](#extract_grok) | GET, POST | Extract URLs from a Grokipedia article. |
+| [`/fetchrefs`](#fetchrefs) | GET, POST | Fetch raw reference wikitext for one or more English Wikipedia pages. |
+| [`/refs_lookup`](#refs_lookup) | GET, POST | Look up a URL in the Wikipedia Citations Database. |
+| [`/editref`](#editref) | GET, POST | Replace a reference string in wikitext and return the result. |
+| [`/get_book_reference`](#get_book_reference) | GET, POST | Book reference lookup (placeholder). |
+| [`/article`](#article) | GET | Full analysis and statistics for a Wikipedia article. |
+| [`/article_cache`](#article_cache) | GET | Return a previously cached article analysis by IARI id. |
+| [`/check-url`](#check-url) | GET | Check the live status of a URL. |
+| [`/get_url_info`](#get_url_info) | GET | Combined URL information by "parts" (in development). |
+| [`/probe`](#probe) | GET | Run reliability probes against a URL. |
+| [`/signals`](#signals) | GET | WikiSignals data for a domain or URL. |
+| [`/wiki_signals`](#wiki_signals) | GET | WikiSignals data for a domain, wrapped per domain. |
+| [`/signals_docs`](#signals_docs) | GET | WikiSignals signal definitions. |
+| [`/insights`, `/webrx_insights`](#insights--webrx_insights) | GET | Wayback link statistics (WebRx / botwikiawk dashboard). |
+| [`/tarb_insights`](#tarb_insights) | GET | IABot (TARB) statistics summary. |
+| [`/wiki_insights`](#wiki_insights) | GET | Wikipedia external-URL statistics. |
+| [`/tapestry_zip`](#tapestry_zip) | POST | Build a Tapestry-importable .zip from a JSON spec. |
+
+---
+
+## Service
+
+### /help
+
+`GET /v2/help`
+
+Returns a summary of every v2 endpoint. No parameters.
+
+**View:** `src/views/v2/help_v2.py` (`HelpV2`)
+
+```json
 {
-    "first_level_domain": "github.com",
-    "fld_is_ip": false,
-    "url": "https://github.com/internetarchive/iari/issues",
-    "scheme": "https",
-    "netloc": "github.com",
-    "tld": "com",
-    "malformed_url": false,
-    "malformed_url_details": null,
-    "archived_url": "",
-    "wayback_machine_timestamp": "",
-    "is_valid": true,
-    "request_error": false,
-    "request_error_details": "",
-    "dns_record_found": true,
-    "dns_no_answer": false,
-    "dns_error": false,
-    "status_code": 200,
-    "testdeadlink_status_code": 200,
-    "timeout": 2,
-    "dns_error_details": "",
-    "response_headers": {
-        "Server": "GitHub.com",
-        "Date": "Mon, 12 Jun 2023 12:00:28 GMT",
-        "Content-Type": "text/html; charset=utf-8",
-        "Vary": "X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame, Accept-Encoding, Accept, X-Requested-With",
-        "ETag": "W/\"03d14b06291209737bb700da5adf5968\"",
-        "Cache-Control": "max-age=0, private, must-revalidate",
-        "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
-        "X-Frame-Options": "deny",
-        "X-Content-Type-Options": "nosniff",
-        "X-XSS-Protection": "0",
-        "Referrer-Policy": "no-referrer-when-downgrade",
-        "Content-Security-Policy": "default-src 'none'; base-uri 'self'; block-all-mixed-content; child-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/; connect-src 'self' uploads.github.com objects-origin.githubusercontent.com www.githubstatus.com collector.github.com raw.githubusercontent.com api.github.com github-cloud.s3.amazonaws.com github-production-repository-file-5c1aeb.s3.amazonaws.com github-production-upload-manifest-file-7fdce7.s3.amazonaws.com github-production-user-asset-6210df.s3.amazonaws.com cdn.optimizely.com logx.optimizely.com/v1/events *.actions.githubusercontent.com productionresultssa0.blob.core.windows.net/ productionresultssa1.blob.core.windows.net/ productionresultssa2.blob.core.windows.net/ productionresultssa3.blob.core.windows.net/ productionresultssa4.blob.core.windows.net/ wss://*.actions.githubusercontent.com github-production-repository-image-32fea6.s3.amazonaws.com github-production-release-asset-2e65be.s3.amazonaws.com insights.github.com wss://alive.github.com; font-src github.githubassets.com; form-action 'self' github.com gist.github.com objects-origin.githubusercontent.com; frame-ancestors 'none'; frame-src viewscreen.githubusercontent.com notebooks.githubusercontent.com; img-src 'self' data: github.githubassets.com media.githubusercontent.com camo.githubusercontent.com identicons.github.com avatars.githubusercontent.com github-cloud.s3.amazonaws.com objects.githubusercontent.com objects-origin.githubusercontent.com secured-user-images.githubusercontent.com/ user-images.githubusercontent.com/ private-user-images.githubusercontent.com opengraph.githubassets.com github-production-user-asset-6210df.s3.amazonaws.com customer-stories-feed.github.com spotlights-feed.github.com *.githubusercontent.com; manifest-src 'self'; media-src github.com user-images.githubusercontent.com/ secured-user-images.githubusercontent.com/ private-user-images.githubusercontent.com; script-src github.githubassets.com; style-src 'unsafe-inline' github.githubassets.com; worker-src github.com/assets-cdn/worker/ gist.github.com/assets-cdn/worker/",
-        "Content-Encoding": "gzip",
-        "Set-Cookie": "_gh_sess=Kt%2FbTAsPUlbQMLzfnhA6DaZ%2FrXJio0ITQdf7cs83MUTpiSwa0ALcco5FkiN3Gne6MBf%2Fzf001SNsFAAt1IXJVU9kFP5EOV1P1UZsps9JI2dyn9lAG0Zt%2FKocfikDwnYU03uuJAmDpI82mOt6L0ULDzxEm1hc0vCMRy72T8saF%2Ba8qoSFPJR296%2FjZVoqrg9cHzAnYr5uo0cj9dQL6pGfoDreWMMV41kG7S%2FbwvU5%2FTWkJnmYTK8XoioOtrVjnvQ%2Fw%2FNuMVh4dkEEeprnmfe8%2Bw%3D%3D--CpOcS3YATJ%2FQZh%2Fk--zuEd5QQlr0A8Pif7t41ywQ%3D%3D; Path=/; HttpOnly; Secure; SameSite=Lax, _octo=GH1.1.1345489649.1686571228; Path=/; Domain=github.com; Expires=Wed, 12 Jun 2024 12:00:28 GMT; Secure; SameSite=Lax, logged_in=no; Path=/; Domain=github.com; Expires=Wed, 12 Jun 2024 12:00:28 GMT; HttpOnly; Secure; SameSite=Lax",
-        "Accept-Ranges": "bytes",
-        "Transfer-Encoding": "chunked",
-        "X-GitHub-Request-Id": "4C01:6326:116FFBB:1199F4E:648708DB"
+  "name": "IARI API",
+  "description": "Help endpoint for available API routes and basic usage.",
+  "base_path": "/v2",
+  "documentation": "https://github.com/internetarchive/iari/blob/main/docs/IARI.documentation.md",
+  "common_parameters": { "refresh": "bool - ...", "testing": "...", "hydrate": "...", "tag": "...", "timeout": "..." },
+  "endpoints": {
+    "/version": { "method": "GET", "description": "Returns the current IARI API version." },
+    "/extract_refs": {
+      "method": "GET, POST",
+      "description": "Extracts references, URLs, section names and cite-refs from a Wikipedia article.",
+      "parameters": { "page_title": "required - article title", "...": "..." }
     },
-    "detected_language": "en",
-    "detected_language_error": false,
-    "detected_language_error_details": "",
-    "timestamp": 1686564033,
-    "isodate": "2023-06-12T12:00:33.941494",
-    "id": "7e8230ce"
+    "...": "one entry per route"
+  }
 }
 ```
 
-When the debug parameter is true the text from the resource is returned. 
-This text is the basis for the language detection. 
+The `parameters` object is included for endpoints that take endpoint-specific parameters.
 
-#### Known limitations
-You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
+---
 
-#### Status codes
-The status_code attribute is not as reliable as the testdeadlink_status_code.
+### /version
 
-Sometimes we get back a 403 because an intermediary like Cloudflare detected that we are not a person behind a browser
-doing the request. We don't have any ways to detect these soft200s.
+`GET /v2/version`
 
-Also sometimes a server returns status code 200 but the content is an error page or any other content than what the
-person asking for the information wants. These are called soft404s and we currently do not make any effort to detect
-them.
+Returns the running IARI version and server information.
 
-#### Language detection
-We need at least 200 characters to be able to reliably detect the language.
+**View:** `version_v2.py` (`VersionV2`) · **Schema:** `VersionSchemaV2` · **Job:** `VersionJobV2`
 
-## Statistics
+**Parameters:** common parameters only.
 
-### article
+**Response:**
 
-the statistics/article endpoint accepts the following parameters:
+```json
+{
+  "version": "4.5.5",
+  "timestamp": 1760140800,
+  "isodate": "2026-10-11T00:00:00.000000",
+  "host": "iari.example.org",
+  "hash_test": { "key": "free.speech.forever", "hash": "<cache hash>" }
+}
+```
 
-* url (mandatory)
-* refresh (bool, optional)
-* testing (bool, optional)
-* revision (int, optional, defaults to the most recent) 
-* dehydrate (bool, optional, defaults to True) 
-* regex (string, mandatory) 
+`hash_test` shows the cache-key hash for a fixed string, so you can check that cache
+hashing behaves the same across deployments.
 
-On error it returns 400. On timeout it returns 504 or 502
-(this is a bug and should be reported).
+---
 
-Regex is a string of section headers separated by "|" to analyze for general references. 
-For enwiki a string like 
-"bibliography|further%20reading|works%20cited|sources|external%20links"
-catches most references outside <ref>-tags.
+## Reference extraction
 
-Dehydrate means it returns a limited reference object. 
-Currently the keys "templates" and "url_objects" are 
-being removed to make sure we don't return a huge blob of json by default.
+### /extract_refs
 
-If you set dehydrate to False the whole reference will be returned.
-For an article like https://en.wikipedia.org/wiki/United_States with >600 references
-1,3 MB of JSON is returned.
+`GET | POST /v2/extract_refs`
 
-It will return json [like this](https://gist.github.com/dpriskorn/aac368490f46016f8fb3bd3cf378e98b) (by default with dehydrated references) 
-and [like this](https://gist.github.com/dpriskorn/b0e4bf7b9b098c5d6f59664450d70cc2) with dehydrate set to false.
+Extracts all references (`<ref>` tags), URLs, section names and cite-ref anchors from
+a Wikipedia article, optionally as of a given point in time. Based on James Hare's
+extraction code. This is the preferred reference extraction endpoint.
 
-#### Known limitations
+**NB**: This should be a mirror of James Hare's extract refs routine, or call
+his routine directly.
 
-* the general references parsing relies on 2 things:
-    * a manually supplied list of sections to search using the 'regex' to the article and all endpoints. The list is
-      case insensitive and should be delimited by the '|' character.
-    * that every line with a general reference begins with a star character (*)
-* URLs in comments are not currently supported. Comments begin with <!-- and end with -->. 
+**View:** `extract_refs_v2.py` (`ExtractRefsV2`) · **Schema:** `ExtractRefsSchemaV2` ·
+**Job:** `ExtractRefsJobV2` · **Analyzer:** `src/models/v2/analyzers/wiki_analyzer.py`
 
-Any line that doesn't begin with a star is ignored when parsing lines in the sections specified by the regex.
+**Parameters:**
 
-### references
+| Parameter    | Type   | Required | Default            | Description |
+|--------------|--------|----------|--------------------|-------------|
+| `page_title` | string | yes\*    | `""`               | Article title, e.g. `Easter Island`. Spaces are converted to underscores. |
+| `domain`     | string | no       | `en.wikipedia.org` | Wiki host to fetch from. |
+| `as_of`      | string | no       | now                | Fetch the revision current as of this ISO 8601 timestamp, e.g. `2024-01-01T00:00:00Z`. |
+| `wikitext`   | string | no\*     | `""`               | Accepted by the schema, but not used for extraction yet (see [caveats](#known-issues-and-caveats)). |
+| `hydrate`    | bool   | no       | `false`            | Adds `claim_array` and `hydrate: true` to each reference. |
 
-the statistics/references endpoint accepts the following parameters:
+\* Either `page_title` or `wikitext` is required. In practice, `page_title` is needed.
 
-* wari_id (mandatory, str) (this is obtained from the article endpoint)
-* all (optional, boolean) (default: false)
-* offset (optional, int) (default: 0)
-* chunk_size (optional, int) (default: 10)
-
-On error it returns 400. If data is not found it returns 404.
-
-It will return json similar to:
+**Example:**
 
 ```
+GET /v2/extract_refs?page_title=Easter_Island&as_of=2024-01-01T00:00:00Z
+```
+
+**Response:**
+
+```json
 {
-    "total": 31,
-    "references": [
-        {
-            "id": "cfa8b438",
-            "template_names": [],
-            "wikitext": "<ref name = \"Hartmann1\" />",
-            "type": "footnote",
-            "footnote_subtype": "named",
-            "flds": [],
-            "urls": [],
-            "templates": [],
-            "titles": [],
-            "section": "History",
-            "served_from_cache": true
-        },
+  "iari_version": "4.5.5",
+  "iari_command": "extract_refs",
+  "page_errors": null,
+  "execution_time": "2.1043 seconds",
+  "hydrate": false,
+  "media_type": "wiki_article",
+  "page_title": "Easter_Island",
+  "domain": "en.wikipedia.org",
+  "as_of": "2024-01-01T00:00:00Z",
+  "page_id": "9692",
+  "revision_id": "1192785042",
+  "section_names": ["", "Etymology", "History", "..."],
+  "url_count": 210,
+  "urls": ["https://...", "..."],
+  "reference_count": 180,
+  "references": [
+    {
+      "wikitext": "<ref name=\"foo\">{{cite web |url=... |title=...}}</ref>",
+      "name": "foo",
+      "urls": ["https://..."],
+      "section": "History",
+      "templates": [ { "name": "cite web", "parameters": { "url": "...", "title": "..." } } ],
+      "template_names": ["cite web"],
+      "titles": ["..."],
+      "claim": "Text in the article that precedes this reference."
+    }
+  ],
+  "cite_refs_count": 220,
+  "cite_refs": [ "..." ]
+}
+```
+
+- `urls` is the de-duplicated set of URLs found across all references.
+- `cite_refs` comes from the article's rendered HTML (`iarilib` `extract_cite_refs`) and
+  maps the in-text citation anchors to their references.
+- `{{sfn}}` short-footnote templates are not yet extracted as references.
+
+---
+
+### /extract_grok
+
+`GET | POST /v2/extract_grok`
+
+Extracts URLs from a [Grokipedia](https://grokipedia.com) article.
+
+**View:** `extract_grok_v2.py` (`ExtractGrokV2`) · **Schema:** `ExtractGrokSchemaV2` ·
+**Job:** `ExtractGrokJobV2` · **Analyzer:** `src/models/v2/analyzers/grok_analyzer.py`
+
+**Parameters:**
+
+| Parameter         | Type   | Required | Default | Description |
+|-------------------|--------|----------|---------|-------------|
+| `page_title`      | string | yes      |         | Grokipedia page title. Fetched from `https://grokipedia.com/page/<page_title>`. |
+| `use_local_cache` | bool   | no       | `false` | Read the page HTML from the local cache directory (`config.iari_cache_local_dir`) instead of the live site. |
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "extract_grok",
+  "page_errors": null,
+  "timestamp": "2026-10-11 12:00:00",
+  "execution_time": "0.8120 seconds",
+  "use_local_cache": false,
+  "media_type": "grokipedia_article",
+  "page_title": "Easter_Island",
+  "url_count": 42,
+  "urls": ["https://...", "..."],
+  "url_dict": { "...": "..." }
+}
+```
+
+If fetching or parsing fails, the endpoint still returns 200. The error message is
+placed in `page_errors` and the data fields are `null`.
+
+---
+
+### /fetchrefs
+
+`GET | POST /v2/fetchrefs`
+
+Fetches the raw reference wikitext for one or more English Wikipedia pages.
+
+**View:** `fetchrefs_v2.py` (`FetchRefsV2`) · **Schema:** `FetchRefsSchemaV2` · **Job:** `FetchRefsJobV2`
+
+**Parameters:**
+
+| Parameter    | Type   | Required | Default  | Description |
+|--------------|--------|----------|----------|-------------|
+| `pages`      | string | yes\*    |          | Pipe-delimited list of page titles, e.g. `Easter_Island\|Moai`. |
+| `which_wiki` | string | no       | `enwiki` | Echoed back in the response. Pages are always fetched from `en.wikipedia.org`. |
+| `wikitext`   | string | no\*     |          | Accepted, but not processed yet. |
+
+\* Either `pages` or `wikitext` is required.
+
+**Response:**
+
+```json
+{
+  "pages": [
+    {
+      "page_title": "Easter_Island",
+      "which_wiki": "enwiki",
+      "refs": [
+        { "name": "foo", "wikitext": "<ref name=\"foo\">...</ref>" }
+      ]
+    },
+    {
+      "page_title": "No_Such_Page",
+      "which_wiki": "enwiki",
+      "error": "Page data error: ..."
+    }
+  ]
+}
+```
+
+Errors for individual pages are reported in that page's entry. They don't fail the whole request.
+
+---
+
+### /refs_lookup
+
+`GET | POST /v2/refs_lookup`
+
+Looks up a URL in James Hare's Wikipedia Citations Database
+(`https://wikipediacitations.scatter.red/`) and returns the Wikipedia references that cite it.
+
+**View:** `refs_lookup_v2.py` (`RefsLookupV2`) · **Schema:** `RefsLookupSchemaV2` · **Job:** `RefsLookupJobV2`
+
+**Parameters:**
+
+| Parameter | Type   | Required | Default | Description |
+|-----------|--------|----------|---------|-------------|
+| `url`     | string | yes      |         | The cited URL to look up (non-empty). |
+| `raw`     | bool   | no       | `false` | Return raw reference wikitext. |
+| `output`  | string | no       | `JSON`  | `JSON`, `HTML` or `TSV` (case-insensitive). `TSV` cannot be combined with `raw=true`. |
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "refs_lookup",
+  "execution_time": "0.5021 seconds",
+  "url": "https://example.com/article",
+  "use_raw": false,
+  "refs": { "...": "data returned by the citations database" }
+}
+```
+
+If the citations database returns a non-200 status, `refs` is
+`{"status": "NOT OK", "data": ["got bad response from json fetch for refs lookup"]}`.
+
+---
+
+### /editref
+
+`GET | POST /v2/editref`
+
+Replaces every occurrence of `old_ref` with `new_ref` in some wikitext and returns the
+edited wikitext. The source is either supplied directly or fetched from a Wikipedia page.
+The endpoint does **not** save anything to Wikipedia.
+
+**View:** `editref_v2.py` (`EditRefV2`) · **Schema:** `EditRefSchemaV2` · **Job:** `EditRefJobV2`
+
+**Parameters:**
+
+| Parameter       | Type   | Required | Description |
+|-----------------|--------|----------|-------------|
+| `old_ref`       | string | yes      | Exact text to find. |
+| `new_ref`       | string | yes      | Replacement text. |
+| `source`        | string | yes\*    | Wikitext to edit. Takes precedence over `wiki_page_url`. |
+| `wiki_page_url` | string | yes\*    | Full article URL, e.g. `https://en.wikipedia.org/wiki/Easter_Island`. The current wikitext is fetched from the MediaWiki REST API. |
+
+\* Either `source` or `wiki_page_url` is required.
+
+Use POST for large `source` values.
+
+**Response:** the edited wikitext as a JSON string. Error responses use the standard
+`{"error": "..."}` shape.
+
+---
+
+### /get_book_reference
+
+`GET | POST /v2/get_book_reference`
+
+Placeholder for returning a book snippet for a book reference. It currently returns
+hard-coded data.
+
+**View:** `get_book_reference_v2.py` (`GetBookReferenceV2`) · **Schema:** `GetBookReferenceSchemaV2` ·
+**Job:** `GetBookReferenceJobV2`
+
+**Parameters:**
+
+| Parameter  | Type   | Required | Description |
+|------------|--------|----------|-------------|
+| `book_ref` | string | yes      | Book reference to look up. |
+
+**Response (fixed):**
+
+```json
+{ "title": "A Book", "pages": "238", "image": "ABCDEFGBASE64GOBLYGOOKGOESHERE" }
+```
+
+---
+
+## Articles
+
+### /article
+
+`GET /v2/article`
+
+Fetches, parses and analyzes a Wikipedia article. Returns article metadata, reference
+statistics, references and URLs. Results are cached on disk (subfolder `articlesV2/`)
+under the article's IARI id, `<lang>.<site>.<page_id>.<revision_id>`.
+
+**View:** `article_view_v2.py` (`ArticleV2`) · **Schema:** `ArticleSchemaV2` · **Job:** `ArticleJobV2` ·
+**Analyzer:** `src/models/v2/wikimedia/wikipedia/analyzer_v2.py` (`WikipediaAnalyzerV2`)
+
+**Parameters:**
+
+| Parameter         | Type   | Required | Description |
+|-------------------|--------|----------|-------------|
+| `url`             | string | yes      | Full article URL, e.g. `https://en.wikipedia.org/wiki/Easter_Island`. Language, site and title are parsed from it. |
+| `reference_types` | string | no       | Accepted, currently unused. |
+| `url_details`     | bool   | no       | Accepted, currently unused. |
+| `url_method`      | string | no       | Accepted, currently unused. |
+| `refresh`         | bool   | no       | Skip the cache and re-analyze. |
+| `testing`         | bool   | no       | Don't write the result to the cache. |
+
+**Example:**
+
+```
+GET /v2/article?url=https://en.wikipedia.org/wiki/Easter_Island
+```
+
+**Response** (`ArticleStatisticsV2`, `src/models/v2/statistics/article_stats_v2.py`):
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_id": "en.wikipedia.org.9692.1192785042",
+  "page_errors": [],
+  "lang": "en",
+  "site": "wikipedia.org",
+  "title": "Easter_Island",
+  "page_id": 9692,
+  "revision_id": 1192785042,
+  "revision_isodate": "2024-01-01T00:00:00+00:00",
+  "revision_timestamp": 1704067200,
+  "served_from_cache": false,
+  "isodate": "2026-10-11T12:00:00.000000",
+  "timestamp": 1760184000,
+  "execution_time": 3,
+  "ores_score": {},
+  "reference_count": 180,
+  "reference_stats": { "...": "..." },
+  "references": [ { "...": "..." } ],
+  "url_count": 210,
+  "url_stats": { "...": "..." },
+  "urls": ["https://..."]
+}
+```
+
+**Status codes:**
+
+| Code | Meaning |
+|------|---------|
+| 200  | Success (fresh or cached). |
+| 400  | Title missing, unsupported site, or the page is a redirect. |
+| 404  | Article not found. |
+| 500  | Wikipedia API or other error. |
+
+---
+
+### /article_cache
+
+`GET /v2/article_cache`
+
+Returns a previously cached article analysis by IARI id, without fetching anything.
+
+**View:** `article_cache_view_v2.py` (`ArticleCacheV2`) · **Schema:** `ArticleCacheSchemaV2` ·
+**Job:** `ArticleCacheJobV2`
+
+**Parameters:**
+
+| Parameter         | Type   | Required | Default | Description |
+|-------------------|--------|----------|---------|-------------|
+| `iari_id`         | string | yes      |         | IARI id, e.g. `en.wikipedia.org.9692.1192785042`. |
+| `article_version` | int    | no       | `1`     | `1` = original article format, `2` = V2 format. Currently not used for the lookup. |
+
+**Response:** the cached article JSON with status 200, or `null` if nothing is cached
+under that id. This endpoint reads from the `articles/` cache subfolder (the original
+`/statistics/article` cache), not from `articlesV2/`.
+
+---
+
+## URLs and sources
+
+### /check-url
+
+`GET /v2/check-url`
+
+Checks the live status of a URL and returns status and parsing information. Results
+are cached per URL and method.
+
+**View:** `check_url_v2.py` (`CheckUrlV2`) · **Schema:** `CheckUrlSchemaV2` · **Job:** `CheckUrlJobV2`
+
+**Parameters:**
+
+| Parameter | Type   | Required | Default        | Description |
+|-----------|--------|----------|----------------|-------------|
+| `url`     | string | yes      |                | URL to check (URL-encode it). |
+| `method`  | string | no       | `LIVEWEBCHECK` | `LIVEWEBCHECK`, `IABOT` or `CORENTIN`. `WAYBACK` and `LWC` are aliases for `LIVEWEBCHECK`. Case-insensitive. |
+| `timeout` | int    | no       | `2`            | Request timeout in seconds. |
+| `refresh` | bool   | no       | `false`        | Bypass the cache. |
+| `testing` | bool   | no       | `false`        | Don't write the result to the cache. |
+
+**Response:** the URL check result from `src/models/identifiers_checking/url.py`
+(`Url.get_dict`), plus:
+
+| Field           | Description |
+|-----------------|-------------|
+| `id`            | 8-character id: the first 8 characters of the MD5 hash of the upper-cased URL. Also the cache key. |
+| `timestamp`     | Unix timestamp of the check. |
+| `isodate`       | ISO date of the check. |
+| `refreshed_now` | `true` if `refresh` was requested. |
+
+The `text` field (page content) is returned in fresh responses but is not stored in the
+cache, so cached responses don't include it.
+
+---
+
+### /get_url_info
+
+`GET /v2/get_url_info`
+
+Combined URL information endpoint that returns selected "parts". **In development:**
+parts currently return placeholders only.
+
+**View:** `get_url_info_v2.py` (`GetUrlInfoV2`) · **Schema:** `GetUrlInfoSchemaV2` · **Job:** `GetUrlInfoJobV2`
+
+**Parameters:**
+
+| Parameter       | Type   | Required | Default               | Description |
+|-----------------|--------|----------|-----------------------|-------------|
+| `url`           | string | yes      |                       | URL to describe. |
+| `parts`         | string | no       | `status\|probes\|test` | Pipe-delimited list of parts to return. |
+| `probes`        | string | no       |                       | Pipe-delimited probe names (not yet used). |
+| `status_method` | string | no       |                       | Accepted, not yet used. |
+| `timeout`       | int    | no       | `2`                   | Timeout in seconds. |
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "get_url_info",
+  "endpoint": "geturlinfov2",
+  "timestamp": 1760184000,
+  "isodate": "2026-10-11T12:00:00.000000",
+  "execution_time": "0.0001 seconds",
+  "url": "https://example.com",
+  "parts_list": ["status", "probes"],
+  "probe_list": [],
+  "parts": {
+    "status": { "part_name": "status" },
+    "probes": { "part_name": "probes" }
+  }
+}
+```
+
+Unrecognized parts (including `test`, which is in the default list) come back as
+`{"errors": ["Unknown part: <name>"]}`.
+
+---
+
+### /probe
+
+`GET /v2/probe`
+
+Runs one or more reliability probes against a URL. Probe results are cached per URL and probe.
+
+**View:** `probe_v2.py` (`ProbeV2`) · **Schema:** `ProbeSchemaV2` · **Job:** `ProbeJobV2` ·
+**Probes:** `src/models/v2/probes/`
+
+**Parameters:**
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `url`     | string | yes      | URL to probe. |
+| `probe`   | string | yes\*    | A single probe name. |
+| `probes`  | string | yes\*    | Pipe-delimited list of probe names. |
+| `refresh` | bool   | no       | Re-run the probes and update the cache. |
+| `tag`     | string | no       | Echoed back in the response. |
+| `timeout` | int    | no       | Timeout in seconds (default `2`). |
+
+\* Specify exactly one of `probe` or `probes`. Specifying both is an error.
+
+**Available probes** (case-insensitive):
+
+| Probe           | Implementation |
+|-----------------|----------------|
+| `verifyi`       | `probe_verifyi.py` |
+| `trust_project` | `probe_trust_project.py` |
+| `test`          | `probe_test.py` |
+
+**Example:**
+
+```
+GET /v2/probe?url=https://www.bbc.com/news&probes=verifyi|trust_project
+```
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "probe",
+  "endpoint": "probev2",
+  "timestamp": 1760184000,
+  "isodate": "2026-10-11T12:00:00.000000",
+  "tag": "optional",
+  "execution_time": "0.7342 seconds",
+  "url": "https://www.bbc.com/news",
+  "probe_list": ["verifyi", "trust_project"],
+  "probe_results": {
+    "verifyi": { "...": "..." },
+    "trust_project": { "...": "..." }
+  }
+}
+```
+
+An unknown probe name returns `{"errors": ["Unknown probe: <name>"]}` in its
+`probe_results` entry.
+
+---
+
+### /signals
+
+`GET /v2/signals`
+
+Returns [WikiSignals](https://wikisignals.org) data for a domain. Results are cached per domain.
+
+**View:** `signals_v2.py` (`SignalsV2`) · **Schema:** `SignalsSchemaV2` · **Job:** `SignalsJobV2`
+
+**Parameters:**
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `domain`  | string | yes\*    | Domain, e.g. `nytimes.com`. |
+| `url`     | string | yes\*    | Any URL. Its registered domain is extracted (via `tldextract`) when `domain` is not given. |
+| `refresh` | bool   | no       | Bypass the cache. |
+| `tag`     | string | no       | Echoed back in the response. |
+
+\* Either `domain` or `url` is required. `domain` takes precedence.
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "signals",
+  "endpoint": "signalsv2",
+  "timestamp": 1760184000,
+  "isodate": "2026-10-11T12:00:00.000000",
+  "execution_time": "0.3011 seconds",
+  "url": "https://www.nytimes.com/some/article",
+  "domain": "nytimes.com",
+  "signal_data": {
+    "retrieved_from_cache": true,
+    "signals": { "...": "WikiSignals API response" }
+  }
+}
+```
+
+`retrieved_from_cache` is present only when the data came from the cache. If the
+WikiSignals API call fails, `signals` is `{}`.
+
+---
+
+### /wiki_signals
+
+`GET /v2/wiki_signals`
+
+Returns WikiSignals data for a domain, keyed by domain. Similar to `/signals`, but always
+reads from the cache when available and requires `domain`.
+
+**View:** `wiki_signals_v2.py` (`WikiSignalsV2`) · **Schema:** `WikiSignalsSchemaV2` · **Job:** `WikiSignalsJobV2`
+
+**Parameters:**
+
+| Parameter | Type   | Required | Description |
+|-----------|--------|----------|-------------|
+| `domain`  | string | yes      | Domain, e.g. `wikipedia.org`. |
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "wiki_signals",
+  "endpoint": "wikisignalsv2",
+  "timestamp": "2026-10-11 12:00:00",
+  "execution_time": "0.2100 seconds",
+  "domains": {
+    "wikipedia.org": {
+      "debug": { "domain": "wikipedia.org" },
+      "synopsis": "Signal data for wikipedia.org",
+      "signals": { "signals": { "...": "..." } }
+    }
+  }
+}
+```
+
+---
+
+### /signals_docs
+
+`GET /v2/signals_docs`
+
+Returns the WikiSignals signal definitions
+(`https://wikisignals.org/wp-json/publications/v1/domain/?view=definitions`). Cached.
+
+**View:** `signals_docs_v2.py` (`SignalsDocsV2`) · **Schema:** `SignalsDocsSchemaV2` · **Job:** `SignalsDocsJobV2`
+
+**Parameters:** common parameters only (`refresh` bypasses the cache, `tag` is echoed back).
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "signals_docs",
+  "endpoint": "signalsdocsv2",
+  "timestamp": 1760184000,
+  "isodate": "2026-10-11T12:00:00.000000",
+  "execution_time": "0.1500 seconds",
+  "data": {
+    "retrieved_from_cache": true,
+    "signals_docs": { "...": "definitions" }
+  }
+}
+```
+
+---
+
+## Insights
+
+All three insights endpoints accept `date_start` and `date_end` (optional strings),
+but none of them use these yet. Each returns the whole available dataset.
+
+### /insights, /webrx_insights
+
+`GET /v2/insights` · `GET /v2/webrx_insights` (aliases for the same resource)
+
+Wayback Machine link statistics, scraped from the botwikiawk yearly dashboard
+(`https://tools-static.wmflabs.org/botwikiawk/dashyearly.html`).
+
+**View:** `insights_webrx_v2.py` (`InsightsWebRxV2`) · **Schema:** `InsightsWebRxSchemaV2` ·
+**Job:** `InsightsWebRxJobV2`
+
+**Response:**
+
+```json
+{
+  "iari_version": "4.5.5",
+  "iari_command": "insights",
+  "endpoint": "insightswebrxv2",
+  "execution_time": "1.0200 seconds",
+  "execution_errors": null,
+  "webrx": {
+    "table_names": ["Wayback by IABot", "Wayback by Users", "Wayback by User Bots", "LAMP", "LAMP SIM", "Media by Users"],
+    "table_totals": {
+      "column_names": ["2016", "2017", "..."],
+      "tables": [ { "name": "Wayback by IABot", "cols": [123, 456], "total": 579 } ]
+    },
+    "tables": [
+      {
+        "name": "Wayback by IABot",
+        "column_names": ["2016", "2017", "..."],
+        "column_totals": [123, 456],
+        "rows": [ { "#": "1", "site": "enwiki", "total": "1,234", "cols": ["100", "200"] } ]
+      }
     ]
+  }
 }
 ```
 
-#### Known limitations
+---
 
-None
+### /tarb_insights
 
-### reference
+`GET /v2/tarb_insights`
 
-the statistics/reference/id endpoint accepts the following parameters:
+IABot ("Turn All References Blue") edit statistics from
+`https://iabot.wmcloud.org/api.php?action=statistics`, loaded year by year from 2022
+through the current year. Past years are cached as pickles in `config.iari_cache_dir`.
+The current year is always re-fetched.
 
-* id (mandatory) (this is unique for each reference and is obtained from the article or references endpoint)
+**View:** `insights_tarb_v2.py` (`InsightsTarbV2`) · **Schema:** `InsightsTarbSchemaV2` ·
+**Job:** `InsightsTarbJobV2`
 
-On error it returns 400. If data is not found it returns 404.
+**Response:**
 
-It will return json similar to:
-
-```
+```json
 {
-    "id": "cfa8b438",
-    "template_names": [],
-    "wikitext": "<ref name = \"Hartmann1\" />",
-    "type": "footnote",
-    "footnote_subtype": "named",
-    "flds": [],
-    "urls": [],
-    "templates": [],
-    "titles": [],
-    "section": "History",
-    "served_from_cache": true
+  "iari_version": "4.5.5",
+  "iari_command": "tarb_insights",
+  "endpoint": "insightstarbv2",
+  "execution_time": "4.5000 seconds",
+  "execution_errors": null,
+  "summary_data": {
+    "first_day": "2022-01-01",
+    "last_day": "2026-10-10"
+  }
 }
 ```
 
-#### Known limitations
+Currently only the date range of the loaded data is summarized.
 
-None
+---
 
-### PDF
+### /wiki_insights
 
-the statistics/pdf endpoint accepts the following parameters:
+`GET /v2/wiki_insights`
 
-* url (mandatory)
-* refresh (bool, optional, default false)
-* testing (bool, optional, default false)
-* timeout (int, optional, default 2 (seconds))
-* debug (bool, optional) Note: you have to set refresh=true to be sure to get debug output.
-  * html (bool, optional, default false)
-  * xml (bool, optional, default false)
-  * json_ (bool, optional, default false)
-  * blocks (bool, optional, default false)
+Wikipedia external-link statistics from the Wikimedia Commons dataset
+`Data:Wikipedia_statistics/exturls.tab`.
 
-On error it returns 404 or 415. The first is when we could not find/fetch the url
-and the second is when it is not a valid PDF.
+**View:** `insights_wiki_v2.py` (`InsightsWikiV2`) · **Schema:** `InsightsWikiSchemaV2` ·
+**Job:** `InsightsWikiJobV2`
 
-If not given debug=true it will return json similar this
+**Response:**
 
-```
+```json
 {
-    "words_mean": 660,
-    "words_max": 836,
-    "words_min": 474,
-    "annotation_links": [
-        {
-            "url": "http://arxiv.org/abs/2210.02667v1",
-            "page": 0
-        },...
-    ],
-    "links_from_original_text": [
-        {
-            "url": "https://www.un.org/en/about-us/universal-declaration-of-human-rights",
-            "page": 1
-        },
-    ],
-    "links_from_text_without_linebreaks": [
-        {
-            "url": "https://www.un.org/en/about-us/universal-declaration-of-human-rights3https://www.ohchr.org/en/issues/pages/whatarehumanrights.aspx4Legal",
-            "page": 1
-        },
-    ],
-    "links_from_text_without_spaces": [
-        {
-            "url": "https://www.un.org/en/about-us/universal-declaration-of-human-rights",
-            "page": 1
-        },
-    ],
-    "url": "https://arxiv.org/pdf/2210.02667.pdf",
-    "timeout": 2,
-    "pages_total": 17,
-    "detected_language": "en",
-    "detected_language_error": false,
-    "detected_language_error_details": "",
-    "characters": 74196,
-    "timestamp": 1686055925,
-    "isodate": "2023-06-06T14:52:05.228754",
-    "id": "639dc1df"
+  "iari_version": "4.5.5",
+  "iari_command": "wiki_insights",
+  "endpoint": "insightswikiv2",
+  "execution_time": "0.9000 seconds",
+  "execution_errors": null,
+  "external_urls": [ "..." ]
 }
 ```
 
-Using the debug and refresh parameter, all the text before and after cleaning is exposed as well as the link-annotations
-before url extraction. Using the 4 additional parameters you can get the corresponding output from PyMuPDF for further debugging.
+---
 
-Example debug expressions:
-  
-To show block debug output:
-```
-https://archive.org/services/context/iari/v2/statistics/pdf?url=https://ia601600.us.archive.org/31/items/Book_URLs/DeSantis.pdf&refresh=true&debug=true&blocks=true
-```
-To show html debug output:
-```
-https://archive.org/services/context/iari/v2/statistics/pdf?url=https://ia601600.us.archive.org/31/items/Book_URLs/DeSantis.pdf&refresh=true&debug=true&html=true
-```
-*Note: Setting debug=true parameter without refresh=true will often not yield any debug output since we don't have it
-stored in the cache.*
+## Tapestry Support
 
-*Warning: The debug outputs can generate very large output up to hundreds of MB 
-so use with care or from the command line to avoid crashing your browser*  
+### /tapestry_zip
 
-This output permits the data consumer to count number of links per page, which links or domains appear most, number of
-characters in the pdf and using the debug outputs you can investigate why the API could not find the links correctly.
+`POST /v2/tapestry_zip`
 
-#### Known limitations
+Builds a Tapestry-importable `.zip` from a JSON spec sent as the request body
+(`Content-Type: application/json`). The spec is the shape of a Tapestry export's
+`root.json`; `version` is forced to 7, and `id`, `createdAt`, `updatedAt` and the other
+top-level defaults are filled in when omitted. The builder does structural validation
+(item types, required item fields, `webpageType` / `actionType` values, `groupId`
+references) but is not a substitute for Tapestry's own import validation.
 
-The extraction of URLs from unstructured text in any random PDF is a
-difficult thing to do reliably. This is because
-PDF is not a structured data format with clear boundaries between different type of information.
+**View:** `tapestry_zip_v2.py` (`TapestryZipV2`) · **Builder:** `iarilib/tapestry_zip.py`
+(shared with the `iarilib/build-tapestry-zip.py` CLI)
 
-We currently use PyMuPDF to extract all the text as it appears on the page. 
-We clean the text in various ways to get the links out via a regex. 
-This approach results in some links containing information that was part of the
-text after the link ended but we have yet to find a way to reliably determine 
-the end boundary of links.
+Unlike the CLI, `{"bundle": "<path>"}` file references are rejected: all media
+(`thumbnail`, item `source`s, thumbnail rendition `source`s) must be external URLs.
 
-We are currently investigating if using the html output of PyMuPdf or 
-using advanced Machine Learning could improve the output.
-
-You are very welcome to suggest improvements by opening an issue or sending a pull request. :)
-
-### XHTML
-
-the statistics/pdf endpoint accepts the following parameters:
-
-* url (mandatory)
-* refresh (optional)
-* testing (optional)
-
-On error it returns 400.
-
-It will return json similar to:
+**Example:**
 
 ```
-{
-    "links": [
-        {
-            "context": "<a accesskey=\"t\" href=\"http://www.hut.fi/u/hsivonen/test/xhtml-suite/\" title=\"The main page of this test suite\">This is a link to the <acronym title=\"Extensible HyperText Markup Language\">XHTML</acronym> test suite table of contents.</a>",
-            "parent": "<p><a accesskey=\"t\" href=\"http://www.hut.fi/u/hsivonen/test/xhtml-suite/\" title=\"The main page of this test suite\">This is a link to the <acronym title=\"Extensible HyperText Markup Language\">XHTML</acronym> test suite table of contents.</a> The link contain inline markup (<code>&lt;acronym&gt;</code>), has a title and an accesskey \u2018t\u2019.</p>",
-            "title": "The main page of this test suite",
-            "href": "http://www.hut.fi/u/hsivonen/test/xhtml-suite/"
-        },
-        {
-            "context": "<a href=\"base-target\">This is a relative link.</a>",
-            "parent": "<p><a href=\"base-target\">This is a relative link.</a> If the link points to http://www.hut.fi/u/hsivonen/test/base-test/base-target, the user agent supports <code>&lt;base/&gt;</code>. if it points to http://www.hut.fi/u/hsivonen/test/xhtml-suite/base-target, the user agent has failed the test.</p>",
-            "title": "",
-            "href": "base-target"
-        }
-    ],
-    "links_total": 2,
-    "timestamp": 1682497512,
-    "isodate": "2023-04-26T10:25:12.798840",
-    "id": "fc5aa88d",
-    "refreshed_now": false
-}
+curl -X POST -H "Content-Type: application/json" \
+  -d @spec.json -o tapestry.zip https://<host>/v2/tapestry_zip
 ```
 
-#### Known limitations
+**Response:** `200` with `application/zip`, as an attachment named after the spec's
+`title`. A missing or invalid JSON body, or a spec that fails validation, returns `400`
+with `{"error": "..."}`.
 
-None
+---
 
-# Installation
+## Code structure (v2)
 
-Clone the git repo:
-
-`$ git clone https://github.com/internetarchive/iari.git && cd iari`
-
-We recommend checking out the latest release before proceeding.
-
-## Requirements
-
-* python pip
-* python gunicorn
-* python poetry
-
-## Setup
-
-We use pip and poetry to set everything up.
-
-`$ pip install poetry gunicorn && poetry install`
-
-### Virtual environment
-Setup:
-
-`$ python3 -m venv venv`
-
-Enter in (in a Linux/Mac terminal):
-
-`$ source venv/bin/activate`
-
-### JSON directories
-Lastly setup the directories for the json cache files
-
-`$ ./setup_json_directories.sh`
-
-## Run
-
-Run these commands in different shells or in GNU screen. 
-
-Before running them please make sure you have activated the virtual environment first, see above.
-
-### GNU screen
-Start GNU screen (if you want to have a persisting session)
-
-`$ screen -D -RR`
-
-### Debug mode
-
-Run it with
-`$ export TESTDEADLINK_KEY="your key here" && ./run-debug-api.sh`
-
-Test it in another Screen window or local terminal with
-`$ curl -i "localhost:5000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
-
-### Production mode
-
-Run it with
-`$ export TESTDEADLINK_KEY="your key here" && ./run-api.sh`
-
-Test it in another Screen window or local terminal with
-`$ curl -i "localhost:8000/v2/statistics/article?regex=external%20links&url=https://en.wikipedia.org/wiki/Test"`
-
-# Dockerized instance
-## Prerequisites
-### JSON directories
-
-Make sure the following directories are created at the root of the iari install (they are not in the git repo)
-```
-json/articles/
-json/references/
-json/dois/
-json/urls/
-json/urls/archives
-json/xhtmls/
-json/pdfs/
-# (for new V2 development)
-json/articlesV2/
-json/referencesV2/
-```
-
-### Environment variables
-Make an ".env" file at same level as docker-compose.yml file with the contents:
+Each v2 endpoint follows the same pattern:
 
 ```
-PORT=<port you'd like the IARI Server to run on>
-#    some suggested values:
-#    5042: for iari-test
-#    5088: for iari-stage
-#    5000: for iari-prod
-TESTDEADLINK_KEY=<api key for iabot's testdeadlink method>
+request ──► View (src/views/v2/*_v2.py)
+              │  __validate_and_get_job__()
+              ▼
+            Schema (src/models/v2/schema/*_schema_v2.py)   marshmallow: validates request args
+              │  @post_load
+              ▼
+            Job (src/models/v2/job/*_job_v2.py)            pydantic: typed params + validate_fields()
+              │
+              ▼
+            View logic ──► analyzers / helpers / file_io cache ──► JSON response
 ```
 
-## Dockerfile
-## docker-compose.yml
-## Running
-docker compose up
+| Directory | Contents                                                                                                                                                                                                          |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `src/views/v2/` | Flask-RESTful resources, one per endpoint. Subclasses `StatisticsViewV2` (`src/views/v2/statistics/__init__.py`), which reads GET args or POST form data, validates it against `schema`, and loads it into `job`. |
+| `src/models/v2/schema/` | Marshmallow request schemas. `BaseSchemaV2` defines the common parameters.                                                                                                                                        |
+| `src/models/v2/job/` | Pydantic job models. `JobV2` provides `refresh`, `testing`, `hydrate`, `tag`. `validate_fields()` handles cross-field rules and normalization.                                                                    |
+| `src/models/v2/analyzers/` | `WikiAnalyzerV2` (Wikipedia reference extraction for `/extract_refs`) and `GrokAnalyzerV2` (Grokipedia, for `/extract_grok`).                                                                                     |
+| `src/models/v2/wikimedia/wikipedia/` | Article, section, reference and URL models used by `/article` and `/fetchrefs`.                                                                                                                                   |
+| `src/models/v2/statistics/` | Pydantic models for article and reference statistics output.                                                                                                                                                      |
+| `src/models/v2/file_io/` | Disk cache readers/writers (`articlesV2/`, `articles/`, `urls/`, …).                                                                                                                                              |
+| `src/models/v2/probes/` | Probe implementations used by `/probe`.                                                                                                                                                                           |
 
-# PyCharm specific recommendations
-## Venv activation
-Make sure this setting is checked.
-https://www.google.com/search?client=firefox-b-d&q=make+pycharm+automatically+enter+the+venv
+### Adding an endpoint
 
-Note for mac users: This might not work, so you have to manually enter the venv in all terminals.
+1. Create a job in `src/models/v2/job/` that subclasses `JobV2`, with a `validate_fields()` method.
+2. Create a schema in `src/models/v2/schema/` that subclasses `BaseSchemaV2`, with a
+   `@post_load` that builds the job and calls `validate_fields()`.
+3. Create a view in `src/views/v2/` that subclasses `StatisticsViewV2`, sets `schema`,
+   and implements `get` and/or `post`.
+4. Register it in `src/__init__.py` with `api.add_resource(...)`.
+5. Add it to this document and to `/help`.
 
-# Deployed instances
+---
 
-See [KNOWN_DEPLOYED_INSTANCES.md](docs/KNOWN_DEPLOYED_INSTANCES.md)
+## Known issues and caveats
 
-# Diagrams
-
-## IARI
-
-### Components
-
-![image](diagrams/components.png)
-
-# History of this repo
-
-* version 1.0.0 a proof of concept import tool based on WikidataIntegrator (by James Hare)
-* version 2.0.0+ a scalable ETL-framework with an API and capability of reading EventStreams (by Dennis Priskorn)
-* version 3.0.0+ WARI, a host of API endpoints that returns statistics
-  about a Wikipedia article and its references. (by Dennis Priskorn)
-* version 4.0.0+ IARI, a host of API endpoints that returns statistics
-  about both Wikipedia articles and its references and can extract links from any PDF or XHTML page. (by Dennis Priskor
-
-# License
-
-This project is licensed under GPLv3+. Copyright Dennis Priskorn 2022
-The diagram PNG files are CC0.
-
-# Further reading and installation/setup
-
-See the [development notes](docs/DEVELOPMENT_NOTES.md)
+- **`wikitext` input isn't implemented** for `/extract_refs` and `/fetchrefs`. The schemas
+  accept it, but the views still need a page title.
+- **`/fetchrefs` only supports English Wikipedia.** `which_wiki` is echoed back but ignored.
+- **`/get_url_info` is a stub.** Parts return placeholders, `probes` and `status_method`
+  are ignored, and the default `test` part returns an "Unknown part" error.
+- **`/get_book_reference` returns hard-coded data.**
+- **`/article_cache` reads the v1 `articles/` cache**, not `articlesV2/`. It returns
+  `null` (status 200) when nothing is cached. `article_version` is ignored.
+- **`/article` ignores `reference_types`, `url_details` and `url_method`.**
+- **Insights `date_start`/`date_end` are ignored.**
+- **Validation errors return 500** rather than 400.
+- **POST reads form data only**, not JSON bodies.
